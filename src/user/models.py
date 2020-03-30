@@ -14,13 +14,9 @@ class User(AbstractUser):
     email = models.EmailField(_('Email address'), unique=True)
     username = models.CharField(
         _('Username'), max_length=150, blank=True, null=True)
-    website_url = models.CharField(_('Website URL'), max_length=255,
+    farm_url = models.CharField(_('Farm URL'), max_length=255,
                                    null=True, validators=[full_domain_validator])
-    mobile_number = models.CharField(
-        _('Mobile Number'), max_length=20, null=True)
-    completed_onboarding = models.BooleanField('Completed Onboarding', default=False)
-    completed_tour = models.BooleanField('Completed Tour', default=False)
-    associated_hs_deal_id =  models.CharField(_('HS Deal ID'),max_length=50, null=True, blank=True)
+
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

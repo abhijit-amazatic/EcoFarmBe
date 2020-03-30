@@ -21,7 +21,7 @@ class IsAuthenticatedSitePermission(BasePermission):
     #     """
     #     related to objects like site
     #     """
-        # message = "You are not allowed to perfoem this"
+        # message = "You are not allowed to perform this"
         # if not (obj.user == request.user):
         #     return True
         # return False

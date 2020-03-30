@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import datetime
-from celery.schedules import crontab
+#from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 try:
@@ -125,7 +125,7 @@ AUTH_USER_MODEL = 'user.User'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
-CORS_ORIGIN_ALLOW_ALL = True  # Make to True to bypass all whitelisting URLs.
+#CORS_ORIGIN_ALLOW_ALL = True  # Make to True to bypass all whitelisting URLs.
 
 
 REST_FRAMEWORK = {

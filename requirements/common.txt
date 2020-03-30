@@ -1,4 +1,4 @@
-Django==2.2.2
+Django==2.2.0
 djangorestframework==3.10.2
 django-filter==2.0.0
 psycopg2-binary==2.8.3
@@ -8,3 +8,6 @@ pycrypto==2.6.1
 requests==2.13.0
 pyOpenSSL==17.2.0
 django-sslserver
+rest-social-auth == 2.2.0
+mongoengine==0.10
+redis==3.3.8
