@@ -14,9 +14,23 @@ class User(AbstractUser):
     email = models.EmailField(_('Email address'), unique=True)
     username = models.CharField(
         _('Username'), max_length=150, blank=True, null=True)
-    farm_url = models.CharField(_('Farm URL'), max_length=255,
-                                   null=True, validators=[full_domain_validator])
-
+    first_name = models.CharField(
+        _('First Name'), max_length=150, blank=True, null=True)
+    last_name = models.CharField(
+        _('Last Name'), max_length=150, blank=True, null=True)
+    country = models.CharField(
+        _('Country'), max_length=150, blank=True, null=True)
+    state = models.CharField(
+        _('State'), max_length=150, blank=True, null=True)
+    city = models.CharField(
+        _('City'), max_length=150, blank=True, null=True)
+    zip_code = models.CharField(
+        _('Mobile Number'), max_length=20, null=True)
+    phone_number = models.CharField(
+        _('Mobile Number'), max_length=20, null=True)
+    date_of_birth = models.DateTimeField()
+    account_existed = models.BooleanField('Account Existed', default=False)
+   
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
