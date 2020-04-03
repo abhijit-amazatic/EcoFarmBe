@@ -27,10 +27,17 @@ from user.views import (UserViewSet, MeView, LogInView,
 
 
 router = SimpleRouter()
-#router.register(r'user', UserViewSet, base_name="user")
+router.register(r'user', UserViewSet, base_name="user")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path(r'user/me/', MeView.as_view(), name='user-me'),
+    path(r'user/login/', LogInView.as_view(), name='login'),
+    path(r'user/logout/', LogoutView.as_view(), name='logout'),
+    path(r'user/change-password/',
+         ChangePasswordView.as_view(), name='change-password'),
+    path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
+    path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset')
 ] + router.urls
 
 
