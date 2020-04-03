@@ -147,7 +147,7 @@ class SendMailView(GenericAPIView):
         return response
 
 
- class ResetPasswordView(GenericAPIView):
+class ResetPasswordView(GenericAPIView):
     """
     Reset Password View
     """

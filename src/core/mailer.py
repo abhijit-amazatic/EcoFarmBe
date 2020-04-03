@@ -16,7 +16,7 @@ def mail(template, context_data, subject, recipient_list, ):
 
     content = template.render(context_data)
     msg = EmailMessage(
-        subject, content, from_email="Fabriq <%s>" % (settings.DEFAULT_FROM_EMAIL), to=[
+        subject, content, from_email="Eco-farm <%s>" % (settings.DEFAULT_FROM_EMAIL), to=[
             recipient_list]
     )
     msg.content_subtype = "html"

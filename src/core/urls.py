@@ -22,8 +22,7 @@ from knox.views import LogoutView
 from rest_framework.routers import SimpleRouter
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
-                        ResetPasswordView, FeedbackView,
-                        RequestAppView,)
+                        ResetPasswordView)
 
 
 router = SimpleRouter()

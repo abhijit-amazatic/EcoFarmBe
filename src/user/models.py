@@ -20,7 +20,7 @@ class User(AbstractUser):
         _('Country'), max_length=150, blank=True, null=True)
     state = models.CharField(
         _('State'), max_length=150, blank=True, null=True)
-    date_of_birth = models.DateTimeField()
+    date_of_birth = models.DateField(null=True, blank=True, default=None, db_index=True)
     city = models.CharField(
         _('City'), max_length=150, blank=True, null=True)
     zip_code = models.CharField(
