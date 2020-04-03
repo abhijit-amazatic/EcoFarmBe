@@ -12,7 +12,7 @@ DEFAULT_CONNECTION.update({"CONN_MAX_AGE": 600})
 DATABASES = {"default": DEFAULT_CONNECTION}
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[\"*\"]"))
 CORS_ORIGIN_REGEX_WHITELIST = json.loads(os.environ.get("CORS_ORIGIN", "[]"))
-#FRONTEND_DOMAIN_NAME = os.environ.get("FRONTEND_DOMAIN_NAME")
+FRONTEND_DOMAIN_NAME = os.environ.get("FRONTEND_DOMAIN_NAME")
 
 # Must generate specific password for your app in [gmail settings][1]
 EMAIL_HOST = 'smtp.gmail.com'
