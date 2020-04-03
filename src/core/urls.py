@@ -20,7 +20,10 @@ from django.urls import path
 from django.views.static import serve
 from knox.views import LogoutView
 from rest_framework.routers import SimpleRouter
-#from user.views import (UserViewSet)
+from user.views import (UserViewSet, MeView, LogInView,
+                        ChangePasswordView, SendMailView,
+                        ResetPasswordView, FeedbackView,
+                        RequestAppView,)
 
 
 router = SimpleRouter()

@@ -114,7 +114,7 @@ STATICFILES_DIRS = [
 REST_KNOX = {
     'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
     'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-    'TOKEN_TTL': None, #datetime.timedelta(hours=12),
+    'TOKEN_TTL':datetime.timedelta(hours=12),#None for never exp. token
     'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 }
 
@@ -134,7 +134,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'knox.auth.TokenAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',
