@@ -22,7 +22,7 @@ from knox.views import LogoutView
 from rest_framework.routers import SimpleRouter
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
-                        ResetPasswordView)
+                        ResetPasswordView, CategoryView)
 
 
 router = SimpleRouter()
@@ -36,7 +36,8 @@ urlpatterns = [
     path(r'user/change-password/',
          ChangePasswordView.as_view(), name='change-password'),
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
-    path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset')
+    path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
+    path(r'category/', CategoryView.as_view(), name='category')
 ] + router.urls
 
 

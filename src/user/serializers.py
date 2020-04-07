@@ -50,7 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'last_name', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff')
+        fields = ('id', 'username', 'email','first_name', 'last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff')
     
 
     def validate_password(self, password):
@@ -77,7 +77,6 @@ class CreateUserSerializer(UserSerializer):
         user.set_password(user.password)
         user.save()
         return user
-
 
     
 class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223

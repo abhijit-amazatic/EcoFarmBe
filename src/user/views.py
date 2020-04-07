@@ -14,8 +14,8 @@ from knox.settings import knox_settings
 
 from core.permissions import UserPermissions
 from core.mailer import mail
-from .models import User
-from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer)
+from .models import User, MemberCategory
+from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer,)
 from integration.crm import (create_record, )
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
@@ -70,6 +70,21 @@ class MeView(APIView):
         """
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=200)
+
+class CategoryView(APIView):
+
+    """
+    Get Categories information.
+    """
+    permission_classes = (AllowAny,)
+    
+    def get(self, request):
+        """
+        Display categories.    
+        """
+        queryset = MemberCategory.objects.values('id','name')
+        return Response(queryset)
+
 
 class LogInView(APIView):
 

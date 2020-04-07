@@ -38,6 +38,12 @@ class User(AbstractUser):
     existing_member = models.BooleanField('Account Existed', default=False)
     zoho_contact_id = models.CharField(
         _('Zoho Contact ID'), max_length=100, blank=True, null=True)
+    categories = models.ManyToManyField(
+        to='MemberCategory',
+        related_name='member_category',
+        blank=True,
+    )
+    
    
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
@@ -53,3 +59,21 @@ class User(AbstractUser):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+
+
+class MemberCategory(models.Model):
+    """
+     Class implementing a categories.
+    """
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Member Category')
+        verbose_name_plural = _('Member Categories')
+
+        
+    
+        
