@@ -16,7 +16,7 @@ from core.permissions import UserPermissions
 from core.mailer import mail
 from .models import User, MemberCategory
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer,)
-from integration.crm import (create_record, )
+#from integration.crm import (create_record, )
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 
