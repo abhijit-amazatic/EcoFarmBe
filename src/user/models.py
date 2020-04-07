@@ -36,6 +36,8 @@ class User(AbstractUser):
     business_dba = models.CharField(
         _('Business DBA'), max_length=150, null=True)
     existing_member = models.BooleanField('Account Existed', default=False)
+    zoho_contact_id = models.CharField(
+        _('Zoho Contact ID'), max_length=100, blank=True, null=True)
    
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
