@@ -40,5 +40,17 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile', 'https://www.googleapis.c
 #REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI  = os.getenv('REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI')
 
 
-
-
+PYZOHO_CONFIG = {
+'apiBaseUrl':'https://www.zohoapis.com',
+'apiVersion':'v2',
+'currentUserEmail':os.environ.get("PYZOHO_USER"), 
+'sandbox':'false',
+'applicationLogFilePath':'',
+'client_id':os.environ.get("PYZOHO_CLIENT_ID"),
+'client_secret':os.environ.get("PYZOHO_CLIENT_SECRET"),
+'redirect_uri': os.environ.get("PYZOHO_REDIRECT_URL"),
+'accounts_url':os.environ.get("TOKEN_PERSISTENCE_PATH"),
+'token_persistence_path':os.environ.get(" TOKEN_PERSISTENCE_PATH"),
+'access_type':'offline',
+}
+PYZOHO_REFRESH_TOKEN=os.environ.get("PYZOHO_REFRESH_TOKEN")
