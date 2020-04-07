@@ -16,7 +16,7 @@ from core.permissions import UserPermissions
 from core.mailer import mail
 from .models import User
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer)
-
+from integration.crm import (create_record, )
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 
@@ -45,6 +45,8 @@ class UserViewSet(ModelViewSet):
             data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Uncomment below when users needs to be inserted into Zoho CRM.
+            # create_record('Contacts', request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

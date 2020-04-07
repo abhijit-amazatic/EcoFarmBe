@@ -14,6 +14,10 @@ class User(AbstractUser):
     email = models.EmailField(_('Email address'), unique=True)
     username = models.CharField(
         _('Username'), max_length=150, blank=True, null=True)
+    first_name = models.CharField(
+        _('First Name'), max_length=255)
+    last_name = models.CharField(
+        _('Last Name'), max_length=255)
     full_name = models.CharField(
         _('Full Name'), max_length=255, blank=True, null=True)
     country = models.CharField(
@@ -25,8 +29,8 @@ class User(AbstractUser):
         _('City'), max_length=150, blank=True, null=True)
     zip_code = models.CharField(
         _('Zip code'), max_length=20, null=True)
-    phone_number = models.CharField(
-        _('Mobile Number'), max_length=20, null=True)
+    phone = models.CharField(
+        _('Phone'), max_length=20, null=True)
     legal_business_name = models.CharField(
         _('Legal Business Name'), max_length=150, null=True)
     business_dba = models.CharField(
