@@ -11,4 +11,5 @@ django-sslserver
 rest-social-auth == 2.2.0
 mongoengine==0.10
 redis==3.3.8
+zcrmsdk==2.0.6
 -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho
