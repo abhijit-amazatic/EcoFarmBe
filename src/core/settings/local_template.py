@@ -47,3 +47,26 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile', 'https://www.googleapis.com/auth/gmail.readonly']
 REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'https://localhost:8000/api/login/social/knox/'
 
+
+#Zoho Take credential from the team.
+PYZOHO_CONFIG = {
+'apiBaseUrl':'https://www.zohoapis.com',
+'apiVersion':'v2',
+'currentUserEmail':'',
+'sandbox':'false',
+'applicationLogFilePath':'',
+'client_id':'',
+'client_secret':'',
+'redirect_uri':'',
+'accounts_url':'',
+'token_persistence_path':'',
+'access_type':'offline',
+}
+
+if DEBUG:
+    PYZOHO_CONFIG['sandbox'] = 'true'
+    PYZOHO_CONFIG['client_id'] = ''
+    PYZOHO_CONFIG['client_secret'] = ''
+    PYZOHO_REFRESH_TOKEN=''
+    PYZOHO_USER_IDENTIFIER=''
+
