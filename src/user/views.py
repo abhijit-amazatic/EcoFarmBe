@@ -28,7 +28,6 @@ class SearchQueryView(APIView):
 
     def get(self, request):
         if request.query_params.get('legal_business_name', None):
-            print(request.query_params['legal_business_name'])
             result = search_query('Licenses', request.query_params['legal_business_name'], 'Legal_Business_Name')
         elif request.query_params.get('business_dba', None):
             result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA')
