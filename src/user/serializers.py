@@ -58,7 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
             default_validate_password(password)
         return password
 
-
+    
     def update(self, instance, validated_data):
         user = super().update(instance, validated_data)
         password = validated_data.get('password', None)
@@ -71,7 +71,16 @@ class UserSerializer(serializers.ModelSerializer):
 class CreateUserSerializer(UserSerializer):
     """
     Serializer to create user.
-    """  
+    """
+    def validate_email(self, email):
+        try:
+            user = User.objects.get(  # noqa
+                email=email)
+            if user:
+                raise serializers.ValidationError("Email address already exists!")
+        except User.DoesNotExist:
+            return email
+
     def create(self, validated_data):
         user = super().create(validated_data)
         user.set_password(user.password)
