@@ -14,3 +14,9 @@ def create_record(module, data):
             contact_dict[k.title()] = v
     response = crm_obj.insert_record(module, contact_dict)
     return response
+
+def get_access_token():
+    crm_obj = CRM(PYZOHO_CONFIG,
+        PYZOHO_REFRESH_TOKEN,
+        PYZOHO_USER_IDENTIFIER)
+    return crm_obj.get_oauth_token()
