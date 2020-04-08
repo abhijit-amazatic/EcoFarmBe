@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'utils',
     'core',
     'user',
+    'cultivator',
     'rest_social_auth',
     'sslserver',
     'social_django'
