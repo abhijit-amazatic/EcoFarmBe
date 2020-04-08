@@ -46,9 +46,9 @@ class UserViewSet(ModelViewSet):
         if serializer.is_valid():
             instance = serializer.save()
             # Uncomment below when users needs to be inserted into Zoho CRM.
-            # result = create_record('Contacts', request.data)
-            # instance.zoho_contact_id = result['response']['data'][0]['details']['id']
-            # instance.save()
+            result = create_record('Contacts', request.data)
+            instance.zoho_contact_id = result['response']['data'][0]['details']['id']
+            instance.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
