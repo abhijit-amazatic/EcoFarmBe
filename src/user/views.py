@@ -16,19 +16,23 @@ from core.permissions import UserPermissions
 from core.mailer import mail
 from .models import User, MemberCategory
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer,)
-from integration.crm import (create_record, get_access_token,)
+from integration.crm import (create_record, search_query,)
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 
-class AccessTokenViewSet(APIView):
+class SearchQueryView(APIView):
     """
     Return access token to frontend.
     """
     permission_classes = (AllowAny,)
 
     def get(self, request):
-        token = get_access_token()
-        return Response(token)
+        if request.query_params.get('legal_business_name', None):
+            print(request.query_params['legal_business_name'])
+            result = search_query('Licenses', request.query_params['legal_business_name'], 'Legal_Business_Name')
+        elif request.query_params.get('business_dba', None):
+            result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA')
+        return Response(result)
 
 class UserViewSet(ModelViewSet):
     """

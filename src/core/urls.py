@@ -23,7 +23,7 @@ from rest_framework.routers import SimpleRouter
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
-                        AccessTokenViewSet,)
+                        SearchQueryView,)
 
 
 router = SimpleRouter()
@@ -39,7 +39,7 @@ urlpatterns = [
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'category/', CategoryView.as_view(), name='category'),
-    path(r'token/', AccessTokenViewSet.as_view(), name='token')
+    path(r'search/', SearchQueryView.as_view(), name='search')
 ] + router.urls
 
 
