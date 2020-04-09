@@ -43,7 +43,7 @@ PYZOHO_CONFIG = {
 'apiBaseUrl':'https://www.zohoapis.com',
 'apiVersion':'v2',
 'currentUserEmail': os.environ.get('PYZOHO_USER'),
-'sandbox':'true',
+'sandbox': os.environ.get('IS_SANDBOX'),
 'applicationLogFilePath':'',
 'client_id': os.environ.get('PYZOHO_CLIENT_ID'),
 'client_secret': os.environ.get('PYZOHO_CLIENT_SECRET'),
