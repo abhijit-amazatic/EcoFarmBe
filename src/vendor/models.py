@@ -18,7 +18,7 @@ class Vendor(models.Model):
     vendor_categories = models.ManyToManyField(
         to='VendorCategory',
         related_name='vendor_category',
-        blank=True,
+        blank=False,
     )
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)

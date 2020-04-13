@@ -24,10 +24,12 @@ from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,)
+from vendor.views import (VendorViewSet,VendorCategoryView, )
 
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
+router.register(r'vendor', VendorViewSet, base_name="vendor")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,7 +41,8 @@ urlpatterns = [
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'category/', CategoryView.as_view(), name='category'),
-    path(r'search/', SearchQueryView.as_view(), name='search')
+    path(r'search/', SearchQueryView.as_view(), name='search'),
+    path(r'vendor-category/', VendorCategoryView.as_view(), name='vendor-category'),
 ] + router.urls
 
 

@@ -7,10 +7,11 @@ from rest_framework.response import Response
 from rest_framework import (permissions, viewsets, status, filters,) 
 from django.utils import timezone
 from django.db import transaction
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
-    VendorSerializer,)
-from .models import (Vendor, )
+    VendorSerializer, VendorCreateSerializer, )
+from .models import (Vendor, VendorCategory )
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -22,6 +23,21 @@ class CustomPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 
+class VendorCategoryView(APIView):
+
+    """
+    Get Vendor Categories information.
+    """
+    permission_classes = (IsAuthenticatedVendorPermission,)
+    
+    def get(self, request):
+        """
+        Display categories.    
+        """
+        queryset = VendorCategory.objects.values('id','name')
+        return Response(queryset)
+
+    
 class VendorViewSet(viewsets.ModelViewSet):
     """
     All Vendor related endpoint's view is defined here.
@@ -61,9 +77,8 @@ class VendorViewSet(viewsets.ModelViewSet):
         serializer = VendorCreateSerializer(
             data=request.data, context={'request': request})
         if serializer.is_valid():
-            vendor = Vendor(ac_manager_id=request.data['user'], vendor_categories=request.data[
-                'vendor_categories'])
-            vendor.save()
+            vendor = Vendor.objects.create(ac_manager_id=request.data['ac_manager'])
+            vendor.vendor_categories.add(*request.data['vendor_categories'])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
