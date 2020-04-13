@@ -10,13 +10,14 @@ class UserPermissions(BasePermission):
         return True
 
 
-# class IsAuthenticatedSitePermission(BasePermission):
+class IsAuthenticatedVendorPermission(BasePermission):
 
-#     def has_permission(self, request, view):
-#         if not request.user.is_authenticated:
-#             return False
-#         return True
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        return True
 
+    
 #     # def has_object_permission(self, request, view, obj):
 #     #     """
 #     #     related to objects like site
