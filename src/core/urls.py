@@ -24,7 +24,7 @@ from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,)
-from vendor.views import (VendorViewSet,VendorCategoryView, )
+from vendor.views import (VendorViewSet,)
 
 
 router = SimpleRouter()
@@ -42,7 +42,6 @@ urlpatterns = [
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'category/', CategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
-    path(r'vendor-category/', VendorCategoryView.as_view(), name='vendor-category'),
 ] + router.urls
 
 

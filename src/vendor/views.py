@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
     VendorSerializer, VendorCreateSerializer, )
-from .models import (Vendor, VendorCategory )
+from .models import (Vendor,)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -22,21 +22,6 @@ class CustomPagination(PageNumberPagination):
     page_size = 50
     page_size_query_param = 'page_size'
 
-
-class VendorCategoryView(APIView):
-
-    """
-    Get Vendor Categories information.
-    """
-    permission_classes = (IsAuthenticatedVendorPermission,)
-    
-    def get(self, request):
-        """
-        Display categories.    
-        """
-        queryset = VendorCategory.objects.values('id','name')
-        return Response(queryset)
-
     
 class VendorViewSet(viewsets.ModelViewSet):
     """
@@ -44,13 +29,12 @@ class VendorViewSet(viewsets.ModelViewSet):
     """
     permission_classes = (IsAuthenticatedVendorPermission, )
     filter_backends = [filters.SearchFilter]
-    search_fields = ['vendor_categories', ]
+    search_fields = ['vendor_category', ]
 
     def get_serializer_class(self):
         """
         Return serializer on the basis of action.
         """
-        print('+++++', self.action)
         if self.action == 'create':
             return VendorCreateSerializer
         elif self.action == 'vendor_profile':
@@ -78,8 +62,7 @@ class VendorViewSet(viewsets.ModelViewSet):
         serializer = VendorCreateSerializer(
             data=request.data, context={'request': request})
         if serializer.is_valid():
-            vendor = Vendor.objects.create(ac_manager_id=request.data['ac_manager'])
-            vendor.vendor_categories.add(*request.data['vendor_categories'])
+            vendor = Vendor.objects.create(ac_manager_id=request.data['ac_manager'], vendor_category=request.data['vendor_category'])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

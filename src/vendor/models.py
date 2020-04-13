@@ -12,30 +12,21 @@ from user.models import User
 class Vendor(models.Model):
     """
     Stores vendor's/cultivator's initial details.
-    """    
+    """
+    CATEGORY_CULTIVATOR = 'cultivator'
+    CATEGORY_NURSARY = 'nursary'
+    CATEGORY_CHOICES = (
+        (CATEGORY_CULTIVATOR, _('Cultivator')),
+        (CATEGORY_NURSARY, _('Nursary')),
+    )
     ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
                                    related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)
-    vendor_categories = models.ManyToManyField(
-        to='VendorCategory',
-        related_name='vendor_category',
-        blank=False,
-    )
+    vendor_category = models.CharField(verbose_name=_('Vendor Category'),max_length=60, choices=CATEGORY_CHOICES)
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
-
-class VendorCategory(models.Model):
-    """
-    Class implementing  Vendor a categories.
-    """
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-    
     class Meta:
-        verbose_name = _('Vendor Category')
-        verbose_name_plural = _('Vendor Categories')
+        unique_together = (('ac_manager', 'vendor_category'), )
 
     
 class VendorUser(models.Model):
@@ -133,7 +124,16 @@ class FinancialOverview(models.Model):
                                 related_name='financial_overview', on_delete=models.CASCADE)
     financial_details = JSONField(null=True, blank=True, default=dict)
     
+       
+# class VendorCategory(models.Model):
+#     """
+#     Class implementing  Vendor a categories.
+#     """
+#     name = models.CharField(max_length=255)
+
+#     def __str__(self):
+#         return self.name
     
-    
-    
-    
+#     class Meta:
+#         verbose_name = _('Vendor Category')
+#         verbose_name_plural = _('Vendor Categories')

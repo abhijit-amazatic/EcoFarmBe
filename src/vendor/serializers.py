@@ -13,9 +13,7 @@ class VendorSerializer(serializers.ModelSerializer):
     """
     def validate(self, data):
         if self.partial:
-            if not (data['ac_manager'] == self.context['request'].user.id) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
-                raise serializers.ValidationError(
-                    "You are not allowed to update Vendor with another user!")
+            pass
         return data
         
     class Meta:
