@@ -2,15 +2,15 @@
 Admin related customization.
 """
 from django.contrib import admin
-from .models import (Vendor, CultivatorCategory,)
+from .models import (Vendor, VendorCategory,)
 
 
 
-class CultivatorCategoryAdmin(admin.ModelAdmin):
+class VendorCategoryAdmin(admin.ModelAdmin):
     """
-    CultivatorCategory Admin
+    VendorCategory Admin
     """
     #search_fields = ('',)
     
 
-admin.site.register(CultivatorCategory, CultivatorCategoryAdmin)      
+admin.site.register(VendorCategory, VendorCategoryAdmin)      

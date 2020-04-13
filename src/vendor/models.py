@@ -22,7 +22,6 @@ class Vendor(models.Model):
     )
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-  
 
 
 class VendorCategory(models.Model):
@@ -41,7 +40,7 @@ class VendorCategory(models.Model):
     
 class VendorUser(models.Model):
     """
-    Stores vendor's/cultivator's User's details.
+    Stores vendor's/cultivator's/Nursary's/etc. User's details.
     """
     ROLE_OWNER = 'OWNER'
     ROLE_USER = 'USER'
@@ -59,57 +58,29 @@ class VendorUser(models.Model):
         unique_together = (('vendor', 'user'), )
 
 
-        
 class VendorProfile(models.Model):
     """
-    Stores vendor's/cultivator's Farm profile details.
+    Stores vendor's/cultivator's/Nursary's/etc. Farm profile details.
     """
     vendor = models.ForeignKey(Vendor, verbose_name=_('Vendor'),
                                 related_name='vendor_profile', on_delete=models.CASCADE)
     profile_type = ArrayField(blank=True, null=True)
     number_of_licenses = models.IntegerField(null=True)
     number_of_legal_entities = models.IntegerField(null=True)
-    content = JSONField(null=True, blank=True, default=dict)
 
+
+class ProfileContact(models.Model):
+    """
+    Stores vendor's/cultivator's/Nursary's/etc. farm's overview.
+    """
+    vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
+                                related_name='profile_contact', on_delete=models.CASCADE)
+    profile_contact_details = JSONField(null=True, blank=True, default=dict)
     
-    
-    primary_country = models.CharField(_('Primary Country'), blank=True, null=True, max_length=60)
-    appellation = models.CharField(_('Appellation'), blank=True, null=True, max_length=255)
-    region = models.CharField(_('Region'), blank=True, null=True, max_length=60)
-    ethics_and_certifications = ArrayField(models.CharField(
-        _('Ethics & Cert'),
-        choices=(('Minority Owned', 'Minority Owned'),
-                 ('Locally Owned', 'Locally Owned'),
-                 ('Public Benefit Corp', 'Public Benefit Corp'),
-                 ('Woman', 'Woman'),
-                 ('First Nation Owned', 'First Nation Owned'),
-                 ('Veganic', 'Veganic'),), max_length=60,),blank=True, null=True)
-    other_distributors = models.BooleanField(default=False)
-    transportation = ArrayField(models.CharField(
-        _('Transportation'),
-        choices=(('self transport', 'Self Transport'),), max_length=16,), blank=True, null=True)
-    packaged_flower_line = models.BooleanField(default=False)
-    interested_in_cobranding = models.BooleanField(default=False)
-    marketing_material = models.BooleanField(default=False)
-    featured_on_site = models.BooleanField(default=False)
-    company_email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(_('Phone'), max_length=20, null=True)
-    website = models.CharField(_('URL'), max_length=255, blank=False, null=False,
-                           db_index=True, unique=True, validators=[full_domain_validator])
-    instagram_url = models.CharField(
-        _('Instagram Link'), blank=True, null=True, max_length=255)
-    facebook_url = models.CharField(
-        _('Facebook Link'), blank=True, null=True, max_length=255)
-    linkedin_url = models.CharField(
-        _('LinkedIn Link'), blank=True, null=True, max_length=255)
-    twitter_url = models.CharField(
-        _('Twitter Link'), blank=True, null=True, max_length=255)
-    number_of_employee = models.IntegerField(null=True)
-    
-    
+        
 class License(models.Model):
     """
-    Stores vendor's/cultivator's License details.
+    Stores vendor's/cultivator's/Nursary's farm's License details.
     """
     vendor_profile = models.ForeignKey(VendorProfile, verbose_name=_('VendorProfile'), on_delete=models.CASCADE)
     license_type = models.CharField(
@@ -144,22 +115,22 @@ class License(models.Model):
         return self.legal_business_name
 
 
-    
-    
-class CultivationOverview(models.Model):
+class ProfileOverview(models.Model):
     """
-    Stores vendor's/cultivator's overview.
+    Stores vendor's/cultivator's/Nursary's/etc. farm's  overview.
     """
-    vendor = models.OneToOneField(Vendor, verbose_name=_('Vendor'),
-                                related_name='cultivation_overview', on_delete=models.CASCADE)    
+    vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
+                                related_name='cultivation_overview', on_delete=models.CASCADE)
+    profile_overview = JSONField(null=True, blank=True, default=dict)
     
     
 class FinancialOverview(models.Model):
     """
-    Stores vendor's/cultivator's Financial overview.
+    Stores vendor's/cultivator's/Nursary's/etc. farm's Financial overview.
     """
-    vendor = models.OneToOneField(Vendor, verbose_name=_('Vendor'),
-                                related_name='financial_overview', on_delete=models.CASCADE)    
+    vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
+                                related_name='financial_overview', on_delete=models.CASCADE)
+    financial_details = JSONField(null=True, blank=True, default=dict)
     
     
     
