@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'utils',
     'core',
     'user',
-    'cultivator',
+    'vendor',
     'rest_social_auth',
     'sslserver',
     'social_django'
@@ -135,7 +135,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'knox.auth.TokenAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',
