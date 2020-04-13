@@ -11,6 +11,13 @@ class VendorSerializer(serializers.ModelSerializer):
     """
     This defines Vendor serializer.
     """
+    def validate(self, data):
+        if self.partial:
+            if not (data['ac_manager'] == self.context['request'].user.id) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+                raise serializers.ValidationError(
+                    "You are not allowed to update Vendor with another user!")
+        return data
+        
     class Meta:
         model = Vendor
         fields = ('__all__')
