@@ -119,6 +119,7 @@ class LogInView(APIView):
             response = Response({
                 "user": KNOXUSER_SERIALIZER(request.user).data,
                 "token": token,
+                "existing_member":request.user.existing_member
             })
         else:
             response = Response({"data": serializer.errors})
