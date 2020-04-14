@@ -10,7 +10,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
-    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer)
+    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer)
 from .models import (Vendor,VendorProfile,)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
@@ -30,6 +30,7 @@ class VendorViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedVendorPermission, )
     filter_backends = [filters.SearchFilter]
     search_fields = ['vendor_category', ]
+    
 
     def get_serializer_class(self):
         """
@@ -68,8 +69,12 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
     """
     All VendorProfile
     """
-    serializer_class = VendorProfileSerializer
+    #serializer_class = VendorProfileSerializer
     permission_classes = (IsAuthenticatedVendorPermission, )
+    profile_contact_path = 'profile-contact(/(?P<app_id>[0-9]*))?'
+    profile_overview_path = 'profile-overview(/(?P<link_id>[0-9]*))?'
+    financial_overview_path = 'financial-overview(/(?P<link_id>[0-9]*))?'
+    
     #filter_backends = [filters.SearchFilter]
     #search_fields = ['vendor_category', ] add this based on farm name
 
@@ -80,9 +85,27 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         vendor_profile = VendorProfile.objects.filter()
         if self.action == "list":
             vendor_profile = vendor_profile.select_related('vendor')
+        elif self.action == "profile_contact":
+            vendor_profile = vendor_profile.select_related('profile_contact')
+        elif self.action == "profile_overview":
+            vendor_profile = vendor_profile.select_related('profile_overview')
+        elif self.action == "financial_overview":
+            vendor_profile = vendor_profile.select_related('financial_overview')
+            
         if not self.request.user.is_staff and not self.request.user.is_superuser:
             vendor_profile = vendor_profile.filter(vendor__ac_manager=self.request.user)
         return vendor_profile
 
     
     
+    def get_serializer_class(self):
+        """
+        Return serializer on the basis of action.
+        """
+        if self.action == 'profile_contact':
+            return ProfileContactSerializer
+        elif self.action == 'profile_overview':
+            return ProfileOverviewSerializer
+        elif self.action == 'financial_overview':
+            return FinancialOverviewSerializer
+        return VendorProfileSerializer

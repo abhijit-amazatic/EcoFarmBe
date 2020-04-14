@@ -113,7 +113,7 @@ class ProfileOverview(models.Model):
     Stores vendor's/cultivator's/Nursary's/etc. farm's  overview.
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
-                                related_name='cultivation_overview', on_delete=models.CASCADE)
+                                related_name='profile_overview', on_delete=models.CASCADE)
     profile_overview = JSONField(null=True, blank=True, default=dict)
     
     
