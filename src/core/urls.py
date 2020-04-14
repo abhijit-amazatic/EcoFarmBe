@@ -25,7 +25,7 @@ from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,)
-from vendor.views import (VendorViewSet,VendorProfileViewSet,)
+from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet)
 
 
 
@@ -33,6 +33,7 @@ router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'vendor', VendorViewSet, base_name="vendor")
 router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
+router.register(r'license', LicenseViewSet, base_name="license")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

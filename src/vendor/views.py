@@ -10,8 +10,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
-    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer)
-from .models import (Vendor,VendorProfile,)
+    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, LicenseSerializer)
+from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, License)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -71,9 +71,9 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
     """
     #serializer_class = VendorProfileSerializer
     permission_classes = (IsAuthenticatedVendorPermission, )
-    profile_contact_path = 'profile-contact(/(?P<app_id>[0-9]*))?'
-    profile_overview_path = 'profile-overview(/(?P<link_id>[0-9]*))?'
-    financial_overview_path = 'financial-overview(/(?P<link_id>[0-9]*))?'
+    profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
+    profile_overview_path = 'profile-overview(/(?P<profile_overview_id>[0-9]*))?'
+    financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
     
     #filter_backends = [filters.SearchFilter]
     #search_fields = ['vendor_category', ] Add this based on farm name
@@ -115,17 +115,43 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         """
         Detail route CRUD operations on profile_contact.
         """
+        print('in profile contact>>>>>>>>')
+        
 
     @action(detail=True, url_path=profile_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
     def profile_overview(self, request, pk,profile_overview_id=None):
         """
         Detail route CRUD operations on profile_overview.
         """
+        
 
 
     @action(detail=True, url_path=financial_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
     def financial_overview(self, request, pk,financial_overview_id=None):
         """
         Detail route CRUD operations on financial_overview.
-        """    
+        """
+        
     
+
+class LicenseViewSet(viewsets.ModelViewSet):
+    """
+    All Vendor profile related license data stored here.
+    """
+    serializer_class = LicenseSerializer
+    permission_classes = (IsAuthenticatedVendorPermission, )
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['legal_business_name', ]
+    
+    
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        licenses = License.objects.filter()
+        if self.action == "list":
+            licenses = licenses.select_related('vendor_profile')
+        if not self.request.user.is_staff and not self.request.user.is_superuser:
+            licenses = licenses.filter(vendor_profile__vendor__ac_manager=self.request.user)
+        return licenses
+        
