@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from core.validators import full_domain_validator
+from core.mixins.models import (StatusFlagMixin, )
 from django.conf import settings
 from user.models import User
 
@@ -49,7 +50,7 @@ class VendorUser(models.Model):
         unique_together = (('vendor', 'user'), )
 
 
-class VendorProfile(models.Model):
+class VendorProfile(StatusFlagMixin,models.Model):
     """
     Stores vendor's/cultivator's/Nursary's/etc. Farm profile details.
     """

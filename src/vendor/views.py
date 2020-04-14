@@ -60,9 +60,9 @@ class VendorViewSet(viewsets.ModelViewSet):
         This endpoint is used to create Vendor.
         """
         serializer = VendorCreateSerializer(
-            data=request.data, context={'request': request})
+            data=request.data, context={'request': request}, many=True)
         if serializer.is_valid():
-            vendor = Vendor.objects.create(ac_manager_id=request.data['ac_manager'], vendor_category=request.data['vendor_category'])
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
