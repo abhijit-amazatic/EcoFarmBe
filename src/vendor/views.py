@@ -110,12 +110,35 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             return FinancialOverviewSerializer
         return VendorProfileSerializer
 
-    @action(detail=True, url_path=profile_contact_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
+
+    def extra_info(self, request, pk, model, serializer, extra_info_attribute):
+        """
+        Generic feature for detail route.
+        """
+        vendor_profile = self.get_object()
+        if request.method == 'GET':
+            try:
+                return Response(serializer(
+                    getattr(vendor_profile, extra_info_attribute)).data)
+            except model.DoesNotExist:
+                return Response({})
+        else:
+            try:
+                ser = serializer(
+                    getattr(vendor_profile, extra_info_attribute), data=request.data, partial=True)
+            except model.DoesNotExist:
+                request.data['vendor_profile'] = vendor_profile.id
+                ser = serializer(data=request.data)
+            ser.is_valid(raise_exception=True)
+            ser.save(vendor_profile=vendor_profile)
+            return Response(ser.data)
+
+    @action(detail=True, url_path=profile_contact_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def profile_contact(self, request, pk,profile_contact_id=None):
         """
         Detail route CRUD operations on profile_contact.
         """
-        print('in profile contact>>>>>>>>')
+        return self.extra_info(request, pk, ProfileContact, ProfileContactSerializer, 'profile_contact')
         
 
     @action(detail=True, url_path=profile_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
@@ -123,6 +146,7 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         """
         Detail route CRUD operations on profile_overview.
         """
+        return self.extra_info(request, pk, ProfileOverview, ProfileOverviewSerializer, 'profile_overview')
         
 
 
@@ -131,6 +155,7 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         """
         Detail route CRUD operations on financial_overview.
         """
+        return self.extra_info(request, pk, FinancialOverview, FinancialOverviewSerializer, 'financial_overview')
         
     
 
