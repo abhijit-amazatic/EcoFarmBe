@@ -103,6 +103,16 @@ class LicenseSerializer(serializers.ModelSerializer):
     """
     This defines License Serializer.
     """
+    def validate(self, obj):
+        """
+        Object level validation.Normal user should allowed to upload license related to his VendorProfile.
+        """
+        if self.context['request'].method == 'POST':
+            vendor_profile = VendorProfile.objects.filter(vendor__ac_manager=self.context['request'].user)
+            if obj.get('vendor_profile') not in vendor_profile and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+                raise serializers.ValidationError(
+                    "You can only add/update license related to your vendors/vendor profile only!")
+        return obj
         
     class Meta:
         model = License
