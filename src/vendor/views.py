@@ -76,7 +76,7 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
     financial_overview_path = 'financial-overview(/(?P<link_id>[0-9]*))?'
     
     #filter_backends = [filters.SearchFilter]
-    #search_fields = ['vendor_category', ] add this based on farm name
+    #search_fields = ['vendor_category', ] Add this based on farm name
 
     def get_queryset(self):
         """
@@ -95,9 +95,9 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_staff and not self.request.user.is_superuser:
             vendor_profile = vendor_profile.filter(vendor__ac_manager=self.request.user)
         return vendor_profile
+    
 
-    
-    
+       
     def get_serializer_class(self):
         """
         Return serializer on the basis of action.
@@ -109,3 +109,23 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         elif self.action == 'financial_overview':
             return FinancialOverviewSerializer
         return VendorProfileSerializer
+
+    @action(detail=True, url_path=profile_contact_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
+    def profile_contact(self, request, pk,profile_contact_id=None):
+        """
+        Detail route CRUD operations on profile_contact.
+        """
+
+    @action(detail=True, url_path=profile_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
+    def profile_overview(self, request, pk,profile_overview_id=None):
+        """
+        Detail route CRUD operations on profile_overview.
+        """
+
+
+    @action(detail=True, url_path=financial_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
+    def financial_overview(self, request, pk,financial_overview_id=None):
+        """
+        Detail route CRUD operations on financial_overview.
+        """    
+    

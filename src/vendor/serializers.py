@@ -5,7 +5,7 @@ Serializer to validate vendor related modules.
 import requests
 from django.conf import settings
 from rest_framework import serializers
-from .models import Vendor, VendorProfile
+from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, License)
 
 class VendorSerializer(serializers.ModelSerializer):
     """
@@ -62,4 +62,50 @@ class VendorProfileSerializer(serializers.ModelSerializer):
 
 
 
-        #ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer
+class ProfileContactSerializer(serializers.ModelSerializer):
+    """
+    This defines ProfileContactSerializer.
+    """
+    def validate(self, data):
+        """
+        Object level validation
+        """
+        if self.partial:
+            pass
+        return data
+        
+    class Meta:
+        model = ProfileContact
+        fields = ('__all__')
+
+
+class ProfileOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines ProfileOverviewSerializer
+    """
+       
+    class Meta:
+        model = ProfileOverview
+        fields = ('__all__')
+
+
+class FinancialOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines FinancialOverviewSerializer.
+    """
+        
+    class Meta:
+        model = FinancialOverview
+        fields = ('__all__')
+        
+
+class LicenseSerializer(serializers.ModelSerializer):
+    """
+    This defines License Serializer.
+    """
+        
+    class Meta:
+        model = License
+        fields = ('__all__')
+
+         
