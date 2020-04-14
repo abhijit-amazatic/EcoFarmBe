@@ -40,3 +40,22 @@ class VendorCreateSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
         
+class VendorProfileSerializer(serializers.ModelSerializer):
+    """
+    This defines VendorProfile serializer.
+    """
+
+    def validate(self, obj):
+        """
+        Object level validation.Normal user should allowed to create VendorProfile only with respective vendor
+        """
+        if self.context['request'].method == 'POST':
+            user_vendors = Vendor.objects.filter(ac_manager=self.context['request'].user)
+            if obj['vendor'] not in user_vendors and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+                raise serializers.ValidationError(
+                    "You can only add/update vendorprofiles related to your vendors only!")
+        return obj
+    
+    class Meta:
+        model = VendorProfile
+        fields = ('__all__')

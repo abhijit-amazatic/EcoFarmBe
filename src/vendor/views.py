@@ -10,8 +10,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
-    VendorSerializer, VendorCreateSerializer, )
-from .models import (Vendor,)
+    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer)
+from .models import (Vendor,VendorProfile,)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -37,8 +37,6 @@ class VendorViewSet(viewsets.ModelViewSet):
         """
         if self.action == 'create':
             return VendorCreateSerializer
-        elif self.action == 'vendor_profile':
-            return VendorProfileSerializer
         return VendorSerializer
     
     def get_queryset(self):
@@ -48,8 +46,6 @@ class VendorViewSet(viewsets.ModelViewSet):
         vendors = Vendor.objects.filter()
         if self.action == "list":
             vendors = vendors.select_related('ac_manager')
-        elif self.action == "vendor_profile":
-            vendors = vendors.prefetch_related('vendor_profile')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
             #vendors = vendors.filter(vendor_roles__user=self.request.user)
             vendors = vendors.filter(ac_manager=self.request.user)
@@ -68,5 +64,25 @@ class VendorViewSet(viewsets.ModelViewSet):
 
 
 
+class VendorProfileViewSet(viewsets.ModelViewSet):
+    """
+    All VendorProfile
+    """
+    serializer_class = VendorProfileSerializer
+    permission_classes = (IsAuthenticatedVendorPermission, )
+    #filter_backends = [filters.SearchFilter]
+    #search_fields = ['vendor_category', ] add this based on farm name
 
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        vendor_profile = VendorProfile.objects.filter()
+        if self.action == "list":
+            vendor_profile = vendor_profile.select_related('vendor')
+        if not self.request.user.is_staff and not self.request.user.is_superuser:
+            vendor_profile = vendor_profile.filter(vendor__ac_manager=self.request.user)
+        return vendor_profile
+
+    
     

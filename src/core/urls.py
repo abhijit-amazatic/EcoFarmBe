@@ -20,16 +20,19 @@ from django.urls import path
 from django.views.static import serve
 from knox.views import LogoutView
 from rest_framework.routers import SimpleRouter
+
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,)
-from vendor.views import (VendorViewSet,)
+from vendor.views import (VendorViewSet,VendorProfileViewSet,)
+
 
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'vendor', VendorViewSet, base_name="vendor")
+router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
