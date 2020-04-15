@@ -58,3 +58,10 @@ PYZOHO_CONFIG = {
 
 PYZOHO_REFRESH_TOKEN=os.environ.get('PYZOHO_REFRESH_TOKEN')
 PYZOHO_USER_IDENTIFIER=os.environ.get('PYZOHO_USER')
+REDIS_URL=os.environ.get('REDIS_URL')
+
+#Box configuration
+BOX_CLIENT_ID=os.environ.get('BOX_CLIENT_ID')
+BOX_CLIENT_SECRET=os.environ.get('BOX_CLIENT_SECRET')
+BOX_REFRESH_TOKEN=os.environ.get('BOX_REFRESH_TOKEN')
+BOX_ACCESS_TOKEN=os.environ.get('BOX_ACCESS_TOKEN')

@@ -17,8 +17,19 @@ from core.mailer import mail
 from .models import User, MemberCategory
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer,)
 from integration.crm import (create_record, search_query,)
+from integration.box import(get_box_tokens, )
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
+
+class GetBoxTokensView(APIView):
+    """
+    Return Access and Refresh Tokens for Box.
+    """
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        tokens = get_box_tokens()
+        return Response(tokens)
 
 class SearchQueryView(APIView):
     """
