@@ -10,8 +10,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
-    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, LicenseSerializer)
-from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, License)
+    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, ProcessingOverviewSerializer, LicenseSerializer)
+from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -74,6 +74,8 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
     profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
     profile_overview_path = 'profile-overview(/(?P<profile_overview_id>[0-9]*))?'
     financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
+    processing_overview_path = 'processing-overview(/(?P<processing_overview_id>[0-9]*))?'
+
     
     #filter_backends = [filters.SearchFilter]
     #search_fields = ['vendor_category', ] Add this based on farm name
@@ -91,6 +93,8 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             vendor_profile = vendor_profile.select_related('profile_overview')
         elif self.action == "financial_overview":
             vendor_profile = vendor_profile.select_related('financial_overview')
+        elif self.action == "processing_overview":
+            vendor_profile = vendor_profile.select_related('processing_overview')    
             
         if not self.request.user.is_staff and not self.request.user.is_superuser:
             vendor_profile = vendor_profile.filter(vendor__ac_manager=self.request.user)
@@ -108,6 +112,8 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             return ProfileOverviewSerializer
         elif self.action == 'financial_overview':
             return FinancialOverviewSerializer
+        elif self.action == 'processing_overview':
+            return ProcessingOverviewSerializer
         return VendorProfileSerializer
 
 
@@ -156,8 +162,14 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         Detail route CRUD operations on financial_overview.
         """
         return self.extra_info(request, pk, FinancialOverview, FinancialOverviewSerializer, 'financial_overview')
+
+    @action(detail=True, url_path=processing_overview_path, methods=['get', 'patch'], pagination_class=CustomPagination)
+    def processing_overview(self, request, pk,processing_overview_id=None):
+        """
+        Detail route CRUD operations on processing_overview.
+        """
+        return self.extra_info(request, pk, ProcessingOverview, ProcessingOverviewSerializer, 'processing_overview')
         
-    
 
 class LicenseViewSet(viewsets.ModelViewSet):
     """

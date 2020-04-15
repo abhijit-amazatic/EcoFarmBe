@@ -70,3 +70,10 @@ if DEBUG:
     PYZOHO_REFRESH_TOKEN=''
     PYZOHO_USER_IDENTIFIER=''
 
+
+REDIS_URL = ''
+#Box configuration get those tokens from heroku or team mate.
+BOX_CLIENT_ID=''
+BOX_CLIENT_SECRET=''
+BOX_REFRESH_TOKEN=''
+BOX_ACCESS_TOKEN=''    
