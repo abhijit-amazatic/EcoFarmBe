@@ -2,6 +2,7 @@
 Integration views
 """
 from rest_framework import (status,)
+from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,7 +16,8 @@ class GetBoxTokensView(APIView):
     """
     Return Access and Refresh Tokens for Box.
     """
-    permission_classes = (AllowAny,)
+    authentication_classes = [TokenAuthentication, ]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         tokens = get_box_tokens()

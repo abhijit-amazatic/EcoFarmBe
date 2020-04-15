@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_social_auth',
     'sslserver',
     'social_django',
-    'integration'
+    'integration',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []
