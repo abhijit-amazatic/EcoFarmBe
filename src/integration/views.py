@@ -1,6 +1,7 @@
 """
 Integration views
 """
+from django.http import (QueryDict, )
 from rest_framework import (status,)
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
@@ -34,9 +35,9 @@ class InventoryView(APIView):
     def get(self, request):
         """
         Get an item.
-        """
+        """        
         if request.query_params.get('item_id', None):
             item_id = request.query_params['item_id']
             return Response(get_inventory_item(item_id))
-        params = dict(request.query_params)
-        return Response(get_inventory_items(params=params))
+        data = get_inventory_items(params=request.query_params.dict())
+        return Response(data)
