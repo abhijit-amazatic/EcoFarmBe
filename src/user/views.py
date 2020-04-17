@@ -16,7 +16,7 @@ from core.permissions import UserPermissions
 from core.mailer import mail
 from .models import User, MemberCategory
 from vendor.models import Vendor
-from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer,)
+from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
 from integration.crm import (create_record, search_query,)
 from integration.box import(get_box_tokens, )
 
@@ -70,18 +70,20 @@ class UserViewSet(ModelViewSet):
             data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
-            # Uncomment below when users needs to be inserted into Zoho CRM.
-            result = create_record('Contacts', request.data)
-            instance.zoho_contact_id = result['response']['data'][0]['details']['id']
-            instance.save()
-            if not instance.existing_member:
-                try:
+            try:
+                # Uncomment below when users needs to be inserted into Zoho CRM.
+                result = create_record('Contacts', request.data)
+                instance.zoho_contact_id = result['response']['data'][0]['details']['id']
+                instance.save()
+                if not instance.existing_member:
                     vendor_list = instance.categories.values_list('name', flat=True)
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
                     Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
-                except Exception as e:
-                    print(e)
-                    pass
+                link = get_encrypted_data(instance.email)
+                mail("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
+            except Exception as e:
+                print(e)
+                pass        
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -139,7 +141,9 @@ class LogInView(APIView):
             response = Response({
                 "user": KNOXUSER_SERIALIZER(request.user).data,
                 "token": token,
-                "existing_member":request.user.existing_member
+                "existing_member":request.user.existing_member,
+                "is_verified":request.user.is_verified
+                
             })
         else:
             response = Response({"data": serializer.errors})
@@ -184,7 +188,7 @@ class SendMailView(GenericAPIView):
         serializer = SendMailSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             recipient_email = serializer.data.get('email')
-            link = serializer.get_encrypted_data(recipient_email)
+            link = get_encrypted_data(recipient_email, 'forgot_password')
             subject = "Forgot Password?"
             mail(
                 "email-send.html",
@@ -222,3 +226,22 @@ class ResetPasswordView(GenericAPIView):
             response = Response("false", status=400)
         return response
    
+
+class VerificationView(GenericAPIView):
+    """
+    Verification View
+    """
+    serializer_class = VerificationSerializer
+    permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        """
+        Post method for verification view.
+        """
+        serializer = VerificationSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            response = Response({"Verified successfully!"}, status=200)
+        else:
+            response = Response("false", status=400)
+        return response

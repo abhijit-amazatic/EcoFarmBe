@@ -24,7 +24,7 @@ from rest_framework.routers import SimpleRouter
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
-                        SearchQueryView,)
+                        SearchQueryView,VerificationView,)
 from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet)
 from integration.views import (GetBoxTokensView, InventoryView)
 
@@ -44,6 +44,7 @@ urlpatterns = [
          ChangePasswordView.as_view(), name='change-password'),
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
+    path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
     path(r'category/', CategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),

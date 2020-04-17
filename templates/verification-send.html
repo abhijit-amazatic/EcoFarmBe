@@ -1,0 +1,12 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;'>Hi {{ email }},</p>
+<div [hidden]={{ forgotpassword }}>
+    <div ><p style='font-size:16px !important;'>Please click the link below for verification.<br>
+        {{ link }}</p></div>
+    <div>
+    </div>
+
+</div>
+{% endblock %}

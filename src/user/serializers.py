@@ -32,6 +32,22 @@ def unpad(s):
     return s[:-ord(s[len(s) - 1:])]
 
 
+def get_encrypted_data(email, reason=None):
+        raw = pad(email)
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(raw))
+        if reason == "forgot_password":
+            return '{}reset-password?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
+        else:
+           return '{}verify-user?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
+
+def get_decrypted_data(enc):
+        enc = base64.urlsafe_b64decode(enc)
+        iv = enc[:BS]
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        return unpad(cipher.decrypt(enc[BS:]))       
+       
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -174,13 +190,15 @@ class SendMailSerializer(serializers.Serializer):  # pylint: disable=W0223
             raise serializers.ValidationError("Email address not found.")
         return email
 
-    def get_encrypted_data(self, email):
-        raw = pad(email)
-        iv = Random.new().read(AES.block_size)
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(raw))
-        return '{}reset-password?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))    
-
+    # def get_encrypted_data(self, email, reason=None):
+    #     raw = pad(email)
+    #     iv = Random.new().read(AES.block_size)
+    #     cipher = AES.new(key, AES.MODE_CBC, iv)
+    #     cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(raw))
+    #     if reason == "forgot_password":
+    #         return '{}reset-password?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
+    #     else
+    #        return '{}verify-user?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
 
     
 class ResetPasswordSerializer(PasswordSerializer):  # pylint: disable=W0223
@@ -189,17 +207,11 @@ class ResetPasswordSerializer(PasswordSerializer):  # pylint: disable=W0223
     """
     code = serializers.CharField(max_length=255)
 
-    def get_decrypted_data(self, enc):
-        enc = base64.urlsafe_b64decode(enc)
-        iv = enc[:BS]
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        return unpad(cipher.decrypt(enc[BS:]))
-
     def validate(self, data):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError(
                 "Passwords do not match")
-        decoded_data = self.get_decrypted_data(data.get('code'))
+        decoded_data = get_decrypted_data(data.get('code'))
         data['user'] = decoded_data.decode('ascii')
         return data
 
@@ -213,3 +225,26 @@ class ResetPasswordSerializer(PasswordSerializer):  # pylint: disable=W0223
         user.set_password(validated_data.get('new_password'))
         user.save()
         return user
+
+
+class VerificationSerializer(serializers.Serializer):  # pylint: disable=W0223
+    """
+    Serializer for requesting extracting & decoing code.
+    """
+    code = serializers.CharField(max_length=255)
+
+    def validate(self, data):
+        decoded_data = get_decrypted_data(data.get('code'))
+        data['user'] = decoded_data.decode('ascii')
+        return data
+
+    def create(self, validated_data):
+        try:
+            user = User.objects.get(
+                email=validated_data.get('user'))
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User Does Not Exist")
+
+        user.is_verified = True
+        user.save()
+        return user    
