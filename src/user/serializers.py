@@ -50,6 +50,8 @@ class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField()
     vendor_profiles = serializers.SerializerMethodField(read_only=True)
     vendors = serializers.SerializerMethodField(read_only=True)
+    is_verified = serializers.ReadOnlyField()
+    is_approved = serializers.ReadOnlyField()
     
     def get_vendors(self, obj):
         """
@@ -69,7 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendor_profiles', 'vendors','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','status', 'step' )
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved', 'status', 'step' )
     
 
     def validate_password(self, password):
