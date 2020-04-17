@@ -11,7 +11,8 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from .models import User
-
+from vendor.models import Vendor, VendorProfile
+from vendor.serializers import VendorSerializer, VendorProfileSerializer
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
@@ -47,10 +48,28 @@ class UserSerializer(serializers.ModelSerializer):
     is_staff = serializers.ReadOnlyField()
     is_superuser = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
+    vendor_profiles = serializers.SerializerMethodField(read_only=True)
+    vendors = serializers.SerializerMethodField(read_only=True)
+    
+    def get_vendors(self, obj):
+        """
+        Adds vendors to the user/me response.
+        """
+        results = Vendor.objects.filter(ac_manager=obj).values('id','vendor_category','ac_manager')
+        return results
+    
+    def get_vendor_profiles(self, obj):
+        """
+        Adds vendors profiles to the user/me response.
+        """
+        results = VendorProfile.objects.filter(vendor__ac_manager=obj).values('id', 'status','step', 'vendor')
+        return results
+    
+
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','status', 'step')
+        fields = ('id', 'username', 'email','first_name', 'vendor_profiles', 'vendors','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','status', 'step' )
     
 
     def validate_password(self, password):
