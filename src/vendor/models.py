@@ -89,8 +89,8 @@ class License(models.Model):
     issue_date = models.DateField(
         _('Issue Date'), blank=True, null=True, default=None)
     premises_address = models.TextField()
-    premises_country = models.CharField(
-        _('Premises Country'), blank=True, null=True, max_length=255)
+    premises_county = models.CharField(
+        _('Premises County'), blank=True, null=True, max_length=255)
     premises_city = models.CharField(
         _('Premises City'), blank=True, null=True, max_length=255)
     zip_code = models.CharField(
