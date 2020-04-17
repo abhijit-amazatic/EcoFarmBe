@@ -16,9 +16,35 @@ class Vendor(models.Model):
     """
     CATEGORY_CULTIVATOR = 'cultivator'
     CATEGORY_NURSARY = 'nursary'
+    CATEGORY_TESTING = 'testing'
+    CATEGORY_HEALTHCARE = 'healthcare'
+    CATEGORY_PATIENT = 'patient'
+    CATEGORY_INVESTOR = 'investor'
+    CATEGORY_ANCILLARY_SERVICES = 'ancillary services'
+    CATEGORY_ANCILLARY_PRODUCTS = 'ancillary products'
+    CATEGORY_HEMP = 'hemp'
+    CATEGORY_BRAND = 'brand'
+    CATEGORY_EVENT = 'event'
+    CATEGORY_PROCESSO = 'processo'
+    CATEGORY_DISTRIBUTOR = 'distributor'
+    CATEGORY_MANUFACTURE = 'manufacture'
+    CATEGORY_RETAILER = 'retailer'
     CATEGORY_CHOICES = (
         (CATEGORY_CULTIVATOR, _('Cultivator')),
         (CATEGORY_NURSARY, _('Nursary')),
+        (CATEGORY_TESTING, _('Testing')),
+        (CATEGORY_HEALTHCARE, _('Healthcare')),
+        (CATEGORY_PATIENT, _('Patient')),
+        (CATEGORY_INVESTOR, _('Investor')),
+        (CATEGORY_ANCILLARY_SERVICES, _('Ancillary Services')),
+        (CATEGORY_ANCILLARY_PRODUCTS, _('Anicllary Products')),
+        (CATEGORY_HEMP, _('Hemp')),
+        (CATEGORY_BRAND, _('Brand')),
+        (CATEGORY_EVENT, _('Event')),
+        (CATEGORY_PROCESSO, _('Processo')),
+        (CATEGORY_DISTRIBUTOR, _('Distributor')),
+        (CATEGORY_MANUFACTURE, _('Manufacture')),
+        (CATEGORY_RETAILER, _('Retailer')),
     )
     ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
                                    related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)

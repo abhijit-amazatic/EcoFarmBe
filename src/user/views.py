@@ -15,6 +15,7 @@ from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail
 from .models import User, MemberCategory
+from vendor.models import Vendor
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer,)
 from integration.crm import (create_record, search_query,)
 from integration.box import(get_box_tokens, )
@@ -73,6 +74,14 @@ class UserViewSet(ModelViewSet):
             result = create_record('Contacts', request.data)
             instance.zoho_contact_id = result['response']['data'][0]['details']['id']
             instance.save()
+            if not instance.existing_member:
+                try:
+                    vendor_list = instance.categories.values_list('name', flat=True)
+                    vendor_list_lower = [vendor.lower() for vendor in vendor_list]
+                    Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
+                except Exception as e:
+                    print(e)
+                    pass
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
