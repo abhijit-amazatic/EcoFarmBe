@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import (ModelViewSet,)
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
+from django.conf import settings
 
 from knox.models import AuthToken
 from knox.settings import knox_settings
@@ -19,8 +20,10 @@ from vendor.models import Vendor
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
 from integration.crm import (create_record, search_query,)
 from integration.box import(get_box_tokens, )
+from slacker import Slacker
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
+slack = Slacker(settings.SLACK_TOKEN)
 
 class GetBoxTokensView(APIView):
     """
@@ -245,3 +248,7 @@ class VerificationView(GenericAPIView):
         else:
             response = Response("false", status=400)
         return response
+
+
+# def test(msg):
+#     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)   
