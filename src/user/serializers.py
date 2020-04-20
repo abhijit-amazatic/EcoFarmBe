@@ -134,14 +134,19 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
         style={'input_type': 'password', 'placeholder': 'Password'})
 
     def validate(self, data):
-        try:
-            email = data.get('email')
-            password = data.get('password')
-            user = authenticate(email=email, password=password)
-            login(self.context['request'], user)
-            return user
-        except Exception:
-            raise serializers.ValidationError('Invalid Email or Password.')
+        get_user = User.objects.get(email=data.get('email'))
+        if not get_user.is_verified:
+            raise serializers.ValidationError('User is not verified!')
+        else:    
+            try:
+                email = data.get('email')
+                password = data.get('password')
+                user = authenticate(email=email, password=password)
+                login(self.context['request'], user)
+                return user
+            except Exception:
+                raise serializers.ValidationError('Invalid Email or Password.')
+        
 
 class PasswordSerializer(serializers.Serializer):  # pylint: disable=W0223
     """
