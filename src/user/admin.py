@@ -33,7 +33,7 @@ class UserAdmin(admin.ModelAdmin):
     #form = UserForm
     list_per_page = 50
     readonly_fields = ['zoho_contact_id']
-    search_fields = ('name', 'legal_business_name', 'email',)
+    search_fields = ('username', 'legal_business_name', 'email',)
 
     def save_model(self, request, obj, form, change):
         if obj.is_approved:
