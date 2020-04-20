@@ -146,7 +146,8 @@ class LogInView(APIView):
                 "token": token,
                 "existing_member":request.user.existing_member,
                 "is_verified":request.user.is_verified,
-                "is_approved":request.user.is_approved
+                "is_approved":request.user.is_approved,
+                "status":request.user.status
                 
                 
             })
