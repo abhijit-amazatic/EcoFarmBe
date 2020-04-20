@@ -25,6 +25,16 @@ from slacker import Slacker
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)
 
+
+def notify_admins(email):
+    """
+    Notify admins on slack & email about new user registration.
+    """
+    msg = "<!channel>User with the EmailID `%s`  is registered with us.Please review and approve from admin Panel!" % email
+    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
+    mail("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
+
+    
 class GetBoxTokensView(APIView):
     """
     Return Access and Refresh Tokens for Box.
@@ -75,15 +85,16 @@ class UserViewSet(ModelViewSet):
             instance = serializer.save()
             try:
                 # Uncomment below when users needs to be inserted into Zoho CRM.
-                # result = create_record('Contacts', request.data)
-                # instance.zoho_contact_id = result['response']['data'][0]['details']['id']
-                # instance.save()
+                result = create_record('Contacts', request.data)
+                instance.zoho_contact_id = result['response']['data'][0]['details']['id']
+                instance.save()
                 if not instance.existing_member:
                     vendor_list = instance.categories.values_list('name', flat=True)
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
                     Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
                 link = get_encrypted_data(instance.email)
                 mail("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
+                notify_admins(instance.email)
             except Exception as e:
                 print(e)
                 pass        

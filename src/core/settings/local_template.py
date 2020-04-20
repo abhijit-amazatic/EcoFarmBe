@@ -88,3 +88,6 @@ INVENTORY_ORGANIZATION_ID=''
 #Slack config
 SLACK_TOKEN = ''
 SLACK_CHANNEL_NAME = ''
+
+#Admin email
+ADMIN_EMAIL = 'tech@ecofarm.ag'

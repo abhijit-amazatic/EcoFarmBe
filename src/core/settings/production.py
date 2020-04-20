@@ -76,3 +76,6 @@ INVENTORY_ORGANIZATION_ID=os.environ.get('INVENTORY_ORGANIZATION_ID')
 #slack tokens
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL_NAME = os.environ.get("SLACK_CHANNEL_NAME")
+
+#Admin Email
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
