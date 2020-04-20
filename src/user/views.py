@@ -145,7 +145,9 @@ class LogInView(APIView):
                 "user": KNOXUSER_SERIALIZER(request.user).data,
                 "token": token,
                 "existing_member":request.user.existing_member,
-                "is_verified":request.user.is_verified
+                "is_verified":request.user.is_verified,
+                "is_approved":request.user.is_approved
+                
                 
             })
         else:

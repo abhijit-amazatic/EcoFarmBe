@@ -38,7 +38,7 @@ class User(StatusFlagMixin,AbstractUser):
         _('Business DBA'), max_length=150, null=True)
     existing_member = models.BooleanField('Account Existed', default=False)
     is_verified = models.BooleanField('Is Verified', default=False)
-    is_approved = models.BooleanField('Is Approved', default=False)
+    is_approved = models.BooleanField('Approve User', default=False)
     zoho_contact_id = models.CharField(
         _('Zoho Contact ID'), max_length=100, blank=True, null=True)
     categories = models.ManyToManyField(
