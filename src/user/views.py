@@ -75,9 +75,9 @@ class UserViewSet(ModelViewSet):
             instance = serializer.save()
             try:
                 # Uncomment below when users needs to be inserted into Zoho CRM.
-                result = create_record('Contacts', request.data)
-                instance.zoho_contact_id = result['response']['data'][0]['details']['id']
-                instance.save()
+                # result = create_record('Contacts', request.data)
+                # instance.zoho_contact_id = result['response']['data'][0]['details']['id']
+                # instance.save()
                 if not instance.existing_member:
                     vendor_list = instance.categories.values_list('name', flat=True)
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
