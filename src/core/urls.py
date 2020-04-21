@@ -28,6 +28,9 @@ from user.views import (UserViewSet, MeView, LogInView,
 from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet)
 from integration.views import (GetBoxTokensView, InventoryView,
                                SearchCultivars,)
+from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet,)
+from integration.views import (GetBoxTokensView, InventoryView)
+from inventory.views import (InventoryViewSet, )
 
 
 router = SimpleRouter()
@@ -35,6 +38,7 @@ router.register(r'user', UserViewSet, base_name="user")
 router.register(r'vendor', VendorViewSet, base_name="vendor")
 router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
 router.register(r'license', LicenseViewSet, base_name="license")
+router.register(r'inventory', InventoryViewSet, base_name="inventory")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

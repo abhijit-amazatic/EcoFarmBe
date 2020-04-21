@@ -68,3 +68,11 @@ def get_inventory_item(item_id):
             refresh_token=inventory.REFRESH_TOKEN
         )
     return inventory.get_inventory(item_id=item_id)
+
+def fetch_inventory():
+    """
+    Fetch latest inventory from Zoho Inventory.
+    """
+    date = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S-0000')
+    data = get_inventory_items({'last_modified_time': date})
+    print(data)
