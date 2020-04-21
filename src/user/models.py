@@ -33,9 +33,9 @@ class User(StatusFlagMixin,AbstractUser):
     phone = models.CharField(
         _('Phone'), max_length=20, null=True)
     legal_business_name = models.CharField(
-        _('Legal Business Name'), max_length=150, null=True)
+        _('Legal Business Name'), max_length=150, null=True, blank=True)
     business_dba = models.CharField(
-        _('Business DBA'), max_length=150, null=True)
+        _('Business DBA'), max_length=150, null=True, blank=True)
     existing_member = models.BooleanField('Account Existed', default=False)
     is_verified = models.BooleanField('Is Verified', default=False)
     is_approved = models.BooleanField('Approve User', default=False)
