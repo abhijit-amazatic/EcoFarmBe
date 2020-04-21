@@ -26,7 +26,8 @@ from user.views import (UserViewSet, MeView, LogInView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,VerificationView,)
 from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet)
-from integration.views import (GetBoxTokensView, InventoryView)
+from integration.views import (GetBoxTokensView, InventoryView,
+                               SearchCultivars,)
 
 
 router = SimpleRouter()
@@ -49,6 +50,7 @@ urlpatterns = [
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
     path(r'inventory/item', InventoryView.as_view(), name='inventory'),
+    path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
 ] + router.urls
 
 

@@ -14,6 +14,7 @@ from .models import Integration
 from integration.box import(get_box_tokens, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
+from integration.crm import (search_query, )
 
 class GetBoxTokensView(APIView):
     """
@@ -25,7 +26,20 @@ class GetBoxTokensView(APIView):
     def get(self, request):
         tokens = get_box_tokens()
         return Response(tokens)
+
+class SearchCultivars(APIView):
+    """
+    Return Cultivar information from Zoho CRM.
+    """
+    permission_class = (IsAuthenticated, )
     
+    def get(self, request):
+        """
+        Get Cultivar information.
+        """
+        data = search_query('Cultivars', request.query_params['cultivar_name'], 'Name')
+        return Response(data)
+  
 class InventoryView(APIView):
     """
     View class for Zoho inventory.
