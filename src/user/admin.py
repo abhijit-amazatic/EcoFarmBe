@@ -34,6 +34,9 @@ class UserAdmin(admin.ModelAdmin):
     list_per_page = 50
     readonly_fields = ['zoho_contact_id']
     search_fields = ('username', 'legal_business_name', 'email',)
+    list_display = ('email', 'is_approved','is_verified', )
+    list_filter = ('is_approved', 'is_verified')
+
 
     def save_model(self, request, obj, form, change):
         if obj.is_approved:
