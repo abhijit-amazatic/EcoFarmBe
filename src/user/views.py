@@ -265,8 +265,7 @@ class VerificationView(GenericAPIView):
 
 
     
-# def test(msg):
-#     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
-# mail("verification-send.html",{'link': 'test'},"Eco-Farm Verification.", recipient_list=['godsevikrant@gmail.com','vikrant.g@gmail.com'])
+def test():
+    mail("verification-send.html",{'link': 'test'},"Testing", recipient_list='vikrant.g@amazatic.com')
    
     

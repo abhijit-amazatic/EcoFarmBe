@@ -15,12 +15,13 @@ CORS_ORIGIN_REGEX_WHITELIST = json.loads(os.environ.get("CORS_ORIGIN", "[]"))
 FRONTEND_DOMAIN_NAME = os.environ.get("FRONTEND_DOMAIN_NAME")
 
 # Must generate specific password for your app in [gmail settings][1]
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com' #'smtp.sendgrid.net' #
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = 587
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_USE_TLS = True
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 
 # Celery settings.
 #CELERY_BROKER_URL = os.environ.get('CLOUDAMQP_URL')

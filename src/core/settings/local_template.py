@@ -30,8 +30,10 @@ EMAIL_PORT = 1025
 EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""
 EMAIL_USE_TLS = False
-DEFAULT_FROM_EMAIL = "Eco-Farm <vikrant.godse@ecofarm.ag>"
+DEFAULT_FROM_EMAIL = "Eco-Farm <tech@ecofarm.ag>"
 DEBUG_EMAIL_RECIPIENTS = []
+SENDGRID_API_KEY = ""
+
 FRONTEND_DOMAIN_NAME = ""
 #connect(host='mongodb://localhost:27017/backServA')
 CELERY_BROKER_URL = 'redis://localhost:6379'
