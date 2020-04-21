@@ -12,6 +12,7 @@ class Inventory(models.Model):
     """
     created_time = models.DateTimeField(auto_now=False)
     last_modified_time = models.DateTimeField(auto_now=False)
+    item_id = models.CharField(_('Item ID'), primary_key=True, max_length=50)
     item_type = models.CharField(_('Item Type'), blank=True, null=True, max_length=50)
     name = models.CharField(_('Name'), max_length=255)
     sku = models.CharField(_('SKU'), blank=True, null=True, max_length=100, db_index=True)
@@ -52,7 +53,7 @@ class Inventory(models.Model):
     cf_procurement_rep = models.CharField(_('Procurement Rep'), blank=True, null=True, max_length=50)
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=50), blank=True, null=True)
-    batched = ArrayField(JSONField(default=dict), blank=True, null=True)
+    batches = ArrayField(JSONField(default=dict), blank=True, null=True)
     
     def __str__(self):
         return self.name

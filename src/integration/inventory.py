@@ -7,7 +7,8 @@ from core.settings import (
     INVENTORY_ORGANIZATION_ID,
 )
 from pyzoho.inventory import Inventory
-from .models import (Integration,)
+from .models import (Integration, )
+# from inventory.models import Inventory as InventoryModel
 
 def get_inventory_items(params={}):
     """
@@ -69,10 +70,13 @@ def get_inventory_item(item_id):
         )
     return inventory.get_inventory(item_id=item_id)
 
-def fetch_inventory():
-    """
-    Fetch latest inventory from Zoho Inventory.
-    """
-    date = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S-0000')
-    data = get_inventory_items({'last_modified_time': date})
-    print(data)
+# def fetch_inventory(days=1):
+#     """
+#     Fetch latest inventory from Zoho Inventory.
+#     """
+#     yesterady = datetime.now() - timedelta(days=days)
+#     date = datetime.strftime(yesterady, '%Y-%m-%dT%H:%M:%S-0000')
+#     records = get_inventory_items({'last_modified_time': date})
+#     for idx, record in records.items():
+#         print(record)
+#         InventoryModel.objects.update_or_create(record)
