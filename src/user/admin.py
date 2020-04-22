@@ -3,7 +3,7 @@ Admin related customization.
 """
 from django import forms
 from django.contrib import admin
-from core.mailer import mail
+from core.mailer import mail, mail_send
 from django.conf import settings
 from datetime import datetime
 from .models import (User, MemberCategory,)
@@ -26,12 +26,11 @@ class MyUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
             (None, {'fields': ('is_approved',)}),
     )
-   
 
 
     def save_model(self, request, obj, form, change):
         if obj.is_approved:
-            mail("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
+            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
         super().save_model(request, obj, form, change)
 
     
@@ -48,7 +47,7 @@ class MyUserAdmin(UserAdmin):
 #         manual_activation = self.cleaned_data.pop('manual_activation', False)  
 #         if manual_activation:
 #              # send_email logics
-#             #mail("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
+#             #mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
 #             print("self.cleaned_data.pop('manual_activation', False)", self.cleaned_data.pop('manual_activation', False)  )
 #             print("self.instance\n", self.instance)
 
@@ -68,7 +67,7 @@ class MyUserAdmin(UserAdmin):
 
 #     def save_model(self, request, obj, form, change):
 #         if obj.is_approved:
-#             mail("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
+#             mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
 #         super().save_model(request, obj, form, change)
 
 class MemberCategoryAdmin(admin.ModelAdmin):

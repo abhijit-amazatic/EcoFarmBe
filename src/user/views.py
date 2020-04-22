@@ -14,7 +14,7 @@ from knox.models import AuthToken
 from knox.settings import knox_settings
 
 from core.permissions import UserPermissions
-from core.mailer import mail
+from core.mailer import mail, mail_send
 from .models import User, MemberCategory
 from vendor.models import Vendor
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
@@ -32,7 +32,7 @@ def notify_admins(email):
     """
     msg = "<!channel>User with the EmailID `%s`  is registered with us.Please review and approve from admin Panel!" % email
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
-    mail("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
+    mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
 
     
 class GetBoxTokensView(APIView):
@@ -89,7 +89,7 @@ class UserViewSet(ModelViewSet):
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
                     Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
                 link = get_encrypted_data(instance.email)
-                mail("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
+                mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
                 notify_admins(instance.email)
             except Exception as e:
                 print(e)
@@ -203,7 +203,7 @@ class SendMailView(GenericAPIView):
             recipient_email = serializer.data.get('email')
             link = get_encrypted_data(recipient_email, 'forgot_password')
             subject = "Forgot Password?"
-            mail(
+            mail_send(
                 "email-send.html",
                 {
                     # 'first_name': recipient_email.capitalize(),
@@ -261,5 +261,6 @@ class VerificationView(GenericAPIView):
 
 
     
-def test():
-    mail("verification-send.html",{'link': 'test'},"Testing", recipient_list='vikrant.g@amazatic.com')
+# def test():
+#     #print('in mail test')
+#     mail_send("verification-send.html",{'link': 'test'},"Testing",'vikrant.g@amazatic.com')
