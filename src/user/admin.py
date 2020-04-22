@@ -9,16 +9,23 @@ from datetime import datetime
 from .models import (User, MemberCategory,)
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
+from django.db import transaction
 
 
 
-# class MyUserChangeForm(UserChangeForm):
-#     class Meta(UserChangeForm.Meta):
-#         model = User
+class MyUserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = User
+        fields = '__all__'
+
+    def clean(self):
+        if self.cleaned_data.get('is_approved'):
+            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
+            return self.cleaned_data
 
         
 class MyUserAdmin(UserAdmin):
-    #form = MyUserChangeForm
+    form = MyUserChangeForm
     list_display = ('email', 'is_approved', )
     list_filter = ('is_approved', 'is_verified')
     list_per_page = 25
@@ -28,11 +35,11 @@ class MyUserAdmin(UserAdmin):
             (('User'), {'fields': ('is_approved','is_verified',)}),
     )
 
-
-    def save_model(self, request, obj, form, change):
-        if obj.is_approved:
-            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
-        super().save_model(request, obj, form, change)
+    # @transaction.atomic
+    # def save_model(self, request, obj, form, change):
+    #     if obj.is_approved:
+    #         mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
+    #     super().save_model(request, obj, form, change)
         
 
     
