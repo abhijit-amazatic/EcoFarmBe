@@ -16,9 +16,9 @@ def register_task_like_this():
     """
     pass
 
-#@periodic_task(run_every=(crontab(minute='*')), options={'queue': 'general'})
+@periodic_task(run_every=(crontab(minute='*')), options={'queue': 'general'})
 def update_user_crm():
     """
     Update user in Zoho CRM.
     """
-    # insert_users()
+    insert_users()
