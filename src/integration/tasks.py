@@ -15,7 +15,7 @@ def register_task_like_this():
     pass
 
 
-@periodic_task(run_every=(crontab(hour=[1], minute=1)), options={'queue': 'general'})
+#@periodic_task(run_every=(crontab(hour=[1], minute=1)), options={'queue': 'general'})
 def periodic_task_example():
     """
     This is just example to show how run periodic tasks.
