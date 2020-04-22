@@ -46,6 +46,7 @@ class User(StatusFlagMixin,AbstractUser):
         related_name='member_category',
         blank=True,
     )
+    is_updated_in_crm = models.BooleanField('Is Updated In CRM', default=False)
     
    
     EMAIL_FIELD = 'email'

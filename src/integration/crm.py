@@ -2,17 +2,45 @@ from pyzoho import CRM
 from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
     PYZOHO_USER_IDENTIFIER)
+from user.models import (User, )
 
-def create_record(module, data):
-    crm_obj = CRM(PYZOHO_CONFIG,
+
+def get_crm_obj():
+    """
+    Return ZCRM object.
+    """
+    return CRM(PYZOHO_CONFIG,
         PYZOHO_REFRESH_TOKEN,
         PYZOHO_USER_IDENTIFIER)
-    contact_dict = dict()
-    contact_fields = [i.lower().replace(' ', '_') for i in crm_obj.get_fields(module).keys()]
-    for k, v in data.items():
-        if k in contact_fields:
-            contact_dict[k.title()] = v
-    response = crm_obj.insert_record(module, contact_dict)
+
+def get_contact_dict():
+    """
+    Return Contact-CRM fields dictionary.
+    """
+    #key- field from CRM, value- field from user model.
+    return {
+        'Email': 'email',
+        'First_Name': 'first_name',
+        'Last_Name': 'last_name',
+        'Full_Name': 'full_name',
+        'Other_Country': 'country',
+        'Other_State': 'state',
+        'Date_Of_Birth': 'date_of_birth',
+        'Other_City': 'city',
+        'Other_Zip': 'zip_code',
+        'Phone': 'phone'
+    }
+
+def create_records(module, records):
+    crm_obj = get_crm_obj()
+    request = list()
+    for record in records:
+        contact_dict = dict()
+        contact_crm_dict = get_contact_dict()
+        for k,v in contact_crm_dict.items():
+            contact_dict[k] = record.get(v)
+        request.append(contact_dict)
+    response = crm_obj.insert_records(module, request)
     return response
 
 def search_query(module, query, criteria):
@@ -20,3 +48,21 @@ def search_query(module, query, criteria):
         PYZOHO_REFRESH_TOKEN,
         PYZOHO_USER_IDENTIFIER)
     return crm_obj.search_record(module, query, criteria)
+
+def insert_users():
+    """
+    Insert Users in Zoho CRM.
+    """
+    records = User.objects.filter(is_updated_in_crm=False, existing_member=False)
+    if not records:
+        return {'status': 'QuerySet empty. No records to push.'}
+    response = create_records('Contacts', records.values())
+    if response['status_code'] == 201:
+        response = response['response']['data']
+        for idx, record in enumerate(records):
+            record.zoho_contact_id = response[idx]['details']['id']
+            record.is_updated_in_crm = True
+            record.save()
+        return response
+    else:
+        return response

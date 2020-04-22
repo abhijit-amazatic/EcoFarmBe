@@ -1,4 +1,5 @@
 boxsdk==2.7.1
+celery==4.4.2
 Django==2.2.0
 djangorestframework==3.10.2
 django-filter==2.0.0

@@ -18,7 +18,7 @@ from core.mailer import mail
 from .models import User, MemberCategory
 from vendor.models import Vendor
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
-from integration.crm import (create_record, search_query,)
+from integration.crm import (search_query,)
 from integration.box import(get_box_tokens, )
 from slacker import Slacker
 
@@ -84,10 +84,6 @@ class UserViewSet(ModelViewSet):
         if serializer.is_valid():
             instance = serializer.save()
             try:
-                # Uncomment below when users needs to be inserted into Zoho CRM.
-                result = create_record('Contacts', request.data)
-                instance.zoho_contact_id = result['response']['data'][0]['details']['id']
-                instance.save()
                 if not instance.existing_member:
                     vendor_list = instance.categories.values_list('name', flat=True)
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
@@ -267,5 +263,3 @@ class VerificationView(GenericAPIView):
     
 def test():
     mail("verification-send.html",{'link': 'test'},"Testing", recipient_list='vikrant.g@amazatic.com')
-   
-    

@@ -6,6 +6,8 @@ from celery.task import periodic_task
 from celery.schedules import crontab
 from core.celery import app
 
+from .crm import (insert_users, )
+
 
 @app.task(queue="general")
 def register_task_like_this():
@@ -14,10 +16,9 @@ def register_task_like_this():
     """
     pass
 
-
-#@periodic_task(run_every=(crontab(hour=[1], minute=1)), options={'queue': 'general'})
-def periodic_task_example():
+#@periodic_task(run_every=(crontab(minute='*')), options={'queue': 'general'})
+def update_user_crm():
     """
-    This is just example to show how run periodic tasks.
+    Update user in Zoho CRM.
     """
-    pass
+    # insert_users()
