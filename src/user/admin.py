@@ -12,19 +12,20 @@ from django.contrib.auth.forms import UserChangeForm
 
 
 
-class MyUserChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = User
+# class MyUserChangeForm(UserChangeForm):
+#     class Meta(UserChangeForm.Meta):
+#         model = User
 
         
 class MyUserAdmin(UserAdmin):
-    form = MyUserChangeForm
+    #form = MyUserChangeForm
     list_display = ('email', 'is_approved', )
     list_filter = ('is_approved', 'is_verified')
     list_per_page = 25
     search_fields = ('username', 'legal_business_name', 'email',)
+    readonly_fields = ['is_verified']
     fieldsets = UserAdmin.fieldsets + (
-            (None, {'fields': ('is_approved',)}),
+            (('User'), {'fields': ('is_approved','is_verified',)}),
     )
 
 
@@ -32,6 +33,7 @@ class MyUserAdmin(UserAdmin):
         if obj.is_approved:
             mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
         super().save_model(request, obj, form, change)
+        
 
     
         
