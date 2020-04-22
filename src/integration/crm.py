@@ -13,6 +13,19 @@ def get_crm_obj():
         PYZOHO_REFRESH_TOKEN,
         PYZOHO_USER_IDENTIFIER)
 
+def get_picklist(module, field_name):
+    """
+    Return picklist for field.
+    """
+    crm_obj = get_crm_obj()
+    module = crm_obj.get_module(module)['response']
+    fields = module.get_all_fields().response_json['fields']
+    for field in fields:
+        if field['field_label'] == field_name and field['data_type'] in ('picklist', 'multiselectpicklist'):
+            return field['pick_list_values']
+    return list()
+            
+ 
 def get_contact_dict():
     """
     Return Contact-CRM fields dictionary.

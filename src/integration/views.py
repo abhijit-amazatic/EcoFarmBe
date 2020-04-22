@@ -14,7 +14,7 @@ from .models import Integration
 from integration.box import(get_box_tokens, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
-from integration.crm import (search_query, )
+from integration.crm import (search_query, get_picklist)
 
 class GetBoxTokensView(APIView):
     """
@@ -39,17 +39,29 @@ class SearchCultivars(APIView):
         """
         data = search_query('Cultivars', request.query_params['cultivar_name'], 'Name')
         return Response(data)
-  
+
+class GetPickListView(APIView):
+    """
+    Get field dropdowns from Zoho CRM.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get picklist.
+        """
+        return Response(get_picklist('Vendors', request.query_params['field']))
+
 class InventoryView(APIView):
     """
-    View class for Zoho inventory.
+    View class for Zoho inventory. Fetch data from Zoho Inventory.
     """
     permission_classes = (IsAuthenticated,)
     
     def get(self, request):
         """
         Get an item.
-        """        
+        """
         if request.query_params.get('item_id', None):
             item_id = request.query_params['item_id']
             return Response(get_inventory_item(item_id))
