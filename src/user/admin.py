@@ -18,10 +18,24 @@ class MyUserChangeForm(UserChangeForm):
         model = User
         fields = '__all__'
 
-    def clean(self):
-        if self.cleaned_data.get('is_approved'):
-            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
-            return self.cleaned_data
+    username = forms.CharField(required=False)
+
+    # def save(self, commit=True):
+    #     user = super(MyUserChangeForm, self).save(commit=False)
+    #     username = self.cleaned_data["username"]
+    #     if username:
+    #         print('in if username', username, type(username))
+    #         user.username = username
+    #     if commit:
+    #         user.save()
+    #     print("======USER", user)    
+    #     return user
+ 
+    #def clean(self):
+        # if self.cleaned_data.get('is_approved'):
+        #     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
+        #     return self.cleaned_data
+        
 
         
 class MyUserAdmin(UserAdmin):
@@ -35,11 +49,12 @@ class MyUserAdmin(UserAdmin):
             (('User'), {'fields': ('is_approved','is_verified',)}),
     )
 
-    # @transaction.atomic
-    # def save_model(self, request, obj, form, change):
-    #     if obj.is_approved:
-    #         mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
-    #     super().save_model(request, obj, form, change)
+    @transaction.atomic
+    def save_model(self, request, obj, form, change):
+        if obj.is_approved:
+            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
+        super().save_model(request, obj, form, change)
+                
         
 
     
