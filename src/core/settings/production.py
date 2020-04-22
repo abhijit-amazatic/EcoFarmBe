@@ -24,8 +24,8 @@ EMAIL_USE_TLS = True
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 
 # Celery settings.
-#CELERY_BROKER_URL = os.environ.get('CLOUDAMQP_URL')
-#CELERY_BROKER_POOL_LIMIT = int(os.environ.get('CELERY_BROKER_POOL_LIMIT'))
+CELERY_BROKER_URL = os.environ.get('CLOUDAMQP_URL')
+CELERY_BROKER_POOL_LIMIT = int(os.environ.get('CELERY_BROKER_POOL_LIMIT'))
 #CELERY_RESULT_BACKEND = os.environ.get("CLOUDAMQP_URL")
 
 # Google Credentials.
