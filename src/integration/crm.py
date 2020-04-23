@@ -34,20 +34,38 @@ def get_format_dict(module):
     """
     return CRM_FORMAT[module]
 
+def parse_fields(key, obj):
+    """
+    Parse fields
+    """
+    import ast
+    if key in ('ethics_and_certifications'):
+        return ast.literal_eval(obj.get(key))
+    if key.startswith('cultivars_'):
+        try:
+            c = key.split('_')
+            d = obj.get(c[0])
+            if d:
+                return d[int(c[1])-1]['harvest_date']
+        except Exception:
+            return []
+        
 def create_records(module, records):
     response = dict()
     crm_obj = get_crm_obj()
     request = list()
     for record in records:
-        print(record)
-        print('--------------------')
         contact_dict = dict()
         contact_crm_dict = get_format_dict(module)
         for k,v in contact_crm_dict.items():
-            contact_dict[k] = record.get(v)
+            if v.endswith('_parse'):
+                v = v.split('_parse')[0]
+                v = parse_fields(v, record)
+                contact_dict[k] = v
+            else:
+                contact_dict[k] = record.get(v)
         request.append(contact_dict)
-        print(request)
-    #response = crm_obj.insert_records(module, request)
+    response = crm_obj.insert_records(module, request)
     return response
 
 def search_query(module, query, criteria):
@@ -82,6 +100,10 @@ def insert_vendors():
     records = VendorProfile.objects.filter(is_updated_in_crm=False).select_related()
     for record in records:
         r = dict()
+        if record.license_set.values():
+            licenses = list(record.license_set.values())
+            result = create_records('Licenses', licenses)
+            r.update({'licenses': [{'id': i['details']['id']} for i in result['response']['data']]})
         r.update(record.profile_contact.profile_contact_details)
         r.update(record.profile_overview.profile_overview)
         r.update(record.financial_overview.financial_details)
