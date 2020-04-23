@@ -61,6 +61,13 @@ class VendorViewSet(viewsets.ModelViewSet):
             data=request.data, context={'request': request}, many=True)
         if serializer.is_valid():
             serializer.save()
+            try:
+                vendors = Vendor.objects.filter(ac_manager_id=request.data['ac_manager'])
+                for vendor in vendors:
+                    if not VendorUser.objects.filter(user_id=request.data['ac_manager'], vendor_id=vendor.id).exists():
+                        VendorUser.objects.create(user_id=request.data['ac_manager'], vendor_id=vendor.id,role='Owner')
+            except Exception as e:
+                print(e)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
