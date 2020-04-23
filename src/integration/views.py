@@ -20,8 +20,7 @@ class GetBoxTokensView(APIView):
     """
     Return Access and Refresh Tokens for Box.
     """
-    authentication_classes = [TokenAuthentication, ]
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         tokens = get_box_tokens()
