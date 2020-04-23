@@ -158,6 +158,14 @@ class ProcessingOverview(models.Model):
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='processing_overview', on_delete=models.CASCADE)
     processing_config = JSONField(null=True, blank=True, default=dict)
+
+class ProgramOverview(models.Model):
+    """
+    Stores vendor's/cultivator's/Nursary's/etc. farm's Program overview.
+    """
+    vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
+                                related_name='program_overview', on_delete=models.CASCADE)
+    program_details = JSONField(null=True, blank=True, default=dict)
     
        
 # class VendorCategory(models.Model):

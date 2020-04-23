@@ -5,7 +5,7 @@ Serializer to validate vendor related modules.
 import requests
 from django.conf import settings
 from rest_framework import serializers
-from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview,  License)
+from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview,  License, ProgramOverview)
 
 class VendorSerializer(serializers.ModelSerializer):
     """
@@ -105,6 +105,15 @@ class ProcessingOverviewSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = ProcessingOverview
+        fields = ('__all__')
+
+class ProgramOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines ProgramOverviewSerializer.
+    """
+        
+    class Meta:
+        model = ProgramOverview
         fields = ('__all__')
         
 
