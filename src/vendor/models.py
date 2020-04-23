@@ -86,6 +86,8 @@ class VendorProfile(StatusFlagMixin,models.Model):
         max_length=255, blank=True),blank=True, null=True)
     number_of_licenses = models.IntegerField(null=True)
     number_of_legal_entities = models.IntegerField(null=True)
+    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
 
 
 class ProfileContact(models.Model):

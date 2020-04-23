@@ -3,6 +3,8 @@ from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
     PYZOHO_USER_IDENTIFIER)
 from user.models import (User, )
+from vendor.models import (VendorProfile, )
+from .crm_format import (CRM_FORMAT, )
 
 
 def get_crm_obj():
@@ -26,34 +28,26 @@ def get_picklist(module, field_name):
     return list()
             
  
-def get_contact_dict():
+def get_format_dict(module):
     """
     Return Contact-CRM fields dictionary.
     """
-    #key- field from CRM, value- field from user model.
-    return {
-        'Email': 'email',
-        'First_Name': 'first_name',
-        'Last_Name': 'last_name',
-        'Full_Name': 'full_name',
-        'Other_Country': 'country',
-        'Other_State': 'state',
-        'Date_Of_Birth': 'date_of_birth',
-        'Other_City': 'city',
-        'Other_Zip': 'zip_code',
-        'Phone': 'phone'
-    }
+    return CRM_FORMAT[module]
 
 def create_records(module, records):
+    response = dict()
     crm_obj = get_crm_obj()
     request = list()
     for record in records:
+        print(record)
+        print('--------------------')
         contact_dict = dict()
-        contact_crm_dict = get_contact_dict()
+        contact_crm_dict = get_format_dict(module)
         for k,v in contact_crm_dict.items():
             contact_dict[k] = record.get(v)
         request.append(contact_dict)
-    response = crm_obj.insert_records(module, request)
+        print(request)
+    #response = crm_obj.insert_records(module, request)
     return response
 
 def search_query(module, query, criteria):
@@ -79,3 +73,19 @@ def insert_users():
         return response
     else:
         return response
+
+def insert_vendors():
+    """
+    Insert Vendors into Zoho CRM.
+    """
+    data_list = list()
+    records = VendorProfile.objects.filter(is_updated_in_crm=False).select_related()
+    for record in records:
+        r = dict()
+        r.update(record.profile_contact.profile_contact_details)
+        r.update(record.profile_overview.profile_overview)
+        r.update(record.financial_overview.financial_details)
+        r.update(record.processing_overview.processing_config)
+        data_list.append(r)
+    result = create_records('Vendors', data_list)
+    return result
