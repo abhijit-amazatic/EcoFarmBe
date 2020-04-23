@@ -52,7 +52,7 @@ class MyUserAdmin(UserAdmin):
     @transaction.atomic
     def save_model(self, request, obj, form, change):
         if obj.is_approved:
-            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
+            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", obj.email)
         super().save_model(request, obj, form, change)
                 
         
