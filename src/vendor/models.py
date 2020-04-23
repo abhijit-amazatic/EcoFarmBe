@@ -60,17 +60,11 @@ class VendorUser(models.Model):
     """
     Stores vendor's/cultivator's/Nursary's/etc. User's details.
     """
-    ROLE_OWNER = 'OWNER'
-    ROLE_USER = 'USER'
-    ROLE_CHOICES = (
-        (ROLE_OWNER, _('Owner')),
-        (ROLE_USER, _('User')),
-    )
     vendor = models.ForeignKey(Vendor, verbose_name=_('Vendor'),
                              related_name='vendor_roles', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              related_name='user_roles', on_delete=models.CASCADE)
-    role = models.CharField(verbose_name=_('Role'),max_length=8, choices=ROLE_CHOICES)
+    role = models.CharField(verbose_name=_('Role'),max_length=60)
     
     class Meta:
         unique_together = (('vendor', 'user'), )

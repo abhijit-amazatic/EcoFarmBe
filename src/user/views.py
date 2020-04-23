@@ -87,7 +87,11 @@ class UserViewSet(ModelViewSet):
                 if not instance.existing_member:
                     vendor_list = instance.categories.values_list('name', flat=True)
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
-                    Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
+                    if vendor_list_lower:
+                        Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
+                        vendors = Vendor.objects.filter(ac_manager__email=instance.email)
+                        VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])
+                        
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
                 notify_admins(instance.email)

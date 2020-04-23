@@ -48,14 +48,15 @@ class VendorViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             vendors = vendors.select_related('ac_manager')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
-            #vendors = vendors.filter(vendor_roles__user=self.request.user)
-            vendors = vendors.filter(ac_manager=self.request.user)
+            vendors = vendors.filter(vendor_roles__user=self.request.user)
+            #vendors = vendors.filter(ac_manager=self.request.user)
         return vendors
 
     def create(self, request):
         """
         This endpoint is used to create Vendor.
         """
+        #when vendor is added here add users entry to vendoruser
         serializer = VendorCreateSerializer(
             data=request.data, context={'request': request}, many=True)
         if serializer.is_valid():
@@ -100,7 +101,10 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             vendor_profile = vendor_profile.select_related('program_overview')        
             
         if not self.request.user.is_staff and not self.request.user.is_superuser:
-            vendor_profile = vendor_profile.filter(vendor__ac_manager=self.request.user)
+            vendor_profile = vendor_profile.filter(vendor__vendor_roles__user=self.request.user)
+            #vendor_profile = vendor_profile.filter(vendor__ac_manager=self.request.user)
+            
+            
         return vendor_profile
     
 
