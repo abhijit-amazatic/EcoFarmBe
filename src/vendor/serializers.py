@@ -29,6 +29,7 @@ class VendorCreateSerializer(serializers.ModelSerializer):
         """
         Object level validation.Normal user should allowed to create Vendor only with self foreign key.
         """
+        #vendor_roles__user
         if not (obj['ac_manager'] == self.context['request'].user) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
             raise serializers.ValidationError(
                 "You are not allowed to create Vendor with another user!")

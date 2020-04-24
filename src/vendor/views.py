@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
     VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, ProcessingOverviewSerializer, LicenseSerializer, ProgramOverviewSerializer)
-from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License, ProgramOverview)
+from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License, ProgramOverview, VendorUser)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -62,10 +62,11 @@ class VendorViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             try:
-                vendors = Vendor.objects.filter(ac_manager_id=request.data['ac_manager'])
-                for vendor in vendors:
-                    if not VendorUser.objects.filter(user_id=request.data['ac_manager'], vendor_id=vendor.id).exists():
-                        VendorUser.objects.create(user_id=request.data['ac_manager'], vendor_id=vendor.id,role='Owner')
+                for data in request.data:
+                    vendors = Vendor.objects.filter(ac_manager_id=data['ac_manager'])
+                    for vendor in vendors:
+                        if not VendorUser.objects.filter(user=data['ac_manager'], vendor=vendor.id).exists():
+                            VendorUser.objects.create(user_id=data['ac_manager'], vendor_id=vendor.id,role='Owner')
             except Exception as e:
                 print(e)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
