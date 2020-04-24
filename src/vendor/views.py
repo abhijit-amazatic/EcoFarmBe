@@ -212,15 +212,16 @@ class LicenseViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             licenses = licenses.select_related('vendor_profile')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
-            licenses = licenses.filter(vendor_profile__vendor__ac_manager=self.request.user)
+            #licenses = licenses.filter(vendor_profile__vendor__ac_manager=self.request.user)
+            licenses = licenses.filter(vendor_profile__vendor__vendor_roles__user=self.request.user)
         return licenses
 
     def create(self, request):
         """
         This endpoint is used to create Licensse.
         """
-        serializer =  LicenseSerializer(data=request.data, context={'request': request}, many=True)
-        if serializer.is_valid():
+        serializer = LicenseSerializer(data=request.data, context={'request': request}, many=True)
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

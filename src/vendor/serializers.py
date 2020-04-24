@@ -50,7 +50,8 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         Object level validation.Normal user should allowed to create VendorProfile only with respective vendor
         """
         if self.context['request'].method == 'POST':
-            user_vendors = Vendor.objects.filter(ac_manager=self.context['request'].user)
+            #user_vendors = Vendor.objects.filter(ac_manager=self.context['request'].user)
+            user_vendors = Vendor.objects.filter(vendor_roles__user=self.context['request'].user)
             if obj['vendor'] not in user_vendors and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
                 raise serializers.ValidationError(
                     "You can only add/update vendorprofiles related to your vendors only!")
@@ -121,15 +122,18 @@ class LicenseSerializer(serializers.ModelSerializer):
     """
     This defines License Serializer.
     """
+
     def validate(self, obj):
         """
         Object level validation.Normal user should allowed to upload license related to his VendorProfile.
         """
         if self.context['request'].method == 'POST':
-            vendor_profile = VendorProfile.objects.filter(vendor__ac_manager=self.context['request'].user)
-            if obj.get('vendor_profile') not in vendor_profile and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+            #vendor_profile = VendorProfile.objects.filter(vendor__ac_manager=self.context['request'].user)
+            vendor_profiles = VendorProfile.objects.filter(vendor__vendor_roles__user=self.context['request'].user)
+            if obj['vendor_profile'] not in vendor_profiles and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
                 raise serializers.ValidationError(
                     "You can only add/update license related to your vendors/vendor profile only!")
+            
         return obj
         
     class Meta:
