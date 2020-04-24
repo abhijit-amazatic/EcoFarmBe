@@ -11,7 +11,7 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from .models import User
-from vendor.models import Vendor, VendorProfile
+from vendor.models import Vendor, VendorProfile, VendorUser
 from vendor.serializers import VendorSerializer, VendorProfileSerializer
 
 BS = 16
@@ -49,6 +49,23 @@ def get_decrypted_data(enc):
         return unpad(cipher.decrypt(enc[BS:]))       
        
 
+
+
+class VendorFromUserVendorSerializer(serializers.ModelSerializer):
+    """
+    Vendor users.
+    """
+    id = serializers.IntegerField(source="vendor.id")
+    vendor_category = serializers.CharField(source="vendor.vendor_category")
+    role_id = serializers.IntegerField(source="id")
+   
+    class Meta:
+        model = VendorUser
+        fields = (
+            'id', 'role', 'role_id','vendor_category',)
+
+
+        
 class UserSerializer(serializers.ModelSerializer):
     """
     User Serializer.
@@ -65,22 +82,26 @@ class UserSerializer(serializers.ModelSerializer):
     is_superuser = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
     vendor_profiles = serializers.SerializerMethodField(read_only=True)
-    vendors = serializers.SerializerMethodField(read_only=True)
+    #vendors = serializers.SerializerMethodField(read_only=True)
+    vendors = VendorFromUserVendorSerializer(
+        source='user_roles', many=True, read_only=True
+    )
     is_verified = serializers.ReadOnlyField()
     is_approved = serializers.ReadOnlyField()
     
-    def get_vendors(self, obj):
-        """
-        Adds vendors to the user/me response.
-        """
-        results = Vendor.objects.filter(ac_manager=obj).values('id','vendor_category','ac_manager')
-        return results
+    
+    # def get_vendors(self, obj):
+    #     """
+    #     Adds vendors to the user/me response.
+    #     """
+    #     results = Vendor.objects.filter(ac_manager=obj).values('id','vendor_category','ac_manager')
+    #     return results
     
     def get_vendor_profiles(self, obj):
         """
         Adds vendors profiles to the user/me response.
         """
-        results = VendorProfile.objects.filter(vendor__ac_manager=obj).values('id', 'status','step', 'vendor')
+        results = VendorProfile.objects.filter(vendor__vendor_roles__user=obj).values('id', 'status','step', 'vendor')
         return results
     
 
