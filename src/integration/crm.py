@@ -1,3 +1,4 @@
+import ast
 from pyzoho import CRM
 from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
@@ -34,20 +35,48 @@ def get_format_dict(module):
     """
     return CRM_FORMAT[module]
 
-def parse_fields(key, obj):
+def parse_fields(key, value, obj, crm_obj):
     """
     Parse fields
     """
-    import ast
-    if key in ('ethics_and_certifications'):
-        return ast.literal_eval(obj.get(key))
-    if key.startswith('cultivars_'):
+    def get_dict(cd, i):
+        user = dict()
+        for k,v in cd.items():
+            user[k] = i.get(v)
+        user = create_records('Contacts', [user])
+        if user['status_code'] == 201:
+            return user['response']['data'][0]['details']['id']
+    
+    if value in ('ethics_and_certifications'):
+        return ast.literal_eval(obj.get(value))
+    if value.startswith('cultivars_'):
         try:
-            c = key.split('_')
+            c = value.split('_')
             d = obj.get(c[0])
             if d:
                 return d[int(c[1])-1]['harvest_date']
         except Exception:
+            return []
+    if value.startswith('employees'):
+        user = None
+        d = obj.get(value)
+        cd = {
+            'last_name': 'employee_name',
+            'email': 'employee_email',
+            'phone': 'phone',
+        }
+        try:
+            for i in d:
+                if i['roles'][0] == 'Cultivation Manager' and key == 'Contact_1':
+                    user = get_dict(cd, i)
+                elif i['roles'][0] == 'Logistics Manager' and key == 'Contact_2':
+                    user = get_dict(cd, i)
+                elif i['roles'][0] == 'Quality Assurance Manager' and key == 'Contact_3':
+                    user = get_dict(cd, i)
+                elif i['roles'][0] == 'Owner' and key == 'Owner1':
+                    user = get_dict(cd, i)
+            return user
+        except IndexError:
             return []
         
 def create_records(module, records):
@@ -60,7 +89,7 @@ def create_records(module, records):
         for k,v in contact_crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
-                v = parse_fields(v, record)
+                v = parse_fields(k, v, record, crm_obj)
                 contact_dict[k] = v
             else:
                 contact_dict[k] = record.get(v)

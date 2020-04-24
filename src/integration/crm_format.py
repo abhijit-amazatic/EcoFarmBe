@@ -39,10 +39,10 @@ CRM_FORMAT  = {
         'Harvest_1': 'cultivars_1_parse',
         'Harvest_2': 'cultivars_2_parse',
         'Harvest_3': 'cultivars_3_parse',
-        # 'Contact_1': 'employees_1_parse',
-        # 'Contact_2': 'employees_2_parse',
-        # 'Contact_3': 'employees_3_parse',
-        # 'Owner1': 'employees_4_parse',
+        'Contact_1': 'employees_parse', # Cultivation Manager
+        'Contact_2': 'employees_parse', # Logistics Manager
+        'Contact_3': 'employees_parse', # Quality Assurance Manager
+        'Owner1': 'employees_parse', # Owner
         'Yearly_Revenue': 'annual_revenue_2019',
         'Flower_Target_Price_Lb': 'avg_target_price',
         'Yearly_Budget': 'yearly_budget',
