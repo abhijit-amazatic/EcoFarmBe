@@ -94,6 +94,7 @@ def create_records(module, records):
             else:
                 contact_dict[k] = record.get(v)
         request.append(contact_dict)
+        print(contact_dict)
     response = crm_obj.insert_records(module, request)
     return response
 
@@ -132,7 +133,7 @@ def insert_vendors():
         if record.license_set.values():
             licenses = list(record.license_set.values())
             result = create_records('Licenses', licenses)
-            r.update({'licenses': [{'id': i['details']['id']} for i in result['response']['data']]})
+            r.update({'licenses': [{"id": i['details']['id'], "Name": 'lba1'} for i in result['response']['data']]})
         r.update(record.profile_contact.profile_contact_details)
         r.update(record.profile_overview.profile_overview)
         r.update(record.financial_overview.financial_details)
