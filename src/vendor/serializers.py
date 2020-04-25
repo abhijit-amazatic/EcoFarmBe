@@ -5,7 +5,8 @@ Serializer to validate vendor related modules.
 import requests
 from django.conf import settings
 from rest_framework import serializers
-from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview,  License, ProgramOverview)
+from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview,  License, ProgramOverview, VendorUser)
+from user.models import User
 
 
 VALID_CULTIVATOR_KEYS = ['farm_name', 'primary_county', 'region', 'appellation', 'ethics_and_certifications', 'other_distributors', 'transportation', 'packaged_flower_line', 'interested_in_co_branding', 'marketing_material', 'featured_on_our_site', 'company_email', 'company_phone', 'website', 'instagram', 'facebook', 'linkedin', 'twitter', 'no_of_employees', 'employees', 'employee_name','employee_email', 'phone', 'roles']
@@ -131,14 +132,27 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         """
         When object is created add custom method here.
         """
-        #print('in create???\n', validated_data)
-        #print("THIS======>", self.context['request'].parser_context["kwargs"]["pk"])
-        profile = super().create(validated_data)
         profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
         if profile.vendor.vendor_category == 'cultivator':
+            print('in create if cultivator>>>')
             employee_data = validated_data.get('profile_contact_details')['employees']
+            new_users = []
+            for employee in employee_data:
+                obj, created = User.objects.get_or_create(email=employee['employee_email'],
+                                                          defaults={'email':employee['employee_email'],
+                                                                    'username':employee['employee_name'],
+                                                                    'phone':employee['phone'],
+                                                                    'is_verified':True,
+                                                                    'existing_member':True})
+                if created:
+                    new_users.append(obj)
+                    if not VendorUser.objects.filter(user_id=obj.id, vendor_id=profile.vendor.id).exists():
+                        VendorUser(user_id=obj.id, vendor_id=profile.vendor.id,role=','.join(employee['roles'])).save() 
+                        print("Added vendor useer<=========>\n")
+        else:
+            pass #this is added for further conditions
             
-        
+        profile = super().create(validated_data)
         #user.set_password(user.password)
         #profile.save()
         return profile

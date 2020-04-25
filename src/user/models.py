@@ -16,9 +16,9 @@ class User(StatusFlagMixin,AbstractUser):
     username = models.CharField(
         _('Username'), max_length=150, blank=True, null=True)
     first_name = models.CharField(
-        _('First Name'), max_length=255)
+        _('First Name'), max_length=255, blank=True, null=True)
     last_name = models.CharField(
-        _('Last Name'), max_length=255)
+        _('Last Name'), max_length=255, blank=True, null=True)
     full_name = models.CharField(
         _('Full Name'), max_length=255, blank=True, null=True)
     country = models.CharField(
