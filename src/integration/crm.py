@@ -122,6 +122,14 @@ def insert_users():
     else:
         return response
 
+def get_licenses(license_field):
+    """
+    Get license from Zoho CRM.
+    """
+    licenses = search_query('Licenses', license_field, 'Legal_Business_Name')
+    if licenses['status_code'] == 200:
+        return [i['id'] for i in licenses['response']]
+
 def insert_vendors():
     """
     Insert Vendors into Zoho CRM.
@@ -131,13 +139,26 @@ def insert_vendors():
     for record in records:
         r = dict()
         if record.license_set.values():
-            licenses = list(record.license_set.values())
-            result = create_records('Licenses', licenses)
-            r.update({'licenses': [{"id": i['details']['id'], "Name": 'lba1'} for i in result['response']['data']]})
+            l = list()
+            for i in record.license_set.values():
+                licenses = get_licenses(i['legal_business_name'])
+                l.extend(licenses)
+            # Below Code creates license.
+            # licenses = list(record.license_set.values())
+            # result = create_records('Licenses', licenses)
+            r.update({'licenses': ','.join(i for i in l)})
         r.update(record.profile_contact.profile_contact_details)
         r.update(record.profile_overview.profile_overview)
         r.update(record.financial_overview.financial_details)
         r.update(record.processing_overview.processing_config)
         data_list.append(r)
-    result = create_records('Vendors', data_list)
-    return result
+    if len(data_list) > 0:
+        result = create_records('Vendors', data_list)
+        if result['status_code'] == 201:
+            result = result['response']['data']
+            for i, record in enumerate(records):
+                record.is_updated_in_crm = True
+                record.zoho_crm_id = result[i]['details']['id']
+                record.save()
+        return result
+    return {}
