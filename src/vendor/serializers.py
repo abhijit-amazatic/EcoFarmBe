@@ -207,31 +207,124 @@ class ProfileOverviewSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 
+class FinanceFieldsSerializer(serializers.Serializer):
+    """
+    JSON data for cultivator finance overview.
+    """
+    annual_revenue_2019 = serializers.CharField(required=True)
+    projected_2020_revenue = serializers.CharField(required=True)
+    target_profit_margin = serializers.CharField(required=True)
+    yearly_budget = serializers.CharField(required=True)
+    know_cost_per_lbs = serializers.CharField(required=True)
+    cost_per_lbs = serializers.CharField(required=True)
+    know_cost_per_sqf = serializers.CharField(required=True)
+    cost_per_sqf = serializers.CharField(required=True)
+    avg_target_price = serializers.CharField(required=True)
+    small_target_price = serializers.CharField(required=True)
+    trim_target_price = serializers.CharField(required=True)
+    bucked_target_price = serializers.CharField(required=True)
+    
+
+    
 class FinancialOverviewSerializer(serializers.ModelSerializer):
     """
     This defines FinancialOverviewSerializer.
     """
     financial_details = serializers.JSONField(required=True)
+
+    def validate(self, attrs):
+        """
+        Object level validation.
+        """    
+        if self.context['request'].method == 'PATCH':
+            profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+            if profile.vendor.vendor_category == 'cultivator':
+                profile_data = attrs.get('financial_details')
+                if profile_data:
+                    serializer = FinanceFieldsSerializer(data=profile_data)
+                    serializer.is_valid(raise_exception=True)   
+            
+        return attrs
     
     class Meta:
         model = FinancialOverview
         fields = ('__all__')
 
+
+class ConfigCultivarsSerializer(serializers.Serializer):
+    """
+    cultivars data for processing config
+    """
+    harvest_date = serializers.CharField(required=True)
+    cultivar_names = serializers.ListField(required=True)
+   
+        
+class ProcessingFieldsSerializer(serializers.Serializer):
+    """
+    JSON data for cultivator processing overview.
+    """
+    no_of_harvest_per_year = serializers.IntegerField(required=True)
+    no_of_harvest = serializers.IntegerField(required=True)
+    outdoor_sqf = serializers.IntegerField(required=True)
+    indoor_sqf = serializers.IntegerField(required=True)
+    mixed_light_sqf = serializers.IntegerField(required=True)
+    flower_yield_percentage = serializers.IntegerField(required=True)
+    small_yield_percentage = serializers.IntegerField(required=True)
+    trim_yield_percentage = serializers.IntegerField(required=True)
+    cultivars = ConfigCultivarsSerializer(required=True, many=True)
+     
+        
 class ProcessingOverviewSerializer(serializers.ModelSerializer):
     """
     This defines ProcessingOverviewSerializer.
     """
     processing_config  = serializers.JSONField(required=True)
+
+    def validate(self, attrs):
+        """
+        Object level validation.
+        """    
+        if self.context['request'].method == 'PATCH':
+            profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+            if profile.vendor.vendor_category == 'cultivator':
+                profile_data = attrs.get('processing_config')
+                if profile_data:
+                    serializer = ProcessingFieldsSerializer(data=profile_data)
+                    serializer.is_valid(raise_exception=True)   
+            
+        return attrs
     
     class Meta:
         model = ProcessingOverview
         fields = ('__all__')
 
+
+class ProgramFieldsSerializer(serializers.Serializer):
+    """
+    JSON data for cultivator program.
+    """
+    program_name = serializers.CharField(required=True)
+    
+    
 class ProgramOverviewSerializer(serializers.ModelSerializer):
     """
     This defines ProgramOverviewSerializer.
     """
     program_details = serializers.JSONField(required=True)
+
+    def validate(self, attrs):
+        """
+        Object level validation.
+        """    
+        if self.context['request'].method == 'PATCH':
+            profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+            if profile.vendor.vendor_category == 'cultivator':
+                profile_data = attrs.get('program_details')
+                if profile_data:
+                    serializer = ProgramFieldsSerializer(data=profile_data)
+                    serializer.is_valid(raise_exception=True)   
+            
+        return attrs
         
     class Meta:
         model = ProgramOverview
