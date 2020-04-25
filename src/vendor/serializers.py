@@ -7,6 +7,10 @@ from django.conf import settings
 from rest_framework import serializers
 from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview,  License, ProgramOverview)
 
+
+VALID_CULTIVATOR_KEYS = ['farm_name', 'primary_county', 'region', 'appellation', 'ethics_and_certifications', 'other_distributors', 'transportation', 'packaged_flower_line', 'interested_in_co_branding', 'marketing_material', 'featured_on_our_site', 'company_email', 'company_phone', 'website', 'instagram', 'facebook', 'linkedin', 'twitter', 'no_of_employees', 'employees', 'employee_name','employee_email', 'phone', 'roles']
+
+
 class VendorSerializer(serializers.ModelSerializer):
     """
     This defines Vendor serializer.
@@ -62,66 +66,94 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         model = VendorProfile
         fields = ('__all__')
 
+        
+class ConfigEmployeeSerializer(serializers.Serializer):
+    """
+    Employee data for cultivator.
+    """
+    phone = serializers.CharField(required=False)
+    roles = serializers.ListField(required=True)
+    employee_name = serializers.CharField(required=True)
+    employee_email = serializers.EmailField(required=True)
 
+    
+class CultivatorFieldsSerializer(serializers.Serializer):
+    """
+    JSON data for cultivator.
+    """
+    farm_name = serializers.CharField(required=True)
+    primary_county = serializers.CharField(required=True)
+    region = serializers.CharField(required=True)
+    appellation = serializers.CharField(required=True)
+    ethics_and_certifications = serializers.ListField(required=True)
+    other_distributors = serializers.CharField(required=True)
+    transportation = serializers.ListField(required=True)
+    packaged_flower_line = serializers.CharField(required=True)
+    interested_in_co_branding = serializers.CharField(required=True)
+    marketing_material = serializers.CharField(required=True)
+    featured_on_our_site = serializers.CharField(required=True)
+    company_email = serializers.CharField(required=True)
+    company_phone = serializers.CharField(required=True)
+    website = serializers.CharField(required=True)
+    instagram = serializers.CharField(required=True)
+    facebook = serializers.CharField(required=True)
+    linkedin = serializers.CharField(required=True)
+    twitter = serializers.CharField(required=True)
+    no_of_employees = serializers.CharField(required=True)
+    employees = ConfigEmployeeSerializer(required=True, many=True)
+    #employees = serializers.ListField(child=serializers.DictField(), required=False)
+    
 
 class ProfileContactSerializer(serializers.ModelSerializer):
     """
     This defines ProfileContactSerializer.
     """
-    VALID_CULTIVATOR_KEYS = ['farm_name', 'primary_county', 'region', 'appellation', 'ethics_and_certifications', 'other_distributors', 'transportation', 'packaged_flower_line', 'interested_in_co_branding', 'marketing_material', 'featured_on_our_site', 'company_email', 'company_phone', 'website', 'instagram', 'facebook', 'linkedin', 'twitter', 'no_of_employees', 'employees', 'employee_name','employee_email', 'phone', 'roles']
-
-    farm_name = serializers.CharField(required=False)
-    primary_county = serializers.CharField(required=False)
-    region = serializers.CharField(required=False)
-    appellation = serializers.CharField(required=False)
-    ethics_and_certifications = serializers.ListField(required=False)
-    other_distributors = serializers.CharField(required=False)
-    transportation = serializers.ListField(required=False)
-    packaged_flower_line = serializers.CharField(required=False)
-    interested_in_co_branding = serializers.CharField(required=False)
-    marketing_material = serializers.CharField(required=False)
-    featured_on_our_site = serializers.CharField(required=False)
-    company_email = serializers.CharField(required=False)
-    company_phone = serializers.CharField(required=False)
-    website = serializers.CharField(required=False)
-    instagram = serializers.CharField(required=False)
-    facebook = serializers.CharField(required=False)
-    linkedin = serializers.CharField(required=False)
-    twitter = serializers.CharField(required=False)
-    no_of_employees = serializers.CharField(required=False)
-    employees = serializers.ListField(child=serializers.DictField(), required=False)
+    profile_contact_details = serializers.JSONField(required=True)
     
     def validate(self, attrs):
         """
         Object level validation
-        catch vendor like this 'profile.vendor'
-        """
-        if self.partial:
+        catch vendor like this 'profile.vendor'.
+        fields are different for different vendors
+        """    
+        #if self.partial:
+        if self.context['request'].method == 'PATCH':
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
             if profile.vendor.vendor_category == 'cultivator':
-                #print('vendor--->', profile.vendor)
-                attrs = super().validate(attrs)
-                employees = attrs['employees']
-                keys_list = []
-                for item in some_config_vars:
-                    keys_list.extend(list(item.keys()))
-                    unwanted_keys = set(keys_list) - set(VALID_CULTIVATOR_KEYS)
-                    if unwanted_keys:
-                        raise serializers.ValidationError("Invalid key/keys.Please add valid keys!")
-                    return attrs
-                
+                profile_data = attrs.get('profile_contact_details')
+                if profile_data:
+                    serializer = CultivatorFieldsSerializer(data=profile_data)
+                    serializer.is_valid(raise_exception=True)   
+            
         return attrs
 
-    def update(self, instance, validated_data):
-        # print('in update---> would return ob updated with id\n', instance.vendor_profile)
-        # v = VendorProfile.objects.select_related('vendor').get(id=instance.vendor_profile.pk)
-        # print('Vendor', v.vendor)
-        #print(' validated_data--->',  validated_data)
-        #if profile.vendor.vendor_category == 'cultivator':
-         #   print('in update email here<><><>')
-        #instance.email = validated_data.get('email', instance.email)
-        #instance.save()
-        return instance
+    def create(self, validated_data):
+        """
+        When object is created add custom method here.
+        """
+        #print('in create???\n', validated_data)
+        #print("THIS======>", self.context['request'].parser_context["kwargs"]["pk"])
+        profile = super().create(validated_data)
+        profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+        if profile.vendor.vendor_category == 'cultivator':
+            employee_data = validated_data.get('profile_contact_details')['employees']
+            
+        
+        #user.set_password(user.password)
+        #profile.save()
+        return profile
+
+
+    # def update(self, instance, validated_data):
+    #     print('in update---> would return ob updated with id\n', instance.vendor_profile)
+    #     # v = VendorProfile.objects.select_related('vendor').get(id=instance.vendor_profile.pk)
+    #     # print('Vendor', v.vendor)
+    #     #print(' validated_data--->',  validated_data)
+    #     #if profile.vendor.vendor_category == 'cultivator':
+    #      #   print('in update email here<><><>')
+    #     #instance.email = validated_data.get('email', instance.email)
+    #     #instance.save()
+    #     return instance
         
     class Meta:
         model = ProfileContact

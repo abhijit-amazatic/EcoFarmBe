@@ -91,7 +91,7 @@ class ProfileContact(models.Model):
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='profile_contact', on_delete=models.CASCADE)
-    profile_contact_details = JSONField(null=True, blank=True, default=dict)
+    profile_contact_details = JSONField(null=False, blank=False, default=dict)
     
         
 class License(models.Model):

@@ -148,10 +148,10 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         else:
             try:
                 ser = serializer(
-                    getattr(vendor_profile, extra_info_attribute), data=request.data, context={'request': request},partial=True)
+                    getattr(vendor_profile, extra_info_attribute), data=request.data,context={'request': request},partial=True)
             except model.DoesNotExist:
                 request.data['vendor_profile'] = vendor_profile.id
-                ser = serializer(data=request.data)
+                ser = serializer(data=request.data, context={'request': request})
             ser.is_valid(raise_exception=True)
             ser.save(vendor_profile=vendor_profile)
             return Response(ser.data)
