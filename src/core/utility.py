@@ -52,7 +52,7 @@ def notify_admins_on_vendors_registration(email,farm):
     """
     Notify admins on slack & email about new user registration under farm.
     """
-    msg = "<!channel>User with the EmailID `%s`  is registered with us for the farm %s.Please review and approve from admin Panel!" % (email, farm)
+    msg = "<!channel>User with the EmailID `%s`  is registered with us for the farm - %s.Please review and approve from admin Panel!" % (email, farm)
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
     mail_send("notify.html",{'link': email},"New Farm User registration.", recipient_list=settings.ADMIN_EMAIL)
 

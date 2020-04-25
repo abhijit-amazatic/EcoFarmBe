@@ -137,7 +137,7 @@ class ProfileOverview(models.Model):
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='profile_overview', on_delete=models.CASCADE)
-    profile_overview = JSONField(null=True, blank=True, default=dict)
+    profile_overview = JSONField(null=False, blank=False, default=dict)
     
     
 class FinancialOverview(models.Model):
@@ -146,7 +146,7 @@ class FinancialOverview(models.Model):
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='financial_overview', on_delete=models.CASCADE)
-    financial_details = JSONField(null=True, blank=True, default=dict)
+    financial_details = JSONField(null=False, blank=False, default=dict)
 
 class ProcessingOverview(models.Model):
     """
@@ -154,7 +154,7 @@ class ProcessingOverview(models.Model):
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='processing_overview', on_delete=models.CASCADE)
-    processing_config = JSONField(null=True, blank=True, default=dict)
+    processing_config = JSONField(null=False, blank=False, default=dict)
 
 class ProgramOverview(models.Model):
     """
@@ -162,7 +162,7 @@ class ProgramOverview(models.Model):
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='program_overview', on_delete=models.CASCADE)
-    program_details = JSONField(null=True, blank=True, default=dict)
+    program_details = JSONField(null=False, blank=False, default=dict)
     
        
 # class VendorCategory(models.Model):
