@@ -1,0 +1,15 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;'>Hi {{ email }},</p>
+<div>
+    <div ><p style='font-size:16px !important;'>You have added on Eco-Farm platform under {{ farm }}.Please click the link below to set your password.<br>
+        {{ link }}</p></div>
+    <div>
+
+        <ul style='font-size:16px !important;'>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}
