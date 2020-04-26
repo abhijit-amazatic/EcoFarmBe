@@ -16,7 +16,7 @@ from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
 from .models import User, MemberCategory
-from vendor.models import Vendor
+from vendor.models import Vendor,VendorUser
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
 from integration.crm import (search_query,)
 from integration.box import(get_box_tokens, )
@@ -90,8 +90,7 @@ class UserViewSet(ModelViewSet):
                     if vendor_list_lower:
                         Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
                         vendors = Vendor.objects.filter(ac_manager__email=instance.email)
-                        VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])
-                        
+                        VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])             
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
                 notify_admins(instance.email)
