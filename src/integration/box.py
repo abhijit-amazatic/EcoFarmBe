@@ -225,3 +225,11 @@ def parse_file(file_obj):
     response["parent"] = file_obj.parent
     response["shared_link"] = file_obj.get_shared_link_download_url()
     return response
+
+def get_shared_link(file_id):
+    """
+    Get shareable link for file
+    """
+    client = get_box_client()
+    return client.file(file_id).get_shared_link()
+    

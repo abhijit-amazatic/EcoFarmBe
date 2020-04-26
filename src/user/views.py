@@ -18,7 +18,7 @@ from core.mailer import mail, mail_send
 from .models import User, MemberCategory
 from vendor.models import Vendor,VendorUser
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
-from integration.crm import (search_query,)
+from integration.crm import (search_query, create_records)
 from integration.box import(get_box_tokens, )
 from slacker import Slacker
 
@@ -83,6 +83,11 @@ class UserViewSet(ModelViewSet):
             data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
+            response = create_records('Contacts', request.data)
+            if response['status_code'] == 201:
+                instance.is_updated_in_crm = True
+                instance.zoho_contact_id = response['response']['data'][0]['details']['id']
+                instance.save()
             try:
                 if not instance.existing_member:
                     vendor_list = instance.categories.values_list('name', flat=True)

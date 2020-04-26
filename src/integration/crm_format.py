@@ -13,6 +13,7 @@ CRM_FORMAT  = {
         'Phone': 'phone'
     },
     'Vendors': {
+        'db_id': 'db_id',
         'Vendor_Name': 'farm_name',
         'Phone': 'company_phone',
         'Email': 'company_email',
@@ -21,8 +22,8 @@ CRM_FORMAT  = {
         'County': 'primary_county',
         'Region': 'region',
         'Appellations': 'appellation',
-        'Special_Certifications': 'ethics_and_certifications_parse',
-        'Transportation_Methods': 'transportation',
+        # 'Special_Certifications': 'ethics_and_certifications_parse',
+        # 'Transportation_Methods': 'transportation',
         'LinkedIn': 'linkedin_url',
         'Instagram': 'instagram_url',
         'Facebook': 'facebook_url',
@@ -44,26 +45,19 @@ CRM_FORMAT  = {
         'Contact_3': 'employees_parse', # Quality Assurance Manager
         'Owner1': 'employees_parse', # Owner
         'Yearly_Revenue': 'annual_revenue_2019',
-        'Flower_Target_Price_Lb': 'avg_target_price',
+        #'Flower_Target_Price_Lb': 'avg_target_price',
         'Yearly_Budget': 'yearly_budget',
-        'Smalls_Target_Price_Lb': 'small_target_price',
+        #'Smalls_Target_Price_Lb': 'small_target_price',
         'Know_your_Cost_per_LB': 'know_cost_per_lbs',
-        'Trim_Target_Price_Lb': 'trim_target_price',
+        #'Trim_Target_Price_Lb': 'trim_target_price',
         'Cost_per_LB': 'cost_per_lbs',
         'Bucked_Untrimmed_Target_Price_Lb': 'bucked_target_price',
         'Know_your_Cost_per_Sqf': 'know_cost_per_sqf',
         'Cost_per_Sqf': 'cost_per_sqf',
         'Which_third_party_lab_do_you_use': '',
         'Number_of_Employees': 'no_of_employees',
-        'Licences': 'licenses',
-        # 'Vendors_X_Licenses': 'licenses',
-        # 'Licenses_Module': 'licenses',
-        # 'Licenses11': 'licenses',
-        # 'Vendors_X_Licenses_Licenses_Module.Licenses11': 'licenses',
-        # 'Licenses_Module.Licenses11': 'licenses',
-        # 'Licenses_Module.Licenses': 'licenses',
-        # 'Vendors_X_Licenses.Licenses': 'licenses',
-        'Sellers_Permit': '',
+        'Licenses_List': 'licenses',
+        'Sellers_Permit_Box_Link': 'Sellers_Permit',
         'Do_you_work_with_other_Distributors': 'other_distributors',
         'Would_you_grow_genetics_suggested_by_Thrive': 'interested_in_growing_genetics',
         'Can_you_Process_on_Site': 'process_on_site',
@@ -73,9 +67,11 @@ CRM_FORMAT  = {
         'Farm_Co_Branding_Interest': 'interested_in_co_branding',
         'Have_you_ever_had_issues_with_failed_Lab_tests': 'issues_with_failed_lab_tests',
         'Marketing_material': 'marketing_material',
-        'Featured_on_our_website_and_social_media': 'featured_on_our_site'
+        'Featured_on_our_website_and_social_media': 'featured_on_our_site',
+        'cultivars': 'cultivars'
     },
     'Licenses':{
+        'id': 'license_id',
         'Name': 'license_number',
         'Legal_Business_Name': 'legal_business_name',
         'License_Type': 'license_type',
@@ -89,6 +85,10 @@ CRM_FORMAT  = {
         'Premises_State': 'premises_state',
         'Premises_County': 'premises_county',
         'Premises_APN_Number': 'premises_apn',
-        'Owner': '',
+        'Owner': 'Owner',
+    },
+    'Vendors_X_Licenses': {
+        'Licenses_Module': 'Licenses_Module',
+        'Licenses': 'Licenses'
     }
 }  
