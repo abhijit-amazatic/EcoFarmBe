@@ -169,16 +169,16 @@ class OverviewFieldsSerializer(serializers.Serializer):
     """
     lighting_type = serializers.ListField(required=True)
     type_of_nutrients = serializers.CharField(required=True)
-    issues_with_failed_lab_tests = serializers.ListField(required=True)
+    issues_with_failed_lab_tests = serializers.CharField(required=True)
     lab_test_issues = serializers.CharField(required=True)
     process_on_site = serializers.CharField(required=True)
     interested_in_growing_genetics = serializers.CharField(required=True)
     avg_yield_pr_sq_ft = serializers.CharField(required=True)
-    know_yield_pr_sq_ft = serializers.CharField(required=True)
+    know_yield_per_sq_ft = serializers.CharField(required=True)
     yield_per_plant = serializers.CharField(required=True)
     know_yield_per_plant = serializers.CharField(required=True)
     plants_cultivate_per_cycle = serializers.CharField(required=True)
-    annula_untrimmed_yield = serializers.CharField(required=True)
+    annual_untrimmed_yield = serializers.CharField(required=True)
     
 
     
