@@ -65,6 +65,7 @@ class VendorUser(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              related_name='user_roles', on_delete=models.CASCADE)
     role = models.CharField(verbose_name=_('Role'),max_length=60)
+    created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     
     class Meta:
         unique_together = (('vendor', 'user'), )
