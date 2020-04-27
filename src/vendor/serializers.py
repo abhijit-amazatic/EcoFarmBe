@@ -181,19 +181,19 @@ class ProfileContactSerializer(serializers.ModelSerializer):
 class OverviewFieldsSerializer(serializers.Serializer):
     """
     JSON data for cultivator profile_overview.
-    """
+    """    
     lighting_type = serializers.ListField(required=True)
     type_of_nutrients = serializers.CharField(required=True)
-    issues_with_failed_lab_tests = serializers.CharField(required=True)
-    lab_test_issues = serializers.CharField(required=True)
-    process_on_site = serializers.CharField(required=True)
     interested_in_growing_genetics = serializers.CharField(required=True)
-    avg_yield_pr_sq_ft = serializers.CharField(required=True)
-    know_yield_per_sq_ft = serializers.CharField(required=True)
-    yield_per_plant = serializers.CharField(required=True)
-    know_yield_per_plant = serializers.CharField(required=True)
-    plants_cultivate_per_cycle = serializers.CharField(required=True)
-    annual_untrimmed_yield = serializers.CharField(required=True)
+    issues_with_failed_lab_tests = serializers.CharField(required=True)
+    lab_test_issues = serializers.CharField(required=False)
+    plants_cultivate_per_cycle = serializers.IntegerField(required=True)
+    annual_untrimmed_yield = serializers.IntegerField(required=True)
+    no_of_harvest = serializers.IntegerField(required=True)
+    indoor_sqf = serializers.IntegerField(required=False)
+    outdoor_sqf = serializers.IntegerField(required=False)
+    no_of_harvest_per_year = serializers.IntegerField(required=True)
+    mixed_light_sqf = serializers.IntegerField(required=False)
     
 
     
@@ -231,9 +231,9 @@ class FinanceFieldsSerializer(serializers.Serializer):
     target_profit_margin = serializers.CharField(required=True)
     yearly_budget = serializers.CharField(required=True)
     know_cost_per_lbs = serializers.CharField(required=True)
-    cost_per_lbs = serializers.CharField(required=True)
+    cost_per_lbs = serializers.CharField(required=False)
     know_cost_per_sqf = serializers.CharField(required=True)
-    cost_per_sqf = serializers.CharField(required=True)
+    cost_per_sqf = serializers.CharField(required=False)
     avg_target_price = serializers.CharField(required=True)
     small_target_price = serializers.CharField(required=True)
     trim_target_price = serializers.CharField(required=True)
@@ -278,14 +278,14 @@ class ProcessingFieldsSerializer(serializers.Serializer):
     """
     JSON data for cultivator processing overview.
     """
-    no_of_harvest_per_year = serializers.IntegerField(required=True)
-    no_of_harvest = serializers.IntegerField(required=True)
-    outdoor_sqf = serializers.IntegerField(required=True)
-    indoor_sqf = serializers.IntegerField(required=True)
-    mixed_light_sqf = serializers.IntegerField(required=True)
     flower_yield_percentage = serializers.IntegerField(required=True)
     small_yield_percentage = serializers.IntegerField(required=True)
     trim_yield_percentage = serializers.IntegerField(required=True)
+    know_yield_per_plant = serializers.CharField(required=True)
+    yield_per_plant = serializers.IntegerField(required=False)
+    know_yield_per_sq_ft = serializers.CharField(required=True)
+    avg_yield_pr_sq_ft = serializers.IntegerField(required=False)
+    process_on_site = serializers.CharField(required=True)
     cultivars = ConfigCultivarsSerializer(required=True, many=True)
      
         
