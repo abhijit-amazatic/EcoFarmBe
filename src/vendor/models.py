@@ -83,6 +83,7 @@ class VendorProfile(StatusFlagMixin,models.Model):
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     code = models.CharField(_('Vendor Code For Box'), max_length=100, blank=True, null=True)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 
 class ProfileContact(models.Model):
@@ -92,6 +93,7 @@ class ProfileContact(models.Model):
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='profile_contact', on_delete=models.CASCADE)
     profile_contact_details = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
     
         
 class License(models.Model):
@@ -138,6 +140,7 @@ class ProfileOverview(models.Model):
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='profile_overview', on_delete=models.CASCADE)
     profile_overview = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
     
     
 class FinancialOverview(models.Model):
@@ -147,6 +150,7 @@ class FinancialOverview(models.Model):
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='financial_overview', on_delete=models.CASCADE)
     financial_details = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 class ProcessingOverview(models.Model):
     """
@@ -155,6 +159,7 @@ class ProcessingOverview(models.Model):
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='processing_overview', on_delete=models.CASCADE)
     processing_config = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 class ProgramOverview(models.Model):
     """
@@ -163,6 +168,7 @@ class ProgramOverview(models.Model):
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='program_overview', on_delete=models.CASCADE)
     program_details = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
     
        
 # class VendorCategory(models.Model):

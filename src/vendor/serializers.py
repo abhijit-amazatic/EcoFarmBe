@@ -109,6 +109,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
     This defines ProfileContactSerializer.
     """
     profile_contact_details = serializers.JSONField(required=True)
+    is_draft = serializers.BooleanField(required=True)
     
     def validate(self, attrs):
         """
@@ -117,7 +118,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         fields are different for different vendors
         """    
         #if self.partial:
-        if self.context['request'].method == 'PATCH':
+        if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
             if profile.vendor.vendor_category == 'cultivator':
                 profile_data = attrs.get('profile_contact_details')
@@ -127,28 +128,35 @@ class ProfileContactSerializer(serializers.ModelSerializer):
             
         return attrs
 
-    def create(self, validated_data):
+    def create_and_notify_employee(self, profile, validated_data):
+        """
+        Generic for create and update as if is_draft is 'true' we need to bypass. validations
+        """
+        employee_data = validated_data.get('profile_contact_details')['employees']
+        new_users = []
+        for employee in employee_data:
+            obj, created = User.objects.get_or_create(email=employee['employee_email'],
+                                                      defaults={'email':employee['employee_email'],
+                                                                'username':employee['employee_name'],
+                                                                'phone':employee['phone'],
+                                                                'is_verified':True,
+                                                                'existing_member':True})
+            if created:
+                new_users.append(obj)
+                if not VendorUser.objects.filter(user_id=obj.id, vendor_id=profile.vendor.id).exists():
+                    VendorUser(user_id=obj.id, vendor_id=profile.vendor.id,role=','.join(employee['roles'])).save()
+                    notify_farm_user(obj.email, validated_data.get('profile_contact_details')['farm_name'])
+                    notify_admins_on_vendors_registration(obj.email,validated_data.get('profile_contact_details')['farm_name'] )    
+                        
+
+        
+    def create(self,validated_data):
         """
         When object is created add custom method here.
         """
         profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-        if profile.vendor.vendor_category == 'cultivator':
-            employee_data = validated_data.get('profile_contact_details')['employees']
-            new_users = []
-            for employee in employee_data:
-                obj, created = User.objects.get_or_create(email=employee['employee_email'],
-                                                          defaults={'email':employee['employee_email'],
-                                                                    'username':employee['employee_name'],
-                                                                    'phone':employee['phone'],
-                                                                    'is_verified':True,
-                                                                    'existing_member':True})
-                if created:
-                    new_users.append(obj)
-                    if not VendorUser.objects.filter(user_id=obj.id, vendor_id=profile.vendor.id).exists():
-                        VendorUser(user_id=obj.id, vendor_id=profile.vendor.id,role=','.join(employee['roles'])).save()
-                        notify_farm_user(obj.email, validated_data.get('profile_contact_details')['farm_name'])
-                        notify_admins_on_vendors_registration(obj.email,validated_data.get('profile_contact_details')['farm_name'] )    
-                        
+        if profile.vendor.vendor_category == 'cultivator' and not validated_data.get('is_draft'):
+            self.create_and_notify_employee(profile,validated_data)
         else:
             pass #this is added for further conditions
             
@@ -157,7 +165,14 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         #profile.save()
         return profile
 
-    
+
+    def update(self, instance, validated_data):
+        profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+        if profile.vendor.vendor_category == 'cultivator' and not validated_data.get('is_draft'):
+            self.create_and_notify_employee(profile,validated_data)
+        user = super().update(instance, validated_data)
+        return user
+         
     class Meta:
         model = ProfileContact
         fields = ('__all__')

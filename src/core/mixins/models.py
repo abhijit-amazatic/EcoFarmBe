@@ -15,6 +15,7 @@ class StatusFlagMixin(models.Model):
     STATUS_COMPLETED = 'completed'
     STATUS_APPROVED = 'approved'
     STATUS_DONE = 'done'
+
     STATUS_CHOICES = ((STATUS_NOT_STARTED, _('Not Started')),
                       (STATUS_IN_PROGRESS, _('In Progress')),
                       (STATUS_APPROVED, _('Approved')),
