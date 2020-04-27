@@ -207,7 +207,7 @@ class ProfileOverviewSerializer(serializers.ModelSerializer):
         """
         Object level validation.
         """    
-        if self.context['request'].method == 'PATCH':
+        if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
             if profile.vendor.vendor_category == 'cultivator':
                 profile_data = attrs.get('profile_overview')
@@ -251,7 +251,7 @@ class FinancialOverviewSerializer(serializers.ModelSerializer):
         """
         Object level validation.
         """    
-        if self.context['request'].method == 'PATCH':
+        if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
             if profile.vendor.vendor_category == 'cultivator':
                 profile_data = attrs.get('financial_details')
@@ -299,7 +299,7 @@ class ProcessingOverviewSerializer(serializers.ModelSerializer):
         """
         Object level validation.
         """    
-        if self.context['request'].method == 'PATCH':
+        if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
             if profile.vendor.vendor_category == 'cultivator':
                 profile_data = attrs.get('processing_config')
@@ -331,7 +331,7 @@ class ProgramOverviewSerializer(serializers.ModelSerializer):
         """
         Object level validation.
         """    
-        if self.context['request'].method == 'PATCH':
+        if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
             if profile.vendor.vendor_category == 'cultivator':
                 profile_data = attrs.get('program_details')
