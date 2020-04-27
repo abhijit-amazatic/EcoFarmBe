@@ -5,7 +5,8 @@ from core.settings import (PYZOHO_CONFIG,
     PYZOHO_USER_IDENTIFIER)
 from user.models import (User, )
 from vendor.models import (VendorProfile, )
-from .crm_format import (CRM_FORMAT, )
+from core.utility import (insert_data_for_vendor_profile,)
+from .crm_format import (CRM_FORMAT, VENDOR_TYPES)
 from .box import (get_shared_link, )
 
 def get_crm_obj():
@@ -34,6 +35,23 @@ def get_format_dict(module):
     Return Contact-CRM fields dictionary.
     """
     return CRM_FORMAT[module]
+
+def get_vendor_types(vendor_type, reverse=False):
+    """
+    Return Zoho CRM vendor type
+    """
+    response = list()
+    if reverse:
+        for vendor in vendor_type:
+            for k,v in VENDOR_TYPES:
+                if v == vendor:
+                    response.append(k)
+    else:
+        for vendor in vendor_type:
+            type_ = VENDOR_TYPES.get(vendor)
+            if type_:
+                response.append(type_)
+    return response
 
 def parse_fields(key, value, obj, crm_obj):
     """
@@ -78,6 +96,8 @@ def parse_fields(key, value, obj, crm_obj):
             return user
         except IndexError:
             return []
+    if value == 'vendor_type':
+        return get_vendor_types(obj.get(value))
         
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
@@ -87,8 +107,8 @@ def create_records(module, records, is_return_orginal_data=False):
         records = [records]
     for record in records:
         contact_dict = dict()
-        contact_crm_dict = get_format_dict(module)
-        for k,v in contact_crm_dict.items():
+        crm_dict = get_format_dict(module)
+        for k,v in crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
                 v = parse_fields(k, v, record, crm_obj)
@@ -105,8 +125,8 @@ def update_records(module, records, is_return_orginal_data=False):
     request = list()
     for record in records:
         contact_dict = dict()
-        contact_crm_dict = get_format_dict(module)
-        for k,v in contact_crm_dict.items():
+        crm_dict = get_format_dict(module)
+        for k,v in crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
                 v = parse_fields(k, v, record, crm_obj)
@@ -156,6 +176,7 @@ def insert_vendors():
     """
     data_list = list()
     records = VendorProfile.objects.filter(is_updated_in_crm=False).select_related()
+    #records = VendorProfile.objects.filter(id=53).select_related()
     for record in records:
         r = dict()
         r['db_id'] = record.id
@@ -171,6 +192,11 @@ def insert_vendors():
             r.update({'licenses': l})
             r.update({'uploaded_sellers_permit_to': i['uploaded_sellers_permit_to']})
         try:
+            type_ = record.vendor.vendor_category
+            if isinstance(type_, list):
+                r.update({'vendor_type': type_})
+            else:
+                r.update({'vendor_type': [type_]})
             r.update(record.profile_contact.profile_contact_details)
             r.update(record.profile_overview.profile_overview)
             r.update(record.financial_overview.financial_details)
@@ -185,11 +211,12 @@ def insert_vendors():
         result = create_records('Vendors', data_list, True)
         if result['status_code'] == 201:
             record_response = result['response']['response']['data']
-            for i, record in enumerate(records):
+            for i, record in enumerate(data_list):
                 try:
-                    record.zoho_crm_id = record_response[i]['details']['id']
-                    record.is_updated_in_crm = True
-                    record.save()
+                    record_obj = VendorProfile.objects.get(id=record['db_id'])
+                    record_obj.zoho_crm_id = record_response[i]['details']['id']
+                    record_obj.is_updated_in_crm = True
+                    record_obj.save()
                 except KeyError:
                     continue
                 if (result['response']['orignal_data'][i].get('Licenses_List')):
@@ -209,11 +236,14 @@ def update_license(license):
     """
     Update license with shareable link.
     """
+    response = None
     data = list()
-    license_url = get_shared_link(license['uploaded_license_to'])
-    license['uploaded_license_to'] = license_url
-    data.append(license)
-    response = update_records('Licenses', data)
+    if license['uploaded_license_to']:
+        license_url = get_shared_link(license['uploaded_license_to'])
+        if license_url:
+            license['uploaded_license_to'] = license_url
+            data.append(license)
+            response = update_records('Licenses', data)
     return response
 
 def get_records_from_crm(legal_business_name):
@@ -222,12 +252,20 @@ def get_records_from_crm(legal_business_name):
     """
     licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
+        vendor = search_query('Vendors_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
         crm_obj = get_crm_obj()
-        vendor = licenses['response'][0]['Vendor_Name_Lookup']
+        vendor = vendor['response'][0]['Licenses_Module']
         vendor_record = crm_obj.get_record('Vendors', vendor['id'])
         if vendor_record['status_code'] == 200:
+            vendor = vendor_record['response'][vendor['id']]
+            licenses = licenses['response']
+            crm_dict = get_format_dict('Vendors_To_DB')
             response = dict()
-            response['vendor'] = vendor_record['response'][vendor['id']]
-            response['licenses'] = licenses['response']
+            response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'])
+            for k,v in crm_dict.items():
+                r = dict()
+                for key,value in v.items():
+                    r[key] = vendor.get(value)
+                response[k] = r
             return response
     return {}

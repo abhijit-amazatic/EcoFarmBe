@@ -15,6 +15,7 @@ CRM_FORMAT  = {
     'Vendors': {
         'db_id': 'db_id',
         'Vendor_Name': 'farm_name',
+        "Vendor_Type": 'vendor_type_parse',
         'Phone': 'company_phone',
         'Email': 'company_email',
         'Layout': '',
@@ -90,5 +91,77 @@ CRM_FORMAT  = {
     'Vendors_X_Licenses': {
         'Licenses_Module': 'Licenses_Module',
         'Licenses': 'Licenses'
+    },
+    'Vendors_X_Cultivars': {
+        'Cultivar_Associations': 'Cultivar_Associations',
+        'Cultivars': 'Cultivars'
+    },
+    'Vendors_To_DB' : {
+        "profile_contact_details": 
+            {
+            "farm_name": "Vendor_Name",
+            "primary_county": "County",
+            "region": "Region",
+            "appellation": "Appellations",
+            "ethics_and_certifications": "Special_Certifications",
+            "other_distributors": "Do_you_work_with_other_Distributors",
+            "transportation": "Transportation_Methods",
+            "packaged_flower_line": "Packaged_Flower_Line",
+            "interested_in_co_branding": "Farm_Co_Branding_Interest",
+            "marketing_material": "Marketing_material",
+            "featured_on_our_site": "Featured_on_our_website_and_social_media",
+            "company_email": "Email",
+            "company_phone": "Phone",
+            "website": "Website",
+            "instagram": "Instagram",
+            "facebook": "Facebook",
+            "linkedin": "Linkedin",
+            "twitter": "Twitter",
+            "no_of_employees": "Number_of_Employees",
+            "employees": "Contacts_parse"
+            },
+        "profile_overview": {
+            "lighting_type": "Indoor_Mixed_Lighting_Type", 
+            "type_of_nutrients": "Type_of_Nutrients_Used",
+            "interested_in_growing_genetics": "Would_you_grow_genetics_suggested_by_Thrive",
+            "issues_with_failed_lab_tests": "Have_you_ever_had_issues_with_failed_Lab_tests",
+            "lab_test_issues": "Issues_with_Failed_Lab_Tests",
+            "plants_cultivate_per_cycle": "Yield_Per_Cycle_Mixed_Light",
+            "annual_untrimmed_yield": "",
+            "no_of_harvest": "Annual_Harvests",
+            "indoor_sqf": "Canopy_Sqf_Indoor",
+            "outdoor_sqf": "Canopy_Sqf_Outdoor",
+            "no_of_harvest_per_year": "Annual_Harvests",
+            "mixed_light_sqf": ""
+            },
+        "processing_config":{
+            "flower_yield_percentage": "Flower",
+            "small_yield_percentage": "Smalls",
+            "trim_yield_percentage": "Trim",
+            "know_yield_per_plant":"",
+            "yield_per_plant":"",
+            "know_yield_per_sq_ft":"",
+            "avg_yield_pr_sq_ft":"",
+            "process_on_site":"Can_you_Process_on_Site",
+            "cultivars": "cultivars"
+            },
+        "financial_details": {
+            "annual_revenue_2019": "Yearly_Revenue",
+            "projected_2020_revenue": "",
+            "target_profit_margin": "",
+            "yearly_budget": "Yearly_Budget",
+            "know_cost_per_lbs": "Know_your_Cost_per_LB",
+            "cost_per_lbs": "Cost_per_LB",
+            "know_cost_per_sqf": "Know_your_Cost_per_Sqf",
+            "cost_per_sqf": "Cost_per_Sqf",
+            "avg_target_price": "Flower_Target_Price_Lb",
+            "small_target_price": "Smalls_Target_Price_Lb",
+            "trim_target_price": "Trim_Target_Price_Lb",
+            "bucked_target_price": "Bucked_Untrimmed_Target_Price_Lb"
+            },
     }
-}  
+}
+
+VENDOR_TYPES = {
+    'cultivator':'Cultivator',
+}
