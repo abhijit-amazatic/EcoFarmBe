@@ -14,6 +14,23 @@ from django.db import transaction
 import nested_admin
 
 
+
+class VendorProfileForm(forms.ModelForm):
+
+    class Meta:
+        model = VendorProfile
+        fields = '__all__'
+
+    def clean(self):
+        if self.changed_data:
+            if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved':
+                vendor_obj = Vendor.objects.filter(id=self.instance.vendor.id)
+                if vendor_obj:
+                    ac_manager = vendor_obj[0].ac_manager.email
+                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+                
+       
+
 class MyUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
@@ -52,6 +69,7 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     model = VendorProfile
     fk_name = 'vendor'
     readonly_fields = ('vendor', 'profile_type','number_of_licenses','is_updated_in_crm','number_of_legal_entities','zoho_crm_id', 'is_draft', 'step',)
+    form = VendorProfileForm
 
         
         
