@@ -282,7 +282,7 @@ class ConfigCultivarsSerializer(serializers.Serializer):
     cultivars data for processing config
     """
     harvest_date = serializers.CharField(required=True)
-    cultivar_names = serializers.ListField(required=True)
+    cultivar_names = serializers.CharField(required=True)
    
         
 class ProcessingFieldsSerializer(serializers.Serializer):
