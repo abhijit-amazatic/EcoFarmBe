@@ -61,6 +61,17 @@ class VendorProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "You can only add/update vendorprofiles related to your vendors only!")
         return obj
+
+    def update(self, instance, validated_data):
+        profile = VendorProfile.objects.select_related('vendor').get(id=instance.id)
+        if profile.vendor.vendor_category == 'cultivator' and  validated_data.get('status') == 'completed':
+            try:
+                profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
+                notify_admins_on_profile_registration(profile.vendor.ac_manager.email,profile_contact_details.get('farm_name'))
+            except Exception as e:
+                print(e)
+        user = super().update(instance, validated_data)
+        return user
     
     class Meta:
         model = VendorProfile
