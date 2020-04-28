@@ -261,9 +261,17 @@ def get_records_from_crm(legal_business_name):
         if vendor_record['status_code'] == 200:
             vendor = vendor_record['response'][vendor['id']]
             licenses = licenses['response']
+            crm_dict = get_format_dict('Licenses_To_DB')
+            li = list()
+            for license in licenses:
+                r = dict()
+                for k, v in crm_dict.items():
+                    r[k] = license.get(v)
+                li.append(r)
             crm_dict = get_format_dict('Vendors_To_DB')
             response = dict()
             response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'], True)
+            response['licenses'] = li
             for k,v in crm_dict.items():
                 r = dict()
                 for key,value in v.items():

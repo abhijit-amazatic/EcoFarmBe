@@ -97,7 +97,7 @@ CRM_FORMAT  = {
         'Cultivars': 'Cultivars'
     },
     'Vendors_To_DB' : {
-        "profile_contact_details": 
+        "profile_contact": 
             {
             "farm_name": "Vendor_Name",
             "primary_county": "County",
@@ -158,8 +158,25 @@ CRM_FORMAT  = {
             "small_target_price": "Smalls_Target_Price_Lb",
             "trim_target_price": "Trim_Target_Price_Lb",
             "bucked_target_price": "Bucked_Untrimmed_Target_Price_Lb"
-            },
-    }
+            }
+    },
+    'Licenses_To_DB': {
+            'license_id': 'id',
+            'license_number': 'Name',
+            'legal_business_name': 'Legal_Business_Name',
+            'license_type': 'License_Type',
+            'expiration_date': 'Expiration_Date',
+            '': 'Business_DBA',
+            'issue_date': 'Issue_Date',
+            'uploaded_license_to': 'License_Box_Link',
+            'premises_address': 'Premises_Address',
+            'premises_city': 'Premises_City',
+            'zip_code': 'Premises_Zipcode',
+            'premises_state': 'Premises_State',
+            'premises_county': 'Premises_County',
+            'premises_apn': 'Premises_APN_Number',
+            'Owner': 'Owner'
+            }
 }
 
 VENDOR_TYPES = {
