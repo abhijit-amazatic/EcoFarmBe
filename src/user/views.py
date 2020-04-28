@@ -18,8 +18,9 @@ from core.mailer import mail, mail_send
 from .models import User, MemberCategory
 from vendor.models import Vendor,VendorUser
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
-from integration.crm import (search_query, create_records)
+from integration.crm import (search_query, create_records, get_records_from_crm)
 from integration.box import(get_box_tokens, )
+from core.utility import insert_data_for_vendor_profile
 from slacker import Slacker
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
@@ -95,7 +96,11 @@ class UserViewSet(ModelViewSet):
                     if vendor_list_lower:
                         Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
                         vendors = Vendor.objects.filter(ac_manager__email=instance.email)
-                        VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])             
+                        VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])
+                else:
+                    crm_data = get_records_from_crm(instance.legal_business_name)
+                    if crm_data:
+                        insert_data_for_vendor_profile(instance.user,crm_data.get('vendor_type'), crm_data)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
                 notify_admins(instance.email)

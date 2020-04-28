@@ -8,6 +8,7 @@ from vendor.models import (VendorProfile, )
 from core.utility import (insert_data_for_vendor_profile,)
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES)
 from .box import (get_shared_link, )
+from core.celery import app
 
 def get_crm_obj():
     """
@@ -246,6 +247,7 @@ def update_license(license):
             response = update_records('Licenses', data)
     return response
 
+@app.task(queue="general")
 def get_records_from_crm(legal_business_name):
     """
     Get records from Zoho CRM using legal business name.
