@@ -23,9 +23,9 @@ def update_user_crm():
     """
     #insert_users()
 
-#@periodic_task(run_every=(crontab(minute='*')), options={'queue': 'general'})
+@periodic_task(run_every=(crontab(hour='*')), options={'queue': 'general'})
 def update_vendor_crm():
     """
     Update user in Zoho CRM.
     """
-    #insert_vendors()
+    insert_vendors()
