@@ -52,6 +52,9 @@ class Vendor(models.Model):
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.vendor_category
+
     class Meta:
         unique_together = (('ac_manager', 'vendor_category'), )
 
@@ -85,6 +88,9 @@ class VendorProfile(StatusFlagMixin,models.Model):
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     code = models.CharField(_('Vendor Code For Box'), max_length=100, blank=True, null=True)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
+
+    def __str__(self):
+        return self.vendor.vendor_category
 
 
 class ProfileContact(models.Model):

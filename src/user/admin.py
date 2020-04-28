@@ -7,10 +7,11 @@ from core.mailer import mail, mail_send
 from django.conf import settings
 from datetime import datetime
 from .models import (User, MemberCategory,)
+from vendor.models import (Vendor,VendorProfile,)
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 from django.db import transaction
-
+import nested_admin
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -20,6 +21,12 @@ class MyUserChangeForm(UserChangeForm):
 
     username = forms.CharField(required=False)
 
+    # def clean(self):
+    #     if self.cleaned_data.get('is_approved'):
+    #         self.cleaned_data.pop('is_approved', False)
+    #         return self.cleaned_data
+
+        
     # def save(self, commit=True):
     #     user = super(MyUserChangeForm, self).save(commit=False)
     #     username = self.cleaned_data["username"]
@@ -37,8 +44,36 @@ class MyUserChangeForm(UserChangeForm):
         #     return self.cleaned_data
         
 
+class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):#
+    """
+    Configuring field admin view for VendorProfile model
+    """
+    extra = 0
+    model = VendorProfile
+    fk_name = 'vendor'
+    readonly_fields = ('vendor', 'profile_type','number_of_licenses','is_updated_in_crm','number_of_legal_entities','zoho_crm_id', 'is_draft', 'step',)
+
         
-class MyUserAdmin(UserAdmin):
+        
+class VendorInlineAdmin(nested_admin.NestedTabularInline):#(admin.StackedInline):
+    """
+    Configuring field admin view for vendor model
+    """
+    extra = 0
+    model = Vendor
+    verbose_name_plural = ('Vendors')
+    can_delete = False
+    inlines = [InlineVendorProfileAdmin]
+    
+    #list_display = ('ac_manager', 'vendor_category', )
+    #readonly_fields = ['vendor_category']
+    
+    
+      
+        
+class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
+
+    inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
     list_display = ('email', 'is_approved', )
     list_filter = ('is_approved', 'is_verified')
@@ -47,16 +82,25 @@ class MyUserAdmin(UserAdmin):
     readonly_fields = ['is_verified']
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('is_approved','is_verified',)}),
-    )
-
+    )     
+    
     @transaction.atomic
     def save_model(self, request, obj, form, change):
-        if obj.is_approved:
+        if 'is_approved' in form.changed_data and obj.is_approved:
             mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", obj.email)
         super().save_model(request, obj, form, change)
-                
+
         
 
+class MemberCategoryAdmin(admin.ModelAdmin):
+    """
+    MemberAdmin
+    """
+    #search_fields = ('',)
+
+#admin.site.unregister(User)
+admin.site.register(User, MyUserAdmin)
+admin.site.register(MemberCategory, MemberCategoryAdmin)  
     
         
 # class UserForm(forms.ModelForm):
@@ -94,14 +138,6 @@ class MyUserAdmin(UserAdmin):
 #             mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", obj.email)
 #         super().save_model(request, obj, form, change)
 
-class MemberCategoryAdmin(admin.ModelAdmin):
-    """
-    MemberAdmin
-    """
-    #search_fields = ('',)
-    
-admin.site.register(User, MyUserAdmin)
-admin.site.register(MemberCategory, MemberCategoryAdmin)  
 
 
 

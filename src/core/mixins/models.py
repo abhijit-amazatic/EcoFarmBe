@@ -18,9 +18,9 @@ class StatusFlagMixin(models.Model):
 
     STATUS_CHOICES = ((STATUS_NOT_STARTED, _('Not Started')),
                       (STATUS_IN_PROGRESS, _('In Progress')),
+                      (STATUS_COMPLETED, _('Completed')),
                       (STATUS_APPROVED, _('Approved')),
-                      (STATUS_DONE, _('Done')),
-                      (STATUS_COMPLETED, _('Completed')))
+                      (STATUS_DONE, _('Done')))
     status = models.CharField(choices=STATUS_CHOICES,
                               max_length=20, default=None, null=True, blank=True)
     step  = models.CharField(_('Steps'), blank=True, null=True, max_length=255)

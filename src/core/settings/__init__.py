@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'social_django',
     'integration',
     'rest_framework.authtoken',
+    'nested_admin',
     'inventory'
 ]
 
@@ -138,7 +139,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'knox.auth.TokenAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',
