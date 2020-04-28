@@ -8,7 +8,7 @@ from rest_framework import serializers
 from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview,  License, ProgramOverview, VendorUser)
 
 from user.models import User
-from core.utility import (notify_farm_user, notify_admins_on_vendors_registration)
+from core.utility import (notify_farm_user, notify_admins_on_vendors_registration, notify_admins_on_profile_registration)
 
 
 class VendorSerializer(serializers.ModelSerializer):
@@ -67,7 +67,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         if profile.vendor.vendor_category == 'cultivator' and  validated_data.get('status') == 'completed':
             try:
                 profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
-                notify_admins_on_profile_registration(profile.vendor.ac_manager.email,profile_contact_details.get('farm_name'))
+                notify_admins_on_profile_registration(profile.vendor.ac_manager.email,profile_contact.profile_contact_details['farm_name'])
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
