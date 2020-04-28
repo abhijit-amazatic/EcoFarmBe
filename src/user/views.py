@@ -100,7 +100,7 @@ class UserViewSet(ModelViewSet):
                 else:
                     crm_data = get_records_from_crm(instance.legal_business_name)
                     if crm_data:
-                        insert_data_for_vendor_profile(instance.user,crm_data.get('vendor_type'), crm_data)
+                        insert_data_for_vendor_profile(instance,crm_data.get('vendor_type'), crm_data)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.", instance.email)
                 notify_admins(instance.email)

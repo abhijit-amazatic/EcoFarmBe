@@ -44,7 +44,7 @@ def get_vendor_types(vendor_type, reverse=False):
     response = list()
     if reverse:
         for vendor in vendor_type:
-            for k,v in VENDOR_TYPES:
+            for k,v in VENDOR_TYPES.items():
                 if v == vendor:
                     response.append(k)
     else:
@@ -263,7 +263,7 @@ def get_records_from_crm(legal_business_name):
             licenses = licenses['response']
             crm_dict = get_format_dict('Vendors_To_DB')
             response = dict()
-            response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'])
+            response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'], True)
             for k,v in crm_dict.items():
                 r = dict()
                 for key,value in v.items():
