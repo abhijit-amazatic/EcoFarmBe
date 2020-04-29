@@ -99,6 +99,17 @@ def parse_fields(key, value, obj, crm_obj):
             return []
     if value == 'vendor_type':
         return get_vendor_types(obj.get(value))
+    if value.startswith('Contact'):
+        contacts = {
+            'Contact_1': 'Cultivation Manager',
+            'Contact_2': 'Logistics Manager',
+            'Contact_3': 'Q&A Manager',
+            'Owner1': 'Owner'
+        }
+        response = dict()
+        for contact, position in contacts.items():
+            response[position] = obj.get(contact)
+        return response
         
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
@@ -278,7 +289,12 @@ def get_records_from_crm(legal_business_name):
             for k,v in crm_dict.items():
                 r = dict()
                 for key,value in v.items():
-                    r[key] = vendor.get(value)
+                    if value.endswith('_parse'):
+                        value = value.split('_parse')[0]
+                        value = parse_fields(key, value, vendor, crm_obj)
+                        r[key] = value
+                    else:
+                        r[key] = vendor.get(value)
                 response[k] = r
             return response
     return {}
