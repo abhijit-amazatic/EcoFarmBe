@@ -107,8 +107,21 @@ def parse_fields(key, value, obj, crm_obj):
             'Owner1': 'Owner'
         }
         response = dict()
+        result = dict()
         for contact, position in contacts.items():
-            response[position] = obj.get(contact)
+            c = obj.get(contact)
+            if c['id'] in result.keys():
+                final = result.get(c['id'])
+            else:
+                final = crm_obj.get_record('Contacts', c['id'])
+                result[c['id']] = final
+            if final['status_code'] == 200:
+                final = {
+                    'employee_name': c['name'],
+                    'employee_email': final['response'][c['id']]['Email'],
+                    'phone': final['response'][c['id']]['Phone']
+                }
+                response[position] = final
         return response
         
 def create_records(module, records, is_return_orginal_data=False):
