@@ -5,7 +5,6 @@ from core.settings import (PYZOHO_CONFIG,
     PYZOHO_USER_IDENTIFIER)
 from user.models import (User, )
 from vendor.models import (VendorProfile, )
-from core.utility import (insert_data_for_vendor_profile,)
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES)
 from .box import (get_shared_link, )
 from core.celery import app

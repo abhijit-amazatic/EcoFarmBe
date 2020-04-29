@@ -14,6 +14,7 @@ from django.db import transaction
 from user.models import *
 from vendor.models import *
 from core.celery import app
+from integration.crm import (get_records_from_crm,)
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -83,8 +84,33 @@ def notify_farm_user(recipient_email,farm):
             'link': link,
             'farm':farm
         }, subject, recipient_email
-    )   
+    )
     
+@app.task(queue="general")
+def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
+    """
+    Create users in system from profile contact.
+    Add them to vendors.
+    Invite them to change password.(if users not exists already)
+    """
+    pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
+    if pro_contact_obj:
+        employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
+              
+        for employee in employee_data:
+            obj, created = User.objects.get_or_create(email=employee['employee_email'],
+                                                      defaults={'email':employee['employee_email'],
+                                                                'username':employee['employee_name'],
+                                                                'phone':employee['phone'],
+                                                                'is_verified':True,
+                                                                'existing_member':True})
+            if created:
+                if not VendorUser.objects.filter(user_id=obj.id, vendor_id=vendor_obj_id).exists():
+                    VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=','.join(employee['roles'])).save()
+                    notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
+                    notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
+                    
+                        
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
     """
@@ -94,58 +120,120 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
     2.parameter could be vendor_type = ['cultivator','nursary']
     3.data will be dict of multiple model fields
     """
-    
-    #get exsiting given category with user and for e.g 'cultivator' if added in vendor_type list.
-    #whenever you create vendor we must add entry of that in vendor user
     try:
         for vendor in vendor_type:
             obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=vendor)
-            if not VendorUser.objects.filter(user=user, vendor=obj.id).exists():
-                VendorUser.objects.create(user=user, vendor_id=obj.id,role='Owner')
-                
-                vendor_user=VendorUser.objects.get(user=user,vendor=obj)
-                if vendor_user.role == 'Owner' and user.existing_member:
-                    """
-                    Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
-                    are added with another role aling with this if added user is owner)
-                    """
-                    vp, created = VendorProfile.objects.get_or_create(vendor=obj) #for step1 create vendor profile
-                    with transaction.atomic():
-                        #STEP1 - update respected data if you want to else comment this
-                        vp_step1 = VendorProfile(number_of_licenses=data.get('vendor_profile')['number_of_licenses'],
-                                                 number_of_legal_entities=data.get('vendor_profile')['number_of_legal_entities'],
-                                                 vendor=vp)
-                        vp_step1.save()
-                        
-                        #Step1 - add license data else comment this,add more fieldshere.I've addded only one field to create
-                        lc_step1  = License(license_type = data.get('license')['license_type'], vendor_profile=vp)
-                        lc_step1.save()
-                        
-                        #STEP2-add profile contact data
-                        pc_step2 = ProfileContact(vendor_profile=vp, is_draft="false",profile_contact_details = data.get('profile_contact'))
-                        pc_step2.save()
-
-                        #STEP3 - add profile_overview
-                        
-                        po_step3 = ProfileOverview(vendor_profile=vp, is_draft="false", profile_overview=data.get(' profile_overview'))
-                        po_step3.save()
-                        
-                        #STEP4 - add  processing_config
-                        pc_step4 = ProcessingOverview(vendor_profile=vp, is_draft="false", processing_config=data.get('processing_config'))
-                        pc_step4.save()
-                        
-                        #STEP5 - add financial details
-                        fd_step5 = FinancialOverview(vendor_profile=vp,is_draft="false", financial_details=data.get('financial_details'))
-                        fd_step5.save()
-                        
-                        #STEP6 - add program overview
-                        po_step6 = ProgramOverview(vendor_profile=vp,is_draft="false",program_details=data.get('program_details'))
-                        po_step6.save()
+            if not VendorUser.objects.filter(user_id=user.id, vendor=obj.id).exists():
+                VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='Owner')         
+            vendor_user=VendorUser.objects.get(user_id=user.id,vendor=obj)
+            if vendor_user.role == 'Owner' and user.existing_member and vendor == "cultivator":
+                """
+                Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
+                are added with another role aling with this if added user is owner)
+                """
+                vp, created = VendorProfile.objects.get_or_create(vendor=obj) #for step1 create vendor profile
+                print('vendor_profile to be updated->', vp)
+                with transaction.atomic():
+                    #STEP1
+                    if data.get('licenses'):
+                        License.objects.bulk_create([License(vendor_profile_id=vp.id,
+                                                             license_type=key.get('license_type',''),
+                                                             owner_or_manager='Owner' if key.get('Owner') else 'Manager',
+                                                             legal_business_name=key.get('legal_business_name',''),
+                                                             license_number=key.get('license_number',''),
+                                                             expiration_date=key.get('expiration_date',''),
+                                                             issue_date=key.get('issue_date',''),
+                                                             premises_address=key.get('premises_address',''),
+                                                             premises_county=key.get('premises_county',''),
+                                                             premises_city = key.get('premises_city',''),
+                                                             zip_code=key.get('zip_code',''),
+                                                             premises_apn=key.get('premises_apn',''),
+                                                             premises_state=key.get('premises_state',''),
+                                                             uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
+                        print("STEP1 License fetched in DB")
+                with transaction.atomic():     
+                    #STEP2-add profile contact data
+                    contacts = list(data.get('profile_contact').get('employees').keys())
+                    formatted_data = {"farm_name":data.get('profile_contact').get('farm_name',''),
+                                      "primary_county":data.get('profile_contact').get('primary_county',''),
+                                      "region":data.get('profile_contact').get('region',''),
+                                      "appellation":data.get('profile_contact').get('appellation',''),
+                                      "ethics_and_certifications":data.get('profile_contact').get('ethics_and_certifications',[]),
+                                      "other_distributors":data.get('profile_contact').get('other_distributors',''),
+                                      "transportation":data.get('profile_contact').get('transportation',[]),
+                                      "packaged_flower_line":data.get('profile_contact').get('packaged_flower_line',''),
+                                      "interested_in_co_branding":data.get('profile_contact').get('interested_in_co_branding',''),
+                                      "marketing_material":data.get('profile_contact').get('marketing_material',''),
+                                      "featured_on_our_site":data.get('profile_contact').get('featured_on_our_site',''),
+                                      "company_email":data.get('profile_contact').get('company_email',''),
+                                      "company_phone":data.get('profile_contact').get('company_phone',''),
+                                      "website":data.get('profile_contact').get('website',''),
+                                      "instagram":data.get('profile_contact').get('instagram',''),
+                                      "facebook":data.get('profile_contact').get('facebook',''),
+                                      "linkedin":data.get('profile_contact').get('linkedin',''),
+                                      "twitter":data.get('profile_contact').get('twitter',''),
+                                      "no_of_employees":data.get('profile_contact').get('no_of_employees',''),
+                                      "employees":[{"employee_name":data.get('profile_contact').get('employees').get('Cultivation Manager','')['employee_name'],
+                                                    "employee_email":data.get('profile_contact').get('employees').get('Cultivation Manager','')['employee_email'] ,
+                                                    "phone":data.get('profile_contact').get('employees').get('Cultivation Manager','')['phone'],
+                                                    "roles":[contact]} for contact in contacts]}
+                    pc_step2, created = ProfileContact.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False,profile_contact_details = formatted_data)
+                    if created:
+                        add_users_to_system.delay(pc_step2.id,vp.id,obj.id)
+                    print("STEP2 Profile contact fetched in DB")
+                with transaction.atomic():
+                    profile_data = {"lighting_type":data.get('profile_overview').get('lighting_type',[]),
+                                    "type_of_nutrients":data.get('profile_overview').get('type_of_nutrients,'''),
+                                    "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics'),
+                                    "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests'),
+                                    "lab_test_issues":data.get('profile_overview').get('lab_test_issues'),
+                                    "plants_cultivate_per_cycle":data.get('profile_overview').get('plants_cultivate_per_cycle',0),
+                                    "annual_untrimmed_yield":data.get('profile_overview').get('annual_untrimmed_yield',0),
+                                    "no_of_harvest":data.get('profile_overview').get('no_of_harvest',0),
+                                    "indoor_sqf":data.get('profile_overview').get('indoor_sqf',0),
+                                    "outdoor_sqf":data.get('profile_overview').get('outdoor_sqf',0),
+                                    "mixed_light_no_of_harvest":data.get('profile_overview').get('mixed_light_no_of_harvest',0),
+                                    "indoor_no_of_harvest":data.get('profile_overview').get('indoor_no_of_harvest',0),
+                                    "outdoor_no_of_harvest":data.get('profile_overview').get('outdoor_no_of_harvest',0),
+                                    "mixed_light_sqf":data.get('profile_overview').get('mixed_light_sqf',0)} 
+                    #STEP3 - add profile_overview
+                    po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
+                    print("STEP3 Profile Overview fetched in DB")
+                with transaction.atomic():         
+                    #STEP4 - add  processing_config
+                    harvest_dates = [value for key, value in data.get('processing_config').items() if 'harvest_' in key.lower()]
+                    cultivars_data = data.get('processing_config').get('cultivars','')
+                    if cultivars_data:
+                        cultivars = cultivars_data.split(',')
+                    else:
+                        cultivars = ""
+                    processing_data = {"flower_yield_percentage": data.get('processing_config').get('flower_yield_percentage',0),
+		                       "small_yield_percentage": data.get('processing_config').get('small_yield_percentage',0),
+		                       "trim_yield_percentage": data.get('processing_config').get('trim_yield_percentage',0),
+		                       "know_yield_per_plant":data.get('processing_config').get('know_yield_per_plant',''),
+		                       "yield_per_plant":data.get('processing_config').get('yield_per_plant',0),
+		                       "know_yield_per_sq_ft":data.get('processing_config').get('know_yield_per_sq_ft',''),
+		                       "avg_yield_pr_sq_ft":data.get('processing_config').get('avg_yield_pr_sq_ft',0),
+                                       "cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]}
+                    pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=data.get('processing_config'))
+                    print("STEP4 Proc.Overview fetched in DB")
+                with transaction.atomic():   
+                    #STEP5 - add financial details
+                    fd_step5 = FinancialOverview.objects.get_or_create(vendor_profile_id=vp.id,is_draft=False, financial_details=data.get('financial_details'))
+                    print("STEP5 Financial data fetched in DB") 
     except Exception as e:
-        print(e)
+        print('Exception\n',e)
 
                 
-                
-
+@app.task(queue="general")
+def get_from_crm_insert_to_vendorprofile(user_id):
+    """
+    async task for existing user.
+    """
+    instance = User.objects.filter(id=user_id)
+    if instance:
+        crm_data = get_records_from_crm(instance[0].legal_business_name)
+        if crm_data:
+            insert_data_for_vendor_profile(instance[0],crm_data.get('vendor_type'), crm_data)
     
-    
+        
