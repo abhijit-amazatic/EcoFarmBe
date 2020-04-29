@@ -241,9 +241,13 @@ def insert_vendors(id=None):
                         data['Licenses'] = license
                         r = create_records('Vendors_X_Licenses', [data])
                 data = dict()
+                l = list()
                 data['Cultivar_Associations'] = record_response[i]['details']['id']
-                data['Cultivars'] = result['response']['orignal_data'][i]['cultivars']
-                r = create_records('Vendors_X_Cultivars', [data])
+                for i in result['response']['orignal_data'][i]['cultivars']:
+                    r = search_query('Cultivars', i['cultivar_names'], 'Name')
+                    if r['status_code'] == 200:
+                        data['Cultivars'] = r['response'][0]['id']
+                        r = create_records('Vendors_X_Cultivars', [data])
         return result
     return {}
 

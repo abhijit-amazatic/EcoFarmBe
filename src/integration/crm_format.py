@@ -143,7 +143,10 @@ CRM_FORMAT  = {
             "know_yield_per_sq_ft":"",
             "avg_yield_pr_sq_ft":"",
             "process_on_site":"Can_you_Process_on_Site",
-            "cultivars": "cultivars"
+            "cultivars": "Cultivars",
+            "harvest_1": "Harvest_1",
+            "harvest_2": "Harvest_2",
+            "harvest_3": "Harvest_3"
             },
         "financial_details": {
             "annual_revenue_2019": "Yearly_Revenue",
