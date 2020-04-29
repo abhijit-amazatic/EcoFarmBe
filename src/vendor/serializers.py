@@ -9,7 +9,7 @@ from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, Fin
 
 from user.models import User
 from core.utility import (notify_farm_user, notify_admins_on_vendors_registration, notify_admins_on_profile_registration)
-
+from integration.crm import (insert_vendors, )
 
 class VendorSerializer(serializers.ModelSerializer):
     """
@@ -66,6 +66,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         profile = VendorProfile.objects.select_related('vendor').get(id=instance.id)
         if profile.vendor.vendor_category == 'cultivator' and  validated_data.get('status') == 'completed':
             try:
+                insert_vendors.delay(id=instance.id)
                 profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
                 notify_admins_on_profile_registration(profile.vendor.ac_manager.email,profile_contact.profile_contact_details['farm_name'])
             except Exception as e:

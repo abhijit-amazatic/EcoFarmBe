@@ -171,13 +171,15 @@ def get_licenses(license_field):
     if licenses['status_code'] == 200:
         return licenses['response']
 
-def insert_vendors():
+def insert_vendors(id=None):
     """
     Insert Vendors into Zoho CRM.
     """
     data_list = list()
-    records = VendorProfile.objects.filter(is_updated_in_crm=False).select_related()
-    #records = VendorProfile.objects.filter(id=53).select_related()
+    if id:
+        records = VendorProfile.objects.filter(id=id).select_related()
+    else:
+        records = VendorProfile.objects.filter(is_updated_in_crm=False).select_related()
     for record in records:
         r = dict()
         r['db_id'] = record.id
