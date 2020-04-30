@@ -204,7 +204,9 @@ class OverviewFieldsSerializer(serializers.Serializer):
     no_of_harvest = serializers.IntegerField(required=True)
     indoor_sqf = serializers.IntegerField(required=False)
     outdoor_sqf = serializers.IntegerField(required=False)
-    no_of_harvest_per_year = serializers.IntegerField(required=True)
+    mixed_light_no_of_harvest = serializers.IntegerField(required=False)
+    indoor_no_of_harvest = serializers.IntegerField(required=False)
+    outdoor_no_of_harvest = serializers.IntegerField(required=False)
     mixed_light_sqf = serializers.IntegerField(required=False)
     
 
@@ -284,6 +286,7 @@ class ConfigCultivarsSerializer(serializers.Serializer):
     """
     harvest_date = serializers.CharField(required=True)
     cultivar_names = serializers.CharField(required=True)
+    cultivation_type = serializers.CharField(required=False)
    
         
 class ProcessingFieldsSerializer(serializers.Serializer):
