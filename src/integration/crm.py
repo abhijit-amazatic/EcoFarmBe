@@ -110,6 +110,8 @@ def parse_fields(key, value, obj, crm_obj):
         result = dict()
         for contact, position in contacts.items():
             c = obj.get(contact)
+            if not c:
+                continue
             if c['id'] in result.keys():
                 final = result.get(c['id'])
             else:
@@ -123,6 +125,8 @@ def parse_fields(key, value, obj, crm_obj):
                 }
                 response[position] = final
         return response
+    if value.startswith('layout'):
+        return "4230236000000399745"
         
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
@@ -256,11 +260,12 @@ def insert_vendors(id=None):
                 data = dict()
                 l = list()
                 data['Cultivar_Associations'] = record_response[i]['details']['id']
-                for i in result['response']['orignal_data'][i]['cultivars']:
-                    r = search_query('Cultivars', i['cultivar_names'], 'Name')
-                    if r['status_code'] == 200:
-                        data['Cultivars'] = r['response'][0]['id']
-                        r = create_records('Vendors_X_Cultivars', [data])
+                for j in result['response']['orignal_data'][i]['cultivars']:
+                    for k in j['cultivar_names']:
+                        r = search_query('Cultivars', k, 'Name')
+                        if r['status_code'] == 200:
+                            data['Cultivars'] = r['response'][0]['id']
+                            r = create_records('Vendors_X_Cultivars', [data])
         return result
     return {}
 
@@ -286,6 +291,8 @@ def get_records_from_crm(legal_business_name):
     licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         vendor = search_query('Vendors_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
+        if vendor['status_code'] != 200:
+            return {}
         crm_obj = get_crm_obj()
         vendor = vendor['response'][0]['Licenses_Module']
         vendor_record = crm_obj.get_record('Vendors', vendor['id'])
