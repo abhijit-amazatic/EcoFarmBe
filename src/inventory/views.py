@@ -4,21 +4,21 @@ Views for Inventory
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import (viewsets, status,)
-from rest_framework.permissions import (IsAuthenticated, )
+from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
-from .serializers import (InventorySerialier, )
+from .serializers import (InventorySerialier, LogoutInventorySerializer, )
 from .models import (Inventory, )
 
 class InventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AllowAny, )
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = {
         'name':['exact', 'contains'],
         'sku':['exact', 'contains'],
-        'category_name':['exact', 'contains'],
+        'category_name':['exact', 'icontains'],
         'cf_cultivar_type':['exact', 'contains'],
         'cf_strain_name':['exact', 'contains'],
         'price':['gte', 'lte', 'gt', 'lt'],
@@ -33,6 +33,8 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return serializer.
         """
+        if not self.request.user.is_authenticated:
+            return LogoutInventorySerializer
         return InventorySerialier
     
     def get_queryset(self):
