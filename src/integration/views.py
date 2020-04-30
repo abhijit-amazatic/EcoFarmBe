@@ -37,7 +37,9 @@ class SearchCultivars(APIView):
         Get Cultivar information.
         """
         data = search_query('Cultivars', request.query_params['cultivar_name'], 'Name')
-        return Response(data)
+        if data['status_code'] == 200:
+            return Response(data)
+        return Response({})
 
 class GetPickListView(APIView):
     """
