@@ -16,16 +16,16 @@ class InventoryViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny, )
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = {
-        'name':['exact', 'contains'],
-        'sku':['exact', 'contains'],
-        'category_name':['exact', 'icontains'],
-        'cf_cultivar_type':['exact', 'contains'],
-        'cf_strain_name':['exact', 'contains'],
+        'name':['icontains'],
+        'sku':['icontains'],
+        'category_name':['icontains'],
+        'cf_cultivar_type':['icontains'],
+        'cf_strain_name':['icontains'],
         'price':['gte', 'lte', 'gt', 'lt'],
         'cf_potency':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
         'stock_on_hand':['gte', 'lte', 'gt', 'lt'],
-        'cf_cannabis_grade_and_category':['exact', 'contains'],
+        'cf_cannabis_grade_and_category':['icontains'],
         'last_modified_time':['gte', 'lte', 'gt', 'lt']
         }
     
