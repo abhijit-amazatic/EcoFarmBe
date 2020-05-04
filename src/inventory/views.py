@@ -1,9 +1,10 @@
 """
 Views for Inventory
 """
-from django.shortcuts import render
-from rest_framework.response import Response
+from django.shortcuts import (render, )
+from rest_framework.response import (Response, )
 from rest_framework import (viewsets, status,)
+from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from .serializers import (InventorySerialier, LogoutInventorySerializer, )
@@ -14,7 +15,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     Inventory View
     """
     permission_classes = (AllowAny, )
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_fields = {
         'name':['icontains', 'exact'],
         'sku':['icontains', 'exact'],
@@ -29,6 +30,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         'cf_cannabis_grade_and_category':['icontains', 'exact'],
         'last_modified_time':['gte', 'lte', 'gt', 'lt']
         }
+    ordering_fields = '__all__'
     
     def get_serializer_class(self):
         """
