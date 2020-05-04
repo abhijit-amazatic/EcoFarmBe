@@ -165,11 +165,12 @@ def update_records(module, records, is_return_orginal_data=False):
     response = crm_obj.update_records(module, request, is_return_orginal_data)
     return response
 
-
-def search_query(module, query, criteria):
+def search_query(module, query, criteria, case_insensitive=False):
     crm_obj = CRM(PYZOHO_CONFIG,
         PYZOHO_REFRESH_TOKEN,
         PYZOHO_USER_IDENTIFIER)
+    if case_insensitive:
+        return crm_obj.isearch_record(module, query, criteria)
     return crm_obj.search_record(module, query, criteria)
 
 def insert_users():

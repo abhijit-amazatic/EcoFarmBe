@@ -36,7 +36,7 @@ class SearchCultivars(APIView):
         """
         Get Cultivar information.
         """
-        data = search_query('Cultivars', request.query_params['cultivar_name'], 'Name')
+        data = search_query('Cultivars', request.query_params['cultivar_name'], 'Name', True)
         if data['status_code'] == 200:
             return Response(data)
         return Response({})
