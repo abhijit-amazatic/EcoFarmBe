@@ -49,6 +49,7 @@ class Inventory(models.Model):
     cf_lab_file = models.URLField(_('Lab File'), blank=True, null=True, max_length=255)
     cf_pending_sale = models.CharField(_('Pending Sale'), blank=True, null=True, max_length=255)
     cf_potency = models.FloatField(_('Potency'), blank=True, null=True)
+    cf_cbd = models.FloatField(_('Potency'), blank=True, null=True)
     cf_cultivar_type = models.CharField(_('Cultivar Type'), blank=True, null=True, max_length=50)
     cf_procurement_rep = models.CharField(_('Procurement Rep'), blank=True, null=True, max_length=50)
     package_details = JSONField(blank=True, null=True, default=dict)

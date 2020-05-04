@@ -23,6 +23,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         'cf_strain_name':['icontains', 'exact'],
         'price':['gte', 'lte', 'gt', 'lt'],
         'cf_potency':['gte', 'lte', 'gt', 'lt'],
+        'cf_cbd':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
         'stock_on_hand':['gte', 'lte', 'gt', 'lt'],
         'cf_cannabis_grade_and_category':['icontains', 'exact'],
