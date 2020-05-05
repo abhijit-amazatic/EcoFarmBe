@@ -83,7 +83,7 @@ class ConfigEmployeeSerializer(serializers.Serializer):
     """
     Employee data for cultivator.
     """
-    phone = serializers.CharField(required=False)
+    phone = serializers.CharField(required=False, allow_blank=True)
     roles = serializers.ListField(required=True)
     employee_name = serializers.CharField(required=True)
     employee_email = serializers.EmailField(required=True)
@@ -106,11 +106,11 @@ class CultivatorFieldsSerializer(serializers.Serializer):
     featured_on_our_site = serializers.CharField(required=True)
     company_email = serializers.CharField(required=True)
     company_phone = serializers.CharField(required=True)
-    website = serializers.CharField(required=False)
-    instagram = serializers.CharField(required=False)
-    facebook = serializers.CharField(required=False)
-    linkedin = serializers.CharField(required=False)
-    twitter = serializers.CharField(required=False)
+    website = serializers.CharField(required=False,allow_blank=True)
+    instagram = serializers.CharField(required=False,allow_blank=True)
+    facebook = serializers.CharField(required=False, allow_blank=True)
+    linkedin = serializers.CharField(required=False, allow_blank=True)
+    twitter = serializers.CharField(required=False, allow_blank=True)
     no_of_employees = serializers.CharField(required=True)
     employees = ConfigEmployeeSerializer(required=True, many=True)
     #employees = serializers.ListField(child=serializers.DictField(), required=False)
@@ -198,10 +198,9 @@ class OverviewFieldsSerializer(serializers.Serializer):
     type_of_nutrients = serializers.CharField(required=True)
     interested_in_growing_genetics = serializers.CharField(required=True)
     issues_with_failed_lab_tests = serializers.CharField(required=True)
-    lab_test_issues = serializers.CharField(required=False)
+    lab_test_issues = serializers.CharField(required=False, allow_blank=True)
     plants_cultivate_per_cycle = serializers.IntegerField(required=True)
     annual_untrimmed_yield = serializers.IntegerField(required=True)
-    no_of_harvest = serializers.IntegerField(required=True)
     indoor_sqf = serializers.IntegerField(required=False)
     outdoor_sqf = serializers.IntegerField(required=False)
     mixed_light_no_of_harvest = serializers.IntegerField(required=False)
@@ -245,9 +244,9 @@ class FinanceFieldsSerializer(serializers.Serializer):
     target_profit_margin = serializers.CharField(required=True)
     yearly_budget = serializers.CharField(required=True)
     know_cost_per_lbs = serializers.CharField(required=True)
-    cost_per_lbs = serializers.CharField(required=False)
+    cost_per_lbs = serializers.CharField(required=False,allow_blank=True)
     know_cost_per_sqf = serializers.CharField(required=True)
-    cost_per_sqf = serializers.CharField(required=False)
+    cost_per_sqf = serializers.CharField(required=False,allow_blank=True)
     avg_target_price = serializers.CharField(required=True)
     small_target_price = serializers.CharField(required=True)
     trim_target_price = serializers.CharField(required=True)
@@ -286,7 +285,7 @@ class ConfigCultivarsSerializer(serializers.Serializer):
     """
     harvest_date = serializers.CharField(required=True)
     cultivar_names = serializers.ListField(required=True)
-    cultivation_type = serializers.CharField(required=False)
+    cultivation_type = serializers.CharField(required=False,allow_blank=True)
    
         
 class ProcessingFieldsSerializer(serializers.Serializer):
