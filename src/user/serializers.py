@@ -155,7 +155,10 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
         style={'input_type': 'password', 'placeholder': 'Password'})
 
     def validate(self, data):
-        get_user = User.objects.get(email=data.get('email'))
+        try:
+            get_user = User.objects.get(email=data.get('email'))
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User Does Not Exist")
         if not get_user.is_verified:
             raise serializers.ValidationError('User is not verified!')
         else:    
