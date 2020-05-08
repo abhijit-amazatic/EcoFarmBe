@@ -160,7 +160,7 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
         except User.DoesNotExist:
             raise serializers.ValidationError("User Does Not Exist")
         if not get_user.is_verified:
-            raise serializers.ValidationError('User is not verified!')
+            raise serializers.ValidationError('Email not confirmed!Please click the confirmation link sent your registered email.')
         else:    
             try:
                 email = data.get('email')
