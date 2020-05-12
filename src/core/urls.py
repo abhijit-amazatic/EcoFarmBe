@@ -30,7 +30,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                SearchCultivars,)
 from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet,)
 from integration.views import (GetBoxTokensView, InventoryView,
-                               GetPickListView, )
+                               GetPickListView, EstimateView,
+                               ContactView, )
 from inventory.views import (InventoryViewSet, )
 
 
@@ -57,6 +58,8 @@ urlpatterns = [
     path(r'inventory/item', InventoryView.as_view(), name='inventory'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
+    path(r'books/estimate', EstimateView.as_view(), name='estimates'),
+    path(r'books/contact', ContactView.as_view(), name='contacts'),
 ] + router.urls
 
 

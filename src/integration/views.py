@@ -15,6 +15,9 @@ from integration.box import(get_box_tokens, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
 from integration.crm import (search_query, get_picklist)
+from integration.books import (create_contact, create_estimate,
+                               get_estimate, list_estimates, 
+                               get_contact, list_contacts, )
 
 class GetBoxTokensView(APIView):
     """
@@ -68,3 +71,43 @@ class InventoryView(APIView):
             return Response(get_inventory_item(item_id))
         data = get_inventory_items(params=request.query_params.dict())
         return Response(data)
+    
+class EstimateView(APIView):
+    """
+    View class for Zoho books estimates.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get estimates.
+        """
+        if request.query_params.get('estimate_id', None):
+            return Response(get_estimate(request.query_params.get('estimate_id')))
+        return Response(list_estimates(params=request.query_params.dict()))
+
+    def post(self, request):
+        """
+        Create estimate in Zoho Books.
+        """
+        return Response(create_estimate(data=request.data, params=request.query_params.dict()))
+
+class ContactView(APIView):
+    """
+    View class for Zoho books contacts.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get contact.
+        """
+        if request.query_params.get('contact_id', None):
+            return Response(get_contact(request.query_params.get('contact_id')))
+        return Response(list_contacts(params=request.query_params.dict()))
+
+    def post(self, request):
+        """
+        Create contact in Zoho Books.
+        """
+        return Response(create_contact(data=request.data, params=request.query_params.dict()))
