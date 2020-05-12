@@ -69,7 +69,7 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     model = VendorProfile
     fk_name = 'vendor'
     readonly_fields = ('vendor', 'profile_type','number_of_licenses','is_updated_in_crm','number_of_legal_entities','zoho_crm_id', 'is_draft', 'step',)
-    form = VendorProfileForm
+    #form = VendorProfileForm
 
         
         
@@ -91,7 +91,7 @@ class VendorInlineAdmin(nested_admin.NestedTabularInline):#(admin.StackedInline)
         
 class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
 
-    inlines = [VendorInlineAdmin]
+    #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
     list_display = ('email', 'is_approved', )
     list_filter = ('is_approved', 'is_verified')

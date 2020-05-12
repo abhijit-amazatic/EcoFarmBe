@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'integration',
     'rest_framework.authtoken',
     'nested_admin',
+    'django_json_widget',    
     'inventory'
 ]
 
