@@ -135,7 +135,9 @@ class License(models.Model):
         _('Uploaded To'), blank=True, null=True, max_length=255)
     uploaded_sellers_permit_to = models.CharField(
         _('Uploaded Sellers Permit To'), blank=True, null=True, max_length=255)
-
+    uploaded_w9_to = models.CharField(
+        _('Uploaded W9  To'), blank=True, null=True, max_length=255)
+    
     def __str__(self):
         return self.legal_business_name
 
