@@ -18,4 +18,5 @@ zcrmsdk==2.0.6
 slacker==0.13.0
 django-nested-admin==3.3.0
 kombu==4.6.8
+django-json-widget==1.0.1
 -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho

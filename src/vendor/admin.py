@@ -1,13 +1,16 @@
 """
 Admin related customization.
 """
+import json
 from django.contrib import admin
 from django import forms
 from core.mailer import mail, mail_send
 from django.conf import settings
-from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
-from user.models import (User, MemberCategory,)
+from django.contrib.postgres import fields
+from django_json_widget.widgets import JSONEditorWidget
 import nested_admin
+from user.models import (User, MemberCategory,)
+from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
 
 
 
@@ -35,30 +38,35 @@ class InlineVendorUserAdmin(nested_admin.NestedTabularInline):#(admin.TabularInl
         'fk': ['user', ],
     }
 
+class ProfileContactForm(forms.ModelForm):
+    class Meta:
+        model = ProfileContact
+        fields = '__all__'
+        widgets = {
+            'profile_contact_details': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }
     
-
-class InlineVendorProfileContactAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
+        
+class InlineVendorProfileContactAdmin(nested_admin.NestedStackedInline):#(nested_admin.NestedTabularInline):#(admin.TabularInline):
     """
     Configuring field admin view for ProfileContact model
     """
     extra = 0
     model = ProfileContact
-    fields = ('profile_contact_details',)
-    readonly_fields = ('profile_contact_details',)
-    list_display = ('profile_contact_details',)
+    readonly_fields = ('is_draft',)
     can_delete = False
-    
+    form = ProfileContactForm    
     
 
-class InlineProfileOverviewAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
+class InlineProfileOverviewAdmin(nested_admin.NestedStackedInline):#(admin.TabularInline):
     """
     Configuring field admin view for ProfileOverview model
     """
     extra = 0
     model = ProfileOverview
     fields = ('profile_overview',)
-    readonly_fields = ('profile_overview',)
     can_delete = False
+
 
 class InlineFinancialOverviewAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
     """
@@ -110,6 +118,7 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     form = VendorProfileForm
     inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
     
+
 class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendors
@@ -118,11 +127,11 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     extra = 0
     model = Vendor
     readonly_fields = ('ac_manager','vendor_category',)
-    list_display = ('vendor_category','ac_manager',)
+    list_display = ('vendor_category','ac_manager',)#,'farm_name'
     search_fields = ('ac_manager__email','vendor_category',)
     #list_per_page = 50
     #search_fields = ('ac_manager__email',)
+    
 
-
-
+        
 admin.site.register(Vendor,MyVendorAdmin)
