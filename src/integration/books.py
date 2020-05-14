@@ -1,3 +1,4 @@
+import json
 from datetime import (datetime, timedelta, )
 from core.settings import (
     BOOKS_CLIENT_ID,
@@ -72,7 +73,7 @@ def get_item(obj, data):
     """
     Return item from Zoho books with applied tax.
     """
-    taxes = ESTIMATE_TAXES
+    taxes = json.loads(ESTIMATE_TAXES)
     line_items = list()
     for line_item in data.get('line_items'):
         item_obj = obj.Items()
@@ -160,11 +161,9 @@ def create_estimate(data, params=None):
     obj = get_books_obj()
     estimate_obj = obj.Estimates()
     result = get_customer(obj, data)
-    print('result', result)
     if result['code'] != 0:
         return result
     result = get_item(obj, result['data'])
-    print('result', result)
     if result['code'] != 0:
         return result
     return estimate_obj.create_estimate(result['data'], parameters=params)
