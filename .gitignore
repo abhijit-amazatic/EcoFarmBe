@@ -15,14 +15,13 @@ src/pyzoho/*
 # C extensions
 *.so
 
-# Distribution / packaging
+# Distribution / packaging  #dist/
 .Python
 env/
 venv/
 bin/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
