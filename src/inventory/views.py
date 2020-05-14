@@ -61,4 +61,4 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return QuerySet.
         """
-        return Inventory.objects.all()
+        return Inventory.objects.filter(cf_cfi_published=True)

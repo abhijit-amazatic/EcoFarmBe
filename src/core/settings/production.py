@@ -80,9 +80,9 @@ BOOKS_CLIENT_SECRET=os.environ.get('BOOKS_CLIENT_SECRET')
 BOOKS_ORGANIZATION_ID=os.environ.get('BOOKS_ORGANIZATION_ID')
 BOOKS_REDIRECT_URI=os.environ.get('BOOKS_REDIRECT_URI')
 BOOKS_REFRESH_TOKEN=os.environ.get('BOOKS_REFRESH_TOKEN')
-ESTIMATE_TAXES = {'Flower': 'Cultivation Tax - Flower (2020)', 'Trim': 'Cultivation Tax - Trim (2020)'}
+ESTIMATE_TAXES = os.environ.get('ESTIMATE_TAXES')
 
-#slack tokens
+#slack tokens'
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL_NAME = os.environ.get("SLACK_CHANNEL_NAME")
 
