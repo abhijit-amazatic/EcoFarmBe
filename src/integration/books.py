@@ -160,9 +160,11 @@ def create_estimate(data, params=None):
     obj = get_books_obj()
     estimate_obj = obj.Estimates()
     result = get_customer(obj, data)
+    print('result', result)
     if result['code'] != 0:
         return result
     result = get_item(obj, result['data'])
+    print('result', result)
     if result['code'] != 0:
         return result
     return estimate_obj.create_estimate(result['data'], parameters=params)
