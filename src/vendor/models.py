@@ -62,7 +62,7 @@ class Vendor(models.Model):
         vp = ProfileContact.objects.select_related('vendor_profile')
         pc = vp.filter(vendor_profile__vendor_id=self.pk)
         farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
-        return ",".join(farm_names)
+        return ",".join(farm_names) if farm_names else "N/A"
 
     class Meta:
         unique_together = (('ac_manager', 'vendor_category'), )
