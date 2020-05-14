@@ -9,8 +9,10 @@ from django.conf import settings
 from django.contrib.postgres import fields
 from django_json_widget.widgets import JSONEditorWidget
 import nested_admin
+from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from user.models import (User, MemberCategory,)
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 
 
 class VendorProfileForm(forms.ModelForm):
@@ -149,6 +151,7 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
     
 
+
 class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendors
@@ -156,16 +159,13 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     inlines = [InlineVendorProfileAdmin, InlineVendorUserAdmin,]
     extra = 0
     model = Vendor
-    readonly_fields = ('ac_manager','vendor_category',)
-    list_display = ('vendor_category','ac_manager','profile_name',)
+    readonly_fields = ('ac_manager','vendor_category','created_on','updated_on')
+    list_display = ('vendor_category','profile_name','ac_manager',)
     search_fields = ('ac_manager__email','vendor_category',)
+    list_filter = (
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),
+    )
     #list_per_page = 50
-    #search_fields = ('ac_manager__email',)
-    
-    # def get_farm_name(self, obj):
-    #     print('>>>>\n', obj)
-    #     return "test" 
-    #     #"\n".join([p.products for p in obj.product.all()])
-        
+         
             
 admin.site.register(Vendor,MyVendorAdmin)
