@@ -157,9 +157,15 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     extra = 0
     model = Vendor
     readonly_fields = ('ac_manager','vendor_category',)
-    list_display = ('vendor_category','ac_manager',)#,'farm_name'
+    list_display = ('vendor_category','ac_manager','profile_name',)
     search_fields = ('ac_manager__email','vendor_category',)
     #list_per_page = 50
     #search_fields = ('ac_manager__email',)
+    
+    # def get_farm_name(self, obj):
+    #     print('>>>>\n', obj)
+    #     return "test" 
+    #     #"\n".join([p.products for p in obj.product.all()])
+        
             
 admin.site.register(Vendor,MyVendorAdmin)

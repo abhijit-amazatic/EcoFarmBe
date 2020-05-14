@@ -55,6 +55,15 @@ class Vendor(models.Model):
     def __str__(self):
         return self.vendor_category
 
+    def profile_name(self):
+        """
+        Returns farm name/s.
+        """
+        vp = ProfileContact.objects.select_related('vendor_profile')
+        pc = vp.filter(vendor_profile__vendor_id=self.pk)
+        farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
+        return ",".join(farm_names)
+
     class Meta:
         unique_together = (('ac_manager', 'vendor_category'), )
 
