@@ -13,7 +13,6 @@ from user.models import (User, MemberCategory,)
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
 
 
-
 class VendorProfileForm(forms.ModelForm):
 
     class Meta:
@@ -57,46 +56,77 @@ class InlineVendorProfileContactAdmin(nested_admin.NestedStackedInline):#(nested
     can_delete = False
     form = ProfileContactForm    
     
-
+class ProfileOverviewForm(forms.ModelForm):
+    class Meta:
+        model = ProfileOverview
+        fields = '__all__'
+        widgets = {
+            'profile_overview': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }
+    
 class InlineProfileOverviewAdmin(nested_admin.NestedStackedInline):#(admin.TabularInline):
     """
     Configuring field admin view for ProfileOverview model
     """
     extra = 0
     model = ProfileOverview
-    fields = ('profile_overview',)
+    readonly_fields = ('is_draft',)
     can_delete = False
+    form = ProfileOverviewForm    
 
-
-class InlineFinancialOverviewAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
+class FinancialOverviewForm(forms.ModelForm):
+    class Meta:
+        model = FinancialOverview
+        fields = '__all__'
+        widgets = {
+            'financial_details': JSONEditorWidget(options={'modes':['code','text'],'search': True},height='80%'),
+        }
+        
+class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):#(admin.TabularInline):
     """
     Configuring field admin view for FinancialOverview model
     """
     extra = 0
     model = FinancialOverview
-    fields = ('financial_details',)
-    readonly_fields = ('financial_details',)
     can_delete = False
+    readonly_fields = ('is_draft',)
+    form = FinancialOverviewForm
 
-class InlineProcessingOverviewAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
+class ProcessingOverviewForm(forms.ModelForm):
+    class Meta:
+        model = ProcessingOverview
+        fields = '__all__'
+        widgets = {
+            'processing_config': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }
+        
+class InlineProcessingOverviewAdmin(nested_admin.NestedStackedInline):#(admin.TabularInline):
     """
     Configuring field admin view for ProcessingOverview model
     """
     extra = 0
     model = ProcessingOverview
-    fields = ('processing_config',)
-    readonly_fields = ('processing_config',)
+    readonly_fields = ('is_draft',)
     can_delete = False
-    
-class InlineProgramOverviewAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
+    form = ProcessingOverviewForm
+
+class ProgramOverviewForm(forms.ModelForm):
+    class Meta:
+        model = ProgramOverview
+        fields = '__all__'
+        widgets = {
+            'program_details': JSONEditorWidget(options={'modes':['code','text'],'search': True}, height='50%'),
+        }
+        
+class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):#(admin.TabularInline):
     """
     Configuring field admin view for ProgramOverview model
     """
     extra = 0
     model = ProgramOverview
-    fields = ('program_details',)
-    readonly_fields = ('program_details',)
+    readonly_fields = ('is_draft',)
     can_delete = False
+    form = ProgramOverviewForm
 
 class InlineLicenseAdmin(nested_admin.NestedStackedInline):#(admin.TabularInline):
     """
@@ -131,7 +161,5 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     search_fields = ('ac_manager__email','vendor_category',)
     #list_per_page = 50
     #search_fields = ('ac_manager__email',)
-    
-
-        
+            
 admin.site.register(Vendor,MyVendorAdmin)
