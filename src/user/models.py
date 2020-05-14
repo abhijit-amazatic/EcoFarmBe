@@ -47,6 +47,8 @@ class User(StatusFlagMixin,AbstractUser):
         blank=True,
     )
     is_updated_in_crm = models.BooleanField('Is Updated In CRM', default=False)
+    profile_photo = models.CharField(
+        _('Profile Photo Link'), blank=True, null=True, max_length=255)
     
    
     EMAIL_FIELD = 'email'

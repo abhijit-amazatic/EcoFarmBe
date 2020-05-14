@@ -108,7 +108,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved', 'status', 'step' )
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved', 'status', 'step','profile_photo')
     
 
     def validate_password(self, password):
