@@ -31,8 +31,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
 from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet,)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
-                               ContactView, )
-from inventory.views import (InventoryViewSet, )
+                               ContactView, CRMContactView)
+from inventory.views import (InventoryViewSet, InventorySyncView)
 
 
 router = SimpleRouter()
@@ -58,8 +58,10 @@ urlpatterns = [
     path(r'inventory/item', InventoryView.as_view(), name='inventory'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
+    path(r'crm/contacts/', CRMContactView.as_view(), name='list_crm_contacts'),
     path(r'books/estimate', EstimateView.as_view(), name='estimates'),
     path(r'books/contact', ContactView.as_view(), name='contacts'),
+    path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
 ] + router.urls
 
 

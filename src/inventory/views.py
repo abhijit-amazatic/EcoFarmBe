@@ -2,7 +2,9 @@
 Views for Inventory
 """
 from django.shortcuts import (render, )
+from rest_framework.views import APIView
 from rest_framework.response import (Response, )
+from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework import (viewsets, status,)
 from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
@@ -10,6 +12,7 @@ from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from .serializers import (InventorySerialier, LogoutInventorySerializer, )
 from .models import (Inventory, )
+from integration.inventory import (sync_inventory, )
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -55,10 +58,23 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         if not self.request.user.is_authenticated:
             return LogoutInventorySerializer
-        return InventorySerialier
+        return InventorySerialier(many=True)
     
     def get_queryset(self):
         """
         Return QuerySet.
         """
         return Inventory.objects.filter(cf_cfi_published=True)
+
+class InventorySyncView(APIView):
+    """
+    Real time inventory sync.
+    """
+    authentication_classes = (TokenAuthentication, )
+    
+    def post(self, request):
+        """
+        Post realtime inventory updates.
+        """
+        record = sync_inventory(request.data.get('JSONString'))
+        return Response(record)

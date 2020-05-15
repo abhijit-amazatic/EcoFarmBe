@@ -322,3 +322,12 @@ def get_records_from_crm(legal_business_name):
                 response[k] = r
             return response
     return {}
+
+def list_crm_contacts(contact_id=None):
+    """
+    Return contacts from Zoho CRM.
+    """
+    crm_obj = get_crm_obj()
+    if contact_id:
+        return crm_obj.get_record('Contacts', contact_id)
+    return crm_obj.get_records('Contacts')

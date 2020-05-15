@@ -3,7 +3,6 @@ Integration views
 """
 from django.http import (QueryDict, )
 from rest_framework import (status,)
-from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,7 +13,8 @@ from .models import Integration
 from integration.box import(get_box_tokens, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
-from integration.crm import (search_query, get_picklist)
+from integration.crm import (search_query, get_picklist,
+                             list_crm_contacts, )
 from integration.books import (create_contact, create_estimate,
                                get_estimate, list_estimates, 
                                get_contact, list_contacts, )
@@ -55,6 +55,21 @@ class GetPickListView(APIView):
         Get picklist.
         """
         return Response(get_picklist('Vendors', request.query_params['field']))
+
+class CRMContactView(APIView):
+    """
+    Get Contacts from Zoho CRM.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get contacts.
+        """
+        if request.query_params.get('contact_id'):
+            return Response(list_crm_contacts(request.query_params.get('contact_id')))
+        return Response(list_crm_contacts())
+
 
 class InventoryView(APIView):
     """
