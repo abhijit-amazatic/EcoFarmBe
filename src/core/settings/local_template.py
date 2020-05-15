@@ -99,6 +99,7 @@ BOOKS_ORGANIZATION_ID=''
 BOOKS_REDIRECT_URI=''
 BOOKS_REFRESH_TOKEN=''
 ESTIMATE_TAXES = {'Flower': 'Cultivation Tax - Flower (2020)', 'Trim': 'Cultivation Tax - Trim (2020)'}
+LICENSE_PARENT_FOLDER_ID='113146023153'
 
 #Slack config
 SLACK_TOKEN = ''

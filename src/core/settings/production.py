@@ -71,6 +71,7 @@ BOX_CLIENT_ID=os.environ.get('BOX_CLIENT_ID')
 BOX_CLIENT_SECRET=os.environ.get('BOX_CLIENT_SECRET')
 BOX_REFRESH_TOKEN=os.environ.get('BOX_REFRESH_TOKEN')
 BOX_ACCESS_TOKEN=os.environ.get('BOX_ACCESS_TOKEN')
+LICENSE_PARENT_FOLDER_ID=os.environ.get('LICENSE_PARENT_FOLDER_ID')
 
 #Zoho Inventory configuration
 INVENTORY_CLIENT_ID=os.environ.get('INVENTORY_CLIENT_ID')
