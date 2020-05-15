@@ -58,7 +58,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         if not self.request.user.is_authenticated:
             return LogoutInventorySerializer
-        return InventorySerialier(many=True)
+        return InventorySerialier
     
     def get_queryset(self):
         """
