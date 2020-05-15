@@ -8,27 +8,12 @@ from django.conf import settings
 from datetime import datetime
 from .models import (User, MemberCategory,)
 from vendor.models import (Vendor,VendorProfile,)
+from core.utility import send_async_user_approval_mail
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 from django.db import transaction
+from django.contrib import messages
 import nested_admin
-
-
-
-class VendorProfileForm(forms.ModelForm):
-
-    class Meta:
-        model = VendorProfile
-        fields = '__all__'
-
-    def clean(self):
-        if self.changed_data:
-            if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved':
-                vendor_obj = Vendor.objects.filter(id=self.instance.vendor.id)
-                if vendor_obj:
-                    ac_manager = vendor_obj[0].ac_manager.email
-                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
-                
        
 
 class MyUserChangeForm(UserChangeForm):
@@ -59,35 +44,20 @@ class MyUserChangeForm(UserChangeForm):
         # if self.cleaned_data.get('is_approved'):
         #     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
         #     return self.cleaned_data
-        
-
-class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):#
-    """
-    Configuring field admin view for VendorProfile model
-    """
-    extra = 0
-    model = VendorProfile
-    fk_name = 'vendor'
-    readonly_fields = ('vendor', 'profile_type','number_of_licenses','is_updated_in_crm','number_of_legal_entities','zoho_crm_id', 'is_draft', 'step',)
-    #form = VendorProfileForm
-
-        
-        
-class VendorInlineAdmin(nested_admin.NestedTabularInline):#(admin.StackedInline):
-    """
-    Configuring field admin view for vendor model
-    """
-    extra = 0
-    model = Vendor
-    verbose_name_plural = ('Vendors')
-    can_delete = False
-    inlines = [InlineVendorProfileAdmin]
+            
     
-    #list_display = ('ac_manager', 'vendor_category', )
-    #readonly_fields = ['vendor_category']
-    
-    
-      
+def approve_user(modeladmin, request, queryset):
+    """
+    Function for bulk user approval.
+    """
+    for user in queryset:
+        if not user.is_approved:
+            user.is_approved = True
+            user.save()
+            send_async_user_approval_mail.delay(user.id)
+                
+    messages.success(request,'Users Approved!')    
+approve_user.short_description = 'Approve Selected Users'      
         
 class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
 
@@ -98,6 +68,7 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     list_per_page = 25
     search_fields = ('username', 'legal_business_name', 'email',)
     readonly_fields = ['is_verified']
+    actions = [approve_user, ] 
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('is_approved','is_verified',)}),
     )     

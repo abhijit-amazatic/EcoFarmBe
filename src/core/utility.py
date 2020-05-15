@@ -250,3 +250,12 @@ def send_async_approval_mail(profile_id):
     if vendor_obj:
         ac_manager = vendor_obj[0].ac_manager.email
         mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+
+        
+@app.task(queue="general")        
+def send_async_user_approval_mail(user_id):
+    """
+    Async email send for after user approval.
+    """
+    user = User.objects.filter(id=user_id)    
+    mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", user[0].email)
