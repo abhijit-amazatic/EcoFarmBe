@@ -64,7 +64,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile = VendorProfile.objects.select_related('vendor').get(id=instance.id)
-        if profile.vendor.vendor_category == 'cultivator' and  validated_data.get('status') == 'completed':
+        if profile.vendor.vendor_category == 'cultivation' and  validated_data.get('status') == 'completed':
             try:
                 insert_vendors.delay(id=instance.id)
                 profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
@@ -132,7 +132,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         #if self.partial:
         if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-            if profile.vendor.vendor_category == 'cultivator':
+            if profile.vendor.vendor_category == 'cultivation':
                 profile_data = attrs.get('profile_contact_details')
                 if profile_data:
                     serializer = CultivatorFieldsSerializer(data=profile_data)
@@ -167,7 +167,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         When object is created add custom method here.
         """
         profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-        if profile.vendor.vendor_category == 'cultivator' and not validated_data.get('is_draft'):
+        if profile.vendor.vendor_category == 'cultivation' and not validated_data.get('is_draft'):
             self.create_and_notify_employee(profile,validated_data)
         else:
             pass #this is added for further conditions
@@ -180,7 +180,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-        if profile.vendor.vendor_category == 'cultivator' and not validated_data.get('is_draft'):
+        if profile.vendor.vendor_category == 'cultivation' and not validated_data.get('is_draft'):
             self.create_and_notify_employee(profile,validated_data)
         user = super().update(instance, validated_data)
         return user
@@ -222,7 +222,7 @@ class ProfileOverviewSerializer(serializers.ModelSerializer):
         """    
         if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-            if profile.vendor.vendor_category == 'cultivator':
+            if profile.vendor.vendor_category == 'cultivation':
                 profile_data = attrs.get('profile_overview')
                 if profile_data:
                     serializer = OverviewFieldsSerializer(data=profile_data)
@@ -266,7 +266,7 @@ class FinancialOverviewSerializer(serializers.ModelSerializer):
         """    
         if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-            if profile.vendor.vendor_category == 'cultivator':
+            if profile.vendor.vendor_category == 'cultivation':
                 profile_data = attrs.get('financial_details')
                 if profile_data:
                     serializer = FinanceFieldsSerializer(data=profile_data)
@@ -315,7 +315,7 @@ class ProcessingOverviewSerializer(serializers.ModelSerializer):
         """    
         if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-            if profile.vendor.vendor_category == 'cultivator':
+            if profile.vendor.vendor_category == 'cultivation':
                 profile_data = attrs.get('processing_config')
                 if profile_data:
                     serializer = ProcessingFieldsSerializer(data=profile_data)
@@ -347,7 +347,7 @@ class ProgramOverviewSerializer(serializers.ModelSerializer):
         """    
         if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-            if profile.vendor.vendor_category == 'cultivator':
+            if profile.vendor.vendor_category == 'cultivation':
                 profile_data = attrs.get('program_details')
                 if profile_data:
                     serializer = ProgramFieldsSerializer(data=profile_data)

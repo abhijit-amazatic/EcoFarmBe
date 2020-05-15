@@ -121,16 +121,16 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
     For existing user, to insert records to perticular vendor profile use this function.
     In order to store data of existing user from crm to our db few things needs to be 
     1.For existing user we need to create vendors as well as vendor profile for given vendor type e. cultivator
-    2.parameter could be vendor_type = ['cultivator','nursary']
+    2.parameter could be vendor_type = ['cultivation','nursary']
     3.data will be dict of multiple model fields
     """
     try:
         for vendor in vendor_type:
-            obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=vendor)
+            obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=NOUN_PROCESS_MAP.get(vendor))
             if not VendorUser.objects.filter(user_id=user.id, vendor=obj.id).exists():
                 VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='Owner')         
             vendor_user=VendorUser.objects.get(user_id=user.id,vendor=obj)
-            if vendor_user.role == 'Owner' and user.existing_member and vendor == "cultivator":
+            if vendor_user.role == 'Owner' and user.existing_member and vendor == "cultivation":
                 """
                 Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
                 are added with another role aling with this if added user is owner)
