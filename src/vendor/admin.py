@@ -146,8 +146,9 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     """
     extra = 0
     model = VendorProfile
-    readonly_fields = ('vendor', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities',)
+    readonly_fields = ('vendor', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities','created_on','updated_on')
     form = VendorProfileForm
+    can_delete = False    
     inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
     
 
@@ -172,11 +173,20 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendors
     """
+    def vendor_category(self, obj):
+        return obj.vendor.vendor_category
+
+    def ac_manager(self, obj):
+        return obj.vendor.ac_manager
+    
     #inlines = [InlineVendorProfileAdmin, InlineVendorUserAdmin,]
     extra = 0
     model = VendorProfile
-    #readonly_fields = ('ac_manager','vendor_category','created_on','updated_on')
-    #list_display = ('profile_name','ac_manager','vendor_category',)
+    list_display = ('profile_name','status','vendor_category','ac_manager','created_on','updated_on', )
+    list_select_related = ['vendor__ac_manager']
+    search_fields = ('profile_type','vendor__vendor_category','vendor__ac_manager')
+    readonly_fields = ('status',)
+  
     
 admin.site.register(Vendor,MyVendorAdmin)
-#admin.site.register(VendorProfile,MyVendorProfileAdmin)
+admin.site.register(VendorProfile,MyVendorProfileAdmin)

@@ -97,6 +97,18 @@ class VendorProfile(StatusFlagMixin,models.Model):
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     code = models.CharField(_('Vendor Code For Box'), max_length=100, blank=True, null=True)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
+    created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+
+    def profile_name(self):
+        """
+        Returns farm name/s.
+        """
+        vp = ProfileContact.objects.select_related('vendor_profile')
+        pc = vp.filter(vendor_profile_id=self.pk)
+        farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
+        return ",".join(farm_names) if farm_names else "N/A"
+
 
     def __str__(self):
         return self.vendor.vendor_category
