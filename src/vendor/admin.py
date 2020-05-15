@@ -11,6 +11,7 @@ from django_json_widget.widgets import JSONEditorWidget
 import nested_admin
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from user.models import (User, MemberCategory,)
+from django.contrib import messages
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 
@@ -181,7 +182,27 @@ class VendorProfileUpdatedForm(forms.ModelForm):
                     ac_manager = vendor_obj[0].ac_manager.email
                     mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
 
-                    
+
+def approve_vendor_profile(modeladmin, request, queryset):
+    """
+    Function for bulk profile approval.
+    """
+    for profile in queryset:
+        if profile.vendor.vendor_category == 'cultivation' and profile.status == 'approved':
+            print('in approved pass>>')
+            pass
+        elif profile.vendor.vendor_category == 'cultivation':
+            profile.status ='approved'
+            profile.save()
+            vendor_obj = Vendor.objects.filter(id=profile.vendor.id)
+            if vendor_obj:
+                ac_manager = vendor_obj[0].ac_manager.email
+                mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+                
+    messages.success(request,'Vendor Profiles Approved!')    
+approve_vendor_profile.short_description = 'Approve Selected Vendor Profiles'
+
+
 class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendor Profile
@@ -212,6 +233,7 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
     ordering = ('status','created_on','updated_on')
+    actions = [approve_vendor_profile, ] 
     list_per_page = 50
     
     
