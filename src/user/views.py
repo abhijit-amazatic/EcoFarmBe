@@ -20,7 +20,7 @@ from vendor.models import Vendor,VendorUser
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
-from core.utility import (get_from_crm_insert_to_vendorprofile,) 
+from core.utility import (get_from_crm_insert_to_vendorprofile,NOUN_PROCESS_MAP,) 
 from slacker import Slacker
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
@@ -94,7 +94,7 @@ class UserViewSet(ModelViewSet):
                     vendor_list = instance.categories.values_list('name', flat=True)
                     vendor_list_lower = [vendor.lower() for vendor in vendor_list]
                     if vendor_list_lower:
-                        Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=category) for category in vendor_list_lower])
+                        Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=NOUN_PROCESS_MAP[category]) for category in vendor_list_lower])
                         vendors = Vendor.objects.filter(ac_manager__email=instance.email)
                         VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])
                 else:

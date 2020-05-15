@@ -20,7 +20,11 @@ slack = Slacker(settings.SLACK_TOKEN)
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
-
+NOUN_PROCESS_MAP = {"cultivator":"cultivation","nursery":"nursery","manufacturer":"manufacturing",
+                    "distributor":"distribution","retailer":"retail","processor":"processing",
+                    "testing":"testing","event":"event","brand":"brand","hemp":"hemp",
+                    "ancillary products":"ancillary products","ancillary services":"ancillary services",
+                    "investor":"investment","patient":"patient","healthcare":"healthcare"}
 
 def pad(s):
     """
