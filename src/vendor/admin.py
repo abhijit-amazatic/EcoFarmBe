@@ -160,12 +160,23 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     extra = 0
     model = Vendor
     readonly_fields = ('ac_manager','vendor_category','created_on','updated_on')
-    list_display = ('vendor_category','profile_name','ac_manager',)
+    list_display = ('profile_name','ac_manager','vendor_category',)
     search_fields = ('ac_manager__email','vendor_category',)
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),
     )
     #list_per_page = 50
          
-            
+
+class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
+    """
+    Configuring Vendors
+    """
+    #inlines = [InlineVendorProfileAdmin, InlineVendorUserAdmin,]
+    extra = 0
+    model = VendorProfile
+    #readonly_fields = ('ac_manager','vendor_category','created_on','updated_on')
+    #list_display = ('profile_name','ac_manager','vendor_category',)
+    
 admin.site.register(Vendor,MyVendorAdmin)
+#admin.site.register(VendorProfile,MyVendorProfileAdmin)
