@@ -152,7 +152,6 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
     
 
-
 class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendors
@@ -168,6 +167,21 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     )
          
 
+class VendorProfileUpdatedForm(forms.ModelForm):
+
+    class Meta:
+        model = VendorProfile
+        fields = '__all__'
+
+    def clean(self):
+        if self.changed_data:
+            if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved' and self.instance.vendor.vendor_category == 'cultivation':
+                vendor_obj = Vendor.objects.filter(id=self.instance.vendor.id)
+                if vendor_obj:
+                    ac_manager = vendor_obj[0].ac_manager.email
+                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+
+                    
 class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendor Profile
@@ -177,21 +191,29 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
 
     def ac_manager(self, obj):
         return obj.vendor.ac_manager
+
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Default and custom search filter for farm names.
+        """
+        queryset, use_distinct = super(MyVendorProfileAdmin, self).get_search_results(request, queryset, search_term)
+        queryset |= self.model.objects.select_related('profile_contact').filter(profile_contact__profile_contact_details__contains={'farm_name':search_term})
+        return queryset, use_distinct
     
     inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
-    readonly_fields = ('vendor','vendor_id', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities','created_on','updated_on')
-    form = VendorProfileForm
+    form = VendorProfileUpdatedForm
     extra = 0
     model = VendorProfile
     list_display = ('profile_name','status','vendor_category','ac_manager','created_on','updated_on', )
     list_select_related = ['vendor__ac_manager']
     search_fields = ('profile_type','vendor__vendor_category','vendor__ac_manager__email','status')
+    readonly_fields = ('vendor','vendor_id', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities','created_on','updated_on', 'number_of_licenses')
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
-    ordering = ('created_on','updated_on','status',)
+    ordering = ('status','created_on','updated_on')
     list_per_page = 50
-  
     
-admin.site.register(Vendor,MyVendorAdmin)
+    
+#admin.site.register(Vendor,MyVendorAdmin)
 admin.site.register(VendorProfile,MyVendorProfileAdmin)

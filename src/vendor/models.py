@@ -110,7 +110,6 @@ class VendorProfile(StatusFlagMixin,models.Model):
         farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
         return ",".join(farm_names) if farm_names else "N/A"
 
-
     def __str__(self):
         return self.vendor.vendor_category
 
