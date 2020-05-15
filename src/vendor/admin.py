@@ -13,7 +13,7 @@ from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from user.models import (User, MemberCategory,)
 from django.contrib import messages
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
-from django.contrib.admin import ModelAdmin, SimpleListFilter
+from core.utility import send_async_approval_mail
 
 
 class VendorProfileForm(forms.ModelForm):
@@ -177,10 +177,7 @@ class VendorProfileUpdatedForm(forms.ModelForm):
     def clean(self):
         if self.changed_data:
             if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved' and self.instance.vendor.vendor_category == 'cultivation':
-                vendor_obj = Vendor.objects.filter(id=self.instance.vendor.id)
-                if vendor_obj:
-                    ac_manager = vendor_obj[0].ac_manager.email
-                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+                send_async_approval_mail(self.instance.vendor.id)
 
 
 def approve_vendor_profile(modeladmin, request, queryset):
@@ -189,15 +186,11 @@ def approve_vendor_profile(modeladmin, request, queryset):
     """
     for profile in queryset:
         if profile.vendor.vendor_category == 'cultivation' and profile.status == 'approved':
-            print('in approved pass>>')
             pass
         elif profile.vendor.vendor_category == 'cultivation':
             profile.status ='approved'
             profile.save()
-            vendor_obj = Vendor.objects.filter(id=profile.vendor.id)
-            if vendor_obj:
-                ac_manager = vendor_obj[0].ac_manager.email
-                mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+            send_async_approval_mail.delay(profile.vendor.id)
                 
     messages.success(request,'Vendor Profiles Approved!')    
 approve_vendor_profile.short_description = 'Approve Selected Vendor Profiles'
