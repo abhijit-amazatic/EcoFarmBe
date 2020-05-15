@@ -166,12 +166,11 @@ class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),
     )
-    #list_per_page = 50
          
 
 class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
-    Configuring Vendors
+    Configuring Vendor Profile
     """
     def vendor_category(self, obj):
         return obj.vendor.vendor_category
@@ -179,13 +178,19 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     def ac_manager(self, obj):
         return obj.vendor.ac_manager
     
-    #inlines = [InlineVendorProfileAdmin, InlineVendorUserAdmin,]
+    inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
+    readonly_fields = ('vendor','vendor_id', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities','created_on','updated_on')
+    form = VendorProfileForm
     extra = 0
     model = VendorProfile
     list_display = ('profile_name','status','vendor_category','ac_manager','created_on','updated_on', )
     list_select_related = ['vendor__ac_manager']
-    search_fields = ('profile_type','vendor__vendor_category','vendor__ac_manager')
-    readonly_fields = ('status',)
+    search_fields = ('profile_type','vendor__vendor_category','vendor__ac_manager__email','status')
+    list_filter = (
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
+    )
+    ordering = ('created_on','updated_on','status',)
+    list_per_page = 50
   
     
 admin.site.register(Vendor,MyVendorAdmin)

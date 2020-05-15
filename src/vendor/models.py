@@ -67,6 +67,7 @@ class Vendor(models.Model):
     class Meta:
         unique_together = (('ac_manager', 'vendor_category'), )
 
+
     
 class VendorUser(models.Model):
     """
@@ -113,6 +114,8 @@ class VendorProfile(StatusFlagMixin,models.Model):
     def __str__(self):
         return self.vendor.vendor_category
 
+    class Meta:
+        verbose_name = _('Vendors/Profile')
 
 class ProfileContact(models.Model):
     """
