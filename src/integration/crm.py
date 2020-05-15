@@ -2,11 +2,12 @@ import ast
 from pyzoho import CRM
 from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
-    PYZOHO_USER_IDENTIFIER)
+    PYZOHO_USER_IDENTIFIER,
+    LICENSE_PARENT_FOLDER_ID)
 from user.models import (User, )
 from vendor.models import (VendorProfile, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES)
-from .box import (get_shared_link, )
+from .box import (get_shared_link, move_file, create_folder)
 from core.celery import app
 
 def get_crm_obj():
@@ -212,6 +213,10 @@ def insert_vendors(id=None):
     for record in records:
         r = dict()
         r['db_id'] = record.id
+        try:
+            farm_name = record.profile_contact.profile_contact_details['farm_name']
+        except Exception:
+            continue
         if record.license_set.values():
             l = list()
             for i in record.license_set.values():
@@ -219,10 +224,11 @@ def insert_vendors(id=None):
                 licenses = get_licenses(i['legal_business_name'])
                 d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
                 d.update(i)
-                update_license(d)
+                update_license(farm_name, d)
                 l.extend(licenses)
             r.update({'licenses': l})
             r.update({'uploaded_sellers_permit_to': i['uploaded_sellers_permit_to']})
+            r.update({'uploaded_w9_to': i['uploaded_w9_to']})
         try:
             type_ = record.vendor.vendor_category
             if isinstance(type_, list):
@@ -236,6 +242,9 @@ def insert_vendors(id=None):
             if r.get('uploaded_sellers_permit_to'):
                 license_url = get_shared_link(r.get('uploaded_sellers_permit_to'))
                 r['Sellers_Permit'] = license_url
+            if r.get('uploaded_w9_to'):
+                license_url = get_shared_link(r.get('uploaded_w9_to'))
+                r['uploaded_w9_to'] = license_url
             data_list.append(r)
         except Exception:
             continue
@@ -269,18 +278,32 @@ def insert_vendors(id=None):
         return result
     return {}
 
-def update_license(license):
+def update_license(farm_name, license):
     """
     Update license with shareable link.
     """
     response = None
     data = list()
-    if license['uploaded_license_to']:
+    new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, farm_name)
+    if license.get('uploaded_license_to').isdigit():
+        moved_file = move_file(license['uploaded_license_to'], new_folder)
         license_url = get_shared_link(license['uploaded_license_to'])
         if license_url:
             license['uploaded_license_to'] = license_url
             data.append(license)
             response = update_records('Licenses', data)
+    # if license.get('uploaded_sellers_permit_to'):
+    #         documents = create_folder(new_folder, 'documents')
+    #         moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
+    #         license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
+    #         r['Sellers_Permit'] = license_url
+    # if license.get('uploaded_w9_to'):
+    #         documents = create_folder(new_folder, 'documents')
+    #         moved_file = move_file(license['uploaded_w9_to'], documents)
+    #         license_url = get_shared_link(license.get('uploaded_w9_to'))
+    #         r['uploaded_w9_to'] = license_url
+    # data.append(license)
+    # response = update_records('Licenses', data)
     return response
 
 @app.task(queue="general")

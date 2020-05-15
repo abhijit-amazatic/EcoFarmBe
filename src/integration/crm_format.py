@@ -71,6 +71,7 @@ CRM_FORMAT  = {
         "Number_of_Employees": "no_of_employees",
         "Licenses_List": "licenses",
         "Sellers_Permit_Box_Link": "Sellers_Permit",
+        "W9_Box_Link": "uploaded_w9_to",
         "Do_you_work_with_other_Distributors": "other_distributors",
         "Would_you_grow_genetics_suggested_by_Thrive": "interested_in_growing_genetics",
         "Can_you_Process_on_Site": "process_on_site",
@@ -112,6 +113,7 @@ CRM_FORMAT  = {
         "profile_contact": 
             {
             "farm_name": "Vendor_Name",
+            "vendor_type": "Vendor_Type",
             "about_farm": "About_Company",
             "primary_county": "County",
             "region": "Region",
@@ -185,6 +187,7 @@ CRM_FORMAT  = {
             "business_dba": "Business_DBA",
             "issue_date": "Issue_Date",
             "uploaded_license_to": "License_Box_Link",
+            "uploaded_w9_to": "W9_Box_Link",
             "premises_address": "Premises_Address",
             "premises_city": "Premises_City",
             "zip_code": "Premises_Zipcode",
@@ -196,5 +199,19 @@ CRM_FORMAT  = {
 }
 
 VENDOR_TYPES = {
-    "cultivator":"Cultivator",
-}
+    'cultivation': 'Cultivator',
+    'nursery': 'Nursery',
+    'manufacturing': 'Manufacturer',
+    'distribution': 'Distributor',
+    'retail': 'Retailer',
+    'processing': 'Processor',
+    'testing': 'Testing',
+    'event': 'Event',
+    'brand': 'Brand',
+    'hemp': 'Hemp',
+    'ancillary products': 'Ancillary Products',
+    'ancillary services': 'Ancillary Services',
+    'investment': 'Investor',
+    'patient': 'Patient',
+    'healthcare': 'Healthcare'
+    }

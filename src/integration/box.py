@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import Integration
 from boxsdk import (OAuth2, Client)
 from boxsdk.exception import (BoxOAuthException,
-    BoxException,)
+    BoxException, BoxAPIException)
 from core.settings import (
     REDIS_URL,
     BOX_CLIENT_ID,
@@ -15,6 +15,8 @@ def get_redis_obj():
     """
     Return redis object.
     """
+    import redis
+    
     return redis.from_url(REDIS_URL)
 
 def set_tokens(access_token, refresh_token):
@@ -25,9 +27,7 @@ def set_tokens(access_token, refresh_token):
     
     @param access_token: Access token to store.
     @param refresh_token: Refresh token to store.
-    """
-    import redis
-    
+    """    
     db = get_redis_obj()
     redis_value = json.dumps({'access_token': access_token, 'refresh_token': refresh_token})
     db.set("box_api_tokens", redis_value)
@@ -129,10 +129,15 @@ def create_folder(parent_folder_id, new_folder_name):
     @param new_folder_name: Name of new folder to create.
     @return folder_id.
     """
-    return get_folder_obj(
-        parent_folder_id).create_subfolder(
-            new_folder_name
-        ).id
+    try:
+        a = get_folder_obj(
+            parent_folder_id).create_subfolder(
+                new_folder_name
+            ).id
+        return a
+    except BoxException as exc:
+        if exc.context_info.get('conflicts'):
+            return exc.context_info.get('conflicts')[0]['id']
 
 def upload_file(folder_id, file_path):
     """
@@ -232,4 +237,13 @@ def get_shared_link(file_id):
     """
     client = get_box_client()
     return client.file(file_id).get_shared_link()
-    
+
+def move_file(file_id, destination_folder_id):
+    """
+    Move file into destination folder.
+    """
+    client = get_box_client()
+    file_to_move = client.file(file_id)
+    destination_folder = client.folder(destination_folder_id)
+    moved_file = file_to_move.move(destination_folder)
+    return moved_file
