@@ -161,7 +161,16 @@ CRM_FORMAT  = {
             "cultivars": "Cultivars",
             "harvest_1": "Harvest_1",
             "harvest_2": "Harvest_2",
-            "harvest_3": "Harvest_3"
+            "harvest_3": "Harvest_3",
+            "harvest_4": "Harvest_4",
+            "harvest_5": "Harvest_5",
+            "harvest_6": "Harvest_6",
+            "harvest_7": "Harvest_7",
+            "harvest_8": "Harvest_8",
+            "harvest_9": "Harvest_9",
+            "harvest_10": "Harvest_10",
+            "harvest_11": "Harvest_11",
+            "harvest_12": "Harvest_12",
             },
         "financial_details": {
             "annual_revenue_2019": "Yearly_Revenue",
