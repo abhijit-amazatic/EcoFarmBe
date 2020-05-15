@@ -13,6 +13,7 @@ class Integration(models.Model):
     refresh_token = models.CharField(_('Refresh Token'), max_length=255)
     access_expiry = models.DateTimeField(_('Access Expiry'), blank=True, null=True)
     refresh_expiry = models.DateTimeField(_('Refresh Expiry'), blank=True, null=True)
+    expiry_time = models.BigIntegerField(_('expiry_time_crm'), blank=True, null=True)
 
     def __str__(self):
         return self.name
