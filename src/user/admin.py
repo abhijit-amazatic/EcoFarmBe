@@ -46,7 +46,15 @@ class MyUserChangeForm(UserChangeForm):
         #     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
         #     return self.cleaned_data
             
-    
+def get_user_data(request):
+    """
+    return user info dict.
+    """
+    return {'id':request.user.id,
+            'email':request.user.email,
+            'first_name':request.user.first_name,
+            'last_name':request.user.last_name}
+
 def approve_user(modeladmin, request, queryset):
     """
     Function for bulk user approval.
@@ -54,17 +62,22 @@ def approve_user(modeladmin, request, queryset):
     for user in queryset:
         if not user.is_approved:
             user.is_approved = True
+            user.approved_on = timezone.now()
+            user.approved_by = get_user_data(request)
             user.save()
             send_async_user_approval_mail.delay(user.id)
                 
     messages.success(request,'Users Approved!')    
 approve_user.short_description = 'Approve Selected Users'      
-        
-class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
 
+class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
+    
+    def approved_by_member(self, obj):
+        return obj.approved_by.get('email',"N/A")
+    
     #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
-    list_display = ('email', 'is_approved', )
+    list_display = ('email', 'is_approved','approved_on','approved_by_member')
     list_filter = ('is_approved', 'is_verified')
     list_per_page = 25
     search_fields = ('username', 'legal_business_name', 'email',)
@@ -78,12 +91,8 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     def save_model(self, request, obj, form, change):
         if 'is_approved' in form.changed_data and obj.is_approved:
             mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", obj.email)
-            user_data = {'id':request.user.id,
-                         'email':request.user.email,
-                         'first_name':request.user.first_name,
-                         'last_name':request.user.last_name}
             obj.approved_on  = timezone.now()
-            obj.approved_by = user_data
+            obj.approved_by = get_user_data(request)
             obj.save()
         super().save_model(request, obj, form, change)
 
