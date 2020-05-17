@@ -6,6 +6,7 @@ from django.contrib.auth.models import (AbstractUser,)
 from django.utils.translation import ugettext_lazy as _
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, )
+from django.contrib.postgres.fields import (JSONField,)
 
 
 class User(StatusFlagMixin,AbstractUser):
@@ -49,6 +50,8 @@ class User(StatusFlagMixin,AbstractUser):
     is_updated_in_crm = models.BooleanField('Is Updated In CRM', default=False)
     profile_photo = models.CharField(
         _('Profile Photo Link'), blank=True, null=True, max_length=255)
+    approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
+    approved_by = JSONField(_('Approved by'), null=False, blank=False, default=dict)
     
    
     EMAIL_FIELD = 'email'
