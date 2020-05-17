@@ -22,7 +22,7 @@ class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
   
     extra = 0
     model = Account
-    #list_display = ()
+    list_display = ()
     #list_select_related = []
     #search_fields = ()
     #readonly_fields = ()

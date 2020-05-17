@@ -48,7 +48,7 @@ class AccountLicense(models.Model):
     """
     account = models.ForeignKey(
         Account,
-        verbose_name=_('Account'),
+        related_name='account_license',
         on_delete=models.CASCADE,
     )
     license_type = models.CharField(

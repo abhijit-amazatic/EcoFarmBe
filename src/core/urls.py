@@ -33,6 +33,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView)
 from inventory.views import (InventoryViewSet, InventorySyncView)
+from account.views import (AccountViewSet,AccountLicenseViewSet)
 
 
 router = SimpleRouter()
@@ -41,6 +42,8 @@ router.register(r'vendor', VendorViewSet, base_name="vendor")
 router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
+router.register(r'account', AccountViewSet, base_name="account")
+router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
