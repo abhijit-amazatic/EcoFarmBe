@@ -100,6 +100,8 @@ class VendorProfile(StatusFlagMixin,models.Model):
     is_draft = models.BooleanField(_('Is Draft'), default=False)
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
+    approved_by = JSONField(_('Approved by'), null=False, blank=False, default=dict)
 
     def profile_name(self):
         """

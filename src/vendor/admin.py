@@ -7,11 +7,13 @@ from django import forms
 from core.mailer import mail, mail_send
 from django.conf import settings
 from django.contrib.postgres import fields
+from django.db import transaction
 from django_json_widget.widgets import JSONEditorWidget
 import nested_admin
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from user.models import (User, MemberCategory,)
 from django.contrib import messages
+from django.utils import timezone
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
 from core.utility import send_async_approval_mail
 
@@ -174,11 +176,20 @@ class VendorProfileUpdatedForm(forms.ModelForm):
         model = VendorProfile
         fields = '__all__'
 
-    def clean(self):
-        if self.changed_data:
-            if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved' and self.instance.vendor.vendor_category == 'cultivation':
-                send_async_approval_mail(self.instance.vendor.id)
+    # def clean(self):
+    #     if self.changed_data:
+    #         if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved' and self.instance.vendor.vendor_category == 'cultivation':
+    #             send_async_approval_mail(self.instance.vendor.id)
 
+
+def get_user_data(request):
+    """
+    return user info dict.
+    """
+    return {'id':request.user.id,
+            'email':request.user.email,
+            'first_name':request.user.first_name,
+            'last_name':request.user.last_name}
 
 def approve_vendor_profile(modeladmin, request, queryset):
     """
@@ -189,6 +200,8 @@ def approve_vendor_profile(modeladmin, request, queryset):
             pass
         elif profile.vendor.vendor_category == 'cultivation':
             profile.status ='approved'
+            profile.approved_on  = timezone.now()
+            profile.approved_by = get_user_data(request)
             profile.save()
             send_async_approval_mail.delay(profile.vendor.id)
                 
@@ -200,6 +213,9 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
     Configuring Vendor Profile
     """
+    def approved_by_member(self, obj):
+        return obj.approved_by.get('email',"N/A")
+    
     def vendor_category(self, obj):
         return obj.vendor.vendor_category
 
@@ -218,16 +234,26 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     form = VendorProfileUpdatedForm
     extra = 0
     model = VendorProfile
-    list_display = ('profile_name','status','vendor_category','ac_manager','created_on','updated_on', )
+    list_display = ('profile_name','status','vendor_category','approved_on','approved_by_member','ac_manager','created_on','updated_on',)
     list_select_related = ['vendor__ac_manager']
     search_fields = ('profile_type','vendor__vendor_category','vendor__ac_manager__email','status')
-    readonly_fields = ('vendor','vendor_id', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities','created_on','updated_on', 'number_of_licenses')
+    readonly_fields = ('vendor','vendor_id', 'profile_type','is_updated_in_crm','zoho_crm_id', 'is_draft', 'step', 'number_of_legal_entities','created_on','updated_on', 'number_of_licenses','approved_on','approved_by',)
     list_filter = (
-        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),('approved_on',DateRangeFilter ),'status',
     )
-    ordering = ('status','created_on','updated_on')
+    ordering = ('status','approved_on','created_on','updated_on')
     actions = [approve_vendor_profile, ] 
     list_per_page = 50
+
+    @transaction.atomic
+    def save_model(self, request, obj, form, change):
+        if 'status' in form.changed_data and obj.status == 'approved' and obj.vendor.vendor_category == 'cultivation':
+            send_async_approval_mail(obj.vendor.id)
+            obj.approved_on  = timezone.now()
+            obj.approved_by = get_user_data(request)
+            obj.save()
+        super().save_model(request, obj, form, change)
+        
     
     
 #admin.site.register(Vendor,MyVendorAdmin)

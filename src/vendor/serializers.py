@@ -77,6 +77,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = VendorProfile
         fields = ('__all__')
+        read_only_fields = ['approved_on','approved_by']
 
         
 class ConfigEmployeeSerializer(serializers.Serializer):
