@@ -1,5 +1,5 @@
 """
-accounts related schemas defined here.
+Accounts related schemas defined here.
 """
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -10,40 +10,41 @@ from django.conf import settings
 from user.models import User
 
 
-
-class Account(models.Model):
+class Account(StatusFlagMixin,models.Model):
     """
-    Stores accounts initial details.
+    Stores accounts initial details.(STEP1)
     """
     CATEGORY_CULTIVATOR = 'cultivator'
     CATEGORY_DISTRIBUTOR = 'distributor'
-    CATEGORY_MANUFACTURE = 'manufacture'
+    CATEGORY_MANUFACTURER = 'manufacturer'
     CATEGORY_RETAILER = 'retailer'
     CATEGORY_CHOICES = (
         (CATEGORY_CULTIVATOR, _('Cultivator')),
         (CATEGORY_DISTRIBUTOR, _('Distributor')),
-        (CATEGORY_MANUFACTURE, _('Manufacture')),
+        (CATEGORY_MANUFACTURER, _('Manufacturer')),
         (CATEGORY_RETAILER, _('Retailer')),
     )
     account_name = models.CharField(
         _('Account Name'), blank=True, null=True, max_length=255)
     ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
                                    related_name='manages_accounts', null=True, blank=True, default=None, on_delete=models.CASCADE)
-    account_category = models.CharField(verbose_name=_('Vendor Category'),max_length=60, choices=CATEGORY_CHOICES)
+    account_category = models.CharField(verbose_name=_('Account Category'),max_length=60, choices=CATEGORY_CHOICES)
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
+    approved_by = JSONField(_('Approved by'), null=False, blank=False, default=dict)
 
     def __str__(self):
         return self.account_category
 
     class Meta:
-        unique_together = (('ac_manager', 'account_category'), )
+        verbose_name = _('Account',)
+        #unique_together = (('ac_manager', 'account_category'), )
 
 
-
-class License(models.Model):
+class AccountLicense(models.Model):
     """
-    Stores account's License details.
+    Stores account's License details.(STEP1)
     """
     account = models.ForeignKey(
         Account,
@@ -62,7 +63,6 @@ class License(models.Model):
         _('Expiration Date'), blank=True, null=True, default=None)
     issue_date = models.DateField(
         _('Issue Date'), blank=True, null=True, default=None)
-
     # Location
     premises_address = models.TextField()
     premises_county = models.CharField(
@@ -75,7 +75,6 @@ class License(models.Model):
         _('Premises APN'), blank=True, null=True, max_length=255)
     premises_state = models.CharField(
         _('Premises State'), blank=True, null=True, max_length=255)
-
     #uploads
     uploaded_license_to = models.CharField(
         _('Uploaded To'), blank=True, null=True, max_length=255)
@@ -83,6 +82,7 @@ class License(models.Model):
         _('Uploaded Sellers Permit To'), blank=True, null=True, max_length=255)
     uploaded_w9_to = models.CharField(
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
 
     def __str__(self):
         return self.legal_business_name
@@ -90,11 +90,11 @@ class License(models.Model):
 
 class AccountBasicProfile(models.Model):
     """
-    Stores account's License details.
+    Stores account's License details.(STEP2)
     """
-    account = models.ForeignKey(
+    account = models.OneToOneField(
         Account,
-        verbose_name=_('Account'),
+        related_name='account_profile',
         on_delete=models.CASCADE,
     )
     company_name = models.CharField(
@@ -103,14 +103,15 @@ class AccountBasicProfile(models.Model):
         _('Region'), blank=True, null=True, max_length=255)
     preferred_payment = models.CharField(
         _('Preferred Payment'), blank=True, null=True, max_length=255)
-    cultivars_of_interest = models.CharField(
-        _('Cultivars Of Interest'), blank=True, null=True, max_length=255)
-    ethics_and_certification = models.CharField(
-        _('Ethics & Certification'), blank=True, null=True, max_length=255)
-    product_of_interest = models.CharField(
-        _('Product Of Interest'), blank=True, null=True, max_length=255)
+    cultivars_of_interest = ArrayField(models.CharField(
+        max_length=255, blank=True),blank=True, null=True)
+    ethics_and_certification = ArrayField(models.CharField(
+        max_length=255, blank=True),blank=True, null=True)
+    product_of_interest = ArrayField(models.CharField(
+        max_length=255, blank=True),blank=True, null=True)
     provide_transport = models.CharField(
         _('Provide Transport'), blank=True, null=True, max_length=255)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
 
     def __str__(self):
         return self.company_name
@@ -118,18 +119,18 @@ class AccountBasicProfile(models.Model):
 
 class AccountContactInfo(models.Model):
     """
-    Stores account's License details.
+    Stores account's Contacts details.(STEP3)
     """
-    account = models.ForeignKey(
+    account = models.OneToOneField(
         Account,
-        verbose_name=_('Account'),
+        related_name='account_contact',
         on_delete=models.CASCADE,
     )
     company_phone = models.CharField(
         _('Company Phone'), blank=True, null=True, max_length=255)
     website = models.CharField(
         _('Website'), blank=True, null=True, max_length=255)
-    compony_email = models.CharField(
+    company_email = models.CharField(
         _('Compony Email'), blank=True, null=True, max_length=255)
     owner_name = models.CharField(
         _('Owner Name'), blank=True, null=True, max_length=255)
@@ -143,8 +144,7 @@ class AccountContactInfo(models.Model):
         _('Logistic Manager Email'), blank=True, null=True, max_length=255)
     logistic_manager_phone = models.CharField(
         _('Logistic Manager Phone'), blank=True, null=True, max_length=255)
-
-    Instagram = models.CharField(
+    instagram = models.CharField(
         _('Instagram'), blank=True, null=True, max_length=255)
     linked_in = models.CharField(
         _('Linked In'), blank=True, null=True, max_length=255)
@@ -152,7 +152,6 @@ class AccountContactInfo(models.Model):
         _('Twitter'), blank=True, null=True, max_length=255)
     facebook = models.CharField(
         _('facebook'), blank=True, null=True, max_length=255)
-
     # Billing and Mailing Addresses
     billing_compony_name = models.CharField(
         _('Billing Nompony Name'), blank=True, null=True, max_length=255)
@@ -166,6 +165,7 @@ class AccountContactInfo(models.Model):
         _('Billing Zip Code'), blank=True, null=True, max_length=255)
     billing_state = models.CharField(
         _('Billing Zip Code'), blank=True, null=True, max_length=255)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
 
     def __str__(self):
         return self.company_name
