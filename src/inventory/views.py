@@ -78,3 +78,14 @@ class InventorySyncView(APIView):
         """
         record = sync_inventory(request.data.get('JSONString'))
         return Response(record)
+
+class CultivarCategoryView(APIView):
+    """
+    Return distinct cultivar categroies.
+    """
+    def get(self, request):
+        """
+        Return QuerySet.
+        """
+        categories = Inventory.objects.values('cf_strain_name').distinct()
+        return Response([i['cf_strain_name'] for i in categories if i['cf_strain_name'] != None])

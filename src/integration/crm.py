@@ -6,9 +6,13 @@ from core.settings import (PYZOHO_CONFIG,
     LICENSE_PARENT_FOLDER_ID)
 from user.models import (User, )
 from vendor.models import (VendorProfile, )
-from .crm_format import (CRM_FORMAT, VENDOR_TYPES)
+from account.models import (Account, )
+from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
+                         ACCOUNT_TYPES)
 from .box import (get_shared_link, move_file, create_folder)
 from core.celery import app
+from .utils import (get_vendor_contacts, get_account_category,
+                    get_cultivars, )
 
 def get_crm_obj():
     """
@@ -54,80 +58,86 @@ def get_vendor_types(vendor_type, reverse=False):
                 response.append(type_)
     return response
 
-def parse_fields(key, value, obj, crm_obj):
-    """
-    Parse fields
-    """
-    def get_dict(cd, i):
+def get_dict(cd, i):
         user = dict()
         for k,v in cd.items():
             user[k] = i.get(v)
         user = create_records('Contacts', [user])
         if user['status_code'] in (201, 202):
+            return user['response']['data'][0]['details']['id']  
+
+def create_employees(key, value, obj, crm_obj):
+    """
+    Create contacts in Zoho CRM.
+    """
+    user = None
+    d = obj.get(value)
+    cd = {
+        'last_name': 'employee_name',
+        'email': 'employee_email',
+        'phone': 'phone',
+    }
+    try:
+        for i in d:
+            if 'Cultivation Manager' in i['roles'] and key == 'Contact_1':
+                user = get_dict(cd, i)
+            elif 'Logistics Manager' in i['roles'] and key == 'Contact_2':
+                user = get_dict(cd, i)
+            elif 'Q&A Manager' in i['roles'] and key == 'Contact_3':
+                user = get_dict(cd, i)
+            elif 'Owner' in i['roles'] and key == 'Owner1':
+                user = get_dict(cd, i)
+        return user
+    except IndexError:
+        return []
+
+def parse_fields(key, value, obj, crm_obj):
+    """
+    Parse fields
+    """
+    def create_or_get_user(last_name, email):
+        data = {}
+        data['last_name'] = last_name
+        data['email'] = email
+        user = create_records('Contacts', [data])
+        if user['status_code'] in (201, 202):
             return user['response']['data'][0]['details']['id']
-        
+    
+    cultivator_type_data = [
+        "outdoor.canopy_sqf",
+        "indoor.canopy_sqf",
+        "mixed_light.canopy_sqf",
+        "mixed_light.no_of_harvest",
+        "indoor.no_of_harvest",
+        "outdoor.no_of_harvest",
+        "mixed_light.plants_per_cycle",
+        "outdoor.plants_per_cycle",
+        "indoor.plants_per_cycle"]
     if value in ('ethics_and_certifications'):
         return ast.literal_eval(obj.get(value))
     if value.startswith('cultivars_'):
-        try:
-            c = value.split('_')
-            d = obj.get(c[0])
-            if d:
-                return d[int(c[1])-1]['harvest_date']
-        except Exception:
-            return []
+        return get_cultivars(key, value, obj, crm_obj)
     if value.startswith('employees'):
-        user = None
-        d = obj.get(value)
-        cd = {
-            'last_name': 'employee_name',
-            'email': 'employee_email',
-            'phone': 'phone',
-        }
-        try:
-            for i in d:
-                if 'Cultivation Manager' in i['roles'] and key == 'Contact_1':
-                    user = get_dict(cd, i)
-                elif 'Logistics Manager' in i['roles'] and key == 'Contact_2':
-                    user = get_dict(cd, i)
-                elif 'Q&A Manager' in i['roles'] and key == 'Contact_3':
-                    user = get_dict(cd, i)
-                elif 'Owner' in i['roles'] and key == 'Owner1':
-                    user = get_dict(cd, i)
-            return user
-        except IndexError:
-            return []
+        return create_employees(key, value, obj, crm_obj)
     if value == 'vendor_type':
         return get_vendor_types(obj.get(value))
     if value.startswith('Contact'):
-        contacts = {
-            'Contact_1': 'Cultivation Manager',
-            'Contact_2': 'Logistics Manager',
-            'Contact_3': 'Q&A Manager',
-            'Owner1': 'Owner'
-        }
-        response = dict()
-        result = dict()
-        for contact, position in contacts.items():
-            c = obj.get(contact)
-            if not c:
-                continue
-            if c['id'] in result.keys():
-                final = result.get(c['id'])
-            else:
-                final = crm_obj.get_record('Contacts', c['id'])
-                result[c['id']] = final
-            if final['status_code'] == 200:
-                final = {
-                    'employee_name': c['name'],
-                    'employee_email': final['response'][c['id']]['Email'],
-                    'phone': final['response'][c['id']]['Phone']
-                }
-                response[position] = final
-        return response
+        return get_vendor_contacts(key, value, obj, crm_obj)
     if value.startswith('layout'):
-        return "4230236000000399745"
-        
+        return "4226315000000705743"
+    if value.startswith('account_category'):
+        return get_account_category(key, value, obj, crm_obj)
+    if value.startswith('logistic_manager_email'):
+        return create_or_get_user(obj.get('logistic_manager_name'), obj.get(value))
+    if value.startswith('Cultivars'):
+        return obj.get(value).split(', ')
+    if value in cultivator_type_data:
+        v = value.split('.')
+        data = obj.get(v[0])
+        if data:
+            return data.get(v[1])
+        return None
+    
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
     crm_obj = get_crm_obj()
@@ -135,16 +145,16 @@ def create_records(module, records, is_return_orginal_data=False):
     if isinstance(records, dict):
         records = [records]
     for record in records:
-        contact_dict = dict()
+        record_dict = dict()
         crm_dict = get_format_dict(module)
         for k,v in crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
                 v = parse_fields(k, v, record, crm_obj)
-                contact_dict[k] = v
+                record_dict[k] = v
             else:
-                contact_dict[k] = record.get(v)
-        request.append(contact_dict)
+                record_dict[k] = record.get(v)
+        request.append(record_dict)
     response = crm_obj.insert_records(module, request, is_return_orginal_data)
     return response
 
@@ -227,8 +237,6 @@ def insert_vendors(id=None):
                 update_license(farm_name, d)
                 l.extend(licenses)
             r.update({'licenses': l})
-            r.update({'uploaded_sellers_permit_to': i['uploaded_sellers_permit_to']})
-            r.update({'uploaded_w9_to': i['uploaded_w9_to']})
         try:
             type_ = record.vendor.vendor_category
             if isinstance(type_, list):
@@ -239,12 +247,6 @@ def insert_vendors(id=None):
             r.update(record.profile_overview.profile_overview)
             r.update(record.financial_overview.financial_details)
             r.update(record.processing_overview.processing_config)
-            if r.get('uploaded_sellers_permit_to'):
-                license_url = get_shared_link(r.get('uploaded_sellers_permit_to'))
-                r['Sellers_Permit'] = license_url
-            if r.get('uploaded_w9_to'):
-                license_url = get_shared_link(r.get('uploaded_w9_to'))
-                r['uploaded_w9_to'] = license_url
             data_list.append(r)
         except Exception:
             continue
@@ -290,20 +292,18 @@ def update_license(farm_name, license):
         license_url = get_shared_link(license['uploaded_license_to'])
         if license_url:
             license['uploaded_license_to'] = license_url
-            data.append(license)
-            response = update_records('Licenses', data)
-    # if license.get('uploaded_sellers_permit_to'):
-    #         documents = create_folder(new_folder, 'documents')
-    #         moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
-    #         license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
-    #         r['Sellers_Permit'] = license_url
-    # if license.get('uploaded_w9_to'):
-    #         documents = create_folder(new_folder, 'documents')
-    #         moved_file = move_file(license['uploaded_w9_to'], documents)
-    #         license_url = get_shared_link(license.get('uploaded_w9_to'))
-    #         r['uploaded_w9_to'] = license_url
-    # data.append(license)
-    # response = update_records('Licenses', data)
+    if license.get('uploaded_sellers_permit_to'):
+            documents = create_folder(new_folder, 'documents')
+            moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
+            license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
+            license['uploaded_sellers_permit_to'] = license_url
+    if license.get('uploaded_w9_to'):
+            documents = create_folder(new_folder, 'documents')
+            moved_file = move_file(license['uploaded_w9_to'], documents)
+            license_url = get_shared_link(license.get('uploaded_w9_to'))
+            license['uploaded_w9_to'] = license_url
+    data.append(license)
+    response = update_records('Licenses', data)
     return response
 
 @app.task(queue="general")
@@ -354,3 +354,93 @@ def list_crm_contacts(contact_id=None):
     if contact_id:
         return crm_obj.get_record('Contacts', contact_id)
     return crm_obj.get_records('Contacts')
+
+@app.task(queue="general")
+def insert_accounts(account_id=None):
+    """
+    Insert new accounts in Zoho CRM.
+    """
+    response = dict()
+    request = list()
+    if account_id:
+        records = Account.objects.filter(id=account_id).select_related()
+    else:
+        records = Account.objects.filter(is_updated_in_crm=False).select_related()
+    for record in records:
+        try:
+            req = dict()
+            l = list()
+            req.update(record.__dict__)
+            req.update(record.account_profile.__dict__)
+            req.update(record.account_contact.__dict__)
+            licenses = record.account_license.all().values()
+            for i in licenses:
+                d = dict()
+                license = get_licenses(i['legal_business_name'])
+                d.update({'license_id':license[0]['id'], 'Owner':license[0]['Owner']['id']})
+                d.update(i)
+                update_license(req['company_name'], d)
+                l.extend(license)
+            req.update({'licenses': l})
+        except Exception:
+            continue
+        request.append(req)
+    if len(request) > 0:
+        result = create_records('Accounts', request, is_return_orginal_data=True)
+        if result['status_code'] == 201:
+            record_response = result['response']['response']['data']
+            for i, record in enumerate(request):
+                try:
+                    record_obj = Account.objects.get(id=record['id'])
+                    record_obj.zoho_crm_id = record_response[i]['details']['id']
+                    record_obj.is_updated_in_crm = True
+                    record_obj.save()
+                except KeyError:
+                    continue
+                if (result['response']['orignal_data'][i].get('Licenses')):
+                    data = dict()
+                    data['Licenses_Module'] = record_response[i]['details']['id']
+                    for license in result['response']['orignal_data'][i]['Licenses']:
+                        data['Licenses'] = license
+                        r = create_records('Accounts_X_Licenses', [data])
+            return result
+    return {}
+
+@app.task(queue="general")
+def get_accounts_from_crm(legal_business_name):
+    """
+    Fetch existing accounts from Zoho CRM.
+    """
+    licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
+    if licenses['status_code'] == 200 and len(licenses['response']) > 0:
+        account = search_query('Accounts_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
+        if account['status_code'] != 200:
+            return {}
+        crm_obj = get_crm_obj()
+        account = account['response'][0]['Licenses_Module']
+        account_record = crm_obj.get_record('Accounts', account['id'])
+        if account_record['status_code'] == 200:
+            account = account_record['response'][account['id']]
+            licenses = licenses['response']
+            crm_dict = get_format_dict('Licenses_To_DB')
+            li = list()
+            for license in licenses:
+                r = dict()
+                for k, v in crm_dict.items():
+                    r[k] = license.get(v)
+                li.append(r)
+            crm_dict = get_format_dict('Accounts_To_DB')
+            response = dict()
+            response['licenses'] = li
+            for k,v in crm_dict.items():
+                r = dict()
+                for key,value in v.items():
+                    if value.endswith('_parse'):
+                        value = value.split('_parse')[0]
+                        value = parse_fields(key, value, account, crm_obj)
+                        r[key] = value
+                    else:
+                        r[key] = account.get(value)
+                response[k] = r
+            return response
+    return {}
