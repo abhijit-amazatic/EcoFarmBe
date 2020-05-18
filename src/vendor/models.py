@@ -205,15 +205,15 @@ class ProgramOverview(models.Model):
     is_draft = models.BooleanField(_('Is Draft'), default=False)
     
        
-# class VendorCategory(models.Model):
-#     """
-#     Class implementing  Vendor a categories.
-#     """
-#     name = models.CharField(max_length=255)
+class VendorCategory(models.Model):
+    """
+    Class implementing  Vendor a categories.
+    """
+    name = models.CharField(max_length=255)
 
-#     def __str__(self):
-#         return self.name
+    def __str__(self):
+        return self.name
     
-#     class Meta:
-#         verbose_name = _('Vendor Category')
-#         verbose_name_plural = _('Vendor Categories')
+    class Meta:
+        verbose_name = _('Vendor Category')
+        verbose_name_plural = _('Vendor Categories')

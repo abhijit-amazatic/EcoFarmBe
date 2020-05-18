@@ -14,7 +14,7 @@ from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from user.models import (User, MemberCategory,)
 from django.contrib import messages
 from django.utils import timezone
-from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License)
+from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License,VendorCategory, )
 from core.utility import send_async_approval_mail
 
 
@@ -255,6 +255,13 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         
     
-    
+
+class VendorCategoryAdmin(admin.ModelAdmin):
+    """
+    VendorAdmin
+    """
+    #search_fields = ('',)
+        
 #admin.site.register(Vendor,MyVendorAdmin)
 admin.site.register(VendorProfile,MyVendorProfileAdmin)
+admin.site.register(VendorCategory, VendorCategoryAdmin)  

@@ -25,13 +25,10 @@ from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,VerificationView,)
-from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet)
-from integration.views import (GetBoxTokensView, InventoryView,
-                               SearchCultivars,)
-from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet,)
+from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
-                               ContactView, CRMContactView)
+                               ContactView, CRMContactView,SearchCultivars,) 
 from inventory.views import (InventoryViewSet, InventorySyncView)
 from account.views import (AccountViewSet,AccountLicenseViewSet)
 
@@ -56,6 +53,7 @@ urlpatterns = [
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
     path(r'category/', CategoryView.as_view(), name='category'),
+    path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
     path(r'inventory/item', InventoryView.as_view(), name='inventory'),

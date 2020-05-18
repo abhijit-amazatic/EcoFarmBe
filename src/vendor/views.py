@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
     VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, ProcessingOverviewSerializer, LicenseSerializer, ProgramOverviewSerializer)
-from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License, ProgramOverview, VendorUser)
+from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License, ProgramOverview, VendorUser, VendorCategory,)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -227,3 +227,16 @@ class LicenseViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+class VendorCategoryView(APIView):
+
+    """
+    Get  VendorCategories information.
+    """
+    permission_classes = (permissions.AllowAny,)
+    
+    def get(self, request):
+        """
+        Display categories.    
+        """
+        queryset = VendorCategory.objects.values('id','name')
+        return Response(queryset)

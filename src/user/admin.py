@@ -104,9 +104,10 @@ class MemberCategoryAdmin(admin.ModelAdmin):
     """
     #search_fields = ('',)
 
+    
 #admin.site.unregister(User)
 admin.site.register(User, MyUserAdmin)
-admin.site.register(MemberCategory, MemberCategoryAdmin)  
+admin.site.register(MemberCategory, MemberCategoryAdmin)
     
         
 # class UserForm(forms.ModelForm):
