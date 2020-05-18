@@ -61,7 +61,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             try:
                 return Response(serializer(
-                    getattr(vendor_profile, extra_info_attribute)).data)
+                    getattr(account, extra_info_attribute)).data)
             except model.DoesNotExist:
                 return Response({})
         else:
@@ -75,20 +75,20 @@ class AccountViewSet(viewsets.ModelViewSet):
             ser.save(account=account)
             return Response(ser.data)
 
-    @action(detail=True, url_path=basic_profile_path, methods=['get', 'post', 'delete', 'patch'])
+    @action(detail=True, url_path=basic_profile_path, methods=['get','patch'])
     def basic_profile(self, request, pk,basic_profile_id=None):
         """
         Detail route CRUD operations on basic_profile.
         """
-        return self.extra_info(request, pk, AccountBasicProfile,AccountBasicProfileSerializer, 'basic_profile')
+        return self.extra_info(request, pk, AccountBasicProfile,AccountBasicProfileSerializer, 'account_profile')
         
 
-    @action(detail=True, url_path=contact_info_path, methods=['get', 'post', 'delete', 'patch'])
+    @action(detail=True, url_path=contact_info_path, methods=['get','patch'])
     def contact_info(self, request, pk,contact_info_id=None):
         """
         Detail route CRUD operations on contact_info.
         """
-        return self.extra_info(request, pk, AccountContactInfo, AccountContactInfoSerializer, 'contact_info')
+        return self.extra_info(request, pk, AccountContactInfo, AccountContactInfoSerializer, 'account_contact')
 
     
 class AccountLicenseViewSet(viewsets.ModelViewSet):
@@ -107,7 +107,7 @@ class AccountLicenseViewSet(viewsets.ModelViewSet):
         """
         licenses = AccountLicense.objects.filter()
         if self.action == "list":
-            licenses = licenses.select_related('account_license')
+            licenses = licenses.select_related('account')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
             licenses = licenses.filter(account__ac_manager=self.request.user)
         return licenses

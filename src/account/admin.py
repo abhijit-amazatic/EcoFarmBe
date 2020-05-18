@@ -22,13 +22,13 @@ class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
   
     extra = 0
     model = Account
-    list_display = ()
+    #list_display = ()
     #list_select_related = []
     #search_fields = ()
     #readonly_fields = ()
-    ordering = ('status','approved_on','created_on','updated_on')
+    #ordering = ('status','approved_on','created_on','updated_on')
     list_per_page = 50
 
 
-admin.site.register(Account,MyAccountAdmin)
+#admin.site.register(Account,MyAccountAdmin)
 

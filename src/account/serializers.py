@@ -20,6 +20,7 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ('__all__')
+        read_only_fields = ['approved_on','approved_by']
 
 class AccountCreateSerializer(serializers.ModelSerializer):
     """
@@ -38,6 +39,7 @@ class AccountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ('__all__')
+        read_only_fields = ['approved_on','approved_by']
 
 class AccountLicenseSerializer(serializers.ModelSerializer):
     """
@@ -49,7 +51,7 @@ class AccountLicenseSerializer(serializers.ModelSerializer):
         Object level validation.Normal user should allowed to upload license related to his Account.
         """
         if self.context['request'].method == 'POST':
-            accounts = Account.objects.filter(account__ac_manager=self.context['request'].user)
+            accounts = Account.objects.filter(ac_manager=self.context['request'].user)
             if obj['account'] not in accounts and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
                 raise serializers.ValidationError(
                     "You can only add/update license related to your Account only!")            
