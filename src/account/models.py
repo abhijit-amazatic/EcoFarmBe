@@ -99,6 +99,7 @@ class AccountBasicProfile(models.Model):
     )
     company_name = models.CharField(
         _('Company Name'), blank=True, null=True, max_length=255)
+    about_company = models.TextField(null=True, blank=True) 
     region = models.CharField(
         _('Region'), blank=True, null=True, max_length=255)
     preferred_payment = models.CharField(
