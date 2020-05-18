@@ -200,16 +200,10 @@ class OverviewFieldsSerializer(serializers.Serializer):
     interested_in_growing_genetics = serializers.CharField(required=True)
     issues_with_failed_lab_tests = serializers.CharField(required=True)
     lab_test_issues = serializers.CharField(required=False, allow_blank=True)
-    plants_cultivate_per_cycle = serializers.IntegerField(required=True)
-    annual_untrimmed_yield = serializers.IntegerField(required=True)
-    indoor_sqf = serializers.IntegerField(required=False)
-    outdoor_sqf = serializers.IntegerField(required=False)
-    mixed_light_no_of_harvest = serializers.IntegerField(required=False)
-    indoor_no_of_harvest = serializers.IntegerField(required=False)
-    outdoor_no_of_harvest = serializers.IntegerField(required=False)
-    mixed_light_sqf = serializers.IntegerField(required=False)
+    mixed_light = serializers.DictField(required=False, allow_empty=True)
+    outdoor = serializers.DictField(required=False, allow_empty=True) 
+    indoor = serializers.DictField(required=False, allow_empty=True)
     
-
     
 class ProfileOverviewSerializer(serializers.ModelSerializer):
     """
