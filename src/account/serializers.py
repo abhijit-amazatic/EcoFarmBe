@@ -6,6 +6,7 @@ import requests
 from django.conf import settings
 from rest_framework import serializers
 from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo, )
+from core.utility import (notify_admins_on_accounts_registration,)
 from user.models import User
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -16,6 +17,15 @@ class AccountSerializer(serializers.ModelSerializer):
         if self.partial:
             pass
         return data
+
+    def update(self, instance, validated_data):
+        if validated_data.get('status') == 'completed':
+            try:
+                notify_admins_on_accounts_registration(instance.ac_manage.email,instance.account_profile.company_name)
+            except Exception as e:
+                print(e)
+        user = super().update(instance, validated_data)
+        return user
         
     class Meta:
         model = Account

@@ -74,7 +74,14 @@ def notify_admins_on_profile_registration(email,farm):
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
     mail_send("farm-register.html",{'link': farm,'mail':email},"Vendor Profile registration.", recipient_list=settings.ADMIN_EMAIL)
     
-
+def notify_admins_on_accounts_registration(email,company):
+    """
+    Notify admins on slack & email about new Accounts registration.
+    """
+    msg = "<!channel>New Account is registered with us with the company name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!" % (farm, email)
+    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
+    mail_send("account-register.html",{'link': company,'mail':email},"New Account profile registration.", recipient_list=settings.ADMIN_EMAIL)
+    
 def notify_farm_user(recipient_email,farm):
     """
      Notify farm user.
@@ -241,6 +248,16 @@ def send_async_approval_mail(profile_id):
         ac_manager = vendor_obj[0].ac_manager.email
         mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
 
+
+@app.task(queue="general")
+def send_async_account_approval_mail(account_id):
+    """
+    Async email send for after account approval.
+    """
+    account_obj = Account.objects.filter(id=account_id)
+    if account_obj:
+        ac_manager = account_obj[0].ac_manager.email
+        mail_send("account-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Profile Approved.", ac_manager)
         
 @app.task(queue="general")        
 def send_async_user_approval_mail(user_id):

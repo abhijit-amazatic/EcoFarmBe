@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.utils import timezone
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo, )
+from core.utility import (send_async_account_approval_mail,)
 
 
 class InlineAccountLicenseAdmin(admin.StackedInline):
@@ -38,6 +39,32 @@ class InlineAccountContactInfoAdmin(admin.StackedInline):
     """
     extra = 0
     model = AccountContactInfo
+    
+def approve_accounts(modeladmin, request, queryset):
+    """
+    Function for bulk accounts approval.
+    """
+    for account in queryset:
+        if account.status == 'approved':
+            pass #can add custom logic here in future.
+        else:
+            account.status ='approved'
+            account.approved_on  = timezone.now()
+            account.approved_by = get_user_data(request)
+            account.save()
+            send_async_account_approval_mail.delay(account.id)
+                
+    messages.success(request,'Accounts Approved!')    
+approve_accounts.short_description = 'Approve Selected Accounts'
+
+def get_user_data(request):
+    """
+    return user info dict.
+    """
+    return {'id':request.user.id,
+            'email':request.user.email,
+            'first_name':request.user.first_name,
+            'last_name':request.user.last_name}
 
 
 class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
@@ -63,6 +90,16 @@ class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
         ('created_on', DateRangeFilter),('approved_on',DateRangeFilter ),'status',
     )
     ordering = ('status','approved_on','created_on',)
+    actions = [approve_accounts, ] 
+
+    @transaction.atomic
+    def save_model(self, request, obj, form, change):
+        if 'status' in form.changed_data and obj.status == 'approved':
+            send_async_account_approval_mail(obj.id)
+            obj.approved_on  = timezone.now()
+            obj.approved_by = get_user_data(request)
+            obj.save()
+        super().save_model(request, obj, form, change)
 
     
     
