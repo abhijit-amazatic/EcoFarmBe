@@ -80,7 +80,7 @@ def notify_admins_on_accounts_registration(email,company):
     Notify admins on slack & email about new Accounts registration.
     """
     msg = "<!channel>New Account is registered with us with the company name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!" % (company, email)
-    #slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
+    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
     mail_send("account-register.html",{'link':company,'mail':email},"New Account profile registration.", recipient_list=settings.ADMIN_EMAIL)
     
 def notify_farm_user(recipient_email,farm):
