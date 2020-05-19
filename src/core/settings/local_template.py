@@ -44,10 +44,10 @@ GOOGLE_AUTH = {
 }
 
 #rest-social-auth settings
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile', 'https://www.googleapis.com/auth/gmail.readonly']
-REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'https://localhost:8000/api/login/social/knox/'
+# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile', 'https://www.googleapis.com/auth/gmail.readonly']
+# REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'https://localhost:8000/api/login/social/knox/'
 
 #For persistence handler class.
 #import os

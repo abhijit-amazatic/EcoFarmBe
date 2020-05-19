@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'user',
     'vendor',
     'account',
-    'rest_social_auth',
+    #'rest_social_auth',
     'sslserver',
-    'social_django',
+    #'social_django',
     'integration',
     'rest_framework.authtoken',
     'nested_admin',
@@ -159,7 +159,7 @@ CELERY_TIMEZONE = TIME_ZONE
 
 #rest-social-auth settings.You can add auth for FB, Github etc.
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
+    #'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
