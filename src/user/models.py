@@ -51,7 +51,7 @@ class User(StatusFlagMixin,AbstractUser):
     profile_photo = models.CharField(
         _('Profile Photo Link'), blank=True, null=True, max_length=255)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
-    approved_by = JSONField(_('Approved by'), null=False, blank=False, default=dict)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     
    
     EMAIL_FIELD = 'email'

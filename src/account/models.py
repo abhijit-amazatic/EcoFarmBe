@@ -32,7 +32,7 @@ class Account(StatusFlagMixin,models.Model):
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
-    approved_by = JSONField(_('Approved by'), null=False, blank=False, default=dict)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
 
     def __str__(self):
         return self.account_category
@@ -84,8 +84,8 @@ class AccountLicense(models.Model):
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
-    def __str__(self):
-        return self.legal_business_name
+    # def __str__(self):
+    #     return self.legal_business_name
 
 
 class AccountBasicProfile(models.Model):
@@ -114,8 +114,8 @@ class AccountBasicProfile(models.Model):
         _('Provide Transport'), blank=True, null=True, max_length=255)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
-    def __str__(self):
-        return self.company_name
+    # def __str__(self):
+    #     return self.company_name 
 
 
 class AccountContactInfo(models.Model):
@@ -154,9 +154,9 @@ class AccountContactInfo(models.Model):
     facebook = models.CharField(
         _('facebook'), blank=True, null=True, max_length=255)
     # Billing and Mailing Addresses
-    billing_address = JSONField(null=False, blank=False, default=dict)
-    mailing_address = JSONField(null=False, blank=False, default=dict)
+    billing_address = JSONField(null=True, blank=True, default=dict)
+    mailing_address = JSONField(null=True, blank=True, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
-    def __str__(self):
-        return self.company_name
+    # def __str__(self):
+    #     return self.website
