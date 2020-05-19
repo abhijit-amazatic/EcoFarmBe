@@ -154,18 +154,8 @@ class AccountContactInfo(models.Model):
     facebook = models.CharField(
         _('facebook'), blank=True, null=True, max_length=255)
     # Billing and Mailing Addresses
-    billing_compony_name = models.CharField(
-        _('Billing Nompony Name'), blank=True, null=True, max_length=255)
-    billing_street = models.CharField(
-        _('Billing Street'), blank=True, null=True, max_length=255)
-    billing_street_line_2 = models.CharField(
-        _('Billing Street Line 2'), blank=True, null=True, max_length=255)
-    billing_city = models.CharField(
-        _('Billing City'), blank=True, null=True, max_length=255)
-    billing_zip_code = models.CharField(
-        _('Billing Zip Code'), blank=True, null=True, max_length=255)
-    billing_state = models.CharField(
-        _('Billing Zip Code'), blank=True, null=True, max_length=255)
+    billing_address = JSONField(null=False, blank=False, default=dict)
+    mailing_address = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
     def __str__(self):

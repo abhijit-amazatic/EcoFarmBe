@@ -191,15 +191,9 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                     "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics'),
                                     "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests'),
                                     "lab_test_issues":data.get('profile_overview').get('lab_test_issues'),
-                                    "plants_cultivate_per_cycle":data.get('profile_overview').get('plants_cultivate_per_cycle',0),
-                                    "annual_untrimmed_yield":data.get('profile_overview').get('annual_untrimmed_yield',0),
-                                    "no_of_harvest":data.get('profile_overview').get('no_of_harvest',0),
-                                    "indoor_sqf":data.get('profile_overview').get('indoor_sqf',0),
-                                    "outdoor_sqf":data.get('profile_overview').get('outdoor_sqf',0),
-                                    "mixed_light_no_of_harvest":data.get('profile_overview').get('mixed_light_no_of_harvest',0),
-                                    "indoor_no_of_harvest":data.get('profile_overview').get('indoor_no_of_harvest',0),
-                                    "outdoor_no_of_harvest":data.get('profile_overview').get('outdoor_no_of_harvest',0),
-                                    "mixed_light_sqf":data.get('profile_overview').get('mixed_light_sqf',0)} 
+                                    "mixed_light":data.get('profile_overview').get('mixed_light',{}),
+                                    "outdoor":data.get('profile_overview').get('outdoor',{}),
+                                    "indoor":data.get('profile_overview').get('indoor',{})} 
                     #STEP3 - add profile_overview
                     po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
                     print("STEP3 Profile Overview fetched in DB")
@@ -211,13 +205,9 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                         cultivars = cultivars_data.split(',')
                     else:
                         cultivars = ""
-                    processing_data = {"flower_yield_percentage": data.get('processing_config').get('flower_yield_percentage',0),
-		                       "small_yield_percentage": data.get('processing_config').get('small_yield_percentage',0),
-		                       "trim_yield_percentage": data.get('processing_config').get('trim_yield_percentage',0),
-		                       "know_yield_per_plant":data.get('processing_config').get('know_yield_per_plant',''),
-		                       "yield_per_plant":data.get('processing_config').get('yield_per_plant',0),
-		                       "know_yield_per_sq_ft":data.get('processing_config').get('know_yield_per_sq_ft',''),
-		                       "avg_yield_pr_sq_ft":data.get('processing_config').get('avg_yield_pr_sq_ft',0),
+                    processing_data = {"mixed_light": data.get('processing_config').get('mixed_light',{}),
+		                       "outdoor": data.get('processing_config').get('outdoor',{}),
+		                       "indoor": data.get('processing_config').get('inodoor',{}),
                                        "cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]}
                     pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=data.get('processing_config'))
                     print("STEP4 Proc.Overview fetched in DB")

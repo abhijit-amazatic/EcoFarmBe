@@ -287,13 +287,9 @@ class ProcessingFieldsSerializer(serializers.Serializer):
     """
     JSON data for cultivator processing overview.
     """
-    flower_yield_percentage = serializers.IntegerField(required=True)
-    small_yield_percentage = serializers.IntegerField(required=True)
-    trim_yield_percentage = serializers.IntegerField(required=True)
-    know_yield_per_plant = serializers.CharField(required=True)
-    yield_per_plant = serializers.IntegerField(required=False)
-    know_yield_per_sq_ft = serializers.CharField(required=True)
-    avg_yield_pr_sq_ft = serializers.IntegerField(required=False)
+    mixed_light = serializers.DictField(required=False, allow_empty=True)
+    outdoor = serializers.DictField(required=False, allow_empty=True) 
+    indoor = serializers.DictField(required=False, allow_empty=True)
     process_on_site = serializers.CharField(required=True)
     cultivars = ConfigCultivarsSerializer(required=True, many=True)
      
