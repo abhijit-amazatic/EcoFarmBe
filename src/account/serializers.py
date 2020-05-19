@@ -21,7 +21,7 @@ class AccountSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if validated_data.get('status') == 'completed':
             try:
-                notify_admins_on_accounts_registration(instance.ac_manage.email,instance.account_profile.company_name)
+                notify_admins_on_accounts_registration(instance.ac_manager.email,instance.account_profile.company_name)
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
