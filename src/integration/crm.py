@@ -12,7 +12,7 @@ from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
 from .box import (get_shared_link, move_file, create_folder)
 from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
-                    get_cultivars, )
+                    get_cultivars_date, )
 
 def get_crm_obj():
     """
@@ -112,11 +112,21 @@ def parse_fields(key, value, obj, crm_obj):
         "outdoor.no_of_harvest",
         "mixed_light.plants_per_cycle",
         "outdoor.plants_per_cycle",
-        "indoor.plants_per_cycle"]
+        "indoor.plants_per_cycle",
+        "po_mixed_light.flower_yield_percentage",
+        "po_indoor.flower_yield_percentage",
+        "po_outdoor.flower_yield_percentage",
+        "po_mixed_light.small_yield_percentage",
+        "po_indoor.small_yield_percentage",
+        "po_outdoor.small_yield_percentage",
+        "po_mixed_light.trim_yield_percentage",
+        "po_indoor.trim_yield_percentage",
+        "po_outdoor.trim_yield_percentage"
+        ]
     if value in ('ethics_and_certifications'):
         return ast.literal_eval(obj.get(value))
-    if value.startswith('cultivars_'):
-        return get_cultivars(key, value, obj, crm_obj)
+    if value.startswith('po_cultivars_'):
+        return get_cultivars_date(key, value, obj, crm_obj)
     if value.startswith('employees'):
         return create_employees(key, value, obj, crm_obj)
     if value == 'vendor_type':
@@ -234,7 +244,7 @@ def insert_vendors(id=None):
                 licenses = get_licenses(i['legal_business_name'])
                 d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
                 d.update(i)
-                update_license(farm_name, d)
+                # update_license(farm_name, d)
                 l.extend(licenses)
             r.update({'licenses': l})
         try:
@@ -246,9 +256,11 @@ def insert_vendors(id=None):
             r.update(record.profile_contact.profile_contact_details)
             r.update(record.profile_overview.profile_overview)
             r.update(record.financial_overview.financial_details)
-            r.update(record.processing_overview.processing_config)
+            for k,v in record.processing_overview.processing_config['processing_config'].items():
+                r.update({'po_' + k:v})
             data_list.append(r)
-        except Exception:
+        except Exception as exc:
+            print(exc)
             continue
     if len(data_list) > 0:
         result = create_records('Vendors', data_list, True)
@@ -271,7 +283,7 @@ def insert_vendors(id=None):
                 data = dict()
                 l = list()
                 data['Cultivar_Associations'] = record_response[i]['details']['id']
-                for j in result['response']['orignal_data'][i]['cultivars']:
+                for j in result['response']['orignal_data'][i]['po_cultivars']:
                     for k in j['cultivar_names']:
                         r = search_query('Cultivars', k, 'Name')
                         if r['status_code'] == 200:

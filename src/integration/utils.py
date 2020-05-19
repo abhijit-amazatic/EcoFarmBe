@@ -43,14 +43,15 @@ def get_account_category(key, value, obj, crm_obj):
     else:
         return [ACCOUNT_TYPES[v]]
     
-def get_cultivars(key, value, obj, crm_obj):
+def get_cultivars_date(key, value, obj, crm_obj):
     """
-    Return cultivar list.
+    Return cultivar dates.
     """
     try:
         c = value.split('_')
-        d = obj.get(c[0])
+        v = "_".join(c[:-1])
+        d = obj.get(v)
         if d:
-            return d[int(c[1])-1]['harvest_date']
+            return d[int(c[2])-1]['harvest_date']
     except Exception as exc:
         return []
