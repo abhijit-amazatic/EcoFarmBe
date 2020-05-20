@@ -16,6 +16,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License,VendorCategory, )
 from core.utility import send_async_approval_mail
+from integration.crm import (insert_vendors, )
 
 
 class VendorProfileForm(forms.ModelForm):
@@ -203,6 +204,7 @@ def approve_vendor_profile(modeladmin, request, queryset):
             profile.approved_on  = timezone.now()
             profile.approved_by = get_user_data(request)
             profile.save()
+            insert_vendors.delay(id=profile.id)
             send_async_approval_mail.delay(profile.vendor.id)
                 
     messages.success(request,'Vendor Profiles Approved!')    
@@ -249,6 +251,7 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status == 'approved' and obj.vendor.vendor_category == 'cultivation':
             send_async_approval_mail(obj.vendor.id)
+            insert_vendors.delay(id=obj.id)
             obj.approved_on  = timezone.now()
             obj.approved_by = get_user_data(request)
             obj.save()
