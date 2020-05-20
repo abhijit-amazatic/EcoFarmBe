@@ -86,39 +86,39 @@ class ConfigEmployeeSerializer(serializers.Serializer):
     Employee data for cultivator.
     """
     phone = serializers.CharField(required=False, allow_blank=True)
-    roles = serializers.ListField(required=True)
-    employee_name = serializers.CharField(required=True)
-    employee_email = serializers.EmailField(required=True)
+    roles = serializers.ListField(required=True,allow_empty=True)
+    employee_name = serializers.CharField(required=True,allow_blank=True)
+    employee_email = serializers.EmailField(required=True,allow_blank=True)
 
     
 class CultivatorFieldsSerializer(serializers.Serializer):
     """
     JSON data for cultivator.
     """
-    farm_name = serializers.CharField(required=True)
-    primary_county = serializers.CharField(required=True)
-    region = serializers.CharField(required=True)
-    appellation = serializers.CharField(required=True)
-    ethics_and_certifications = serializers.ListField(required=True)
-    other_distributors = serializers.CharField(required=True)
-    transportation = serializers.ListField(required=True)
-    packaged_flower_line = serializers.CharField(required=True)
-    interested_in_co_branding = serializers.CharField(required=True)
-    marketing_material = serializers.CharField(required=True)
-    featured_on_our_site = serializers.CharField(required=True)
-    company_email = serializers.CharField(required=True)
-    company_phone = serializers.CharField(required=True)
+    farm_name = serializers.CharField(required=False,allow_blank=True)
+    primary_county = serializers.CharField(required=False,allow_blank=True)
+    region = serializers.CharField(required=False,allow_blank=True)
+    appellation = serializers.CharField(required=False,allow_blank=True)
+    ethics_and_certifications = serializers.ListField(required=False,allow_empty=True)
+    other_distributors = serializers.CharField(required=False,allow_blank=True)
+    transportation = serializers.ListField(required=False,allow_empty=True)
+    packaged_flower_line = serializers.CharField(required=False,allow_blank=True)
+    interested_in_co_branding = serializers.CharField(required=False,allow_blank=True)
+    marketing_material = serializers.CharField(required=False,allow_blank=True)
+    featured_on_our_site = serializers.CharField(required=False,allow_blank=True)
+    company_email = serializers.CharField(required=False,allow_blank=True)
+    company_phone = serializers.CharField(required=False,allow_blank=True)
     website = serializers.CharField(required=False,allow_blank=True)
     instagram = serializers.CharField(required=False,allow_blank=True)
-    facebook = serializers.CharField(required=False, allow_blank=True)
-    linkedin = serializers.CharField(required=False, allow_blank=True)
-    twitter = serializers.CharField(required=False, allow_blank=True)
-    no_of_employees = serializers.CharField(required=True)
-    employees = ConfigEmployeeSerializer(required=True, many=True)
-    billing_address = serializers.DictField(required=True, allow_empty=True) 
-    mailing_address = serializers.DictField(required=True, allow_empty=True) 
+    facebook = serializers.CharField(required=False,allow_blank=True)
+    linkedin = serializers.CharField(required=False,allow_blank=True)
+    twitter = serializers.CharField(required=False,allow_blank=True)
+    no_of_employees = serializers.CharField(required=False,allow_blank=True)
+    employees = ConfigEmployeeSerializer(required=False, many=True)
+    billing_address = serializers.DictField(required=False, allow_empty=True) 
+    mailing_address = serializers.DictField(required=False, allow_empty=True) 
     #employees = serializers.ListField(child=serializers.DictField(), required=False)
-    
+
 
 class ProfileContactSerializer(serializers.ModelSerializer):
     """
