@@ -30,8 +30,6 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView,SearchCultivars,) 
 from inventory.views import (InventoryViewSet, InventorySyncView,
-                               ContactView, CRMContactView)
-from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, )
 from account.views import (AccountViewSet,AccountLicenseViewSet)
 
