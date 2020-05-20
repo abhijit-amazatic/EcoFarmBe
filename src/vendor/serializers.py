@@ -79,6 +79,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         fields = ('__all__')
         read_only_fields = ['approved_on','approved_by']
 
+
         
 class ConfigEmployeeSerializer(serializers.Serializer):
     """
@@ -114,6 +115,8 @@ class CultivatorFieldsSerializer(serializers.Serializer):
     twitter = serializers.CharField(required=False, allow_blank=True)
     no_of_employees = serializers.CharField(required=True)
     employees = ConfigEmployeeSerializer(required=True, many=True)
+    billing_address = serializers.DictField(required=True, allow_empty=True) 
+    mailing_address = serializers.DictField(required=True, allow_empty=True) 
     #employees = serializers.ListField(child=serializers.DictField(), required=False)
     
 
