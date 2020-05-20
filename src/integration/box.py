@@ -247,3 +247,17 @@ def move_file(file_id, destination_folder_id):
     destination_folder = client.folder(destination_folder_id)
     moved_file = file_to_move.move(destination_folder)
     return moved_file
+
+def get_embed_url(file_id):
+    """
+    Return embed url for file.
+    """
+    client = get_box_client()
+    return client.file(file_id).get_embed_url()
+
+def get_download_url(file_id):
+    """
+    Return download url for file.
+    """
+    client = get_box_client()
+    return client.file(file_id).get_download_url()

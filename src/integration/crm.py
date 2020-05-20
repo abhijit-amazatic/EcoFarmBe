@@ -5,7 +5,7 @@ from core.settings import (PYZOHO_CONFIG,
     PYZOHO_USER_IDENTIFIER,
     LICENSE_PARENT_FOLDER_ID)
 from user.models import (User, )
-from vendor.models import (VendorProfile, )
+from vendor.models import (VendorProfile, License, )
 from account.models import (Account, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
                          ACCOUNT_TYPES)
@@ -121,7 +121,13 @@ def parse_fields(key, value, obj, crm_obj):
         "po_outdoor.small_yield_percentage",
         "po_mixed_light.trim_yield_percentage",
         "po_indoor.trim_yield_percentage",
-        "po_outdoor.trim_yield_percentage"
+        "po_outdoor.trim_yield_percentage",
+        "po_indoor.yield_per_plant",
+        "po_outdoor.yield_per_plant",
+        "po_mixed_light.yield_per_plant",
+        "po_indoor.avg_yield_pr_sq_ft",
+        "po_outdoor.avg_yield_pr_sq_ft",
+        "po_mixed_light.avg_yield_pr_sq_ft"
         ]
     if value in ('ethics_and_certifications'):
         return ast.literal_eval(obj.get(value))
@@ -143,6 +149,7 @@ def parse_fields(key, value, obj, crm_obj):
         return obj.get(value).split(', ')
     if value in cultivator_type_data:
         v = value.split('.')
+        print(v)
         data = obj.get(v[0])
         if data:
             return data.get(v[1])
@@ -301,19 +308,24 @@ def update_license(farm_name, license):
     new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, farm_name)
     if license.get('uploaded_license_to').isdigit():
         moved_file = move_file(license['uploaded_license_to'], new_folder)
-        license_url = get_shared_link(license['uploaded_license_to'])
+        license_url = get_shared_link(license.get('uploaded_license_to'))
         if license_url:
-            license['uploaded_license_to'] = license_url
+            license['uploaded_license_to'] = license_url  + "?id=" + license.get('uploaded_license_to')
     if license.get('uploaded_sellers_permit_to'):
             documents = create_folder(new_folder, 'documents')
             moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
             license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
-            license['uploaded_sellers_permit_to'] = license_url
+            license['uploaded_sellers_permit_to'] = license_url  + "?id=" + license.get('uploaded_sellers_permit_to')
     if license.get('uploaded_w9_to'):
             documents = create_folder(new_folder, 'documents')
             moved_file = move_file(license['uploaded_w9_to'], documents)
             license_url = get_shared_link(license.get('uploaded_w9_to'))
-            license['uploaded_w9_to'] = license_url
+            license['uploaded_w9_to'] = license_url + "?id=" + license.get('uploaded_w9_to')
+    license_obj = License.objects.filter(pk=license['id']).update(
+        uploaded_license_to=license.get('uploaded_license_to'),
+        uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
+        uploaded_w9_to=license.get('uploaded_w9_to')
+    )
     data.append(license)
     response = update_records('Licenses', data)
     return response

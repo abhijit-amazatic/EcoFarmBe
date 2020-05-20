@@ -32,6 +32,7 @@ CRM_FORMAT  = {
         "Twitter": "twitter_url",
         "Indoor_Mixed_Lighting_Type": "lighting_type",
         "Type_of_Nutrients_Used": "type_of_nutrients",
+        "Types_of_Nutrients_Used": "type_of_nutrients",
         "Canopy_Sqf_Outdoor": "outdoor.canopy_sqf_parse",
         "Canopy_Sqf_Indoor": "indoor.canopy_sqf_parse",
         "Total_Canopy_Space": "mixed_light.canopy_sqf_parse",
@@ -91,6 +92,12 @@ CRM_FORMAT  = {
         "Plants_per_Cycle_Mixed_Light": "mixed_light.plants_per_cycle_parse",
         "Plants_per_Cycle_Outdoor": "outdoor.plants_per_cycle_parse",
         "Plants_per_Cycle_Indoor": "indoor.plants_per_cycle_parse",
+        "Yield_Plant_Average_Indoor": "po_indoor.yield_per_plant_parse",
+        "Yield_Plant_Average_Outdoor": "po_outdoor.yield_per_plant_parse",
+        "Expected_Yield_Per_Plant": "po_mixed_light.yield_per_plant_parse",
+        "Yield_Sqf_Average_Indoor": "po_indoor.avg_yield_pr_sq_ft_parse",
+        "Yield_Sqf_Average_Outdoor": "po_outdoor.avg_yield_pr_sq_ft_parse",
+        "Yield_Sqf_Average_Mixed_Light": "po_mixed_light.avg_yield_pr_sq_ft_parse"
     },
     "Licenses":{
         "id": "license_id",
