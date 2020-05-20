@@ -123,8 +123,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     
     def update(self, instance, validated_data):
-        print('>>> in user update\n', validated_data)
         user = super().update(instance, validated_data)
+        profile_photo_id = validated_data.get("profile_photo")
+        try:
+            if profile_photo_id:
+                shared_url = get_shared_link(profile_photo_id)
+                user.profile_photo_sharable_link = shared_url
+                user.save()
+        except Exception as e:
+            print("Error while updating profile photo link.", e)
         password = validated_data.get('password', None)
         if user.check_password(password):
             user.set_password(password)
