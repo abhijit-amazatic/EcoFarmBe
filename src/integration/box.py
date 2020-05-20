@@ -261,3 +261,11 @@ def get_download_url(file_id):
     """
     client = get_box_client()
     return client.file(file_id).get_download_url()
+
+def get_preview_url(file_id):
+    """
+    """
+    client = get_box_client()
+    return client.file(file_id).get_shared_link_download_url(
+        access='open',
+        allow_preview=True)

@@ -13,7 +13,7 @@ from Crypto import Random
 from .models import User
 from vendor.models import Vendor, VendorProfile, VendorUser
 from vendor.serializers import VendorSerializer, VendorProfileSerializer
-from integration.box import (get_shared_link, )
+from integration.box import (get_preview_url, )
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
@@ -127,7 +127,7 @@ class UserSerializer(serializers.ModelSerializer):
         profile_photo_id = validated_data.get("profile_photo")
         try:
             if profile_photo_id:
-                shared_url = get_shared_link(profile_photo_id)
+                shared_url = get_preview_url(profile_photo_id)
                 user.profile_photo_sharable_link = shared_url
                 user.save()
         except Exception as e:
