@@ -132,7 +132,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         Object level validation
         catch vendor like this 'profile.vendor'.
         fields are different for different vendors
-        """    
+        """
         #if self.partial:
         if self.context['request'].method == 'PATCH' and not attrs.get('is_draft'):
             profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
@@ -148,21 +148,22 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         """
         Generic for create and update as if is_draft is 'true' we need to bypass. validations
         """
-        employee_data = validated_data.get('profile_contact_details')['employees']
+        employee_data = validated_data.get('profile_contact_details').get('employees',[])
         new_users = []
-        for employee in employee_data:
-            obj, created = User.objects.get_or_create(email=employee['employee_email'],
-                                                      defaults={'email':employee['employee_email'],
-                                                                'username':employee['employee_name'],
-                                                                'phone':employee['phone'],
-                                                                'is_verified':True,
-                                                                'existing_member':True})
-            if created:
-                new_users.append(obj)
-                if not VendorUser.objects.filter(user_id=obj.id, vendor_id=profile.vendor.id).exists():
-                    VendorUser(user_id=obj.id, vendor_id=profile.vendor.id,role=','.join(employee['roles'])).save()
-                    notify_farm_user(obj.email, validated_data.get('profile_contact_details')['farm_name'])
-                    notify_admins_on_vendors_registration(obj.email,validated_data.get('profile_contact_details')['farm_name'] )    
+        if employee_data:
+            for employee in employee_data:
+                obj, created = User.objects.get_or_create(email=employee['employee_email'],
+                                                          defaults={'email':employee['employee_email'],
+                                                                    'username':employee['employee_name'],
+                                                                    'phone':employee['phone'],
+                                                                    'is_verified':True,
+                                                                    'existing_member':True})
+                if created:
+                    new_users.append(obj)
+                    if not VendorUser.objects.filter(user_id=obj.id, vendor_id=profile.vendor.id).exists():
+                        VendorUser(user_id=obj.id, vendor_id=profile.vendor.id,role=','.join(employee['roles'])).save()
+                        notify_farm_user(obj.email, validated_data.get('profile_contact_details')['farm_name'])
+                        notify_admins_on_vendors_registration(obj.email,validated_data.get('profile_contact_details')['farm_name'] )    
                         
 
         
