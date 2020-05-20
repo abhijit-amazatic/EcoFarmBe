@@ -13,6 +13,7 @@ from Crypto import Random
 from .models import User
 from vendor.models import Vendor, VendorProfile, VendorUser
 from vendor.serializers import VendorSerializer, VendorProfileSerializer
+from integration.box import (get_shared_link, )
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
@@ -90,6 +91,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_approved = serializers.ReadOnlyField()
     approved_on = serializers.ReadOnlyField()
     approved_by = serializers.ReadOnlyField()
+    profile_photo_sharable_link = serializers.ReadOnlyField()
     
     
     
@@ -111,7 +113,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','approved_on','approved_by')
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','approved_on','approved_by')
     
 
     def validate_password(self, password):
@@ -121,6 +123,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     
     def update(self, instance, validated_data):
+        print('>>> in user update\n', validated_data)
         user = super().update(instance, validated_data)
         password = validated_data.get('password', None)
         if user.check_password(password):

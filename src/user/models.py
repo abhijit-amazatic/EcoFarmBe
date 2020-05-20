@@ -49,7 +49,9 @@ class User(StatusFlagMixin,AbstractUser):
     )
     is_updated_in_crm = models.BooleanField('Is Updated In CRM', default=False)
     profile_photo = models.CharField(
-        _('Profile Photo Link'), blank=True, null=True, max_length=255)
+        _('Profile Photo Box ID'), blank=True, null=True, max_length=255)
+    profile_photo_sharable_link = models.CharField(
+        _('Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     
