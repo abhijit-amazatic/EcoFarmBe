@@ -48,12 +48,14 @@ class AccountUser(models.Model):
     Stores account's User's details.
     """
     ROLE_OWNER = 'owner'
+    ROLE_LICENSE_OWNER = 'license_owner'
     ROLE_LOGISTICS = 'logistics'
     ROLE_SALES_OR_INVENTORY = 'sales_or_inventory'
     ROLE_CHOICES = (
         (ROLE_OWNER, _('Owner')),
-        (ROLE_LOGISTICS, _('logistics')),
-        (ROLE_SALES_OR_INVENTORY, _('sales_or_inventory')),
+        (ROLE_LICENSE_OWNER, _('License Owner')),
+        (ROLE_LOGISTICS, _('Logistics')),
+        (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
     )
     account = models.ForeignKey(Account, verbose_name=_('Account'),
                              related_name='account_roles', on_delete=models.CASCADE)
