@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License,VendorCategory, )
-from core.utility import send_async_approval_mail
+from core.utility import (send_async_approval_mail,get_encrypted_data,notify_employee_admin_to_verify_and_reset,)
 from integration.crm import (insert_vendors, )
 
 
@@ -213,6 +213,7 @@ def approve_vendor_profile(modeladmin, request, queryset):
             profile.save()
             insert_vendors.delay(id=profile.id)
             send_async_approval_mail.delay(profile.vendor.id)
+            notify_employee_admin_to_verify_and_reset.delay(profile.vendor.id,profile.id)
                 
     messages.success(request,'Vendor Profiles Approved!')    
 approve_vendor_profile.short_description = 'Approve Selected Vendor Profiles'
@@ -239,7 +240,7 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
         queryset |= self.model.objects.select_related('profile_contact').filter(profile_contact__profile_contact_details__contains={'farm_name':search_term})
         return queryset, use_distinct
     
-    inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
+    inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin]
     form = VendorProfileUpdatedForm
     extra = 0
     model = VendorProfile
@@ -262,6 +263,8 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
             obj.approved_on  = timezone.now()
             obj.approved_by = get_user_data(request)
             obj.save()
+            notify_employee_admin_to_verify_and_reset(obj.vendor.id,obj.id)
+            
         super().save_model(request, obj, form, change)
         
     

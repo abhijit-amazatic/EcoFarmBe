@@ -268,3 +268,25 @@ def send_async_user_approval_mail(user_id):
     """
     user = User.objects.filter(id=user_id)    
     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", user[0].email)
+
+@app.task(queue="general")            
+def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
+    """
+    Notify farm employee to verify and set password for account.Notfiy admin to approve user
+    """
+    vendor_users = VendorUser.objects.filter(vendor=vendor_id,user__is_approved=False, user__is_verified=False).select_related()
+    profile_contact = ProfileContact.objects.filter(vendor_profile_id=vendor_profile_id)
+    for vendor_user in vendor_users:
+        try:
+            # send email verification link to farm user
+            link = get_encrypted_data(vendor_user.user.email)
+            mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.",vendor_user.user.email)
+            #inform admins to approve farm user
+            notify_admins_on_vendors_registration(vendor_user.user.email,profile_contact[0].profile_contact_details.get('farm_name'))
+            #notify user to set password
+            notify_farm_user(vendor_user.user.email, profile_contact[0].profile_contact_details.get('farm_name'))
+        except Exception as e:
+            print("Exception on profile aproval notification",e)
+    
+
+    

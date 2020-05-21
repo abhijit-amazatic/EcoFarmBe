@@ -163,14 +163,15 @@ class ProfileContactSerializer(serializers.ModelSerializer):
                                                           defaults={'email':employee['employee_email'],
                                                                     'username':employee['employee_name'],
                                                                     'phone':employee['phone'],
-                                                                    'is_verified':True,
+                                                                    'is_verified':False,
                                                                     'existing_member':True})
                 if created:
                     new_users.append(obj)
                     if not VendorUser.objects.filter(user_id=obj.id, vendor_id=profile.vendor.id).exists():
                         VendorUser(user_id=obj.id, vendor_id=profile.vendor.id,role=','.join(employee['roles'])).save()
-                        notify_farm_user(obj.email, validated_data.get('profile_contact_details')['farm_name'])
-                        notify_admins_on_vendors_registration(obj.email,validated_data.get('profile_contact_details')['farm_name'] )    
+                        #following part should be called after admin approval
+                        #notify_farm_user(obj.email, validated_data.get('profile_contact_details')['farm_name'])
+                        #notify_admins_on_vendors_registration(obj.email,validated_data.get('profile_contact_details')['farm_name'] )    
                         
 
         
