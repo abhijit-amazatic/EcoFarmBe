@@ -31,7 +31,7 @@ CRM_FORMAT  = {
         "Facebook": "facebook_url",
         "Twitter": "twitter_url",
         "Indoor_Mixed_Lighting_Type": "lighting_type",
-        "Type_of_Nutrients_Used": "type_of_nutrients",
+        #"Type_of_Nutrients_Used": "type_of_nutrients",
         "Types_of_Nutrients_Used": "type_of_nutrients",
         "Canopy_Sqf_Outdoor": "outdoor.canopy_sqf_parse",
         "Canopy_Sqf_Indoor": "indoor.canopy_sqf_parse",
@@ -235,7 +235,7 @@ CRM_FORMAT  = {
             },
         "profile_overview": {
             "lighting_type": "Indoor_Mixed_Lighting_Type", 
-            "type_of_nutrients": "Type_of_Nutrients_Used",
+            "type_of_nutrients": "Types_of_Nutrients_Used",
             "interested_in_growing_genetics": "Would_you_grow_genetics_suggested_by_Thrive",
             "issues_with_failed_lab_tests": "Have_you_ever_had_issues_with_failed_Lab_tests",
             "lab_test_issues": "Issues_with_Failed_Lab_Tests",
