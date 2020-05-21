@@ -250,7 +250,7 @@ def insert_vendors(id=None):
                 licenses = get_licenses(i['legal_business_name'])
                 d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
                 d.update(i)
-                # update_license(farm_name, d)
+                update_license(farm_name, d)
                 l.extend(licenses)
             r.update({'licenses': l})
         try:
