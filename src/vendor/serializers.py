@@ -200,7 +200,7 @@ class OverviewFieldsSerializer(serializers.Serializer):
     JSON data for cultivator profile_overview.
     """    
     lighting_type = serializers.ListField(required=True)
-    type_of_nutrients = serializers.CharField(required=True)
+    type_of_nutrients = serializers.ListField(required=True,allow_empty=True)
     interested_in_growing_genetics = serializers.CharField(required=True)
     issues_with_failed_lab_tests = serializers.CharField(required=True)
     lab_test_issues = serializers.CharField(required=False, allow_blank=True)

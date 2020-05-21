@@ -9,7 +9,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (AccountSerializer,AccountCreateSerializer, AccountLicenseSerializer, AccountBasicProfileSerializer, AccountContactInfoSerializer,)
-from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo, )
+from .models import (Account,AccountUser,AccountLicense, AccountBasicProfile, AccountContactInfo, )
 from core.permissions import IsAuthenticatedAccountPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -50,8 +50,27 @@ class AccountViewSet(viewsets.ModelViewSet):
         elif self.action =="contact_info":
             accounts = accounts.select_related('account_contact')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
-            accounts = accounts.filter(ac_manager=self.request.user)
+            accounts = accounts.filter(account_roles__user=self.request.user)
         return accounts
+
+    def create(self, request):
+        """
+        This endpoint is used to create Account.
+        """
+        #when account is added here add users entry to accountuser
+        serializer = AccountCreateSerializer(
+            data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            try:
+                accounts = Account.objects.filter(ac_manager_id=request.data.get('ac_manager'))
+                for account in accounts:
+                    if not AccountUser.objects.filter(user=request.data.get('ac_manager'), account=account.id).exists():
+                        AccountUser.objects.create(user_id=request.data.get('ac_manager'),account_id=account.id,role='owner')
+            except Exception as e:
+                print(e)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def extra_info(self, request, pk, model, serializer, extra_info_attribute):
         """
@@ -109,7 +128,7 @@ class AccountLicenseViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             licenses = licenses.select_related('account')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
-            licenses = licenses.filter(account__ac_manager=self.request.user)
+            licenses = licenses.filter(account__account_roles__user=self.request.user)
         return licenses
 
     def create(self, request):
