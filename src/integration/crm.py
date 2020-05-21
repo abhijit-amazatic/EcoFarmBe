@@ -33,8 +33,8 @@ def get_picklist(module, field_name):
         if field['field_label'] == field_name and field['data_type'] in ('picklist', 'multiselectpicklist'):
             return field['pick_list_values']
     return list()
-            
- 
+
+
 def get_format_dict(module):
     """
     Return Contact-CRM fields dictionary.
@@ -64,7 +64,7 @@ def get_dict(cd, i):
             user[k] = i.get(v)
         user = create_records('Contacts', [user])
         if user['status_code'] in (201, 202):
-            return user['response']['data'][0]['details']['id']  
+            return user['response']['data'][0]['details']['id']
 
 def create_employees(key, value, obj, crm_obj):
     """
@@ -102,7 +102,7 @@ def parse_fields(key, value, obj, crm_obj):
         user = create_records('Contacts', [data])
         if user['status_code'] in (201, 202):
             return user['response']['data'][0]['details']['id']
-    
+
     cultivator_type_data = [
         "outdoor.canopy_sqf",
         "indoor.canopy_sqf",
@@ -149,12 +149,11 @@ def parse_fields(key, value, obj, crm_obj):
         return obj.get(value).split(', ')
     if value in cultivator_type_data:
         v = value.split('.')
-        print(v)
         data = obj.get(v[0])
         if data:
             return data.get(v[1])
         return None
-    
+
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
     crm_obj = get_crm_obj()

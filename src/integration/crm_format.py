@@ -116,7 +116,7 @@ CRM_FORMAT  = {
         "Premises_APN_Number": "premises_apn",
         "Owner": "Owner",
         "Seller_s_Permit_Box_Link": "uploaded_sellers_permit_to",
-        "w9_Box_Link": "uploaded_w9_to",
+        "W9_Box_Link": "uploaded_w9_to",
     },
     "Accounts":{
         "db_id": "id",
@@ -303,7 +303,7 @@ CRM_FORMAT  = {
             "business_dba": "Business_DBA",
             "issue_date": "Issue_Date",
             "uploaded_license_to": "License_Box_Link",
-            "uploaded_w9_to": "w9_Box_Link",
+            "uploaded_w9_to": "W9_Box_Link",
             "premises_address": "Premises_Address",
             "premises_city": "Premises_City",
             "zip_code": "Premises_Zipcode",
