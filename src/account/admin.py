@@ -15,6 +15,7 @@ from django.utils import timezone
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo, )
 from core.utility import (send_async_account_approval_mail,)
+from integration.crm import (insert_accounts, )
 
 
 class InlineAccountLicenseAdmin(admin.StackedInline):
@@ -53,6 +54,7 @@ def approve_accounts(modeladmin, request, queryset):
             account.approved_by = get_user_data(request)
             account.save()
             send_async_account_approval_mail.delay(account.id)
+            insert_accounts.delay(account_id=account.id)
                 
     messages.success(request,'Accounts Approved!')    
 approve_accounts.short_description = 'Approve Selected Accounts'
@@ -96,6 +98,7 @@ class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status == 'approved':
             send_async_account_approval_mail(obj.id)
+            insert_accounts.delay(account_id=obj.id)
             obj.approved_on  = timezone.now()
             obj.approved_by = get_user_data(request)
             obj.save()
