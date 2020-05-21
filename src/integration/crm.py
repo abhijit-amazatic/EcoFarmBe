@@ -140,7 +140,7 @@ def parse_fields(key, value, obj, crm_obj):
     if value.startswith('Contact'):
         return get_vendor_contacts(key, value, obj, crm_obj)
     if value.startswith('layout'):
-        return "4226315000000705743"
+        return "4230236000000758743"
     if value.startswith('account_category'):
         return get_account_category(key, value, obj, crm_obj)
     if value.startswith('logistic_manager_email'):
