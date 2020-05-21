@@ -43,6 +43,31 @@ class Account(StatusFlagMixin,models.Model):
         verbose_name = _('Account',)
         #unique_together = (('ac_manager', 'account_category'), )
 
+class AccountUser(models.Model):
+    """
+    Stores account's User's details.
+    """
+    ROLE_OWNER = 'owner'
+    ROLE_LOGISTICS = 'logistics'
+    ROLE_SALES_OR_INVENTORY = 'sales_or_inventory'
+    ROLE_CHOICES = (
+        (ROLE_OWNER, _('Owner')),
+        (ROLE_LOGISTICS, _('logistics')),
+        (ROLE_SALES_OR_INVENTORY, _('sales_or_inventory')),
+    )
+    account = models.ForeignKey(Account, verbose_name=_('Account'),
+                             related_name='account_roles', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
+                             related_name='account_user_roles', on_delete=models.CASCADE)
+    role = models.CharField(
+        verbose_name=_('Role'),
+        max_length=60, choices=ROLE_CHOICES
+    )
+    created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
+    
+    class Meta:
+        unique_together = (('account', 'user'), )
+
 
 class AccountLicense(models.Model):
     """
@@ -86,8 +111,6 @@ class AccountLicense(models.Model):
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
-    # def __str__(self):
-    #     return self.legal_business_name
 
 
 class AccountBasicProfile(models.Model):
@@ -116,8 +139,6 @@ class AccountBasicProfile(models.Model):
         _('Provide Transport'), blank=True, null=True, max_length=255)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
-    # def __str__(self):
-    #     return self.company_name 
 
 
 class AccountContactInfo(models.Model):
@@ -147,6 +168,12 @@ class AccountContactInfo(models.Model):
         _('Logistic Manager Email'), blank=True, null=True, max_length=255)
     logistic_manager_phone = models.CharField(
         _('Logistic Manager Phone'), blank=True, null=True, max_length=255)
+    sales_or_inventory_name = models.CharField(
+        _('Sales/inventory Name'), blank=True, null=True, max_length=255)
+    sales_or_inventory_email = models.CharField(
+        _('Sales/Inventory Email'), blank=True, null=True, max_length=255)
+    sales_or_inventory_phone = models.CharField(
+        _('Sales/Inventory Phone'), blank=True, null=True, max_length=255)
     instagram = models.CharField(
         _('Instagram'), blank=True, null=True, max_length=255)
     linked_in = models.CharField(
@@ -160,5 +187,3 @@ class AccountContactInfo(models.Model):
     mailing_address = JSONField(null=True, blank=True, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
-    # def __str__(self):
-    #     return self.website
