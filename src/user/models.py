@@ -54,6 +54,16 @@ class User(StatusFlagMixin,AbstractUser):
         _('Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    title = models.CharField(
+        _('Title'), max_length=150, null=True, blank=True)
+    department = models.CharField(
+        _('Department'), max_length=150, null=True, blank=True)
+    website = models.CharField(
+        _('Website'), max_length=150, null=True, blank=True)
+    instagram = models.CharField(
+        _('Instagram'), max_length=150, null=True, blank=True)
+    linkedin = models.CharField(
+        _('LinkedIn'), max_length=150, null=True, blank=True)
     
    
     EMAIL_FIELD = 'email'

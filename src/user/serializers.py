@@ -11,7 +11,7 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from .models import User
-from vendor.models import Vendor, VendorProfile, VendorUser
+from vendor.models import Vendor, VendorProfile, VendorUser, ProfileContact
 from vendor.serializers import VendorSerializer, VendorProfileSerializer
 from integration.box import (get_preview_url, )
 
@@ -83,6 +83,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_superuser = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
     vendor_profiles = serializers.SerializerMethodField(read_only=True)
+    associated_profile_names = serializers.SerializerMethodField(read_only=True)
     #vendors = serializers.SerializerMethodField(read_only=True)
     vendors = VendorFromUserVendorSerializer(
         source='user_roles', many=True, read_only=True
@@ -108,12 +109,24 @@ class UserSerializer(serializers.ModelSerializer):
         """
         results = VendorProfile.objects.filter(vendor__vendor_roles__user=obj).values('id', 'status','step', 'vendor')
         return results
-    
 
+    def get_associated_profile_names(self, obj):
+        """
+        Returns farm name/s of vendors.
+        """
+        farms = []
+        profiles = VendorProfile.objects.filter(vendor__vendor_roles__user=obj)
+        if profiles:
+            for profile in profiles:
+                pc = ProfileContact.objects.filter(vendor_profile_id=profile.id)
+                farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
+                farms.extend(farm_names)
+        return farms if farms else []     
+    
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','approved_on','approved_by')
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories', 'full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','approved_on','approved_by')
     
 
     def validate_password(self, password):
