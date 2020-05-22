@@ -205,7 +205,9 @@ class OverviewFieldsSerializer(serializers.Serializer):
     issues_with_failed_lab_tests = serializers.CharField(required=True)
     lab_test_issues = serializers.CharField(required=False, allow_blank=True)
     autoflower = serializers.BooleanField(required=False)
+    full_season = serializers.BooleanField(required=False)
     outdoor_autoflower = serializers.DictField(required=False, allow_empty=True)
+    outdoor_full_season = serializers.DictField(required=False, allow_empty=True)
     mixed_light = serializers.DictField(required=False, allow_empty=True)
     outdoor = serializers.DictField(required=False, allow_empty=True) 
     indoor = serializers.DictField(required=False, allow_empty=True)
@@ -242,22 +244,11 @@ class FinanceFieldsSerializer(serializers.Serializer):
     """
     annual_revenue_2019 = serializers.CharField(required=True)
     projected_2020_revenue = serializers.CharField(required=True)
-    target_profit_margin = serializers.CharField(required=True)
     yearly_budget = serializers.CharField(required=True)
-    know_cost_per_lbs = serializers.CharField(required=True)
-    cost_per_lbs = serializers.CharField(required=False,allow_blank=True)
-    know_cost_per_sqf = serializers.CharField(required=True)
-    cost_per_sqf = serializers.CharField(required=False,allow_blank=True)
-    avg_target_price = serializers.CharField(required=True)
-    small_target_price = serializers.CharField(required=True)
-    trim_target_price = serializers.CharField(required=True)
-    bucked_target_price = serializers.CharField(required=True)
-    bucked_untrimmed = serializers.CharField(required=False,allow_blank=True)
-    flower_tops_price = serializers.CharField(required=False,allow_blank=True)
-    flower_smalls_price = serializers.CharField(required=False,allow_blank=True)
-    trim_price = serializers.CharField(required=False,allow_blank=True)
-    target_profit_margin = serializers.CharField(required=False,allow_blank=True)
-    
+    outdoor_autoflower = serializers.DictField(required=False, allow_empty=True)
+    outdoor_full_season = serializers.DictField(required=False, allow_empty=True)
+    mixed_light = serializers.DictField(required=False, allow_empty=True)
+    indoor = serializers.DictField(required=False, allow_empty=True)
 
     
 class FinancialOverviewSerializer(serializers.ModelSerializer):
@@ -299,11 +290,11 @@ class ProcessingFieldsSerializer(serializers.Serializer):
     JSON data for cultivator processing overview.
     """
     mixed_light = serializers.DictField(required=False, allow_empty=True)
-    outdoor = serializers.DictField(required=False, allow_empty=True) 
-    indoor = serializers.DictField(required=False, allow_empty=True)
     outdoor_autoflower = serializers.DictField(required=False, allow_empty=True)
+    outdoor_full_season = serializers.DictField(required=False, allow_empty=True)
+    indoor = serializers.DictField(required=False, allow_empty=True)
     process_on_site = serializers.CharField(required=True)
-    cultivars = ConfigCultivarsSerializer(required=True, many=True)
+    #cultivars = ConfigCultivarsSerializer(required=True, many=True)
      
         
 class ProcessingOverviewSerializer(serializers.ModelSerializer):
