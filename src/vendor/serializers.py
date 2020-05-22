@@ -204,6 +204,8 @@ class OverviewFieldsSerializer(serializers.Serializer):
     interested_in_growing_genetics = serializers.CharField(required=True)
     issues_with_failed_lab_tests = serializers.CharField(required=True)
     lab_test_issues = serializers.CharField(required=False, allow_blank=True)
+    autoflower = serializers.BooleanField(required=False)
+    outdoor_autoflower = serializers.DictField(required=False, allow_empty=True)
     mixed_light = serializers.DictField(required=False, allow_empty=True)
     outdoor = serializers.DictField(required=False, allow_empty=True) 
     indoor = serializers.DictField(required=False, allow_empty=True)
@@ -250,6 +252,11 @@ class FinanceFieldsSerializer(serializers.Serializer):
     small_target_price = serializers.CharField(required=True)
     trim_target_price = serializers.CharField(required=True)
     bucked_target_price = serializers.CharField(required=True)
+    bucked_untrimmed = serializers.CharField(required=False,allow_blank=True)
+    flower_tops_price = serializers.CharField(required=False,allow_blank=True)
+    flower_smalls_price = serializers.CharField(required=False,allow_blank=True)
+    trim_price = serializers.CharField(required=False,allow_blank=True)
+    target_profit_margin = serializers.CharField(required=False,allow_blank=True)
     
 
     
@@ -294,6 +301,7 @@ class ProcessingFieldsSerializer(serializers.Serializer):
     mixed_light = serializers.DictField(required=False, allow_empty=True)
     outdoor = serializers.DictField(required=False, allow_empty=True) 
     indoor = serializers.DictField(required=False, allow_empty=True)
+    outdoor_autoflower = serializers.DictField(required=False, allow_empty=True)
     process_on_site = serializers.CharField(required=True)
     cultivars = ConfigCultivarsSerializer(required=True, many=True)
      
