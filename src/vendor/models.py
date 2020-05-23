@@ -66,6 +66,7 @@ class Vendor(models.Model):
 
     class Meta:
         unique_together = (('ac_manager', 'vendor_category'), )
+        verbose_name = _('Vendor User')
 
 
     
@@ -82,6 +83,7 @@ class VendorUser(models.Model):
     
     class Meta:
         unique_together = (('vendor', 'user'), )
+        verbose_name = _('Vendor User')
 
 
 class VendorProfile(StatusFlagMixin,models.Model):

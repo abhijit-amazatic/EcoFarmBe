@@ -14,6 +14,7 @@ from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from user.models import (User, MemberCategory,)
 from django.contrib import messages
 from django.utils import timezone
+from django_reverse_admin import ReverseModelAdmin
 from .models import (Vendor,VendorProfile,VendorUser,ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, ProgramOverview, License,VendorCategory, )
 from core.utility import send_async_approval_mail
 from integration.crm import (insert_vendors, )
@@ -33,15 +34,6 @@ class VendorProfileForm(forms.ModelForm):
                     ac_manager = vendor_obj[0].ac_manager.email
                     mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
                 
-
-class InlineVendorUserAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
-    extra = 0
-    model = VendorUser
-    fields = ('user', 'role', )
-    raw_id_fields = ('user', )
-    autocomplete_lookup_fields = {
-        'fk': ['user', ],
-    }
 
 class ProfileContactForm(forms.ModelForm):
     class Meta:
@@ -156,19 +148,34 @@ class InlineVendorProfileAdmin(nested_admin.NestedTabularInline):#(admin.Tabular
     inlines = [InlineVendorProfileContactAdmin,InlineProfileOverviewAdmin,InlineFinancialOverviewAdmin,InlineProcessingOverviewAdmin,InlineProgramOverviewAdmin,InlineLicenseAdmin,]
     
 
+class InlineVendorUserAdmin(nested_admin.NestedTabularInline):#(admin.TabularInline):
+    extra = 0
+    model = VendorUser
+    raw_id_fields = ('user', )
+    autocomplete_lookup_fields = {
+        'fk': ['user', ],
+    }
+
+    
 class MyVendorAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     """
-    Configuring Vendors
+    Configuring Vendors , displaying this as vendorusers
     """
-    inlines = [InlineVendorProfileAdmin, InlineVendorUserAdmin,]
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Default and custom search filter for farm names.
+        """
+        queryset, use_distinct = super(MyVendorAdmin, self).get_search_results(request, queryset, search_term)
+        vp_obj = VendorProfile.objects.select_related('profile_contact').filter(profile_contact__profile_contact_details__contains={'farm_name':search_term})
+        queryset |= Vendor.objects.filter(id__in = [i.vendor.id for i in vp_obj])
+        return queryset, use_distinct
+    
+    inlines = [InlineVendorUserAdmin,] #InlineVendorProfileAdmin,
     extra = 0
     model = Vendor
     readonly_fields = ('ac_manager','vendor_category','created_on','updated_on')
     list_display = ('profile_name','ac_manager','vendor_category',)
     search_fields = ('ac_manager__email','vendor_category',)
-    list_filter = (
-        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),
-    )
          
 
 class VendorProfileUpdatedForm(forms.ModelForm):
@@ -264,7 +271,8 @@ class VendorCategoryAdmin(admin.ModelAdmin):
     VendorAdmin
     """
     #search_fields = ('',)
-        
-#admin.site.register(Vendor,MyVendorAdmin)
+
+    
+admin.site.register(Vendor,MyVendorAdmin)
 admin.site.register(VendorProfile,MyVendorProfileAdmin)
 admin.site.register(VendorCategory, VendorCategoryAdmin)  

@@ -13,7 +13,7 @@ from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
-from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo, )
+from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo,AccountUser,)
 from core.utility import (send_async_account_approval_mail,)
 from integration.crm import (insert_accounts, )
 
@@ -25,7 +25,16 @@ class InlineAccountLicenseAdmin(admin.StackedInline):
     extra = 0
     model = AccountLicense
     readonly_fields = ('license_number',)
-    can_delete = False    
+    can_delete = False
+
+class InlineAccountUserAdmin(admin.TabularInline):
+    """
+    Configuring field admin.
+    """
+    extra = 0
+    model = AccountUser
+    #readonly_fields = ('license_number',)
+    #can_delete = False        
 
 class InlineAccountBasicProfileAdmin(admin.StackedInline):
     """
@@ -85,7 +94,7 @@ class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
     
     extra = 0
     model = Account
-    inlines = [InlineAccountLicenseAdmin,InlineAccountBasicProfileAdmin,InlineAccountContactInfoAdmin]
+    inlines = [InlineAccountLicenseAdmin,InlineAccountBasicProfileAdmin,InlineAccountContactInfoAdmin, InlineAccountUserAdmin]
     list_display = ('company_name','status','website','account_category', 'created_on', 'approved_on', 'approved_by_member',)
     search_fields = ('account_profile__company_name','account_contact__website','account_category','status',)
     list_filter = (
