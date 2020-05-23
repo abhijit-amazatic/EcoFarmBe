@@ -22,8 +22,8 @@ class StatusFlagMixin(models.Model):
                       (STATUS_APPROVED, _('Approved')),
                       (STATUS_DONE, _('Done')))
     status = models.CharField(choices=STATUS_CHOICES,
-                              max_length=20, default='not_started', null=True, blank=True)
-    step  = models.CharField(_('Steps'), default='0', blank=True, null=True, max_length=255)
+                              max_length=20, default=STATUS_NOT_STARTED, null=False, blank=False)
+    step  = models.CharField(_('Steps'),default='0',blank=False, null=False, max_length=255)
 
     class Meta:
         abstract = True
