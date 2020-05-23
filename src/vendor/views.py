@@ -4,7 +4,8 @@ This module defines API views.
 """
 import json
 from rest_framework.response import Response
-from rest_framework import (permissions, viewsets, status, filters,) 
+from rest_framework import (permissions, viewsets, status, filters,)
+from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.db import transaction
 from rest_framework.views import APIView
@@ -201,8 +202,10 @@ class LicenseViewSet(viewsets.ModelViewSet):
     """
     serializer_class = LicenseSerializer
     permission_classes = (IsAuthenticatedVendorPermission, )
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['legal_business_name', ]
+    filter_backends = [filters.SearchFilter,DjangoFilterBackend]
+    search_fields = ['legal_business_name']
+    filterset_fields = ['vendor_profile']
+
     
     
     def get_queryset(self):
