@@ -93,7 +93,7 @@ class VendorProfile(StatusFlagMixin,models.Model):
     vendor = models.ForeignKey(Vendor, verbose_name=_('Vendor'),
                                 related_name='vendor_profile', on_delete=models.CASCADE)
     profile_type = ArrayField(models.CharField(
-        max_length=255, blank=True),blank=True, null=True)
+        max_length=255, blank=True),blank=True, null=True, default=list)
     number_of_licenses = models.IntegerField(null=True)
     number_of_legal_entities = models.IntegerField(null=True)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)

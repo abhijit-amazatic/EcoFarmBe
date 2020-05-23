@@ -62,6 +62,10 @@ class User(StatusFlagMixin,AbstractUser):
         _('Website'), max_length=150, null=True, blank=True)
     instagram = models.CharField(
         _('Instagram'), max_length=150, null=True, blank=True)
+    facebook = models.CharField(
+        _('Facebook'), max_length=150, null=True, blank=True)
+    twitter = models.CharField(
+        _('Twitter'), max_length=150, null=True, blank=True)
     linkedin = models.CharField(
         _('LinkedIn'), max_length=150, null=True, blank=True)
     
