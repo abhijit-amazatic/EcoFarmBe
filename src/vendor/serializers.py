@@ -49,6 +49,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
     """
     This defines VendorProfile serializer.
     """
+    farm = serializers.SerializerMethodField(read_only=True)
 
     def validate(self, obj):
         """
@@ -73,6 +74,12 @@ class VendorProfileSerializer(serializers.ModelSerializer):
                 print(e)
         user = super().update(instance, validated_data)
         return user
+
+    def get_farm(self, obj):
+        """
+        Return respective farm names.
+        """
+        return obj.profile_name()
     
     class Meta:
         model = VendorProfile
