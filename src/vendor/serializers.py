@@ -301,6 +301,7 @@ class ProcessingFieldsSerializer(serializers.Serializer):
     outdoor_full_season = serializers.DictField(required=False, allow_empty=True)
     indoor = serializers.DictField(required=False, allow_empty=True)
     process_on_site = serializers.CharField(required=True)
+    cultivars = serializers.ListField(required=False,allow_empty=True)    
     #cultivars = ConfigCultivarsSerializer(required=True, many=True)
      
         
@@ -323,7 +324,42 @@ class ProcessingOverviewSerializer(serializers.ModelSerializer):
                     serializer.is_valid(raise_exception=True)   
             
         return attrs
-    
+
+    def create_filter_cultivars(self, validated_data):
+        """
+        return & Set cultivars.
+        """
+        try:
+            cultivars = []
+            ref_types = ["mixed_light", "indoor", "outdoor_full_season", "outdoor_autoflower"]
+            data_keys = list(validated_data.get('processing_config').keys())
+            for cultivar_type in [i for i in data_keys if i in ref_types]:
+                for harvest in validated_data.get('processing_config')[cultivar_type]['cultivars']:
+                    cultivars.extend(harvest['cultivar_names'])
+            cultivars=list(set(cultivars))
+            if validated_data.get('processing_config').get('cultivars',[]):
+                cultivars = list(set(validated_data.get('processing_config')["cultivars"]))
+            validated_data.get('processing_config').update({"cultivars":cultivars})
+            return validated_data
+        except Exception as e:
+            print('exception on overview update',e)
+                
+    def create(self,validated_data):
+        """
+        When object is created add custom method here.
+        """
+        profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+        if profile.vendor.vendor_category == 'cultivation':
+            self.create_filter_cultivars(validated_data)
+        profile = super().create(validated_data)
+        return profile
+        
+    def update(self, instance, validated_data):
+        profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
+        if profile.vendor.vendor_category == 'cultivation':
+            self.create_filter_cultivars(validated_data)
+        user=super().update(instance, validated_data)
+        return user
     class Meta:
         model = ProcessingOverview
         fields = ('__all__')
