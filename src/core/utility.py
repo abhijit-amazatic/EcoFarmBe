@@ -161,6 +161,8 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                                              zip_code=key.get('zip_code',''),
                                                              premises_apn=key.get('premises_apn',''),
                                                              premises_state=key.get('premises_state',''),
+                                                             uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
+                                                             uploaded_w9_to=key.get('uploaded_w9_to',''),
                                                              uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
                         print("STEP1 License fetched in DB")
                 with transaction.atomic():     
@@ -195,33 +197,45 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                     print("STEP2 Profile contact fetched in DB")
                 with transaction.atomic():
                     profile_data = {"lighting_type":data.get('profile_overview').get('lighting_type',[]),
-                                    "type_of_nutrients":data.get('profile_overview').get('type_of_nutrients,'''),
-                                    "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics'),
-                                    "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests'),
-                                    "lab_test_issues":data.get('profile_overview').get('lab_test_issues'),
+                                    "type_of_nutrients":data.get('profile_overview').get('type_of_nutrients',''),
+                                    "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics',''),
+                                    "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests',''),
+                                    "lab_test_issues":data.get('profile_overview').get('lab_test_issues',''),
+                                    "autoflower":data.get('profile_overview').get('autoflower',''),
+                                    "full_season":data.get('profile_overview').get('full_season',''),
+                                    "outdoor_full_season":data.get('profile_overview').get('outdoor_full_season',{}),
+                                    "outdoor_autoflower":data.get('profile_overview').get('outdoor_autoflower',{}),
                                     "mixed_light":data.get('profile_overview').get('mixed_light',{}),
-                                    "outdoor":data.get('profile_overview').get('outdoor',{}),
                                     "indoor":data.get('profile_overview').get('indoor',{})} 
                     #STEP3 - add profile_overview
                     po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
                     print("STEP3 Profile Overview fetched in DB")
                 with transaction.atomic():         
                     #STEP4 - add  processing_config
-                    harvest_dates = [value for key, value in data.get('processing_config').items() if 'harvest_' in key.lower()]
+                    #harvest_dates = [value for key, value in data.get('processing_config').items() if 'harvest_' in key.lower()]
                     cultivars_data = data.get('processing_config').get('cultivars','')
                     if cultivars_data:
                         cultivars = cultivars_data.split(',')
                     else:
                         cultivars = ""
                     processing_data = {"mixed_light": data.get('processing_config').get('mixed_light',{}),
-		                       "outdoor": data.get('processing_config').get('outdoor',{}),
+		                       "outdoor_autoflower": data.get('processing_config').get('outdoor_autoflower',{}),
+                                       "outdoor_full_season": data.get('processing_config').get('outdoor_full_season',{}),
 		                       "indoor": data.get('processing_config').get('inodoor',{}),
-                                       "cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]}
+                                       "process_on_site": data.get('processing_config').get('process_on_site','')}
+                    #"cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]
                     pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=data.get('processing_config'))
                     print("STEP4 Proc.Overview fetched in DB")
                 with transaction.atomic():   
                     #STEP5 - add financial details
-                    fd_step5 = FinancialOverview.objects.get_or_create(vendor_profile_id=vp.id,is_draft=False, financial_details=data.get('financial_details'))
+                    financial_data = {"annual_revenue_2019":data.get('financial_details').get('annual_revenue_2019',''),
+                                      "projected_2020_revenue":data.get('financial_details').get('projected_2020_revenue',''),
+                                      "yearly_budget":data.get('financial_details').get('yearly_budget',''),
+                                      "mixed_light":data.get('financial_details').get('mixed_light',{}),
+                                      "outdoor_full_season":data.get('financial_details').get('outdoor_full_season',{}),
+                                      "outdoor_autoflower":data.get('financial_details').get('outdoor_autoflower',{}),
+                                      "indoor":data.get('financial_details').get('indoor',{})}
+                    fd_step5 = FinancialOverview.objects.get_or_create(vendor_profile_id=vp.id,is_draft=False, financial_details=financial_data)
                     print("STEP5 Financial data fetched in DB") 
     except Exception as e:
         print('Exception\n',e)
