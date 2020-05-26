@@ -105,6 +105,7 @@ def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
     Add them to vendors.
     Invite them to change password.(if users not exists already)
     """
+    role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
     pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
     if pro_contact_obj:
         employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
@@ -118,7 +119,8 @@ def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
                                                                 'existing_member':True})
             if created:
                 if not VendorUser.objects.filter(user_id=obj.id, vendor_id=vendor_obj_id).exists():
-                    VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=','.join(employee['roles'])).save()
+                    extracted_role = role_map.get(employee['roles'][0])
+                    VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=extracted_role).save()
                     notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
                     notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
                     
@@ -136,9 +138,9 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
         for vendor in vendor_type:
             obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=NOUN_PROCESS_MAP.get(vendor))
             if not VendorUser.objects.filter(user_id=user.id, vendor=obj.id).exists():
-                VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='Owner')         
+                VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='owner')         
             vendor_user=VendorUser.objects.get(user_id=user.id,vendor=obj)
-            if vendor_user.role == 'Owner' and user.existing_member and vendor == "cultivation":
+            if vendor_user.role == 'owner' and user.existing_member and vendor == "cultivation":
                 """
                 Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
                 are added with another role aling with this if added user is owner)

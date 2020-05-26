@@ -74,11 +74,26 @@ class VendorUser(models.Model):
     """
     Stores vendor's/cultivator's/Nursary's/etc. User's details.
     """
+    ROLE_OWNER = 'owner'
+    ROLE_LICENSE_OWNER = 'license_owner'
+    ROLE_FARM_MANAGER = 'farm_manager'
+    ROLE_LOGISTICS = 'logistics'
+    ROLE_SALES_OR_INVENTORY = 'sales_or_inventory'
+    ROLE_BILLING = 'billing'
+    ROLE_CHOICES = (
+        (ROLE_OWNER, _('Owner')),
+        (ROLE_LICENSE_OWNER, _('License Owner')),
+        (ROLE_FARM_MANAGER, _('Farm Manager')),
+        (ROLE_LOGISTICS, _('Logistics')),
+        (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
+        (ROLE_BILLING, _('Billing')),
+    )
+    
     vendor = models.ForeignKey(Vendor, verbose_name=_('Vendor'),
                              related_name='vendor_roles', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              related_name='user_roles', on_delete=models.CASCADE)
-    role = models.CharField(verbose_name=_('Role'),max_length=60)
+    role = models.CharField(verbose_name=_('Role'),max_length=60, choices=ROLE_CHOICES)
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     
     class Meta:

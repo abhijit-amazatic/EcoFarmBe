@@ -67,7 +67,7 @@ class VendorViewSet(viewsets.ModelViewSet):
                     vendors = Vendor.objects.filter(ac_manager_id=data['ac_manager'])
                     for vendor in vendors:
                         if not VendorUser.objects.filter(user=data['ac_manager'], vendor=vendor.id).exists():
-                            VendorUser.objects.create(user_id=data['ac_manager'], vendor_id=vendor.id,role='Owner')
+                            VendorUser.objects.create(user_id=data['ac_manager'], vendor_id=vendor.id,role='owner')
             except Exception as e:
                 print(e)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
