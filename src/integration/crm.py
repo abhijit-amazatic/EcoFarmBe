@@ -79,13 +79,13 @@ def create_employees(key, value, obj, crm_obj):
     }
     try:
         for i in d:
-            if 'Cultivation Manager' in i['roles'] and key == 'Contact_1':
+            if 'Farm Manager' in i['roles'] and key == 'Contact_1':
                 user = get_dict(cd, i)
-            elif 'Logistics Manager' in i['roles'] and key == 'Contact_2':
+            elif 'Logistics' in i['roles'] and key == 'Contact_2':
                 user = get_dict(cd, i)
-            elif 'Q&A Manager' in i['roles'] and key == 'Contact_3':
+            elif 'Sales/Inventory' in i['roles'] and key == 'Contact_3':
                 user = get_dict(cd, i)
-            elif 'Owner' in i['roles'] and key == 'Owner1':
+            elif 'License Owner' in i['roles'] and key == 'Owner1':
                 user = get_dict(cd, i)
         return user
     except IndexError:
@@ -103,32 +103,20 @@ def parse_fields(key, value, obj, crm_obj):
         if user['status_code'] in (201, 202):
             return user['response']['data'][0]['details']['id']
 
-    cultivator_type_data = [
-        "outdoor.canopy_sqf",
-        "indoor.canopy_sqf",
-        "mixed_light.canopy_sqf",
-        "mixed_light.no_of_harvest",
-        "indoor.no_of_harvest",
-        "outdoor.no_of_harvest",
-        "mixed_light.plants_per_cycle",
-        "outdoor.plants_per_cycle",
-        "indoor.plants_per_cycle",
-        "po_mixed_light.flower_yield_percentage",
-        "po_indoor.flower_yield_percentage",
-        "po_outdoor.flower_yield_percentage",
-        "po_mixed_light.small_yield_percentage",
-        "po_indoor.small_yield_percentage",
-        "po_outdoor.small_yield_percentage",
-        "po_mixed_light.trim_yield_percentage",
-        "po_indoor.trim_yield_percentage",
-        "po_outdoor.trim_yield_percentage",
-        "po_indoor.yield_per_plant",
-        "po_outdoor.yield_per_plant",
-        "po_mixed_light.yield_per_plant",
-        "po_indoor.avg_yield_pr_sq_ft",
-        "po_outdoor.avg_yield_pr_sq_ft",
-        "po_mixed_light.avg_yield_pr_sq_ft"
-        ]
+    cultivator_starts_with = (
+        "indoor.",
+        "outdoor_full_season.",
+        "outdoor_autoflower.",
+        "mixed_light.",
+        "po_indoor.",
+        "po_outdoor_full_season.",
+        "po_outdoor_autoflower.",
+        "po_mixed_light.",
+        "fd_indoor.",
+        "fd_outdoor_full_season.",
+        "fd_outdoor_autoflower.",
+        "fd_mixed_light.",
+    )
     if value in ('ethics_and_certifications'):
         return ast.literal_eval(obj.get(value))
     if value.startswith('po_cultivars_'):
@@ -140,19 +128,25 @@ def parse_fields(key, value, obj, crm_obj):
     if value.startswith('Contact'):
         return get_vendor_contacts(key, value, obj, crm_obj)
     if value.startswith('layout'):
-        return "4230236000000758743"
+        return "4226315000000819743"
     if value.startswith('account_category'):
         return get_account_category(key, value, obj, crm_obj)
     if value.startswith('logistic_manager_email'):
         return create_or_get_user(obj.get('logistic_manager_name'), obj.get(value))
     if value.startswith('Cultivars'):
-        return obj.get(value).split(', ')
-    if value in cultivator_type_data:
+        if obj.get(value):
+            return obj.get(value).split(', ')
+    if value.startswith(cultivator_starts_with):
         v = value.split('.')
         data = obj.get(v[0])
         if data:
             return data.get(v[1])
         return None
+    if value in ('full_season', 'autoflower'):
+        return "yes" if obj.get(value) else "No"
+    if value.startswith(('billing_address', 'mailing_address')):
+        v = value.split('.')
+        return obj.get(v[0]).get(v[1])
 
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
@@ -261,8 +255,9 @@ def insert_vendors(id=None):
                 r.update({'vendor_type': [type_]})
             r.update(record.profile_contact.profile_contact_details)
             r.update(record.profile_overview.profile_overview)
-            r.update(record.financial_overview.financial_details)
-            for k,v in record.processing_overview.processing_config['processing_config'].items():
+            for k,v in record.financial_overview.financial_details.items():
+                r.update({'fd_' + k:v})
+            for k,v in record.processing_overview.processing_config.items():
                 r.update({'po_' + k:v})
             data_list.append(r)
         except Exception as exc:
@@ -286,15 +281,16 @@ def insert_vendors(id=None):
                     for license in result['response']['orignal_data'][i]['Licenses_List']:
                         data['Licenses'] = license
                         r = create_records('Vendors_X_Licenses', [data])
-                data = dict()
-                l = list()
-                data['Cultivar_Associations'] = record_response[i]['details']['id']
-                for j in result['response']['orignal_data'][i]['po_cultivars']:
-                    for k in j['cultivar_names']:
-                        r = search_query('Cultivars', k, 'Name')
-                        if r['status_code'] == 200:
-                            data['Cultivars'] = r['response'][0]['id']
-                            r = create_records('Vendors_X_Cultivars', [data])
+                if result['response']['orignal_data'][i].get('po_cultivars'):
+                    data = dict()
+                    l = list()
+                    data['Cultivar_Associations'] = record_response[i]['details']['id']
+                    for j in result['response']['orignal_data'][i]['po_cultivars']:
+                        for k in j['cultivar_names']:
+                            r = search_query('Cultivars', k, 'Name')
+                            if r['status_code'] == 200:
+                                data['Cultivars'] = r['response'][0]['id']
+                                r = create_records('Vendors_X_Cultivars', [data])
         return result
     return {}
 
@@ -344,7 +340,11 @@ def get_records_from_crm(legal_business_name):
         vendor_record = crm_obj.get_record('Vendors', vendor['id'])
         if vendor_record['status_code'] == 200:
             vendor = vendor_record['response'][vendor['id']]
-            licenses = licenses['response']
+            licenses = list()
+            for l in vendor.get('Licenses').split(','):
+                license = search_query('Licenses', l.strip(), 'Name')
+                if license['status_code'] == 200:
+                    licenses.append(license['response'][0])
             crm_dict = get_format_dict('Licenses_To_DB')
             li = list()
             for license in licenses:
