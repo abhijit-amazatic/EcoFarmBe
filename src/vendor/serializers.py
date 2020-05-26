@@ -345,22 +345,6 @@ class ProcessingOverviewSerializer(serializers.ModelSerializer):
         except Exception as e:
             print('exception on overview update',e)
                 
-    def create(self,validated_data):
-        """
-        When object is created add custom method here.
-        """
-        profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-        if profile.vendor.vendor_category == 'cultivation':
-            self.create_filter_cultivars(validated_data)
-        profile = super().create(validated_data)
-        return profile
-        
-    def update(self, instance, validated_data):
-        profile = VendorProfile.objects.select_related('vendor').get(id=self.context['request'].parser_context["kwargs"]["pk"])
-        if profile.vendor.vendor_category == 'cultivation':
-            self.create_filter_cultivars(validated_data)
-        user=super().update(instance, validated_data)
-        return user
     class Meta:
         model = ProcessingOverview
         fields = ('__all__')
