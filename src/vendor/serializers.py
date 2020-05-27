@@ -157,7 +157,7 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         Generic for create and update as if is_draft is 'true' we need to bypass. validations
         """
         role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
-        employee_data = validated_data.get('profile_contact_details').get('employees',[])
+        employee_data = validated_data.get('profile_contact_details',{}).get('employees',[])
         new_users = []
         if employee_data:
             for employee in employee_data:
