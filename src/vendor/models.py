@@ -143,6 +143,10 @@ class ProfileContact(models.Model):
                                 related_name='profile_contact', on_delete=models.CASCADE)
     profile_contact_details = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
+    farm_profile_photo = models.CharField(
+        _('Farm Profile Photo Box ID'), blank=True, null=True, max_length=255)
+    farm_photo_sharable_link = models.CharField(
+        _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     
         
 class License(models.Model):

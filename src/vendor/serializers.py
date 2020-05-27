@@ -10,6 +10,7 @@ from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, Fin
 from user.models import User
 from core.utility import (notify_farm_user, notify_admins_on_vendors_registration, notify_admins_on_profile_registration)
 from integration.crm import (insert_vendors, )
+from integration.box import (get_preview_url, )
 
 class VendorSerializer(serializers.ModelSerializer):
     """
@@ -198,6 +199,14 @@ class ProfileContactSerializer(serializers.ModelSerializer):
         if profile.vendor.vendor_category == 'cultivation' and not validated_data.get('is_draft'):
             self.create_and_notify_employee(profile,validated_data)
         user = super().update(instance, validated_data)
+        profile_photo_id = validated_data.get("farm_profile_photo")
+        try:
+            if profile_photo_id:
+                shared_url = get_preview_url(profile_photo_id)
+                user.farm_photo_sharable_link = shared_url
+                user.save()
+        except Exception as e:
+            print("Error while updating Farm profile photo link.", e)
         return user
          
     class Meta:
