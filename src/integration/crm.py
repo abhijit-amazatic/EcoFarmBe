@@ -146,7 +146,8 @@ def parse_fields(module, key, value, obj, crm_obj):
         return "yes" if obj.get(value) else "No"
     if value.startswith(('billing_address', 'mailing_address')):
         v = value.split('.')
-        return obj.get(v[0]).get(v[1])
+        if len(v) == 2 and obj.get(v[0]):
+            return obj.get(v[0]).get(v[1])
 
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
@@ -245,7 +246,7 @@ def insert_vendors(id=None):
                 d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
                 d.update(i)
                 update_license(farm_name, d)
-                l.extend(licenses)
+                l.append(licenses[0]['id'])
             r.update({'licenses': l})
         try:
             type_ = record.vendor.vendor_category
@@ -306,12 +307,12 @@ def update_license(farm_name, license):
         license_url = get_shared_link(license.get('uploaded_license_to'))
         if license_url:
             license['uploaded_license_to'] = license_url  + "?id=" + license.get('uploaded_license_to')
-    if license.get('uploaded_sellers_permit_to'):
+    if license.get('uploaded_sellers_permit_to').isdigit():
             documents = create_folder(new_folder, 'documents')
             moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
             license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
             license['uploaded_sellers_permit_to'] = license_url  + "?id=" + license.get('uploaded_sellers_permit_to')
-    if license.get('uploaded_w9_to'):
+    if license.get('uploaded_w9_to').isdigit():
             documents = create_folder(new_folder, 'documents')
             moved_file = move_file(license['uploaded_w9_to'], documents)
             license_url = get_shared_link(license.get('uploaded_w9_to'))
