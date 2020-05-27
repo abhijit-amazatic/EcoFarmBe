@@ -449,6 +449,24 @@ CRM_FORMAT  = {
                     "billing_zip_code": "Billing_Code",
                     "billing_state": "Billing_State",
                 }
+        },
+    "Leads":
+        {
+            "Layout": "layout_parse",
+            "Company": "company_name",
+            "Company_Name": "first_name",
+            "Last_Name": "first_name",
+            "County": "county",
+            "Email": "email",
+            "Region": "region",
+            "Phone": "phone",
+            "Country": "country",
+            "Vendor_type": "vendor_type",
+            "Lead_Source": "lead_source",
+            "Mailing_State": "state",
+            "Mailing_Country": "country",
+            "Mailing_City": "city",
+            "Mailing_Zip_Code": "zip_code",
         }
 }
 VENDOR_TYPES = {

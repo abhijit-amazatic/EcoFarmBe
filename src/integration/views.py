@@ -14,7 +14,7 @@ from integration.box import(get_box_tokens, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
 from integration.crm import (search_query, get_picklist,
-                             list_crm_contacts, )
+                             list_crm_contacts, create_lead)
 from integration.books import (create_contact, create_estimate,
                                get_estimate, list_estimates, 
                                get_contact, list_contacts, )
@@ -126,3 +126,15 @@ class ContactView(APIView):
         Create contact in Zoho Books.
         """
         return Response(create_contact(data=request.data, params=request.query_params.dict()))
+
+class LeadView(APIView):
+    """
+    View class for Zoho CRM Leads.
+    """
+    permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        """
+        Create Leads.
+        """
+        return Response(create_lead(record=request.data))

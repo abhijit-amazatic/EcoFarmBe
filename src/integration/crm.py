@@ -12,7 +12,7 @@ from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
 from .box import (get_shared_link, move_file, create_folder)
 from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
-                    get_cultivars_date, )
+                    get_cultivars_date, get_layout,)
 
 def get_crm_obj():
     """
@@ -91,7 +91,7 @@ def create_employees(key, value, obj, crm_obj):
     except IndexError:
         return []
 
-def parse_fields(key, value, obj, crm_obj):
+def parse_fields(module, key, value, obj, crm_obj):
     """
     Parse fields
     """
@@ -128,7 +128,7 @@ def parse_fields(key, value, obj, crm_obj):
     if value.startswith('Contact'):
         return get_vendor_contacts(key, value, obj, crm_obj)
     if value.startswith('layout'):
-        return "4226315000000819743"
+        return get_layout(module)
     if value.startswith('account_category'):
         return get_account_category(key, value, obj, crm_obj)
     if value.startswith('logistic_manager_email'):
@@ -160,7 +160,7 @@ def create_records(module, records, is_return_orginal_data=False):
         for k,v in crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
-                v = parse_fields(k, v, record, crm_obj)
+                v = parse_fields(module, k, v, record, crm_obj)
                 record_dict[k] = v
             else:
                 record_dict[k] = record.get(v)
@@ -178,7 +178,7 @@ def update_records(module, records, is_return_orginal_data=False):
         for k,v in crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
-                v = parse_fields(k, v, record, crm_obj)
+                v = parse_fields(module, k, v, record, crm_obj)
                 contact_dict[k] = v
             else:
                 contact_dict[k] = record.get(v)
@@ -467,3 +467,11 @@ def get_accounts_from_crm(legal_business_name):
                 response[k] = r
             return response
     return {}
+
+@app.task(queue="general")
+def create_lead(record):
+    """
+    Create lead in Zoho CRM.
+    """
+    response = create_records('Leads', record)
+    return response

@@ -55,3 +55,12 @@ def get_cultivars_date(key, value, obj, crm_obj):
             return d[int(c[2])-1]['harvest_date']
     except Exception as exc:
         return []
+
+def get_layout(module, layout_name=None):
+    """
+    Return Layout for Zoho CRM.
+    """
+    if module == 'Vendors':
+        return "4226315000000819743"
+    if module == 'Leads':
+        return "4226315000000882434"
