@@ -74,17 +74,21 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     
     def approved_by_member(self, obj):
         return obj.approved_by.get('email',"N/A")
+
+    # def created_on(self,obj):
+    #     return obj.created_on
     
     #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
-    list_display = ('email', 'is_approved','approved_on','approved_by_member')
-    list_filter = ('is_approved', 'is_verified')
+    list_display = ('email', 'is_approved','approved_on','approved_by_member','date_joined',)
+    list_filter = ('is_approved', 'is_verified',)
     list_per_page = 25
     search_fields = ('username', 'legal_business_name', 'email',)
+    ordering = ('-date_joined',)
     readonly_fields = ['is_verified','approved_on','approved_by',]
     actions = [approve_user, ] 
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('is_approved','approved_on','approved_by','is_verified')}),
+            (('User'), {'fields': ('is_approved','approved_on','approved_by','is_verified',)}),
     )     
     
     @transaction.atomic

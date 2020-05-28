@@ -68,6 +68,8 @@ class User(StatusFlagMixin,AbstractUser):
         _('Twitter'), max_length=150, null=True, blank=True)
     linkedin = models.CharField(
         _('LinkedIn'), max_length=150, null=True, blank=True)
+    created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
     
    
     EMAIL_FIELD = 'email'

@@ -251,7 +251,7 @@ class MyVendorProfileAdmin(nested_admin.NestedModelAdmin):#(admin.ModelAdmin):
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),('approved_on',DateRangeFilter ),'status',
     )
-    ordering = ('status','approved_on','created_on','updated_on')
+    ordering = ('-created_on','status','approved_on','updated_on')
     actions = [approve_vendor_profile, ] 
     list_per_page = 50
 

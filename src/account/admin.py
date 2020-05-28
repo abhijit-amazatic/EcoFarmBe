@@ -100,7 +100,7 @@ class MyAccountAdmin(admin.ModelAdmin):#(nested_admin.NestedModelAdmin):
     list_filter = (
         ('created_on', DateRangeFilter),('approved_on',DateRangeFilter ),'status',
     )
-    ordering = ('status','approved_on','created_on',)
+    ordering = ('-created_on','status','approved_on',)
     actions = [approve_accounts, ] 
 
     @transaction.atomic
