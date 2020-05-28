@@ -263,7 +263,7 @@ class FinanceFieldsSerializer(serializers.Serializer):
     """
     annual_revenue_2019 = serializers.CharField(required=True)
     projected_2020_revenue = serializers.CharField(required=True)
-    yearly_budget = serializers.CharField(required=True)
+    yearly_budget = serializers.CharField(required=False,allow_blank=True)
     outdoor_autoflower = serializers.DictField(required=False, allow_empty=True)
     outdoor_full_season = serializers.DictField(required=False, allow_empty=True)
     mixed_light = serializers.DictField(required=False, allow_empty=True)
