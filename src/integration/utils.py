@@ -61,6 +61,6 @@ def get_layout(module, layout_name=None):
     Return Layout for Zoho CRM.
     """
     if module == 'Vendors':
-        return "4226315000000819743"
+        return "4230236000000866793"
     if module == 'Leads':
-        return "4226315000000882434"
+        return "4230236000000929439"
