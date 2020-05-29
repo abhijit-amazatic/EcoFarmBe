@@ -12,7 +12,8 @@ from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
 from .box import (get_shared_link, move_file, create_folder)
 from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
-                    get_cultivars_date, get_layout,)
+                    get_cultivars_date, get_layout,
+                    get_regex_checked, )
 
 def get_crm_obj():
     """
@@ -119,7 +120,7 @@ def parse_fields(module, key, value, obj, crm_obj):
     )
     if value in ('ethics_and_certifications'):
         return ast.literal_eval(obj.get(value))
-    if value.startswith('po_cultivars_'):
+    if get_regex_checked(value):
         return get_cultivars_date(key, value, obj, crm_obj)
     if value.startswith('employees'):
         return create_employees(key, value, obj, crm_obj)

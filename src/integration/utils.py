@@ -1,3 +1,4 @@
+from datetime import (datetime, )
 from .crm_format import (ACCOUNT_TYPES, )
 
 def get_vendor_contacts(key, value, obj, crm_obj):
@@ -48,11 +49,13 @@ def get_cultivars_date(key, value, obj, crm_obj):
     Return cultivar dates.
     """
     try:
-        c = value.split('_')
-        v = "_".join(c[:-1])
-        d = obj.get(v)
+        c = value.split('.')
+        d = obj.get(c[0])
+        e = c[1].split('_')
         if d:
-            return d[int(c[2])-1]['harvest_date']
+            date = d[e[0]][int(e[1])-1]['harvest_date']
+            date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
+            return date
     except Exception as exc:
         return []
 
@@ -64,3 +67,12 @@ def get_layout(module, layout_name=None):
         return "4230236000000866793"
     if module == 'Leads':
         return "4230236000000929439"
+    
+def get_regex_checked(v):
+    """
+    Check if regex matches.
+    """
+    import re
+    
+    regex = 'po_[a-z_]*(.)(cultivars)'
+    return re.search(regex, v)
