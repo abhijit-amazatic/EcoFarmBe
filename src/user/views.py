@@ -57,6 +57,8 @@ class SearchQueryView(APIView):
             result = search_query('Licenses', request.query_params['legal_business_name'], 'Legal_Business_Name')
         elif request.query_params.get('business_dba', None):
             result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA')
+        elif request.query_params.get('license_number', None):
+            result = search_query('Licenses', request.query_params['license_number'], 'Name')
         return Response(result)
 
 class UserViewSet(ModelViewSet):
