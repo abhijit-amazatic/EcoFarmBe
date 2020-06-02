@@ -48,13 +48,19 @@ class GetPickListView(APIView):
     """
     Get field dropdowns from Zoho CRM.
     """
-    permission_classes = (IsAuthenticated,)
     
     def get(self, request):
         """
         Get picklist.
         """
         return Response(get_picklist('Vendors', request.query_params['field']))
+
+    def get_permissions(self):
+        if self.request.query_params['field'] in ('Region', 'County'):
+            self.permission_classes = [AllowAny, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+        return super(GetPickListView, self).get_permissions()
 
 class CRMContactView(APIView):
     """
