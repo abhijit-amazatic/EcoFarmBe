@@ -520,6 +520,7 @@ def sync_cultivars(record):
     crm_obj = get_crm_obj()
     record = parse_crm_record('Cultivars', record['response'])[0]
     try:
+        print(record)
         obj, created = Cultivar.objects.update_or_create(
             cultivar_crm_id=record['cultivar_crm_id'],
             cultivar_name=record['cultivar_name'],
