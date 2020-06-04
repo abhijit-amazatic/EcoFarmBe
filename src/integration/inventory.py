@@ -11,6 +11,7 @@ from core.settings import (
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
 from inventory.models import Inventory as InventoryModel
+from cultivar.models import (Cultivar, )
 
 def get_inventory_obj():
     """
@@ -56,16 +57,33 @@ def get_inventory_item(item_id):
     inventory = get_inventory_obj()
     return inventory.get_inventory(item_id=item_id)
 
+def get_cultivar_from_db(cultivar_name):
+    """
+    Return cultivar from db.
+    """
+    try:
+        return Cultivar.objects.filter(cultivar_name=cultivar_name)
+    except Cultivar.DoesNotExist:
+        return None
+
 def fetch_inventory(days=1):
     """
     Fetch latest inventory from Zoho Inventory.
     """
+    cultivar = None
     yesterday = datetime.now() - timedelta(days=days)
     date = datetime.strftime(yesterday, '%Y-%m-%dT%H:%M:%S-0000')
     records = get_inventory_items({'last_modified_time': date})
     for record in records['items']:
         try:
-            obj = InventoryModel.objects.update_or_create(item_id=record['item_id'], name=record['name'], defaults=record)
+            cultivar = get_cultivar_from_db(record['cf_strain_name'])
+            if cultivar.count() > 0:
+                record['cultivar'] = cultivar.first()
+            obj = InventoryModel.objects.update_or_create(
+                item_id=record['item_id'],
+                name=record['name'],
+                cultivar=cultivar.first(),
+                defaults=record)
         except Exception as exc:
             print(exc)
             continue
@@ -78,7 +96,14 @@ def sync_inventory(response):
     record = json.loads(unquote(response))['item']
     record = inventory.parse_item(response=record, is_detail=True)
     try:
-        obj, created = InventoryModel.objects.update_or_create(item_id=record['item_id'], name=record['name'], defaults=record)
+        cultivar = get_cultivar_from_db(record['cf_strain_name'])
+        if cultivar.count() > 0:
+            record['cultivar'] = cultivar.first()
+        obj, created = InventoryModel.objects.update_or_create(
+            item_id=record['item_id'],
+            name=record['name'],
+            cultivar=cultivar.first(),
+            defaults=record)
         return obj.item_id
     except Exception as exc:
         print(exc)

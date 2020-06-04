@@ -525,7 +525,7 @@ def sync_cultivars(record):
             cultivar_crm_id=record['cultivar_crm_id'],
             cultivar_name=record['cultivar_name'],
             defaults=record)
-        return obj.cultivar_name
+        return created
     except Exception as exc:
         print(exc)
         return {}

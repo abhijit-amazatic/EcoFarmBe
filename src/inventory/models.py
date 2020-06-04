@@ -11,6 +11,8 @@ class Inventory(models.Model):
     """
     Inventory Model Class
     """
+    cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), blank=True, null=True,
+                                related_name='cultivar', on_delete=models.PROTECT)
     created_time = models.DateTimeField(auto_now=False)
     last_modified_time = models.DateTimeField(auto_now=False)
     item_id = models.CharField(_('Item ID'), primary_key=True, max_length=50)
