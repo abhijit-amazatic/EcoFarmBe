@@ -367,7 +367,7 @@ def get_records_from_crm(legal_business_name):
                 for key,value in v.items():
                     if value.endswith('_parse'):
                         value = value.split('_parse')[0]
-                        value = parse_fields(key, value, vendor, crm_obj)
+                        value = parse_fields('Vendors', key, value, vendor, crm_obj)
                         r[key] = value
                     else:
                         r[key] = vendor.get(value)
@@ -466,7 +466,7 @@ def get_accounts_from_crm(legal_business_name):
                 for key,value in v.items():
                     if value.endswith('_parse'):
                         value = value.split('_parse')[0]
-                        value = parse_fields(key, value, account, crm_obj)
+                        value = parse_fields('Accounts', key, value, account, crm_obj)
                         r[key] = value
                     else:
                         r[key] = account.get(value)
@@ -482,7 +482,7 @@ def create_lead(record):
     response = create_records('Leads', record)
     return response
 
-def parse_field(record, key, field):
+def get_field(record, key, field):
     """
     Parse crm fields.
     """
@@ -504,7 +504,7 @@ def parse_crm_record(module, records):
             try:
                 if v.endswith('_parse'):
                     key = v.split('_parse')
-                    value = parse_field(record, k, key[0])
+                    value = get_field(record, k, key[0])
                     record_dict[key[0]] = value
                 else:
                     record_dict[v] = record.get(k)
