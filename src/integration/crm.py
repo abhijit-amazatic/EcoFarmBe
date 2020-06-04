@@ -518,6 +518,7 @@ def sync_cultivars(record):
     Webhook for Zoho CRM to sync cultivars real time.
     """
     crm_obj = get_crm_obj()
+    print(record)
     record = parse_crm_record('Cultivars', record['response'])[0]
     try:
         print(record)
