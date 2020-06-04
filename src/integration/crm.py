@@ -508,8 +508,7 @@ def parse_crm_record(module, records):
                     record_dict[key[0]] = value
                 else:
                     record_dict[v] = record.get(k)
-            except Exception as exc:
-                print(exc)
+            except Exception:
                 continue
         record_list.append(record_dict)
     return record_list
