@@ -73,20 +73,25 @@ def fetch_inventory(days=1):
     cultivar = None
     yesterday = datetime.now() - timedelta(days=days)
     date = datetime.strftime(yesterday, '%Y-%m-%dT%H:%M:%S-0000')
-    records = get_inventory_items({'last_modified_time': date})
-    for record in records['items']:
-        try:
-            cultivar = get_cultivar_from_db(record['cf_strain_name'])
-            if cultivar.count() > 0:
-                record['cultivar'] = cultivar.first()
-            obj = InventoryModel.objects.update_or_create(
-                item_id=record['item_id'],
-                name=record['name'],
-                cultivar=cultivar.first(),
-                defaults=record)
-        except Exception as exc:
-            print(exc)
-            continue
+    has_more = True
+    page = 0
+    while has_more:
+        records = get_inventory_items({'page': page, 'last_modified_time': date})
+        has_more = records['page_context']['has_more_page']
+        page = records['page_context']['page'] + 1
+        for record in records['items']:
+            try:
+                cultivar = get_cultivar_from_db(record['cf_strain_name'])
+                if cultivar.count() > 0:
+                    record['cultivar'] = cultivar.first()
+                obj = InventoryModel.objects.update_or_create(
+                    item_id=record['item_id'],
+                    name=record['name'],
+                    cultivar=cultivar.first(),
+                    defaults=record)
+            except Exception as exc:
+                print(exc)
+                continue
         
 def sync_inventory(response):
     """
