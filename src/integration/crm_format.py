@@ -494,10 +494,10 @@ CRM_FORMAT  = {
             'CBD_Range': 'cbd_range',
             'Record_Image': 'cultivar_image',
             'THCv_Range': 'thcv_range',
-            'Modified_By': 'modified_by.id',
+            'Modified_By': 'modified_by_parse',
             'Terpenes_Secondary': 'terpenes_secondary',
-            'Parent_2': 'parent_2',
-            'Parent_1': 'parent_1',
+            'Parent_2': 'parent_2_parse',
+            'Parent_1': 'parent_1_parse',
             'id': 'cultivar_crm_id',
             'Modified_Time': 'modify_time',
             'Created_Time': 'create_time',
@@ -505,7 +505,7 @@ CRM_FORMAT  = {
             'Type': 'cultivar_type',
             'THC_Range': 'thc_range',
             'CBG_Range': 'cbg_range',
-            'Created_By': 'created_by.id',
+            'Created_By': 'created_by_parse',
             'Terpenes': 'terpenes_primary'
         }
 }

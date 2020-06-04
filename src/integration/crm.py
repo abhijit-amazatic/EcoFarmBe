@@ -482,20 +482,32 @@ def create_lead(record):
     response = create_records('Leads', record)
     return response
 
-def sync_cultivars(record):
+def sync_cultivars(response):
     """
     Webhook for Zoho CRM to sync cultivars real time.
     """
     crm_obj = get_crm_obj()
+    id = response['cultivar_id']
+    record = crm_obj.get_record('Cultivars', id)
+    record = parse_crm_record('Cultivars', [record['response'][id]])[0]
     try:
         obj, created = Cultivar.objects.update_or_create(
-            cultivar_crm_id=record['cultivar_crm_id'],
+            cultivar_crm_id=id,
             cultivar_name=record['cultivar_name'],
             defaults=record)
         return obj.cultivar_name
     except Exception as exc:
         print(exc)
         return {}
+
+def parse_field(record, field):
+    """
+    Parse crm fields.
+    """
+    if field in ('created_by', 'modified_by'):
+        return record.get(field).get('id')
+    if field in ('parent_1', 'parent_2'):
+        return list(record.get(field))
 
 def parse_crm_record(module, records):
     """
@@ -507,11 +519,15 @@ def parse_crm_record(module, records):
     for record in records:
         record_dict = dict()
         for k,v in crm_dict.items():
-            if '.' in v:
-                key = v.split('.')
-                record_dict[key[0]] = record.get(k).get(key[1])
-            else:
-                record_dict[v] = record.get(k)
+            try:
+                if v.endswith('_parse'):
+                    key = v.split('_parse')
+                    value = parse_field(record, key)
+                    record_dict[key[0]] = value
+                else:
+                    record_dict[v] = record.get(k)
+            except Exception:
+                continue
         record_list.append(record_dict)
     return record_list
 
