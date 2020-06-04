@@ -508,7 +508,8 @@ def parse_crm_record(module, records):
                     record_dict[key[0]] = value
                 else:
                     record_dict[v] = record.get(k)
-            except Exception:
+            except Exception as exc:
+                print(exc)
                 continue
         record_list.append(record_dict)
     return record_list
@@ -518,10 +519,9 @@ def sync_cultivars(record):
     Webhook for Zoho CRM to sync cultivars real time.
     """
     crm_obj = get_crm_obj()
-    print(record)
-    record = parse_crm_record('Cultivars', record['response'])[0]
+    record = json.loads(record.dict()['response'])
+    record = parse_crm_record('Cultivars', [record])[0]
     try:
-        print(record)
         obj, created = Cultivar.objects.update_or_create(
             cultivar_crm_id=record['cultivar_crm_id'],
             cultivar_name=record['cultivar_name'],
