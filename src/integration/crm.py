@@ -1,4 +1,7 @@
 import ast
+import json
+from datetime import (datetime, timedelta, )
+from urllib.parse import (unquote, )
 from pyzoho import CRM
 from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
@@ -7,6 +10,7 @@ from core.settings import (PYZOHO_CONFIG,
 from user.models import (User, )
 from vendor.models import (VendorProfile, License, )
 from account.models import (Account, )
+from cultivar.models import (Cultivar, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
                          ACCOUNT_TYPES)
 from .box import (get_shared_link, move_file, create_folder)
@@ -477,3 +481,59 @@ def create_lead(record):
     """
     response = create_records('Leads', record)
     return response
+
+def sync_cultivars(record):
+    """
+    Webhook for Zoho CRM to sync cultivars real time.
+    """
+    crm_obj = get_crm_obj()
+    try:
+        obj, created = Cultivar.objects.update_or_create(
+            cultivar_crm_id=record['cultivar_crm_id'],
+            cultivar_name=record['cultivar_name'],
+            defaults=record)
+        return obj.cultivar_name
+    except Exception as exc:
+        print(exc)
+        return {}
+
+def parse_crm_record(module, records):
+    """
+    Parse crm record.
+    """
+    record_list = list()
+    crm_obj = get_crm_obj()
+    crm_dict = get_format_dict(module)
+    for record in records:
+        record_dict = dict()
+        for k,v in crm_dict.items():
+            if '.' in v:
+                key = v.split('.')
+                record_dict[key[0]] = record.get(k).get(key[1])
+            else:
+                record_dict[v] = record.get(k)
+        record_list.append(record_dict)
+    return record_list
+
+def fetch_cultivars(days=1):
+    """
+    Fetch cultivars from Zoho CRM.
+    """
+    crm_obj = get_crm_obj()
+    yesterday = datetime.now() - timedelta(days=days)
+    date = datetime.strftime(yesterday, '%Y-%m-%dT%H:%M:%S%z')
+    request_headers = dict()
+    request_headers['If-Modified-Since'] = date
+    has_more = True
+    while has_more != False:
+        records = crm_obj.get_records(module='Cultivars', extra_headers=request_headers)['response']
+        has_more = records['info']['more_records']
+        records = parse_crm_record('Cultivars', records['data'])
+        for record in records:
+            try:
+                obj, created = Cultivar.objects.update_or_create(
+                    cultivar_crm_id=record['cultivar_crm_id'], cultivar_name=record['cultivar_name'], defaults=record)
+            except Exception as exc:
+                print(exc)
+                continue
+    return

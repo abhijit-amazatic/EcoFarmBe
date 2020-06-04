@@ -33,6 +33,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, )
 from account.views import (AccountViewSet,AccountLicenseViewSet)
+from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 
 
 router = SimpleRouter()
@@ -41,6 +42,7 @@ router.register(r'vendor', VendorViewSet, base_name="vendor")
 router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
+router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'account', AccountViewSet, base_name="account")
 router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
 
@@ -63,6 +65,7 @@ urlpatterns = [
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
     path(r'crm/contacts/', CRMContactView.as_view(), name='list_crm_contacts'),
     path(r'crm/lead/', LeadView.as_view(), name='create_lead'),
+    path(r'cultivar/sync/', CultivarSyncView.as_view(), name='sync_cultivar'),
     path(r'books/estimate', EstimateView.as_view(), name='estimate'),
     path(r'books/contact', ContactView.as_view(), name='contact'),
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),

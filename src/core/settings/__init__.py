@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'nested_admin',
     'django_json_widget',
     'rangefilter',
-    'inventory'
+    'inventory',
+    'cultivar',
 ]
 
 MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []

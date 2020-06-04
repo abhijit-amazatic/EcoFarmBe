@@ -4,6 +4,7 @@ Inventory Model
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
+from cultivar.models import (Cultivar, )
 
 
 class Inventory(models.Model):

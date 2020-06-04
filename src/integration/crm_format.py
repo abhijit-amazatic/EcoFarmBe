@@ -485,6 +485,28 @@ CRM_FORMAT  = {
             "Mailing_Country": "country",
             "Mailing_City": "city",
             "Mailing_Zip_Code": "zip_code",
+        },
+    "Cultivars":
+        {
+            'Description': 'description',
+            'Effects': 'effect',
+            'Name': 'cultivar_name',
+            'CBD_Range': 'cbd_range',
+            'Record_Image': 'cultivar_image',
+            'THCv_Range': 'thcv_range',
+            'Modified_By': 'modified_by.id',
+            'Terpenes_Secondary': 'terpenes_secondary',
+            'Parent_2': 'parent_2',
+            'Parent_1': 'parent_1',
+            'id': 'cultivar_crm_id',
+            'Modified_Time': 'modify_time',
+            'Created_Time': 'create_time',
+            'Flavor': 'flavor',
+            'Type': 'cultivar_type',
+            'THC_Range': 'thc_range',
+            'CBG_Range': 'cbg_range',
+            'Created_By': 'created_by.id',
+            'Terpenes': 'terpenes_primary'
         }
 }
 VENDOR_TYPES = {
