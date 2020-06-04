@@ -482,37 +482,14 @@ def create_lead(record):
     response = create_records('Leads', record)
     return response
 
-def sync_cultivars(response):
-    """
-    Webhook for Zoho CRM to sync cultivars real time.
-    """
-    crm_obj = get_crm_obj()
-    print('response', response)
-    id = response['cultivar_id']
-    print('id', id)
-    record = crm_obj.get_record('Cultivars', id)
-    print('record 1', record)
-    record = parse_crm_record('Cultivars', [record['response'][id]])[0]
-    print('record 2', record)
-    try:
-        obj, created = Cultivar.objects.update_or_create(
-            cultivar_crm_id=id,
-            cultivar_name=record['cultivar_name'],
-            defaults=record)
-        print(obj, created)
-        return obj.cultivar_name
-    except Exception as exc:
-        print(exc)
-        return {}
-
-def parse_field(record, field):
+def parse_field(record, key, field):
     """
     Parse crm fields.
     """
     if field in ('created_by', 'modified_by'):
-        return record.get(field).get('id')
+        return record.get(key).get('id')
     if field in ('parent_1', 'parent_2'):
-        return list(record.get(field))
+        return [record.get(key).get('id')]
 
 def parse_crm_record(module, records):
     """
@@ -527,7 +504,7 @@ def parse_crm_record(module, records):
             try:
                 if v.endswith('_parse'):
                     key = v.split('_parse')
-                    value = parse_field(record, key)
+                    value = parse_field(record, k, key[0])
                     record_dict[key[0]] = value
                 else:
                     record_dict[v] = record.get(k)
@@ -535,6 +512,22 @@ def parse_crm_record(module, records):
                 continue
         record_list.append(record_dict)
     return record_list
+
+def sync_cultivars(record):
+    """
+    Webhook for Zoho CRM to sync cultivars real time.
+    """
+    crm_obj = get_crm_obj()
+    record = parse_crm_record('Cultivars', record['response'])[0]
+    try:
+        obj, created = Cultivar.objects.update_or_create(
+            cultivar_crm_id=record['cultivar_crm_id'],
+            cultivar_name=record['cultivar_name'],
+            defaults=record)
+        return obj.cultivar_name
+    except Exception as exc:
+        print(exc)
+        return {}
 
 def fetch_cultivars(days=1):
     """
