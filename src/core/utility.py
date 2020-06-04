@@ -124,7 +124,17 @@ def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
                     notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
                     notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
                     
-                        
+def extract_role(role):
+    """
+    Map role for existing user according to database choices.
+    """
+    role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
+    extracted_role =  [value for key, value in role_map.items() if role.lower() in key.lower()]
+    if extracted_role:
+        return extracted_role
+    else:
+        return ["farm_manager"]
+
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
     """
@@ -136,7 +146,7 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
     """
     try:
         for vendor in vendor_type:
-            obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=NOUN_PROCESS_MAP.get(vendor))
+            obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=vendor)
             if not VendorUser.objects.filter(user_id=user.id, vendor=obj.id).exists():
                 VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='owner')         
             vendor_user=VendorUser.objects.get(user_id=user.id,vendor=obj)
@@ -189,10 +199,10 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                       "linkedin":data.get('profile_contact').get('linkedin',''),
                                       "twitter":data.get('profile_contact').get('twitter',''),
                                       "no_of_employees":data.get('profile_contact').get('no_of_employees',''),
-                                      "employees":[{"employee_name":data.get('profile_contact').get('employees').get('Cultivation Manager','')['employee_name'],
-                                                    "employee_email":data.get('profile_contact').get('employees').get('Cultivation Manager','')['employee_email'] ,
-                                                    "phone":data.get('profile_contact').get('employees').get('Cultivation Manager','')['phone'],
-                                                    "roles":[contact]} for contact in contacts]}
+                                      "employees":[{"employee_name":data.get('profile_contact').get('employees',{}).get(contact,'')['employee_name'],
+                                                    "employee_email":data.get('profile_contact').get('employees',{}).get(contact,'')['employee_email'] ,
+                                                    "phone":data.get('profile_contact').get('employees',{}).get(contact,'')['phone'],
+                                                    "roles":extract_role(contact.split()[0])} for contact in contacts]}
                     pc_step2, created = ProfileContact.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False,profile_contact_details = formatted_data)
                     if created:
                         add_users_to_system.delay(pc_step2.id,vp.id,obj.id)
