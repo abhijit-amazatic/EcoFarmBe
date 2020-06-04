@@ -525,9 +525,11 @@ def fetch_cultivars(days=1):
     request_headers = dict()
     request_headers['If-Modified-Since'] = date
     has_more = True
+    page = 0
     while has_more != False:
-        records = crm_obj.get_records(module='Cultivars', extra_headers=request_headers)['response']
+        records = crm_obj.get_records(module='Cultivars', page=page, extra_headers=request_headers)['response']
         has_more = records['info']['more_records']
+        page = records['info']['page'] + 1
         records = parse_crm_record('Cultivars', records['data'])
         for record in records:
             try:
