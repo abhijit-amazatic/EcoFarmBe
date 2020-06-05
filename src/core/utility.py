@@ -115,14 +115,14 @@ def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
                                                       defaults={'email':employee['employee_email'],
                                                                 'username':employee['employee_name'],
                                                                 'phone':employee['phone'],
-                                                                'is_verified':True,
+                                                                'is_verified':False,
                                                                 'existing_member':True})
             if created:
                 if not VendorUser.objects.filter(user_id=obj.id, vendor_id=vendor_obj_id).exists():
                     extracted_role = role_map.get(employee['roles'][0])
-                    VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=extracted_role).save()
-                    notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
-                    notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
+                    VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=employee['roles'][0]).save()
+                    #notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
+                    #notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
                     
 def extract_role(role):
     """
@@ -213,6 +213,28 @@ def extract_financial_data(cultivation_type,data):
 		"trim_target_price":data.get('financial_details').get('fd_indoor.trim_target_price_parse',''),
 		"bucked_untrimmed":data.get('financial_details').get('fd_indoor.bucked_untrimmed_parse','')
 		}
+
+def extract_overview_data(cultivation_type,data):
+    """
+    extract overview data according to inputs.
+    """
+    if cultivation_type == "mixed_light":
+        return {"canopy_sqf":data.get('profile_overview').get('mixed_light.canopy_sqf_parse',0),
+                "no_of_harvest":data.get('profile_overview').get('mixed_light.no_of_harvest_parse',0),
+                "plants_per_cycle":data.get('profile_overview').get('mixed_light.plants_per_cycle_parse',0)}
+    elif cultivation_type == "indoor":
+        return {"canopy_sqf":data.get('profile_overview').get('indoor.canopy_sqf_parse',0),
+                "no_of_harvest":data.get('profile_overview').get('indoor.no_of_harvest_parse',0),
+                "plants_per_cycle":data.get('profile_overview').get('indoor.plants_per_cycle_parse',0)}
+    elif cultivation_type == "outdoor_full_season":
+        return {"canopy_sqf":data.get('profile_overview').get('outdoor_full_season.canopy_sqf_parse',0),
+                "no_of_harvest":data.get('profile_overview').get('outdoor_full_season.no_of_harvest_parse',0),
+                "plants_per_cycle":data.get('profile_overview').get('outdoor_full_season.plants_per_cycle_parse',0)}
+    elif cultivation_type == "outdoor_autoflower":
+        return {"canopy_sqf":data.get('profile_overview').get('outdoor_autoflower.canopy_sqf_parse',0),
+                "no_of_harvest":data.get('profile_overview').get('outdoor_autoflower.no_of_harvest_parse',0),
+                "plants_per_cycle":data.get('profile_overview').get('outdoor_autoflower.plants_per_cycle_parse',0)}
+    
     
     
 @app.task(queue="general")
@@ -295,18 +317,10 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                     "lab_test_issues":data.get('profile_overview').get('lab_test_issues',''),
                                     "autoflower":data.get('profile_overview').get('autoflower_parse',''),
                                     "full_season":data.get('profile_overview').get('full_season_parse',''),
-                                    "outdoor_full_season":{"canopy_sqf":data.get('profile_overview').get('outdoor_full_season.canopy_sqf_parse',0),
-                                                           "no_of_harvest":data.get('profile_overview').get('outdoor_full_season.no_of_harvest_parse',0),
-                                                           "plants_per_cycle":data.get('profile_overview').get('outdoor_full_season.plants_per_cycle_parse',0)},
-                                    "outdoor_autoflower":{"canopy_sqf":data.get('profile_overview').get('outdoor_autoflower.canopy_sqf_parse',0),
-                                                          "no_of_harvest":data.get('profile_overview').get('outdoor_autoflower.no_of_harvest_parse',0),
-                                                          "plants_per_cycle":data.get('profile_overview').get('outdoor_autoflower.plants_per_cycle_parse',0)},
-                                    "mixed_light":{"canopy_sqf":data.get('profile_overview').get('mixed_light.canopy_sqf_parse',0),
-                                                   "no_of_harvest":data.get('profile_overview').get('mixed_light.no_of_harvest_parse',0),
-                                                   "plants_per_cycle":data.get('profile_overview').get('mixed_light.plants_per_cycle_parse',0)},
-                                    "indoor":{"canopy_sqf":data.get('profile_overview').get('indoor.canopy_sqf_parse',0),
-                                              "no_of_harvest":data.get('profile_overview').get('indoor.no_of_harvest_parse',0),
-                                              "plants_per_cycle":data.get('profile_overview').get('indoor.plants_per_cycle_parse',0)}} 
+                                    "outdoor_full_season":extract_overview_data('outdoor_full_season',data),
+                                    "outdoor_autoflower":extract_overview_data('outdoor_autoflower',data),
+                                    "mixed_light":extract_overview_data('mixed_light',data),
+                                    "indoor":extract_overview_data('indoor',data)} 
                     #STEP3 - add profile_overview
                     po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
                     print("STEP3 Profile Overview fetched in DB")
