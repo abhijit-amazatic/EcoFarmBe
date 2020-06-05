@@ -3,7 +3,7 @@ Accounts related schemas defined here.
 """
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.postgres.fields import (ArrayField, JSONField,)
+from django.contrib.postgres.fields import (ArrayField,JSONField,HStoreField,)
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, )
 from django.conf import settings
@@ -158,24 +158,7 @@ class AccountContactInfo(models.Model):
         _('Website'), blank=True, null=True, max_length=255)
     company_email = models.CharField(
         _('Compony Email'), blank=True, null=True, max_length=255)
-    owner_name = models.CharField(
-        _('Owner Name'), blank=True, null=True, max_length=255)
-    owner_email = models.CharField(
-        _('Owner Email'), blank=True, null=True, max_length=255)
-    owner_phone = models.CharField(
-        _('Owner Phone'), blank=True, null=True, max_length=255)
-    logistic_manager_name = models.CharField(
-        _('Logistic Manager Name'), blank=True, null=True, max_length=255)
-    logistic_manager_email = models.CharField(
-        _('Logistic Manager Email'), blank=True, null=True, max_length=255)
-    logistic_manager_phone = models.CharField(
-        _('Logistic Manager Phone'), blank=True, null=True, max_length=255)
-    sales_or_inventory_name = models.CharField(
-        _('Sales/inventory Name'), blank=True, null=True, max_length=255)
-    sales_or_inventory_email = models.CharField(
-        _('Sales/Inventory Email'), blank=True, null=True, max_length=255)
-    sales_or_inventory_phone = models.CharField(
-        _('Sales/Inventory Phone'), blank=True, null=True, max_length=255)
+    employees = ArrayField(HStoreField(default=dict, ), default=list)
     instagram = models.CharField(
         _('Instagram'), blank=True, null=True, max_length=255)
     linked_in = models.CharField(
