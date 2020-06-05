@@ -136,7 +136,7 @@ def extract_role(role):
         return ["farm_manager"]
 
 
-def get_processing_data(cultivation_type,data):
+def extract_processing_data(cultivation_type,data):
     """
     extract processing data according to inputs
     """
@@ -165,6 +165,55 @@ def get_processing_data(cultivation_type,data):
 		"yield_per_plant":data.get('processing_config').get('po_outdoor_full_season.yield_per_plant_parse',0),
 		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_full_season.avg_yield_pr_sq_ft_parse',0)}
         
+def extract_financial_data(cultivation_type,data):
+    """
+    extract financial data according to inputs
+    """
+    if cultivation_type == "mixed_light":
+        return {"target_profit_margin":data.get('financial_details').get('fd_mixed_light.target_profit_margin_parse',''),
+		"know_cost_per_lbs":data.get('financial_details').get('fd_mixed_light.know_cost_per_lbs_parse',''),
+		"cost_per_lbs":data.get('financial_details').get('fd_mixed_light.cost_per_lbs_parse',''),
+		"know_cost_per_sqf":data.get('financial_details').get('fd_mixed_light.know_cost_per_sqf_parse',''),
+		"cost_per_sqf":data.get('financial_details').get('fd_mixed_light.cost_per_sqf_parse',''),
+		"tops_target_price":data.get('financial_details').get('fd_mixed_light.tops_target_price_parse',''),
+		"small_target_price":data.get('financial_details').get('fd_mixed_light.small_target_price_parse',''),
+		"trim_target_price":data.get('financial_details').get('fd_mixed_light.trim_target_price_parse',''),
+		"bucked_untrimmed":data.get('financial_details').get('fd_mixed_light.bucked_untrimmed_parse','')
+		}
+    elif cultivation_type == "outdoor_full_season":
+        return {"target_profit_margin":data.get('financial_details').get('fd_outdoor_full_season.target_profit_margin_parse',''),
+	        "know_cost_per_lbs":data.get('financial_details').get('fd_outdoor_full_season.know_cost_per_lbs_parse',''),
+	        "cost_per_lbs":data.get('financial_details').get('fd_outdoor_full_season.cost_per_lbs_parse',''),
+		"know_cost_per_sqf":data.get('financial_details').get('fd_outdoor_full_season.know_cost_per_sqf_parse',''),
+		"cost_per_sqf":data.get('financial_details').get('fd_outdoor_full_season.cost_per_sqf_parse',''),
+		"tops_target_price":data.get('financial_details').get('fd_outdoor_full_season.tops_target_price_parse',''),
+		"small_target_price":data.get('financial_details').get('fd_outdoor_full_season.small_target_price_parse',''),
+		"trim_target_price":data.get('financial_details').get('fd_outdoor_full_season.trim_target_price_parse',''),
+		"bucked_untrimmed":data.get('financial_details').get('fd_outdoor_full_season.bucked_untrimmed_parse','')
+		}
+    elif cultivation_type == "outdoor_autoflower":
+        return {"target_profit_margin":data.get('financial_details').get('fd_outdoor_autoflower.target_profit_margin_parse',''),
+	        "know_cost_per_lbs":data.get('financial_details').get('fd_outdoor_autoflower.know_cost_per_lbs_parse',''),
+	        "cost_per_lbs":data.get('financial_details').get('fd_outdoor_autoflower.cost_per_lbs_parse',''),
+		"know_cost_per_sqf":data.get('financial_details').get('fd_outdoor_autoflower.know_cost_per_sqf_parse',''),
+		"cost_per_sqf":data.get('financial_details').get('fd_outdoor_autoflower.cost_per_sqf_parse',''),
+		"tops_target_price":data.get('financial_details').get('fd_outdoor_autoflower.tops_target_price_parse',''),
+		"small_target_price":data.get('financial_details').get('fd_outdoor_autoflower.small_target_price_parse',''),
+		"trim_target_price":data.get('financial_details').get('fd_outdoor_autoflower.trim_target_price_parse',''),
+		"bucked_untrimmed":data.get('financial_details').get('fd_outdoor_autoflower.bucked_untrimmed_parse','')
+		}
+    elif cultivation_type == "indoor":
+        return {"target_profit_margin":data.get('financial_details').get('fd_indoor.target_profit_margin_parse',''),
+	        "know_cost_per_lbs":data.get('financial_details').get('fd_indoor.know_cost_per_lbs_parse',''),
+	        "cost_per_lbs":data.get('financial_details').get('fd_indoor.cost_per_lbs_parse',''),
+		"know_cost_per_sqf":data.get('financial_details').get('fd_indoor.know_cost_per_sqf_parse',''),
+		"cost_per_sqf":data.get('financial_details').get('fd_indoor.cost_per_sqf_parse',''),
+		"tops_target_price":data.get('financial_details').get('fd_indoor.tops_target_price_parse',''),
+		"small_target_price":data.get('financial_details').get('fd_indoor.small_target_price_parse',''),
+		"trim_target_price":data.get('financial_details').get('fd_indoor.trim_target_price_parse',''),
+		"bucked_untrimmed":data.get('financial_details').get('fd_indoor.bucked_untrimmed_parse','')
+		}
+    
     
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
@@ -269,25 +318,23 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                         cultivars = cultivars_data.split(',')
                     else:
                         cultivars = ""
-                    processing_data = {"mixed_light":get_processing_data('mixed_light',data),
-                                       "indoor":get_processing_data('indoor',data) 
-		                       "outdoor_autoflower": data.get('processing_config').get('outdoor_autoflower',{}),
-                                       "outdoor_full_season": data.get('processing_config').get('outdoor_full_season',{}),
-		                       
-                                       
+                    processing_data = {"mixed_light":extract_processing_data('mixed_light',data),
+                                       "indoor":extract_processing_data('indoor',data), 
+		                       "outdoor_autoflower":extract_processing_data('outdoor_autoflower',data),
+                                       "outdoor_full_season":extract_processing_data('outdoor_full_season',data),
                                        "process_on_site": data.get('processing_config').get('process_on_site','')}
                     #"cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]
                     pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=data.get('processing_config'))
                     print("STEP4 Proc.Overview fetched in DB")
                 with transaction.atomic():   
                     #STEP5 - add financial details
-                    financial_data = {"annual_revenue_2019":data.get('financial_details').get('annual_revenue_2019',''),
-                                      "projected_2020_revenue":data.get('financial_details').get('projected_2020_revenue',''),
-                                      "yearly_budget":data.get('financial_details').get('yearly_budget',''),
-                                      "mixed_light":data.get('financial_details').get('mixed_light',{}),
-                                      "outdoor_full_season":data.get('financial_details').get('outdoor_full_season',{}),
-                                      "outdoor_autoflower":data.get('financial_details').get('outdoor_autoflower',{}),
-                                      "indoor":data.get('financial_details').get('indoor',{})}
+                    financial_data = {"annual_revenue_2019":data.get('financial_details').get('fd_annual_revenue_2019',''),
+                                      "projected_2020_revenue":data.get('financial_details').get('fd_projected_2020_revenue',''),
+                                      "yearly_budget":data.get('financial_details').get('fd_yearly_budget',''),
+                                      "mixed_light":extract_financial_data('mixed_light',data),
+                                      "outdoor_full_season":extract_financial_data('outdoor_full_season',data),
+                                      "outdoor_autoflower":extract_financial_data('outdoor_autoflower',data),
+                                      "indoor":extract_financial_data('indoor',data)}
                     fd_step5 = FinancialOverview.objects.get_or_create(vendor_profile_id=vp.id,is_draft=False, financial_details=financial_data)
                     print("STEP5 Financial data fetched in DB") 
     except Exception as e:
