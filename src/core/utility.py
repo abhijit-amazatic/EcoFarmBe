@@ -135,6 +135,37 @@ def extract_role(role):
     else:
         return ["farm_manager"]
 
+
+def get_processing_data(cultivation_type,data):
+    """
+    extract processing data according to inputs
+    """
+    if cultivation_type == "mixed_light":
+        return {"flower_yield_percentage":data.get('processing_config').get('po_mixed_light.flower_yield_percentage_parse',0),
+		"small_yield_percentage":data.get('processing_config').get('po_mixed_light.small_yield_percentage_parse',0),
+		"trim_yield_percentage":data.get('processing_config').get('po_mixed_light.trim_yield_percentage_parse',0),
+		"yield_per_plant":data.get('processing_config').get('po_mixed_light.yield_per_plant_parse',0),
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_mixed_light.avg_yield_pr_sq_ft_parse',0)}
+    elif cultivation_type == "indoor":
+        return {"flower_yield_percentage":data.get('processing_config').get('po_indoor.flower_yield_percentage_parse',0),
+		"small_yield_percentage":data.get('processing_config').get('po_indoor.small_yield_percentage_parse',0),
+		"trim_yield_percentage":data.get('processing_config').get('po_indoor.trim_yield_percentage_parse',0),
+		"yield_per_plant":data.get('processing_config').get('po_indoor.yield_per_plant_parse',0),
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_indoor.avg_yield_pr_sq_ft_parse',0)}
+    elif cultivation_type == "outdoor_autoflower":
+        return {"flower_yield_percentage":data.get('processing_config').get('po_outdoor_autoflower.flower_yield_percentage_parse',0),
+		"small_yield_percentage":data.get('processing_config').get('po_outdoor_autoflower.small_yield_percentage_parse',0),
+		"trim_yield_percentage":data.get('processing_config').get('po_outdoor_autoflower.trim_yield_percentage_parse',0),
+		"yield_per_plant":data.get('processing_config').get('po_outdoor_autoflower.yield_per_plant_parse',0),
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_autoflower.avg_yield_per_sq_ft_parse',0)}
+    elif cultivation_type == "outdoor_full_season":
+        return {"flower_yield_percentage":data.get('processing_config').get('po_outdoor_full_season.flower_yield_percentage_parse',0),
+		"small_yield_percentage":data.get('processing_config').get('po_outdoor_full_season.small_yield_percentage_parse',0),
+		"trim_yield_percentage":data.get('processing_config').get('po_outdoor_full_season.trim_yield_percentage_parse',0),
+		"yield_per_plant":data.get('processing_config').get('po_outdoor_full_season.yield_per_plant_parse',0),
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_full_season.avg_yield_pr_sq_ft_parse',0)}
+        
+    
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
     """
@@ -213,12 +244,20 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                     "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics',''),
                                     "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests',''),
                                     "lab_test_issues":data.get('profile_overview').get('lab_test_issues',''),
-                                    "autoflower":data.get('profile_overview').get('autoflower',''),
-                                    "full_season":data.get('profile_overview').get('full_season',''),
-                                    "outdoor_full_season":data.get('profile_overview').get('outdoor_full_season',{}),
-                                    "outdoor_autoflower":data.get('profile_overview').get('outdoor_autoflower',{}),
-                                    "mixed_light":data.get('profile_overview').get('mixed_light',{}),
-                                    "indoor":data.get('profile_overview').get('indoor',{})} 
+                                    "autoflower":data.get('profile_overview').get('autoflower_parse',''),
+                                    "full_season":data.get('profile_overview').get('full_season_parse',''),
+                                    "outdoor_full_season":{"canopy_sqf":data.get('profile_overview').get('outdoor_full_season.canopy_sqf_parse',0),
+                                                           "no_of_harvest":data.get('profile_overview').get('outdoor_full_season.no_of_harvest_parse',0),
+                                                           "plants_per_cycle":data.get('profile_overview').get('outdoor_full_season.plants_per_cycle_parse',0)},
+                                    "outdoor_autoflower":{"canopy_sqf":data.get('profile_overview').get('outdoor_autoflower.canopy_sqf_parse',0),
+                                                          "no_of_harvest":data.get('profile_overview').get('outdoor_autoflower.no_of_harvest_parse',0),
+                                                          "plants_per_cycle":data.get('profile_overview').get('outdoor_autoflower.plants_per_cycle_parse',0)},
+                                    "mixed_light":{"canopy_sqf":data.get('profile_overview').get('mixed_light.canopy_sqf_parse',0),
+                                                   "no_of_harvest":data.get('profile_overview').get('mixed_light.no_of_harvest_parse',0),
+                                                   "plants_per_cycle":data.get('profile_overview').get('mixed_light.plants_per_cycle_parse',0)},
+                                    "indoor":{"canopy_sqf":data.get('profile_overview').get('indoor.canopy_sqf_parse',0),
+                                              "no_of_harvest":data.get('profile_overview').get('indoor.no_of_harvest_parse',0),
+                                              "plants_per_cycle":data.get('profile_overview').get('indoor.plants_per_cycle_parse',0)}} 
                     #STEP3 - add profile_overview
                     po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
                     print("STEP3 Profile Overview fetched in DB")
@@ -230,10 +269,12 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                         cultivars = cultivars_data.split(',')
                     else:
                         cultivars = ""
-                    processing_data = {"mixed_light": data.get('processing_config').get('mixed_light',{}),
+                    processing_data = {"mixed_light":get_processing_data('mixed_light',data),
+                                       "indoor":get_processing_data('indoor',data) 
 		                       "outdoor_autoflower": data.get('processing_config').get('outdoor_autoflower',{}),
                                        "outdoor_full_season": data.get('processing_config').get('outdoor_full_season',{}),
-		                       "indoor": data.get('processing_config').get('inodoor',{}),
+		                       
+                                       
                                        "process_on_site": data.get('processing_config').get('process_on_site','')}
                     #"cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]
                     pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=data.get('processing_config'))
