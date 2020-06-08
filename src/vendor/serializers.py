@@ -314,6 +314,7 @@ class ProcessingFieldsSerializer(serializers.Serializer):
     outdoor_full_season = serializers.DictField(required=False, allow_empty=True)
     indoor = serializers.DictField(required=False, allow_empty=True)
     process_on_site = serializers.CharField(required=True)
+    need_processing_support = serializers.CharField(required=False, allow_blank=True)     
     cultivars = serializers.ListField(required=False, allow_empty=True)
     #cultivars = ConfigCultivarsSerializer(required=True, many=True)
 
