@@ -338,7 +338,7 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                        "outdoor_full_season":extract_processing_data('outdoor_full_season',data),
                                        "process_on_site": data.get('processing_config').get('process_on_site','')}
                     #"cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]
-                    pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=data.get('processing_config'))
+                    pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=processing_data)
                     print("STEP4 Proc.Overview fetched in DB")
                 with transaction.atomic():   
                     #STEP5 - add financial details
