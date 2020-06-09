@@ -11,7 +11,7 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from .models import User
-from vendor.models import Vendor, VendorProfile, VendorUser, ProfileContact
+from vendor.models import Vendor, VendorProfile, VendorUser, ProfileContact, License
 from vendor.serializers import VendorSerializer, VendorProfileSerializer
 from integration.box import (get_preview_url, )
 
@@ -143,7 +143,8 @@ class UserSerializer(serializers.ModelSerializer):
                  'county': "N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.profile_contact_details.get('primary_county','N/A'),
                  'region':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.profile_contact_details.get('region','N/A'),
                  'cultivation_types':profile.profile_type,
-                 'number_of_licenses':profile.number_of_licenses
+                 'licenses_owned':License.objects.filter(vendor_profile=profile,owner_or_manager='owner').count(),
+                 'licenses_managed':License.objects.filter(vendor_profile=profile,owner_or_manager='manager').count(),
         } for profile in results]
     
     
