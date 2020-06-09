@@ -94,6 +94,7 @@ class UserSerializer(serializers.ModelSerializer):
     approved_on = serializers.ReadOnlyField()
     approved_by = serializers.ReadOnlyField()
     profile_photo_sharable_link = serializers.ReadOnlyField()
+    platform_kpi = serializers.SerializerMethodField(read_only=True)
     
     
     
@@ -128,12 +129,28 @@ class UserSerializer(serializers.ModelSerializer):
                 pc = ProfileContact.objects.filter(vendor_profile_id=profile.id)
                 farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
                 farms.extend(farm_names)
-        return farms if farms else []     
+        return farms if farms else []
+
+    def get_platform_kpi(self, obj):
+        """
+        Adds vendors profiles kpis for 'my platform' to the user/me response.
+        """
+        results = VendorProfile.objects.filter(vendor__vendor_roles__user=obj)
+        return [{'vendor_category':profile.vendor.vendor_category,
+                 'farm_profile_photo':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.farm_profile_photo,
+                 'farm_photo_sharable_link':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.farm_photo_sharable_link, 
+                 'profile_name':profile.profile_name(),
+                 'county': "N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.profile_contact_details.get('primary_county','N/A'),
+                 'region':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.profile_contact_details.get('region','N/A'),
+                 'cultivation_types':profile.profile_type,
+                 'number_of_licenses':profile.number_of_licenses
+        } for profile in results]
+    
     
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories','member_categories','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by')
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories','member_categories','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi')
     
 
     def validate_password(self, password):
