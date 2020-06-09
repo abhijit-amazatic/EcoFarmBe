@@ -10,6 +10,7 @@ class InventorySerialier(serializers.ModelSerializer):
     """
     class Meta:
         model = Inventory
+        depth = 1
         fields = ('__all__')
         
 class LogoutInventorySerializer(serializers.ModelSerializer):
