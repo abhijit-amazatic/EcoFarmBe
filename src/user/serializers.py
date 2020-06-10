@@ -136,7 +136,9 @@ class UserSerializer(serializers.ModelSerializer):
         Adds vendors profiles kpis for 'my platform' to the user/me response.
         """
         results = VendorProfile.objects.filter(vendor__vendor_roles__user=obj)
-        return [{'vendor_category':profile.vendor.vendor_category,
+        return [{'profile_id':profile.id,
+                 'status':profile.status,
+                 'vendor_category':profile.vendor.vendor_category,
                  'farm_profile_photo':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.farm_profile_photo,
                  'farm_photo_sharable_link':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.farm_photo_sharable_link, 
                  'profile_name':profile.profile_name(),
