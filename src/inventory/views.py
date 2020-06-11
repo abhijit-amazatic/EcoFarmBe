@@ -1,6 +1,7 @@
 """
 Views for Inventory
 """
+import django_filters
 from django.shortcuts import (render, )
 from rest_framework.views import APIView
 from rest_framework.response import (Response, )
@@ -36,7 +37,12 @@ class DataFilter(FilterSet):
     cf_cbdv__in = CharInFilter(field_name='cf_cbdv', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
+    cultivar = django_filters.CharFilter(method='get_cultivars')
             
+    def get_cultivars(self, queryset, name, value):
+        items = queryset.filter(
+            cf_strain_name__icontains=value).filter(cf_cfi_published=True)
+        return items
     
     class Meta:
         model = Inventory
