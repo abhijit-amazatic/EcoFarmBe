@@ -117,6 +117,15 @@ class CultivarCategoryView(APIView):
         """
         Return QuerySet.
         """
-        categories = Inventory.objects.filter(
-            cf_cfi_published=True).values('cf_strain_name').distinct()
-        return Response([i['cf_strain_name'] for i in categories if i['cf_strain_name'] != None])
+        if request.query_params.get('cultivar_name'):
+            categories = Inventory.objects.filter(
+                cf_cfi_published=True,
+                cf_strain_name__icontains=request.query_params.get('cultivar_name')
+                ).values('cf_strain_name').distinct()
+        else:
+            categories = Inventory.objects.filter(
+                cf_cfi_published=True,
+                ).values('cf_strain_name').distinct()
+        return Response([{
+            'label': i['cf_strain_name'],
+            'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None])
