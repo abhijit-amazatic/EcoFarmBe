@@ -135,8 +135,14 @@ def extract_role(role):
     else:
         return ["farm_manager"]
 
+def harvest_dates(data,param):
+    """
+    Extract harvest dates based on type.
+    """
+    return [value for key, value in data.get('processing_config').items() if param in key.lower() and value]
 
-def extract_processing_data(cultivation_type,data):
+    
+def extract_processing_data(cultivation_type,data,cultivars):
     """
     extract processing data according to inputs
     """
@@ -145,25 +151,33 @@ def extract_processing_data(cultivation_type,data):
 		"small_yield_percentage":data.get('processing_config').get('po_mixed_light.small_yield_percentage',0),
 		"trim_yield_percentage":data.get('processing_config').get('po_mixed_light.trim_yield_percentage',0),
 		"yield_per_plant":data.get('processing_config').get('po_mixed_light.yield_per_plant',0),
-		"avg_yield_per_sq_ft": data.get('processing_config').get('po_mixed_light.avg_yield_pr_sq_ft',0)}
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_mixed_light.avg_yield_pr_sq_ft',0),
+                "cultivars": [{"harvest_date":date, "cultivar_names": cultivars,"cultivation_type":"mixed_light"}
+                              for date in harvest_dates(data,'po_mixed_light.cultivars_')]}
     elif cultivation_type == "indoor":
         return {"flower_yield_percentage":data.get('processing_config').get('po_indoor.flower_yield_percentage',0),
 		"small_yield_percentage":data.get('processing_config').get('po_indoor.small_yield_percentage',0),
 		"trim_yield_percentage":data.get('processing_config').get('po_indoor.trim_yield_percentage',0),
 		"yield_per_plant":data.get('processing_config').get('po_indoor.yield_per_plant',0),
-		"avg_yield_per_sq_ft": data.get('processing_config').get('po_indoor.avg_yield_pr_sq_ft',0)}
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_indoor.avg_yield_pr_sq_ft',0),
+                "cultivars": [{"harvest_date":date, "cultivar_names": cultivars,"cultivation_type":"indoor"}
+                              for date in harvest_dates(data,'po_indoor.cultivars_')]}
     elif cultivation_type == "outdoor_autoflower":
         return {"flower_yield_percentage":data.get('processing_config').get('po_outdoor_autoflower.flower_yield_percentage',0),
 		"small_yield_percentage":data.get('processing_config').get('po_outdoor_autoflower.small_yield_percentage',0),
 		"trim_yield_percentage":data.get('processing_config').get('po_outdoor_autoflower.trim_yield_percentage',0),
 		"yield_per_plant":data.get('processing_config').get('po_outdoor_autoflower.yield_per_plant',0),
-		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_autoflower.avg_yield_per_sq_ft',0)}
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_autoflower.avg_yield_per_sq_ft',0),
+                "cultivars": [{"harvest_date":date, "cultivar_names": cultivars,"cultivation_type":"outdoor_autoflower"}
+                              for date in harvest_dates(data,'po_outdoor_autoflower.cultivars_')]}
     elif cultivation_type == "outdoor_full_season":
         return {"flower_yield_percentage":data.get('processing_config').get('po_outdoor_full_season.flower_yield_percentage',0),
 		"small_yield_percentage":data.get('processing_config').get('po_outdoor_full_season.small_yield_percentage',0),
 		"trim_yield_percentage":data.get('processing_config').get('po_outdoor_full_season.trim_yield_percentage',0),
 		"yield_per_plant":data.get('processing_config').get('po_outdoor_full_season.yield_per_plant',0),
-		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_full_season.avg_yield_pr_sq_ft',0)}
+		"avg_yield_per_sq_ft": data.get('processing_config').get('po_outdoor_full_season.avg_yield_pr_sq_ft',0),
+                "cultivars": [{"harvest_date":date, "cultivar_names": cultivars,"cultivation_type":"outdoor_full_season"}
+                              for date in harvest_dates(data,'po_outdoor_full_season.cultivars_')]}
         
 def extract_financial_data(cultivation_type,data):
     """
@@ -326,18 +340,16 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                     print("STEP3 Profile Overview fetched in DB")
                 with transaction.atomic():         
                     #STEP4 - add  processing_config
-                    #harvest_dates = [value for key, value in data.get('processing_config').items() if 'harvest_' in key.lower()]
                     cultivars_data = data.get('processing_config').get('cultivars','')
                     if cultivars_data:
                         cultivars = cultivars_data.split(',')
                     else:
-                        cultivars = ""
-                    processing_data = {"mixed_light":extract_processing_data('mixed_light',data),
-                                       "indoor":extract_processing_data('indoor',data), 
-		                       "outdoor_autoflower":extract_processing_data('outdoor_autoflower',data),
-                                       "outdoor_full_season":extract_processing_data('outdoor_full_season',data),
+                        cultivars = ['']
+                    processing_data = {"mixed_light":extract_processing_data('mixed_light',data,cultivars),
+                                       "indoor":extract_processing_data('indoor',data,cultivars), 
+		                       "outdoor_autoflower":extract_processing_data('outdoor_autoflower',data,cultivars),
+                                       "outdoor_full_season":extract_processing_data('outdoor_full_season',data,cultivars),
                                        "process_on_site": data.get('processing_config').get('process_on_site','')}
-                    #"cultivars": [{"harvest_date":date, "cultivar_names": cultivars } for date in harvest_dates]
                     pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=processing_data)
                     print("STEP4 Proc.Overview fetched in DB")
                 with transaction.atomic():   
