@@ -82,6 +82,8 @@ class Inventory(models.Model):
     cf_cbdv = models.FloatField(_('CBDV'), blank=True, null=True)
     cf_testing_type = ArrayField(models.CharField(max_length=50), blank=True, null=True)
     cf_pesticide_summary = models.CharField(_('Pesticide Summary'), blank=True, null=True, max_length=255)
+    cf_farm_price = models.FloatField(_('Farm Price'), blank=True, null=True)
+    cf_next_harvest_date = models.DateTimeField(auto_now=False, blank=True, null=True, default=None)
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=50), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
