@@ -331,6 +331,15 @@ def update_license(farm_name, license):
     response = update_records('Licenses', data)
     return response
 
+def get_vendors_from_licenses(field, licenses):
+    """
+    Get vendor id from licenses.
+    """
+    for license in licenses['response']:
+        vendor_lookup = license.get(field)
+        if vendor_lookup:
+            return vendor_lookup.get('id')
+
 @app.task(queue="general")
 def get_records_from_crm(legal_business_name):
     """
@@ -340,12 +349,16 @@ def get_records_from_crm(legal_business_name):
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         vendor = search_query('Vendors_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
         if vendor['status_code'] != 200:
-            return {}
+            vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', licenses)
+        else:
+            vendor = vendor['response'][0]['Licenses_Module']
+            vendor_id = vendor['id']
+        if not vendor_id:
+            return {'error': 'No association found for legal business name'}
         crm_obj = get_crm_obj()
-        vendor = vendor['response'][0]['Licenses_Module']
-        vendor_record = crm_obj.get_record('Vendors', vendor['id'])
+        vendor_record = crm_obj.get_record('Vendors', vendor_id)
         if vendor_record['status_code'] == 200:
-            vendor = vendor_record['response'][vendor['id']]
+            vendor = vendor_record['response'][vendor_id]
             licenses = list()
             for l in vendor.get('Licenses').split(','):
                 license = search_query('Licenses', l.strip(), 'Name')
@@ -444,12 +457,16 @@ def get_accounts_from_crm(legal_business_name):
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         account = search_query('Accounts_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
         if account['status_code'] != 200:
-            return {}
+            account_id = get_vendors_from_licenses('Account_Name_Lookup', licenses)
+        else:
+            account = account['response'][0]['Licenses_Module']
+            account_id = account['id']
+        if not account_id:
+            return {'error': 'No association found for legal business name'}
         crm_obj = get_crm_obj()
-        account = account['response'][0]['Licenses_Module']
-        account_record = crm_obj.get_record('Accounts', account['id'])
+        account_record = crm_obj.get_record('Accounts', account_id)
         if account_record['status_code'] == 200:
-            account = account_record['response'][account['id']]
+            account = account_record['response'][account_id]
             licenses = licenses['response']
             crm_dict = get_format_dict('Licenses_To_DB')
             li = list()
