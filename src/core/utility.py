@@ -429,4 +429,97 @@ def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
             print("Exception on profile aproval notification",e)
     
 
-    
+def extract_account_employees_data(data,param):
+    """
+    Format and extract data according to models
+    """
+    if param == "employees":
+        return [{"phone":data.get('contact_info',{}).get('owner_phone'),
+                 "role": "Owner",
+                 "employee_name":data.get('contact_info',{}).get('owner_name'),
+                 "employee_email":data.get('contact_info',{}).get('owner_email')},
+                {"phone":data.get('contact_info',{}).get('logistic_manager_phone'),
+                 "role": "Logistics",
+                 "employee_name":data.get('contact_info',{}).get('logistic_manager_name'),
+                 "employee_email":data.get('contact_info',{}).get('logistic_manager_email')}]
+    elif param == "address":
+        return  {
+	    "billing_compony_name":data.get('contact_info',{}).get('billing_compony_name'),
+	    "billing_street":data.get('contact_info',{}).get('billing_street'),
+	    "billing_street_line_2":data.get('contact_info',{}).get('billing_street_line_2'),
+	    "billing_city":data.get('contact_info',{}).get('billing_city'),
+	    "billing_zip_code":data.get('contact_info',{}).get('billing_zip_code'),
+	    "billing_state":data.get('contact_info',{}).get('billing_state'),
+	}
+
+
+@app.task(queue="general")
+def insert_data_for_accounts(user,account_type,data):
+    """
+    For existing user, to insert records to perticular accounts use this function.
+    """
+    try:
+        for account in account_type:
+            category = [k for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
+            obj,created = Account.objects.get_or_create(ac_manager=user,account_category=category[0])
+            if not AccountUser.objects.filter(user_id=user.id, account=obj.id).exists():
+                AccountUser.objects.create(user_id=user.id, vendor_id=obj.id,role='owner')         
+            account_user=AccountUser.objects.get(user_id=user.id,account=obj)
+            if account_user.role == 'owner' and user.existing_member:
+                """
+                Only first owner can pull & store data as others will have access anyways.
+                """
+                act, created = AccountLicense.objects.get_or_create(account=obj) #for step1
+                print('account to be updated->', ac)
+                with transaction.atomic():
+                    #STEP1
+                    if data.get('licenses'):
+                        AccountLicense.objects.bulk_create([AccountLicense(account_id=act.id,
+                                                             license_type=key.get('license_type',''),
+                                                             owner_or_manager='Owner' if key.get('Owner') else 'Manager',
+                                                             legal_business_name=key.get('legal_business_name',''),
+                                                             license_number=key.get('license_number',''),
+                                                             expiration_date=key.get('expiration_date',''),
+                                                             issue_date=key.get('issue_date',''),
+                                                             premises_address=key.get('premises_address',''),
+                                                             premises_county=key.get('premises_county',''),
+                                                             premises_city = key.get('premises_city',''),
+                                                             zip_code=key.get('zip_code',''),
+                                                             premises_apn=key.get('premises_apn',''),
+                                                             premises_state=key.get('premises_state',''),
+                                                             uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
+                                                             uploaded_w9_to=key.get('uploaded_w9_to',''),
+                                                             uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
+                        print("STEP1 Account License fetched in DB")
+                with transaction.atomic():   
+                    #STEP2 - add account basic details
+                    account_step2 = AccountBasicProfile.objects.get_or_create(account_id=act.id,
+                                                                              is_draft=False,
+                                                                              company_name=data.get('basic_profile',{}).get('company_name'),
+                                                                              about_company=data.get('basic_profile',{}).get('about'),
+                                                                              region=data.get('basic_profile',{}).get('region'),
+                                                                              preferred_payment=",".join(data.get('basic_profile',{}).get('preferred_payment')),
+                                                                              cultivars_of_interest=data.get('basic_profile',{}).get('cultivars_of_interest',[]),
+                                                                              ethics_and_certification=data.get('basic_profile',{}).get('ethics_and_certification',[]),
+                                                                              product_of_interest=data.get('basic_profile',{}).get('product_of_interest',[]),
+                                                                              provide_transport=data.get('basic_profile',{}).get('provide_transport',[]))
+                    print("STEP2 basic data fetched in DB")
+                    
+                with transaction.atomic():     
+                    #STEP3-add account contact data
+                    account_step3, created = AccountContactInfo.objects.get_or_create(account_id=act.id, is_draft=False,
+                                                                                      company_phone=data.get('contact_info',{}).get('company_phone'),
+                                                                                      website=data.get('contact_info',{}).get('website'),
+                                                                                      company_email=data.get('contact_info',{}).get('company_email'),
+                                                                                      employees=extract_account_employees_data(data,'employees'),
+                                                                                      instagram=data.get('contact_info',{}).get('instagram'),
+                                                                                      linked_in=data.get('contact_info',{}).get('linked_in'),
+                                                                                      twitter=data.get('contact_info',{}).get('twitter'),
+                                                                                      facebook=data.get('contact_info',{}).get('facebook'),
+                                                                                      billing_address=extract_account_employees_data(data,'address'),
+                                                                                      mailing_address=extract_account_employees_data(data,'employees'))
+                    if created:
+                        pass #add_users_to_system.delay(account_step3.id,act.id,obj.id)
+                    print("STEP3 account contact fetched in DB")
+    except Exception as e:
+        print('Exception in accounts insertation\n',e)        
