@@ -54,11 +54,11 @@ class SearchQueryView(APIView):
 
     def get(self, request):
         if request.query_params.get('legal_business_name', None):
-            result = search_query('Licenses', request.query_params['legal_business_name'], 'Name')
+            result = search_query('Licenses', request.query_params['legal_business_name'], 'Name', True)
         elif request.query_params.get('business_dba', None):
-            result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA')
+            result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA', True)
         elif request.query_params.get('license_number', None):
-            result = search_query('Licenses', request.query_params['license_number'], 'Legal_Business_Name')
+            result = search_query('Licenses', request.query_params['license_number'], 'Legal_Business_Name', True)
         return Response(result)
 
 class UserViewSet(ModelViewSet):
