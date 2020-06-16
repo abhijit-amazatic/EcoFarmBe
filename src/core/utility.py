@@ -15,7 +15,7 @@ from user.models import *
 from vendor.models import *
 from account.models import *
 from core.celery import app
-from integration.crm import (get_records_from_crm,)
+from integration.crm import (get_records_from_crm,get_accounts_from_crm,)
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -385,7 +385,7 @@ def get_from_crm_insert_to_account(user_id):
     """
     instance = User.objects.filter(id=user_id)
     if instance:
-        crm_data = get_records_from_crm(instance[0].legal_business_name)
+        crm_data = get_accounts_from_crm(instance[0].legal_business_name)
         if crm_data:
             insert_data_for_accounts(instance[0],crm_data.get('basic_profile',{}).get('company_type'), crm_data)            
             
