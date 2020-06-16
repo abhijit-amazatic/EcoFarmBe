@@ -126,6 +126,8 @@ class CultivarCategoryView(APIView):
             categories = Inventory.objects.filter(
                 cf_cfi_published=True,
                 ).values('cf_strain_name').distinct()
-        return Response([{
-            'label': i['cf_strain_name'],
-            'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None])
+        return Response({
+            'status_code': 200,
+            'response': [{
+                'label': i['cf_strain_name'],
+                'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None]})
