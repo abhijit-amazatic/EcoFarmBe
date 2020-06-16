@@ -1,5 +1,5 @@
 from datetime import (datetime, )
-from .crm_format import (ACCOUNT_TYPES, )
+from .crm_format import (ACCOUNT_TYPES, LAYOUTS)
 
 def get_vendor_contacts(key, value, obj, crm_obj):
     """
@@ -63,10 +63,12 @@ def get_layout(module, layout_name=None):
     """
     Return Layout for Zoho CRM.
     """
+    if layout_name:
+        layout = LAYOUTS[module]
     if module == 'Vendors':
-        return "4230236000000866793"
+        return "4226315000000940743"
     if module == 'Leads':
-        return "4230236000000929439"
+        return layout[layout_name]
     
 def get_regex_checked(v):
     """
