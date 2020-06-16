@@ -377,8 +377,18 @@ def get_from_crm_insert_to_vendorprofile(user_id):
         crm_data = get_records_from_crm(instance[0].legal_business_name)
         if crm_data:
             insert_data_for_vendor_profile(instance[0],crm_data.get('vendor_type'), crm_data)
-    
-        
+
+@app.task(queue="general")
+def get_from_crm_insert_to_account(user_id):
+    """
+    async task for existing user for account.
+    """
+    instance = User.objects.filter(id=user_id)
+    if instance:
+        crm_data = get_records_from_crm(instance[0].legal_business_name)
+        if crm_data:
+            insert_data_for_accounts(instance[0],crm_data.get('basic_profile',{}).get('company_type'), crm_data)            
+            
 @app.task(queue="general")
 def send_async_approval_mail(profile_id):
     """
