@@ -223,7 +223,7 @@ def get_licenses(license_field):
     """
     Get license from Zoho CRM.
     """
-    licenses = search_query('Licenses', license_field, 'Legal_Business_Name')
+    licenses = search_query('Licenses', license_field, 'Name')
     if licenses['status_code'] == 200:
         return licenses['response']
 
@@ -346,7 +346,7 @@ def get_records_from_crm(legal_business_name):
     """
     Get records from Zoho CRM using legal business name.
     """
-    licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
+    licenses = search_query('Licenses', legal_business_name, 'Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         vendor = search_query('Vendors_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
         if vendor['status_code'] != 200:
@@ -362,7 +362,7 @@ def get_records_from_crm(legal_business_name):
             vendor = vendor_record['response'][vendor_id]
             licenses = list()
             for l in vendor.get('Licenses').split(','):
-                license = search_query('Licenses', l.strip(), 'Name')
+                license = search_query('Licenses', l.strip(), 'Legal_Business_Name')
                 if license['status_code'] == 200:
                     licenses.append(license['response'][0])
             crm_dict = get_format_dict('Licenses_To_DB')
@@ -454,7 +454,7 @@ def get_accounts_from_crm(legal_business_name):
     """
     Fetch existing accounts from Zoho CRM.
     """
-    licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
+    licenses = search_query('Licenses', legal_business_name, 'Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         account = search_query('Accounts_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
         if account['status_code'] != 200:
