@@ -154,6 +154,12 @@ def parse_fields(module, key, value, obj, crm_obj):
         v = value.split('.')
         if len(v) == 2 and obj.get(v[0]):
             return obj.get(v[0]).get(v[1])
+    if value.startswith('po_cultivars'):
+        cultivars = list()
+        for i in ['po_mixed_light', 'po_outdoor_autoflower', 'po_outdoor_full_season', 'po_indoor']:
+            for cultivar in obj.get(i)['cultivars']:
+                cultivars.extend(cultivar['cultivar_names'])
+        return cultivars
 
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
@@ -296,8 +302,7 @@ def insert_vendors(id=None):
                     l = list()
                     data['Cultivar_Associations'] = record_response[i]['details']['id']
                     for j in result['response']['orignal_data'][i]['po_cultivars']:
-                        for k in j['cultivar_names']:
-                            r = search_query('Cultivars', k, 'Name')
+                            r = search_query('Cultivars', j, 'Name')
                             if r['status_code'] == 200:
                                 data['Cultivars'] = r['response'][0]['id']
                                 r = create_records('Vendors_X_Cultivars', [data])

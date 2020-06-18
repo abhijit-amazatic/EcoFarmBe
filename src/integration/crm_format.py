@@ -40,7 +40,7 @@ CRM_FORMAT  = {
         "Owner1": "employees_parse", # Owner
         "Number_of_Employees": "no_of_employees",
         #Questionnaire
-        "po_cultivars": "po_cultivars",
+        "po_cultivars": "po_cultivars_parse",
         "Indoor_Mixed_Lighting_Type": "lighting_type",
         "Types_of_Nutrients_Used": "type_of_nutrients",
         "Would_you_grow_genetics_suggested_by_Thrive": "interested_in_growing_genetics",
