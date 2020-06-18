@@ -435,8 +435,8 @@ CRM_FORMAT  = {
     },
     "Licenses_To_DB": {
             "license_id": "id",
-            "license_number": "Name",
-            "legal_business_name": "Legal_Business_Name",
+            "license_number": "Legal_Business_Name",
+            "legal_business_name": "Name",
             "license_type": "License_Type",
             "expiration_date": "Expiration_Date",
             "business_dba": "Business_DBA",
