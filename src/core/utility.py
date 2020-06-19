@@ -129,11 +129,11 @@ def extract_role(role):
     Map role for existing user according to database choices.
     """
     role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
-    extracted_role =  [value for key, value in role_map.items() if role.lower() in key.lower()]
+    extracted_role =  [key for key, value in role_map.items() if role.lower() in key.lower()]
     if extracted_role:
         return extracted_role
     else:
-        return ["farm_manager"]
+        return ["Farm Manager"]
 
 def harvest_dates(data,param):
     """
@@ -260,6 +260,34 @@ def get_license_types(licenses):
                 license_type.append(i)
     return list(set(license_type))
 
+def search_emp(role,emp):
+    """
+    search employee based on role
+    """
+    return[ele for ele in emp if ele['roles'][0] == role]
+
+def get_employee(data,contacts):
+    """
+    structure employee according to db format & insert empty data also.
+    """
+    final_data = []
+    final_contacts = ["License Owner","Farm Manager","Logistics","Sales/Inventory","Billing"]
+    employee_data = [{"employee_name":data.get('profile_contact').get('employees',{}).get(contact,'')['employee_name'],
+                      "employee_email":data.get('profile_contact').get('employees',{}).get(contact,'')['employee_email'] ,
+                      "phone":data.get('profile_contact').get('employees',{}).get(contact,'')['phone'],
+                      "roles":extract_role(contact.split()[0])}
+                     for contact in contacts]
+    for i in final_contacts:
+        retrive_data = search_amp(i,employee_data)
+        if retrive_data:
+            final_data.push(retrive_data)
+        else:
+            final_data.push({"employee_name":"",
+                             "employee_email":"",
+                             "phone":"",
+                             "roles":[i]})
+    return final_data        
+    
     
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
@@ -328,10 +356,7 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                       "linkedin":data.get('profile_contact').get('linkedin',''),
                                       "twitter":data.get('profile_contact').get('twitter',''),
                                       "no_of_employees":data.get('profile_contact').get('no_of_employees',''),
-                                      "employees":[{"employee_name":data.get('profile_contact').get('employees',{}).get(contact,'')['employee_name'],
-                                                    "employee_email":data.get('profile_contact').get('employees',{}).get(contact,'')['employee_email'] ,
-                                                    "phone":data.get('profile_contact').get('employees',{}).get(contact,'')['phone'],
-                                                    "roles":extract_role(contact.split()[0])} for contact in contacts]}
+                                      "employees":get_employee(data,contacts)}
                     pc_step2, created = ProfileContact.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False,profile_contact_details = formatted_data)
                     if created:
                         add_users_to_system.delay(pc_step2.id,vp.id,obj.id)
