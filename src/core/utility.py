@@ -498,21 +498,25 @@ def extract_account_employees_data(data,param):
     """
     if param == "employees":
         return [{"phone":data.get('contact_info',{}).get('owner_phone'),
-                 "role": "Owner",
+                 "role": "License Owner",
                  "employee_name":data.get('contact_info',{}).get('owner_name'),
                  "employee_email":data.get('contact_info',{}).get('owner_email')},
+                {"phone":data.get('contact_info',{}).get('sales_manager_phone'),
+                 "role": "Sales/Inventory",
+                 "employee_name":data.get('contact_info',{}).get('sales_manager_name'),
+                 "employee_email":data.get('contact_info',{}).get('sales_manager_email')},
                 {"phone":data.get('contact_info',{}).get('logistic_manager_phone'),
                  "role": "Logistics",
                  "employee_name":data.get('contact_info',{}).get('logistic_manager_name'),
                  "employee_email":data.get('contact_info',{}).get('logistic_manager_email')}]
     elif param == "address":
         return  {
-	    "billing_compony_name":data.get('contact_info',{}).get('billing_compony_name'),
-	    "billing_street":data.get('contact_info',{}).get('billing_street'),
-	    "billing_street_line_2":data.get('contact_info',{}).get('billing_street_line_2'),
-	    "billing_city":data.get('contact_info',{}).get('billing_city'),
-	    "billing_zip_code":data.get('contact_info',{}).get('billing_zip_code'),
-	    "billing_state":data.get('contact_info',{}).get('billing_state'),
+	    "compony_name":data.get('contact_info',{}).get('billing_compony_name'),
+	    "street":data.get('contact_info',{}).get('billing_street'),
+	    "street_line_2":data.get('contact_info',{}).get('billing_street_line_2'),
+	    "city":data.get('contact_info',{}).get('billing_city'),
+	    "zip_code":data.get('contact_info',{}).get('billing_zip_code'),
+	    "state":data.get('contact_info',{}).get('billing_state'),
 	}
 
 
@@ -532,12 +536,12 @@ def insert_data_for_accounts(user,account_type,data):
                 """
                 Only first owner can pull & store data as others will have access anyways.
                 """
-                act, created = AccountLicense.objects.get_or_create(account=obj) #for step1
-                print('account to be updated->', act)
+                #act, created = AccountLicense.objects.get_or_create(account=obj) #for step1
+                print('account to be updated->', obj)
                 with transaction.atomic():
                     #STEP1
                     if data.get('licenses'):
-                        AccountLicense.objects.bulk_create([AccountLicense(account_id=act.id,
+                        AccountLicense.objects.bulk_create([AccountLicense(account_id=obj.id,
                                                              license_type=key.get('license_type',''),
                                                              owner_or_manager='Owner' if key.get('Owner') else 'Manager',
                                                              legal_business_name=key.get('legal_business_name',''),
@@ -556,7 +560,7 @@ def insert_data_for_accounts(user,account_type,data):
                         print("STEP1 Account License fetched in DB")
                 with transaction.atomic():   
                     #STEP2 - add account basic details
-                    account_step2 = AccountBasicProfile.objects.get_or_create(account_id=act.id,
+                    account_step2 = AccountBasicProfile.objects.get_or_create(account_id=obj.id,
                                                                               is_draft=False,
                                                                               company_name=data.get('basic_profile',{}).get('company_name'),
                                                                               about_company=data.get('basic_profile',{}).get('about'),
@@ -570,7 +574,7 @@ def insert_data_for_accounts(user,account_type,data):
                     
                 with transaction.atomic():     
                     #STEP3-add account contact data
-                    account_step3, created = AccountContactInfo.objects.get_or_create(account_id=act.id, is_draft=False,
+                    account_step3, created = AccountContactInfo.objects.get_or_create(account_id=obj.id, is_draft=False,
                                                                                       company_phone=data.get('contact_info',{}).get('company_phone'),
                                                                                       website=data.get('contact_info',{}).get('website'),
                                                                                       company_email=data.get('contact_info',{}).get('company_email'),
