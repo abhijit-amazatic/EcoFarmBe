@@ -249,7 +249,17 @@ def extract_overview_data(cultivation_type,data):
                 "no_of_harvest":data.get('profile_overview').get('outdoor_autoflower.no_of_harvest',0),
                 "plants_per_cycle":data.get('profile_overview').get('outdoor_autoflower.plants_per_cycle',0)}
     
-    
+def get_license_types(licenses):
+    """
+    scan licenses and return license types.
+    """
+    license_type = []
+    for license in licenses:
+        for i in ['Mixed-Light', 'Outdoor', 'Indoor']:
+            if i in license['license_type']:
+                license_type.append(i)
+    return list(set(license_type))
+
     
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
@@ -271,7 +281,10 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                 Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
                 are added with another role aling with this if added user is owner)
                 """
-                vp, created = VendorProfile.objects.get_or_create(vendor=obj) #for step1 create vendor profile
+                profile_types = get_license_types(data.get('licenses',[]))
+                vp, created = VendorProfile.objects.get_or_create(vendor=obj,defaults={'profile_type':profile_types,
+                                                                                       'number_of_licenses':len(data.get('licenses',[])),
+                                                                                       'number_of_legal_entities':0}) #for step1 create vendor profile
                 print('vendor_profile to be updated->', vp)
                 with transaction.atomic():
                     #STEP1
