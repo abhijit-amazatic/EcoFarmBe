@@ -483,7 +483,7 @@ def get_accounts_from_crm(legal_business_name):
         account_record = crm_obj.get_record('Accounts', account_id)
         if account_record['status_code'] == 200:
             account = account_record['response'][account_id]
-            licenses = licenses['response']
+            licenses = [licenses['response'][0]]
             crm_dict = get_format_dict('Licenses_To_DB')
             li = list()
             for license in licenses:
