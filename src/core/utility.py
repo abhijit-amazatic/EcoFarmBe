@@ -278,11 +278,11 @@ def get_employee(data,contacts):
                       "roles":extract_role(contact.split()[0])}
                      for contact in contacts]
     for i in final_contacts:
-        retrive_data = search_amp(i,employee_data)
+        retrive_data = search_emp(i,employee_data)
         if retrive_data:
-            final_data.push(retrive_data)
+            final_data.append(retrive_data)
         else:
-            final_data.push({"employee_name":"",
+            final_data.append({"employee_name":"",
                              "employee_email":"",
                              "phone":"",
                              "roles":[i]})
