@@ -288,6 +288,19 @@ def get_employee(data,contacts):
                              "roles":[i]})
     return final_data        
     
+def get_empty_address():
+    """
+    ref function-to be edited:['billing_address', 'mailing_address']
+    """
+    return {
+	"company_name": "",
+	"street": "",
+	"street_line_2": "",
+	"city": "",
+	"zip_code": "",
+	"state": "",
+	"country": ""}
+
     
 @app.task(queue="general")
 def insert_data_for_vendor_profile(user,vendor_type,data):
@@ -356,6 +369,8 @@ def insert_data_for_vendor_profile(user,vendor_type,data):
                                       "linkedin":data.get('profile_contact').get('linkedin',''),
                                       "twitter":data.get('profile_contact').get('twitter',''),
                                       "no_of_employees":data.get('profile_contact').get('no_of_employees',''),
+                                      "mailing_address":get_empty_address(),
+                                      "billing_address":get_empty_address(),
                                       "employees":get_employee(data,contacts)}
                     pc_step2, created = ProfileContact.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False,profile_contact_details = formatted_data)
                     if created:
