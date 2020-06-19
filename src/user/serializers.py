@@ -12,6 +12,7 @@ from Crypto.Cipher import AES
 from Crypto import Random
 from .models import User
 from vendor.models import Vendor, VendorProfile, VendorUser, ProfileContact, License
+from account.models import Account, AccountUser,AccountLicense,AccountBasicProfile,AccountContactInfo
 from vendor.serializers import VendorSerializer, VendorProfileSerializer
 from integration.box import (get_preview_url, )
 
@@ -95,6 +96,7 @@ class UserSerializer(serializers.ModelSerializer):
     approved_by = serializers.ReadOnlyField()
     profile_photo_sharable_link = serializers.ReadOnlyField()
     platform_kpi = serializers.SerializerMethodField(read_only=True)
+    accounts_kpi = serializers.SerializerMethodField(read_only=True)
     
     
     
@@ -149,11 +151,16 @@ class UserSerializer(serializers.ModelSerializer):
                  'licenses_managed':License.objects.filter(vendor_profile=profile,owner_or_manager='manager').count(),
         } for profile in results]
     
-    
+    def get_accounts_kpi(self, obj):
+        """
+        Adds account kpis for 'my platform' to the user/me response.
+        """
+        results = Account.objects.filter(account_roles__user=obj).values('id', 'status','step', 'account_category')
+        return results
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories','member_categories','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi')
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories','member_categories','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','accounts_kpi')
     
 
     def validate_password(self, password):
