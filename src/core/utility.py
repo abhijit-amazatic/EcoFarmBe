@@ -584,7 +584,7 @@ def insert_data_for_accounts(user,account_type,data):
                                                                                       twitter=data.get('contact_info',{}).get('twitter'),
                                                                                       facebook=data.get('contact_info',{}).get('facebook'),
                                                                                       billing_address=extract_account_employees_data(data,'address'),
-                                                                                      mailing_address=extract_account_employees_data(data,'employees'))
+                                                                                      mailing_address=extract_account_employees_data(data,'address'))
                     if created:
                         pass #add_users_to_system.delay(account_step3.id,act.id,obj.id)
                     print("STEP3 account contact fetched in DB")
