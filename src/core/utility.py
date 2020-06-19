@@ -109,8 +109,8 @@ def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
     pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
     if pro_contact_obj:
         employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
-              
-        for employee in employee_data:
+        extracted_employee = [i for i in employee_data if i.get('employee_email')]      
+        for employee in extracted_employee:
             obj, created = User.objects.get_or_create(email=employee['employee_email'],
                                                       defaults={'email':employee['employee_email'],
                                                                 'username':employee['employee_name'],
@@ -280,7 +280,7 @@ def get_employee(data,contacts):
     for i in final_contacts:
         retrive_data = search_emp(i,employee_data)
         if retrive_data:
-            final_data.append(retrive_data)
+            final_data.append(retrive_data[0])
         else:
             final_data.append({"employee_name":"",
                              "employee_email":"",
