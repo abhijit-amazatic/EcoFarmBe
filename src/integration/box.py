@@ -231,12 +231,14 @@ def parse_file(file_obj):
     response["shared_link"] = file_obj.get_shared_link_download_url()
     return response
 
-def get_shared_link(file_id):
+def get_shared_link(file_id, access=None, unshared_at=None, allow_download=None):
     """
     Get shareable link for file
     """
     client = get_box_client()
-    return client.file(file_id).get_shared_link()
+    return client.file(file_id).get_shared_link(
+        access=access,
+        allow_download=allow_download)
 
 def move_file(file_id, destination_folder_id):
     """

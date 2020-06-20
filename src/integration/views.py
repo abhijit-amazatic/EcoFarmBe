@@ -1,6 +1,7 @@
 """
 Integration views
 """
+from datetime import (datetime, timedelta)
 from django.http import (QueryDict, )
 from rest_framework import (status,)
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
@@ -10,7 +11,7 @@ from rest_framework.generics import GenericAPIView
 
 from core.permissions import UserPermissions
 from .models import Integration
-from integration.box import(get_box_tokens, )
+from integration.box import(get_box_tokens, get_shared_link, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
 from integration.crm import (search_query, get_picklist,
@@ -28,6 +29,28 @@ class GetBoxTokensView(APIView):
     def get(self, request):
         tokens = get_box_tokens()
         return Response(tokens)
+
+class GetBoxSharedLink(APIView):
+    """
+    Get shared file link.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        try:
+            file_id = request.query_params.get('id')
+            expire_time = datetime.today() + timedelta(hours=1)
+            response = get_shared_link(
+                file_id,
+                access="open",
+                unshared_at=expire_time,
+                allow_download=False)
+            return Response({"status_code": 200,
+                             "shared_link":response})
+        except Exception as exc:
+            return Response({
+                "status_code": 400,
+                "error": exc})
 
 class SearchCultivars(APIView):
     """
