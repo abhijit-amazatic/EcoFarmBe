@@ -528,7 +528,10 @@ def insert_data_for_accounts(user,account_type,data):
     try:
         for account in account_type:
             category = [k for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
-            obj,created = Account.objects.get_or_create(ac_manager=user,account_category=category[0])
+            profile_types = get_license_types(data.get('licenses',[]))
+            obj,created = Account.objects.get_or_create(ac_manager=user,account_category=category[0],defaults={'profile_type':profile_types,
+                                                                                                               'number_of_licenses':len(data.get('licenses',[])),
+                                                                                                               'number_of_legal_entities':0})
             if not AccountUser.objects.filter(user_id=user.id, account=obj.id).exists():
                 AccountUser.objects.create(user_id=user.id,account_id=obj.id,role='owner')         
             account_user=AccountUser.objects.get(user_id=user.id,account=obj)
