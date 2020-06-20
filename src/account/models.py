@@ -35,6 +35,10 @@ class Account(StatusFlagMixin,models.Model):
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    profile_type = ArrayField(models.CharField(
+        max_length=255, blank=True),blank=True, null=True, default=list)
+    number_of_licenses = models.IntegerField(null=True)
+    number_of_legal_entities = models.IntegerField(null=True)
 
     def __str__(self):
         return self.account_category
