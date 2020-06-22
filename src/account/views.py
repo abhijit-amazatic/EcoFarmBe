@@ -49,8 +49,8 @@ class AccountViewSet(viewsets.ModelViewSet):
             accounts = accounts.select_related('account_profile')
         elif self.action =="contact_info":
             accounts = accounts.select_related('account_contact')
-        if not self.request.user.is_staff and not self.request.user.is_superuser:
-            accounts = accounts.filter(account_roles__user=self.request.user)
+        #if not self.request.user.is_staff and not self.request.user.is_superuser:
+        accounts = accounts.filter(account_roles__user=self.request.user)
         return accounts
 
     def create(self, request):
