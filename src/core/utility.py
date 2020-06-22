@@ -483,7 +483,7 @@ def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
         try:
             # send email verification link to farm user
             link = get_encrypted_data(vendor_user.user.email)
-            mail_send("verification-send.html",{'link': link},"Eco-Farm Verification.",vendor_user.user.email)
+            mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",vendor_user.user.email)
             #inform admins to approve farm user
             notify_admins_on_vendors_registration(vendor_user.user.email,profile_contact[0].profile_contact_details.get('farm_name'))
             #notify user to set password
