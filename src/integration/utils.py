@@ -66,7 +66,7 @@ def get_layout(module, layout_name=None):
     if layout_name:
         layout = LAYOUTS[module]
     if module == 'Vendors':
-        return "4226315000000940743"
+        return "4230236000001156761"
     if module == 'Leads':
         return layout[layout_name]
     
