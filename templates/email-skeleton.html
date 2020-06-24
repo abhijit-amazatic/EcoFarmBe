@@ -1,13 +1,40 @@
-<html style="margin:0px; padding:0px">
-    <body style="margin:0px; padding:0px; ">
-        <div style="margin:0px 8px; font-family:Georgia; font-color:black; text-align: justify;">
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+
+    <body style="margin: 0;">
+        <header style="height: 50px; background-color: #013c48;"></header>
+        <div class="container" style="max-width: 1000px; margin: 0 auto 50px; font-size: 20px;">
+            <img src="images/logo-with-text.png" alt="logo" style="margin: 20px 0 80px;" />
 
             {% block body %}{% endblock %}
 
-            <div style="margin-top:10px; font-size:16px;">
-                With Gratitude, <br/>
-                Thrive Society Team
-            </div>
+            <p style="color: #013c48; margin-bottom: 0;">
+                With Gratitude,
+            </p>
+            <p style="color: #013c48;">Thrive Society Team</p>
         </div>
+        <footer
+            style="text-transform: uppercase; background-color: #013c48; color: #c1d7db; padding: 10px 0 20px; text-align: center; font-size: 16px; font-family: Arial, Helvetica, sans-serif;">
+            <div class="container" style="max-width: 1000px; margin: 0 auto;">
+                <p style="font-size: 16px; letter-spacing: 1px">call us at 707-485-3119</p>
+                <p style="letter-spacing: 2px; font-weight: 600;">Find us on instagram <i class="fa fa-instagram"></i></p>
+                <p style="letter-spacing: 2px;">
+                    <a href="https://www.thrive-society.com/" target="_BLANK"
+                       style="color: #c1d7db; text-decoration: none; border-right: 1px solid #fff; padding-right: 10px; margin-right: 7px;">thrive-society.com</a>
+                    <a href="https://www.connect@thrive-society.com" target="_BLANK"
+                       style="color: #c1d7db; text-decoration: none;">connect@thrive-society.com</a>
+                </p>
+                <p style="color: #90835c; font-size: 13px; letter-spacing: 1px;">license #:c11-0001007-lic, cdph-10003113
+                </p>
+                <p style="color: #90835c; font-size: 13px; letter-spacing: 1px;">2020 eco farm holdings pbc. all rights
+                    reserved</p>
+            </div>
+        </footer>
     </body>
+
 </html>
