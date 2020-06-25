@@ -30,5 +30,5 @@ def mail_send(template, context_data, subject, recipient_list, ):
     """
     template = get_template(template)
     content = template.render(context_data)
-    send_mail(subject,content,"Eco-farm <tech@ecofarm.ag>",recipient_list=[recipient_list],html_message=content)
+    send_mail(subject,content,"Thrive-Society <tech@thrive-society.com>",recipient_list=[recipient_list],html_message=content)
    
