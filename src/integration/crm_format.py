@@ -636,16 +636,6 @@ CRM_FORMAT  = {
         },
 }
 
-LAYOUTS = {
-    "Leads":
-        {
-            "accounts": "4369012000000091055",
-            "vendor_cannabis_cultivar": "4369012000000806334",
-            "vendor_cannabis_non_cultivator": "4369012000004042021",
-            "vendor_non_cannabis": "4369012000004095007",
-        },
-}
-
 VENDOR_TYPES = {
     "cultivation": "Cultivator",
     "nursery": "Nursery",

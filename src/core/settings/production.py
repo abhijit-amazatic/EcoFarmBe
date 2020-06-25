@@ -94,3 +94,7 @@ SLACK_CHANNEL_NAME = os.environ.get("SLACK_CHANNEL_NAME")
 
 #Admin Email
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
+
+#layouts
+VENDOR_LAYOUT = os.environ.get("VENDOR_LAYOUT")
+LEADS_LAYOUT = os.environ.get("LEADS_LAYOUT")

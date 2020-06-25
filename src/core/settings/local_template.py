@@ -107,3 +107,13 @@ SLACK_CHANNEL_NAME = ''
 
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'
+
+#layouts
+VENDOR_LAYOUT = "4230236000001156761"
+
+LEADS_LAYOUT = {
+    "accounts": "4230236000001156737",
+    "vendor_cannabis_cultivar": "4230236000001229441",
+    "vendor_cannabis_non_cultivator": "4230236000001229442",
+    "vendor_non_cannabis": "4230236000001229443",
+    }
