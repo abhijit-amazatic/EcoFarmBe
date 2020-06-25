@@ -1,10 +1,9 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
-{% load static %}
 <p style='font-size:16px !important;color: #013c48;'>Hi {{ email }},</p>
 <div>
-    <div ><p style='font-size:16px !important;color: #013c48;'>You have been approved by Eco Farm admins.Now You can access your account with the following link.<br>
-        <a style='font-size:16px !important;color: #013c48;'>{{ link }}</a></p></div>
+    <div><p style='font-size:16px !important;color: #013c48;'>You have been approved by Eco Farm admins.Now You can access your account with the following link.<br>
+        {{ link }}</p></div>
     <div>
     </div>
 
