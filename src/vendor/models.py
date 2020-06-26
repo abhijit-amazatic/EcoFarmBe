@@ -224,6 +224,14 @@ class ProgramOverview(models.Model):
                                 related_name='program_overview', on_delete=models.CASCADE)
     program_details = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
+
+class ProfileReport(models.Model):
+    """
+    Stores reports/calculation data.
+    """
+    vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
+                                related_name='profile_report', on_delete=models.CASCADE)
+    profile_reports = JSONField(null=False, blank=False, default=dict)
     
        
 class VendorCategory(models.Model):

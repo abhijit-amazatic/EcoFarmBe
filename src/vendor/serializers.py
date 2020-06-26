@@ -6,7 +6,7 @@ import requests
 from django.conf import settings
 from rest_framework import serializers
 from .models import (Vendor, VendorProfile, ProfileContact, ProfileOverview, FinancialOverview,
-                     ProcessingOverview,  License, ProgramOverview, VendorUser)
+                     ProcessingOverview,  License, ProgramOverview, VendorUser, ProfileReport)
 
 from user.models import User
 from core.utility import (notify_farm_user, notify_admins_on_vendors_registration, notify_admins_on_profile_registration)
@@ -416,3 +416,12 @@ class LicenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = License
         fields = ('__all__')
+
+        
+class ProfileReportSerializer(serializers.ModelSerializer):
+    """
+    This defines ProfileReport serializer
+    """
+    class Meta:
+        model = ProfileReport
+        fields = ('__all__')        

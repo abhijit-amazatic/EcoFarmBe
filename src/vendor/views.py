@@ -11,8 +11,8 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (
-    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, ProcessingOverviewSerializer, LicenseSerializer, ProgramOverviewSerializer)
-from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License, ProgramOverview, VendorUser, VendorCategory,)
+    VendorSerializer, VendorCreateSerializer, VendorProfileSerializer, ProfileContactSerializer, ProfileOverviewSerializer, FinancialOverviewSerializer, ProcessingOverviewSerializer, LicenseSerializer, ProgramOverviewSerializer, ProfileReportSerializer)
+from .models import (Vendor,VendorProfile, ProfileContact, ProfileOverview, FinancialOverview, ProcessingOverview, License, ProgramOverview, VendorUser, VendorCategory,ProfileReport)
 from core.permissions import IsAuthenticatedVendorPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -87,6 +87,7 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
     financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
     processing_overview_path = 'processing-overview(/(?P<processing_overview_id>[0-9]*))?'
     program_overview_path = 'program-overview(/(?P<program_overview_id>[0-9]*))?'
+    profile_report_path = 'profile-report(/(?P<profile_report_id>[0-9]*))?'
 
     
     #filter_backends = [filters.SearchFilter]
@@ -108,7 +109,9 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         elif self.action == "processing_overview":
             vendor_profile = vendor_profile.select_related('processing_overview')
         elif self.action == "program_overview":
-            vendor_profile = vendor_profile.select_related('program_overview')        
+            vendor_profile = vendor_profile.select_related('program_overview')
+        elif self.action == "profile_report":
+            vendor_profile = vendor_profile.select_related('profile_report')    
             
         #if not self.request.user.is_staff and not self.request.user.is_superuser:
         vendor_profile = vendor_profile.filter(vendor__vendor_roles__user=self.request.user)
@@ -133,6 +136,8 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             return ProcessingOverviewSerializer
         elif self.action == 'program_overview':
             return ProgramOverviewSerializer
+        elif self.action == 'profile_report':
+            return ProfileReportSerializer
         return VendorProfileSerializer
 
 
@@ -195,6 +200,13 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         Detail route CRUD operations on program_overview.
         """
         return self.extra_info(request, pk, ProgramOverview, ProgramOverviewSerializer, 'program_overview')
+
+    @action(detail=True, url_path=profile_report_path, methods=['get', 'patch'], pagination_class=CustomPagination)
+    def profile_report(self, request, pk,profile_report_id=None):
+        """
+        Detail route CRUD operations on profile_report.
+        """
+        return self.extra_info(request, pk, ProfileReport, ProfileReportSerializer, 'profile_report')
         
 
 class LicenseViewSet(viewsets.ModelViewSet):
