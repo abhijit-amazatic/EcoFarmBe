@@ -14,6 +14,7 @@ CRM_FORMAT  = {
     },
     "Vendors": {
         "db_id": "db_id",
+        "id": "id",
         "Layout": "layout_parse",
         #Farm Profile
         "Vendor_Name": "farm_name",
@@ -202,7 +203,7 @@ CRM_FORMAT  = {
         "W9_Box_Link": "uploaded_w9_to",
     },
     "Accounts":{
-        "db_id": "id",
+        "id": "id",
         "Account_Name": "company_name",
         "Website": "website",
         "Client_Code": "",

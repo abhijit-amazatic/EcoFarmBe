@@ -186,16 +186,16 @@ def update_records(module, records, is_return_orginal_data=False):
     crm_obj = get_crm_obj()
     request = list()
     for record in records:
-        contact_dict = dict()
+        record_dict = dict()
         crm_dict = get_format_dict(module)
         for k,v in crm_dict.items():
             if v.endswith('_parse'):
                 v = v.split('_parse')[0]
                 v = parse_fields(module, k, v, record, crm_obj)
-                contact_dict[k] = v
+                record_dict[k] = v
             else:
-                contact_dict[k] = record.get(v)
-        request.append(contact_dict)
+                record_dict[k] = record.get(v)
+        request.append(record_dict)
     response = crm_obj.update_records(module, request, is_return_orginal_data)
     return response
 
@@ -234,7 +234,7 @@ def get_licenses(license_field):
         return licenses['response']
 
 @app.task(queue="general")
-def insert_vendors(id=None):
+def insert_vendors(id=None, is_update=False):
     """
     Insert Vendors into Zoho CRM.
     """
@@ -246,6 +246,8 @@ def insert_vendors(id=None):
     for record in records:
         r = dict()
         r['db_id'] = record.id
+        if is_update:
+            r['id'] = record.zoho_crm_id
         try:
             farm_name = record.profile_contact.profile_contact_details['farm_name']
         except Exception:
@@ -277,7 +279,10 @@ def insert_vendors(id=None):
             print(exc)
             continue
     if len(data_list) > 0:
-        result = create_records('Vendors', data_list, True)
+        if is_update:
+            result = update_records('Vendors', data_list, True)
+        else:
+            result = create_records('Vendors', data_list, True)
         if result['status_code'] == 201:
             record_response = result['response']['response']['data']
             for i, record in enumerate(data_list):
@@ -293,7 +298,10 @@ def insert_vendors(id=None):
                     data['Licenses_Module'] = record_response[i]['details']['id']
                     for license in result['response']['orignal_data'][i]['Licenses_List']:
                         data['Licenses'] = license
-                        r = create_records('Vendors_X_Licenses', [data])
+                        if is_update:
+                            r = update_records('Vendors_X_Licenses', [data])
+                        else:
+                            r = create_records('Vendors_X_Licenses', [data])
                 if result['response']['orignal_data'][i].get('po_cultivars'):
                     data = dict()
                     l = list()
@@ -302,7 +310,10 @@ def insert_vendors(id=None):
                             r = search_query('Cultivars', j, 'Name')
                             if r['status_code'] == 200:
                                 data['Cultivars'] = r['response'][0]['id']
-                                r = create_records('Vendors_X_Cultivars', [data])
+                                if is_update:
+                                    r = update_records('Vendors_X_Cultivars', [data])
+                                else:
+                                    r = create_records('Vendors_X_Cultivars', [data])
         return result
     return {}
 
@@ -405,7 +416,7 @@ def list_crm_contacts(contact_id=None):
     return crm_obj.get_records('Contacts')
 
 @app.task(queue="general")
-def insert_accounts(account_id=None):
+def insert_accounts(account_id=None, is_update=False):
     """
     Insert new accounts in Zoho CRM.
     """
@@ -419,6 +430,8 @@ def insert_accounts(account_id=None):
         try:
             req = dict()
             l = list()
+            if is_update:
+                req['id'] = record.zoho_crm_id
             req.update(record.__dict__)
             req.update(record.account_profile.__dict__)
             req.update(record.account_contact.__dict__)
@@ -435,7 +448,10 @@ def insert_accounts(account_id=None):
             continue
         request.append(req)
     if len(request) > 0:
-        result = create_records('Accounts', request, is_return_orginal_data=True)
+        if is_update:
+            result = update_records('Accounts', request, is_return_orginal_data=True)
+        else:    
+            result = create_records('Accounts', request, is_return_orginal_data=True)
         if result['status_code'] == 201:
             record_response = result['response']['response']['data']
             for i, record in enumerate(request):
@@ -451,7 +467,10 @@ def insert_accounts(account_id=None):
                     data['Licenses_Module'] = record_response[i]['details']['id']
                     for license in result['response']['orignal_data'][i]['Licenses']:
                         data['Licenses'] = license
-                        r = create_records('Accounts_X_Licenses', [data])
+                        if is_update:
+                            r = update_records('Accounts_X_Licenses', [data])
+                        else:
+                            r = create_records('Accounts_X_Licenses', [data])
             return result
     return {}
 
