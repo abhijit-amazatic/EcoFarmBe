@@ -365,14 +365,14 @@ def get_records_from_crm(legal_business_name):
         vendor_record = crm_obj.get_record('Vendors', vendor_id)
         if vendor_record['status_code'] == 200:
             vendor = vendor_record['response'][vendor_id]
-            licenses = list()
-            for l in vendor.get('Licenses').split(','):
-                license = search_query('Licenses', l.strip(), 'Legal_Business_Name')
-                if license['status_code'] == 200:
-                    licenses.append(license['response'][0])
+            licenses = [licenses['response'][0]]
+            if vendor.get('Licenses'):
+                for l in vendor.get('Licenses').split(','):
+                    license = search_query('Licenses', l.strip(), 'Name')
+                    if license['status_code'] == 200:
+                        licenses.append(license['response'][0])
             crm_dict = get_format_dict('Licenses_To_DB')
             li = list()
-            licenses = [licenses['response'][0]]
             for license in licenses:
                 r = dict()
                 for k, v in crm_dict.items():
@@ -475,6 +475,11 @@ def get_accounts_from_crm(legal_business_name):
         if account_record['status_code'] == 200:
             account = account_record['response'][account_id]
             licenses = [licenses['response'][0]]
+            if account.get('Licenses'):
+                for l in account.get('Licenses').split(','):
+                    license = search_query('Licenses', l.strip(), 'Name')
+                    if license['status_code'] == 200:
+                        licenses.append(license['response'][0])
             crm_dict = get_format_dict('Licenses_To_DB')
             li = list()
             for license in licenses:
