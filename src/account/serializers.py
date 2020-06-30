@@ -7,6 +7,7 @@ from django.conf import settings
 from rest_framework import serializers
 from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo, )
 from core.utility import (notify_admins_on_accounts_registration,)
+from integration.crm import (insert_accounts, )
 from user.models import User
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -21,6 +22,7 @@ class AccountSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if validated_data.get('status') == 'completed':
             try:
+                insert_accounts.delay(id=instance.id,is_update=True)
                 notify_admins_on_accounts_registration(instance.ac_manager.email,instance.account_profile.company_name)
             except Exception as e:
                 print(e)

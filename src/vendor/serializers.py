@@ -72,7 +72,7 @@ class VendorProfileSerializer(serializers.ModelSerializer):
         profile = VendorProfile.objects.select_related('vendor').get(id=instance.id)
         if profile.vendor.vendor_category == 'cultivation' and validated_data.get('status') == 'completed':
             try:
-                # insert_vendors.delay(id=instance.id)
+                insert_vendors.delay(id=instance.id,is_update=True)
                 profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
                 notify_admins_on_profile_registration(profile.vendor.ac_manager.email, profile_contact.profile_contact_details['farm_name'])
             except Exception as e:
