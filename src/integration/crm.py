@@ -364,7 +364,8 @@ def get_records_from_crm(legal_business_name):
     """
     licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
-        vendor = search_query('Vendors_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
+        license_number = licenses['response'][0]['Name']
+        vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
         if vendor['status_code'] != 200:
             vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', licenses)
         else:
@@ -378,7 +379,9 @@ def get_records_from_crm(legal_business_name):
             vendor = vendor_record['response'][vendor_id]
             licenses = [licenses['response'][0]]
             if vendor.get('Licenses'):
-                for l in vendor.get('Licenses').split(','):
+                license_list = vendor.get('Licenses').split(',')
+                license_list.remove(license_number  )
+                for l in license_list:
                     license = search_query('Licenses', l.strip(), 'Name')
                     if license['status_code'] == 200:
                         licenses.append(license['response'][0])
@@ -481,7 +484,8 @@ def get_accounts_from_crm(legal_business_name):
     """
     licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
-        account = search_query('Accounts_X_Licenses', licenses['response'][0]['Name'], 'Licenses')
+        license_number = licenses['response'][0]['Name']
+        account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
         if account['status_code'] != 200:
             account_id = get_vendors_from_licenses('Account_Name_Lookup', licenses)
         else:
@@ -495,7 +499,9 @@ def get_accounts_from_crm(legal_business_name):
             account = account_record['response'][account_id]
             licenses = [licenses['response'][0]]
             if account.get('Licenses'):
-                for l in account.get('Licenses').split(','):
+                license_list = account.get('Licenses').split(',')
+                license_list.remove(license_number)
+                for l in license_list:
                     license = search_query('Licenses', l.strip(), 'Name')
                     if license['status_code'] == 200:
                         licenses.append(license['response'][0])
