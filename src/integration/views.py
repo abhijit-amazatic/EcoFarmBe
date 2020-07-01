@@ -167,3 +167,15 @@ class LeadView(APIView):
         Create Leads.
         """
         return Response(create_lead(record=request.data))
+
+class LeadSourcesView(APIView):
+    """
+    View class for Zoho CRM Leads.
+    """
+    permission_classes = (AllowAny,)
+    
+    def get(self, request):
+        """
+        Get lead sources list.
+        """
+        return Response(get_picklist('Leads', 'Lead Source'))

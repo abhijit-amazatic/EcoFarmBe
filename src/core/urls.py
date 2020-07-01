@@ -29,7 +29,7 @@ from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, Ven
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView,SearchCultivars,
-                               LeadView, GetBoxSharedLink,) 
+                               LeadView, GetBoxSharedLink, LeadSourcesView) 
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet)
@@ -66,6 +66,7 @@ urlpatterns = [
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
     path(r'crm/contacts/', CRMContactView.as_view(), name='list_crm_contacts'),
     path(r'crm/lead/', LeadView.as_view(), name='create_lead'),
+    path(r'crm/lead-sources/', LeadSourcesView.as_view(), name='get_lead_sources'),
     path(r'cultivar/sync/', CultivarSyncView.as_view(), name='sync_cultivar'),
     path(r'books/estimate', EstimateView.as_view(), name='estimate'),
     path(r'books/contact', ContactView.as_view(), name='contact'),
