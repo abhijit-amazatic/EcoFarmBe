@@ -262,10 +262,10 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
         """
         reports = ProfileReport.objects.filter()
         if self.action == "list":
-            reports = reports.select_related('vendor_profile')
+            reports = reports.select_related('user')
         if not self.request.user.is_staff and not self.request.user.is_superuser:
             #licenses = licenses.filter(vendor_profile__vendor__ac_manager=self.request.user)
-            reports = reports.filter(vendor_profile__vendor__vendor_roles__user=self.request.user)
+            reports = reports.filter(vendor_roles__user=self.request.user)
         return reports
 
     def create(self, request):

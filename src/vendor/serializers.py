@@ -427,12 +427,10 @@ class ProfileReportSerializer(serializers.ModelSerializer):
         Object level validation.Normal user should allowed to upload reports related to his VendorProfile.
         """
         if self.context['request'].method == 'POST':
-            #vendor_profile = VendorProfile.objects.filter(vendor__ac_manager=self.context['request'].user)
-            vendor_profiles = VendorProfile.objects.filter(vendor__vendor_roles__user=self.context['request'].user)
-            if obj['vendor_profile'] not in vendor_profiles and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+            if not (obj['user'] == self.context['request'].user) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
                 raise serializers.ValidationError(
-                    "You can only add/update reports related to your vendors/vendor profile only!")
-
+                    "You are not allowed to create report with another user!")
+            
         return obj
     
     class Meta:

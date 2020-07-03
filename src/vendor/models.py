@@ -229,8 +229,8 @@ class ProfileReport(models.Model):
     """
     Stores reports/calculation data.
     """
-    vendor_profile = models.ForeignKey(VendorProfile, verbose_name=_('VendorProfile'),
-                                       related_name='profile_report', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Report Manager'), null=True, blank=True, default=None, on_delete=models.CASCADE)
+    vendor_profile = models.CharField( _('Vendor Profile'), blank=True, null=True, max_length=255)
     report_name = models.CharField( _('Report Name'), blank=True, null=True, max_length=255)
     profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     profile_reports = JSONField(null=False, blank=False, default=dict)
