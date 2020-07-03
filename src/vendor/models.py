@@ -231,6 +231,7 @@ class ProfileReport(models.Model):
     """
     vendor_profile = models.OneToOneField(VendorProfile, verbose_name=_('VendorProfile'),
                                 related_name='profile_report', on_delete=models.CASCADE)
+    profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     profile_reports = JSONField(null=False, blank=False, default=dict)
     
        
