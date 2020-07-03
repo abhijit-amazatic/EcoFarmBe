@@ -11,7 +11,8 @@ from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
-from .serializers import (InventorySerialier, LogoutInventorySerializer, )
+from .serializers import (InventorySerializer, LogoutInventorySerializer, 
+                          InventoryDetailSerializer, )
 from .models import (Inventory, )
 from integration.inventory import (sync_inventory, )
 
@@ -88,14 +89,16 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         if not self.request.user.is_authenticated:
             return LogoutInventorySerializer
-        return InventorySerialier
+        elif self.action == 'retrieve':
+            return InventoryDetailSerializer
+        return InventorySerializer
     
     def get_queryset(self):
         """
         Return QuerySet.
         """
         return Inventory.objects.filter(cf_cfi_published=True)
-
+            
 class InventorySyncView(APIView):
     """
     Real time inventory sync.

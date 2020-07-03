@@ -11,6 +11,7 @@ from user.models import (User, )
 from vendor.models import (VendorProfile, License, )
 from account.models import (Account, )
 from cultivar.models import (Cultivar, )
+from labtest.models import (LabTest, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
                          ACCOUNT_TYPES)
 from .box import (get_shared_link, move_file, create_folder)
@@ -541,10 +542,21 @@ def get_field(record, key, field):
     """
     Parse crm fields.
     """
+    date_fields = [
+        'Date_Harvested',
+        'Date_Received',
+        'Date_Reported',
+        'Date_Tested',
+        'Created_Time',
+        'Last_Activity_Time',
+        'Modified_Time',
+    ]
     if field in ('created_by', 'modified_by'):
         return record.get(key).get('id')
     if field in ('parent_1', 'parent_2'):
         return [record.get(key).get('id')]
+    if field in date_fields:
+        return datetime.strptime(record.get(key), '%Y-%m-%d')
 
 def parse_crm_record(module, records):
     """
@@ -605,6 +617,46 @@ def fetch_cultivars(days=1):
             try:
                 obj, created = Cultivar.objects.update_or_create(
                     cultivar_crm_id=record['cultivar_crm_id'], cultivar_name=record['cultivar_name'], defaults=record)
+            except Exception as exc:
+                print(exc)
+                continue
+    return
+
+def get_labtest(id=None, sku=None):
+    """
+    Fetch labtest from Zoho CRM.
+    """
+    crm_obj = get_crm_obj()
+    if id:
+        response = crm_obj.get_record('Testing', id)
+    else:
+        response = search_query('Testing', sku, 'Inventory_SKU')
+    if response['status_code'] != 200:
+        return response
+    response = parse_crm_record('Testing', response['response'])
+    return {'status_code': 200,
+            'response': response}
+    
+def fetch_labtests(days=1):
+    """
+    Fetch labtests from Zoho CRM.
+    """
+    crm_obj = get_crm_obj()
+    yesterday = datetime.now() - timedelta(days=days)
+    date = datetime.strftime(yesterday, '%Y-%m-%dT%H:%M:%S%z')
+    request_headers = dict()
+    request_headers['If-Modified-Since'] = date
+    has_more = True
+    page = 0
+    while has_more != False:
+        records = crm_obj.get_records(module='Testing', page=page, extra_headers=request_headers)['response']
+        has_more = records['info']['more_records']
+        page = records['info']['page'] + 1
+        records = parse_crm_record('Testing', records['data'])
+        for record in records:
+            try:
+                obj, created = LabTest.objects.update_or_create(
+                    labtest_crm_id=record['labtest_crm_id'], Inventory_SKU=record['Inventory_SKU'], defaults=record)
             except Exception as exc:
                 print(exc)
                 continue

@@ -34,6 +34,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
+from labtest.views import (LabTestViewSet, )
 
 
 router = SimpleRouter()
@@ -46,6 +47,8 @@ router.register(r'inventory', InventoryViewSet, base_name="inventory")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'account', AccountViewSet, base_name="account")
 router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
+router.register(r'labtest', LabTestViewSet, base_name="labtest")
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),

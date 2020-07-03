@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rangefilter',
     'inventory',
     'cultivar',
+    'labtest',
 ]
 
 MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []

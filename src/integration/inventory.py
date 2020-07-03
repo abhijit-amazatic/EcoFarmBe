@@ -12,6 +12,7 @@ from pyzoho.inventory import Inventory
 from .models import (Integration, )
 from inventory.models import Inventory as InventoryModel
 from cultivar.models import (Cultivar, )
+from integration.crm import (get_labtest, )
 
 def get_inventory_obj():
     """
