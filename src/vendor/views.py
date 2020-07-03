@@ -87,7 +87,6 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
     financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
     processing_overview_path = 'processing-overview(/(?P<processing_overview_id>[0-9]*))?'
     program_overview_path = 'program-overview(/(?P<program_overview_id>[0-9]*))?'
-    profile_report_path = 'profile-report(/(?P<profile_report_id>[0-9]*))?'
 
     
     #filter_backends = [filters.SearchFilter]
@@ -110,8 +109,6 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             vendor_profile = vendor_profile.select_related('processing_overview')
         elif self.action == "program_overview":
             vendor_profile = vendor_profile.select_related('program_overview')
-        elif self.action == "profile_report":
-            vendor_profile = vendor_profile.select_related('profile_report')    
             
         #if not self.request.user.is_staff and not self.request.user.is_superuser:
         vendor_profile = vendor_profile.filter(vendor__vendor_roles__user=self.request.user)
@@ -136,8 +133,6 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
             return ProcessingOverviewSerializer
         elif self.action == 'program_overview':
             return ProgramOverviewSerializer
-        elif self.action == 'profile_report':
-            return ProfileReportSerializer
         return VendorProfileSerializer
 
 
@@ -201,12 +196,6 @@ class VendorProfileViewSet(viewsets.ModelViewSet):
         """
         return self.extra_info(request, pk, ProgramOverview, ProgramOverviewSerializer, 'program_overview')
 
-    @action(detail=True, url_path=profile_report_path, methods=['get', 'patch'], pagination_class=CustomPagination)
-    def profile_report(self, request, pk,profile_report_id=None):
-        """
-        Detail route CRUD operations on profile_report.
-        """
-        return self.extra_info(request, pk, ProfileReport, ProfileReportSerializer, 'profile_report')
         
 
 class LicenseViewSet(viewsets.ModelViewSet):
@@ -219,8 +208,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
     search_fields = ['legal_business_name']
     filterset_fields = ['vendor_profile']
 
-    
-    
+        
     def get_queryset(self):
         """
         Return queryset based on action.
@@ -256,3 +244,36 @@ class VendorCategoryView(APIView):
         """
         queryset = VendorCategory.objects.values('id','name')
         return Response(queryset)
+
+
+class ProfileReportViewSet(viewsets.ModelViewSet):
+    """
+    All Vendor profile related report data stored here.
+    """
+    serializer_class = ProfileReportSerializer
+    permission_classes = (IsAuthenticatedVendorPermission, )
+    filter_backends = [filters.SearchFilter,DjangoFilterBackend]
+    search_fields = ['report_name']
+    filterset_fields = ['vendor_profile']
+
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        reports = ProfileReport.objects.filter()
+        if self.action == "list":
+            reports = reports.select_related('vendor_profile')
+        if not self.request.user.is_staff and not self.request.user.is_superuser:
+            #licenses = licenses.filter(vendor_profile__vendor__ac_manager=self.request.user)
+            reports = reports.filter(vendor_profile__vendor__vendor_roles__user=self.request.user)
+        return reports
+
+    def create(self, request):
+        """
+        This endpoint is used to create report
+        """
+        serializer = ProfileReportSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    

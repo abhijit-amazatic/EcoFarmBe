@@ -422,6 +422,19 @@ class ProfileReportSerializer(serializers.ModelSerializer):
     """
     This defines ProfileReport serializer
     """
+    def validate(self, obj):
+        """
+        Object level validation.Normal user should allowed to upload reports related to his VendorProfile.
+        """
+        if self.context['request'].method == 'POST':
+            #vendor_profile = VendorProfile.objects.filter(vendor__ac_manager=self.context['request'].user)
+            vendor_profiles = VendorProfile.objects.filter(vendor__vendor_roles__user=self.context['request'].user)
+            if obj['vendor_profile'] not in vendor_profiles and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+                raise serializers.ValidationError(
+                    "You can only add/update reports related to your vendors/vendor profile only!")
+
+        return obj
+    
     class Meta:
         model = ProfileReport
         fields = ('__all__')        
