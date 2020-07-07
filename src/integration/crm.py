@@ -667,7 +667,7 @@ def sync_labtest(record):
     Webhook for Zoho CRM to sync labtest real time.
     """
     crm_obj = get_crm_obj()
-    record = json.loads(unquote(record).split('=')[1])
+    record = json.loads(record.dict()['response'])
     record = parse_crm_record('Testing', [record])[0]
     try:
         obj, created = LabTest.objects.update_or_create(
