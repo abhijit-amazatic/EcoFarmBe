@@ -40,5 +40,5 @@ class LabTestSyncViewSet(APIView):
         """
         Post realtime labtest updates.
         """
-        record = sync_labtest(request.data.get('JSONString'))
+        record = sync_labtest(request.data)
         return Response(record)
