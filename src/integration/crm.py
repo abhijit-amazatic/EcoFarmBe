@@ -661,3 +661,20 @@ def fetch_labtests(days=1):
                 print(exc)
                 continue
     return
+
+def sync_labtest(record):
+    """
+    Webhook for Zoho CRM to sync labtest real time.
+    """
+    crm_obj = get_crm_obj()
+    record = json.loads(record.dict()['response'])
+    record = parse_crm_record('Testing', [record])[0]
+    try:
+        obj, created = LabTest.objects.update_or_create(
+            labtest_crm_id=record['labtest_crm_id'],
+            Name=record['Name'],
+            defaults=record)
+        return created
+    except Exception as exc:
+        print(exc)
+        return {}

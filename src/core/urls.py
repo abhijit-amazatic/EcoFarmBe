@@ -34,7 +34,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
-from labtest.views import (LabTestViewSet, )
+from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 
 
 router = SimpleRouter()
@@ -76,6 +76,7 @@ urlpatterns = [
     path(r'books/contact', ContactView.as_view(), name='contact'),
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(), name='cultivar_category'),
+    path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
 ] + router.urls
 
 
