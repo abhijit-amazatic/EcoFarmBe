@@ -3,8 +3,6 @@ Serializer for inventory
 """
 from rest_framework import serializers
 from .models import (Inventory, )
-from labtest.models import (LabTest, )
-from labtest.serializers import (LabTestSerializer, )
 
 class InventorySerializer(serializers.ModelSerializer):
     """
@@ -14,20 +12,6 @@ class InventorySerializer(serializers.ModelSerializer):
         model = Inventory
         depth = 1
         exclude = ()
-
-class InventoryDetailSerializer(InventorySerializer):
-    """
-    Inventory Details Serializer
-    """
-    labtest = serializers.SerializerMethodField()
-    
-    def get_labtest(self, obj):
-        try:
-            labtest = LabTest.objects.get(Inventory_SKU=obj.sku)
-            labtest = LabTestSerializer(labtest)
-            return labtest.data
-        except LabTest.DoesNotExist:
-            return None
         
 class LogoutInventorySerializer(serializers.ModelSerializer):
     """

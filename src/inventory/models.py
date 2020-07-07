@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from cultivar.models import (Cultivar, )
+from labtest.models import (LabTest, )
 
 
 class Inventory(models.Model):
@@ -13,6 +14,8 @@ class Inventory(models.Model):
     """
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), blank=True, null=True,
                                 related_name='cultivar', on_delete=models.PROTECT)
+    labtest = models.ForeignKey(LabTest, verbose_name=_('LabTest'), blank=True, null=True,
+                                related_name='labtest', on_delete=models.PROTECT)
     created_time = models.DateTimeField(auto_now=False)
     last_modified_time = models.DateTimeField(auto_now=False)
     item_id = models.CharField(_('Item ID'), primary_key=True, max_length=50)

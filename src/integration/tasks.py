@@ -6,26 +6,22 @@ from celery.task import periodic_task
 from celery.schedules import crontab
 from core.celery import app
 
+from inventory.models import (Inventory, )
 from .crm import (insert_users, insert_vendors)
-
-
-@app.task(queue="general")
-def register_task_like_this():
-    """
-    This is just example to show how to register task.
-    """
-    pass
-
-#@periodic_task(run_every=(crontab(minute='*')), options={'queue': 'general'})
-def update_user_crm():
-    """
-    Update user in Zoho CRM.
-    """
-    #insert_users()
+from .inventory import (fetch_inventory, )
 
 #@periodic_task(run_every=(crontab(hour='*')), options={'queue': 'general'})
-def update_vendor_crm():
+def fetch_inventory_on_interval():
     """
-    Update user in Zoho CRM.
+    Update inventory on every interval from Zoho Inventory.
     """
-    insert_vendors()
+    try:
+        inventory_before = Inventory.objects.all().delete()
+        fetch_inventory(days=150)
+        inventory_after = Inventory.objects.all().count()
+        return {'status_code': 200,
+                'deleted': inventory_before[0],
+                'inserted': inventory_after}
+    except Exception as exc:
+        return {'status_code': 400,
+                'error': exc}

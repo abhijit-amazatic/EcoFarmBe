@@ -10,6 +10,7 @@ from core.settings import (
 )
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
+from labtest.models import (LabTest, )
 from inventory.models import Inventory as InventoryModel
 from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, )
@@ -63,8 +64,20 @@ def get_cultivar_from_db(cultivar_name):
     Return cultivar from db.
     """
     try:
-        return Cultivar.objects.filter(cultivar_name=cultivar_name)
+        cultivar = Cultivar.objects.filter(cultivar_name=cultivar_name)
+        return cultivar.first()
     except Cultivar.DoesNotExist:
+        return None
+
+def get_labtest_from_db(sku):
+    """
+    Return labtest from db.
+    """
+    try:
+        labtest = LabTest.objects.filter(Inventory_SKU=sku)
+        return labtest.first()
+    except LabTest.DoesNotExist as exc:
+        print(exc)
         return None
 
 def fetch_inventory(days=1):
@@ -83,12 +96,16 @@ def fetch_inventory(days=1):
         for record in records['items']:
             try:
                 cultivar = get_cultivar_from_db(record['cf_strain_name'])
-                if cultivar.count() > 0:
-                    record['cultivar'] = cultivar.first()
+                if cultivar:
+                    record['cultivar'] = cultivar
+                labtest = get_labtest_from_db(record['sku'])
+                if labtest:
+                    record['labtest'] = labtest
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     name=record['name'],
-                    cultivar=cultivar.first(),
+                    cultivar=cultivar,
+                    labtest=labtest,
                     defaults=record)
             except Exception as exc:
                 print(exc)
