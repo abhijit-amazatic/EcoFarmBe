@@ -120,12 +120,16 @@ def sync_inventory(response):
     record = inventory.parse_item(response=record, is_detail=True)
     try:
         cultivar = get_cultivar_from_db(record['cf_strain_name'])
-        if cultivar.count() > 0:
-            record['cultivar'] = cultivar.first()
+        if cultivar:
+            record['cultivar'] = cultivar
+        labtest = get_labtest_from_db(record['sku'])
+        if labtest:
+            record['labtest'] = labtest
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
             name=record['name'],
-            cultivar=cultivar.first(),
+            cultivar=cultivar,
+            labtest=labtest,
             defaults=record)
         return obj.item_id
     except Exception as exc:
