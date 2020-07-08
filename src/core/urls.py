@@ -29,7 +29,8 @@ from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, Ven
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView,SearchCultivars,
-                               LeadView, GetBoxSharedLink, LeadSourcesView) 
+                               LeadView, GetBoxSharedLink, LeadSourcesView,
+                               PurchaseOrderView, CRMVendorView) 
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet)
@@ -68,12 +69,14 @@ urlpatterns = [
     path(r'inventory/item', InventoryView.as_view(), name='inventory'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
-    path(r'crm/contacts/', CRMContactView.as_view(), name='list_crm_contacts'),
+    path(r'crm/contact/', CRMContactView.as_view(), name='list_crm_contacts'),
     path(r'crm/lead/', LeadView.as_view(), name='create_lead'),
     path(r'crm/lead-sources/', LeadSourcesView.as_view(), name='get_lead_sources'),
+    path(r'crm/vendor/', CRMVendorView.as_view(), name='get_vendor'),
     path(r'cultivar/sync/', CultivarSyncView.as_view(), name='sync_cultivar'),
-    path(r'books/estimate', EstimateView.as_view(), name='estimate'),
-    path(r'books/contact', ContactView.as_view(), name='contact'),
+    path(r'books/estimate/', EstimateView.as_view(), name='estimate'),
+    path(r'books/contact/', ContactView.as_view(), name='contact'),
+    path(r'books/purchase-order/', PurchaseOrderView.as_view(), name='purchase_order'),
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(), name='cultivar_category'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),

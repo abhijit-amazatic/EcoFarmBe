@@ -15,10 +15,12 @@ from integration.box import(get_box_tokens, get_shared_link, )
 from integration.inventory import (get_inventory_item,
                                    get_inventory_items,)
 from integration.crm import (search_query, get_picklist,
-                             list_crm_contacts, create_lead)
+                             list_crm_contacts, create_lead,
+                             get_records_from_crm, )
 from integration.books import (create_contact, create_estimate,
                                get_estimate, list_estimates, 
-                               get_contact, list_contacts, )
+                               get_contact, list_contacts, 
+                               get_purchase_order, list_purchase_orders,)
 
 class GetBoxTokensView(APIView):
     """
@@ -99,6 +101,19 @@ class CRMContactView(APIView):
             return Response(list_crm_contacts(request.query_params.get('contact_id')))
         return Response(list_crm_contacts())
 
+class CRMVendorView(APIView):
+    """
+    Get Vendor from Zoho CRM.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get vendor.
+        """
+        if request.query_params.get('legal_business_name'):
+            return Response(get_records_from_crm(request.query_params.get('legal_business_name')))
+        return Response({})
 
 class InventoryView(APIView):
     """
@@ -135,6 +150,20 @@ class EstimateView(APIView):
         Create estimate in Zoho Books.
         """
         return Response(create_estimate(data=request.data, params=request.query_params.dict()))
+
+class PurchaseOrderView(APIView):
+    """
+    View class for Zoho books purchase orders.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get PO.
+        """
+        if request.query_params.get('po_id', None):
+            return Response(get_purchase_order(request.query_params.get('po_id')))
+        return Response(list_purchase_orders(params=request.query_params.dict()))
 
 class ContactView(APIView):
     """

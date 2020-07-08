@@ -199,3 +199,33 @@ def list_contacts(params=None):
     obj = get_books_obj()
     contact_obj = obj.Contacts()
     return contact_obj.list_contacts(parameters=params)
+
+def get_purchase_order(po_id, params=None):
+    """
+    Get specific purchase order.
+    """
+    obj = get_books_obj()
+    po_obj = obj.PurchaseOrders()
+    return po_obj.get_purchase_order(po_id=po_id, parameters=params)
+
+def list_purchase_orders(params=None):
+    """
+    List specific purchase order.
+    """
+    obj = get_books_obj()
+    po_obj = obj.PurchaseOrders()
+    return po_obj.list_purchase_orders(parameters=params)
+
+# def create_purchase_order(data, params=None):
+#     """
+#     Create purchase order in Zoho Books.
+#     """
+#     obj = get_books_obj()
+#     po_obj = obj.PurchaseOrders()
+#     result = get_customer(obj, data)
+#     if result['code'] != 0:
+#         return result
+#     result = get_item(obj, result['data'])
+#     if result['code'] != 0:
+#         return result
+#     return po_obj.create_purchase_order(result['data'], parameters=params)
