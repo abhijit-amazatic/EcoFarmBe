@@ -108,7 +108,10 @@ def fetch_inventory(days=1):
                     labtest=labtest,
                     defaults=record)
             except Exception as exc:
-                print(exc)
+                print({
+                    'item_id': record['item_id'],
+                    'error': exc
+                    })
                 continue
         
 def sync_inventory(response):
