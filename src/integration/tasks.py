@@ -10,7 +10,7 @@ from inventory.models import (Inventory, )
 from .crm import (insert_users, insert_vendors)
 from .inventory import (fetch_inventory, )
 
-#@periodic_task(run_every=(crontab(hour='*')), options={'queue': 'general'})
+@periodic_task(run_every=(crontab(hour=[9], minute=0)), options={'queue': 'general'})
 def fetch_inventory_on_interval():
     """
     Update inventory on every interval from Zoho Inventory.
