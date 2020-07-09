@@ -20,7 +20,8 @@ from integration.crm import (search_query, get_picklist,
 from integration.books import (create_contact, create_estimate,
                                get_estimate, list_estimates, 
                                get_contact, list_contacts, 
-                               get_purchase_order, list_purchase_orders,)
+                               get_purchase_order, list_purchase_orders,
+                               get_vendor_payment, list_vendor_payments )
 
 class GetBoxTokensView(APIView):
     """
@@ -142,7 +143,9 @@ class EstimateView(APIView):
         Get estimates.
         """
         if request.query_params.get('estimate_id', None):
-            return Response(get_estimate(request.query_params.get('estimate_id')))
+            return Response(get_estimate(
+                request.query_params.get('estimate_id'),
+                params=request.query_params.dict()))
         return Response(list_estimates(params=request.query_params.dict()))
 
     def post(self, request):
@@ -162,8 +165,26 @@ class PurchaseOrderView(APIView):
         Get PO.
         """
         if request.query_params.get('po_id', None):
-            return Response(get_purchase_order(request.query_params.get('po_id')))
+            return Response(get_purchase_order(
+                request.query_params.get('po_id'),
+                params=request.query_params.dict()))
         return Response(list_purchase_orders(params=request.query_params.dict()))
+
+class VendorPaymentView(APIView):
+    """
+    View class for Zoho books vendor payments.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get PO.
+        """
+        if request.query_params.get('payment_id', None):
+            return Response(get_vendor_payment(
+                request.query_params.get('payment_id'),
+                params=request.query_params.dict()))
+        return Response(list_vendor_payments(params=request.query_params.dict()))
 
 class ContactView(APIView):
     """
@@ -208,3 +229,4 @@ class LeadSourcesView(APIView):
         Get lead sources list.
         """
         return Response(get_picklist('Leads', 'Lead Source'))
+

@@ -216,6 +216,22 @@ def list_purchase_orders(params=None):
     po_obj = obj.PurchaseOrders()
     return po_obj.list_purchase_orders(parameters=params)
 
+def get_vendor_payment(payment_id, params=None):
+    """
+    Return vendor payments made.
+    """
+    obj = get_books_obj()
+    vp_obj = obj.VendorPayments()
+    return vp_obj.get_payment(payment_id=payment_id, parameters=params)
+
+def list_vendor_payments(params=None):
+    """
+    List vendor payments.
+    """
+    obj = get_books_obj()
+    po_obj = obj.VendorPayments()
+    return po_obj.list_payments(parameters=params)
+
 # def create_purchase_order(data, params=None):
 #     """
 #     Create purchase order in Zoho Books.
