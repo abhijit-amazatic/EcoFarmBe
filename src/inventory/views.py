@@ -23,18 +23,18 @@ class DataFilter(FilterSet):
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
-    cf_cbd__in = CharInFilter(field_name='cf_cbd', lookup_expr='in')
-    cf_potency__in = CharInFilter(field_name='cf_potency', lookup_expr='in')
-    cf_d_8_thc__in = CharInFilter(field_name='cf_d_8_thc', lookup_expr='in')
-    cf_thca__in = CharInFilter(field_name='cf_thca', lookup_expr='in')
-    cf_cbda__in = CharInFilter(field_name='cf_cbda', lookup_expr='in')
-    cf_cbn__in = CharInFilter(field_name='cf_cbn', lookup_expr='in')
-    cf_cbc__in = CharInFilter(field_name='cf_cbc', lookup_expr='in')
-    cf_cbca__in = CharInFilter(field_name='cf_cbca', lookup_expr='in')
-    cf_cbga__in = CharInFilter(field_name='cf_cbga', lookup_expr='in')
-    cf_cbl__in = CharInFilter(field_name='cf_cbl', lookup_expr='in')
-    cf_thcva__in = CharInFilter(field_name='cf_thcva', lookup_expr='in')
-    cf_cbdv__in = CharInFilter(field_name='cf_cbdv', lookup_expr='in')
+    # cf_cbd__in = CharInFilter(field_name='cf_cbd', lookup_expr='in')
+    # cf_potency__in = CharInFilter(field_name='cf_potency', lookup_expr='in')
+    # cf_d_8_thc__in = CharInFilter(field_name='cf_d_8_thc', lookup_expr='in')
+    # cf_thca__in = CharInFilter(field_name='cf_thca', lookup_expr='in')
+    # cf_cbda__in = CharInFilter(field_name='cf_cbda', lookup_expr='in')
+    # cf_cbn__in = CharInFilter(field_name='cf_cbn', lookup_expr='in')
+    # cf_cbc__in = CharInFilter(field_name='cf_cbc', lookup_expr='in')
+    # cf_cbca__in = CharInFilter(field_name='cf_cbca', lookup_expr='in')
+    # cf_cbga__in = CharInFilter(field_name='cf_cbga', lookup_expr='in')
+    # cf_cbl__in = CharInFilter(field_name='cf_cbl', lookup_expr='in')
+    # cf_thcva__in = CharInFilter(field_name='cf_thcva', lookup_expr='in')
+    # cf_cbdv__in = CharInFilter(field_name='cf_cbdv', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
@@ -52,24 +52,24 @@ class DataFilter(FilterSet):
         'cf_cultivar_type':['icontains', 'exact'],
         'cf_strain_name':['icontains', 'exact'],
         'price':['gte', 'lte', 'gt', 'lt'],
-        'cf_potency':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbd':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_potency':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbd':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
         'stock_on_hand':['gte', 'lte', 'gt', 'lt'],
         'cf_cannabis_grade_and_category':['icontains', 'exact'],
         'last_modified_time':['gte', 'lte', 'gt', 'lt'],
         'product_type':['icontains', 'exact'],
         'cf_pesticide_summary':['icontains', 'exact'],
-        'cf_d_8_thc':['gte', 'lte', 'gt', 'lt'],
-        'cf_thca':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbda':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbn':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbc':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbca':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbga':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbl':['gte', 'lte', 'gt', 'lt'],
-        'cf_thcva':['gte', 'lte', 'gt', 'lt'],
-        'cf_cbdv':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_d_8_thc':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_thca':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbda':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbn':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbc':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbca':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbga':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbl':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_thcva':['gte', 'lte', 'gt', 'lt'],
+        # 'cf_cbdv':['gte', 'lte', 'gt', 'lt'],
         }
 
 
