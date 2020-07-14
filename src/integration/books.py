@@ -264,19 +264,23 @@ def list_vendor_credits(params=None):
     invoice_obj = obj.VendorCredits()
     return invoice_obj.list_vendor_credit(parameters=params)
 
-def get_unpaid_invoices(status='unpaid'):
+def get_unpaid_invoices(vendor, status='unpaid'):
     """
     Return total unpaid invoices.
     """
-    response = list_invoices({'status': status})['response']
+    response = list_invoices({
+        'customer_name': vendor,
+        'status': status})['response']
     unpaid = sum([i['total'] for i in response])
     return unpaid
 
-def get_available_credit(status='open'):
+def get_available_credit(vendor, status='open'):
     """
     Get available vendor credits.
     """
-    response = list_vendor_credits({'status':status})['response']
+    response = list_vendor_credits({
+        'vendor_name': vendor,
+        'status':status})['response']
     credits = sum([i['total'] for i in response])
     return credits
 

@@ -102,6 +102,12 @@ BOOKS_REFRESH_TOKEN=''
 ESTIMATE_TAXES = {'Flower': 'Cultivation Tax - Flower (2020)', 'Trim': 'Cultivation Tax - Trim (2020)'}
 LICENSE_PARENT_FOLDER_ID='113146023153'
 
+#Zoho Sign configuration
+SIGN_CLIENT_ID=''
+SIGN_CLIENT_SECRET=''
+SIGN_REDIRECT_URI=''
+SIGN_REFRESH_TOKEN=''
+
 #Slack config
 SLACK_TOKEN = ''
 SLACK_CHANNEL_NAME = ''

@@ -232,8 +232,9 @@ class AccountSummaryView(APIView):
         """
         Get account summary.
         """
-        total_unpaid_invoices = get_unpaid_invoices()
-        total_credits = get_available_credit()
+        vendor = request.query_params.get('vendor_name')
+        total_unpaid_invoices = get_unpaid_invoices(vendor)
+        total_credits = get_available_credit(vendor)
         return Response({
             "Available_Credits": total_credits,
             "Overdue_Invoices": total_unpaid_invoices
