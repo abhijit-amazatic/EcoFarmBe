@@ -21,7 +21,10 @@ from integration.books import (create_contact, create_estimate,
                                get_estimate, list_estimates, 
                                get_contact, list_contacts, 
                                get_purchase_order, list_purchase_orders,
-                               get_vendor_payment, list_vendor_payments )
+                               get_vendor_payment, list_vendor_payments,
+                               get_invoice, list_invoices, 
+                               get_unpaid_invoices, get_vendor_credit,
+                               list_vendor_credits,get_available_credit, )
 
 class GetBoxTokensView(APIView):
     """
@@ -185,6 +188,56 @@ class VendorPaymentView(APIView):
                 request.query_params.get('payment_id'),
                 params=request.query_params.dict()))
         return Response(list_vendor_payments(params=request.query_params.dict()))
+
+class InvoiceView(APIView):
+    """
+    View class for Zoho books invoices.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get an invoice.
+        """
+        if request.query_params.get('invoice_id', None):
+            return Response(get_invoice(
+                request.query_params.get('invoice_id'),
+                params=request.query_params.dict()))
+        return Response(list_invoices(params=request.query_params.dict()))
+
+class VendorCreditView(APIView):
+    """
+    View class for Zoho books vendor credit.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get vendor credit.
+        """
+        if request.query_params.get('credit_id', None):
+            return Response(get_vendor_credit(
+                request.query_params.get('credit_id'),
+                params=request.query_params.dict()))
+        return Response(list_vendor_credits(params=request.query_params.dict()))
+
+
+class AccountSummaryView(APIView):
+    """
+    View class for Zoho books summary.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get account summary.
+        """
+        total_unpaid_invoices = get_unpaid_invoices()
+        total_credits = get_available_credit()
+        return Response({
+            "Available_Credits": total_credits,
+            "Overdue_Invoices": total_unpaid_invoices
+            })
 
 class ContactView(APIView):
     """

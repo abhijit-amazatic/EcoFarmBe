@@ -232,6 +232,54 @@ def list_vendor_payments(params=None):
     po_obj = obj.VendorPayments()
     return po_obj.list_payments(parameters=params)
 
+def get_invoice(invoice_id, params=None):
+    """
+    Get an invoice.
+    """
+    obj = get_books_obj()
+    invoice_obj = obj.Invoices()
+    return invoice_obj.get_payment(invoice_id=invoice_id, parameters=params)
+
+def list_invoices(params=None):
+    """
+    List invoices.
+    """
+    obj = get_books_obj()
+    invoice_obj = obj.Invoices()
+    return invoice_obj.list_invoices(parameters=params)
+
+def get_vendor_credit(credit_id, params=None):
+    """
+    Get vendor credit.
+    """
+    obj = get_books_obj()
+    invoice_obj = obj.VendorCredits()
+    return invoice_obj.get_vendor_credit(credit_id=credit_id, parameters=params)
+
+def list_vendor_credits(params=None):
+    """
+    List vendor credits.
+    """
+    obj = get_books_obj()
+    invoice_obj = obj.VendorCredits()
+    return invoice_obj.list_vendor_credit(parameters=params)
+
+def get_unpaid_invoices(status='unpaid'):
+    """
+    Return total unpaid invoices.
+    """
+    response = list_invoices({'status': status})['response']
+    unpaid = sum([i['total'] for i in response])
+    return unpaid
+
+def get_available_credit(status='open'):
+    """
+    Get available vendor credits.
+    """
+    response = list_vendor_credits({'status':status})['response']
+    credits = sum([i['total'] for i in response])
+    return credits
+
 # def create_purchase_order(data, params=None):
 #     """
 #     Create purchase order in Zoho Books.
