@@ -106,7 +106,9 @@ class InventorySyncView(APIView):
         """
         Post realtime inventory updates.
         """
-        record = sync_inventory(request.data.get('JSONString'))
+        record = sync_inventory(
+            request.data.get('inventory_name'),
+            request.data.get('JSONString'))
         return Response(record)
 
 class CultivarCategoryView(APIView):

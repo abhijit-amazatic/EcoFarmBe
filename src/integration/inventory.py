@@ -119,11 +119,11 @@ def fetch_inventory(inventory_name, days=1):
                     })
                 continue
         
-def sync_inventory(response):
+def sync_inventory(inventory_name, response):
     """
     Webhook for Zoho inventory to sync inventory real time.
     """
-    inventory = get_inventory_obj()
+    inventory = get_inventory_obj(inventory_name)
     record = json.loads(unquote(response))['item']
     record = inventory.parse_item(response=record, is_detail=True)
     try:
