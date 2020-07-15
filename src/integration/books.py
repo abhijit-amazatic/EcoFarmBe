@@ -84,7 +84,7 @@ def calculate_tax(product_category, quantity):
         tax = item['rate']
         total_tax = float(quantity) * float(tax)
     elif product_category == 'Trim':
-        item = get_tax(books_obj, taxes['Trim'])['response']['rate']
+        item = get_tax(books_obj, taxes['Trim'])['response'][0]
         item_name = item['name']
         tax = item['rate']
         total_tax = float(quantity) * float(tax)
