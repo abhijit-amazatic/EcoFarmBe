@@ -431,7 +431,11 @@ CRM_FORMAT  = {
             "fd_indoor.tops_target_price": "Target_Price_Lb_Tops_Indoor",
             "fd_indoor.trim_target_price": "Target_Price_Lb_Trim_Indoor",
             "fd_indoor.small_target_price": "Target_Price_Lb_Smalls",
-            "fd_indoor.target_profit_margin": "Target_Profit_Margin_Indoor"
+            "fd_indoor.target_profit_margin": "Target_Profit_Margin_Indoor",
+            'bank_account_number': 'Bank_Account_Number',
+            'bank_routing_numver': 'Bank_Routing_Number',
+            'bank_name': 'Bank_Name',
+            'do_you_have_a_bank_account': 'Do_you_have_a_bank_account',
         }
     },
     "Licenses_To_DB": {
@@ -487,6 +491,13 @@ CRM_FORMAT  = {
                     "billing_city": "Billing_City",
                     "billing_zip_code": "Billing_Code",
                     "billing_state": "Billing_State",
+                    'bank_account_number': 'Bank_Account_Number',
+                    'bank_city': 'Bank_City',
+                    'bank_name': 'Bank_Name',
+                    'bank_routing_number': 'Bank_Routing_Number',
+                    'bank_state': 'Bank_State',
+                    'bank_street': 'Bank_Street',
+                    'bank_zip_code': 'Bank_Zip_Code',
                 }
         },
     "Leads":
