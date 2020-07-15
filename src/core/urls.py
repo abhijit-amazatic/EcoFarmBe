@@ -68,7 +68,6 @@ urlpatterns = [
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
-    path(r'inventory/item', InventoryView.as_view(), name='inventory'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
     path(r'crm/contact/', CRMContactView.as_view(), name='list_crm_contacts'),

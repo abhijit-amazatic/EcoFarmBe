@@ -35,3 +35,37 @@ def get_sign_obj():
             access_expiry=sign_obj.access_expiry[0]
             )
     return sign_obj
+
+def create_estimate_document(
+    file_obj,
+    recipients,
+    notes=None,
+    expiry=10,
+    reminder_period=5
+    ):
+    """
+    create estimate in Zoho sign.
+    """
+    sign_obj = get_sign_obj()
+    return sign_obj.create_document(
+        file_obj=file_obj,
+        recipients=recipients,
+        notes=notes,
+        expiry=expiry,
+        reminder_period=reminder_period)
+
+def submit_estimate_document(document_obj):
+    """
+    Submit estimate document for sign.
+    """
+    sign_obj = get_sign_obj()
+    document_obj = document_obj.get('requests')
+    return sign_obj.submit_document(document_obj['request_id'], document_obj)
+
+def download_pdf(request_id):
+    """
+    Download estimate pdf.
+    """
+    sign_obj = get_sign_obj()
+    return sign_obj.download_pdf(request_id)
+    

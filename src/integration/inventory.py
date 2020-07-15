@@ -6,7 +6,8 @@ from core.settings import (
     INVENTORY_CLIENT_SECRET,
     INVENTORY_REFRESH_TOKEN,
     INVENTORY_REDIRECT_URI,
-    INVENTORY_ORGANIZATION_ID,
+    INVENTORY_EFL_ORGANIZATION_ID,
+    INVENTORY_EFD_ORGANIZATION_ID
 )
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
@@ -15,16 +16,20 @@ from inventory.models import Inventory as InventoryModel
 from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, )
 
-def get_inventory_obj():
+def get_inventory_obj(inventory_name):
     """
     Return pyzoho.inventory object.
     """
     try:
-        token = Integration.objects.get(name='inventory')
+        token = Integration.objects.get(name=inventory_name)
         access_token = token.access_token
         access_expiry = token.access_expiry
     except Integration.DoesNotExist:
         access_token = access_expiry = None
+    if inventory_name == 'inventory_efd':
+        INVENTORY_ORGANIZATION_ID = INVENTORY_EFD_ORGANIZATION_ID
+    elif inventory_name == 'inventory_efl':
+        INVENTORY_ORGANIZATION_ID = INVENTORY_EFL_ORGANIZATION_ID
     inventory = Inventory(
         client_id=INVENTORY_CLIENT_ID,
         client_secret=INVENTORY_CLIENT_SECRET,
@@ -36,7 +41,7 @@ def get_inventory_obj():
     )
     if not access_token and not access_expiry:
         Integration.objects.update_or_create(
-            name='inventory',
+            name=inventory_name,
             client_id=inventory.CLIENT_ID,
             client_secret=inventory.CLIENT_SECRET,
             access_token=inventory.ACCESS_TOKEN,
@@ -45,18 +50,18 @@ def get_inventory_obj():
         )
     return inventory
 
-def get_inventory_items(params={}):
+def get_inventory_items(inventory_name, params={}):
     """
     Return Inventory list.
     """
-    inventory = get_inventory_obj()
+    inventory = get_inventory_obj(inventory_name)
     return inventory.get_inventory(params=params)
 
-def get_inventory_item(item_id):
+def get_inventory_item(item_id, inventory_name):
     """
     Return inventory item.
     """
-    inventory = get_inventory_obj()
+    inventory = get_inventory_obj(inventory_name)
     return inventory.get_inventory(item_id=item_id)
 
 def get_cultivar_from_db(cultivar_name):
@@ -80,7 +85,7 @@ def get_labtest_from_db(sku):
         print(exc)
         return None
 
-def fetch_inventory(days=1):
+def fetch_inventory(inventory_name, days=1):
     """
     Fetch latest inventory from Zoho Inventory.
     """
@@ -90,7 +95,7 @@ def fetch_inventory(days=1):
     has_more = True
     page = 0
     while has_more:
-        records = get_inventory_items({'page': page, 'last_modified_time': date})
+        records = get_inventory_items(inventory_name, {'page': page, 'last_modified_time': date})
         has_more = records['page_context']['has_more_page']
         page = records['page_context']['page'] + 1
         for record in records['items']:
