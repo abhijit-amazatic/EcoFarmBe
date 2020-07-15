@@ -6,7 +6,7 @@ from core.settings import (
     BOOKS_ORGANIZATION_ID,
     BOOKS_REDIRECT_URI,
     BOOKS_REFRESH_TOKEN,
-    ESTIMATE_TAXES
+    ESTIMATE_TAXES,
 )
 from pyzoho.books import (Books, )
 from .models import (Integration, )
@@ -68,6 +68,37 @@ def get_tax(obj, tax):
     """
     tax_obj = obj.Items()
     return tax_obj.list_items(parameters={'name': tax})
+
+def calculate_tax(product_category, quantity):
+    """
+    Calculate tax from product category.
+    """
+    try:
+        taxes = json.loads(ESTIMATE_TAXES)
+    except Exception:
+        taxes = ESTIMATE_TAXES
+    books_obj = get_books_obj()
+    if product_category == 'Flower':
+        item = get_tax(books_obj, taxes['Flower'])['response'][0]
+        item_name = item['name']
+        tax = item['rate']
+        total_tax = float(quantity) * float(tax)
+    elif product_category == 'Trim':
+        item = get_tax(books_obj, taxes['Trim'])['response']['rate']
+        item_name = item['name']
+        tax = item['rate']
+        total_tax = float(quantity) * float(tax)
+    else:
+        return {'status_code': 400,
+                'error': 'product category not found.'}
+    return {
+        'status_code': 200,
+        'response': {
+            'item_name': item_name,
+            'total_tax': total_tax,
+            'quantity': quantity
+        }
+    }
 
 def get_item(obj, data):
     """

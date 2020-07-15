@@ -24,7 +24,8 @@ from integration.books import (create_contact, create_estimate,
                                get_vendor_payment, list_vendor_payments,
                                get_invoice, list_invoices, 
                                get_unpaid_invoices, get_vendor_credit,
-                               list_vendor_credits,get_available_credit, )
+                               list_vendor_credits,get_available_credit, 
+                               calculate_tax, )
 
 class GetBoxTokensView(APIView):
     """
@@ -156,6 +157,22 @@ class EstimateView(APIView):
         Create estimate in Zoho Books.
         """
         return Response(create_estimate(data=request.data, params=request.query_params.dict()))
+
+class EstimateTaxView(APIView):
+    """
+    View class to calculate tax for estimate.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get estimates tax.
+        """
+        product_category = request.query_params.get('product_category', None)
+        quantity = request.query_params.get('quantity', None)
+        if product_category and quantity:
+            return Response(calculate_tax(product_category, quantity))
+        return Response({})
 
 class PurchaseOrderView(APIView):
     """
