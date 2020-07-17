@@ -22,6 +22,8 @@ class Inventory(models.Model):
     item_type = models.CharField(_('Item Type'), blank=True, null=True, max_length=50)
     name = models.CharField(_('Name'), max_length=255)
     sku = models.CharField(_('SKU'), blank=True, null=True, max_length=100, db_index=True)
+    image_name = models.CharField(_('Image Name'), blank=True, null=True, max_length=100)
+    image_type = models.CharField(_('Image Type'), blank=True, null=True, max_length=50)
     manufacturer = models.CharField(_('Manufracturer'), blank=True, null=True, max_length=100)
     category_name = models.CharField(_('Category Name'), max_length=50)
     category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
@@ -90,7 +92,7 @@ class Inventory(models.Model):
     cf_lab_test_results_box_url = models.URLField(_('Lab Test Results Box Url'), blank=True, null=True, max_length=255)
     track_batch_number = models.CharField(_('Track Batch Number'), blank=True, null=True, max_length=100)
     package_details = JSONField(blank=True, null=True, default=dict)
-    documents = ArrayField(models.CharField(max_length=50), blank=True, null=True)
+    documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
     
     def __str__(self):

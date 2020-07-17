@@ -149,7 +149,18 @@ def upload_file(folder_id, file_path):
     """
     client = get_box_client()
     return client.folder(folder_id).upload(file_path)
-    
+
+def upload_file_stream(folder_id, stream, file_name):
+    """
+    Upload file using live stream.
+    """
+    try:
+        client = get_box_client()
+        return client.folder(folder_id).upload_stream(stream, file_name)
+    except BoxException as exc:
+        if exc.context_info.get('conflicts'):
+            return exc.context_info.get('conflicts')['id']
+
 def get_folder_items(folder_id):
     """
     Return sub-directories of folder.
@@ -266,6 +277,7 @@ def get_download_url(file_id):
 
 def get_preview_url(file_id):
     """
+    Generate preview url.
     """
     client = get_box_client()
     return client.file(file_id).get_shared_link_download_url(
