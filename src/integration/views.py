@@ -307,7 +307,7 @@ class GetTaxView(APIView):
     """
     View class to get tax.
     """
-    permission_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, )
     
     def get(self, request):
         """
