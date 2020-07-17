@@ -27,8 +27,7 @@ from integration.books import (create_contact, create_estimate,
                                get_invoice, list_invoices, 
                                get_unpaid_invoices, get_vendor_credit,
                                list_vendor_credits,get_available_credit, 
-                               calculate_tax, )
-from core.settings import (ESTIMATE_TAXES, )
+                               calculate_tax, get_tax_rates, )
 
 class GetBoxTokensView(APIView):
     """
@@ -314,7 +313,4 @@ class GetTaxView(APIView):
         """
         Get tax.
         """
-        try:
-            return Response(json.loads(ESTIMATE_TAXES))
-        except TypeError:
-            return Response(ESTIMATE_TAXES)
+        return Response(get_tax_rates())

@@ -69,9 +69,24 @@ def get_tax(obj, tax):
     tax_obj = obj.Items()
     return tax_obj.list_items(parameters={'name': tax})
 
+def get_tax_rates():
+    """
+    Get all tax rates.
+    """
+    try:
+        taxes = json.loads(ESTIMATE_TAXES)
+    except Exception:
+        taxes = ESTIMATE_TAXES
+    books_obj = get_books_obj()
+    response = dict()
+    for k,v in taxes.items():
+        item = get_tax(books_obj, v)['response'][0]
+        response[item['name']] = item['rate']
+    return response
+
 def calculate_tax(product_category, quantity):
     """
-    Calculate tax from product category.
+    Calculate tax from product category for estimate page.
     """
     try:
         taxes = json.loads(ESTIMATE_TAXES)
