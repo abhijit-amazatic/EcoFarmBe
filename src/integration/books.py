@@ -29,14 +29,16 @@ def get_books_obj():
         redirect_uri=BOOKS_REDIRECT_URI,
         organization_id=BOOKS_ORGANIZATION_ID,
         refresh_token=BOOKS_REFRESH_TOKEN)
-    if books_obj._refreshed:
+    if books_obj.refreshed:
         Integration.objects.update_or_create(
             name='books',
-            client_id=BOOKS_CLIENT_ID,
-            client_secret=BOOKS_CLIENT_SECRET,
-            refresh_token=BOOKS_REFRESH_TOKEN,
-            access_token=books_obj.access_token,
-            access_expiry=books_obj.access_expiry
+            defaults={
+                "name":'books',
+                "client_id":BOOKS_CLIENT_ID,
+                "client_secret":BOOKS_CLIENT_SECRET,
+                "refresh_token":BOOKS_REFRESH_TOKEN,
+                "access_token":books_obj.access_token,
+                "access_expiry":books_obj.access_expiry}
     )
     return books_obj
         

@@ -52,7 +52,7 @@ def get_inventory_obj(inventory_name):
                 "client_id":inventory.CLIENT_ID,
                 "client_secret":inventory.CLIENT_SECRET,
                 "access_token":inventory.ACCESS_TOKEN,
-                "access_expiry":inventory.ACCESS_EXPIRY[0],
+                "access_expiry":inventory.ACCESS_EXPIRY,
                 "refresh_token":inventory.REFRESH_TOKEN
                 }
         )
