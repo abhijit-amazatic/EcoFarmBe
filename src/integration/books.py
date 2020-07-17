@@ -38,7 +38,7 @@ def get_books_obj():
                 "client_secret":BOOKS_CLIENT_SECRET,
                 "refresh_token":BOOKS_REFRESH_TOKEN,
                 "access_token":books_obj.access_token,
-                "access_expiry":books_obj.access_expiry}
+                "access_expiry":books_obj.access_expiry[0]}
     )
     return books_obj
         
