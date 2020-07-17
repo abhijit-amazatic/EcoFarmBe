@@ -1,6 +1,7 @@
 """
 Integration views
 """
+import json
 from datetime import (datetime, timedelta)
 from django.http import (QueryDict, )
 from rest_framework import (status,)
@@ -313,4 +314,7 @@ class GetTaxView(APIView):
         """
         Get tax.
         """
-        return Response(ESTIMATE_TAXES)
+        try:
+            return Response(json.loads(ESTIMATE_TAXES))
+        except TypeError:
+            return Response(ESTIMATE_TAXES)
