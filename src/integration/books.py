@@ -28,8 +28,7 @@ def get_books_obj():
         client_secret=BOOKS_CLIENT_SECRET,
         redirect_uri=BOOKS_REDIRECT_URI,
         organization_id=BOOKS_ORGANIZATION_ID,
-        refresh_token=BOOKS_REFRESH_TOKEN
-    )
+        refresh_token=BOOKS_REFRESH_TOKEN)
     if books_obj._refreshed:
         Integration.objects.update_or_create(
             name='books',
