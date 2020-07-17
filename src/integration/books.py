@@ -122,11 +122,18 @@ def get_item(obj, data):
     """
     Return item from Zoho books with applied tax.
     """
-    taxes = json.loads(ESTIMATE_TAXES)
+    try:
+        taxes = json.loads(ESTIMATE_TAXES)
+    except Exception:
+        taxes = ESTIMATE_TAXES
     line_items = list()
     for line_item in data.get('line_items'):
         item_obj = obj.Items()
-        book_item = item_obj.list_items(parameters={'search_text': line_item['sku']})
+        try:
+            book_item = item_obj.list_items(parameters={'search_text': line_item['sku']})
+            book_item = book_item['response']
+        except KeyError:
+            return {"status_code": 500, "error": "Customer name not provided"}
         if len(book_item) == 1:
             book_item = book_item[0]
         elif len(book_item) > 1:
@@ -138,51 +145,6 @@ def get_item(obj, data):
             return {'code': 1003, 'message': 'Item not in zoho books.'}
         item = get_item_dict(book_item, line_item)
         line_items.append(item)
-    flower_quantity = 0
-    trim_quantity = 0
-    for line_item in line_items:
-        if line_item['category_name'] == 'Flower':
-            flower_quantity += int(line_item['quantity'])
-        elif line_item['category_name'] == 'Trim':
-            trim_quantity += int(line_item['quantity'])
-    if flower_quantity > 0:
-        tax = get_tax(obj, taxes['Flower'])
-        if len(tax) == 1:
-            tax = tax[0]
-        elif len(tax) > 1:
-            for i in tax:
-                if i['name'] == taxes['Flower']:
-                    tax = i
-                    break
-        else:
-            return {'code': 1003, 'message': 'Tax not in zoho books.'}
-        line_items.append({
-                'item_id': tax['item_id'],
-                'rate': tax['rate'],
-                'quantity': flower_quantity})
-        line_items.append({
-                'item_id': tax['item_id'],
-                'rate': -int(tax['rate']),
-                'quantity': flower_quantity})
-    if trim_quantity > 0:
-        tax = get_tax(obj, taxes['Trim'])
-        if len(tax) == 1:
-            tax = tax[0]
-        elif len(tax) > 1:
-            for i in tax:
-                if i['name'] == taxes['Trim']:
-                    tax = i
-                    break
-        else:
-            return {'code': 1003, 'message': 'Tax not in zoho books.'}
-        line_items.append({
-                'item_id': tax['item_id'],
-                'rate': tax['rate'],
-                'quantity': trim_quantity})
-        line_items.append({
-                'item_id': tax['item_id'],
-                'rate': -int(tax['rate']),
-                'quantity': trim_quantity})
     data['line_items'] = line_items
     return {'code': 0, 'data': data}
 
@@ -191,13 +153,18 @@ def get_customer(obj, data):
     Return customer from Zoho books using Zoho Inventory name.
     """
     contact_obj = obj.Contacts()
-    customer = contact_obj.list_contacts(parameters={'contact_name': data['customer_name']})
+    try:
+        customer = contact_obj.list_contacts(parameters={'contact_name': data['customer_name']})
+        customer = customer['response']
+    except KeyError:
+        return {"status_code": 500, "error": "Customer name not provided"}
     if len(customer) == 1:
         customer = customer[0]
     elif len(customer) > 1:
         for i in customer:
             if i['contact_name'] == data['customer_name']:
                 customer = i
+                break
     else:
         return {'code': 1003, 'message': 'Contact not in zoho books.'}
     data['customer_id'] = customer['contact_id']
@@ -207,15 +174,21 @@ def create_estimate(data, params=None):
     """
     Create estimate in Zoho Books.
     """
-    obj = get_books_obj()
-    estimate_obj = obj.Estimates()
-    result = get_customer(obj, data)
-    if result['code'] != 0:
-        return result
-    result = get_item(obj, result['data'])
-    if result['code'] != 0:
-        return result
-    return estimate_obj.create_estimate(result['data'], parameters=params)
+    try:
+        obj = get_books_obj()
+        estimate_obj = obj.Estimates()
+        result = get_customer(obj, data)
+        if result['code'] != 0:
+            return result
+        result = get_item(obj, result['data'])
+        if result['code'] != 0:
+           return result
+        return estimate_obj.create_estimate(result['data'], parameters=params)
+    except Exception as exc:
+        return {
+            'status_code': 400,
+            'error': exc
+        }
 
 def get_estimate(estimate_id, params=None):
     """
