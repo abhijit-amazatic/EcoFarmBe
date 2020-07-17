@@ -33,7 +33,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                PurchaseOrderView, CRMVendorView,
                                VendorPaymentView, InvoiceView, 
                                AccountSummaryView, VendorCreditView,
-                               EstimateTaxView, ) 
+                               EstimateTaxView, GetTaxView) 
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet)
@@ -84,6 +84,7 @@ urlpatterns = [
     path(r'books/vendor-credits/', VendorCreditView.as_view(), name='vendor_credits'),
     path(r'books/account-summary/', AccountSummaryView.as_view(), name='account_summary'),
     path(r'books/calculate-tax/', EstimateTaxView.as_view(), name='calculate-tax'),
+    path(r'books/tax/', GetTaxView.as_view(), name='get-tax'),
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(), name='cultivar_category'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),

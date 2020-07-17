@@ -8,6 +8,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
+from rest_framework.authentication import (TokenAuthentication, )
 
 from core.permissions import UserPermissions
 from .models import Integration
@@ -26,6 +27,7 @@ from integration.books import (create_contact, create_estimate,
                                get_unpaid_invoices, get_vendor_credit,
                                list_vendor_credits,get_available_credit, 
                                calculate_tax, )
+from core.settings import (ESTIMATE_TAXES, )
 
 class GetBoxTokensView(APIView):
     """
@@ -301,3 +303,14 @@ class LeadSourcesView(APIView):
         """
         return Response(get_picklist('Leads', 'Lead Source'))
 
+class GetTaxView(APIView):
+    """
+    View class to get tax.
+    """
+    permission_classes = (TokenAuthentication,)
+    
+    def get(self, request):
+        """
+        Get tax.
+        """
+        return Response(ESTIMATE_TAXES)
