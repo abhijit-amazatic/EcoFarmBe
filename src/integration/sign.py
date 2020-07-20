@@ -1,3 +1,4 @@
+from io import BytesIO
 from pyzoho.sign import (Sign, )
 from integration.models import (Integration, )
 from core.settings import (
@@ -6,6 +7,7 @@ from core.settings import (
     SIGN_REDIRECT_URI,
     SIGN_REFRESH_TOKEN,
 )
+from integration.box import (create_folder, upload_file_stream,)
 
 def get_sign_obj():
     """
@@ -68,4 +70,11 @@ def download_pdf(request_id):
     """
     sign_obj = get_sign_obj()
     return sign_obj.download_pdf(request_id)
-    
+
+def upload_pdf_box(request_id, folder_id, file_name):
+    """
+    Upload document to box.
+    """
+    file_obj = download_pdf(request_id)
+    file_obj = BytesIO(file_obj)
+    new_file = upload_file_stream(folder_id, file_obj, file_name)

@@ -24,6 +24,12 @@ class InventorySerializer(serializers.ModelSerializer):
             return obj.price - taxes['Flower']
         elif 'Trim' in obj.category_name:
             return obj.price - taxes['Trim']
+        
+        # taxes = get_tax_rates()
+        # if 'Flower' in obj.category_name:
+        #     return obj.price - taxes[ESTIMATE_TAXES['Flower']]
+        # elif 'Trim' in obj.category_name:
+            # return obj.price - taxes[ESTIMATE_TAXES['Trim']]
     
     class Meta:
         model = Inventory

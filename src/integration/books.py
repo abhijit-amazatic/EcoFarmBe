@@ -127,13 +127,15 @@ def get_item(obj, data):
     except Exception:
         taxes = ESTIMATE_TAXES
     line_items = list()
+    if not data.get('line_items'):
+        return {"code": 1004, "data": data}
     for line_item in data.get('line_items'):
         item_obj = obj.Items()
         try:
             book_item = item_obj.list_items(parameters={'search_text': line_item['sku']})
             book_item = book_item['response']
         except KeyError:
-            return {"status_code": 500, "error": "Customer name not provided"}
+            return {"code": 1003, "error": "Customer name not provided"}
         if len(book_item) == 1:
             book_item = book_item[0]
         elif len(book_item) > 1:
@@ -142,11 +144,11 @@ def get_item(obj, data):
                     book_item = i
                     break
         else:
-            return {'code': 1003, 'message': 'Item not in zoho books.'}
+            return {"code": 1003, "message": "Item not in zoho books."}
         item = get_item_dict(book_item, line_item)
         line_items.append(item)
     data['line_items'] = line_items
-    return {'code': 0, 'data': data}
+    return {"code": 0, "data": data}
 
 def get_customer(obj, data):
     """
@@ -157,7 +159,7 @@ def get_customer(obj, data):
         customer = contact_obj.list_contacts(parameters={'contact_name': data['customer_name']})
         customer = customer['response']
     except KeyError:
-        return {"status_code": 500, "error": "Customer name not provided"}
+        return {"code": 1003, "error": "Customer name not provided"}
     if len(customer) == 1:
         customer = customer[0]
     elif len(customer) > 1:
@@ -166,9 +168,9 @@ def get_customer(obj, data):
                 customer = i
                 break
     else:
-        return {'code': 1003, 'message': 'Contact not in zoho books.'}
+        return {"code": 1003, "message": "Contact not in zoho books."}
     data['customer_id'] = customer['contact_id']
-    return {'code': 0, 'data': data}
+    return {"code": 0, "data": data}
 
 def create_estimate(data, params=None):
     """
@@ -186,10 +188,30 @@ def create_estimate(data, params=None):
         return estimate_obj.create_estimate(result['data'], parameters=params)
     except Exception as exc:
         return {
+            "status_code": 400,
+            "error": exc
+        }
+
+def update_estimate(estimate_id, data, params=None):
+    """
+    Update an estimate in Zoho Books.
+    """
+    try:
+        obj = get_books_obj()
+        estimate_obj = obj.Estimates()
+        result = get_customer(obj, data)
+        if result['code'] != 0:
+            return result
+        result = get_item(obj, result['data'])
+        if result['code'] != 0 and result['code'] != 1004:
+           return result
+        return estimate_obj.update_estimate(estimate_id, result['data'], parameters=params)
+    except Exception as exc:
+        return {
             'status_code': 400,
             'error': exc
         }
-
+        
 def get_estimate(estimate_id, params=None):
     """
     Get an estimate.
@@ -260,7 +282,7 @@ def get_invoice(invoice_id, params=None):
     """
     obj = get_books_obj()
     invoice_obj = obj.Invoices()
-    return invoice_obj.get_payment(invoice_id=invoice_id, parameters=params)
+    return invoice_obj.get_invoice(invoice_id=invoice_id, parameters=params)
 
 def list_invoices(params=None):
     """
