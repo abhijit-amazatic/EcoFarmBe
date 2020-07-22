@@ -9,7 +9,7 @@ from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from .serializers import (AccountSerializer,AccountCreateSerializer, AccountLicenseSerializer, AccountBasicProfileSerializer, AccountContactInfoSerializer,)
-from .models import (Account,AccountUser,AccountLicense, AccountBasicProfile, AccountContactInfo, )
+from .models import (Account,AccountUser,AccountLicense, AccountBasicProfile, AccountContactInfo, AccountCategory )
 from core.permissions import IsAuthenticatedAccountPermission
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
@@ -141,3 +141,18 @@ class AccountLicenseViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
+
+class AccountCategoryView(APIView):
+
+    """
+    Get  accountCategories information.
+    """
+    permission_classes = (permissions.AllowAny,)
+    
+    def get(self, request):
+        """
+        Display categories.    
+        """
+        queryset = AccountCategory.objects.values('id','name')
+        return Response(queryset)
+    

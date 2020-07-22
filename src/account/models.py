@@ -130,6 +130,8 @@ class AccountBasicProfile(models.Model):
     )
     company_name = models.CharField(
         _('Company Name'), blank=True, null=True, max_length=255)
+    brand_name = models.CharField(
+        _('Brand Name'), blank=True, null=True, max_length=255)
     about_company = models.TextField(null=True, blank=True) 
     region = models.CharField(
         _('Region'), blank=True, null=True, max_length=255)
@@ -176,3 +178,16 @@ class AccountContactInfo(models.Model):
     mailing_address = JSONField(null=True, blank=True, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
+
+class AccountCategory(models.Model):
+    """
+    Class implementing  Account a categories.
+    """
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = _('Account Category')
+        verbose_name_plural = _('Account Categories')    

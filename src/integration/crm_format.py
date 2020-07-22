@@ -504,7 +504,7 @@ CRM_FORMAT  = {
         {
             "Layout": 'layout_parse',
             "Layout_Name": "Layout_Name",
-            "Company": "Company",
+            "Company": "company_name",
             "Last_Name": "last_name",
             "Company_Name": "company_name",
             "First_Name": "first_name",
@@ -513,7 +513,8 @@ CRM_FORMAT  = {
             "Company_Type": "Company_Type",
             "Legal_Entity_Name": "Legal_Entity_Name",
             "Email": "email",
-            "Phone": "Phone",
+            "Phone": "phone",
+            "Title": "title",
             "Designation": "Designation",
             "Mobile": "Mobile",
             "Lead_Status": "Lead_Status",
