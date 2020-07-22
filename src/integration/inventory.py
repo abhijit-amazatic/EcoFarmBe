@@ -112,7 +112,7 @@ def check_documents(inventory_name, record):
             folder_name = f"{record['name']}-{record['item_id']}"
             folder_id = create_folder(INVENTORY_BOX_ID, folder_name)
             for document in record['documents']:
-                if document['attachment_order'] == 1:
+                if document['attachment_order'] == 1: # Limit upload image to primary.
                     file_obj = get_inventory_document(inventory_name, record['item_id'], document['document_id'])
                     file_obj = BytesIO(file_obj)
                     file_name = f"{document['document_id']}-{document['file_name']}"
@@ -126,6 +126,37 @@ def check_documents(inventory_name, record):
         return response
     except Exception as exc:
         print(exc)
+
+def fetch_inventory_from_list(inventory_name, inventory_list):
+    """
+    Fetch list of inventory from Zoho Inventory.
+    """
+    cultivar = None
+    inventory_obj = get_inventory_obj(inventory_name)
+    for record in inventory_list:
+        record = inventory_obj.get_inventory(item_id=record)
+        try:
+            cultivar = get_cultivar_from_db(record['cf_strain_name'])
+            if cultivar:
+                record['cultivar'] = cultivar
+            labtest = get_labtest_from_db(record['sku'])
+            if labtest:
+                record['labtest'] = labtest
+            documents = check_documents(inventory_name, record)
+            if documents and len(documents) > 0:
+                record['documents'] = documents
+            obj = InventoryModel.objects.update_or_create(
+                item_id=record['item_id'],
+                name=record['name'],
+                cultivar=cultivar,
+                labtest=labtest,
+                defaults=record)
+        except Exception as exc:
+            print({
+                'item_id': record['item_id'],
+                'error': exc
+                })
+            continue
 
 def fetch_inventory(inventory_name, days=1):
     """

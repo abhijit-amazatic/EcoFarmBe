@@ -8,6 +8,7 @@ from core.settings import (
     SIGN_REFRESH_TOKEN,
 )
 from integration.box import (create_folder, upload_file_stream,)
+from .utils import (parse_pdf, )
 
 def get_sign_obj():
     """
@@ -56,13 +57,17 @@ def create_estimate_document(
         expiry=expiry,
         reminder_period=reminder_period)
 
-def submit_estimate_document(document_obj):
+def submit_estimate_document(document_obj, x, y, page_number):
     """
     Submit estimate document for sign.
     """
     sign_obj = get_sign_obj()
     document_obj = document_obj.get('requests')
-    return sign_obj.submit_document(document_obj['request_id'], document_obj)
+    return sign_obj.submit_document(
+        document_obj['request_id'],
+        document_obj,
+        x, y,
+        page_number)
 
 def download_pdf(request_id):
     """
@@ -78,3 +83,22 @@ def upload_pdf_box(request_id, folder_id, file_name):
     file_obj = download_pdf(request_id)
     file_obj = BytesIO(file_obj)
     new_file = upload_file_stream(folder_id, file_obj, file_name)
+    
+def submit_estimate(
+    file_obj,
+    recipients,
+    notes=None,
+    expiry=10,
+    reminder_period=5):
+    """
+    Create document and submit for signature.
+    """
+    document_obj = create_estimate_document(
+        file_obj,
+        recipients,
+        notes,
+        expiry,
+        reminder_period
+    )
+    x, y, page_number = parse_pdf(file_obj[0][1])
+    return submit_estimate_document(document_obj, round(x), round(y), page_number)

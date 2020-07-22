@@ -95,7 +95,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Return QuerySet.
         """
         return Inventory.objects.filter(cf_cfi_published=True)
-            
+
 class InventorySyncView(APIView):
     """
     Real time inventory sync.

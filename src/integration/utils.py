@@ -1,4 +1,11 @@
 from datetime import (datetime, )
+
+from pdfminer.layout import LAParams, LTTextBox
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfinterp import PDFResourceManager
+from pdfminer.pdfinterp import PDFPageInterpreter
+from pdfminer.converter import PDFPageAggregator
+
 from .crm_format import (ACCOUNT_TYPES, )
 from core.settings import (VENDOR_LAYOUT, LEADS_LAYOUT)
 
@@ -79,3 +86,20 @@ def get_regex_checked(v):
     
     regex = 'po_[a-z_]*(.)(cultivars)'
     return re.search(regex, v)
+
+def parse_pdf(file_obj):
+    resource_manager = PDFResourceManager()
+    la_params = LAParams()
+    device = PDFPageAggregator(resource_manager, laparams=la_params)
+    interpreter = PDFPageInterpreter(resource_manager, device)
+
+    pages = PDFPage.get_pages(file_obj)
+    for page_number, page in enumerate(pages):
+        interpreter.process_page(page)
+        layout = device.get_result()
+        for lobj in layout:
+            if isinstance(lobj, LTTextBox):
+                x, y, text = lobj.bbox[0], lobj.bbox[3], lobj.get_text()
+                if text.strip() == 'Signature':
+                    max_coord = page.mediabox
+                    return x, max_coord[3]-y, page_number

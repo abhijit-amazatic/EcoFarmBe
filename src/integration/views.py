@@ -14,22 +14,23 @@ from rest_framework.authentication import (TokenAuthentication,)
 from core.permissions import UserPermissions
 from .models import Integration
 from integration.box import(get_box_tokens, get_shared_link,)
-from integration.inventory import (get_inventory_item,
-                                   get_inventory_items,)
-from integration.crm import (search_query, get_picklist,
-                             list_crm_contacts, create_lead,
-                             get_records_from_crm,)
-
-from integration.books import (create_contact, create_estimate,
-                               get_estimate, list_estimates,
-                               get_contact, list_contacts,
-                               get_purchase_order, list_purchase_orders,
-                               get_vendor_payment, list_vendor_payments,
-                               get_invoice, list_invoices,
-                               get_unpaid_invoices, get_vendor_credit,
-                               list_vendor_credits,get_available_credit,
-                               calculate_tax, get_tax_rates,
-                               update_estimate, )
+from integration.inventory import (
+    get_inventory_item, get_inventory_items,)
+from integration.crm import (
+    search_query, get_picklist,
+    list_crm_contacts, create_lead,
+    get_records_from_crm,)
+from integration.books import (
+    create_contact, create_estimate,
+    get_estimate, list_estimates,
+    get_contact, list_contacts,
+    get_purchase_order, list_purchase_orders,
+    get_vendor_payment, list_vendor_payments,
+    get_invoice, list_invoices,
+    get_unpaid_invoices, get_vendor_credit,
+    list_vendor_credits,get_available_credit,
+    calculate_tax, get_tax_rates,
+    update_estimate, delete_estimate)
 
 class GetBoxTokensView(APIView):
     """
@@ -168,6 +169,13 @@ class EstimateView(APIView):
         """
         estimate_id = request.data['estimate_id']
         return Response(update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict()))
+    
+    def delete(self, request):
+        """
+        Delete an estimate from Zoho books.
+        """
+        estimate_id = request.data['estimate_id']
+        return Response(delete_estimate(estimate_id=estimate_id, params=request.query_params.dict()))
     
 class EstimateTaxView(APIView):
     """

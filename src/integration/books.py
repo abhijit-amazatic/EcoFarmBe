@@ -192,6 +192,20 @@ def create_estimate(data, params=None):
             "error": exc
         }
 
+def delete_estimate(estimate_id, params=None):
+    """
+    Delete an estimate in Zoho Books.
+    """
+    try:
+        obj = get_books_obj()
+        estimate_obj = obj.Estimates()
+        return estimate_obj.delete_estimate(estimate_id=estimate_id, parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
+
 def update_estimate(estimate_id, data, params=None):
     """
     Update an estimate in Zoho Books.
