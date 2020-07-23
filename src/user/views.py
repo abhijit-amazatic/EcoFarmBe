@@ -277,4 +277,6 @@ class VerificationView(GenericAPIView):
     
 # def test():
 #     #print('in mail test')
-#     mail_send("verification-send.html",{'link': 'test'},"Testing",'vikrant.g@amazatic.com')
+#     record = {"first_name":"Vikrant","last_name":"Godse","email":"vikrant.godse@ecofarm.ag","company_name":"Amazatic","title":"Test","vendor_category":["Cultivator"],"heard_from":"Advertisement","phone":"8380803130","message":"My test"}
+#     mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':record.get("vendor_category"),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message")},"New lead via connect page.",'vikrant.g@amazatic.com')
+#     

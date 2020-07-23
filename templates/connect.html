@@ -1,0 +1,25 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;color: #013c48;'>Hi {{ email }},</p>
+<div>
+    <div ><p style='font-size:16px !important;color: #013c48;'>New lead generated via connect page with the following details.<br>
+        <ul style="list-style-type:square;font-size:16px !important;color: #013c48;">
+            <li>First Name:{{first_name}}</li>
+            <li>Last Name:{{last_name}}</li>
+            <li>Email:{{mail}}</li>
+            <li>Company Name:{{company_name}}</li>
+            <li>Title:{{title}}</li>
+            <li>Vendor Category:{{vendor_category}}</li>
+            <li>Heard From:{{heard_from}}</li>
+            <li>Phone:{{phone}}</li>
+            <li>Message:{{message}}</li>
+        </ul>
+    </p></div>
+    <div>
+        <ul style='font-size:16px !important;'>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}

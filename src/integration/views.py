@@ -19,6 +19,7 @@ from integration.inventory import (get_inventory_item,
 from integration.crm import (search_query, get_picklist,
                              list_crm_contacts, create_lead,
                              get_records_from_crm,)
+
 from integration.books import (create_contact, create_estimate,
                                get_estimate, list_estimates,
                                get_contact, list_contacts,
