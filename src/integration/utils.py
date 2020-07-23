@@ -92,14 +92,18 @@ def parse_pdf(file_obj):
     la_params = LAParams()
     device = PDFPageAggregator(resource_manager, laparams=la_params)
     interpreter = PDFPageInterpreter(resource_manager, device)
-
-    pages = PDFPage.get_pages(file_obj)
-    for page_number, page in enumerate(pages):
-        interpreter.process_page(page)
-        layout = device.get_result()
-        for lobj in layout:
-            if isinstance(lobj, LTTextBox):
-                x, y, text = lobj.bbox[0], lobj.bbox[3], lobj.get_text()
-                if text.strip() == 'Signature':
-                    max_coord = page.mediabox
-                    return x, max_coord[3]-y, page_number
+    try:
+        pages = PDFPage.get_pages(file_obj)
+        for page_number, page in enumerate(pages):
+            interpreter.process_page(page)
+            layout = device.get_result()
+            for lobj in layout:
+                if isinstance(lobj, LTTextBox):
+                    x, y, text = lobj.bbox[0], lobj.bbox[3], lobj.get_text()
+                    if text.strip() == 'Signature':
+                        max_coord = page.mediabox
+                        return x+15, max_coord[3]-y, page_number
+        return None
+    except Exception:
+        print('Estimate file donot have signature field')
+        return None

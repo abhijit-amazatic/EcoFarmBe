@@ -30,7 +30,8 @@ from integration.books import (
     get_unpaid_invoices, get_vendor_credit,
     list_vendor_credits,get_available_credit,
     calculate_tax, get_tax_rates,
-    update_estimate, delete_estimate)
+    update_estimate, delete_estimate,
+    sync_estimate_status,)
 
 class GetBoxTokensView(APIView):
     """
@@ -331,3 +332,16 @@ class GetTaxView(APIView):
         Get tax.
         """
         return Response(get_tax_rates())
+
+class EstimateApproveView(APIView):
+    """
+    View class to sync estimate status from zoho books.
+    """
+    authentication_classes = (TokenAuthentication, )
+    
+    def post(self, request):
+        """
+        sync status from zoho books.
+        """
+        record = sync_estimate_status(request.data)
+        return Response(record)

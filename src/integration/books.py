@@ -1,4 +1,6 @@
 import json
+import base64
+from io import (BytesIO, )
 from datetime import (datetime, timedelta, )
 from core.settings import (
     BOOKS_CLIENT_ID,
@@ -11,6 +13,7 @@ from core.settings import (
 from pyzoho.books import (Books, )
 from .models import (Integration, )
 from .inventory import (get_inventory_items, )
+from .sign import (submit_estimate, )
 
 
 def get_books_obj():
@@ -241,6 +244,37 @@ def list_estimates(params=None):
     obj = get_books_obj()
     estimate_obj = obj.Estimates()
     return estimate_obj.list_estimates(parameters=params)
+
+def sync_estimate_status(response, params=None):
+    """
+    sync estimate status from zoho books.
+    """
+    try:
+        response = response.split('&')
+        response = {i.split('=')[0]:i.split('=')[1] for i in response}
+        file_obj = get_estimate(estimate_id=response['estimate_id'], params={'accept': 'pdf'})
+        file_name = (file_obj['Content-Disposition'].split(';')[1]).split('=')[1].strip('"')
+        file_binary = BytesIO(base64.b64decode(file_obj['data']))
+        file_type = 'application/pdf'
+        file_obj = [[file_name, file_binary, file_type]]
+        obj = get_books_obj()
+        customer = get_contact(contact_id=response['customer_id'])
+        customer_dict = [{'name': customer['contact_name'], 'email': customer['email']}]
+        return submit_estimate(
+            file_obj=file_obj,
+            # recipients=customer_dict,
+            recipients=[{'name': 'harshal', 'email': 'harshal.c@amazatic.com'}],
+            notes="",
+            expiry=10,
+            reminder_period=15
+            )
+    except KeyError as exc:
+        print('Key not found', exc)
+    except IndexError as exc:
+        print('problem with file object', exc)
+    except Exception as exc:
+        print('error in sync estimate status', exc)
+    
 
 def get_contact(contact_id, params=None):
     """
