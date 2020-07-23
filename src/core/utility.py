@@ -527,7 +527,7 @@ def insert_data_for_accounts(user,account_type,data):
     """
     try:
         for account in account_type:
-            category = [k for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
+            category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
             profile_types = get_license_types(data.get('licenses',[]))
             obj,created = Account.objects.get_or_create(ac_manager=user,account_category=category[0],defaults={'profile_type':profile_types,
                                                                                                                'number_of_licenses':len(data.get('licenses',[])),
@@ -566,6 +566,7 @@ def insert_data_for_accounts(user,account_type,data):
                     account_step2 = AccountBasicProfile.objects.get_or_create(account_id=obj.id,
                                                                               is_draft=False,
                                                                               company_name=data.get('basic_profile',{}).get('company_name'),
+                                                                              brand_name=data.get('basic_profile',{}).get('brand_name'),
                                                                               about_company=data.get('basic_profile',{}).get('about'),
                                                                               region=data.get('basic_profile',{}).get('region'),
                                                                               preferred_payment=",".join(data.get('basic_profile',{}).get('preferred_payment')),
