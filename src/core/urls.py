@@ -36,7 +36,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                EstimateTaxView, GetTaxView) 
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
-from account.views import (AccountViewSet,AccountLicenseViewSet, AccountCategoryView)
+from account.views import (AccountViewSet,AccountLicenseViewSet,)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 
@@ -66,7 +66,7 @@ urlpatterns = [
     path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
     path(r'category/', CategoryView.as_view(), name='category'),
     path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
-    path(r'account-category/', AccountCategoryView.as_view(), name='category'),
+    #path(r'account-category/', AccountCategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),

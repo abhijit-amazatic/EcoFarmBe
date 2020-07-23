@@ -14,15 +14,19 @@ class Account(StatusFlagMixin,models.Model):
     """
     Stores accounts initial details.(STEP1)
     """
-    CATEGORY_CULTIVATOR = 'cultivator'
-    CATEGORY_DISTRIBUTOR = 'distributor'
-    CATEGORY_MANUFACTURER = 'manufacturer'
-    CATEGORY_RETAILER = 'retailer'
+    #CATEGORY_CULTIVATOR = 'cultivator'
+    CATEGORY_DISTRIBUTION = 'distribution'
+    CATEGORY_MANUFACTURERING = 'manufacturing'
+    CATEGORY_RETAIL = 'retail'
+    CATEGORY_STOREFRONT = 'storefront'  
+    CATEGORY_DELIVERY = 'delivery'
     CATEGORY_CHOICES = (
-        (CATEGORY_CULTIVATOR, _('Cultivator')),
-        (CATEGORY_DISTRIBUTOR, _('Distributor')),
-        (CATEGORY_MANUFACTURER, _('Manufacturer')),
-        (CATEGORY_RETAILER, _('Retailer')),
+        (CATEGORY_DISTRIBUTION, _('Distribution')),
+        (CATEGORY_MANUFACTURERING, _('Manufacturing')),
+        ('Retail', (
+            (CATEGORY_STOREFRONT, 'Storefront'),
+            (CATEGORY_DELIVERY, 'Delivery'),
+        )),
     )
     account_name = models.CharField(
         _('Account Name'), blank=True, null=True, max_length=255)
@@ -179,15 +183,15 @@ class AccountContactInfo(models.Model):
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 
-class AccountCategory(models.Model):
-    """
-    Class implementing  Account a categories.
-    """
-    name = models.CharField(max_length=255)
+# class AccountCategory(models.Model):
+#     """
+#     Class implementing  Account a categories.
+#     """
+#     name = models.CharField(max_length=255)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
     
-    class Meta:
-        verbose_name = _('Account Category')
-        verbose_name_plural = _('Account Categories')    
+#     class Meta:
+#         verbose_name = _('Account Category')
+#         verbose_name_plural = _('Account Categories')    
