@@ -23,21 +23,21 @@ class DataFilter(FilterSet):
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
-    # cf_cbd__in = CharInFilter(field_name='cf_cbd', lookup_expr='in')
-    # cf_potency__in = CharInFilter(field_name='cf_potency', lookup_expr='in')
-    # cf_d_8_thc__in = CharInFilter(field_name='cf_d_8_thc', lookup_expr='in')
-    # cf_thca__in = CharInFilter(field_name='cf_thca', lookup_expr='in')
-    # cf_cbda__in = CharInFilter(field_name='cf_cbda', lookup_expr='in')
-    # cf_cbn__in = CharInFilter(field_name='cf_cbn', lookup_expr='in')
-    # cf_cbc__in = CharInFilter(field_name='cf_cbc', lookup_expr='in')
-    # cf_cbca__in = CharInFilter(field_name='cf_cbca', lookup_expr='in')
-    # cf_cbga__in = CharInFilter(field_name='cf_cbga', lookup_expr='in')
-    # cf_cbl__in = CharInFilter(field_name='cf_cbl', lookup_expr='in')
-    # cf_thcva__in = CharInFilter(field_name='cf_thcva', lookup_expr='in')
-    # cf_cbdv__in = CharInFilter(field_name='cf_cbdv', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
+    labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
+    labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
+    labtest__d_8_THC__in = CharInFilter(field_name='labtest__d_8_THC', lookup_expr='in')
+    labtest__THCA__in = CharInFilter(field_name='labtest__THCA', lookup_expr='in')
+    labtest__CBDA__in = CharInFilter(field_name='labtest__CBDA', lookup_expr='in')
+    labtest__CBN__in = CharInFilter(field_name='labtest__CBN', lookup_expr='in')
+    labtest__CBC__in = CharInFilter(field_name='labtest__CBC', lookup_expr='in')
+    labtest__CBCA__in = CharInFilter(field_name='labtest__CBCA', lookup_expr='in')
+    labtest__CBGA__in = CharInFilter(field_name='labtest__CBGA', lookup_expr='in')
+    labtest__CBL__in = CharInFilter(field_name='labtest__CBL', lookup_expr='in')
+    labtest__THCVA__in = CharInFilter(field_name='labtest__THCVA', lookup_expr='in')
+    labtest__CBDV__in = CharInFilter(field_name='labtest__CBDV', lookup_expr='in')
             
     def get_cultivars(self, queryset, name, value):
         items = queryset.filter(
@@ -52,24 +52,24 @@ class DataFilter(FilterSet):
         'cf_cultivar_type':['icontains', 'exact'],
         'cf_strain_name':['icontains', 'exact'],
         'price':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_potency':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbd':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
         'stock_on_hand':['gte', 'lte', 'gt', 'lt'],
         'cf_cannabis_grade_and_category':['icontains', 'exact'],
         'last_modified_time':['gte', 'lte', 'gt', 'lt'],
         'product_type':['icontains', 'exact'],
         'cf_pesticide_summary':['icontains', 'exact'],
-        # 'cf_d_8_thc':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_thca':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbda':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbn':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbc':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbca':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbga':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbl':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_thcva':['gte', 'lte', 'gt', 'lt'],
-        # 'cf_cbdv':['gte', 'lte', 'gt', 'lt'],
+        'labtest__THC':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBD':['gte', 'lte', 'gt', 'lt'],
+        'labtest__d_8_THC':['gte', 'lte', 'gt', 'lt'],
+        'labtest__THCA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBDA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBN':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBC':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBCA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBGA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBL':['gte', 'lte', 'gt', 'lt'],
+        'labtest__THCVA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
         }
 
 
