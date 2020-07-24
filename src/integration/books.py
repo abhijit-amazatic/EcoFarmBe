@@ -101,12 +101,16 @@ def calculate_tax(product_category, quantity):
     books_obj = get_books_obj()
     if product_category == 'Flower':
         item = get_tax(books_obj, taxes['Flower'])['response'][0]
+        item_id = item['item_id']
+        item_sku = item['sku']
         item_name = item['name']
         tax = item['rate']
         total_tax = float(quantity) * float(tax)
     elif product_category == 'Trim':
         item = get_tax(books_obj, taxes['Trim'])['response'][0]
         item_name = item['name']
+        item_id = item['item_id']
+        item_sku = item['sku']
         tax = item['rate']
         total_tax = float(quantity) * float(tax)
     else:
@@ -117,7 +121,9 @@ def calculate_tax(product_category, quantity):
         'response': {
             'item_name': item_name,
             'total_tax': total_tax,
-            'quantity': quantity
+            'quantity': quantity,
+            'item_id': item_id,
+            'sku': item_sku
         }
     }
 
