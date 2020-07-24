@@ -98,6 +98,24 @@ class GetPickListView(APIView):
             self.permission_classes = [IsAuthenticated, ]
         return super(GetPickListView, self).get_permissions()
 
+class GetPickListAccountView(APIView):
+    """
+    Get field dropdowns from Zoho CRM accounts.
+    """
+    
+    def get(self, request):
+        """
+        Get picklist.
+        """
+        return Response(get_picklist('Accounts', request.query_params['field']))
+
+    def get_permissions(self):
+        if self.request.query_params['field'] in ('Product of Interest',):
+            self.permission_classes = [AllowAny, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+        return super(GetPickListAccountView, self).get_permissions()
+
 class CRMContactView(APIView):
     """
     Get Contacts from Zoho CRM.
@@ -257,7 +275,6 @@ class VendorCreditView(APIView):
                 request.query_params.get('credit_id'),
                 params=request.query_params.dict()))
         return Response(list_vendor_credits(params=request.query_params.dict()))
-
 
 class AccountSummaryView(APIView):
     """

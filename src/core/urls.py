@@ -34,7 +34,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                VendorPaymentView, InvoiceView, 
                                AccountSummaryView, VendorCreditView,
                                EstimateTaxView, GetTaxView,
-                               ContactAddressView, ) 
+                               ContactAddressView, GetPickListAccountView) 
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet,)
@@ -73,6 +73,7 @@ urlpatterns = [
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
+    path(r'crm/account-picklist/', GetPickListAccountView.as_view(), name='get_account_picklist'),
     path(r'crm/contact/', CRMContactView.as_view(), name='list_crm_contacts'),
     path(r'crm/lead/', LeadView.as_view(), name='create_lead'),
     path(r'crm/lead-sources/', LeadSourcesView.as_view(), name='get_lead_sources'),
