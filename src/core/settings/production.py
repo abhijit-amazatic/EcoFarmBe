@@ -92,6 +92,12 @@ BOOKS_REDIRECT_URI=os.environ.get('BOOKS_REDIRECT_URI')
 BOOKS_REFRESH_TOKEN=os.environ.get('BOOKS_REFRESH_TOKEN')
 ESTIMATE_TAXES = os.environ.get('ESTIMATE_TAXES')
 
+#Zoho Sign configuration
+SIGN_CLIENT_ID = os.environ.get('SIGN_CLIENT_ID')
+SIGN_CLIENT_SECRET = os.environ.get('SIGN_CLIENT_SECRET')
+SIGN_REDIRECT_URI = os.environ.get('SIGN_REDIRECT_URI')
+SIGN_REFRESH_TOKEN = os.environ.get('SIGN_REFRESH_TOKEN')
+
 #slack tokens'
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL_NAME = os.environ.get("SLACK_CHANNEL_NAME")
