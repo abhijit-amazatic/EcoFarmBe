@@ -31,7 +31,9 @@ from integration.books import (
     list_vendor_credits,get_available_credit,
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
-    sync_estimate_status, get_contact_addresses,)
+    send_estimate_to_sign, get_contact_addresses,
+    mark_estimate, )
+from integration.tasks import (send_estimate, )
 
 class GetBoxTokensView(APIView):
     """
@@ -180,14 +182,31 @@ class EstimateView(APIView):
         """
         Create and estimate in Zoho Books.
         """
-        return Response(create_estimate(data=request.data, params=request.query_params.dict()))
+        is_draft = request.query_params.get('is_draft')
+        if is_draft == 'true' or is_draft == 'True':
+            return Response(create_estimate(data=request.data, params=request.query_params.dict()))
+        estimate = create_estimate(data=request.data, params=request.query_params.dict())
+        if estimate.get('estimate_id'):
+            estimate_id = estimate['estimate_id']
+            contact_id = estimate['customer_id']
+            mark_estimate(estimate_id, 'sent')
+            mark_estimate(estimate_id, 'accepted')
+            # response = send_estimate.delay(estimate_id, contact_id)
+        return Response(estimate)
 
     def put(self, request):
         """
         Update an estimate in Zoho Books.
         """
         estimate_id = request.data['estimate_id']
-        return Response(update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict()))
+        estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+        if estimate.get('estimate_id'):
+            estimate_id = estimate['estimate_id']
+            contact_id = estimate['customer_id']
+            mark_estimate(estimate_id, 'sent')
+            mark_estimate(estimate_id, 'accepted')
+            # response = send_estimate.delay(estimate_id, contact_id)
+        return Response(estimate)
     
     def delete(self, request):
         """
@@ -210,6 +229,22 @@ class EstimateTaxView(APIView):
         quantity = request.query_params.get('quantity', None)
         if product_category and quantity:
             return Response(calculate_tax(product_category, quantity))
+        return Response({})
+
+class EstimateStatusView(APIView):
+    """
+    View class to update status for estimate.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def put(self, request):
+        """
+        Update status.
+        """
+        estimate_id = request.query_params.get('estimate_id', None)
+        status = request.query_params.get('status', None)
+        if estimate_id and status:
+            return Response(mark_estimate(estimate_id, status))
         return Response({})
 
 class PurchaseOrderView(APIView):
@@ -374,5 +409,5 @@ class EstimateApproveView(APIView):
         """
         sync status from zoho books.
         """
-        record = sync_estimate_status(request.data)
+        record = send_estimate_to_sign(request.data)
         return Response(record)

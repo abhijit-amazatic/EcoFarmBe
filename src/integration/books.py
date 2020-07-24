@@ -245,20 +245,18 @@ def list_estimates(params=None):
     estimate_obj = obj.Estimates()
     return estimate_obj.list_estimates(parameters=params)
 
-def sync_estimate_status(response, params=None):
+def send_estimate_to_sign(estimate_id, customer_id):
     """
     sync estimate status from zoho books.
     """
     try:
-        response = response.split('&')
-        response = {i.split('=')[0]:i.split('=')[1] for i in response}
-        file_obj = get_estimate(estimate_id=response['estimate_id'], params={'accept': 'pdf'})
+        file_obj = get_estimate(estimate_id=estimate_id, params={'accept': 'pdf'})
         file_name = (file_obj['Content-Disposition'].split(';')[1]).split('=')[1].strip('"')
         file_binary = BytesIO(base64.b64decode(file_obj['data']))
         file_type = 'application/pdf'
         file_obj = [[file_name, file_binary, file_type]]
         obj = get_books_obj()
-        customer = get_contact(contact_id=response['customer_id'])
+        customer = get_contact(contact_id=customer_id)
         customer_dict = [{'name': customer['contact_name'], 'email': customer['email']}]
         return submit_estimate(
             file_obj=file_obj,
@@ -275,7 +273,14 @@ def sync_estimate_status(response, params=None):
     except Exception as exc:
         print('error in sync estimate status', exc)
     
-
+def mark_estimate(estimate_id, status, params=None):
+    """
+    Mark statement as sent, accepted, declined.
+    """
+    obj = get_books_obj()
+    estimate_obj = obj.Estimates()
+    return estimate_obj.mark_as(estimate_id, status, parameters=params)
+    
 def get_contact(contact_id, params=None):
     """
     Get contact.
@@ -408,6 +413,18 @@ def get_contact_addresses(contact_name):
     contact_id = contact['contact_id']
     contact_obj = obj.Contacts()
     return contact_obj.get_contact_addresses(contact_id) 
+
+def get_contact_statement(contact_name):
+    """
+    Get contact address list.
+    """
+    obj = get_books_obj()
+    contact = get_contact_id(obj, contact_name)
+    if contact.get('code'):
+        return {'code': '1003', 'error': 'Contact not found in zoho books.'}
+    contact_id = contact['contact_id']
+    contact_obj = obj.Contacts()
+    return contact_obj.get_statement(contact_id)
 
 # def create_purchase_order(data, params=None):
 #     """
