@@ -136,6 +136,8 @@ class AccountBasicProfile(models.Model):
         _('Company Name'), blank=True, null=True, max_length=255)
     brand_name = models.CharField(
         _('Brand Name'), blank=True, null=True, max_length=255)
+    county = models.CharField(
+        _('County'), blank=True, null=True, max_length=255)
     about_company = models.TextField(null=True, blank=True) 
     region = models.CharField(
         _('Region'), blank=True, null=True, max_length=255)
