@@ -376,6 +376,39 @@ def get_available_credit(vendor, status='open'):
     credits = sum([i['total'] for i in response])
     return credits
 
+def get_contact_id(obj, contact_name):
+    """
+    Get contact id using contact name.
+    """
+    contact_obj = obj.Contacts()
+    try:
+        customer = contact_obj.list_contacts(parameters={'contact_name': contact_name})
+        customer = customer['response']
+    except KeyError:
+        return {"code": 1003, "error": "Customer name not provided"}
+    if len(customer) == 1:
+        customer = customer[0]
+    elif len(customer) > 1:
+        for i in customer:
+            if i['contact_name'] == contact_name:
+                customer = i
+                break
+    else:
+        return {"code": 1003, "message": "Contact not in zoho books."}
+    return customer
+
+def get_contact_addresses(contact_name):
+    """
+    Get contact address list.
+    """
+    obj = get_books_obj()
+    contact = get_contact_id(obj, contact_name)
+    if contact.get('code'):
+        return {'code': '1003', 'error': 'Contact not found in zoho books.'}
+    contact_id = contact['contact_id']
+    contact_obj = obj.Contacts()
+    return contact_obj.get_contact_addresses(contact_id) 
+
 # def create_purchase_order(data, params=None):
 #     """
 #     Create purchase order in Zoho Books.

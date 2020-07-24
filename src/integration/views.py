@@ -31,7 +31,7 @@ from integration.books import (
     list_vendor_credits,get_available_credit,
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
-    sync_estimate_status,)
+    sync_estimate_status, get_contact_addresses,)
 
 class GetBoxTokensView(APIView):
     """
@@ -296,6 +296,20 @@ class ContactView(APIView):
         Create contact in Zoho Books.
         """
         return Response(create_contact(data=request.data, params=request.query_params.dict()))
+
+class ContactAddressView(APIView):
+    """
+    View class for Zoho books contacts address.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get contact addresses.
+        """
+        if request.query_params.get('contact_name', None):
+            return Response(get_contact_addresses(request.query_params.get('contact_name')))
+        return Response({'error': 'Conact name not specified'})
 
 class LeadView(APIView):
     """
