@@ -4,6 +4,7 @@ Django==2.2.0
 djangorestframework==3.10.2
 django-filter==2.0.0
 psycopg2-binary==2.8.3
+pdfminer==20191125
 django-rest-knox==3.6.0
 django-cors-headers==3.0.0
 pycrypto==2.6.1
