@@ -123,7 +123,8 @@ def calculate_tax(product_category, quantity):
             'total_tax': total_tax,
             'quantity': quantity,
             'item_id': item_id,
-            'sku': item_sku
+            'sku': item_sku,
+            'rate': tax
         }
     }
 
