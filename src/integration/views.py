@@ -198,7 +198,10 @@ class EstimateView(APIView):
         """
         Update an estimate in Zoho Books.
         """
+        is_draft = request.query_params.get('is_draft')
         estimate_id = request.data['estimate_id']
+        if is_draft == 'true' or is_draft == 'True':
+            return update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
         estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
         if estimate.get('estimate_id'):
             estimate_id = estimate['estimate_id']
