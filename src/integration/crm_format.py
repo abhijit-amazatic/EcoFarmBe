@@ -206,7 +206,7 @@ CRM_FORMAT  = {
         "id": "id",
         "Account_Name": "company_name",
         "Website": "website",
-        "Client_Code": "",
+        "Client_Code": "client_code",
         "Account_Owner": "",
         "Company_Type": "account_category_parse",
         "Account_Legal_Entity_Name": "",
@@ -469,6 +469,7 @@ CRM_FORMAT  = {
                     "ethics_and_certification": "Ethics_Certifications",
                     "product_of_interest": "Product_of_Interest",
                     "provide_transport": "Can_Provide_Transport",
+                    "client_code":"Client_Code"
                     },
             "contact_info":
                 {

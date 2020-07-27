@@ -19,7 +19,7 @@ from integration.inventory import (
 from integration.crm import (
     search_query, get_picklist,
     list_crm_contacts, create_lead,
-    get_records_from_crm,)
+    get_records_from_crm,get_accounts_from_crm,)
 from integration.books import (
     create_contact, create_estimate,
     get_estimate, list_estimates,
@@ -414,3 +414,21 @@ class EstimateApproveView(APIView):
         """
         record = send_estimate_to_sign(request.data)
         return Response(record)
+
+
+class ClientCodeView(APIView):
+    """
+    Account's client code view
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get accounts client code.
+        """
+        if request.query_params.get('legal_business_name'):
+            account_data = get_accounts_from_crm(request.query_params.get('legal_business_name'))
+            return Response({"client_code":account_data.get('basic_profile',{}).get('client_code')})
+        return Response({'error': 'Something went wrong!'})    
+
+    
