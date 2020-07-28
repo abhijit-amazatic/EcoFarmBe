@@ -282,7 +282,7 @@ def send_estimate_to_sign(estimate_id, customer_name):
         print('problem with file object', exc)
     except Exception as exc:
         print('error in sync estimate status', exc)
-    
+
 def mark_estimate(estimate_id, status, params=None):
     """
     Mark statement as sent, accepted, declined.

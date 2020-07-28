@@ -97,6 +97,7 @@ SIGN_CLIENT_ID = os.environ.get('SIGN_CLIENT_ID')
 SIGN_CLIENT_SECRET = os.environ.get('SIGN_CLIENT_SECRET')
 SIGN_REDIRECT_URI = os.environ.get('SIGN_REDIRECT_URI')
 SIGN_REFRESH_TOKEN = os.environ.get('SIGN_REFRESH_TOKEN')
+ESTIMATE_UPLOAD_FOLDER_ID=os.environ.get('ESTIMATE_UPLOAD_FOLDER_ID')
 
 #slack tokens'
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")

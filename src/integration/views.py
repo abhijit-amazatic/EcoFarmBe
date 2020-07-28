@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import (TokenAuthentication,)
 
+from core.settings import (ESTIMATE_UPLOAD_FOLDER_ID, )
 from core.permissions import UserPermissions
 from .models import Integration
 from integration.box import(get_box_tokens, get_shared_link,)
@@ -32,7 +33,8 @@ from integration.books import (
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
-    mark_estimate, send_estimate_to_sign)
+    mark_estimate, send_estimate_to_sign,)
+from integration.sign import (upload_pdf_box, )
 from integration.tasks import (send_estimate, )
 
 class GetBoxTokensView(APIView):
@@ -426,20 +428,22 @@ class GetTaxView(APIView):
         """
         return Response(get_tax_rates())
 
-class EstimateApproveView(APIView):
+class EstimateSignCompleteView(APIView):
     """
-    View class to sync estimate status from zoho books.
+    View class for sign completed.
     """
-    authentication_classes = (TokenAuthentication, )
+    permission_classess = (IsAuthenticated, )
     
     def post(self, request):
         """
-        sync status from zoho books.
+        Post data from zoho sign on sign.
         """
-        record = send_estimate_to_sign(request.data)
-        return Response(record)
-
-
+        request_id = request.data.get('requests').get('request_id')
+        for document in request.data.get('requests').get('document_ids'):
+            filename = document.get('document_name')
+            response = upload_pdf_box(request_id, ESTIMATE_UPLOAD_FOLDER_ID, filename)
+        return Response(response)
+        
 class ClientCodeView(APIView):
     """
     Account's client code view
@@ -453,6 +457,4 @@ class ClientCodeView(APIView):
         if request.query_params.get('legal_business_name'):
             account_data = get_accounts_from_crm(request.query_params.get('legal_business_name'))
             return Response({"client_code":account_data.get('basic_profile',{}).get('client_code')})
-        return Response({'error': 'Something went wrong!'})    
-
-    
+        return Response({'error': 'Something went wrong!'})
