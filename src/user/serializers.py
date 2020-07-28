@@ -149,6 +149,7 @@ class UserSerializer(serializers.ModelSerializer):
                  'cultivation_types':profile.profile_type,
                  'licenses_owned':License.objects.filter(vendor_profile=profile,owner_or_manager='owner').count(),
                  'licenses_managed':License.objects.filter(vendor_profile=profile,owner_or_manager='manager').count(),
+                 'updated_on':profile.updated_on
         } for profile in results]
     
     def get_accounts_kpi(self, obj):
@@ -164,6 +165,7 @@ class UserSerializer(serializers.ModelSerializer):
                  'region':"N/A" if not hasattr(account,'account_profile') else account.account_profile.region,
                  'licenses_owned':AccountLicense.objects.filter(account=account,owner_or_manager='owner').count(),
                  'licenses_managed':AccountLicense.objects.filter(account=account,owner_or_manager='manager').count(),
+                 'updated_on':account.updated_on
         } for account in results]
     
     class Meta:
