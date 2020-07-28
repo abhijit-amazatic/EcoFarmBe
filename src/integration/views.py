@@ -184,8 +184,13 @@ class EstimateView(APIView):
         """
         is_draft = request.query_params.get('is_draft')
         if is_draft == 'true' or is_draft == 'True':
-            return Response(create_estimate(data=request.data, params=request.query_params.dict()))
+            response = create_estimate(data=request.data, params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response)
         estimate = create_estimate(data=request.data, params=request.query_params.dict())
+        if estimate.get('code') and estimate['code'] != 0:
+            return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
         if estimate.get('estimate_id'):
             estimate_id = estimate['estimate_id']
             contact_id = estimate['customer_id']
@@ -200,8 +205,13 @@ class EstimateView(APIView):
         is_draft = request.query_params.get('is_draft')
         estimate_id = request.data['estimate_id']
         if is_draft == 'true' or is_draft == 'True':
-            return update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            response = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response)
         estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+        if estimate.get('code') and estimate['code'] != 0:
+            return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
         if estimate.get('estimate_id'):
             estimate_id = estimate['estimate_id']
             contact_id = estimate['customer_id']
