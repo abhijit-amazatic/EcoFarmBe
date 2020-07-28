@@ -102,8 +102,8 @@ def parse_pdf(file_obj):
                     x, y, text = lobj.bbox[0], lobj.bbox[3], lobj.get_text()
                     if text.strip() == 'Signature':
                         max_coord = page.mediabox
-                        return x+15, max_coord[3]-y, page_number
+                        return round(x), round(max_coord[3]-y), page_number
         return None
-    except Exception:
-        print('Estimate file donot have signature field')
+    except Exception as exc:
+        print('Estimate file donot have signature field', exc)
         return None

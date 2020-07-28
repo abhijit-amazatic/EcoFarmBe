@@ -32,7 +32,7 @@ from integration.books import (
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
-    mark_estimate, )
+    mark_estimate, send_estimate_to_sign)
 from integration.tasks import (send_estimate, )
 
 class GetBoxTokensView(APIView):
@@ -191,7 +191,6 @@ class EstimateView(APIView):
             contact_id = estimate['customer_id']
             mark_estimate(estimate_id, 'sent')
             mark_estimate(estimate_id, 'accepted')
-            # response = send_estimate.delay(estimate_id, contact_id)
         return Response(estimate)
 
     def put(self, request):
@@ -208,7 +207,6 @@ class EstimateView(APIView):
             contact_id = estimate['customer_id']
             mark_estimate(estimate_id, 'sent')
             mark_estimate(estimate_id, 'accepted')
-            # response = send_estimate.delay(estimate_id, contact_id)
         return Response(estimate)
     
     def delete(self, request):
@@ -217,7 +215,23 @@ class EstimateView(APIView):
         """
         estimate_id = request.data['estimate_id']
         return Response(delete_estimate(estimate_id=estimate_id, params=request.query_params.dict()))
+
+class EstimateSignView(APIView):
+    """
+    View class to sign for estimate.
+    """
+    permission_classes = (IsAuthenticated,)
     
+    def get(self, request):
+        """
+        Get signing url.
+        """
+        estimate_id = request.query_params.get('estimate_id', None)
+        customer_name = request.query_params.get('customer_name', None)
+        if estimate_id and customer_name:
+            return Response(send_estimate_to_sign(estimate_id, customer_name))
+        return Response({})
+
 class EstimateTaxView(APIView):
     """
     View class to calculate tax for estimate.

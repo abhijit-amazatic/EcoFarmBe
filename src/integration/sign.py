@@ -101,4 +101,16 @@ def submit_estimate(
         reminder_period
     )
     x, y, page_number = parse_pdf(file_obj[0][1])
-    return submit_estimate_document(document_obj, round(x), round(y), page_number)
+    x, y = x+42, y-5
+    response = submit_estimate_document(document_obj, x, y, page_number)
+    if response['code'] == 0:
+        return get_embedded_url_from_sign(
+            response['requests']['request_id'],
+            response['requests']['actions'][0]['action_id'])
+
+def get_embedded_url_from_sign(request_id, action_id):
+    """
+    Return embedded url to sign.
+    """
+    sign_obj = get_sign_obj()
+    return sign_obj.get_embedded_url(request_id, action_id)

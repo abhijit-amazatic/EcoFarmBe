@@ -252,19 +252,22 @@ def list_estimates(params=None):
     estimate_obj = obj.Estimates()
     return estimate_obj.list_estimates(parameters=params)
 
-def send_estimate_to_sign(estimate_id, customer_id):
+def send_estimate_to_sign(estimate_id, customer_name):
     """
     sync estimate status from zoho books.
     """
     try:
+        obj = get_books_obj()
+        contact = get_contact_id(obj, customer_name)
+        if contact.get('code'):
+            return {'code': '1003', 'error': 'Contact not found in zoho books.'}
+        contact_id = contact['contact_id']
         file_obj = get_estimate(estimate_id=estimate_id, params={'accept': 'pdf'})
         file_name = (file_obj['Content-Disposition'].split(';')[1]).split('=')[1].strip('"')
         file_binary = BytesIO(base64.b64decode(file_obj['data']))
         file_type = 'application/pdf'
         file_obj = [[file_name, file_binary, file_type]]
-        obj = get_books_obj()
-        customer = get_contact(contact_id=customer_id)
-        customer_dict = [{'name': customer['contact_name'], 'email': customer['email']}]
+        customer_dict = [{'name': contact['contact_name'], 'email': contact['email']}]
         return submit_estimate(
             file_obj=file_obj,
             # recipients=customer_dict,
