@@ -161,7 +161,7 @@ class UserSerializer(serializers.ModelSerializer):
                  'status':account.status,
                  'step':account.step,
                  'account_category':account.account_category,
-                 'company_name':"N/A" if not hasattr(account,'account_profile') else account.account_profile.company_name,
+                 'brand_name':"N/A" if not hasattr(account,'account_profile') else account.account_profile.brand_name,
                  'region':"N/A" if not hasattr(account,'account_profile') else account.account_profile.region,
                  'licenses_owned':AccountLicense.objects.filter(account=account,owner_or_manager='owner').count(),
                  'licenses_managed':AccountLicense.objects.filter(account=account,owner_or_manager='manager').count(),
