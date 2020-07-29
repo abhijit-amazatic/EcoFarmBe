@@ -6,6 +6,7 @@ from core.settings import (
     SIGN_CLIENT_SECRET,
     SIGN_REDIRECT_URI,
     SIGN_REFRESH_TOKEN,
+    SIGN_HOST_URL,
 )
 from integration.box import (create_folder, upload_file_stream,)
 from .utils import (parse_pdf, )
@@ -26,7 +27,8 @@ def get_sign_obj():
         redirect_uri=SIGN_REDIRECT_URI,
         refresh_token=SIGN_REFRESH_TOKEN,
         access_token=access_token,
-        access_expiry=access_expiry
+        access_expiry=access_expiry,
+        host=SIGN_HOST_URL
     )
     if not access_token and not access_expiry:
         a = Integration.objects.update_or_create(
