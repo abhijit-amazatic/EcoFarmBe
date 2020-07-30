@@ -43,6 +43,13 @@ def get_sign_obj():
             )
     return sign_obj
 
+def get_document(request_id):
+    """
+    Get document from Zoho sign.
+    """
+    sign_obj = get_sign_obj()
+    return sign_obj.get_document(request_id)
+
 def create_estimate_document(
     file_obj,
     recipients,
@@ -117,7 +124,10 @@ def get_embedded_url_from_sign(request_id, action_id):
     Return embedded url to sign.
     """
     sign_obj = get_sign_obj()
-    return sign_obj.get_embedded_url(request_id, action_id)
+    response = sign_obj.get_embedded_url(request_id, action_id)
+    if response['code'] == 0:
+        response['request_id'] = request_id
+        return response
 
 def get_template(template_id):
     """

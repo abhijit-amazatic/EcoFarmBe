@@ -36,7 +36,7 @@ from integration.books import (
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
     mark_estimate, send_estimate_to_sign,)
-from integration.sign import (upload_pdf_box, )
+from integration.sign import (upload_pdf_box, get_document,)
 from integration.tasks import (send_estimate, )
 
 class GetBoxTokensView(APIView):
@@ -440,18 +440,14 @@ class EstimateSignCompleteView(APIView):
         """
         Post data from zoho sign on sign.
         """
-        request_id = request.data.get('requests').get('request_id')
-        email = request.data.get('requests').get('actions')[0].get('recipient_email')
+        request_id = request.data.get('request_id')
+        client_id = request.data.get('client_id')
+        data = get_document(request_id)['requests']
         response = list()
-        for document in request.data.get('requests').get('document_ids'):
+        for document in data.get('document_ids'):
             filename = document.get('document_name')
-            client = list_contacts({'email': email})['response']
-            if len(client) > 0:
-                client_name = client[0]['company_name']
-                folder_id = get_client_folder_id(client_name)
-                response.append(upload_pdf_box(request_id, folder_id, filename))
-            else:
-                response.append(upload_pdf_box(request_id, ESTIMATE_UPLOAD_FOLDER_ID, filename))
+            folder_id = get_client_folder_id(client_id)
+            response.append(upload_pdf_box(request_id, folder_id, filename))
         return Response(response)
         
 class ClientCodeView(APIView):
