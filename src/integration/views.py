@@ -14,7 +14,9 @@ from rest_framework.authentication import (TokenAuthentication,)
 from core.settings import (ESTIMATE_UPLOAD_FOLDER_ID, )
 from core.permissions import UserPermissions
 from .models import Integration
-from integration.box import(get_box_tokens, get_shared_link,)
+from integration.box import(
+    get_box_tokens, get_shared_link,
+    get_client_folder_id, )
 from integration.inventory import (
     get_inventory_item, get_inventory_items,)
 from integration.crm import (
@@ -439,9 +441,17 @@ class EstimateSignCompleteView(APIView):
         Post data from zoho sign on sign.
         """
         request_id = request.data.get('requests').get('request_id')
+        email = request.data.get('requests').get('actions')[0].get('recipient_email')
+        response = list()
         for document in request.data.get('requests').get('document_ids'):
             filename = document.get('document_name')
-            response = upload_pdf_box(request_id, ESTIMATE_UPLOAD_FOLDER_ID, filename)
+            client = list_contacts({'email': email})['response']
+            if len(client) > 0:
+                client_name = client[0]['company_name']
+                folder_id = get_client_folder_id(client_name)
+                response.append(upload_pdf_box(request_id, folder_id, filename))
+            else:
+                response.append(upload_pdf_box(request_id, ESTIMATE_UPLOAD_FOLDER_ID, filename))
         return Response(response)
         
 class ClientCodeView(APIView):

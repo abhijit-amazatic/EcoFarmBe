@@ -99,6 +99,7 @@ SIGN_REDIRECT_URI = os.environ.get('SIGN_REDIRECT_URI')
 SIGN_REFRESH_TOKEN = os.environ.get('SIGN_REFRESH_TOKEN')
 SIGN_HOST_URL = os.environ.get('SIGN_HOST_URL')
 ESTIMATE_UPLOAD_FOLDER_ID=os.environ.get('ESTIMATE_UPLOAD_FOLDER_ID')
+FARM_FOLDER_ID = os.environ.get('FARM_FOLDER_ID')
 
 #slack tokens'
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")

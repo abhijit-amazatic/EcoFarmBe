@@ -29,8 +29,10 @@ def get_inventory_obj(inventory_name):
         token = Integration.objects.get(name=inventory_name)
         access_token = token.access_token
         access_expiry = token.access_expiry
+        refresh_token = token.refresh_token
     except Integration.DoesNotExist:
         access_token = access_expiry = None
+        refresh_token = INVENTORY_REFRESH_TOKEN
     if inventory_name == 'inventory_efd':
         INVENTORY_ORGANIZATION_ID = INVENTORY_EFD_ORGANIZATION_ID
     elif inventory_name == 'inventory_efl':
@@ -38,7 +40,7 @@ def get_inventory_obj(inventory_name):
     inventory = Inventory(
         client_id=INVENTORY_CLIENT_ID,
         client_secret=INVENTORY_CLIENT_SECRET,
-        refresh_token=INVENTORY_REFRESH_TOKEN,
+        refresh_token=refresh_token,
         redirect_uri=INVENTORY_REDIRECT_URI,
         organization_id=INVENTORY_ORGANIZATION_ID,
         access_token=access_token,

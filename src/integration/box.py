@@ -9,7 +9,8 @@ from core.settings import (
     BOX_CLIENT_ID,
     BOX_CLIENT_SECRET,
     BOX_REFRESH_TOKEN,
-    BOX_ACCESS_TOKEN)
+    BOX_ACCESS_TOKEN,
+    FARM_FOLDER_ID,)
 
 def get_redis_obj():
     """
@@ -173,7 +174,18 @@ def get_folder_items(folder_id):
     for folder in folders:
         response[folder.object_id] = folder.name
     return response
-    
+
+def get_client_folder_id(client_folder_name):
+    """
+    upload file to specific client folder on box.
+    """
+    dirs = get_folder_items(FARM_FOLDER_ID)
+    for k, v in dirs.items():
+        if v.lower() == client_folder_name.lower():
+            return k
+        else:
+            return create_folder(FARM_FOLDER_ID, client_folder_name)
+
 def parse_folder(folder):
     """
     Parse folder information from api.

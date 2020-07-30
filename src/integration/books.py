@@ -24,14 +24,16 @@ def get_books_obj():
         token = Integration.objects.get(name='books')
         access_token = token.access_token
         access_expiry = token.access_expiry
+        refresh_token = token.refresh_token
     except Integration.DoesNotExist:
         access_token = access_expiry = None
+        refresh_token = BOOKS_REFRESH_TOKEN
     books_obj = Books(
         client_id=BOOKS_CLIENT_ID,
         client_secret=BOOKS_CLIENT_SECRET,
         redirect_uri=BOOKS_REDIRECT_URI,
         organization_id=BOOKS_ORGANIZATION_ID,
-        refresh_token=BOOKS_REFRESH_TOKEN,
+        refresh_token=refresh_token,
         access_expiry=access_expiry,
         access_token=access_token)
     if books_obj.refreshed:
@@ -41,7 +43,7 @@ def get_books_obj():
                 "name":'books',
                 "client_id":BOOKS_CLIENT_ID,
                 "client_secret":BOOKS_CLIENT_SECRET,
-                "refresh_token":BOOKS_REFRESH_TOKEN,
+                "refresh_token":books_obj.refresh_token,
                 "access_token":books_obj.access_token,
                 "access_expiry":books_obj.access_expiry[0]}
     )

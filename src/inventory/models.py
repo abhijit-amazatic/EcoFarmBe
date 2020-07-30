@@ -83,6 +83,7 @@ class Inventory(models.Model):
     tags = ArrayField(models.CharField(max_length=50), blank=True, null=True)
     available_for_sale_stock = models.FloatField(_('Available For Sale Stock'), blank=True, null=True)
     actual_available_for_sale_stock = models.FloatField(_('Actual Available For Sale Stock'), blank=True, null=True)
+    actual_available_stock = models.FloatField(_('Actual Available For Sale Stock'), blank=True, null=True)
     cf_manufacturing_date = models.DateField(auto_now=False, blank=True, null=True, default=None)
     cf_batch_blending = models.CharField(_('Batch Blending'), blank=True, null=True, max_length=100)
     cf_lab_testing_status = models.URLField(_('Lab Testing Status'), blank=True, null=True, max_length=255)

@@ -19,13 +19,15 @@ def get_sign_obj():
         token = Integration.objects.get(name='sign')
         access_token = token.access_token
         access_expiry = token.access_expiry
+        refresh_token = token.refresh_token
     except Integration.DoesNotExist:
         access_token = access_expiry = None
+        refresh_token = SIGN_REFRESH_TOKEN
     sign_obj = Sign(
         client_id=SIGN_CLIENT_ID,
         client_secret=SIGN_CLIENT_SECRET,
         redirect_uri=SIGN_REDIRECT_URI,
-        refresh_token=SIGN_REFRESH_TOKEN,
+        refresh_token=refresh_token,
         access_token=access_token,
         access_expiry=access_expiry,
         host=SIGN_HOST_URL
@@ -35,7 +37,7 @@ def get_sign_obj():
             name='sign',
             client_id=SIGN_CLIENT_ID,
             client_secret=SIGN_CLIENT_SECRET,
-            refresh_token=SIGN_REFRESH_TOKEN,
+            refresh_token=sign_obj.refresh_token,
             access_token=sign_obj.access_token,
             access_expiry=sign_obj.access_expiry[0]
             )
@@ -116,3 +118,10 @@ def get_embedded_url_from_sign(request_id, action_id):
     """
     sign_obj = get_sign_obj()
     return sign_obj.get_embedded_url(request_id, action_id)
+
+def get_template(template_id):
+    """
+    Get template details.
+    """
+    sign_obj = get_sign_obj()
+    return sign_obj.get_template(template_id)
