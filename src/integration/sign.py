@@ -135,3 +135,21 @@ def get_template(template_id):
     """
     sign_obj = get_sign_obj()
     return sign_obj.get_template(template_id)
+
+def send_template(
+    template_id,
+    recipients,
+    notes=None,
+    expiry=10,
+    reminder_period=5):
+    """
+    Send template to sign.
+    """
+    sign_obj = get_sign_obj()
+    return sign_obj.send_document_using_template(
+        template_id,
+        recipients,
+        notes,
+        expiry,
+        reminder_period
+    )

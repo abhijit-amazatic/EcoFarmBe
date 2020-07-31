@@ -94,6 +94,7 @@ class Inventory(models.Model):
     track_batch_number = models.CharField(_('Track Batch Number'), blank=True, null=True, max_length=100)
     cf_date_available = models.DateField(auto_now=False, blank=True, null=True, default=None)
     cf_status = models.CharField(_('Status'), blank=True, null=True, max_length=100)
+    cf_lab_test_sample_id = models.CharField(_('cf_lab_test_sample_id'), blank=True, null=True, max_length=100)
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)

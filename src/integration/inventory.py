@@ -91,12 +91,16 @@ def get_cultivar_from_db(cultivar_name):
     except Cultivar.DoesNotExist:
         return None
 
-def get_labtest_from_db(sku):
+def get_labtest_from_db(sku, labtest_sample_id):
     """
     Return labtest from db.
     """
     try:
-        labtest = LabTest.objects.filter(Inventory_SKU=sku)
+        labtest = LabTest.objects.filter(Sample_I_D=labtest_sample_id)
+        if labtest.count() == 0:
+            labtest = LabTest.objects.filter(Inventory_SKU=sku)
+            if labtest.count() == 0:
+                return None
         return labtest.first()
     except LabTest.DoesNotExist as exc:
         print(exc)
@@ -141,7 +145,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
             cultivar = get_cultivar_from_db(record['cf_strain_name'])
             if cultivar:
                 record['cultivar'] = cultivar
-            labtest = get_labtest_from_db(record['sku'])
+            labtest = get_labtest_from_db(record['sku'], record['cf_lab_test_sample_id'])
             if labtest:
                 record['labtest'] = labtest
             documents = check_documents(inventory_name, record)
@@ -179,7 +183,7 @@ def fetch_inventory(inventory_name, days=1):
                 cultivar = get_cultivar_from_db(record['cf_strain_name'])
                 if cultivar:
                     record['cultivar'] = cultivar
-                labtest = get_labtest_from_db(record['sku'])
+                labtest = get_labtest_from_db(record['sku'], record['cf_lab_test_sample_id'])
                 if labtest:
                     record['labtest'] = labtest
                 documents = check_documents(inventory_name, record)
@@ -209,7 +213,7 @@ def sync_inventory(inventory_name, response):
         cultivar = get_cultivar_from_db(record['cf_strain_name'])
         if cultivar:
             record['cultivar'] = cultivar
-        labtest = get_labtest_from_db(record['sku'])
+        labtest = get_labtest_from_db(record['sku'], record['cf_lab_test_sample_id'])
         if labtest:
             record['labtest'] = labtest
         documents = check_documents(inventory_name, record)
