@@ -36,7 +36,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                EstimateTaxView, GetTaxView,
                                ContactAddressView, GetPickListAccountView,
                                EstimateStatusView, ClientCodeView, 
-                               EstimateSignView, EstimateSignCompleteView)
+                               EstimateSignView, EstimateSignCompleteView,
+                               GetDocumentStatus, )
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView,)
 from account.views import (AccountViewSet,AccountLicenseViewSet,)
@@ -95,6 +96,7 @@ urlpatterns = [
     path(r'books/estimate-status/', EstimateStatusView.as_view(), name='update_status'),
     path(r'books/sign-estimate/', EstimateSignView.as_view(), name='sign-estimate'),
     path(r'books/signed-estimate/', EstimateSignCompleteView.as_view(), name='sined-estimate'),
+    path(r'books/sign-status/', GetDocumentStatus.as_view(), name='get-sign-status'),
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(), name='cultivar_category'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),

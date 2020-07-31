@@ -133,6 +133,22 @@ def check_documents(inventory_name, record):
     except Exception as exc:
         print(exc)
 
+def upload_file_to_box(item_name, item_id, file_obj):
+    """
+    Upload image/video file to box.
+    """
+    folder_name = f"{item_name}-{item_id}"
+    folder_id = create_folder(INVENTORY_BOX_ID, folder_name)
+    try:
+        file_name = file_obj.name.split('/')[-1]
+    except Exception:
+        file_name = file_obj.name
+    new_file = upload_file_stream(folder_id, file_obj, file_name)
+    try:
+        return get_preview_url(new_file.id)
+    except Exception:
+        return get_preview_url(new_file)
+
 def fetch_inventory_from_list(inventory_name, inventory_list):
     """
     Fetch list of inventory from Zoho Inventory.

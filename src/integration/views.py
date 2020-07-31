@@ -464,3 +464,22 @@ class ClientCodeView(APIView):
             account_data = get_accounts_from_crm(request.query_params.get('legal_business_name'))
             return Response({"client_code":account_data.get('basic_profile',{}).get('client_code')})
         return Response({'error': 'Something went wrong!'})
+
+class GetDocumentStatus(APIView):
+    """
+    View class to get Zoho sign document status.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        """
+        Get Zoho sign document status.
+        """
+        request_id = request.query_params.get('request_id')
+        if request_id:
+            response = get_document(request_id)
+            if response['code'] == 0:
+                return Response({'code': 0, 'status': response['requests']['request_status']})
+            else:
+                return Response({'code': 1, 'error': 'Incorrect request id or Document not in Zoho sign'})
+        return Response({'code': 1, 'error': 'No request id provided.'})
