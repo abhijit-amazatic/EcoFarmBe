@@ -36,7 +36,8 @@ from integration.books import (
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
     mark_estimate, send_estimate_to_sign,)
-from integration.sign import (upload_pdf_box, get_document,)
+from integration.sign import (upload_pdf_box, get_document,
+                              get_embedded_url_from_sign,)
 from integration.tasks import (send_estimate, )
 
 class GetBoxTokensView(APIView):
@@ -483,3 +484,23 @@ class GetDocumentStatus(APIView):
             else:
                 return Response({'code': 1, 'error': 'Incorrect request id or Document not in Zoho sign'})
         return Response({'code': 1, 'error': 'No request id provided.'})
+    
+class GetSignURL(APIView):
+    """
+    View class to get Zoho sign url.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        """
+        Get Zoho sign url.
+        """
+        request_id = request.query_params.get('request_id')
+        action_id = request.query_params.get('action_id')
+        if request_id and action_id:
+            response = get_embedded_url_from_sign(request_id, action_id)
+            if response and response['code'] == 0:
+                return Response(response)
+            else:
+                return Response({'code': 1, 'error': 'Incorrect request id or action id'})
+        return Response({'code': 1, 'error': 'No request id or action id provided.'})
