@@ -200,9 +200,9 @@ def fetch_inventory(inventory_name, days=1):
                 labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
                 if labtest:
                     record['labtest'] = labtest
-                #documents = check_documents(inventory_name, record)
-                #if documents and len(documents) > 0:
-                #    record['documents'] = documents
+                documents = check_documents(inventory_name, record)
+                if documents and len(documents) > 0:
+                   record['documents'] = documents
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     name=record['name'],
