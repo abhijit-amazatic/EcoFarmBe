@@ -36,12 +36,12 @@ def get_picklist(module, field_name):
     picklist_types = ('picklist', 'multiselectpicklist', 'pick_list_values', )
     crm_obj = get_crm_obj()
     module = crm_obj.get_module(module)
-    print(module)
-    module = module['response']
-    fields = module.get_all_fields().response_json['fields']
-    for field in fields:
-        if field['field_label'] == field_name and field['data_type'] in picklist_types:
-            return field['pick_list_values']
+    if module.get('response'):
+        module = module['response']
+        fields = module.get_all_fields().response_json['fields']
+        for field in fields:
+            if field['field_label'] == field_name and field['data_type'] in picklist_types:
+                return field['pick_list_values']
     return list()
 
 
