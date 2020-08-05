@@ -37,9 +37,9 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                ContactAddressView, GetPickListAccountView,
                                EstimateStatusView, ClientCodeView, 
                                EstimateSignView, EstimateSignCompleteView,
-                               GetDocumentStatus, GetSignURL)
+                               GetDocumentStatus, GetSignURL,)
 from inventory.views import (InventoryViewSet, InventorySyncView,
-                             CultivarCategoryView,)
+                             CultivarCategoryView, InventoryStatusTypeView)
 from account.views import (AccountViewSet,AccountLicenseViewSet,)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
@@ -100,6 +100,7 @@ urlpatterns = [
     path(r'books/sign-url/', GetSignURL.as_view(), name='get-sign-url'),
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(), name='cultivar_category'),
+    path(r'inventory/status/', InventoryStatusTypeView.as_view(), name='get_status_types'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
 ] + router.urls
 

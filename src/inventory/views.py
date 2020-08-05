@@ -25,6 +25,7 @@ class DataFilter(FilterSet):
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
+    cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
@@ -58,6 +59,7 @@ class DataFilter(FilterSet):
         'last_modified_time':['gte', 'lte', 'gt', 'lt'],
         'product_type':['icontains', 'exact'],
         'cf_pesticide_summary':['icontains', 'exact'],
+        'cf_status':['icontains', 'exact'],
         'labtest__THC':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBD':['gte', 'lte', 'gt', 'lt'],
         'labtest__d_8_THC':['gte', 'lte', 'gt', 'lt'],
@@ -133,3 +135,18 @@ class CultivarCategoryView(APIView):
             'response': [{
                 'label': i['cf_strain_name'],
                 'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None]})
+
+class InventoryStatusTypeView(APIView):
+    """
+    Return distinct status types.
+    """
+    def get(self, request):
+        """
+        Return distinct status types.
+        """
+        categories = Inventory.objects.filter(
+                cf_cfi_published=True
+                ).values('cf_status').distinct()
+        return Response({
+            'status_code': 200,
+            'response': [i['cf_status'] for i in categories]})
