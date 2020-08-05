@@ -164,6 +164,13 @@ def parse_fields(module, key, value, obj, crm_obj):
                 cultivars.extend(cultivar['cultivar_names'])
         return cultivars
 
+def get_record(module, record_id):
+    """
+    Get record.
+    """
+    crm_obj = get_crm_obj()
+    return crm_obj.get_record(module, record_id)
+
 def create_records(module, records, is_return_orginal_data=False):
     response = dict()
     crm_obj = get_crm_obj()
@@ -412,6 +419,25 @@ def get_records_from_crm(legal_business_name):
             return response
     return {}
 
+def get_vendor_from_contact(contact_email):
+    """
+    Return vendor information using contact email.
+    """
+    response = dict()
+    contact_details = search_query('Contacts', contact_email, 'Email')
+    if contact_details['status_code'] == 200:
+        response['contact_company_role'] = contact_details['response'][0]['Contact_Company_Role']
+        vendor_details = search_query(
+            'Vendors_X_Contacts',
+            contact_details['response'][0]['id'],
+            'Contact')
+        if vendor_details['status_code'] == 200:
+            vendor_id = vendor_details['response'][0]['Vendor']['id']
+            response['vendor'] = get_record('Vendors', vendor_id)['response']
+            response['code'] = 0
+            return response
+    return {'code': 1, 'error': 'No data found'}
+
 def list_crm_contacts(contact_id=None):
     """
     Return contacts from Zoho CRM.
@@ -651,17 +677,19 @@ def fetch_labtests(days=1):
     has_more = True
     page = 0
     while has_more != False:
-        records = crm_obj.get_records(module='Testing', page=page, extra_headers=request_headers)['response']
-        has_more = records['info']['more_records']
-        page = records['info']['page'] + 1
-        records = parse_crm_record('Testing', records['data'])
-        for record in records:
-            try:
-                obj, created = LabTest.objects.update_or_create(
-                    labtest_crm_id=record['labtest_crm_id'], Inventory_SKU=record['Inventory_SKU'], defaults=record)
-            except Exception as exc:
-                print(exc)
-                continue
+        records = crm_obj.get_records(module='Testing', page=page, extra_headers=request_headers)
+        if records.get('response'):
+            records = records['response']
+            has_more = records['info']['more_records']
+            page = records['info']['page'] + 1
+            records = parse_crm_record('Testing', records['data'])
+            for record in records:
+                try:
+                    obj, created = LabTest.objects.update_or_create(
+                        labtest_crm_id=record['labtest_crm_id'], Inventory_SKU=record['Inventory_SKU'], defaults=record)
+                except Exception as exc:
+                    print(exc)
+                    continue
     return
 
 def sync_labtest(record):

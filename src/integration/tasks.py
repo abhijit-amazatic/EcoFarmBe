@@ -31,6 +31,7 @@ def fetch_inventory_efd_on_interval():
                 'deleted': inventory_before[0],
                 'inserted': inventory_after}
     except Exception as exc:
+        print(exc)
         return {'status_code': 400,
                 'error': exc}
 
