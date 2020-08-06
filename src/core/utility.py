@@ -491,7 +491,13 @@ def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
         except Exception as e:
             print("Exception on profile aproval notification",e)
     
-
+def send_verification_link(email):
+    """
+    Send verification link to user.
+    """
+    link = get_encrypted_data(email)
+    mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
+    
 def extract_account_employees_data(data,param):
     """
     Format and extract data according to models

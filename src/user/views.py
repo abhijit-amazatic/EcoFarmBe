@@ -17,10 +17,10 @@ from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
 from .models import User, MemberCategory
 from vendor.models import Vendor,VendorUser
-from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data)
+from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data, SendVerificationSerializer,)
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
-from core.utility import (get_from_crm_insert_to_vendorprofile,NOUN_PROCESS_MAP,get_from_crm_insert_to_account,) 
+from core.utility import (get_from_crm_insert_to_vendorprofile,NOUN_PROCESS_MAP,get_from_crm_insert_to_account,send_verification_link,) 
 from slacker import Slacker
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
@@ -273,7 +273,24 @@ class VerificationView(GenericAPIView):
             response = Response("false", status=400)
         return response
 
-
+class SendVerificationView(APIView):
+    """
+    Send Verification link
+    """
+    serializer_class = SendVerificationSerializer
+    permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        """
+        Post method for verification view link.
+        """
+        serializer = SendVerificationSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            send_verification_link(request.data.get('email'))
+            response = Response({"Verification link sent!"}, status=200)
+        else:
+            response = Response("false", status=400)
+        return response
     
 # def test():
 #     #print('in mail test')

@@ -347,3 +347,10 @@ class VerificationSerializer(serializers.Serializer):  # pylint: disable=W0223
         user.is_verified = True
         user.save()
         return user    
+
+class SendVerificationSerializer(serializers.Serializer):  # pylint: disable=W0223
+    """
+    Serializer for requesting verification link
+    """
+    email = serializers.CharField(max_length=255)
+    
