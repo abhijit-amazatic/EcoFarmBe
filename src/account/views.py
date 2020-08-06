@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import (AccountSerializer,AccountCreateSerializer, AccountLicenseSerializer, AccountBasicProfileSerializer, AccountContactInfoSerializer,)
 from .models import (Account,AccountUser,AccountLicense, AccountBasicProfile, AccountContactInfo)
 from core.permissions import IsAuthenticatedAccountPermission
@@ -116,9 +117,9 @@ class AccountLicenseViewSet(viewsets.ModelViewSet):
     """
     serializer_class = AccountLicenseSerializer
     permission_classes = (IsAuthenticatedAccountPermission, )
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['legal_business_name', ]
-    
+    filterset_fields = ['account']
     
     def get_queryset(self):
         """
