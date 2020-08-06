@@ -44,7 +44,6 @@ def get_picklist(module, field_name):
                 return field['pick_list_values']
     return list()
 
-
 def get_format_dict(module):
     """
     Return Contact-CRM fields dictionary.
