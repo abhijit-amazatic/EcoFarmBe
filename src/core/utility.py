@@ -21,6 +21,8 @@ slack = Slacker(settings.SLACK_TOKEN)
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
+#key = 'zaqwsxedcrfvbgto'.encode("utf8")
+
 NOUN_PROCESS_MAP = {"cultivator":"cultivation","nursery":"nursery","manufacturer":"manufacturing",
                     "distributor":"distribution","retailer":"retail","processor":"processing",
                     "testing":"testing","event":"event","brand":"brand","hemp":"hemp",
@@ -41,11 +43,18 @@ def unpad(s):
     return s[:-ord(s[len(s) - 1:])]
 
 
+
+
 def get_encrypted_data(email, reason=None):
         raw = pad(email)
         iv = Random.new().read(AES.block_size)
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(raw))
+        cipher = AES.new(bytes(key,'utf-8'),AES.MODE_CBC,iv)
+        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(bytes(raw,'utf-8')))
+        #cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(raw))
+        print("Normal====>\n", cipher_text)
+        print("decode asci====>\n", cipher_text.decode('ascii'))
+        print("decode utf-8====>\n", cipher_text.decode('utf-8'))
+        
         if reason == "forgot_password" or "reset_user_password":
             return '{}reset-password?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
         else:
