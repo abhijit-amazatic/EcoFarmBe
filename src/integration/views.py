@@ -37,7 +37,8 @@ from integration.books import (
     send_estimate_to_sign, get_contact_addresses,
     mark_estimate, send_estimate_to_sign,)
 from integration.sign import (upload_pdf_box, get_document,
-                              get_embedded_url_from_sign,)
+                              get_embedded_url_from_sign,
+                              send_template)
 from integration.tasks import (send_estimate, )
 
 class GetBoxTokensView(APIView):
@@ -245,6 +246,23 @@ class EstimateSignView(APIView):
         customer_name = request.query_params.get('customer_name', None)
         if estimate_id and customer_name:
             return Response(send_estimate_to_sign(estimate_id, customer_name))
+        return Response({})
+
+class TemplateSignView(APIView):
+    """
+    View class to sign for template.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Get template signing url.
+        """
+        template_id = request.data.get('template_id', None)
+        recipient = request.data.get('recipient', None)
+        licenses = request.data.get('licenses', None)
+        if template_id and licenses and recipient:
+            return Response(send_template(template_id, recipient, licenses))
         return Response({})
 
 class EstimateTaxView(APIView):
