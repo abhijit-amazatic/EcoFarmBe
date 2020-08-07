@@ -42,16 +42,18 @@ def unpad(s):
     return s[:-ord(s[len(s) - 1:])]
 
 
-def get_encrypted_data(email, reason=None):
+def get_encrypted_data(email,reason=None):
         raw = pad(email)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(bytes(key,'utf-8'),AES.MODE_CBC,iv)
-        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(bytes(raw,'utf-8')))    
-        if reason == "forgot_password" or "reset_user_password":
+        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(bytes(raw,'utf-8')))
+        if reason == "verify":
+            return '{}verify-user?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
+        elif reason == "forgot_password" or "reset_user_password":
             return '{}reset-password?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
-        else:
-           return '{}verify-user?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
-
+        
+            
+        
 def get_decrypted_data(enc):
         enc = base64.urlsafe_b64decode(enc)
         iv = enc[:BS]
@@ -483,7 +485,7 @@ def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
     for vendor_user in vendor_users:
         try:
             # send email verification link to farm user
-            link = get_encrypted_data(vendor_user.user.email)
+            link = get_encrypted_data(vendor_user.user.email,reason='verify')
             mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",vendor_user.user.email)
             #inform admins to approve farm user
             notify_admins_on_vendors_registration(vendor_user.user.email,profile_contact[0].profile_contact_details.get('farm_name'))
@@ -496,7 +498,7 @@ def send_verification_link(email):
     """
     Send verification link to user.
     """
-    link = get_encrypted_data(email)
+    link = get_encrypted_data(email,reason='verify')
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
     
 def extract_account_employees_data(data,param):
