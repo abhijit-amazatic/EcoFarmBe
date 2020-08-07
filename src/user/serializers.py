@@ -37,8 +37,8 @@ def unpad(s):
 def get_encrypted_data(email, reason=None):
         raw = pad(email)
         iv = Random.new().read(AES.block_size)
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(raw))
+        cipher = AES.new(bytes(key,'utf-8'),AES.MODE_CBC,iv)
+        cipher_text = base64.urlsafe_b64encode(iv + cipher.encrypt(bytes(raw,'utf-8')))
         if reason == "forgot_password":
             return '{}reset-password?code={}'.format(settings.FRONTEND_DOMAIN_NAME, cipher_text.decode('ascii'))
         else:
@@ -47,7 +47,8 @@ def get_encrypted_data(email, reason=None):
 def get_decrypted_data(enc):
         enc = base64.urlsafe_b64decode(enc)
         iv = enc[:BS]
-        cipher = AES.new(key, AES.MODE_CBC, iv)
+        #cipher = AES.new(key, AES.MODE_CBC, iv)
+        cipher = AES.new(bytes(key,'utf-8'),AES.MODE_CBC,iv)
         return unpad(cipher.decrypt(enc[BS:]))       
        
 
