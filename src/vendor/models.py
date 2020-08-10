@@ -183,6 +183,8 @@ class License(models.Model):
         _('Uploaded Sellers Permit To'), blank=True, null=True, max_length=255)
     uploaded_w9_to = models.CharField(
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
+    associated_program = models.CharField(
+        _('Associated_program'), blank=True, null=True, max_length=255)
     
     def __str__(self):
         return self.legal_business_name

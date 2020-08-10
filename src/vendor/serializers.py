@@ -383,6 +383,20 @@ class ProgramOverviewSerializer(serializers.ModelSerializer):
     """
     program_details = serializers.JSONField(required=True)
 
+    def save_program_details_in_license(self, profile, profile_data):
+        """
+        Connect program selection with license.
+        """
+        for data in profile_data.get('program_details'):
+            try:
+                related_licese = License.objects.get(vendor_profile_id=profile.id,license_number=data.get('for_license'))
+                if related_licese:
+                    related_licese.associated_program = data.get('program_name')
+                    related_licese.save()
+            except Exception as e:
+                print("Error in assciating license to program")
+        
+       
     def validate(self, attrs):
         """
         Object level validation.
@@ -394,6 +408,7 @@ class ProgramOverviewSerializer(serializers.ModelSerializer):
                 if profile_data:
                     serializer = ProgramFieldsSerializer(data=profile_data)
                     serializer.is_valid(raise_exception=True)
+                    self.save_program_details_in_license(profile,profile_data)
 
         return attrs
 
