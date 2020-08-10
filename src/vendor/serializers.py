@@ -363,11 +363,18 @@ class ProcessingOverviewSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 
+class ConfigProgramSerializer(serializers.Serializer):
+    """
+    Program selection
+    """
+    for_license = serializers.CharField(required=True, allow_blank=True)
+    program_name = serializers.CharField(required=True, allow_blank=True)
+    
 class ProgramFieldsSerializer(serializers.Serializer):
     """
     JSON data for cultivator program.
     """
-    program_name = serializers.CharField(required=True)
+    program_details = ConfigProgramSerializer(required=True, many=True)
 
 
 class ProgramOverviewSerializer(serializers.ModelSerializer):
