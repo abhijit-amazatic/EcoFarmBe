@@ -371,7 +371,7 @@ def list_vendor_credits(params=None):
     """
     obj = get_books_obj()
     invoice_obj = obj.VendorCredits()
-    return invoice_obj.list_vendor_credit(parameters=params)
+    return invoice_obj.list_vendor_credits(parameters=params)
 
 def get_unpaid_invoices(vendor, status='unpaid'):
     """
