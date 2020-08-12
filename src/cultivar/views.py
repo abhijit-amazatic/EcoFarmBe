@@ -40,6 +40,7 @@ class CultivarViewSet(viewsets.ModelViewSet):
     """
     permission_classes = (IsAuthenticated, )
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
+    filterset_class = DataFilter
     ordering_fields = '__all__'
     
     def get_serializer_class(self):
