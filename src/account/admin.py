@@ -48,6 +48,7 @@ class InlineAccountContactInfoAdmin(admin.StackedInline):
     Configuring field admin.
     """
     extra = 0
+    readonly_fields = ('employees',)
     model = AccountContactInfo
     
 def approve_accounts(modeladmin, request, queryset):
