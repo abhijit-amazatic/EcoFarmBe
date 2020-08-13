@@ -139,27 +139,27 @@ def get_template(template_id):
     sign_obj = get_sign_obj()
     return sign_obj.get_template(template_id)
 
-def send_template(
-    template_id,
-    recipients,
-    licenses):
-    """
-    Send template to sign.
-    """
-    sign_obj = get_sign_obj()
-    data = get_template(template_id)
-    if data.get('templates'):
-        response = sign_obj.send_document_using_template(
-            template_id,
-            data['templates'],
-            recipients,
-            licenses
-        )
-        if response['code'] == 0:
-            return get_embedded_url_from_sign(
-                response['requests']['request_id'],
-                response['requests']['actions'][0]['action_id']
-            )
-        return response
-    return {'code': 1,
-            'error': data}
+# def send_template(
+#     template_id,
+#     recipients,
+#     licenses):
+#     """
+#     Send template to sign.
+#     """
+#     sign_obj = get_sign_obj()
+#     data = get_template(template_id)
+#     if data.get('templates'):
+#         response = sign_obj.send_document_using_template(
+#             template_id,
+#             data['templates'],
+#             recipients,
+#             licenses
+#         )
+#         if response['code'] == 0:
+#             return get_embedded_url_from_sign(
+#                 response['requests']['request_id'],
+#                 response['requests']['actions'][0]['action_id']
+#             )
+#         return response
+#     return {'code': 1,
+#             'error': data}
