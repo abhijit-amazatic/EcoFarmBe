@@ -40,6 +40,7 @@ from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
 from integration.tasks import (send_estimate, )
+from integration.utils import (get_distance, )
 
 class GetBoxTokensView(APIView):
     """
@@ -522,3 +523,20 @@ class GetSignURL(APIView):
             else:
                 return Response({'code': 1, 'error': 'Incorrect request id or action id'})
         return Response({'code': 1, 'error': 'No request id or action id provided.'})
+    
+class GetDistanceView(APIView):
+    """
+    View class to get distance between two locations.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request):
+        """
+        Get distance.
+        """
+        location_a = request.data.get('location_a')
+        location_b = request.data.get('location_b')
+        if location_a and location_b:
+            response = get_distance(location_a, location_b)
+            return Response(response)
+        return Response({'code': 1, 'error': 'No location_a or location_b provided.'})

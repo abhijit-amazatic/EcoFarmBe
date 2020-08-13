@@ -1,3 +1,4 @@
+import requests
 from datetime import (datetime, )
 
 from pdfminer.layout import LAParams, LTTextBox
@@ -5,9 +6,11 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
+from geopy.geocoders import Nominatim
 
 from .crm_format import (ACCOUNT_TYPES, )
-from core.settings import (VENDOR_LAYOUT, LEADS_LAYOUT)
+from core.settings import (
+    VENDOR_LAYOUT, LEADS_LAYOUT,OPENSTREET_API_KEY)
 
 def get_vendor_contacts(key, value, obj, crm_obj):
     """
@@ -107,3 +110,33 @@ def parse_pdf(file_obj):
     except Exception as exc:
         print('Estimate file donot have signature field', exc)
         return None
+
+def get_distance(location_a, location_b):
+    """
+    Get distance between two locations.
+    """
+    geolocator = Nominatim(user_agent="ecofarm")
+    location_a = geolocator.geocode(location_a)
+    location_b = geolocator.geocode(location_b)
+    if location_a and location_b:
+        location_a = [location_a.longitude,location_a.latitude]
+        location_b = [location_b.longitude,location_b.latitude]
+        body = {"coordinates":[location_a, location_b], "units": "km"}
+        url = 'https://api.openrouteservice.org/v2/directions/driving-hgv'
+        headers = {
+            'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+            'Authorization': OPENSTREET_API_KEY,
+            'Content-Type': 'application/json; charset=utf-8'
+            }
+        matrix = requests.post(url=url, json=body, headers=headers)
+        return matrix.json()
+    response = {
+        'code': 1
+    }
+    if not location_a and location_b:
+        response['error'] = 'Both addresses are not valid.'
+    if not location_a:
+        response['error'] = 'location_a is not valid.'
+    elif not location_b:
+        response['error'] = 'location_b is not valid.'
+    return response

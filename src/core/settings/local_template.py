@@ -129,3 +129,5 @@ LEADS_LAYOUT = {
     "vendor_cannabis_non_cultivator": "4230236000001229442",
     "vendor_non_cannabis": "4230236000001229443",
     }
+
+OPENSTREET_API_KEY=''

@@ -38,7 +38,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                EstimateStatusView, ClientCodeView, 
                                EstimateSignView, EstimateSignCompleteView,
                                GetDocumentStatus, GetSignURL,
-                               TemplateSignView, )
+                               TemplateSignView, GetDistanceView)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
 from account.views import (AccountViewSet,AccountLicenseViewSet,)
@@ -105,6 +105,7 @@ urlpatterns = [
     path(r'inventory/status/', InventoryStatusTypeView.as_view(), name='get_status_types'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
+    path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
 ] + router.urls
 
 
