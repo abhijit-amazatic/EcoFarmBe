@@ -542,4 +542,6 @@ class GetDistanceView(APIView):
                 units = "mi"
             response = get_distance(location_a, location_b, units)
             return Response(response)
-        return Response({'code': 1, 'error': 'No location_a or location_b provided.'})
+        return Response(
+            {'code': 1, 'error': 'No location_a or location_b provided.'},
+            status=status.HTTP_400_BAD_REQUEST)

@@ -156,13 +156,10 @@ def send_template(
             licenses
         )
         if response['code'] == 0:
-            return sign_obj.get_embedded_url(
+            return get_embedded_url_from_sign(
                 response['requests']['request_id'],
                 response['requests']['actions'][0]['action_id']
             )
-        return {'code': 1,
-                'error': 'Problem sending template for sign.',
-                'response': response}
+        return response
     return {'code': 1,
-            'error': 'Problem with template.',
-            'response': data}
+            'error': data}
