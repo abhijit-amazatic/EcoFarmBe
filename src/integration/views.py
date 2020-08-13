@@ -37,8 +37,8 @@ from integration.books import (
     send_estimate_to_sign, get_contact_addresses,
     mark_estimate, send_estimate_to_sign,)
 from integration.sign import (upload_pdf_box, get_document,
-                              get_embedded_url_from_sign,
-                              send_template)
+                              get_embedded_url_from_sign,)
+                              #send_template)
 from integration.tasks import (send_estimate, )
 from integration.utils import (get_distance, )
 
