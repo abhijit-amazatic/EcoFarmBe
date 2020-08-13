@@ -32,14 +32,16 @@ def get_sign_obj():
         access_expiry=access_expiry,
         host=SIGN_HOST_URL
     )
-    if not access_token and not access_expiry:
+    if sign_obj._refreshed:
         a = Integration.objects.update_or_create(
             name='sign',
-            client_id=SIGN_CLIENT_ID,
-            client_secret=SIGN_CLIENT_SECRET,
-            refresh_token=sign_obj.refresh_token,
-            access_token=sign_obj.access_token,
-            access_expiry=sign_obj.access_expiry[0]
+            defaults={
+                "client_id":SIGN_CLIENT_ID,
+                "client_secret":SIGN_CLIENT_SECRET,
+                "refresh_token":sign_obj.refresh_token,
+                "access_token":sign_obj.access_token,
+                "access_expiry":sign_obj.access_expiry[0]
+                }
             )
     return sign_obj
 
