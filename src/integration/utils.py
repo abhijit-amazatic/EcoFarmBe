@@ -111,7 +111,7 @@ def parse_pdf(file_obj):
         print('Estimate file donot have signature field', exc)
         return None
 
-def get_distance(location_a, location_b):
+def get_distance(location_a, location_b, units):
     """
     Get distance between two locations.
     """
@@ -121,7 +121,7 @@ def get_distance(location_a, location_b):
     if location_a and location_b:
         location_a = [location_a.longitude,location_a.latitude]
         location_b = [location_b.longitude,location_b.latitude]
-        body = {"coordinates":[location_a, location_b], "units": "km"}
+        body = {"coordinates":[location_a, location_b], "units": units}
         url = 'https://api.openrouteservice.org/v2/directions/driving-hgv'
         headers = {
             'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',

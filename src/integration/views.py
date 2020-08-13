@@ -536,7 +536,10 @@ class GetDistanceView(APIView):
         """
         location_a = request.data.get('location_a')
         location_b = request.data.get('location_b')
+        units = request.query_params.get('units')
         if location_a and location_b:
-            response = get_distance(location_a, location_b)
+            if not units:
+                units = "mi"
+            response = get_distance(location_a, location_b, units)
             return Response(response)
         return Response({'code': 1, 'error': 'No location_a or location_b provided.'})
