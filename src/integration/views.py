@@ -547,8 +547,8 @@ class GetDistanceView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             fees = get_transportation_fees()
             if fees.get('response'):
-                rate = fees['response'][0]['rate']
-                response['transportation_fees'] = rate
+                data = fees['response'][0]
+                response['transportation'] = data
                 return Response(response)
         return Response(
             {'code': 1, 'error': 'No location_a or location_b provided.'},
