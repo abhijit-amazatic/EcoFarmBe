@@ -13,6 +13,12 @@ class User(StatusFlagMixin,AbstractUser):
     """
     Class implementing a custom user model.
     """
+    CATEGORY_BUSINESS = 'business'
+    CATEGORY_PERSONAL = 'personal'
+    MEMBERSHIP_CHOICES = (
+        (CATEGORY_BUSINESS, _('Business')),
+        (CATEGORY_PERSONAL, _('Personal')),
+    )
     email = models.EmailField(_('Email address'), unique=True)
     username = models.CharField(
         _('Username'), max_length=150, blank=True, null=True)
@@ -38,6 +44,7 @@ class User(StatusFlagMixin,AbstractUser):
     business_dba = models.CharField(
         _('Business DBA'), max_length=150, null=True, blank=True)
     existing_member = models.BooleanField('Account Existed', default=False)
+    membership_type = models.CharField(verbose_name=_('Membership Type'),max_length=60, choices=MEMBERSHIP_CHOICES)
     is_verified = models.BooleanField('Is Verified', default=False)
     is_approved = models.BooleanField('Approve User', default=False)
     zoho_contact_id = models.CharField(
