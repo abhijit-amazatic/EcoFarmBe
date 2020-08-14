@@ -412,7 +412,7 @@ class ContactAddressView(APIView):
         """
         if request.query_params.get('contact_name', None):
             return Response(get_contact_addresses(request.query_params.get('contact_name')))
-        return Response({'error': 'Conact name not specified'})
+        return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
 
 class LeadView(APIView):
     """
@@ -501,8 +501,9 @@ class GetDocumentStatus(APIView):
             if response['code'] == 0:
                 return Response({'code': 0, 'status': response['requests']['request_status']})
             else:
-                return Response({'code': 1, 'error': 'Incorrect request id or Document not in Zoho sign'})
-        return Response({'code': 1, 'error': 'No request id provided.'})
+                return Response({'code': 1, 'error': 'Incorrect request id or Document not in Zoho sign'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return Response({'code': 1, 'error': 'No request id provided.'}, status=status.HTTP_400_BAD_REQUEST)
     
 class GetSignURL(APIView):
     """
@@ -541,6 +542,8 @@ class GetDistanceView(APIView):
             if not units:
                 units = "mi"
             response = get_distance(location_a, location_b, units)
+            if response.get('code'):
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response)
         return Response(
             {'code': 1, 'error': 'No location_a or location_b provided.'},
