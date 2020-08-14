@@ -35,7 +35,8 @@ from integration.books import (
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
-    mark_estimate, send_estimate_to_sign,)
+    mark_estimate, send_estimate_to_sign,
+    get_transportation_fees,)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -544,7 +545,11 @@ class GetDistanceView(APIView):
             response = get_distance(location_a, location_b, units)
             if response.get('code'):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            return Response(response)
+            fees = get_transportation_fees()
+            if fees.get('response'):
+                rate = fees['response'][0]['rate']
+                response['transportation_fees'] = rate
+                return Response(response)
         return Response(
             {'code': 1, 'error': 'No location_a or location_b provided.'},
             status=status.HTTP_400_BAD_REQUEST)

@@ -9,6 +9,7 @@ from core.settings import (
     BOOKS_REDIRECT_URI,
     BOOKS_REFRESH_TOKEN,
     ESTIMATE_TAXES,
+    TRANSPORTATION_FEES,
 )
 from pyzoho.books import (Books, )
 from .models import (Integration, )
@@ -91,6 +92,15 @@ def get_tax_rates():
         item = get_tax(books_obj, v)['response'][0]
         response[item['name']] = item['rate']
     return response
+
+def get_transportation_fees(name=None):
+    """
+    Return transportation fees.
+    """
+    obj = get_books_obj()
+    if name:
+        return get_tax(obj, name)
+    return get_tax(obj, TRANSPORTATION_FEES)
 
 def calculate_tax(product_category, quantity):
     """
