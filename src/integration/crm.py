@@ -564,7 +564,7 @@ def create_lead(record):
     Create lead in Zoho CRM.
     """
     response = create_records('Leads', record)
-    mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':record.get("vendor_category"),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message")},"New lead via connect page.",'connect@thrive-society.com')
+    mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':','.join(record.get("vendor_category")),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message")},"New lead via connect page.",'connect@thrive-society.com')
     return response
 
 def get_field(record, key, field):
