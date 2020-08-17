@@ -26,6 +26,7 @@ class DataFilter(FilterSet):
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
     cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
+    cf_quantity_estimate__in = CharInFilter(field_name='cf_status', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
@@ -72,6 +73,7 @@ class DataFilter(FilterSet):
         'labtest__CBL':['gte', 'lte', 'gt', 'lt'],
         'labtest__THCVA':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
+        'cf_quantity_estimate': ['gte', 'lte', 'gt', 'lt'],
         }
 
 
