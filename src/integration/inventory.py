@@ -206,8 +206,6 @@ def fetch_inventory(inventory_name, days=1):
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     name=record['name'],
-                    cultivar=cultivar,
-                    labtest=labtest,
                     defaults=record)
             except Exception as exc:
                 print({
@@ -236,8 +234,6 @@ def sync_inventory(inventory_name, response):
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
             name=record['name'],
-            cultivar=cultivar,
-            labtest=labtest,
             defaults=record)
         return obj.item_id
     except Exception as exc:
