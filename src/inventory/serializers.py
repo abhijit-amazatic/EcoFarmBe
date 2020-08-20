@@ -48,4 +48,9 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'cf_cultivation_type',
             'cf_cannabis_grade_and_category',
             'available_stock',
-            'category_name')
+            'category_name',
+            'sku',
+            'cf_status',
+            'cf_quantity_estimate',
+            'actual_available_stock',
+            'documents')
