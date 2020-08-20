@@ -16,7 +16,7 @@ from .models import (Integration, )
 from labtest.models import (LabTest, )
 from inventory.models import Inventory as InventoryModel
 from cultivar.models import (Cultivar, )
-from integration.crm import (get_labtest, )
+from integration.crm import (get_labtest, search_query,)
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version)
 
@@ -103,6 +103,19 @@ def get_labtest_from_db(labtest_sample_id):
     except LabTest.DoesNotExist as exc:
         print(exc)
         return None
+
+def get_vendor_from_crm(vendor_name):
+    """
+    Get inventory vendor from crm.
+    """
+    vendors = search_query(
+        'Vendors',
+        vendor_name,
+        'Vendor_Name'
+    )
+    if vendors['status_code'] == 200:
+        return vendors.get('response')[0]
+    return {}
 
 def check_documents(inventory_name, record):
     """

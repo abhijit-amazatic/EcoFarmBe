@@ -26,7 +26,7 @@ class DataFilter(FilterSet):
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
     cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
-    cf_quantity_estimate__in = CharInFilter(field_name='cf_status', lookup_expr='in')
+    cf_quantity_estimate__in = CharInFilter(field_name='cf_quantity_estimate', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
@@ -40,6 +40,7 @@ class DataFilter(FilterSet):
     labtest__CBL__in = CharInFilter(field_name='labtest__CBL', lookup_expr='in')
     labtest__THCVA__in = CharInFilter(field_name='labtest__THCVA', lookup_expr='in')
     labtest__CBDV__in = CharInFilter(field_name='labtest__CBDV', lookup_expr='in')
+    actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
             
     def get_cultivars(self, queryset, name, value):
         items = queryset.filter(
@@ -74,6 +75,7 @@ class DataFilter(FilterSet):
         'labtest__THCVA':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
         'cf_quantity_estimate': ['gte', 'lte', 'gt', 'lt'],
+        'actual_available_stock': ['gte', 'lte', 'gt', 'lt']
         }
 
 

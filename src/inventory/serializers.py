@@ -25,6 +25,7 @@ class InventorySerializer(serializers.ModelSerializer):
         elif 'Trim' in obj.category_name:
             return obj.price - taxes['Trim']
         
+        # Issue:- It will call Books API multiple times.
         # taxes = get_tax_rates()
         # if 'Flower' in obj.category_name:
         #     return obj.price - taxes[ESTIMATE_TAXES['Flower']]
