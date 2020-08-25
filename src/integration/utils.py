@@ -10,7 +10,7 @@ from pdfminer.converter import PDFPageAggregator
 
 from .crm_format import (ACCOUNT_TYPES, )
 from core.settings import (
-    VENDOR_LAYOUT, LEADS_LAYOUT,OPENSTREET_API_KEY)
+    VENDOR_LAYOUT, LEADS_LAYOUT, GOOGLEMAPS_API_KEY)
 
 def get_vendor_contacts(key, value, obj, crm_obj):
     """
