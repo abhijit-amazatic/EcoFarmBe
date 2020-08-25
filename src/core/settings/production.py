@@ -113,4 +113,4 @@ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 VENDOR_LAYOUT = os.environ.get("VENDOR_LAYOUT")
 LEADS_LAYOUT = os.environ.get("LEADS_LAYOUT")
 
-OPENSTREET_API_KEY = os.environ.get('OPENSTREET_API_KEY')
+GOOGLEMAPS_API_KEY = os.environ.get('GOOGLEMAPS_API_KEY')

@@ -1,12 +1,12 @@
 import requests
 from datetime import (datetime, )
 
+import googlemaps
 from pdfminer.layout import LAParams, LTTextBox
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
-from geopy.geocoders import Nominatim
 
 from .crm_format import (ACCOUNT_TYPES, )
 from core.settings import (
@@ -111,25 +111,14 @@ def parse_pdf(file_obj):
         print('Estimate file donot have signature field', exc)
         return None
 
-def get_distance(location_a, location_b, units):
+def get_distance(location_a, location_b):
     """
     Get distance between two locations.
     """
-    geolocator = Nominatim(user_agent="ecofarm")
-    location_a = geolocator.geocode(location_a)
-    location_b = geolocator.geocode(location_b)
     if location_a and location_b:
-        location_a = [location_a.longitude,location_a.latitude]
-        location_b = [location_b.longitude,location_b.latitude]
-        body = {"coordinates":[location_a, location_b], "units": units}
-        url = 'https://api.openrouteservice.org/v2/directions/driving-hgv'
-        headers = {
-            'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-            'Authorization': OPENSTREET_API_KEY,
-            'Content-Type': 'application/json; charset=utf-8'
-            }
-        matrix = requests.post(url=url, json=body, headers=headers)
-        return matrix.json()
+        gmaps = googlemaps.Client(key=OPENSTREET_API_KEY)
+        response = gmaps.distance_matrix(location_a, location_b)['rows'][0]['elements'][0]
+        return response
     response = {
         'code': 1
     }

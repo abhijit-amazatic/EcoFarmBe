@@ -131,4 +131,4 @@ LEADS_LAYOUT = {
     "vendor_non_cannabis": "4230236000001229443",
     }
 
-OPENSTREET_API_KEY=''
+GOOGLEMAPS_API_KEY=''

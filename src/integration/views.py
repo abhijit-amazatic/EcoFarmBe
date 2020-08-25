@@ -538,11 +538,8 @@ class GetDistanceView(APIView):
         """
         location_a = request.data.get('location_a')
         location_b = request.data.get('location_b')
-        units = request.query_params.get('units')
         if location_a and location_b:
-            if not units:
-                units = "mi"
-            response = get_distance(location_a, location_b, units)
+            response = get_distance(location_a, location_b)
             if response.get('code'):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             fees = get_transportation_fees()

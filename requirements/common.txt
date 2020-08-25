@@ -3,7 +3,7 @@ celery==4.4.2
 Django==2.2.0
 djangorestframework==3.10.2
 django-filter==2.0.0
-geopy==2.0.0
+googlemaps==4.4.2
 psycopg2-binary==2.8.3
 pdfminer==20191125
 django-rest-knox==3.6.0
