@@ -165,11 +165,13 @@ def parse_fields(module, key, value, obj, crm_obj):
                 cultivars.extend(cultivar['cultivar_names'])
         return cultivars
 
-def get_record(module, record_id):
+def get_record(module, record_id, full=False):
     """
     Get record.
     """
     crm_obj = get_crm_obj()
+    if full:
+        return crm_obj.get_full_record(module, record_id)
     return crm_obj.get_record(module, record_id)
 
 def create_records(module, records, is_return_orginal_data=False):

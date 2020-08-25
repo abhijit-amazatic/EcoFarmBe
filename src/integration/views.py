@@ -22,7 +22,8 @@ from integration.inventory import (
 from integration.crm import (
     search_query, get_picklist,
     list_crm_contacts, create_lead,
-    get_records_from_crm,get_accounts_from_crm,)
+    get_records_from_crm,get_accounts_from_crm,
+    get_record,)
 from integration.books import (
     create_contact, create_estimate,
     get_estimate, list_estimates,
@@ -550,3 +551,20 @@ class GetDistanceView(APIView):
         return Response(
             {'code': 1, 'error': 'No location_a or location_b provided.'},
             status=status.HTTP_400_BAD_REQUEST)
+
+class GetSalesPersonView(APIView):
+    """
+    View class to get sales person information.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        """
+        Get sales person.
+        """
+        account_id = request.query_params.get('account_id')
+        response = get_record('Accounts', account_id, full=True)
+        if response['status_code'] == 200:
+            return Response(response.get('response').get('Owner'))
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
