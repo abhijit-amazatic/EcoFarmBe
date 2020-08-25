@@ -116,7 +116,7 @@ def get_distance(location_a, location_b):
     Get distance between two locations.
     """
     if location_a and location_b:
-        gmaps = googlemaps.Client(key=OPENSTREET_API_KEY)
+        gmaps = googlemaps.Client(key=GOOGLEMAPS_API_KEY)
         response = gmaps.distance_matrix(location_a, location_b)['rows'][0]['elements'][0]
         return response
     response = {
