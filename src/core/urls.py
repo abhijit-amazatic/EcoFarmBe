@@ -107,7 +107,7 @@ urlpatterns = [
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
-    path(r'crm/account/', GetSalesPersonView.as_view(), name='get_sales_person'),
+    path(r'crm/sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
 ] + router.urls
 
 
