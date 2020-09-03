@@ -74,6 +74,9 @@ class LicenseProfile(TimeStampFlagModelMixin, models.Model):
         _('Associated_program'), blank=True, null=True, max_length=255)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
+    agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
+    
     # profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     # is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     # zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
@@ -111,4 +114,72 @@ class LicenseProfileUser(TimeStampFlagModelMixin, models.Model):
     
     class Meta:
         unique_together = (('license_profile', 'user'), )
-        verbose_name = _('License Profile User')    
+        verbose_name = _('License Profile User')
+
+
+class ProfileContact(models.Model):
+    """
+    Stores people, company, billing and mailing address.
+    """
+    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+                                related_name='profile_contact', on_delete=models.CASCADE)
+    profile_contact_details = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+    
+class FarmProfile(models.Model):
+    """
+    Stores Farm data.Vendors are essentially replica of license.
+    """
+    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+                                related_name='farm_profile', on_delete=models.CASCADE)
+    brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
+    
+    farm_name = models.CharField(_('Farm Name'), blank=True, null=True, max_length=255)
+    farm_county = models.CharField(
+        _('Farm County'), blank=True, null=True, max_length=255)
+    appellation = models.CharField(_('Appellation'), blank=True, null=True, max_length=255)
+    region = models.CharField(_('Region'), blank=True, null=True, max_length=255)
+    ethics_and_certification = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    about_farm = models.TextField(blank=True, null=True)
+    work_with_other_distributors = models.BooleanField(_('Work With Other distributors'), default=False)
+    have_transportation = models.BooleanField(_('Have Transportation'), default=False)    
+    issues_with_failed_labtest = models.BooleanField(_('Issues With Failed Lab tests'), default=False)
+    
+class ProfileOverview(models.Model):
+    """
+    e.g. cultivation overview.
+    """
+    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+                                related_name='profile_overview', on_delete=models.CASCADE)
+    profile_overview = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+
+class ProgramOverview(models.Model):
+    """
+    Stores program overview.
+    """
+    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+                                related_name='program_overview', on_delete=models.CASCADE)
+    program_details = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+
+class FinancialOverview(models.Model):
+    """
+    Stores farm's Financial overview.
+    """
+    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+                                related_name='financial_overview', on_delete=models.CASCADE)
+    financial_details = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+
+class ProcessingOverview(models.Model):
+    """
+    Stores farm's  farm's Processing overview i.e. crop overview.
+    """
+    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+                                related_name='processing_overview', on_delete=models.CASCADE)
+    processing_config = JSONField(null=False, blank=False, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)    
+
+
+    
