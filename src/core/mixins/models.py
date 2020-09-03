@@ -28,3 +28,13 @@ class StatusFlagMixin(models.Model):
     class Meta:
         abstract = True
 
+
+class TimeStampFlagModelMixin(models.Model):
+    """
+    Mixin to add timestamp fields to a Model
+    """
+    created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        abstract = True       
