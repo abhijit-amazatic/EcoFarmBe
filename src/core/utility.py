@@ -12,8 +12,8 @@ from core.mailer import mail, mail_send
 from slacker import Slacker
 from django.db import transaction
 from user.models import *
-from vendor.models import *
-from account.models import *
+# from vendor.models import *
+# from account.models import *
 from core.celery import app
 from integration.crm import (get_records_from_crm,get_accounts_from_crm,)
 
@@ -101,31 +101,31 @@ def notify_farm_user(recipient_email,farm):
         }, subject, recipient_email
     )
     
-@app.task(queue="general")
-def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
-    """
-    Create users in system from profile contact.
-    Add them to vendors.
-    Invite them to change password.(if users not exists already)
-    """
-    role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
-    pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
-    if pro_contact_obj:
-        employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
-        extracted_employee = [i for i in employee_data if i.get('employee_email')]      
-        for employee in extracted_employee:
-            obj, created = User.objects.get_or_create(email=employee['employee_email'],
-                                                      defaults={'email':employee['employee_email'],
-                                                                'username':employee['employee_name'],
-                                                                'phone':employee['phone'],
-                                                                'is_verified':False,
-                                                                'existing_member':True})
-            if created:
-                if not VendorUser.objects.filter(user_id=obj.id, vendor_id=vendor_obj_id).exists():
-                    extracted_role = role_map.get(employee['roles'][0])
-                    VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=employee['roles'][0]).save()
-                    #notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
-                    #notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
+# @app.task(queue="general")
+# def add_users_to_system(profile_contact_id,vendor_profile_id,vendor_obj_id):
+#     """
+#     Create users in system from profile contact.
+#     Add them to vendors.
+#     Invite them to change password.(if users not exists already)
+#     """
+#     role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
+#     pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
+#     if pro_contact_obj:
+#         employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
+#         extracted_employee = [i for i in employee_data if i.get('employee_email')]      
+#         for employee in extracted_employee:
+#             obj, created = User.objects.get_or_create(email=employee['employee_email'],
+#                                                       defaults={'email':employee['employee_email'],
+#                                                                 'username':employee['employee_name'],
+#                                                                 'phone':employee['phone'],
+#                                                                 'is_verified':False,
+#                                                                 'existing_member':True})
+#             if created:
+#                 if not VendorUser.objects.filter(user_id=obj.id, vendor_id=vendor_obj_id).exists():
+#                     extracted_role = role_map.get(employee['roles'][0])
+#                     VendorUser(user_id=obj.id, vendor_id=vendor_obj_id,role=employee['roles'][0]).save()
+#                     #notify_farm_user(obj.email, pro_contact_obj[0].profile_contact_details.get('farm_name'))
+#                     #notify_admins_on_vendors_registration(obj.email,pro_contact_obj[0].profile_contact_details.get('farm_name'))
                     
 def extract_role(role):
     """
@@ -305,122 +305,122 @@ def get_empty_address():
 	"country": ""}
 
     
-@app.task(queue="general")
-def insert_data_for_vendor_profile(user,vendor_type,data):
-    """
-    For existing user, to insert records to perticular vendor profile use this function.
-    In order to store data of existing user from crm to our db few things needs to be 
-    1.For existing user we need to create vendors as well as vendor profile for given vendor type e. cultivator
-    2.parameter could be vendor_type = ['cultivation','nursary']
-    3.data will be dict of multiple model fields
-    """
-    try:
-        for vendor in vendor_type:
-            obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=vendor)
-            if not VendorUser.objects.filter(user_id=user.id, vendor=obj.id).exists():
-                VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='owner')         
-            vendor_user=VendorUser.objects.get(user_id=user.id,vendor=obj)
-            if vendor_user.role == 'owner' and user.existing_member and vendor == "cultivation":
-                """
-                Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
-                are added with another role aling with this if added user is owner)
-                """
-                profile_types = get_license_types(data.get('licenses',[]))
-                vp, created = VendorProfile.objects.get_or_create(vendor=obj,defaults={'profile_type':profile_types,
-                                                                                       'number_of_licenses':len(data.get('licenses',[])),
-                                                                                       'number_of_legal_entities':0}) #for step1 create vendor profile
-                print('vendor_profile to be updated->', vp)
-                with transaction.atomic():
-                    #STEP1
-                    if data.get('licenses'):
-                        License.objects.bulk_create([License(vendor_profile_id=vp.id,
-                                                             license_type=key.get('license_type',''),
-                                                             owner_or_manager='Owner' if key.get('Owner') else 'Manager',
-                                                             legal_business_name=key.get('legal_business_name',''),
-                                                             license_number=key.get('license_number',''),
-                                                             expiration_date=key.get('expiration_date',''),
-                                                             issue_date=key.get('issue_date',''),
-                                                             premises_address=key.get('premises_address',''),
-                                                             premises_county=key.get('premises_county',''),
-                                                             premises_city = key.get('premises_city',''),
-                                                             zip_code=key.get('zip_code',''),
-                                                             premises_apn=key.get('premises_apn',''),
-                                                             premises_state=key.get('premises_state',''),
-                                                             uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
-                                                             uploaded_w9_to=key.get('uploaded_w9_to',''),
-                                                             uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
-                        print("STEP1 License fetched in DB")
-                with transaction.atomic():     
-                    #STEP2-add profile contact data
-                    contacts = list(data.get('profile_contact').get('employees').keys())
-                    formatted_data = {"farm_name":data.get('profile_contact').get('farm_name',''),
-                                      "primary_county":data.get('profile_contact').get('primary_county',''),
-                                      "region":data.get('profile_contact').get('region',''),
-                                      "appellation":data.get('profile_contact').get('appellation',''),
-                                      "ethics_and_certifications":data.get('profile_contact').get('ethics_and_certifications',[]),
-                                      "other_distributors":data.get('profile_contact').get('other_distributors',''),
-                                      "transportation":data.get('profile_contact').get('transportation',[]),
-                                      "packaged_flower_line":data.get('profile_contact').get('packaged_flower_line',''),
-                                      "interested_in_co_branding":data.get('profile_contact').get('interested_in_co_branding',''),
-                                      "marketing_material":data.get('profile_contact').get('marketing_material',''),
-                                      "featured_on_our_site":data.get('profile_contact').get('featured_on_our_site',''),
-                                      "company_email":data.get('profile_contact').get('company_email',''),
-                                      "company_phone":data.get('profile_contact').get('company_phone',''),
-                                      "website":data.get('profile_contact').get('website',''),
-                                      "instagram":data.get('profile_contact').get('instagram',''),
-                                      "facebook":data.get('profile_contact').get('facebook',''),
-                                      "linkedin":data.get('profile_contact').get('linkedin',''),
-                                      "twitter":data.get('profile_contact').get('twitter',''),
-                                      "no_of_employees":data.get('profile_contact').get('no_of_employees',''),
-                                      "mailing_address":get_empty_address(),
-                                      "billing_address":get_empty_address(),
-                                      "employees":get_employee(data,contacts)}
-                    pc_step2, created = ProfileContact.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False,profile_contact_details = formatted_data)
-                    if created:
-                        add_users_to_system.delay(pc_step2.id,vp.id,obj.id)
-                    print("STEP2 Profile contact fetched in DB")
-                with transaction.atomic():
-                    profile_data = {"lighting_type":data.get('profile_overview').get('lighting_type',[]),
-                                    "type_of_nutrients":data.get('profile_overview').get('type_of_nutrients',''),
-                                    "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics',''),
-                                    "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests',''),
-                                    "lab_test_issues":data.get('profile_overview').get('lab_test_issues',''),
-                                    "autoflower":data.get('profile_overview').get('autoflower',''),
-                                    "full_season":data.get('profile_overview').get('full_season',''),
-                                    "outdoor_full_season":extract_overview_data('outdoor_full_season',data),
-                                    "outdoor_autoflower":extract_overview_data('outdoor_autoflower',data),
-                                    "mixed_light":extract_overview_data('mixed_light',data),
-                                    "indoor":extract_overview_data('indoor',data)} 
-                    #STEP3 - add profile_overview
-                    po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
-                    print("STEP3 Profile Overview fetched in DB")
-                with transaction.atomic():         
-                    #STEP4 - add  processing_config
-                    cultivars_data = data.get('processing_config').get('cultivars','')
-                    if cultivars_data:
-                        cultivars = cultivars_data.split(',')
-                    else:
-                        cultivars = ['']
-                    processing_data = {"mixed_light":extract_processing_data('mixed_light',data,cultivars),
-                                       "indoor":extract_processing_data('indoor',data,cultivars), 
-		                       "outdoor_autoflower":extract_processing_data('outdoor_autoflower',data,cultivars),
-                                       "outdoor_full_season":extract_processing_data('outdoor_full_season',data,cultivars),
-                                       "process_on_site": data.get('processing_config').get('process_on_site','')}
-                    pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=processing_data)
-                    print("STEP4 Proc.Overview fetched in DB")
-                with transaction.atomic():   
-                    #STEP5 - add financial details
-                    financial_data = {"annual_revenue_2019":data.get('financial_details').get('fd_annual_revenue_2019',''),
-                                      "projected_2020_revenue":data.get('financial_details').get('fd_projected_2020_revenue',''),
-                                      "yearly_budget":data.get('financial_details').get('fd_yearly_budget',''),
-                                      "mixed_light":extract_financial_data('mixed_light',data),
-                                      "outdoor_full_season":extract_financial_data('outdoor_full_season',data),
-                                      "outdoor_autoflower":extract_financial_data('outdoor_autoflower',data),
-                                      "indoor":extract_financial_data('indoor',data)}
-                    fd_step5 = FinancialOverview.objects.get_or_create(vendor_profile_id=vp.id,is_draft=False, financial_details=financial_data)
-                    print("STEP5 Financial data fetched in DB") 
-    except Exception as e:
-        print('Exception\n',e)
+# @app.task(queue="general")
+# def insert_data_for_vendor_profile(user,vendor_type,data):
+#     """
+#     For existing user, to insert records to perticular vendor profile use this function.
+#     In order to store data of existing user from crm to our db few things needs to be 
+#     1.For existing user we need to create vendors as well as vendor profile for given vendor type e. cultivator
+#     2.parameter could be vendor_type = ['cultivation','nursary']
+#     3.data will be dict of multiple model fields
+#     """
+#     try:
+#         for vendor in vendor_type:
+#             obj,created = Vendor.objects.get_or_create(ac_manager=user,vendor_category=vendor)
+#             if not VendorUser.objects.filter(user_id=user.id, vendor=obj.id).exists():
+#                 VendorUser.objects.create(user_id=user.id, vendor_id=obj.id,role='owner')         
+#             vendor_user=VendorUser.objects.get(user_id=user.id,vendor=obj)
+#             if vendor_user.role == 'owner' and user.existing_member and vendor == "cultivation":
+#                 """
+#                 Only first owner can pull & store data as others will have access anyways.(This will be first owner as profileusers 
+#                 are added with another role aling with this if added user is owner)
+#                 """
+#                 profile_types = get_license_types(data.get('licenses',[]))
+#                 vp, created = VendorProfile.objects.get_or_create(vendor=obj,defaults={'profile_type':profile_types,
+#                                                                                        'number_of_licenses':len(data.get('licenses',[])),
+#                                                                                        'number_of_legal_entities':0}) #for step1 create vendor profile
+#                 print('vendor_profile to be updated->', vp)
+#                 with transaction.atomic():
+#                     #STEP1
+#                     if data.get('licenses'):
+#                         License.objects.bulk_create([License(vendor_profile_id=vp.id,
+#                                                              license_type=key.get('license_type',''),
+#                                                              owner_or_manager='Owner' if key.get('Owner') else 'Manager',
+#                                                              legal_business_name=key.get('legal_business_name',''),
+#                                                              license_number=key.get('license_number',''),
+#                                                              expiration_date=key.get('expiration_date',''),
+#                                                              issue_date=key.get('issue_date',''),
+#                                                              premises_address=key.get('premises_address',''),
+#                                                              premises_county=key.get('premises_county',''),
+#                                                              premises_city = key.get('premises_city',''),
+#                                                              zip_code=key.get('zip_code',''),
+#                                                              premises_apn=key.get('premises_apn',''),
+#                                                              premises_state=key.get('premises_state',''),
+#                                                              uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
+#                                                              uploaded_w9_to=key.get('uploaded_w9_to',''),
+#                                                              uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
+#                         print("STEP1 License fetched in DB")
+#                 with transaction.atomic():     
+#                     #STEP2-add profile contact data
+#                     contacts = list(data.get('profile_contact').get('employees').keys())
+#                     formatted_data = {"farm_name":data.get('profile_contact').get('farm_name',''),
+#                                       "primary_county":data.get('profile_contact').get('primary_county',''),
+#                                       "region":data.get('profile_contact').get('region',''),
+#                                       "appellation":data.get('profile_contact').get('appellation',''),
+#                                       "ethics_and_certifications":data.get('profile_contact').get('ethics_and_certifications',[]),
+#                                       "other_distributors":data.get('profile_contact').get('other_distributors',''),
+#                                       "transportation":data.get('profile_contact').get('transportation',[]),
+#                                       "packaged_flower_line":data.get('profile_contact').get('packaged_flower_line',''),
+#                                       "interested_in_co_branding":data.get('profile_contact').get('interested_in_co_branding',''),
+#                                       "marketing_material":data.get('profile_contact').get('marketing_material',''),
+#                                       "featured_on_our_site":data.get('profile_contact').get('featured_on_our_site',''),
+#                                       "company_email":data.get('profile_contact').get('company_email',''),
+#                                       "company_phone":data.get('profile_contact').get('company_phone',''),
+#                                       "website":data.get('profile_contact').get('website',''),
+#                                       "instagram":data.get('profile_contact').get('instagram',''),
+#                                       "facebook":data.get('profile_contact').get('facebook',''),
+#                                       "linkedin":data.get('profile_contact').get('linkedin',''),
+#                                       "twitter":data.get('profile_contact').get('twitter',''),
+#                                       "no_of_employees":data.get('profile_contact').get('no_of_employees',''),
+#                                       "mailing_address":get_empty_address(),
+#                                       "billing_address":get_empty_address(),
+#                                       "employees":get_employee(data,contacts)}
+#                     pc_step2, created = ProfileContact.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False,profile_contact_details = formatted_data)
+#                     if created:
+#                         add_users_to_system.delay(pc_step2.id,vp.id,obj.id)
+#                     print("STEP2 Profile contact fetched in DB")
+#                 with transaction.atomic():
+#                     profile_data = {"lighting_type":data.get('profile_overview').get('lighting_type',[]),
+#                                     "type_of_nutrients":data.get('profile_overview').get('type_of_nutrients',''),
+#                                     "interested_in_growing_genetics":data.get('profile_overview').get('interested_in_growing_genetics',''),
+#                                     "issues_with_failed_lab_tests":data.get('profile_overview').get('issues_with_failed_lab_tests',''),
+#                                     "lab_test_issues":data.get('profile_overview').get('lab_test_issues',''),
+#                                     "autoflower":data.get('profile_overview').get('autoflower',''),
+#                                     "full_season":data.get('profile_overview').get('full_season',''),
+#                                     "outdoor_full_season":extract_overview_data('outdoor_full_season',data),
+#                                     "outdoor_autoflower":extract_overview_data('outdoor_autoflower',data),
+#                                     "mixed_light":extract_overview_data('mixed_light',data),
+#                                     "indoor":extract_overview_data('indoor',data)} 
+#                     #STEP3 - add profile_overview
+#                     po_step3 = ProfileOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, profile_overview=profile_data)
+#                     print("STEP3 Profile Overview fetched in DB")
+#                 with transaction.atomic():         
+#                     #STEP4 - add  processing_config
+#                     cultivars_data = data.get('processing_config').get('cultivars','')
+#                     if cultivars_data:
+#                         cultivars = cultivars_data.split(',')
+#                     else:
+#                         cultivars = ['']
+#                     processing_data = {"mixed_light":extract_processing_data('mixed_light',data,cultivars),
+#                                        "indoor":extract_processing_data('indoor',data,cultivars), 
+# 		                       "outdoor_autoflower":extract_processing_data('outdoor_autoflower',data,cultivars),
+#                                        "outdoor_full_season":extract_processing_data('outdoor_full_season',data,cultivars),
+#                                        "process_on_site": data.get('processing_config').get('process_on_site','')}
+#                     pc_step4 = ProcessingOverview.objects.get_or_create(vendor_profile_id=vp.id, is_draft=False, processing_config=processing_data)
+#                     print("STEP4 Proc.Overview fetched in DB")
+#                 with transaction.atomic():   
+#                     #STEP5 - add financial details
+#                     financial_data = {"annual_revenue_2019":data.get('financial_details').get('fd_annual_revenue_2019',''),
+#                                       "projected_2020_revenue":data.get('financial_details').get('fd_projected_2020_revenue',''),
+#                                       "yearly_budget":data.get('financial_details').get('fd_yearly_budget',''),
+#                                       "mixed_light":extract_financial_data('mixed_light',data),
+#                                       "outdoor_full_season":extract_financial_data('outdoor_full_season',data),
+#                                       "outdoor_autoflower":extract_financial_data('outdoor_autoflower',data),
+#                                       "indoor":extract_financial_data('indoor',data)}
+#                     fd_step5 = FinancialOverview.objects.get_or_create(vendor_profile_id=vp.id,is_draft=False, financial_details=financial_data)
+#                     print("STEP5 Financial data fetched in DB") 
+#     except Exception as e:
+#         print('Exception\n',e)
 
                 
 @app.task(queue="general")
@@ -445,27 +445,27 @@ def get_from_crm_insert_to_account(user_id):
         if crm_data:
             insert_data_for_accounts(instance[0],crm_data.get('basic_profile',{}).get('company_type'), crm_data)            
             
-@app.task(queue="general")
-def send_async_approval_mail(profile_id):
-    """
-    Async email send for after profile approval.
-    """
-    vendor_obj = Vendor.objects.filter(id=profile_id)
-    if vendor_obj:
-        ac_manager = vendor_obj[0].ac_manager.email
-        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+# @app.task(queue="general")
+# def send_async_approval_mail(profile_id):
+#     """
+#     Async email send for after profile approval.
+#     """
+#     vendor_obj = Vendor.objects.filter(id=profile_id)
+#     if vendor_obj:
+#         ac_manager = vendor_obj[0].ac_manager.email
+#         mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
 
 
-@app.task(queue="general")
-def send_async_account_approval_mail(account_id):
-    """
-    Async email send for after account approval.
-    """
-    account_obj = Account.objects.filter(id=account_id)
+# @app.task(queue="general")
+# def send_async_account_approval_mail(account_id):
+#     """
+#     Async email send for after account approval.
+#     """
+#     account_obj = Account.objects.filter(id=account_id)
     
-    if account_obj:
-        ac_manager = account_obj[0].ac_manager.email
-        mail_send("account-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Profile Approved.", ac_manager)
+#     if account_obj:
+#         ac_manager = account_obj[0].ac_manager.email
+#         mail_send("account-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Profile Approved.", ac_manager)
         
 @app.task(queue="general")        
 def send_async_user_approval_mail(user_id):
@@ -475,24 +475,24 @@ def send_async_user_approval_mail(user_id):
     user = User.objects.filter(id=user_id)    
     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", user[0].email)
 
-@app.task(queue="general")            
-def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
-    """
-    Notify farm employee to verify and set password for account.Notfiy admin to approve user
-    """
-    vendor_users = VendorUser.objects.filter(vendor=vendor_id,user__is_approved=False, user__is_verified=False).select_related()
-    profile_contact = ProfileContact.objects.filter(vendor_profile_id=vendor_profile_id)
-    for vendor_user in vendor_users:
-        try:
-            # send email verification link to farm user
-            link = get_encrypted_data(vendor_user.user.email,reason='verify')
-            mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",vendor_user.user.email)
-            #inform admins to approve farm user
-            notify_admins_on_vendors_registration(vendor_user.user.email,profile_contact[0].profile_contact_details.get('farm_name'))
-            #notify user to set password
-            notify_farm_user(vendor_user.user.email, profile_contact[0].profile_contact_details.get('farm_name'))
-        except Exception as e:
-            print("Exception on profile aproval notification",e)
+# @app.task(queue="general")            
+# def notify_employee_admin_to_verify_and_reset(vendor_id,vendor_profile_id):
+#     """
+#     Notify farm employee to verify and set password for account.Notfiy admin to approve user
+#     """
+#     vendor_users = VendorUser.objects.filter(vendor=vendor_id,user__is_approved=False, user__is_verified=False).select_related()
+#     profile_contact = ProfileContact.objects.filter(vendor_profile_id=vendor_profile_id)
+#     for vendor_user in vendor_users:
+#         try:
+#             # send email verification link to farm user
+#             link = get_encrypted_data(vendor_user.user.email,reason='verify')
+#             mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",vendor_user.user.email)
+#             #inform admins to approve farm user
+#             notify_admins_on_vendors_registration(vendor_user.user.email,profile_contact[0].profile_contact_details.get('farm_name'))
+#             #notify user to set password
+#             notify_farm_user(vendor_user.user.email, profile_contact[0].profile_contact_details.get('farm_name'))
+#         except Exception as e:
+#             print("Exception on profile aproval notification",e)
     
 def send_verification_link(email):
     """
@@ -529,77 +529,77 @@ def extract_account_employees_data(data,param):
 	}
 
 
-@app.task(queue="general")
-def insert_data_for_accounts(user,account_type,data):
-    """
-    For existing user, to insert records to perticular accounts use this function.
-    """
-    try:
-        for account in account_type:
-            category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
-            profile_types = get_license_types(data.get('licenses',[]))
-            obj,created = Account.objects.get_or_create(ac_manager=user,account_category=category[0],defaults={'profile_type':profile_types,
-                                                                                                               'number_of_licenses':len(data.get('licenses',[])),
-                                                                                                               'number_of_legal_entities':0})
-            if not AccountUser.objects.filter(user_id=user.id, account=obj.id).exists():
-                AccountUser.objects.create(user_id=user.id,account_id=obj.id,role='owner')         
-            account_user=AccountUser.objects.get(user_id=user.id,account=obj)
-            if account_user.role == 'owner' and user.existing_member:
-                """
-                Only first owner can pull & store data as others will have access anyways.
-                """
-                #act, created = AccountLicense.objects.get_or_create(account=obj) #for step1
-                print('account to be updated->', obj)
-                with transaction.atomic():
-                    #STEP1
-                    if data.get('licenses'):
-                        AccountLicense.objects.bulk_create([AccountLicense(account_id=obj.id,
-                                                             license_type=key.get('license_type',''),
-                                                             owner_or_manager='Owner' if key.get('Owner') else 'Manager',
-                                                             legal_business_name=key.get('legal_business_name',''),
-                                                             license_number=key.get('license_number',''),
-                                                             expiration_date=key.get('expiration_date',''),
-                                                             issue_date=key.get('issue_date',''),
-                                                             premises_address=key.get('premises_address',''),
-                                                             premises_county=key.get('premises_county',''),
-                                                             premises_city = key.get('premises_city',''),
-                                                             zip_code=key.get('zip_code',''),
-                                                             premises_apn=key.get('premises_apn',''),
-                                                             premises_state=key.get('premises_state',''),
-                                                             uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
-                                                             uploaded_w9_to=key.get('uploaded_w9_to',''),
-                                                             uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
-                        print("STEP1 Account License fetched in DB")
-                with transaction.atomic():   
-                    #STEP2 - add account basic details
-                    account_step2 = AccountBasicProfile.objects.get_or_create(account_id=obj.id,
-                                                                              is_draft=False,
-                                                                              company_name=data.get('basic_profile',{}).get('company_name'),
-                                                                              brand_name=data.get('basic_profile',{}).get('brand_name'),
-                                                                              about_company=data.get('basic_profile',{}).get('about'),
-                                                                              region=data.get('basic_profile',{}).get('region'),
-                                                                              preferred_payment=",".join(data.get('basic_profile',{}).get('preferred_payment')),
-                                                                              cultivars_of_interest=data.get('basic_profile',{}).get('cultivars_of_interest',[]),
-                                                                              ethics_and_certification=data.get('basic_profile',{}).get('ethics_and_certification',[]),
-                                                                              product_of_interest=data.get('basic_profile',{}).get('product_of_interest',[]),
-                                                                              provide_transport=data.get('basic_profile',{}).get('provide_transport',[]))
-                    print("STEP2 basic data fetched in DB")
+# @app.task(queue="general")
+# def insert_data_for_accounts(user,account_type,data):
+#     """
+#     For existing user, to insert records to perticular accounts use this function.
+#     """
+#     try:
+#         for account in account_type:
+#             category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
+#             profile_types = get_license_types(data.get('licenses',[]))
+#             obj,created = Account.objects.get_or_create(ac_manager=user,account_category=category[0],defaults={'profile_type':profile_types,
+#                                                                                                                'number_of_licenses':len(data.get('licenses',[])),
+#                                                                                                                'number_of_legal_entities':0})
+#             if not AccountUser.objects.filter(user_id=user.id, account=obj.id).exists():
+#                 AccountUser.objects.create(user_id=user.id,account_id=obj.id,role='owner')         
+#             account_user=AccountUser.objects.get(user_id=user.id,account=obj)
+#             if account_user.role == 'owner' and user.existing_member:
+#                 """
+#                 Only first owner can pull & store data as others will have access anyways.
+#                 """
+#                 #act, created = AccountLicense.objects.get_or_create(account=obj) #for step1
+#                 print('account to be updated->', obj)
+#                 with transaction.atomic():
+#                     #STEP1
+#                     if data.get('licenses'):
+#                         AccountLicense.objects.bulk_create([AccountLicense(account_id=obj.id,
+#                                                              license_type=key.get('license_type',''),
+#                                                              owner_or_manager='Owner' if key.get('Owner') else 'Manager',
+#                                                              legal_business_name=key.get('legal_business_name',''),
+#                                                              license_number=key.get('license_number',''),
+#                                                              expiration_date=key.get('expiration_date',''),
+#                                                              issue_date=key.get('issue_date',''),
+#                                                              premises_address=key.get('premises_address',''),
+#                                                              premises_county=key.get('premises_county',''),
+#                                                              premises_city = key.get('premises_city',''),
+#                                                              zip_code=key.get('zip_code',''),
+#                                                              premises_apn=key.get('premises_apn',''),
+#                                                              premises_state=key.get('premises_state',''),
+#                                                              uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
+#                                                              uploaded_w9_to=key.get('uploaded_w9_to',''),
+#                                                              uploaded_license_to=key.get('uploaded_license_to','')) for key in data.get('licenses')], ignore_conflicts=False)
+#                         print("STEP1 Account License fetched in DB")
+#                 with transaction.atomic():   
+#                     #STEP2 - add account basic details
+#                     account_step2 = AccountBasicProfile.objects.get_or_create(account_id=obj.id,
+#                                                                               is_draft=False,
+#                                                                               company_name=data.get('basic_profile',{}).get('company_name'),
+#                                                                               brand_name=data.get('basic_profile',{}).get('brand_name'),
+#                                                                               about_company=data.get('basic_profile',{}).get('about'),
+#                                                                               region=data.get('basic_profile',{}).get('region'),
+#                                                                               preferred_payment=",".join(data.get('basic_profile',{}).get('preferred_payment')),
+#                                                                               cultivars_of_interest=data.get('basic_profile',{}).get('cultivars_of_interest',[]),
+#                                                                               ethics_and_certification=data.get('basic_profile',{}).get('ethics_and_certification',[]),
+#                                                                               product_of_interest=data.get('basic_profile',{}).get('product_of_interest',[]),
+#                                                                               provide_transport=data.get('basic_profile',{}).get('provide_transport',[]))
+#                     print("STEP2 basic data fetched in DB")
                     
-                with transaction.atomic():     
-                    #STEP3-add account contact data
-                    account_step3, created = AccountContactInfo.objects.get_or_create(account_id=obj.id, is_draft=False,
-                                                                                      company_phone=data.get('contact_info',{}).get('company_phone'),
-                                                                                      website=data.get('contact_info',{}).get('website'),
-                                                                                      company_email=data.get('contact_info',{}).get('company_email'),
-                                                                                      employees=extract_account_employees_data(data,'employees'),
-                                                                                      instagram=data.get('contact_info',{}).get('instagram'),
-                                                                                      linked_in=data.get('contact_info',{}).get('linked_in'),
-                                                                                      twitter=data.get('contact_info',{}).get('twitter'),
-                                                                                      facebook=data.get('contact_info',{}).get('facebook'),
-                                                                                      billing_address=extract_account_employees_data(data,'address'),
-                                                                                      mailing_address=extract_account_employees_data(data,'address'))
-                    if created:
-                        pass #add_users_to_system.delay(account_step3.id,act.id,obj.id)
-                    print("STEP3 account contact fetched in DB")
-    except Exception as e:
-        print('Exception in accounts insertation\n',e)        
+#                 with transaction.atomic():     
+#                     #STEP3-add account contact data
+#                     account_step3, created = AccountContactInfo.objects.get_or_create(account_id=obj.id, is_draft=False,
+#                                                                                       company_phone=data.get('contact_info',{}).get('company_phone'),
+#                                                                                       website=data.get('contact_info',{}).get('website'),
+#                                                                                       company_email=data.get('contact_info',{}).get('company_email'),
+#                                                                                       employees=extract_account_employees_data(data,'employees'),
+#                                                                                       instagram=data.get('contact_info',{}).get('instagram'),
+#                                                                                       linked_in=data.get('contact_info',{}).get('linked_in'),
+#                                                                                       twitter=data.get('contact_info',{}).get('twitter'),
+#                                                                                       facebook=data.get('contact_info',{}).get('facebook'),
+#                                                                                       billing_address=extract_account_employees_data(data,'address'),
+#                                                                                       mailing_address=extract_account_employees_data(data,'address'))
+#                     if created:
+#                         pass #add_users_to_system.delay(account_step3.id,act.id,obj.id)
+#                     print("STEP3 account contact fetched in DB")
+#     except Exception as e:
+#         print('Exception in accounts insertation\n',e)        

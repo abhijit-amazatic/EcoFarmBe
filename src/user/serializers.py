@@ -11,9 +11,6 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from .models import User
-from vendor.models import Vendor, VendorProfile, VendorUser, ProfileContact, License
-from account.models import Account, AccountUser,AccountLicense,AccountBasicProfile,AccountContactInfo
-from vendor.serializers import VendorSerializer, VendorProfileSerializer
 from integration.box import (get_preview_url, )
 
 BS = 16
@@ -53,21 +50,6 @@ def get_decrypted_data(enc):
        
 
 
-
-class VendorFromUserVendorSerializer(serializers.ModelSerializer):
-    """
-    Vendor users.
-    """
-    id = serializers.IntegerField(source="vendor.id")
-    vendor_category = serializers.CharField(source="vendor.vendor_category")
-    role_id = serializers.IntegerField(source="id")
-   
-    class Meta:
-        model = VendorUser
-        fields = (
-            'id', 'role', 'role_id','vendor_category',)
-
-
         
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -88,25 +70,14 @@ class UserSerializer(serializers.ModelSerializer):
     associated_profile_names = serializers.SerializerMethodField(read_only=True)
     member_categories = serializers.SerializerMethodField(read_only=True)
     #vendors = serializers.SerializerMethodField(read_only=True)
-    vendors = VendorFromUserVendorSerializer(
-        source='user_roles', many=True, read_only=True
-    )
     is_verified = serializers.ReadOnlyField()
     is_approved = serializers.ReadOnlyField()
     approved_on = serializers.ReadOnlyField()
     approved_by = serializers.ReadOnlyField()
     profile_photo_sharable_link = serializers.ReadOnlyField()
     platform_kpi = serializers.SerializerMethodField(read_only=True)
-    accounts_kpi = serializers.SerializerMethodField(read_only=True)
     
     
-    
-    # def get_vendors(self, obj):
-    #     """
-    #     Adds vendors to the user/me response.
-    #     """
-    #     results = Vendor.objects.filter(ac_manager=obj).values('id','vendor_category','ac_manager')
-    #     return results
 
     def get_member_categories(self, obj):
         """
@@ -114,65 +85,17 @@ class UserSerializer(serializers.ModelSerializer):
         """
         return obj.categories.values()
     
-    def get_vendor_profiles(self, obj):
-        """
-        Adds vendors profiles to the user/me response.
-        """
-        results = VendorProfile.objects.filter(vendor__vendor_roles__user=obj).values('id', 'status','step', 'vendor')
-        return results
-
-    def get_associated_profile_names(self, obj):
-        """
-        Returns farm name/s of vendors.
-        """
-        farms = []
-        profiles = VendorProfile.objects.filter(vendor__vendor_roles__user=obj)
-        if profiles:
-            for profile in profiles:
-                pc = ProfileContact.objects.filter(vendor_profile_id=profile.id)
-                farm_names = [i.profile_contact_details.get('farm_name','') for i in pc]
-                farms.extend(farm_names)
-        return farms if farms else []
 
     def get_platform_kpi(self, obj):
         """
         Adds vendors profiles kpis for 'my platform' to the user/me response.
         """
-        results = VendorProfile.objects.filter(vendor__vendor_roles__user=obj)
-        return [{'profile_id':profile.id,
-                 'status':profile.status,
-                 'vendor_category':profile.vendor.vendor_category,
-                 'farm_profile_photo':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.farm_profile_photo,
-                 'farm_photo_sharable_link':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.farm_photo_sharable_link, 
-                 'profile_name':profile.profile_name(),
-                 'county': "N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.profile_contact_details.get('primary_county','N/A'),
-                 'region':"N/A" if not hasattr(profile,'profile_contact') else profile.profile_contact.profile_contact_details.get('region','N/A'),
-                 'cultivation_types':profile.profile_type,
-                 'licenses_owned':License.objects.filter(vendor_profile=profile,owner_or_manager='owner').count(),
-                 'licenses_managed':License.objects.filter(vendor_profile=profile,owner_or_manager='manager').count(),
-                 'updated_on':profile.updated_on
-        } for profile in results]
+        pass
     
-    def get_accounts_kpi(self, obj):
-        """
-        Adds account kpis for 'my platform' to the user/me response.
-        """
-        results = Account.objects.filter(account_roles__user=obj)#.values('id', 'status','step', 'account_category')
-        return [{'account_id':account.id,
-                 'status':account.status,
-                 'step':account.step,
-                 'account_category':account.account_category,
-                 'brand_name':"N/A" if not hasattr(account,'account_profile') else account.account_profile.brand_name,
-                 'county':"N/A" if not hasattr(account,'account_profile') else account.account_profile.county,
-                 'region':"N/A" if not hasattr(account,'account_profile') else account.account_profile.region,
-                 'licenses_owned':AccountLicense.objects.filter(account=account,owner_or_manager='owner').count(),
-                 'licenses_managed':AccountLicense.objects.filter(account=account,owner_or_manager='manager').count(),
-                 'updated_on':account.updated_on
-        } for account in results]
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','accounts_kpi')
+        fields = ('id', 'username', 'email','first_name', 'vendors', 'vendor_profiles','associated_profile_names','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi')
     
 
     def validate_password(self, password):

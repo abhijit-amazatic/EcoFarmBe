@@ -40,9 +40,10 @@ INSTALLED_APPS = [
     'utils',
     'core',
     'user',
-    #'vendor',
-    #'account',
+    'vendor',
+    'account',
     'brand',
+    'django_extensions',
     #'rest_social_auth',
     'sslserver',
     #'social_django',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'inventory',
     'cultivar',
     'labtest',
+    
 ]
 
 MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []

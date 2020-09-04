@@ -7,7 +7,6 @@ from core.mailer import mail, mail_send
 from django.conf import settings
 from datetime import datetime
 from .models import (User, MemberCategory,)
-from vendor.models import (Vendor,VendorProfile,)
 from core.utility import send_async_user_approval_mail
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm

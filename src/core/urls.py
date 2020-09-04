@@ -25,7 +25,7 @@ from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,VerificationView,SendVerificationView,)
-from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView, ProfileReportViewSet)
+#from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView, ProfileReportViewSet)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView,SearchCultivars,
@@ -42,21 +42,21 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetSalesPersonView,)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
-from account.views import (AccountViewSet,AccountLicenseViewSet,)
+#from account.views import (AccountViewSet,AccountLicenseViewSet,)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
-router.register(r'vendor', VendorViewSet, base_name="vendor")
-router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
-router.register(r'license', LicenseViewSet, base_name="license")
-router.register(r'profile-report', ProfileReportViewSet, base_name="report")
+#router.register(r'vendor', VendorViewSet, base_name="vendor")
+#router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
+#router.register(r'license', LicenseViewSet, base_name="license")
+#router.register(r'profile-report', ProfileReportViewSet, base_name="report")
+#router.register(r'account', AccountViewSet, base_name="account")
+#router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
-router.register(r'account', AccountViewSet, base_name="account")
-router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
 
 
@@ -72,7 +72,7 @@ urlpatterns = [
     path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
     path(r'user/send-verification/', SendVerificationView.as_view(), name='verification-user'),
     path(r'category/', CategoryView.as_view(), name='category'),
-    path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
+    #path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
     #path(r'account-category/', AccountCategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),

@@ -16,7 +16,7 @@ from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
 from .models import User, MemberCategory
-from vendor.models import Vendor,VendorUser
+#from vendor.models import Vendor,VendorUser
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data, SendVerificationSerializer,)
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
@@ -93,15 +93,17 @@ class UserViewSet(ModelViewSet):
                 instance.save()
             try:
                 if not instance.existing_member:
-                    vendor_list = instance.categories.values_list('name', flat=True)
-                    vendor_list_lower = [vendor.lower() for vendor in vendor_list]
-                    if vendor_list_lower:
-                        Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=NOUN_PROCESS_MAP[category]) for category in vendor_list_lower])
-                        vendors = Vendor.objects.filter(ac_manager__email=instance.email)
-                        VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])
+                    pass
+                    # vendor_list = instance.categories.values_list('name', flat=True)
+                    # vendor_list_lower = [vendor.lower() for vendor in vendor_list]
+                    # if vendor_list_lower:
+                    #     Vendor.objects.bulk_create([Vendor(ac_manager_id=instance.id, vendor_category=NOUN_PROCESS_MAP[category]) for category in vendor_list_lower])
+                    #     vendors = Vendor.objects.filter(ac_manager__email=instance.email)
+                    #     VendorUser.objects.bulk_create([VendorUser(user_id=instance.id, vendor_id=vendor.id,role='Owner') for vendor in vendors])
                 else:
-                    get_from_crm_insert_to_vendorprofile.delay(instance.id)
-                    get_from_crm_insert_to_account.delay(instance.id)
+                    pass
+                    #get_from_crm_insert_to_vendorprofile.delay(instance.id)
+                    #get_from_crm_insert_to_account.delay(instance.id)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", instance.email)
                 notify_admins(instance.email)
