@@ -49,15 +49,16 @@ from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
+router.register(r'inventory', InventoryViewSet, base_name="inventory")
+router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
+router.register(r'labtest', LabTestViewSet, base_name="labtest")
 #router.register(r'vendor', VendorViewSet, base_name="vendor")
 #router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
 #router.register(r'license', LicenseViewSet, base_name="license")
 #router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 #router.register(r'account', AccountViewSet, base_name="account")
 #router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
-router.register(r'inventory', InventoryViewSet, base_name="inventory")
-router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
-router.register(r'labtest', LabTestViewSet, base_name="labtest")
+
 
 
 urlpatterns = [

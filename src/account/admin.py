@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.utils import timezone
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 from .models import (Account,AccountLicense, AccountBasicProfile, AccountContactInfo,AccountUser)
-from core.utility import (send_async_account_approval_mail,)
+#from core.utility import (send_async_account_approval_mail,)
 from integration.crm import (insert_accounts, )
 
 

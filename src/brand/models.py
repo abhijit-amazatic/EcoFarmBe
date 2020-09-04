@@ -14,20 +14,23 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     Stores Brand's details.
     """
     brand_name = models.CharField(_('Brand Name'), blank=True, null=True, max_length=255)
+    parent_brand = models.ForeignKey(
+        'self', blank=True, null=True, default=None, on_delete=models.CASCADE)
     ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
                                    related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)
     brand_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     brand_county = models.CharField(
-        _('Brand County'), blank=True, null=True, max_length=255)
+        _('Brand County'), blank=True, null=True, max_length=255)  #Array if ask
     appellation = models.CharField(_('Brand Appellation'), blank=True, null=True, max_length=255)
     ethics_and_certification = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     about_brand = models.TextField(blank=True, null=True)
     interested_in_cobranding = models.BooleanField(_('Is Interested In Co-Branding'), default=False)
     have_marketing = models.BooleanField(_('Have marketing'), default=False)    
     featured_on_our_site = models.BooleanField(_('Interested In Featured on Our Site'), default=False)
+    profile_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     is_buyer = models.BooleanField(_('Is Buyer/accounts'), default=False)    
-    is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)    
-
+    is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)
+    
     def __str__(self):
         return self.brand_name
 
@@ -35,12 +38,12 @@ class Brand(TimeStampFlagModelMixin,models.Model):
         #unique_together = (('ac_manager', 'brand_name'),)
 
 
-class LicenseProfile(TimeStampFlagModelMixin, models.Model):
+class License(TimeStampFlagModelMixin, models.Model):
     """
-    Stores License Profile for either related to brand or individual user.
+    Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
-    individual_user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Individual User'),null=True, blank=True, default=None, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Individual User'),null=True, blank=True, default=None, on_delete=models.CASCADE)
     license_type = models.CharField(
         _('License Type'), blank=True, null=True, max_length=255)
     owner_or_manager = models.CharField(
@@ -72,10 +75,9 @@ class LicenseProfile(TimeStampFlagModelMixin, models.Model):
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
     associated_program = models.CharField(
         _('Associated_program'), blank=True, null=True, max_length=255)
-    approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
-    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
-    agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
-    agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
+    profile_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    is_buyer = models.BooleanField(_('Is Buyer/accounts'), default=False)    
+    is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)
     
     # profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     # is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
@@ -86,7 +88,7 @@ class LicenseProfile(TimeStampFlagModelMixin, models.Model):
         return self.legal_business_name
 
 
-class LicenseProfileUser(TimeStampFlagModelMixin, models.Model):
+class LicenseUser(TimeStampFlagModelMixin, models.Model):
     """
     Stores License Profile User's details #combined roles for all accounts & vendors.
     Only farm manager is extra in vendors/sellers.
@@ -105,7 +107,7 @@ class LicenseProfileUser(TimeStampFlagModelMixin, models.Model):
         (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
         (ROLE_BILLING, _('Billing')),
     )
-    license_profile = models.ForeignKey(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.ForeignKey(License, verbose_name=_('LicenseProfile'),
                              related_name='profile_roles', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              related_name='user_roles', on_delete=models.CASCADE)
@@ -121,17 +123,18 @@ class ProfileContact(models.Model):
     """
     Stores people, company, billing and mailing address.
     """
-    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='profile_contact', on_delete=models.CASCADE)
     profile_contact_details = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
     
-class FarmProfile(models.Model):
+class LicenseProfile(models.Model):
     """
-    Stores Farm data.Vendors are essentially replica of license.
+    Stores Farm data.Vendors are essentially replica of license.It is farm profile in UI.
     """
-    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='farm_profile', on_delete=models.CASCADE)
+    
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
     
     farm_name = models.CharField(_('Farm Name'), blank=True, null=True, max_length=255)
@@ -144,12 +147,16 @@ class FarmProfile(models.Model):
     work_with_other_distributors = models.BooleanField(_('Work With Other distributors'), default=False)
     have_transportation = models.BooleanField(_('Have Transportation'), default=False)    
     issues_with_failed_labtest = models.BooleanField(_('Issues With Failed Lab tests'), default=False)
+    approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
+    agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
     
 class ProfileOverview(models.Model):
     """
     e.g. cultivation overview.
     """
-    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='profile_overview', on_delete=models.CASCADE)
     profile_overview = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
@@ -158,7 +165,7 @@ class ProgramOverview(models.Model):
     """
     Stores program overview.
     """
-    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='program_overview', on_delete=models.CASCADE)
     program_details = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
@@ -167,7 +174,7 @@ class FinancialOverview(models.Model):
     """
     Stores farm's Financial overview.
     """
-    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='financial_overview', on_delete=models.CASCADE)
     financial_details = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
@@ -176,10 +183,24 @@ class ProcessingOverview(models.Model):
     """
     Stores farm's  farm's Processing overview i.e. crop overview.
     """
-    license_profile = models.OneToOneField(LicenseProfile, verbose_name=_('LicenseProfile'),
+    license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='processing_overview', on_delete=models.CASCADE)
     processing_config = JSONField(null=False, blank=False, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)    
 
+
+    
+class ProfileCategory(models.Model):
+    """
+    Class implementing  Vendor/Profile categories.
+    """
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = _('Vendor/Profile Category')
+        verbose_name_plural = _('Vendor/Profile Categories')
 
     
