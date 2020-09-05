@@ -45,41 +45,84 @@ class BrandCreateSerializer(serializers.ModelSerializer):
 
  class LicenseSerializer(serializers.ModelSerializer):
     """
-    This defines VendorProfile serializer.
+    This defines license serializer.
     """
-    farm = serializers.SerializerMethodField(read_only=True)
 
     def validate(self, obj):
         """
-        Object level validation.Normal user should allowed to create VendorProfile only with respective vendor
+        Object level validation.Normal user should allowed to create license only with respective brand
         """
         if self.context['request'].method == 'POST':
-            #user_vendors = Vendor.objects.filter(ac_manager=self.context['request'].user)
-            user_vendors = Vendor.objects.filter(vendor_roles__user=self.context['request'].user)
-            if obj['vendor'] not in user_vendors and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+            user_brands = Brand.objects.filter(ac_manager=self.context['request'].user)
+            if obj['license'] not in user_brands and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
                 raise serializers.ValidationError(
-                    "You can only add/update vendorprofiles related to your vendors only!")
+                    "You can only add/update license related to your brand only!")
         return obj
 
     def update(self, instance, validated_data):
-        profile = VendorProfile.objects.select_related('vendor').get(id=instance.id)
-        if profile.vendor.vendor_category == 'cultivation' and validated_data.get('status') == 'completed':
+        profile = License.objects.select_related('brand').get(id=instance.id)
+        if validated_data.get('status') == 'completed':
             try:
-                insert_vendors.delay(id=instance.id,is_update=True)
-                profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
-                notify_admins_on_profile_registration(profile.vendor.ac_manager.email, profile_contact.profile_contact_details['farm_name'])
+                # insert_vendors.delay(id=instance.id,is_update=True)
+                # profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
+                #notify_admins_on_profile_registration(profile.vendor.ac_manager.email, profile_contact.profile_contact_details['farm_name'])
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
         return user
 
-    def get_farm(self, obj):
-        """
-        Return respective farm names.
-        """
-        return obj.profile_name()
-
     class Meta:
-        model = VendorProfile
+        model = License
         fields = ('__all__')
         read_only_fields = ['approved_on', 'approved_by']       
+
+
+class ProfileContactSerializer(serializers.ModelSerializer):
+    """
+    This defines ProfileContactSerializer
+    """
+    class Meta:
+        model = ProfileContact
+        fields = ('__all__')
+
+class CultivationOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines CultivationOverviewSerializer
+    """
+    class Meta:
+        model = CultivationOverview
+        fields = ('__all__')
+
+class LicenseProfileSerializer(serializers.ModelSerializer):
+    """
+    This defines LicenseProfileSerializer
+    """
+    class Meta:
+        model  = LicenseProfile
+        fields = ('__all__')
+        
+class FinancialOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines FinancialOverviewSerializer
+    """
+    class Meta:
+        model  = FinancialOverview
+        fields = ('__all__')
+
+class CropOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines CropOverviewSerializer
+    """
+    class Meta:
+        model  = CropOverview
+        fields = ('__all__')
+
+
+class ProgramOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines ProgramOverviewSerializer
+    """
+    class Meta:
+        model  = ProgramOverview
+        fields = ('__all__')                           
+        

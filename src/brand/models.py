@@ -33,7 +33,7 @@ class Brand(TimeStampFlagModelMixin,models.Model):
         return self.brand_name
     
 
-class License(TimeStampFlagModelMixin,models.Model):
+class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     """
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
