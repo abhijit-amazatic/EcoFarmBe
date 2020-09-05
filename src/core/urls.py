@@ -20,12 +20,10 @@ from django.urls import path
 from django.views.static import serve
 from knox.views import LogoutView
 from rest_framework.routers import SimpleRouter
-
 from user.views import (UserViewSet, MeView, LogInView,
-                        ChangePasswordView, SendMailView,
+                        ChangePasswordView,SendMailView,
                         ResetPasswordView, CategoryView,
                         SearchQueryView,VerificationView,SendVerificationView,)
-#from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView, ProfileReportViewSet)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView,SearchCultivars,
@@ -42,10 +40,10 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetSalesPersonView,)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
-#from account.views import (AccountViewSet,AccountLicenseViewSet,)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-
+#from account.views import (AccountViewSet,AccountLicenseViewSet,)
+#from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView, ProfileReportViewSet)
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
@@ -66,15 +64,12 @@ urlpatterns = [
     path(r'user/me/', MeView.as_view(), name='user-me'),
     path(r'user/login/', LogInView.as_view(), name='login'),
     path(r'user/logout/', LogoutView.as_view(), name='logout'),
-    path(r'user/change-password/',
-         ChangePasswordView.as_view(), name='change-password'),
+    path(r'user/change-password/',ChangePasswordView.as_view(), name='change-password'),
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
     path(r'user/send-verification/', SendVerificationView.as_view(), name='verification-user'),
     path(r'category/', CategoryView.as_view(), name='category'),
-    #path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
-    #path(r'account-category/', AccountCategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
@@ -109,6 +104,8 @@ urlpatterns = [
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
+    #path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
+    #path(r'account-category/', AccountCategoryView.as_view(), name='category'),
 ] + router.urls
 
 

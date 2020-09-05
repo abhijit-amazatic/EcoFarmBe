@@ -48,9 +48,7 @@ def get_decrypted_data(enc):
         cipher = AES.new(bytes(key,'utf-8'),AES.MODE_CBC,iv)
         return unpad(cipher.decrypt(enc[BS:]))       
        
-
-
-        
+    
 class UserSerializer(serializers.ModelSerializer):
     """
     User Serializer.
@@ -78,7 +76,6 @@ class UserSerializer(serializers.ModelSerializer):
     platform_kpi = serializers.SerializerMethodField(read_only=True)
     
     
-
     def get_member_categories(self, obj):
         """
         Adds ,member categories to response

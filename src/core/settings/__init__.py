@@ -35,18 +35,13 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'django_filters',
+    'user',
     'knox',
     'corsheaders',
     'utils',
     'core',
-    'user',
-    #'vendor',
-    #'account',
-    #'brand',
+    'brand',
     'django_extensions',
-    #'rest_social_auth',
-    'sslserver',
-    #'social_django',
     'integration',
     'rest_framework.authtoken',
     'nested_admin',
@@ -55,7 +50,9 @@ INSTALLED_APPS = [
     'inventory',
     'cultivar',
     'labtest',
-    
+    #'rest_social_auth',
+    #'sslserver',
+    #'social_django',
 ]
 
 MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []

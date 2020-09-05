@@ -8,8 +8,6 @@ from core.settings import (PYZOHO_CONFIG,
     PYZOHO_USER_IDENTIFIER,
     LICENSE_PARENT_FOLDER_ID)
 from user.models import (User, )
-from vendor.models import (VendorProfile, License, )
-from account.models import (Account, )
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
@@ -20,6 +18,8 @@ from .utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout,
                     get_regex_checked, )
 from core.mailer import mail, mail_send
+#from vendor.models import (VendorProfile, License, )
+#from account.models import (Account, )
 
 def get_crm_obj():
     """
