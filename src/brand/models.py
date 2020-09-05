@@ -146,13 +146,14 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
     agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class CultivationOverview(models.Model):
     """
     This is profile_overview in old DB schema.
     """
     license = models.OneToOneField(License, verbose_name=_('License'),
-                                related_name='cultivation_overview', on_delete=models.CASCADE)
+                                   related_name='cultivation_overview', on_delete=models.CASCADE)
     autoflower = models.BooleanField(_('Is Agreement Signed'), default=False)
     full_season = models.BooleanField(_('Is Agreement Signed'), default=False)
     lighting_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
@@ -161,6 +162,7 @@ class CultivationOverview(models.Model):
     indoor = JSONField(null=True, blank=True, default=dict)
     outdoor_full_season = JSONField(null=True, blank=True, default=dict)
     outdoor_autoflower = JSONField(null=True, blank=True, default=dict)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class ProgramOverview(models.Model):
     """

@@ -42,22 +42,17 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (ProfileCategoryView, )
-
-#from account.views import (AccountViewSet,AccountLicenseViewSet,)
-#from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView, ProfileReportViewSet)
+from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,)
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
-#router.register(r'vendor', VendorViewSet, base_name="vendor")
-#router.register(r'vendor-profile', VendorProfileViewSet, base_name="vendor-profile")
-#router.register(r'license', LicenseViewSet, base_name="license")
+router.register(r'brand', BrandViewSet, base_name="brand")
+router.register(r'license', LicenseViewSet, base_name="license")
 #router.register(r'profile-report', ProfileReportViewSet, base_name="report")
-#router.register(r'account', AccountViewSet, base_name="account")
-#router.register(r'account-license', AccountLicenseViewSet, base_name="account-license")
+
 
 
 
@@ -107,7 +102,7 @@ urlpatterns = [
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
-    #path(r'account-category/', AccountCategoryView.as_view(), name='category'),
+
 ] + router.urls
 
 
