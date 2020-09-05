@@ -10,7 +10,7 @@ class UserPermissions(BasePermission):
         return True
 
 
-class IsAuthenticatedVendorPermission(BasePermission):
+class IsAuthenticatedBrandPermission(BasePermission):
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:

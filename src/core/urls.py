@@ -42,6 +42,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
+from brand.views import (ProfileCategoryView, )
+
 #from account.views import (AccountViewSet,AccountLicenseViewSet,)
 #from vendor.views import (VendorViewSet,VendorProfileViewSet,LicenseViewSet, VendorCategoryView, ProfileReportViewSet)
 
@@ -104,7 +106,7 @@ urlpatterns = [
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
-    #path(r'vendor-category/', VendorCategoryView.as_view(), name='category'),
+    path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
     #path(r'account-category/', AccountCategoryView.as_view(), name='category'),
 ] + router.urls
 
