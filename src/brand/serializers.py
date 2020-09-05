@@ -43,11 +43,11 @@ class BrandCreateSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 
- class LicenseSerializer(serializers.ModelSerializer):
+class LicenseSerializer(serializers.ModelSerializer):
     """
     This defines license serializer.
     """
-
+    
     def validate(self, obj):
         """
         Object level validation.Normal user should allowed to create license only with respective brand
@@ -63,13 +63,11 @@ class BrandCreateSerializer(serializers.ModelSerializer):
         profile = License.objects.select_related('brand').get(id=instance.id)
         if validated_data.get('status') == 'completed':
             try:
-                # insert_vendors.delay(id=instance.id,is_update=True)
-                # profile_contact = ProfileContact.objects.get(vendor_profile=instance.id)
-                #notify_admins_on_profile_registration(profile.vendor.ac_manager.email, profile_contact.profile_contact_details['farm_name'])
+                pass
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
-        return user
+        return usero
 
     class Meta:
         model = License

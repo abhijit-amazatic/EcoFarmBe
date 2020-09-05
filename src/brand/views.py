@@ -15,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
 from django.conf import settings
 from core.permissions import IsAuthenticatedBrandPermission
-from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview)
+from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview,)
 from .serializers import (BrandSerializer,BrandCreateSerializer,LicenseSerializer,ProfileContactSerializer,CultivationOverviewSerializer,LicenseProfileSerializer,FinancialOverviewSerializer,CropOverviewSerializer,ProgramOverviewSerializer,)
 
 
