@@ -59,16 +59,14 @@ class LicenseSerializer(serializers.ModelSerializer):
         return obj
 
     def update(self, instance, validated_data):
-        print('un update..')
-        profile = License.objects.select_related('brand').get(id=instance.id)
-        print('profile>>>', profile)
         if validated_data.get('status') == 'completed':
             try:
-                pass
+                profile = LicenseProfile.objects.get(license=instance.id)
+                notify_admins_on_profile_registration(profile.license.brand.ac_manager.email,profile.farm_name)
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
-        return usero
+        return user
 
     class Meta:
         model = License
@@ -101,7 +99,6 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         Object level validation.after brand Associated properly associate brand with license
         """
         if self.context['request'].method == 'PATCH':
-            #print('#1>>', self.context['request'].parser_context["kwargs"]["pk"])
             user_brands = Brand.objects.filter(ac_manager=self.context['request'].user).values_list('id', flat=True)
             if self.context['request'].data.get('brand_association') not in user_brands:
                 raise serializers.ValidationError(

@@ -159,7 +159,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
         return self.extra_info(request, pk, ProfileContact, ProfileContactSerializer, 'profile_contact')
         
 
-    @action(detail=True, url_path=cultivation_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
+    @action(detail=True, url_path=cultivation_overview_path, methods=['get','patch'], pagination_class=CustomPagination)
     def cultivation_overview(self, request, pk,cultivation_overview_id=None):
         """
         Detail route CRUD operations on cultivation_overview.
@@ -167,7 +167,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
         return self.extra_info(request, pk, CultivationOverview, CultivationOverviewSerializer, 'cultivation_overview')
         
 
-    @action(detail=True, url_path=financial_overview_path, methods=['get', 'post', 'delete', 'patch'], pagination_class=CustomPagination)
+    @action(detail=True, url_path=financial_overview_path, methods=['get','delete', 'patch'], pagination_class=CustomPagination)
     def financial_overview(self, request, pk,financial_overview_id=None):
         """
         Detail route CRUD operations on financial_overview.
@@ -179,7 +179,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
         """
         Detail route CRUD operations on crop_overview.
         """
-        return self.extra_info(request, pk, CroOverview, CropOverviewSerializer, 'crop_overview')
+        return self.extra_info(request, pk, CropOverview, CropOverviewSerializer, 'crop_overview')
 
     @action(detail=True, url_path=program_overview_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def program_overview(self, request, pk,program_overview_id=None):

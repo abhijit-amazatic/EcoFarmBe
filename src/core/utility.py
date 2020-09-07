@@ -74,9 +74,9 @@ def notify_admins_on_profile_registration(email,farm):
     """
     Notify admins on slack & email about new farm registration under farm.
     """
-    msg = "<!channel>New Vendor profile is registered with us with the farm name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!" % (farm, email)
+    msg = "<!channel>New Vendor/Account profile is registered with us with the Profile name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!" % (farm, email)
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
-    mail_send("farm-register.html",{'link': farm,'mail':email},"Vendor Profile registration.", recipient_list=settings.ADMIN_EMAIL)
+    mail_send("farm-register.html",{'link': farm,'mail':email},"Profile registration.", recipient_list=settings.ADMIN_EMAIL)
     
 def notify_admins_on_accounts_registration(email,company):
     """
