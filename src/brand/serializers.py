@@ -33,9 +33,7 @@ class BrandCreateSerializer(serializers.ModelSerializer):
         Object level validation.Normal user should allowed to create Brand only with self foreign key.
         """
         if not (obj['ac_manager'] == self.context['request'].user) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
-            raise serializers.ValidationError(
-                "You are not allowed to create brand with another user!")
-
+            raise serializers.ValidationError("You are not allowed to create brand with another user!")
         return obj
 
     class Meta:
