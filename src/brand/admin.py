@@ -175,12 +175,12 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     @transaction.atomic
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status == 'approved':
-            #send_async_approval_mail(obj.vendor.id)
+            send_async_approval_mail(obj.id)
             #insert_vendors.delay(id=obj.id)
             obj.license_profile.approved_on  = timezone.now()
             obj.license_profile.approved_by = get_user_data(request)
             obj.save()
-            notify_employee_admin_to_verify_and_reset(obj.vendor.id,obj.id)
+            #notify_employee_admin_to_verify_and_reset(obj.vendor.id,obj.id)
             
         super().save_model(request, obj, form, change)
 
