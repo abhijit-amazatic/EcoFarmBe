@@ -16,7 +16,7 @@ from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
-from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview)
+from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
 from core.utility import (send_async_approval_mail,) #notify_employee_admin_to_verify_and_reset
 #from integration.crm import (insert_vendors, )
 
@@ -52,7 +52,7 @@ def approve_license_profile(modeladmin, request, queryset):
             #notify_employee_admin_to_verify_and_reset.delay(profile.vendor.id,profile.id)
                 
     messages.success(request,'License Profiles Approved!')    
-approve_vendor_profile.short_description = 'Approve Selected License Profiles'
+approve_license_profile.short_description = 'Approve Selected License Profiles'
 
 
 class ProfileContactForm(forms.ModelForm):
@@ -141,8 +141,11 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     def farm_name(self, obj):
         return obj.license_profile.farm_name
     
-    def approved_by_member(self, obj):
-        return obj.license_profile.approved_by.get('email',"N/A")
+    def approved_by(self, obj):
+        if obj.license_profile.approved_by:
+            return obj.license_profile.approved_by.get('email',"N/A")
+        return "N/A"
+        
 
     def get_search_results(self, request, queryset, search_term):
         """
@@ -156,12 +159,12 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('farm_name','brand','status','approved_on','approved_by_member','created_by','created_on','updated_on',)
+    list_display = ('farm_name','brand','status','approved_on','approved_by','created_by','created_on','updated_on',)
     list_select_related = ['brand__ac_manager']
     search_fields = ('brand__brand_name','brand__ac_manager__email','status')
-    readonly_fields = ('brand','is_draft', 'step','created_on','updated_on','approved_on','created_by')
+    readonly_fields = ('step','created_on','updated_on','created_by',)
     list_filter = (
-        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),('approved_on',DateRangeFilter ),'status',
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
     ordering = ('-created_on','status','updated_on')
     actions = [approve_license_profile, ] 
