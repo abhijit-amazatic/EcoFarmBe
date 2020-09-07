@@ -51,14 +51,17 @@ class LicenseSerializer(serializers.ModelSerializer):
         Object level validation.Normal user should allowed to create license only with respective brand
         """
         if self.context['request'].method == 'POST':
-            user_brands = Brand.objects.filter(ac_manager=self.context['request'].user)
-            if obj['license'] not in user_brands and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
-                raise serializers.ValidationError(
-                    "You can only add/update license related to your brand only!")
+            pass
+            # user_brands = Brand.objects.filter(ac_manager=self.context['request'].user)
+            # if obj['license'] not in user_brands and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+            #     raise serializers.ValidationError(
+            #         "You can only add/update license related to your brand only!")
         return obj
 
     def update(self, instance, validated_data):
+        print('un update..')
         profile = License.objects.select_related('brand').get(id=instance.id)
+        print('profile>>>', profile)
         if validated_data.get('status') == 'completed':
             try:
                 pass
@@ -93,6 +96,19 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     """
     This defines LicenseProfileSerializer
     """
+    def validate(self, attrs):
+        """
+        Object level validation.
+        """
+        if self.context['request'].method == 'PATCH':
+            #print('#1>>', self.context['request'].parser_context["kwargs"]["pk"])
+            user_brands = Brand.objects.filter(ac_manager=self.context['request'].user).values_list('id', flat=True)
+            if self.context['request'].data.get('brand_association') not in user_brands:
+                raise serializers.ValidationError(
+                    "You can only associate/update license related to your brand only!")
+            
+        return attrs
+    
     class Meta:
         model  = LicenseProfile
         fields = ('__all__')

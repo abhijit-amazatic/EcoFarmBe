@@ -83,20 +83,22 @@ class LicenseViewSet(viewsets.ModelViewSet):
         """
         license = License.objects.filter()
         if self.action == "list":
+            print('in listv action')
             license = license.select_related('brand')
         elif self.action == "profile_contact":
             license = license.select_related('profile_contact')
         elif self.action == "cultivation_overview":
-            license = license.select_related('profile_overview')
+            license = license.select_related('cultivation_overview')
         elif self.action == "license_profile":
-            license = license.select_related('profile_overview')
+            license = license.select_related('license_profile')
         elif self.action == "financial_overview":
             license = license.select_related('financial_overview')
         elif self.action == "crop_overview":
             license = license.select_related('crop_overview')
         elif self.action == "program_overview":
             license = license.select_related('program_overview')            
-        license = license.filter(brand__ac_manager=self.request.user)
+        #license = license.filter(brand__ac_manager=self.request.user)
+        license = license.filter(created_by=self.request.user)
         return license
     
     def get_serializer_class(self):
@@ -117,6 +119,15 @@ class LicenseViewSet(viewsets.ModelViewSet):
             return ProgramOverviewSerializer
         return LicenseSerializer
 
+    def create(self, request):
+        """
+        This is used to create Licensse.
+        """
+        serializer = LicenseSerializer(data=request.data, context={'request': request}, many=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def extra_info(self, request, pk, model, serializer, extra_info_attribute):
         """

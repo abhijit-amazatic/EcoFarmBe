@@ -38,7 +38,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Individual User'),null=True, blank=True, default=None, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Individual User'), on_delete=models.CASCADE)
     license_type = models.CharField(
         _('License Type'), blank=True, null=True, max_length=255)
     owner_or_manager = models.CharField(
@@ -51,7 +51,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
         _('Expiration Date'), blank=True, null=True, default=None)
     issue_date = models.DateField(
         _('Issue Date'), blank=True, null=True, default=None)
-    premises_address = models.TextField()
+    premises_address = models.TextField(blank=True, null=True)
     premises_county = models.CharField(
         _('Premises County'), blank=True, null=True, max_length=255)
     premises_city = models.CharField(
@@ -127,7 +127,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     It is farm profile/Account profile in UI.Stores Farm data.Vendors are essentially replica of license.
     """
     license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
-                                related_name='farm_profile', on_delete=models.CASCADE)
+                                related_name='license_profile', on_delete=models.CASCADE)
     brand_association = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)  
     farm_name = models.CharField(_('Farm Name'), blank=True, null=True, max_length=255)
     farm_county = models.CharField(
