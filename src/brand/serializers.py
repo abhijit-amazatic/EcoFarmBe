@@ -98,7 +98,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     """
     def validate(self, attrs):
         """
-        Object level validation.
+        Object level validation.after brand Associated properly associate brand with license
         """
         if self.context['request'].method == 'PATCH':
             #print('#1>>', self.context['request'].parser_context["kwargs"]["pk"])
@@ -106,6 +106,10 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
             if self.context['request'].data.get('brand_association') not in user_brands:
                 raise serializers.ValidationError(
                     "You can only associate/update license related to your brand only!")
+            license_obj = License.objects.get(id=self.context['request'].parser_context["kwargs"]["pk"])
+            if license_obj:
+                license_obj.brand_id = self.context['request'].data.get('brand_association')
+                license_obj.save()
             
         return attrs
     

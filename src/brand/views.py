@@ -191,7 +191,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
     @action(detail=True, url_path=license_profile_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def license_profile(self, request, pk,license_profile_id=None):
         """
-        Detail route CRUD operations on program_overview.
+        Detail route CRUD operations on license_profile.
         """
         return self.extra_info(request, pk, LicenseProfile, LicenseProfileSerializer, 'license_profile')
     
