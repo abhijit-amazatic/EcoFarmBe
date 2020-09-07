@@ -119,7 +119,9 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
     can_delete = False
     readonly_fields = ('is_draft',)   
     
-
+class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
+    extra = 0
+    model = LicenseUser
 
 def get_user_data(request):
     """
@@ -155,7 +157,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         queryset |= self.model.objects.select_related('license_profile').filter(license_profile__farm_name__contains={'farm_name':search_term})
         return queryset, use_distinct
     
-    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin]
+    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin, InlineLicenseUserAdmin]
     form = LicenseUpdatedForm
     extra = 0
     model = License
