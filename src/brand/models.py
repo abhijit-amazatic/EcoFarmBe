@@ -29,6 +29,8 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     profile_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     is_buyer = models.BooleanField(_('Is Buyer/accounts'), default=False)    
     is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)
+    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.brand_name
@@ -74,9 +76,9 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     profile_category = models.CharField(_('Profile Category Individual user'), blank=True, null=True, max_length=255)
     is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)    
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
+    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     # profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    # is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
-    # zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     # code = models.CharField(_('Vendor Code For Box'), max_length=100, blank=True, null=True)
     
     def __str__(self):
@@ -155,7 +157,10 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
         _('Farm Profile Photo Box ID'), blank=True, null=True, max_length=255)
     farm_photo_sharable_link = models.CharField(
         _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
-    
+    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+
+
 class CultivationOverview(models.Model):
     """
     This is profile_overview in old DB schema.
