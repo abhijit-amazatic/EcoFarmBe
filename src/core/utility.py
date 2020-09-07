@@ -445,15 +445,15 @@ def get_from_crm_insert_to_account(user_id):
         if crm_data:
             insert_data_for_accounts(instance[0],crm_data.get('basic_profile',{}).get('company_type'), crm_data)            
             
-# @app.task(queue="general")
-# def send_async_approval_mail(profile_id):
-#     """
-#     Async email send for after profile approval.
-#     """
-#     vendor_obj = Vendor.objects.filter(id=profile_id)
-#     if vendor_obj:
-#         ac_manager = vendor_obj[0].ac_manager.email
-#         mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+@app.task(queue="general")
+def send_async_approval_mail(profile_id):
+    """
+    Async email send for after profile approval.
+    """
+    license_obj = License.objects.filter(id=profile_id)
+    if license_obj:
+        ac_manager = license_obj[0].created_by.email
+        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
 
 
 # @app.task(queue="general")

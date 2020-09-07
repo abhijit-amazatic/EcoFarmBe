@@ -16,16 +16,192 @@ from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
-from .models import (Brand,ProfileCategory, )
-#from core.utility import (send_async_approval_mail,get_encrypted_data,notify_employee_admin_to_verify_and_reset,)
+from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview)
+from core.utility import (send_async_approval_mail,) #notify_employee_admin_to_verify_and_reset
 #from integration.crm import (insert_vendors, )
 
 
 
+class LicenseUpdatedForm(forms.ModelForm):
+
+    class Meta:
+        model = License
+        fields = '__all__'
+
+    def clean(self):
+        if self.changed_data:
+            if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved':
+                license_obj = License.objects.filter(id=self.instance.id)
+                if license_obj:
+                    ac_manager = license_obj[0].created_by.email
+                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+                    
+
+def approve_license_profile(modeladmin, request, queryset):
+    """
+    Function for bulk profile approval.
+    """
+    for profile in queryset:
+        if profile.status != 'approved':
+            profile.status ='approved'
+            profile.license_profile.approved_on  = timezone.now()
+            profile.license_profile.approved_by = get_user_data(request)
+            profile.save()
+            send_async_approval_mail.delay(profile.id)
+            #insert_vendors.delay(id=profile.id)
+            #notify_employee_admin_to_verify_and_reset.delay(profile.vendor.id,profile.id)
+                
+    messages.success(request,'License Profiles Approved!')    
+approve_vendor_profile.short_description = 'Approve Selected License Profiles'
+
+
+class ProfileContactForm(forms.ModelForm):
+    class Meta:
+        model = ProfileContact
+        fields = '__all__'
+        widgets = {
+            'profile_contact_details': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }
+        
+class InlineLicenseProfileContactAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for ProfileContact model.
+    """
+    extra = 0
+    model = ProfileContact
+    readonly_fields = ('is_draft',)
+    can_delete = False
+    form = ProfileContactForm
+
+class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for CultivationOverview.
+    """
+    extra = 0
+    model = CultivationOverview
+    readonly_fields = ('is_draft',)
+    can_delete = False
+
+
+class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for FinancialOverview model.
+    """
+    extra = 0
+    model = FinancialOverview
+    can_delete = False
+    readonly_fields = ('is_draft',)
+
+class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for InlineCropOverview model.
+    """
+    extra = 0
+    model = CropOverview
+    can_delete = False
+    readonly_fields = ('is_draft',)
+
+class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for InlineProgramOverviewAdmin  model
+    """
+    extra = 0
+    model = ProgramOverview
+    can_delete = False
+    readonly_fields = ('is_draft',)
+ 
+class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for InlineLicenseProfile  model
+    """
+    extra = 0
+    model = LicenseProfile
+    can_delete = False
+    readonly_fields = ('is_draft',)   
+    
+
+
+def get_user_data(request):
+    """
+    return user info dict.
+    """
+    return {'id':request.user.id,
+            'email':request.user.email,
+            'first_name':request.user.first_name,
+            'last_name':request.user.last_name}
+
+
+class MyLicenseAdmin(nested_admin.NestedModelAdmin):
+    """
+    Configuring License
+    """
+    def approved_on(self, obj):
+        return obj.license_profile.approved_on
+
+    def farm_name(self, obj):
+        return obj.license_profile.farm_name
+    
+    def approved_by_member(self, obj):
+        return obj.license_profile.approved_by.get('email',"N/A")
+
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Default and custom search filter for farm names.
+        """
+        queryset, use_distinct = super(MyLicenseAdmin, self).get_search_results(request, queryset, search_term)
+        queryset |= self.model.objects.select_related('license_profile').filter(license_profile__farm_name__contains={'farm_name':search_term})
+        return queryset, use_distinct
+    
+    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin]
+    form = LicenseUpdatedForm
+    extra = 0
+    model = License
+    list_display = ('farm_name','brand','status','approved_on','approved_by_member','created_by','created_on','updated_on',)
+    list_select_related = ['brand__ac_manager']
+    search_fields = ('brand__brand_name','brand__ac_manager__email','status')
+    readonly_fields = ('brand','is_draft', 'step','created_on','updated_on','approved_on','created_by')
+    list_filter = (
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),('approved_on',DateRangeFilter ),'status',
+    )
+    ordering = ('-created_on','status','updated_on')
+    actions = [approve_license_profile, ] 
+    list_per_page = 50
+
+    @transaction.atomic
+    def save_model(self, request, obj, form, change):
+        if 'status' in form.changed_data and obj.status == 'approved':
+            #send_async_approval_mail(obj.vendor.id)
+            #insert_vendors.delay(id=obj.id)
+            obj.license_profile.approved_on  = timezone.now()
+            obj.license_profile.approved_by = get_user_data(request)
+            obj.save()
+            notify_employee_admin_to_verify_and_reset(obj.vendor.id,obj.id)
+            
+        super().save_model(request, obj, form, change)
+
+        
+class MyBrandAdmin(admin.ModelAdmin):
+    """
+    Configuring brand
+    """    
+    extra = 0
+    model = Brand
+    #inlines = [InlineAccountLicenseAdmin,InlineAccountBasicProfileAdmin,InlineAccountContactInfoAdmin, InlineAccountUserAdmin]
+    list_display = ('brand_name','ac_manager','appellation','created_on', 'updated_on',)
+    search_fields = ('brand_name', 'ac_manager', 'appellation')
+    list_filter = (
+        ('created_on', DateRangeFilter),('updated_on',DateRangeFilter ),
+    )
+    ordering = ('-created_on','updated_on',)
+
+    
 class ProfileCategoryAdmin(admin.ModelAdmin):
     """
     ProfileCategoryAdmin
     """
     #search_fields = ('',)
     
-admin.site.register(ProfileCategory, ProfileCategoryAdmin)  
+admin.site.register(Brand,MyBrandAdmin)
+admin.site.register(License,MyLicenseAdmin)
+admin.site.register(ProfileCategory, ProfileCategoryAdmin)
+

@@ -81,6 +81,9 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     def __str__(self):
         return self.legal_business_name
 
+    class Meta:
+        verbose_name = _('LicenseProfile')
+
     
 class LicenseUser(TimeStampFlagModelMixin,models.Model):
     """
