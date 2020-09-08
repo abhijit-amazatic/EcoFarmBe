@@ -75,6 +75,8 @@ class LicenseViewSet(viewsets.ModelViewSet):
     financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
     crop_overview_path = 'crop-overview(/(?P<crop_overview_id>[0-9]*))?'
     program_overview_path = 'program-overview(/(?P<program_overview_id>[0-9]*))?'
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['status', ]
 
 
     def get_queryset(self):
