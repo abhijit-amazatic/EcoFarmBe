@@ -15,11 +15,15 @@ class StatusFlagMixin(models.Model):
     STATUS_COMPLETED = 'completed'
     STATUS_APPROVED = 'approved'
     STATUS_DONE = 'done'
+    STATUS_CROP = 'crop_overview'
+    STATUS_FINANCIAL = 'financial_overview'
 
     STATUS_CHOICES = ((STATUS_NOT_STARTED, _('Not Started')),
                       (STATUS_IN_PROGRESS, _('In Progress')),
                       (STATUS_COMPLETED, _('Completed')),
                       (STATUS_APPROVED, _('Approved')),
+                      (STATUS_CROP, _('Crop Overview')),
+                      (STATUS_FINANCIAL, _('Financial Overview')),
                       (STATUS_DONE, _('Done')))
     status = models.CharField(choices=STATUS_CHOICES,
                               max_length=20, default=STATUS_NOT_STARTED, null=False, blank=False)
