@@ -38,7 +38,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Individual User'), on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), on_delete=models.CASCADE)
     license_type = models.CharField(
         _('License Type'), blank=True, null=True, max_length=255)
     owner_or_manager = models.CharField(
