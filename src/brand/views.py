@@ -217,7 +217,7 @@ class KpiViewSet(APIView):
     """
     permission_classes = (IsAuthenticatedBrandPermission, )
     
-    def get(self):
+    def get(self,request):
         """
         Return QuerySet.
         """
@@ -241,8 +241,8 @@ class KpiViewSet(APIView):
                                  'profile_category': "N/A" if not hasattr(license,'profile_category') else license.profile_category,
                                  'farm_name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_name,
                                  'region':"N/A" if not hasattr(license,'license_profile') else license.license_profile.region,
-                                 'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else profile.license_profile.farm_profile_photo,
-                                 'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else profile.license_profile.farm_photo_sharable_link, 
+                                 'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_profile_photo,
+                                 'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link, 
                                  'updated_on':"N/A" if not hasattr(license,'updated_on') else license.updated_on
         } for license in license_obj]
         
