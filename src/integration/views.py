@@ -100,6 +100,8 @@ class GetPickListView(APIView):
         """
         Get picklist.
         """
+        if request.query_params.get('module') == 'Brands':
+            return Response(get_picklist('Brands', request.query_params['field']))
         return Response(get_picklist('Vendors', request.query_params['field']))
 
     def get_permissions(self):
