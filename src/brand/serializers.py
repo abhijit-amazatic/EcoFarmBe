@@ -7,9 +7,11 @@ from django.conf import settings
 from tempfile import TemporaryFile
 
 from rest_framework import serializers
+from phonenumber_field.serializerfields import PhoneNumberField
 from core.settings import (AWS_BUCKET, )
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile,
                      CultivationOverview, ProgramOverview, FinancialOverview, CropOverview, ProfileReport)
+from .models import (LicenseRole,)
 from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (notify_admins_on_profile_registration,)
@@ -279,3 +281,59 @@ class FileUploadSerializer(serializers.Serializer):
         upload_file('111282192684', validated_data['file'].temporary_file_path(),
                     validated_data['file'].name, validated_data['license'], key)
         return {'name': validated_data['file'].name}
+
+
+class InviteUserRelatedLicenceField(serializers.RelatedField):
+    queryset = License.objects.all()
+
+    def to_representation(self, obj):
+        return obj.pk
+
+    def to_internal_value(self, data):
+        queryset = self.get_queryset()
+        try:
+            return queryset.get(pk=data)
+        except License.DoesNotExist:
+            raise serializers.ValidationError(
+            f'License id {data} does not exist or you do not have access.'
+            )
+
+    def display_value(self, obj):
+        return f'{obj.license_number} | {obj.legal_business_name}'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # queryset = queryset.filter(created_by=self.context['request'].user)
+        return queryset
+
+
+class InviteUserSerializer(serializers.Serializer):
+    """
+    This defines Brand serializer.
+    """
+    
+    full_name = serializers.CharField(max_length=200)
+    phone = PhoneNumberField(max_length=15)
+    email = serializers.EmailField()
+    role = serializers.ChoiceField(choices=LicenseRole.ROLE_CHOICES)
+    licenses = InviteUserRelatedLicenceField(many=True,)
+
+    def validate_licenses(self, value):
+        """
+        Check that license is selected.
+        """
+        if not value:
+            raise serializers.ValidationError("At leat one License must be selected.")
+        return value
+
+    def validate_phone(self, value):
+        """
+        nonfield validation.
+        """
+        try:
+            user = User.objects.get(phone=self.initial_data['phone'])
+            if user.email != self.initial_data['email']:
+                raise serializers.ValidationError("Phone number already in usefor another account.")
+        except User.DoesNotExist:
+            pass
+        return value

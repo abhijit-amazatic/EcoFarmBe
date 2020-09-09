@@ -65,6 +65,7 @@ from two_factor.views import (
     AddPhoneDeviceViewSet,
     AddAuthenticatorRequestViewSet,
 )
+from brand.views import (InviteUserView,)
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
@@ -173,6 +174,7 @@ urlpatterns = [
     path(r'document/', DocumentView.as_view(), name='extra-documents'),
     path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
+    path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
 ] + router.urls
 
 

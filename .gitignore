@@ -80,3 +80,7 @@ src/*/settings/local.py
 # direnv
 .envrc
 .env
+
+# celery
+celerybeat.pid
+celerybeat-schedule

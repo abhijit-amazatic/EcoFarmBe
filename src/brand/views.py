@@ -5,11 +5,15 @@ This module defines API views.
 
 import json
 import re
+from django.contrib.auth import get_user_model
+from rest_framework.response import Response
+from rest_framework import (permissions, viewsets, status, filters,)
+from rest_framework.generics import (CreateAPIView,)
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
-
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -23,10 +27,18 @@ from core.permissions import IsAuthenticatedBrandPermission
 
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile, CultivationOverview,
                      ProgramOverview, FinancialOverview, CropOverview, ProfileCategory, ProfileReport,)
+from .models import (LicenseRole,)
 from .serializers import (BrandSerializer, BrandCreateSerializer, LicenseSerializer, ProfileContactSerializer, CultivationOverviewSerializer,
                           LicenseProfileSerializer, FinancialOverviewSerializer, CropOverviewSerializer, ProgramOverviewSerializer, ProfileReportSerializer, FileUploadSerializer)
+from .serializers import (InviteUserSerializer,)
 from integration.crm import (get_licenses,)
 from core.utility import (get_license_from_crm_insert_to_db,)
+
+from user.serializers import (get_encrypted_data,)
+from user.views import (notify_admins,)
+from core.mailer import (mail, mail_send,)
+
+Auth_User = get_user_model()
 
 
 
@@ -40,7 +52,7 @@ def get_license_numbers(legal_business_names):
             response = get_licenses(business)
             license_nos.extend([i.get('Name') for i in response])
         return license_nos
-    
+
 
 class CustomPagination(PageNumberPagination):
     page_size = 50
@@ -116,6 +128,9 @@ class LicenseViewSet(viewsets.ModelViewSet):
         """
         Return queryset based on action.
         """
+        license_user = self.request.user.license_roles.get_queryset()
+        accessible_licenses = [x.license.id for x in license_user]
+
         license = License.objects.filter()
         if self.action == "list":
             license = license.select_related('brand')
@@ -132,7 +147,10 @@ class LicenseViewSet(viewsets.ModelViewSet):
         elif self.action == "program_overview":
             license = license.select_related('program_overview')
         #license = license.filter(brand__ac_manager=self.request.user)
-        license = license.filter(created_by=self.request.user)
+        license = License.objects.filter(
+            Q(brand__ac_manager=self.request.user) |
+            Q(id__in=accessible_licenses)
+        )
         return license
 
     def get_serializer_class(self):
@@ -399,4 +417,64 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
 #             response = Response({"Verification link sent!"}, status=200)
 #         else:
 #             response = Response("false", status=400)
-#        return response    
+#        return response
+
+
+class InviteUserView(CreateAPIView):
+    """
+    Invite User view
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    serializer_class = InviteUserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.get_validated_data()
+
+        try:
+            invite_user  = Auth_User.objects.get(email=validated_data['email'])
+        except Auth_User.DoesNotExist:
+            invite_user  = Auth_User.objects.create(
+                email=validated_data['email'],
+                phone=validated_data['phone'],
+            )
+            invite_user.full_name = validated_data['full_name']
+            invite_user.phone = validated_data['phone']
+            invite_user.save()
+            invite_user.set_unusable_password()
+            try:
+                link = get_encrypted_data(invite_user.email)
+                mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", invite_user.email)
+                notify_admins(invite_user.email)
+            except Exception as e:
+                print(e)
+                pass
+
+        invite_role, invite_role_created = LicenseRole.objects.get_or_create(name=validated_data['role'])
+        response_data = {
+            'user': {
+                'id': invite_user.id,
+                'email': invite_user.email,
+            },
+            'role': {
+                'id': invite_role.id,
+                'name': invite_role.name,
+            },
+            'licenses': [],
+        }
+
+        for license in validated_data['licenses']:
+            license_user, license_user_created =  LicenseUser.objects.update_or_create(
+                license=license,
+                role=invite_role,
+                user=invite_user,
+            )
+            response_data['licenses'].append({
+                'id': license_user.license.id,
+                'legal_business_name': license_user.license.legal_business_name,
+                'license_number': license_user.license.license_number,
+            })
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)

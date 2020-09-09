@@ -2,7 +2,9 @@
 Brand related schemas defined here.
 """
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import Permission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
 from core.validators import full_domain_validator
@@ -98,11 +100,10 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     class Meta:
         verbose_name = _('License/Profile')
 
-    
-class LicenseUser(TimeStampFlagModelMixin,models.Model):
+
+class LicenseRole(TimeStampFlagModelMixin,models.Model):
     """
-    Stores License Profile User's details #combined roles for all accounts & vendors.
-    Only farm manager is extra in vendors/sellers.
+    Stores License Profile User's User's Roles.
     """
     ROLE_OWNER = 'owner'
     ROLE_LICENSE_OWNER = 'license_owner'
@@ -118,15 +119,73 @@ class LicenseUser(TimeStampFlagModelMixin,models.Model):
         (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
         (ROLE_BILLING, _('Billing')),
     )
+    name = models.CharField(
+        verbose_name=_('Name'),
+        max_length=60,
+        choices=ROLE_CHOICES,
+        unique=True,
+    )
+    default_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_('Default Permissions'),
+        blank=True,
+        limit_choices_to=Q(content_type__app_label='brand'),
+    )
+
+    def __str__(self):
+        return self.name
+
+    def natural_key(self):
+        return (self.name,)
+
+    class Meta:
+        verbose_name = _('License Role')
+        verbose_name_plural = _('License Roles')
+
+
+class LicenseUser(TimeStampFlagModelMixin,models.Model):
+    """
+    Stores License Profile User's details #combined roles for all accounts & vendors.
+    Only farm manager is extra in vendors/sellers.
+    """
     license = models.ForeignKey(License, verbose_name=_('License'),
                              related_name='profile_roles', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              related_name='user_roles', on_delete=models.CASCADE)
-    role = ArrayField(models.CharField(verbose_name=_('Role'),max_length=60, choices=ROLE_CHOICES,help_text='choice options are 1.license_owner 2.farm_manager 3.logistics 4.sales_or_inventory 5.billing'))
-    
+    role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'),related_name='license_users')
+
+    def __str__(self):
+        return f'{self.license} | {self.role}'
+
     class Meta:
         unique_together = (('license', 'user'), )
         verbose_name = _('License Profile User')
+        verbose_name_plural = _('License Profile Users')
+
+
+class LicenseRolePermissions(TimeStampFlagModelMixin,models.Model):
+    """
+    Stores License Profile Role's Permissions.
+    """
+    license = models.ForeignKey(License, verbose_name=_('License'),
+                             related_name='license_role_permissions', on_delete=models.CASCADE)
+    role = models.ForeignKey(LicenseRole, verbose_name=_('Role'),
+                             related_name='license_role_permissions', on_delete=models.CASCADE)
+    permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_('License Role Permissions'),
+        blank=True,
+        limit_choices_to=Q(content_type__app_label='brand'),
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        unique_together = (('license', 'role'), )
+        verbose_name = _('License Role Permissions')
+        verbose_name_plural = _('License Roles Permissions')
+
 
 
 class ProfileContact(models.Model):

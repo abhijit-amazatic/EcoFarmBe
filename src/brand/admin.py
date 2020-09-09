@@ -17,6 +17,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
+from .models import (LicenseRole,)
 from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
 from integration.box import (delete_file,)
 
@@ -275,6 +276,14 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
     """
     #search_fields = ('',)
     
+
+class LicenseRoleAdmin(admin.ModelAdmin):
+    """
+    ProfileCategoryAdmin
+    """
+
+
+admin.site.register(LicenseRole,LicenseRoleAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)
 admin.site.register(ProfileCategory, ProfileCategoryAdmin)
