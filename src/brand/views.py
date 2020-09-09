@@ -15,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
 from django.conf import settings
 from core.permissions import IsAuthenticatedBrandPermission
-from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview,)
+from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview,ProfileCategory,)
 from .serializers import (BrandSerializer,BrandCreateSerializer,LicenseSerializer,ProfileContactSerializer,CultivationOverviewSerializer,LicenseProfileSerializer,FinancialOverviewSerializer,CropOverviewSerializer,ProgramOverviewSerializer,)
 
 
@@ -210,5 +210,44 @@ class ProfileCategoryView(APIView):
         """
         queryset = ProfileCategory.objects.values('id','name')
         return Response(queryset)
+
+class KpiViewSet(APIView):
+    """
+    All KPI view set
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    
+    def get(self):
+        """
+        Return QuerySet.
+        """
+        license_obj = License.objects.filter(created_by=self.request.user).select_related()
+        brand_obj = Brand.objects.filter(ac_manager=self.request.user)
+        
+        brand_kpis = [{
+            'brand_id':profile.id,
+            'brand_name':"N/A" if not hasattr(profile,'brand_name') else profile.brand_name,
+            'brand_category': "N/A" if not hasattr(profile,'brand_category') else profile.brand_category,
+            'brand_county': "N/A" if not hasattr(profile,'brand_county') else profile.brand_county,
+            'profile_category':"N/A" if not hasattr(profile,'profile_category') else profile.profile_category,
+            'licenses_owned':License.objects.filter(brand=profile,owner_or_manager='owner').count(),
+            'licenses_managed':License.objects.filter(brand=profile,owner_or_manager='manager').count(),
+            'updated_on':"N/A" if not hasattr(profile,'updated_on') else profile.updated_on,
+        } for profile in brand_obj]
+        
+        license_profile_kpis = [{'license_id':license.id,
+                                 'status':"N/A" if not hasattr(license,'status') else license.status,
+                                 'step':"N/A" if not hasattr(license,'status') else license.step,
+                                 'profile_category': "N/A" if not hasattr(license,'profile_category') else license.profile_category,
+                                 'farm_name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_name,
+                                 'region':"N/A" if not hasattr(license,'license_profile') else license.license_profile.region,
+                                 'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else profile.license_profile.farm_profile_photo,
+                                 'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else profile.license_profile.farm_photo_sharable_link, 
+                                 'updated_on':"N/A" if not hasattr(license,'updated_on') else license.updated_on
+        } for license in license_obj]
+        
+        return Response({"brand_kpis": brand_kpis,
+                         "license_profile_kpis":license_profile_kpis})
+    
 
 

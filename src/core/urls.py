@@ -42,7 +42,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,)
+from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiViewSet,)
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
@@ -102,6 +102,8 @@ urlpatterns = [
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
+    path(r'platform-kpi/', KpiViewSet.as_view(), name='kpi'),
+   
 
 ] + router.urls
 

@@ -149,7 +149,11 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
     agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
-    is_draft = models.BooleanField(_('Is Draft'), default=False)    
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+    farm_profile_photo = models.CharField(
+        _('Farm Profile Photo Box ID'), blank=True, null=True, max_length=255)
+    farm_photo_sharable_link = models.CharField(
+        _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     
 class CultivationOverview(models.Model):
     """
