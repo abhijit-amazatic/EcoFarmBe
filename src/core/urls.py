@@ -37,7 +37,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                EstimateSignView, EstimateSignCompleteView,
                                GetDocumentStatus, GetSignURL,
                                TemplateSignView, GetDistanceView,
-                               GetSalesPersonView,)
+                               GetSalesPersonView, GetTemplateStatus)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
@@ -99,6 +99,7 @@ urlpatterns = [
     path(r'inventory/status/', InventoryStatusTypeView.as_view(), name='get_status_types'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
+    path(r'sign/template-status/', GetTemplateStatus.as_view(), name='template_status'),
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
