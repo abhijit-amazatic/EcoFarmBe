@@ -19,6 +19,7 @@ class Brand(TimeStampFlagModelMixin,models.Model):
                                    related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)
     brand_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     brand_county = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    region = models.CharField(_('Region'), blank=True, null=True, max_length=255)
     appellation = models.CharField(_('Brand Appellation'), blank=True, null=True, max_length=255)
     ethics_and_certification = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     about_brand = models.TextField(blank=True, null=True)
