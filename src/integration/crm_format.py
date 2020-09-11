@@ -94,7 +94,7 @@ CRM_FORMAT  = {
         "Vendor_Type": "vendor_type_parse",
         "County": "farm_county",
         "Region": "region",
-        "Special_Certifications": "ethics_and_certifications_parse",
+        "Special_Certifications": "ethics_and_certification_parse",
         "Appellations": "appellation",
         "Transportation_Method": "transportation_methods_parse",
         "Program_Selection": "program_details_parse",
@@ -249,9 +249,9 @@ CRM_FORMAT  = {
         "Title": "title",
         #Cultivation Overview
         "Types_of_Nutrients": "co.type_of_nutrients",
-        "Canopy_Square_Feet_Mixed_Light": "co.canopy_sqf_parse",
-        "Annual_Harvests_Mixed_Light": "co.no_of_harvest_parse",
-        "Plants_per_Cycle_Mixed_Light": "co.plants_per_cycle_parse",
+        "Canopy_Square_Feet_Mixed_Light": "co_.canopy_sqf_parse",
+        "Annual_Harvests_Mixed_Light": "co_.no_of_harvest_parse",
+        "Plants_per_Cycle_Mixed_Light": "co_.plants_per_cycle_parse",
         #Farm Profile
         "Ethics_Certification": "ethics_certification",
         "Region": "region",

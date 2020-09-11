@@ -117,9 +117,14 @@ def parse_fields(module, key, value, obj, crm_obj):
         "fo.",
         "cr.",
     )
-    if value in ('ethics_and_certifications'):
+    fields = (
+        'co_.canopy_sqf',
+        'co_.no_of_harvest',
+        'co_.plants_per_cycle',
+    )
+    if value.startswith('ethics_and_certification'):
         if isinstance(obj.get(value), list) and len(obj.get(value)) > 0:
-            return ast.literal_eval(obj.get(value))
+            return obj.get(value)
         return []
     if value.startswith('employees'):
         return create_employees(key, value, obj, crm_obj)
@@ -154,13 +159,20 @@ def parse_fields(module, key, value, obj, crm_obj):
     boolean_conversion_list = ('featured_on_our_site',)
     if value.startswith(boolean_conversion_list):
         return True if obj.get(value) in ['true', 'True'] else False
-    elif value.startswith(cultivator_starts_with):
+    elif value.startswith(cultivator_starts_with) and (value not in fields):
         v = value.split('.')
         for i in ['.mixed_light', '.indoor', '.outdoor_full_season', '.outdoor_autoflower']:
             d = obj.get(v[0] + i)
             if d:
                 if 'cultivars' in v[1]:
                     return get_cultivars_date(key, v[1], d, crm_obj)
+                return d.get(v[1])
+        return None
+    elif value in fields:
+        v = value.split('_.')
+        for i in ['.mixed_light', '.indoor', '.outdoor_full_season', '.outdoor_autoflower']:
+            d = obj.get(v[0] + i)
+            if isinstance(d, dict) and len(d)>0:
                 return d.get(v[1])
         return None
     if value in ('full_season', 'autoflower'):
@@ -275,10 +287,11 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             l = list()
             d.update(i)
             license_db_id= i['id']
+            d.update({'license_db_id': license_db_id})
             license_db = License.objects.select_related().get(id=license_db_id)
             licenses = get_licenses(i['legal_business_name'])
             d.update(license_db.license_profile.__dict__)
-            d.update(license_db.profile_contact.__dict__)
+            d.update(license_db.profile_contact.profile_contact_details)
             vendor_id = license_db.profile_contact.__dict__['id']
             try:
                 for k, v in license_db.cultivation_overview.__dict__.items():
@@ -418,7 +431,7 @@ def update_license(farm_name, license):
             moved_file = move_file(license['uploaded_w9_to'], documents)
             license_url = get_shared_link(license.get('uploaded_w9_to'))
             license['uploaded_w9_to'] = license_url + "?id=" + license.get('uploaded_w9_to')
-    license_obj = License.objects.filter(pk=license['id']).update(
+    license_obj = License.objects.filter(pk=license['license_db_id']).update(
         uploaded_license_to=license.get('uploaded_license_to'),
         uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
         uploaded_w9_to=license.get('uploaded_w9_to')
