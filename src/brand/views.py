@@ -226,7 +226,7 @@ class KpiViewSet(APIView):
         for value in value_list:
             license_obj = License.objects.filter(created_by=self.request.user,profile_category=value).select_related()
             license_profile_kpis = [{
-                'license_id':license.id,
+                'id':license.id,
                 'status':"N/A" if not hasattr(license,'status') else license.status,
                 'step':"N/A" if not hasattr(license,'status') else license.step,
                 'farm_name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_name,
@@ -235,7 +235,7 @@ class KpiViewSet(APIView):
                 'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link, 
                 'updated_on':"N/A" if not hasattr(license,'updated_on') else license.updated_on,
                 'brand':"N/A" if not hasattr(license,'brand') else {
-                    'brand_id':"N/A" if not hasattr(license.brand,'id')else license.brand.id,
+                    'id':"N/A" if not hasattr(license.brand,'id')else license.brand.id,
                     'brand_name':"N/A" if not hasattr(license.brand,'brand_name') else license.brand.brand_name,
                     'brand_category': "N/A" if not hasattr(license.brand,'brand_category') else license.brand.brand_category,
                     'brand_county': "N/A" if not hasattr(license.brand,'brand_county') else license.brand.brand_county,

@@ -78,8 +78,6 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
-    # profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    # code = models.CharField(_('Vendor Code For Box'), max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.legal_business_name
