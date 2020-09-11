@@ -137,8 +137,8 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     def approved_on(self, obj):
         return obj.license_profile.approved_on
 
-    def farm_name(self, obj):
-        return obj.license_profile.farm_name
+    def name(self, obj):
+        return obj.license_profile.name
     
     def approved_by(self, obj):
         if obj.license_profile.approved_by:
@@ -151,14 +151,14 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         Default and custom search filter for farm names.
         """
         queryset, use_distinct = super(MyLicenseAdmin, self).get_search_results(request, queryset, search_term)
-        queryset |= self.model.objects.select_related('license_profile').filter(license_profile__farm_name__contains={'farm_name':search_term})
+        queryset |= self.model.objects.select_related('license_profile').filter(license_profile__name__contains={'name':search_term})
         return queryset, use_distinct
     
     inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin, InlineLicenseUserAdmin]
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('farm_name','brand','status','profile_category','approved_on','approved_by','created_by','created_on','updated_on',)
+    list_display = ('name','brand','status','profile_category','approved_on','approved_by','created_by','created_on','updated_on',)
     list_select_related = ['brand__ac_manager']
     search_fields = ('brand__brand_name','brand__ac_manager__email','status')
     readonly_fields = ('step','created_on','updated_on','created_by',)

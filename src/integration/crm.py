@@ -321,7 +321,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             elif id and is_single_user and is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
             if is_single_user:
-                brand_name = license_db.license_profile.__dict__['farm_name']
+                brand_name = license_db.license_profile.__dict__['name']
             else:
                 brand_name = record.brand_name
             response = update_license(brand_name, d)
@@ -413,13 +413,13 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
             return record_response
         return []
 
-def update_license(farm_name, license):
+def update_license(name, license):
     """
     Update license with shareable link.
     """
     response = None
     data = list()
-    new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, farm_name)
+    new_folder = create_folder(LICENSE_PARENT_FOLDER_ID,name)
     if license.get('uploaded_license_to') and license.get('uploaded_license_to').isdigit():
         moved_file = move_file(license['uploaded_license_to'], new_folder)
         license_url = get_shared_link(license.get('uploaded_license_to'))
@@ -566,7 +566,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
         elif id and is_single_user and is_update:
             d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
         if is_single_user:
-            brand_name = license_db.license_profile.__dict__['farm_name']
+            brand_name = license_db.license_profile.__dict__['name']
         else:
             brand_name = record.brand_name
         response = update_license(brand_name, d)

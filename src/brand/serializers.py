@@ -63,7 +63,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         if validated_data.get('status') == 'completed':
             try:
                 profile = LicenseProfile.objects.get(license=instance.id)
-                notify_admins_on_profile_registration(profile.license.brand.ac_manager.email,profile.farm_name)
+                notify_admins_on_profile_registration(profile.license.brand.ac_manager.email,profile.name)
                 if instance.brand:
                     insert_vendors.delay(id=instance.brand.id)
                 else:

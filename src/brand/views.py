@@ -229,7 +229,7 @@ class KpiViewSet(APIView):
                 'id':license.id,
                 'status':"N/A" if not hasattr(license,'status') else license.status,
                 'step':"N/A" if not hasattr(license,'status') else license.step,
-                'farm_name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_name,
+                'name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.name,
                 'region':"N/A" if not hasattr(license,'license_profile') else license.license_profile.region,
                 'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_profile_photo,
                 'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link, 

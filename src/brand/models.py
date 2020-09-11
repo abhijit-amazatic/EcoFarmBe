@@ -133,9 +133,9 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='license_profile', on_delete=models.CASCADE)
     brand_association = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)  
-    farm_name = models.CharField(_('Farm Name'), blank=True, null=True, max_length=255)
-    farm_county = models.CharField(
-        _('Farm County'), blank=True, null=True, max_length=255)
+    name = models.CharField(_('Name'), blank=True, null=True, max_length=255)
+    county = models.CharField(
+        _('County'), blank=True, null=True, max_length=255)
     appellation = models.CharField(_('Appellation'), blank=True, null=True, max_length=255)
     region = models.CharField(_('Region'), blank=True, null=True, max_length=255)
     ethics_and_certification = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)

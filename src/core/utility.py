@@ -120,10 +120,10 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
             if not LicenseUser.objects.filter(user_id=obj.id,license_id=license_obj_id).exists():
                 extracted_role = role_map.get(employee['roles'][0])
                 LicenseUser(user_id=obj.id,license_id=license_obj_id,role=extracted_role).save()
-                notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.farm_name)
+                notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
                 link = get_encrypted_data(obj.email,reason='verify')
                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
-                notify_profile_user(obj.email,license_obj[0].license_profile.farm_name)
+                notify_profile_user(obj.email,license_obj[0].license_profile.name)
                     
                                 
 @app.task(queue="general")
