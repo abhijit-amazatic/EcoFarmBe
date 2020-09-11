@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from core.utility import (send_async_approval_mail,)
+from core.utility import (send_async_approval_mail,add_users_to_system_and_license,)
 
 
 class LicenseUpdatedForm(forms.ModelForm):
@@ -46,8 +46,7 @@ def approve_license_profile(modeladmin, request, queryset):
             profile.license_profile.approved_by = get_user_data(request)
             profile.save()
             send_async_approval_mail.delay(profile.id)
-            #insert_vendors.delay(id=profile.id)
-            #notify_employee_admin_to_verify_and_reset.delay(profile.vendor.id,profile.id)
+            add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
                 
     messages.success(request,'License Profiles Approved!')    
 approve_license_profile.short_description = 'Approve Selected License Profiles'
@@ -174,11 +173,10 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status == 'approved':
             send_async_approval_mail(obj.id)
-            #insert_vendors.delay(id=obj.id)
             obj.license_profile.approved_on  = timezone.now()
             obj.license_profile.approved_by = get_user_data(request)
             obj.save()
-            #notify_employee_admin_to_verify_and_reset(obj.vendor.id,obj.id)
+            add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
             
         super().save_model(request, obj, form, change)
 
