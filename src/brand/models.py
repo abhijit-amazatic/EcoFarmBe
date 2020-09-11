@@ -190,7 +190,7 @@ class FinancialOverview(models.Model):
     """
     license = models.OneToOneField(License, verbose_name=_('License'),
                                 related_name='financial_overview', on_delete=models.CASCADE)
-    know_annual_budget = models.BooleanField(_('Is Agreement Signed'), default=False)
+    know_annual_budget = models.CharField(blank=True, null=True, max_length=255)
     annual_budget = models.CharField(_('Annual Budget'), blank=True, null=True, max_length=255)
     mixed_light = JSONField(null=True, blank=True, default=dict)
     outdoor_autoflower = JSONField(null=True, blank=True, default=dict)
