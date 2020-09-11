@@ -221,33 +221,34 @@ class KpiViewSet(APIView):
         """
         Return QuerySet.
         """
-        license_obj = License.objects.filter(created_by=self.request.user).select_related()
-        brand_obj = Brand.objects.filter(ac_manager=self.request.user)
+        value_list = License.objects.filter(created_by=self.request.user).values_list('profile_category', flat=True).distinct()
+        group_by_value = {}
+        for value in value_list:
+            license_obj = License.objects.filter(created_by=self.request.user,profile_category=value).select_related()
+            license_profile_kpis = [{
+                'license_id':license.id,
+                'status':"N/A" if not hasattr(license,'status') else license.status,
+                'step':"N/A" if not hasattr(license,'status') else license.step,
+                'farm_name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_name,
+                'region':"N/A" if not hasattr(license,'license_profile') else license.license_profile.region,
+                'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_profile_photo,
+                'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link, 
+                'updated_on':"N/A" if not hasattr(license,'updated_on') else license.updated_on,
+                'brand':"N/A" if not hasattr(license,'brand') else {
+                    'brand_id':"N/A" if not hasattr(license.brand,'id')else license.brand.id,
+                    'brand_name':"N/A" if not hasattr(license.brand,'brand_name') else license.brand.brand_name,
+                    'brand_category': "N/A" if not hasattr(license.brand,'brand_category') else license.brand.brand_category,
+                    'brand_county': "N/A" if not hasattr(license.brand,'brand_county') else license.brand.brand_county,
+                    'profile_category':"N/A" if not hasattr(license.brand,'profile_category') else license.brand.profile_category,
+                    'licenses_owned':License.objects.filter(brand=license.brand,owner_or_manager='owner').count(),
+                    'licenses_managed':License.objects.filter(brand=license.brand,owner_or_manager='manager').count(),
+                    'updated_on':"N/A" if not hasattr(license.brand,'updated_on') else license.brand.updated_on,
+                }
+            } for license in license_obj]
+            group_by_value[value] = license_profile_kpis
         
-        brand_kpis = [{
-            'brand_id':profile.id,
-            'brand_name':"N/A" if not hasattr(profile,'brand_name') else profile.brand_name,
-            'brand_category': "N/A" if not hasattr(profile,'brand_category') else profile.brand_category,
-            'brand_county': "N/A" if not hasattr(profile,'brand_county') else profile.brand_county,
-            'profile_category':"N/A" if not hasattr(profile,'profile_category') else profile.profile_category,
-            'licenses_owned':License.objects.filter(brand=profile,owner_or_manager='owner').count(),
-            'licenses_managed':License.objects.filter(brand=profile,owner_or_manager='manager').count(),
-            'updated_on':"N/A" if not hasattr(profile,'updated_on') else profile.updated_on,
-        } for profile in brand_obj]
-        
-        license_profile_kpis = [{'license_id':license.id,
-                                 'status':"N/A" if not hasattr(license,'status') else license.status,
-                                 'step':"N/A" if not hasattr(license,'status') else license.step,
-                                 'profile_category': "N/A" if not hasattr(license,'profile_category') else license.profile_category,
-                                 'farm_name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_name,
-                                 'region':"N/A" if not hasattr(license,'license_profile') else license.license_profile.region,
-                                 'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_profile_photo,
-                                 'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link, 
-                                 'updated_on':"N/A" if not hasattr(license,'updated_on') else license.updated_on
-        } for license in license_obj]
-        
-        return Response({"brand_kpis": brand_kpis,
-                         "license_profile_kpis":license_profile_kpis})
+            
+        return Response({"kpis":group_by_value})
     
 
 
