@@ -73,7 +73,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
     associated_program = models.CharField(
         _('Associated_program'), blank=True, null=True, max_length=255)
-    profile_category = models.CharField(_('Profile Category Individual user'), blank=True, null=True, max_length=255)
+    profile_category = models.CharField(_('Profile Category'), blank=True, null=True, max_length=255)
     is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)    
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
