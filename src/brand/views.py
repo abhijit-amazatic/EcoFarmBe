@@ -76,7 +76,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
     crop_overview_path = 'crop-overview(/(?P<crop_overview_id>[0-9]*))?'
     program_overview_path = 'program-overview(/(?P<program_overview_id>[0-9]*))?'
     filter_backends = [filters.SearchFilter]
-    search_fields = ['status', ]
+    search_fields = ['status','profile_category']
 
 
     def get_queryset(self):
