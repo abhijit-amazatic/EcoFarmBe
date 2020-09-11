@@ -87,7 +87,7 @@ CRM_FORMAT  = {
         "id": "id",
         "Layout": "layout_parse",
         #Farm Profile
-        "Vendor_Name": "farm_name",
+        "Vendor_Name": "name",
         "Legal_Entity_Names": "Legal_Entity_Names",
         "Client_Code": "Client_Code",
         "Cultivation_Type": "cultivation_type_parse",
@@ -323,7 +323,7 @@ CRM_FORMAT  = {
     },
     "Accounts":{
         "id": "id",
-        "Account_Name": "farm_name",
+        "Account_Name": "name",
         "Website": "website",
         "Client_Code": "client_code",
         "Account_Owner": "",
@@ -423,7 +423,7 @@ CRM_FORMAT  = {
         'db_id': 'db_id',
         'id': 'id',
         'layout': 'Layout',
-        'farm_name': 'Vendor_Name',
+        'name': 'Vendor_Name',
         'Legal_Entity_Names': 'Legal_Entity_Names',
         'Client_Code': 'Client_Code',
         'cultivation_type': 'Cultivation_Type',
