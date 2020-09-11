@@ -232,7 +232,9 @@ class KpiViewSet(APIView):
                 'name':"N/A" if not hasattr(license,'license_profile') else license.license_profile.name,
                 'region':"N/A" if not hasattr(license,'license_profile') else license.license_profile.region,
                 'farm_profile_photo':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_profile_photo,
-                'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link, 
+                'farm_photo_sharable_link':"N/A" if not hasattr(license,'license_profile') else license.license_profile.farm_photo_sharable_link,
+                'is_buyer': license.is_buyer,
+                'is_seller':license.is_seller,
                 'updated_on':"N/A" if not hasattr(license,'updated_on') else license.updated_on,
                 'brand':"N/A" if not hasattr(license,'brand') else {
                     'id':"N/A" if not hasattr(license.brand,'id')else license.brand.id,
@@ -243,6 +245,8 @@ class KpiViewSet(APIView):
                     'licenses_owned':License.objects.filter(brand=license.brand,owner_or_manager='owner').count(),
                     'licenses_managed':License.objects.filter(brand=license.brand,owner_or_manager='manager').count(),
                     'updated_on':"N/A" if not hasattr(license.brand,'updated_on') else license.brand.updated_on,
+                    'is_buyer': license.brand.is_buyer,
+                    'is_seller':license.brand.is_seller
                 }
             } for license in license_obj]
             group_by_value[value] = license_profile_kpis
