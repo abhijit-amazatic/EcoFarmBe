@@ -7,7 +7,7 @@ from django.conf import settings
 from rest_framework import serializers
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview)
 from user.models import User
-from core.utility import (notify_farm_user, notify_admins_on_vendors_registration, notify_admins_on_profile_registration)
+from core.utility import (notify_admins_on_profile_registration,)
 from integration.crm import insert_vendors
 
 class BrandSerializer(serializers.ModelSerializer):

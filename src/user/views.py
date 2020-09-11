@@ -17,9 +17,8 @@ from .models import User, MemberCategory
 from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data, SendVerificationSerializer,)
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
-from core.utility import (get_from_crm_insert_to_vendorprofile,NOUN_PROCESS_MAP,get_from_crm_insert_to_account,send_verification_link,)
+from core.utility import (NOUN_PROCESS_MAP,send_verification_link,)
 from slacker import Slacker
-#from vendor.models import Vendor,VendorUser
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)

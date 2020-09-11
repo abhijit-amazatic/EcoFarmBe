@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from core.utility import (send_async_approval_mail,) #notify_employee_admin_to_verify_and_reset
+from core.utility import (send_async_approval_mail,)
 
 
 class LicenseUpdatedForm(forms.ModelForm):
