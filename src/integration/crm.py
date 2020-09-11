@@ -126,6 +126,10 @@ def parse_fields(module, key, value, obj, crm_obj):
         if isinstance(obj.get(value), list) and len(obj.get(value)) > 0:
             return obj.get(value)
         return []
+    if value.startswith('program_details'):
+        d = obj.get('program_details')
+        if len(d) > 0:
+            return d.get('program_name')
     if value.startswith('employees'):
         return create_employees(key, value, obj, crm_obj)
     if value == 'brand_category':
@@ -632,14 +636,12 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                     data = dict()
                     resp_brand = result['response']['response']['data']
                     resp_vendor = record_response['response']['response']['data']
-                    data['name'] = result['response']['orignal_data'][0]['Name'] + '_' +\
-                        record_response['response']['orignal_data'][0]['Vendor_Name']
                     data['brands'] = resp_brand[0]['details']['id']
-                    data['vendors'] = resp_vendor[0]['details']['id']
+                    data['accounts'] = resp_vendor[0]['details']['id']
                     if is_update:
-                        r = update_records('Brands_X_Vendors', [data])
+                        r = update_records('Brands_X_Accounts', [data])
                     else:
-                        r = create_records('Brands_X_Vendors', [data])
+                        r = create_records('Brands_X_Accounts', [data])
                 response.append(record_response)
             except Exception as exc:
                 print(exc)
