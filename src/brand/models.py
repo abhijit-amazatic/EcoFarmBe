@@ -3,7 +3,7 @@ Brand related schemas defined here.
 """
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.postgres.fields import (ArrayField, JSONField,)
+from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from django.conf import settings
@@ -169,10 +169,7 @@ class CultivationOverview(models.Model):
     full_season = models.BooleanField(_('Is Agreement Signed'), default=False)
     lighting_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     type_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    mixed_light = JSONField(null=True, blank=True, default=dict)
-    indoor = JSONField(null=True, blank=True, default=dict)
-    outdoor_full_season = JSONField(null=True, blank=True, default=dict)
-    outdoor_autoflower = JSONField(null=True, blank=True, default=dict)
+    overview = ArrayField(HStoreField(default=dict, ), default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class ProgramOverview(models.Model):
@@ -192,10 +189,7 @@ class FinancialOverview(models.Model):
                                 related_name='financial_overview', on_delete=models.CASCADE)
     know_annual_budget = models.CharField(blank=True, null=True, max_length=255)
     annual_budget = models.CharField(_('Annual Budget'), blank=True, null=True, max_length=255)
-    mixed_light = JSONField(null=True, blank=True, default=dict)
-    outdoor_autoflower = JSONField(null=True, blank=True, default=dict)
-    outdoor_full_season = JSONField(null=True, blank=True, default=dict)
-    indoor = JSONField(null=True, blank=True, default=dict)
+    overview = ArrayField(HStoreField(default=dict, ), default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 class CropOverview(models.Model):
@@ -206,10 +200,7 @@ class CropOverview(models.Model):
                                 related_name='crop_overview', on_delete=models.CASCADE)
     process_on_site = models.CharField(blank=True, null=True, max_length=255)
     need_processing_support = models.CharField(blank=True, null=True, max_length=255)
-    mixed_light = JSONField(null=True, blank=True, default=dict)
-    outdoor_autoflower = JSONField(null=True, blank=True, default=dict)
-    outdoor_full_season = JSONField(null=True, blank=True, default=dict)
-    indoor = JSONField(null=True, blank=True, default=dict)
+    overview = ArrayField(HStoreField(default=dict, ), default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class ProfileCategory(models.Model):
