@@ -54,19 +54,6 @@ def get_account_category(key, value, obj, crm_obj):
         return l
     else:
         return [ACCOUNT_TYPES[v]]
-    
-def get_cultivars_date(key, value, obj, crm_obj):
-    """
-    Return cultivar dates.
-    """
-    try:
-        e = value.split('_')
-        if obj:
-            date = obj[e[0]][int(e[1])-1]['harvest_date']
-            date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
-            return date
-    except Exception as exc:
-        return []
 
 def get_layout(module, layout_name=None):
     """
@@ -118,3 +105,39 @@ def get_distance(location_a, location_b):
     elif not location_b:
         response['error'] = 'location_b is not valid.'
     return response
+
+def get_cultivars_date(key, value, obj, crm_obj):
+    """
+    Return cultivar dates.
+    """
+    try:
+        e = value.split('_')
+        if obj:
+            date = obj[e[0]][int(e[1])-1]['harvest_date']
+            date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
+            return date
+    except Exception as exc:
+        return []
+
+def get_overview_field(key, value, obj, crm_obj):
+    """
+    Return overview field.
+    """
+    is_full_season = obj.get('co.full_season')
+    is_autoflower = obj.get('co.autoflower')
+    v = value.split('.')
+    overview_name = v[0]
+    dictionary = obj.get(overview_name + '.overview')
+    field = v[2]
+    if is_full_season == False and is_autoflower == True:
+        index = 0
+    else:
+        index = int(v[1])
+    if is_autoflower == False and index == 1:
+        return None
+    if dictionary:
+        if 'cultivars' in field:
+            return get_cultivars_date(key, field, dictionary[index], crm_obj)
+        else:
+            return dictionary[index].get(field)
+    return None

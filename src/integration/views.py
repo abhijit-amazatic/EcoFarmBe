@@ -604,4 +604,3 @@ class GetSalesPersonView(APIView):
         if response['status_code'] == 200:
             return Response(response.get('response').get('Owner'))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        
