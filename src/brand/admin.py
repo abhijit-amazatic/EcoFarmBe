@@ -42,9 +42,12 @@ def approve_license_profile(modeladmin, request, queryset):
     for profile in queryset:
         if profile.status != 'approved':
             profile.status ='approved'
-            profile.license_profile.approved_on  = timezone.now()
-            profile.license_profile.approved_by = get_user_data(request)
             profile.save()
+            license_profile = LicenseProfile.objects.filter(license=profile)
+            if license_profile:
+                license_profile[0].approved_on  = timezone.now()
+                license_profile[0].approved_by = get_user_data(request)
+                license_profile[0].save()
             send_async_approval_mail.delay(profile.id)
             add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
                 
@@ -202,9 +205,11 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status == 'approved':
             send_async_approval_mail(obj.id)
-            obj.license_profile.approved_on  = timezone.now()
-            obj.license_profile.approved_by = get_user_data(request)
-            obj.save()
+            license_profile = LicenseProfile.objects.filter(license=obj)
+            if license_profile:
+                license_profile[0].approved_on  = timezone.now()
+                license_profile[0].approved_by = get_user_data(request)
+                license_profile[0].save()
             add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
             
         super().save_model(request, obj, form, change)
