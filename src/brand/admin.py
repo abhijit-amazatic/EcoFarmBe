@@ -70,15 +70,33 @@ class InlineLicenseProfileContactAdmin(nested_admin.NestedStackedInline):
     can_delete = False
     form = ProfileContactForm
 
+
+class CultivationForm(forms.ModelForm):
+    class Meta:
+        model = CultivationOverview
+        fields = '__all__'
+        widgets = {
+            'overview': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }
+        
+
 class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
     """
     Configuring field admin view for CultivationOverview.
     """
     extra = 0
     model = CultivationOverview
-    readonly_fields = ('is_draft','overview',)
+    readonly_fields = ('is_draft',)
     can_delete = False
+    form = CultivationForm
 
+class FinancialForm(forms.ModelForm):
+    class Meta:
+        model = FinancialOverview
+        fields = '__all__'
+        widgets = {
+            'overview': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }    
 
 class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
     """
@@ -87,7 +105,16 @@ class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = FinancialOverview
     can_delete = False
-    readonly_fields = ('is_draft','overview',)
+    readonly_fields = ('is_draft',)
+    form = FinancialForm
+
+class CropForm(forms.ModelForm):
+    class Meta:
+        model = CropOverview
+        fields = '__all__'
+        widgets = {
+            'overview': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }        
 
 class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     """
@@ -96,7 +123,9 @@ class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = CropOverview
     can_delete = False
-    readonly_fields = ('is_draft','overview',)
+    readonly_fields = ('is_draft',)
+    form = CropForm
+    
 
 class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
     """

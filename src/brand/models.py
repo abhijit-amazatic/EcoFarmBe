@@ -169,7 +169,7 @@ class CultivationOverview(models.Model):
     full_season = models.BooleanField(_('Is Agreement Signed'), default=False)
     lighting_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     type_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    overview = ArrayField(HStoreField(default=dict, ), default=list)
+    overview = ArrayField(HStoreField(blank=True, null=True), blank=True, null=True,default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class ProgramOverview(models.Model):
@@ -189,7 +189,7 @@ class FinancialOverview(models.Model):
                                 related_name='financial_overview', on_delete=models.CASCADE)
     know_annual_budget = models.CharField(blank=True, null=True, max_length=255)
     annual_budget = models.CharField(_('Annual Budget'), blank=True, null=True, max_length=255)
-    overview = ArrayField(HStoreField(default=dict, ), default=list)
+    overview = ArrayField(HStoreField(blank=True, null=True), blank=True, null=True, default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 class CropOverview(models.Model):
@@ -200,7 +200,7 @@ class CropOverview(models.Model):
                                 related_name='crop_overview', on_delete=models.CASCADE)
     process_on_site = models.CharField(blank=True, null=True, max_length=255)
     need_processing_support = models.CharField(blank=True, null=True, max_length=255)
-    overview = ArrayField(JSONField(default=dict), default=list)
+    overview = ArrayField(JSONField(blank=True,null=True), blank=True, null=True, default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class ProfileCategory(models.Model):
