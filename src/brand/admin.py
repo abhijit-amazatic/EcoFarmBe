@@ -76,7 +76,7 @@ class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
     """
     extra = 0
     model = CultivationOverview
-    readonly_fields = ('is_draft',)
+    readonly_fields = ('is_draft','overview',)
     can_delete = False
 
 
@@ -87,7 +87,7 @@ class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = FinancialOverview
     can_delete = False
-    readonly_fields = ('is_draft',)
+    readonly_fields = ('is_draft','overview',)
 
 class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     """
@@ -96,7 +96,7 @@ class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = CropOverview
     can_delete = False
-    readonly_fields = ('is_draft',)
+    readonly_fields = ('is_draft','overview',)
 
 class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
     """
