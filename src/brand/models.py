@@ -200,7 +200,7 @@ class CropOverview(models.Model):
                                 related_name='crop_overview', on_delete=models.CASCADE)
     process_on_site = models.CharField(blank=True, null=True, max_length=255)
     need_processing_support = models.CharField(blank=True, null=True, max_length=255)
-    overview = ArrayField(HStoreField(default=dict, ), default=list)
+    overview = ArrayField(JSONField(default=dict), default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)    
     
 class ProfileCategory(models.Model):
