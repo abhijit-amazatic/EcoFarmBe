@@ -86,7 +86,7 @@ class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
     """
     extra = 0
     model = CultivationOverview
-    readonly_fields = ('is_draft',)
+    readonly_fields = ('is_draft','overview',)
     can_delete = False
     form = CultivationForm
 
@@ -105,7 +105,7 @@ class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = FinancialOverview
     can_delete = False
-    readonly_fields = ('is_draft',)
+    readonly_fields = ('is_draft','overview',)
     form = FinancialForm
 
 class CropForm(forms.ModelForm):
@@ -123,7 +123,7 @@ class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = CropOverview
     can_delete = False
-    readonly_fields = ('is_draft',)
+    readonly_fields = ('is_draft','overview',)
     form = CropForm
     
 
