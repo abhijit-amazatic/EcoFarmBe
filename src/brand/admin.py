@@ -193,7 +193,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     list_display = ('name','brand','status','profile_category','approved_on','approved_by','created_by','created_on','updated_on',)
     list_select_related = ['brand__ac_manager']
     search_fields = ('brand__brand_name','brand__ac_manager__email','status')
-    readonly_fields = ('step','created_on','updated_on','created_by',)
+    readonly_fields = ('created_on','updated_on','created_by',)
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
