@@ -84,13 +84,42 @@ class DataFilter(FilterSet):
         'actual_available_stock': ['gte', 'lte', 'gt', 'lt']
         }
 
+class CustomOrderFilter(OrderingFilter):
+    allowed_custom_filters = ['Total_THC', 'Total_CBD', 'Box_Link']
+    fields_related = {
+        'Total_THC': 'labtest__Total_THC', # ForeignKey Field lookup for ordering
+        'Box_Link': 'labtest__Box_Link', 
+        'Total_CBD': 'labtest__Total_CBD'
+    }
+    def get_ordering(self, request, queryset, view):
+        params = request.query_params.get(self.ordering_param)
+        if params:
+            fields = [param.strip() for param in params.split(',')]
+            ordering = [f for f in fields if f.lstrip('-') in self.allowed_custom_filters]
+            if ordering:
+                return ordering
 
+        return self.get_default_ordering(view)
+
+    def filter_queryset(self, request, queryset, view):
+        order_fields = []
+        ordering = self.get_ordering(request, queryset, view)
+        if ordering:
+            for field in ordering:
+                symbol = "-" if "-" in field else ""
+                order_fields.append(symbol+self.fields_related[field.lstrip('-')])
+        if order_fields:
+            return queryset.order_by(*order_fields)
+
+        return queryset
+
+    
 class InventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
     """
     permission_classes = (AllowAny, )
-    filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
+    filter_backends = (filters.DjangoFilterBackend,OrderingFilter,CustomOrderFilter) #
     filterset_class = DataFilter
     ordering_fields = '__all__'
     
