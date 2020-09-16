@@ -322,8 +322,10 @@ class GetTemplateStatus(APIView):
                 if action['recipient_email'] == recipient_email:
                     if action['action_status'] == 'SIGNED':
                         is_signed = True
+                        break
                     else:
                         is_signed = False
+                        break
             if response['code'] == 0:
                 return Response({
                     'code': 0,
