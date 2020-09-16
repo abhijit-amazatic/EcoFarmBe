@@ -40,6 +40,9 @@ class DataFilter(FilterSet):
     labtest__CBL__in = CharInFilter(field_name='labtest__CBL', lookup_expr='in')
     labtest__THCVA__in = CharInFilter(field_name='labtest__THCVA', lookup_expr='in')
     labtest__CBDV__in = CharInFilter(field_name='labtest__CBDV', lookup_expr='in')
+    labtest__Total_THC__in = CharInFilter(field_name='labtest__Total_THC', lookup_expr='in')
+    labtest__Total_CBD__in = CharInFilter(field_name='labtest__Total_CBD', lookup_expr='in')
+    labtest__Box_Link__in = CharInFilter(field_name='labtest__Box_Link', lookup_expr='in')
     actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
             
     def get_cultivars(self, queryset, name, value):
@@ -62,6 +65,7 @@ class DataFilter(FilterSet):
         'product_type':['icontains', 'exact'],
         'cf_pesticide_summary':['icontains', 'exact'],
         'cf_status':['icontains', 'exact'],
+        'labtest__Box_Link':['icontains', 'exact'],
         'labtest__THC':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBD':['gte', 'lte', 'gt', 'lt'],
         'labtest__d_8_THC':['gte', 'lte', 'gt', 'lt'],
@@ -75,6 +79,8 @@ class DataFilter(FilterSet):
         'labtest__THCVA':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
         'cf_quantity_estimate': ['gte', 'lte', 'gt', 'lt'],
+        'labtest__Total_THC':['gte', 'lte', 'gt', 'lt'],
+        'labtest__Total_CBD':['gte', 'lte', 'gt', 'lt'],    
         'actual_available_stock': ['gte', 'lte', 'gt', 'lt']
         }
 
