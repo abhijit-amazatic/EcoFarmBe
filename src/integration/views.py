@@ -544,38 +544,6 @@ class GetDocumentStatus(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
         return Response({'code': 1, 'error': 'No request id provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
-class GetTemplateStatus(APIView):
-    """
-    View class to get Zoho sign template status.
-    """
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request):
-        """
-        Get Zoho sign document status.
-        """
-        request_id = request.query_params.get('request_id')
-        recipient_email = request.query_params.get('recipient_email')
-        if request_id:
-            response = get_document(request_id)
-            status = response['requests']['request_status']
-            actions = response['requests']['actions']
-            for action in actions:
-                if action['recipient_email'] == recipient_email:
-                    if action['action_status'] == 'SIGNED':
-                        is_signed = True
-                    else:
-                        is_signed = False
-            if response['code'] == 0:
-                return Response({
-                    'code': 0,
-                    'status': status,
-                    'is_singed_by_user': is_signed})
-            else:
-                return Response({'code': 1, 'error': 'Incorrect request id or Document not in Zoho sign'},
-                                status=status.HTTP_400_BAD_REQUEST)
-        return Response({'code': 1, 'error': 'No request id provided.'}, status=status.HTTP_400_BAD_REQUEST)
-
 class GetSignURL(APIView):
     """
     View class to get Zoho sign url.
