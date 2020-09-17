@@ -103,7 +103,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         """
         Object level validation.after brand Associated properly associate brand with license
         """
-        if self.context['request'].method == 'PATCH':
+        if self.context['request'].method == 'PATCH' and LicenseProfile.objects.filter(id=self.context['request'].parser_context["kwargs"]["pk"]).exists():
             user_brands = Brand.objects.filter(ac_manager=self.context['request'].user).values_list('id', flat=True)
             if self.context['request'].data.get('brand_association') not in user_brands:
                 raise serializers.ValidationError(
