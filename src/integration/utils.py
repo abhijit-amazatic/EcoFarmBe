@@ -114,7 +114,7 @@ def get_cultivars_date(key, value, obj, crm_obj):
         e = value.split('_')
         if obj:
             date = obj[e[0]][int(e[1])-1]['harvest_date']
-            date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
+            date = datetime.strptime(date, '%Y-%m-%d')
             return date
     except Exception as exc:
         return []
