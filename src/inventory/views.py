@@ -156,6 +156,8 @@ class CultivarCategoryView(APIView):
     """
     Return distinct cultivar categroies.
     """
+    permission_classes = (AllowAny, )
+
     def get(self, request):
         """
         Return QuerySet.
