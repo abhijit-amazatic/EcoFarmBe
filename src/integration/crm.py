@@ -166,12 +166,14 @@ def parse_fields(module, key, value, obj, crm_obj):
         v = value.split('.')
         if len(v) == 2 and obj.get(v[0]):
             return obj.get(v[0]).get(v[1])
-    if value.startswith('po_cultivars'):
+    if value.startswith('cultivars'):
         cultivars = list()
-        for i in ['po_mixed_light', 'po_outdoor_autoflower', 'po_outdoor_full_season', 'po_indoor']:
-            for cultivar in obj.get(i)['cultivars']:
-                cultivars.extend(cultivar['cultivar_names'])
-        return cultivars
+        dictionary = obj.get('cr.overview')
+        if dictionary:
+            for i in dictionary:
+                for j in i['cultivars']:
+                    cultivars.extend(j['cultivar_names'])
+        return list(set(cultivars))
     
 def get_record(module, record_id, full=False):
     """
@@ -343,11 +345,11 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     for license in result['response']['orignal_data'][0]['Licenses_List']:
                         data['Licenses'] = license
                         r = create_records('Vendors_X_Licenses', [data])
-                if result['response']['orignal_data'][0].get('po_cultivars'):
+                if result['response']['orignal_data'][0].get('Cultivars_List'):
                     data = dict()
                     l = list()
                     data['Cultivar_Associations'] = record_response[0]['details']['id']
-                    for j in result['response']['orignal_data'][0]['po_cultivars']:
+                    for j in result['response']['orignal_data'][0]['Cultivars_List']:
                             r = search_query('Cultivars', j, 'Name')
                             if r['status_code'] == 200:
                                 data['Cultivars'] = r['response'][0]['id']

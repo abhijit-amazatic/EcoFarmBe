@@ -125,7 +125,7 @@ CRM_FORMAT  = {
         "Sellers_Permit_Box_Link": "Sellers_Permit_Box_Link",
         "Sellers_Permit_Expiration_Date": "Sellers_Permit_Expiration_Date",
         #Cultivar Questionaire
-        "Cultivars": "cultivars_parse",
+        "Cultivars_List": "cultivars_parse",
         "Indoor_Mixed_Lighting_Type": "lighting_type",
         "Types_of_Nutrients_Used": "type_of_nutrients_parse",
         "Would_you_grow_genetics_suggested_by_Thrive": "interested_in_growing_genetics",
