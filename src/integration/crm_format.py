@@ -252,6 +252,9 @@ CRM_FORMAT  = {
         "Canopy_Square_Feet_Mixed_Light": "co.0.canopy_sqf_parse",
         "Annual_Harvests_Mixed_Light": "co.0.no_of_harvest_parse",
         "Plants_per_Cycle_Mixed_Light": "co.0.plants_per_cycle_parse",
+        "Canopy_Square_Feet_Autoflower": "co.1.canopy_sqf_parse",
+        "Annual_Harvests_Autoflower": "co.1.no_of_harvest_parse",
+        "Plants_per_Cycle_Autoflower": "co.1.plants_per_cycle_parse",
         #Farm Profile
         "Ethics_Certification": "ethics_certification",
         "Region": "region",
