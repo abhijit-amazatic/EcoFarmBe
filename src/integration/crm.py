@@ -665,7 +665,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 final_dict['exception'] = exc
                 continue
             final_list[record.id] = final_dict
-        return final_dict
+        return final_list
 
 @app.task(queue="general")
 def get_accounts_from_crm(legal_business_name):

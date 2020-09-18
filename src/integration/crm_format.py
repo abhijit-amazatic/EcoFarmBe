@@ -386,7 +386,7 @@ CRM_FORMAT  = {
         "Driver_s_Name": "",
         "License_Plate_Number": "",
         "Billing_Company_Name": "billing_compony_name",
-        "Preferred_Payment_Method": "preferred_payment",
+        #"Preferred_Payment_Method": "preferred_payment_parse",
         "Billing_Street": "billing_street",
         "Bank_Routing_Number": "",
         "Billing_City": "billing_city",
@@ -426,7 +426,7 @@ CRM_FORMAT  = {
     },
     "Brands_X_Accounts": {
         "Brand": "brands",
-        "Vendor": "accounts"
+        "Account": "accounts"
     },
     "Vendors_X_Licenses": {
         "Licenses_Module": "Licenses_Module",
