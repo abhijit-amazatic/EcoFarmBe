@@ -566,7 +566,6 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 d.update({'cr.' + k:v})
         except Exception:
             pass
-        d.update(license_db.program_overview.__dict__)
         d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
         l.append(d['license_id'])
         d.update({'licenses': l})    
