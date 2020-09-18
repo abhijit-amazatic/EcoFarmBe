@@ -15,7 +15,7 @@ def get_client():
     """
     return Client(TWILIO_ACCOUNT, TWILIO_AUTH_TOKEN)
 
-def send_sms(to, from_, body):
+def send_sms(to, body, from_=DEFAULT_PHONE_NUMBER):
     """
     Send sms to contact.
     
