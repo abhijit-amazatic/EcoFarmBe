@@ -28,22 +28,23 @@ def send_sms(to, from_, body):
     except TwilioRestException as exc:
         return exc
 
-def make_call(to, from_, body,
-              url='http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient'):
+def make_call(to, from_, body_plain=None, body_xml=None):
     """
     Make a call to contact.
     
     @param to: receivers contact number.
     @param from: senders contact number.
-    @param body: sms body.
+    @param body_plain: plain text to send as automated voice.
+    @param body_xml: already generated automated xml voice.
     """
     try:
         client = get_client()
+        if body_plain:
+            body_xml = get_twiml(body_plain)
         call = client.calls.create(
             to=to,
             from_=from_,
-            url=url,
-            twiml=get_twiml(body))
+            twiml=body_xml)
         return call
     except TwilioRestException as exc:
         return exc
@@ -55,3 +56,12 @@ def get_twiml(body):
     response = VoiceResponse()
     response.say(body, loop=5)
     return response
+
+def get_verfication_twiml(verification_code):
+    """
+    Get verification twiml.
+    """
+    if verification_code:
+        body = f'Your verification code is {verification_code}.'
+        return get_twiml(body)
+    return None

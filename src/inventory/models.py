@@ -97,6 +97,7 @@ class Inventory(models.Model):
     cf_lab_test_sample_id = models.CharField(_('cf_lab_test_sample_id'), blank=True, null=True, max_length=100)
     cf_quantity_estimate = models.FloatField(_('cf_quantity_estimate'), blank=True, null=True)
     cf_metrc_source_package_id = models.CharField(_('cf_metrc_source_package_id'), blank=True, null=True, max_length=100)
+    cf_market_feedback = models.TextField(_('cf_market_feedback'), blank=True, null=True)
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
