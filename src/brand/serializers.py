@@ -8,7 +8,7 @@ from rest_framework import serializers
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileReport)
 from user.models import User
 from core.utility import (notify_admins_on_profile_registration,)
-from integration.crm import insert_vendors
+from integration.crm import (insert_vendors,insert_accounts,)
 
 class BrandSerializer(serializers.ModelSerializer):
     """
@@ -64,10 +64,16 @@ class LicenseSerializer(serializers.ModelSerializer):
             try:
                 profile = LicenseProfile.objects.get(license=instance.id)
                 notify_admins_on_profile_registration(profile.license.created_by.email,profile.name)
-                if instance.brand:
-                    insert_vendors.delay(id=instance.brand.id)
+                if profile.license.profile_category == 'cultivation':
+                    if instance.brand:
+                        insert_vendors.delay(id=instance.brand.id)
+                    else:
+                        insert_vendors.delay(id=instance.id,is_single_user=True)
                 else:
-                    insert_vendors.delay(id=instance.id,is_single_user=True)
+                    if instance.brand:
+                        insert_accounts.delay(id=instance.brand.id)
+                    else:
+                        insert_accounts.delay(id=instance.id,is_single_user=True)
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
