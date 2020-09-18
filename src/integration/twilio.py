@@ -1,7 +1,9 @@
 """
 Twilio Integration.
 """
-from core.settings import (TWILIO_ACCOUNT, TWILIO_AUTH_TOKEN,)
+from core.settings import (
+    TWILIO_ACCOUNT, TWILIO_AUTH_TOKEN,
+    DEFAULT_PHONE_NUMBER,)
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 from twilio.base.exceptions import TwilioRestException
@@ -57,11 +59,12 @@ def get_twiml(body):
     response.say(body, loop=5)
     return response
 
-def get_verfication_twiml(verification_code):
+def verification_call(to, from_=DEFAULT_PHONE_NUMBER, verification_code=None):
     """
-    Get verification twiml.
+    Call for verification with automated response.
     """
     if verification_code:
+        verification_code = ' '.join(list(verification_code))
         body = f'Your verification code is {verification_code}.'
-        return get_twiml(body)
+        return make_call(to=to, from_=from_, body_xml=get_twiml(body))
     return None
