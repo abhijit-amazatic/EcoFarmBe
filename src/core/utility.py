@@ -104,7 +104,7 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
     role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
     
     pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
-    license_obj = License.objects.filter(id=self.license_obj_id)
+    license_obj = License.objects.filter(id=license_obj_id)
     if pro_contact_obj:
         employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
         extracted_employee = [i for i in employee_data if i.get('employee_email')]      
