@@ -15,8 +15,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
 from django.conf import settings
 from core.permissions import IsAuthenticatedBrandPermission
-from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview,ProfileCategory,)
-from .serializers import (BrandSerializer,BrandCreateSerializer,LicenseSerializer,ProfileContactSerializer,CultivationOverviewSerializer,LicenseProfileSerializer,FinancialOverviewSerializer,CropOverviewSerializer,ProgramOverviewSerializer,)
+from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview,ProfileCategory,ProfileReport,)
+from .serializers import (BrandSerializer,BrandCreateSerializer,LicenseSerializer,ProfileContactSerializer,CultivationOverviewSerializer,LicenseProfileSerializer,FinancialOverviewSerializer,CropOverviewSerializer,ProgramOverviewSerializer,ProfileReportSerializer)
 
 
 class CustomPagination(PageNumberPagination):
@@ -85,7 +85,6 @@ class LicenseViewSet(viewsets.ModelViewSet):
         """
         license = License.objects.filter()
         if self.action == "list":
-            print('in listv action')
             license = license.select_related('brand')
         elif self.action == "profile_contact":
             license = license.select_related('profile_contact')
@@ -295,3 +294,32 @@ class KpiViewSet(APIView):
     
 
 
+class ProfileReportViewSet(viewsets.ModelViewSet):
+    """
+    All Vendor/account profile related report data stored here.
+    """
+    serializer_class = ProfileReportSerializer
+    permission_classes = (IsAuthenticatedBrandPermission,)
+    filter_backends = [filters.SearchFilter,DjangoFilterBackend]
+    search_fields = ['report_name']
+    filterset_fields = ['profile']
+
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        reports = ProfileReport.objects.filter()
+        if self.action == "list":
+            reports = reports.select_related('user')
+        reports = reports.filter(user=self.request.user)
+        return reports
+
+    def create(self, request):
+        """
+        This endpoint is used to create report
+        """
+        serializer = ProfileReportSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    

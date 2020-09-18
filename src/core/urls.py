@@ -42,7 +42,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiViewSet,)
+from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiViewSet,ProfileReportViewSet,)
 
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
@@ -51,7 +51,7 @@ router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
-#router.register(r'profile-report', ProfileReportViewSet, base_name="report")
+router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 
 
 

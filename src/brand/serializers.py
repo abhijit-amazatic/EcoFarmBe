@@ -5,7 +5,7 @@ Serializer to validate brand related modules.
 import requests
 from django.conf import settings
 from rest_framework import serializers
-from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview)
+from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileReport)
 from user.models import User
 from core.utility import (notify_admins_on_profile_registration,)
 from integration.crm import insert_vendors
@@ -142,5 +142,25 @@ class ProgramOverviewSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model  = ProgramOverview
-        fields = ('__all__')                           
+        fields = ('__all__')
+
+        
+class ProfileReportSerializer(serializers.ModelSerializer):
+    """
+    This defines ProfileReport serializer
+    """
+    def validate(self, obj):
+        """
+        Object level validation.Normal user should allowed to upload reports related to his VendorProfile.
+        """
+        if self.context['request'].method == 'POST':
+            if not (obj['user'] == self.context['request'].user) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
+                raise serializers.ValidationError(
+                    "You are not allowed to create report with another user!")
+            
+        return obj
+    
+    class Meta:
+        model = ProfileReport
+        fields = ('__all__')                
         
