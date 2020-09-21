@@ -114,12 +114,20 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
             if self.context['request'].data.get('brand_association') not in user_brands:
                 raise serializers.ValidationError(
                     "You can only associate/update license related to your brand only!")
-            license_obj = License.objects.get(id=self.context['request'].parser_context["kwargs"]["pk"])
-            if license_obj:
-                license_obj.brand_id = self.context['request'].data.get('brand_association')
-                license_obj.save()
-            
         return attrs
+
+    def update(self, instance, validated_data):
+        """
+        Update for licenseprofile
+        """
+        if not instance.brand_association:
+            if validated_data.get('brand_association'):
+                license_obj = License.objects.filter(id=instance.license.id)
+                if license_obj:   
+                    license_obj[0].brand_id = validated_data.get('brand_association')
+                    license_obj[0].save()
+        user = super().update(instance, validated_data)
+        return user
     
     class Meta:
         model  = LicenseProfile
