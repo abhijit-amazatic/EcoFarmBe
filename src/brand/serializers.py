@@ -109,23 +109,23 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         """
         Object level validation.after brand Associated properly associate brand with license
         """
-        if self.context['request'].method == 'PATCH' and LicenseProfile.objects.filter(id=self.context['request'].parser_context["kwargs"]["pk"]).exists():
-            user_brands = Brand.objects.filter(ac_manager=self.context['request'].user).values_list('id', flat=True)
-            if self.context['request'].data.get('brand_association') not in user_brands:
-                raise serializers.ValidationError(
-                    "You can only associate/update license related to your brand only!")
+        if self.context['request'].method == 'PATCH':
+            profile = LicenseProfile.objects.filter(license_id=self.context['request'].parser_context["kwargs"]["pk"])
+            if self.context['request'].data.get('brand_association'):
+                user_brands = Brand.objects.filter(ac_manager=self.context['request'].user).values_list('id', flat=True)
+                if self.context['request'].data.get('brand_association') not in user_brands:
+                    raise serializers.ValidationError(
+                        "You can only associate/update license related to your brand only!")
+                license_obj = License.objects.filter(id=self.context['request'].parser_context["kwargs"]["pk"])
+                if license_obj:
+                    license_obj[0].brand_id = attrs.get('brand_association')
+                    license_obj[0].save()
         return attrs
 
     def update(self, instance, validated_data):
         """
         Update for licenseprofile
         """
-        if not instance.brand_association:
-            if validated_data.get('brand_association'):
-                license_obj = License.objects.filter(id=instance.license.id)
-                if license_obj:   
-                    license_obj[0].brand_id = validated_data.get('brand_association')
-                    license_obj[0].save()
         user = super().update(instance, validated_data)
         return user
     
