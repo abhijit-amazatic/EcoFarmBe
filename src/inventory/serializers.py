@@ -3,7 +3,7 @@ Serializer for inventory
 """
 import json
 from rest_framework import serializers
-from .models import (Inventory, )
+from .models import (Inventory, ItemFeedback)
 from core.settings import (INVENTORY_TAXES, )
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -55,3 +55,11 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'cf_quantity_estimate',
             'actual_available_stock',
             'documents')
+        
+class ItemFeedbackSerializer(serializers.ModelSerializer):
+    """
+    User item feedback serializer.
+    """
+    class Meta:
+        model = ItemFeedback
+        fields = ('__all__')

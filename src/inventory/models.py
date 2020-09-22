@@ -6,6 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
+from user.models import (User, )
+from core.mixins.models import (TimeStampFlagModelMixin, )
 
 
 class Inventory(models.Model):
@@ -104,3 +106,13 @@ class Inventory(models.Model):
     
     def __str__(self):
         return self.name
+    
+
+class ItemFeedback(TimeStampFlagModelMixin, models.Model):
+    """
+    Inventory item feedbacks by user.
+    """
+    user = models.ForeignKey(User, verbose_name=_('User'), related_name='user', on_delete=models.PROTECT)
+    item = models.ForeignKey(Inventory, verbose_name=_('Item'), related_name='item', on_delete=models.PROTECT)
+    feedback = models.TextField(_('feedback'))
+    estimate_number = models.CharField(_('Estimate Number'), blank=True, null=True, max_length=100)

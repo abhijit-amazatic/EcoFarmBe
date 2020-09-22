@@ -39,7 +39,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                TemplateSignView, GetDistanceView,
                                GetSalesPersonView, GetTemplateStatus)
 from inventory.views import (InventoryViewSet, InventorySyncView,
-                             CultivarCategoryView, InventoryStatusTypeView)
+                             CultivarCategoryView, InventoryStatusTypeView,
+                             ItemFeedbackViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiViewSet,ProfileReportViewSet,)
@@ -47,6 +48,7 @@ from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiView
 router = SimpleRouter()
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
+router.register(r'item-feedback', ItemFeedbackViewSet, base_name="feedback")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'brand', BrandViewSet, base_name="brand")

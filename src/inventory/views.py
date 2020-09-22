@@ -11,8 +11,8 @@ from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
-from .serializers import (InventorySerializer, LogoutInventorySerializer, )
-from .models import (Inventory, )
+from .serializers import (InventorySerializer, LogoutInventorySerializer, ItemFeedbackSerializer)
+from .models import (Inventory, ItemFeedback)
 from integration.inventory import (sync_inventory, )
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -136,6 +136,26 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Return QuerySet.
         """
         return Inventory.objects.filter(cf_cfi_published=True)
+
+class ItemFeedbackViewSet(viewsets.ModelViewSet):
+    """
+    Item Feedback View
+    """
+    permission_classes = (IsAuthenticated, )
+    filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
+    ordering_fields = '__all__'
+    
+    def get_serializer_class(self):
+        """
+        Return serializer.
+        """
+        return ItemFeedbackSerializer
+    
+    def get_queryset(self):
+        """
+        Return QuerySet.
+        """
+        return ItemFeedback.objects.all()
 
 class InventorySyncView(APIView):
     """
