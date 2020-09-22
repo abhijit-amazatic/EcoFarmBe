@@ -113,6 +113,6 @@ class ItemFeedback(TimeStampFlagModelMixin, models.Model):
     Inventory item feedbacks by user.
     """
     user = models.ForeignKey(User, verbose_name=_('User'), related_name='user', on_delete=models.PROTECT)
-    item = models.ForeignKey(Inventory, verbose_name=_('Item'), related_name='item', on_delete=models.PROTECT)
+    item = models.CharField(_('item_id'), blank=True, null=True, max_length=100)
     feedback = models.TextField(_('feedback'))
     estimate_number = models.CharField(_('Estimate Number'), blank=True, null=True, max_length=100)
