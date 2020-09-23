@@ -37,8 +37,10 @@ class DataFilter(FilterSet):
     labtest__CBC__in = CharInFilter(field_name='labtest__CBC', lookup_expr='in')
     labtest__CBCA__in = CharInFilter(field_name='labtest__CBCA', lookup_expr='in')
     labtest__CBGA__in = CharInFilter(field_name='labtest__CBGA', lookup_expr='in')
+    labtest__CBG__in = CharInFilter(field_name='labtest__CBG', lookup_expr='in')
     labtest__CBL__in = CharInFilter(field_name='labtest__CBL', lookup_expr='in')
     labtest__THCVA__in = CharInFilter(field_name='labtest__THCVA', lookup_expr='in')
+    labtest__THCV__in = CharInFilter(field_name='labtest__THCV', lookup_expr='in')
     labtest__CBDV__in = CharInFilter(field_name='labtest__CBDV', lookup_expr='in')
     labtest__Total_THC__in = CharInFilter(field_name='labtest__Total_THC', lookup_expr='in')
     labtest__Total_CBD__in = CharInFilter(field_name='labtest__Total_CBD', lookup_expr='in')
@@ -75,8 +77,10 @@ class DataFilter(FilterSet):
         'labtest__CBC':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBCA':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBGA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__CBG':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBL':['gte', 'lte', 'gt', 'lt'],
         'labtest__THCVA':['gte', 'lte', 'gt', 'lt'],
+        'labtest__THCV':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
         'cf_quantity_estimate': ['gte', 'lte', 'gt', 'lt'],
         'labtest__Total_THC':['gte', 'lte', 'gt', 'lt'],
