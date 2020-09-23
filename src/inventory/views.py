@@ -219,6 +219,8 @@ class InventoryUpdateDateView(APIView):
     """
     Return inventory update date.
     """
+    permission_classes = (AllowAny, )
+
     def get(self, request):
         """
         Return inventory update date.
