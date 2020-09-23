@@ -40,7 +40,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetSalesPersonView, GetTemplateStatus)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
-                             ItemFeedbackViewSet)
+                             ItemFeedbackViewSet, InventoryUpdateDateView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiViewSet,ProfileReportViewSet,)
@@ -99,6 +99,7 @@ urlpatterns = [
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(), name='cultivar_category'),
     path(r'inventory/status/', InventoryStatusTypeView.as_view(), name='get_status_types'),
+    path(r'inventory/last-modified-time/', InventoryUpdateDateView.as_view(), name='get_last_modified_time'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
     path(r'sign/template-status/', GetTemplateStatus.as_view(), name='template_status'),

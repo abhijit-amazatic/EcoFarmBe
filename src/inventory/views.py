@@ -113,7 +113,6 @@ class CustomOrderFilter(OrderingFilter):
 
         return queryset
 
-    
 class InventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
@@ -211,3 +210,19 @@ class InventoryStatusTypeView(APIView):
         return Response({
             'status_code': 200,
             'response': [i['cf_status'] for i in categories]})
+        
+class InventoryUpdateDateView(APIView):
+    """
+    Return inventory update date.
+    """
+    def get(self, request):
+        """
+        Return inventory update date.
+        """
+        items = Inventory.objects.filter(
+            cf_cfi_published=True).order_by('-last_modified_time')
+        if items.exists():
+            return Response({
+                'last_modified_time': items.first().last_modified_time},
+            status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
