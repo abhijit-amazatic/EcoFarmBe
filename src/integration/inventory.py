@@ -15,7 +15,7 @@ from core.settings import (
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
 from labtest.models import (LabTest, )
-from inventory.models import Inventory as InventoryModel
+from inventory.models import PriceChange, Inventory as InventoryModel
 from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, search_query,)
 from integration.box import (upload_file_stream, create_folder,
@@ -181,6 +181,41 @@ def upload_file_to_box(item_name, item_id, file_obj):
     except Exception:
         return get_preview_url(new_file)
 
+def get_price_change(old_price, new_price):
+    """
+    Return price change.
+    """
+    return round(((new_price - old_price)/old_price)*100, 2)
+    
+def update_price_change(price_data, record):
+    """
+    Update new price in db.
+    """
+    price_change_array = dict()
+    item_id = record['item_id']
+    if price_data.get(item_id):
+        old_price = price_data.get(item_id)
+        new_price = record['price']
+        price_change = get_price_change(old_price, new_price)
+        price_change_array['date'] = datetime.now().isoformat()
+        price_change_array['price'] = price_change    
+        try:
+            pc = PriceChange.objects.get(item_id=item_id)
+            array = pc.price_array
+            array.append(price_change_array)
+            pc.price_array = array
+            pc.save()
+        except PriceChange.DoesNotExist as exc:
+            print('exception', exc)
+            PriceChange.objects.create(
+                item_id=item_id,
+                price_array=[price_change_array],
+            )
+        item = InventoryModel.objects.get(item_id=item_id)
+        item.current_price_change = price_change
+        item.save()
+    return True
+
 def fetch_inventory_from_list(inventory_name, inventory_list):
     """
     Fetch list of inventory from Zoho Inventory.
@@ -213,7 +248,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
                 })
             continue
 
-def fetch_inventory(inventory_name, days=1):
+def fetch_inventory(inventory_name, days=1, price_data=None):
     """
     Fetch latest inventory from Zoho Inventory.
     """
@@ -243,6 +278,7 @@ def fetch_inventory(inventory_name, days=1):
                     item_id=record['item_id'],
                     name=record['name'],
                     defaults=record)
+                update_price_change(price_data, record)
             except Exception as exc:
                 print({
                     'item_id': record['item_id'],
@@ -254,11 +290,17 @@ def sync_inventory(inventory_name, response):
     """
     Webhook for Zoho inventory to sync inventory real time.
     """
+    price_data = {}
     inventory = get_inventory_obj(inventory_name)
     record = json.loads(unquote(response))['item']
     record = inventory.parse_item(response=record, is_detail=True)
     try:
         record['pre_tax_price'] = get_pre_tax_price(record)
+        try:
+            item = InventoryModel.objects.get(item_id=record['item_id'])
+            price_data[record['item_id']] = item.price
+        except InventoryModel.DoesNotExist:
+            price_data[record['item_id']] = 0
         cultivar = get_cultivar_from_db(record['cf_strain_name'])
         if cultivar:
             record['cultivar'] = cultivar
@@ -272,6 +314,7 @@ def sync_inventory(inventory_name, response):
             item_id=record['item_id'],
             name=record['name'],
             defaults=record)
+        update_price_change(price_data, record)
         return obj.item_id
     except Exception as exc:
         print(exc)

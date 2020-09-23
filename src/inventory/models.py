@@ -138,6 +138,7 @@ class Inventory(models.Model):
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
     pre_tax_price = models.FloatField(_('pre_tax_price'), blank=True, null=True)
     extra_documents = GenericRelation(Documents)
+    current_price_change = models.FloatField(_('Current Price Change'), blank=True, null=True)
     
     def __str__(self):
         return self.name
@@ -165,3 +166,11 @@ class InTransitOrder(TimeStampFlagModelMixin, models.Model):
         unique_together = (('user', 'profile_id'), )
         verbose_name = _('In Transit order')
         verbose_name_plural = _('In Transit orders')
+    
+
+class PriceChange(TimeStampFlagModelMixin, models.Model):
+    """
+    Price change class.
+    """
+    item_id = models.CharField(_('item_id'), blank=True, null=True, max_length=100)
+    price_array = ArrayField(JSONField(default=dict), blank=True, null=True)
