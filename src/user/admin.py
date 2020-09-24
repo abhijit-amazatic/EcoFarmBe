@@ -79,15 +79,15 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     
     #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
-    list_display = ('email', 'is_approved','approved_on','approved_by_member','date_joined',)
+    list_display = ('email', 'is_approved', 'phone', 'approved_on','approved_by_member','date_joined',)
     list_filter = ('is_approved', 'is_verified',)
     list_per_page = 25
     search_fields = ('username', 'legal_business_name', 'email',)
     ordering = ('-date_joined',)
-    readonly_fields = ['is_verified','approved_on','approved_by',]
+    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified', 'phone']
     actions = [approve_user, ] 
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('is_approved','approved_on','approved_by','is_verified',)}),
+            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified',)}),
     )     
     
     @transaction.atomic

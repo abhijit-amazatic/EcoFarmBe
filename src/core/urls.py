@@ -23,7 +23,10 @@ from rest_framework.routers import SimpleRouter
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView,SendMailView,
                         ResetPasswordView, CategoryView,
-                        SearchQueryView,VerificationView,SendVerificationView,)
+                        SearchQueryView,VerificationView,
+                        SendVerificationView,
+                        SendPhoneNumberVerificationCodeView,
+                        PhoneNumberVerificationView,)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView,SearchCultivars,
@@ -68,6 +71,8 @@ urlpatterns = [
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
     path(r'user/send-verification/', SendVerificationView.as_view(), name='verification-user'),
+    path(r'user/send-sms-verification/', SendPhoneNumberVerificationCodeView.as_view(), name='verification-user'),
+    path(r'user/sms-verify/', PhoneNumberVerificationView.as_view(), name='verification-user'),
     path(r'category/', CategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),

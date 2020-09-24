@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django_filters',
     'user',
     'knox',
+    'django_otp',
+    'phonenumber_field',
     'corsheaders',
     'utils',
     'core',

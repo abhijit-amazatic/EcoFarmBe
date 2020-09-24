@@ -14,7 +14,19 @@ from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
 from .models import User, MemberCategory
-from .serializers import (UserSerializer, CreateUserSerializer, LogInSerializer, ChangePasswordSerializer, SendMailSerializer, ResetPasswordSerializer, VerificationSerializer, get_encrypted_data, SendVerificationSerializer,)
+from .serializers import (
+    UserSerializer,
+    CreateUserSerializer,
+    LogInSerializer,
+    ChangePasswordSerializer,
+    SendMailSerializer,
+    ResetPasswordSerializer,
+    VerificationSerializer,
+    get_encrypted_data,
+    SendVerificationSerializer,
+    PhoneNumberSerializer,
+    PhoneNumberVerificationSerializer,
+)
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,)
@@ -285,8 +297,48 @@ class SendVerificationView(APIView):
             response = Response("false", status=400)
         return response
     
-# def test():
-#     #print('in mail test')
-#     record = {"first_name":"Vikrant","last_name":"Godse","email":"vikrant.godse@ecofarm.ag","company_name":"Amazatic","title":"Test","vendor_category":["Cultivator"],"heard_from":"Advertisement","phone":"8380803130","message":"My test"}
-#     mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':record.get("vendor_category"),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message")},"New lead via connect page.",'vikrant.g@amazatic.com')
-#     
+class SendPhoneNumberVerificationCodeView(GenericAPIView):
+    """
+    Send Verification SMS
+    """
+    serializer_class = PhoneNumberSerializer
+    permission_classes = (AllowAny,)
+    def post(self, request):
+        """
+        Post method for verification SMS
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.get(phone=serializer.validated_data['phone_number'])
+            if not user.is_phone_verified:
+                user.send_otp()
+                return Response({"Verification SMS sent!"}, status=200)
+            else:
+                return Response("Phone is already Verified!", status=400)
+        except User.DoesNotExist:
+            return Response({"detail": "Phone number in not registered."}, status=404)
+         
+class PhoneNumberVerificationView(GenericAPIView):
+    """
+    Verification View 
+    """
+    serializer_class = PhoneNumberVerificationSerializer
+    permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        """
+        Post method for verification view.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.get(phone=serializer.validated_data['phone_number'])
+            if not user.verify_otp(serializer.validated_data['code']):
+                user.is_phone_verified = True
+                user.save()
+                return Response({"Phone Verified successfully!"}, status=200)
+            else:
+                return Response({"detail": "Verification code dit not match."}, status=400)
+        except User.DoesNotExist:
+            return Response({"detail": "Phone number in not registered."}, status=404)

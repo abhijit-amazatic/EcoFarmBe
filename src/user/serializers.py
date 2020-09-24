@@ -10,6 +10,7 @@ from django.contrib.auth import (authenticate, login)
 from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
+from phonenumber_field.serializerfields import PhoneNumberField
 from .models import User
 from integration.box import (get_preview_url, )
 
@@ -273,3 +274,16 @@ class SendVerificationSerializer(serializers.Serializer):  # pylint: disable=W02
     """
     email = serializers.CharField(max_length=255)
     
+
+class PhoneNumberSerializer(serializers.Serializer):  # pylint: disable=W0223
+    """
+    Serializer for requesting verification SMS
+    """
+    phone_number = PhoneNumberField(max_length=15)
+ 
+ 
+class PhoneNumberVerificationSerializer(PhoneNumberSerializer):  # pylint: disable=W0223
+    """
+    Serializer for requesting extracting & decoing code.
+    """
+    code = serializers.CharField(min_length=6, max_length=6)

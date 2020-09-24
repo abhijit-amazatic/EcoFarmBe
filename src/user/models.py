@@ -1,12 +1,23 @@
 """
 User model defined here.
 """
+from binascii import unhexlify
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import (AbstractUser,)
 from django.utils.translation import ugettext_lazy as _
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, )
 from django.contrib.postgres.fields import (JSONField,)
+
+from django.utils import timezone
+
+# from django_otp.models import Device
+from django_otp.oath import totp
+from phonenumber_field.modelfields import PhoneNumberField
+
+from integration.apps.twilio import (send_sms,)
+from utils.otp import (random_hex_str, key_validator)
 
 
 class User(StatusFlagMixin,AbstractUser):
@@ -37,8 +48,14 @@ class User(StatusFlagMixin,AbstractUser):
         _('City'), max_length=150, blank=True, null=True)
     zip_code = models.CharField(
         _('Zip code'), max_length=20, null=True)
-    phone = models.CharField(
-        _('Phone'), max_length=20, null=True)
+    phone = PhoneNumberField(_('Phone'), unique=True,)
+    is_phone_verified = models.BooleanField(_('Is Phone Verified'), default=False)
+    key = models.CharField(
+        max_length=40,
+        validators=[key_validator],
+        default=random_hex_str,
+        help_text="Hex-encoded secret key"
+    )
     legal_business_name = models.CharField(
         _('Legal Business Name'), max_length=150, null=True, blank=True)
     business_dba = models.CharField(
@@ -81,7 +98,7 @@ class User(StatusFlagMixin,AbstractUser):
    
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'phone']
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
@@ -93,6 +110,37 @@ class User(StatusFlagMixin,AbstractUser):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+
+    @property
+    def bin_key(self):
+        return unhexlify(self.key.encode())
+
+    def verify_otp(self, token):
+        # local import to avoid circular import
+        no_digits = getattr(settings, 'TOTP_DIGITS', 6)
+        try:
+            token = int(token)
+        except ValueError:
+            return False
+
+        for drift in range(-5, 1):
+            if totp(self.bin_key, drift=drift, digits=no_digits) == token:
+                return True
+        return False
+
+    def generate_otp(self):
+        # local import to avoid circular import
+
+        """
+        Return current TOTP token.
+        """
+        no_digits = getattr(settings, 'TOTP_DIGITS', 6)
+        token = str(totp(self.bin_key, digits=no_digits)).zfill(no_digits)
+        return token
+
+    def send_otp(self):
+        token = self.generate_otp()
+        send_sms(to=self.phone.as_e164, body="Your verification code is "+token)
 
 
 class MemberCategory(models.Model):
