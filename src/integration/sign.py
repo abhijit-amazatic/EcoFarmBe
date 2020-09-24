@@ -142,7 +142,8 @@ def get_template(template_id):
 def send_template(
     template_id,
     recipients,
-    licenses):
+    licenses,
+    legal_business_names):
     """
     Send template to sign.
     """
@@ -153,7 +154,8 @@ def send_template(
             template_id,
             data['templates'],
             recipients,
-            licenses
+            licenses,
+            legal_business_names
         )
         if response['code'] == 0:
             return get_embedded_url_from_sign(
