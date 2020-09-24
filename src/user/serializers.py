@@ -5,6 +5,7 @@ Basically they are used for API representation & validation.
 import hashlib
 import base64
 from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth.password_validation import validate_password as default_validate_password
 from django.contrib.auth import (authenticate, login)
 from rest_framework import serializers
@@ -265,6 +266,10 @@ class VerificationSerializer(serializers.Serializer):  # pylint: disable=W0223
             raise serializers.ValidationError("User Does Not Exist")
 
         user.is_verified = True
+        if user.is_phone_verified:
+            user.is_approved = True
+            user.approved_on = timezone.now()
+            user.approved_by = {'email':"connect@thrive-society.com(Automated-Bot)"}
         user.save()
         return user    
 

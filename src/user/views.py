@@ -9,6 +9,7 @@ from rest_framework.viewsets import (ModelViewSet,)
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from django.conf import settings
+from django.utils import timezone
 from knox.models import AuthToken
 from knox.settings import knox_settings
 from core.permissions import UserPermissions
@@ -360,6 +361,10 @@ class PhoneNumberVerificationView(GenericAPIView):
             user = User.objects.get(phone=serializer.validated_data['phone_number'])
             if user.verify_otp(serializer.validated_data['code']):
                 user.is_phone_verified = True
+                if user.is_verified:
+                    user.is_approved = True
+                    user.approved_on = timezone.now()
+                    user.approved_by = {'email':"connect@thrive-society.com(Automated-Bot)"}
                 user.save()
                 return Response({"Phone Verified successfully!"}, status=200)
             else:

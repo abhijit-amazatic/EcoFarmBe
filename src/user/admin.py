@@ -72,7 +72,11 @@ approve_user.short_description = 'Approve Selected Users'
 class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     
     def approved_by_member(self, obj):
-        return obj.approved_by.get('email',"N/A")
+        if hasattr(obj,'approved_by') and obj.approved_by is not None :
+           return obj.approved_by.get('email',"N/A")
+        else:
+            return "N/A"
+        
 
     # def created_on(self,obj):
     #     return obj.created_on
