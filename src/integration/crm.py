@@ -740,6 +740,23 @@ def get_field(record, key, field):
         'Last_Activity_Time',
         'Modified_Time',
     ]
+    labtest_float_values = ['THC', 'CBD', 'THCA',
+                            'THCVA', 'THCV', 'CBDA',
+                            'CBGA', 'CBG', 'CBN',
+                            'CBL', 'CBCA', 'CBC', 'CBDV',
+                            'Cannabinoids', 'Total_CBD',
+                            'Total_Cannabinoids', 'Total_THC']
+    if field in labtest_float_values:
+        v = record.get(field)
+        if '%' in v:
+            v = v.strip('%')
+        if v == 'NA':
+            v = "-1"
+        elif v == 'ND':
+            v = "-2"
+        elif v == 'NT':
+            v = "-3"
+        return float(v)
     if field in ('created_by', 'modified_by'):
         return record.get(key).get('id')
     if field in ('parent_1', 'parent_2'):
@@ -822,7 +839,7 @@ def get_labtest(id=None, sku=None):
         response = search_query('Testing', sku, 'Inventory_SKU')
     if response['status_code'] != 200:
         return response
-    response = parse_crm_record('Testing', response['response'])
+    response = parse_crm_record('Testing', [response['response'][id]])
     return {'status_code': 200,
             'response': response}
     
