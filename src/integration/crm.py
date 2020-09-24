@@ -745,7 +745,8 @@ def get_field(record, key, field):
                             'CBGA', 'CBG', 'CBN',
                             'CBL', 'CBCA', 'CBC', 'CBDV',
                             'Cannabinoids', 'Total_CBD',
-                            'Total_Cannabinoids', 'Total_THC']
+                            'Total_Cannabinoids', 'Total_THC'
+                            'd_8_THC', 'Total_CBD']
     if field in labtest_float_values:
         v = record.get(field)
         if '%' in v:

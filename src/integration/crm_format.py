@@ -1023,7 +1023,7 @@ CRM_FORMAT  = {
             "Single_Line_81": "beta_Pinene",
             "Single_Line_143": "butanone",
             "cis_Nerolidol": "cis_Nerolidol",
-            "d_8_THC": "d_8_THC",
+            "d_8_THC": "d_8_THC_parse",
             "Single_Line_122": "ethanol",
             "Single_Line_142": "ether",
             "Single_Line_134": "ethyl_acetate",
