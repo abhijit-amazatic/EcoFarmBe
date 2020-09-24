@@ -334,7 +334,7 @@ class PhoneNumberVerificationView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             user = User.objects.get(phone=serializer.validated_data['phone_number'])
-            if not user.verify_otp(serializer.validated_data['code']):
+            if user.verify_otp(serializer.validated_data['code']):
                 user.is_phone_verified = True
                 user.save()
                 return Response({"Phone Verified successfully!"}, status=200)
