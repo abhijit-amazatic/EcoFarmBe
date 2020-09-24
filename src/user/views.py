@@ -184,9 +184,8 @@ class LogInView(APIView):
                 "existing_member":request.user.existing_member,
                 "is_verified":request.user.is_verified,
                 "is_approved":request.user.is_approved,
+                "is_phone_verified":request.user.is_phone_verified,
                 "status":request.user.status
-                
-                
             })
         else:
             response = Response({"data": serializer.errors})

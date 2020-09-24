@@ -91,7 +91,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi')
     
 
     def validate_password(self, password):
@@ -152,6 +152,8 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
             raise serializers.ValidationError("User Does Not Exist")
         if not get_user.is_verified:
             raise serializers.ValidationError('Email not confirmed!Please click the confirmation link sent your registered email.')
+        elif not get_user.is_phone_verified:
+            raise serializers.ValidationError('Phone Number is not Verified!Please Verify your phone Number with OTP received on your Phone.')
         else:    
             try:
                 email = data.get('email')
