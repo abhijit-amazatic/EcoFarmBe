@@ -4,34 +4,12 @@ Serializer for inventory
 import json
 from rest_framework import serializers
 from .models import (Inventory, ItemFeedback)
-from core.settings import (INVENTORY_TAXES, )
+
 
 class InventorySerializer(serializers.ModelSerializer):
     """
     Inventory Serializer
     """
-    pre_tax_price = serializers.SerializerMethodField()
-    
-    def get_pre_tax_price(self, obj):
-        """
-        Get pre tax price.
-        """
-        if not isinstance(INVENTORY_TAXES, dict):
-            taxes = json.loads(INVENTORY_TAXES)
-        else:
-            taxes = INVENTORY_TAXES
-        if 'Flower' in obj.category_name:
-            return obj.price - taxes['Flower']
-        elif 'Trim' in obj.category_name:
-            return obj.price - taxes['Trim']
-        
-        # Issue:- It will call Books API multiple times.
-        # taxes = get_tax_rates()
-        # if 'Flower' in obj.category_name:
-        #     return obj.price - taxes[ESTIMATE_TAXES['Flower']]
-        # elif 'Trim' in obj.category_name:
-            # return obj.price - taxes[ESTIMATE_TAXES['Trim']]
-    
     class Meta:
         model = Inventory
         depth = 1

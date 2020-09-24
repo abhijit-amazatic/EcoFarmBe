@@ -46,6 +46,7 @@ class DataFilter(FilterSet):
     labtest__Total_CBD__in = CharInFilter(field_name='labtest__Total_CBD', lookup_expr='in')
     labtest__Box_Link__in = CharInFilter(field_name='labtest__Box_Link', lookup_expr='in')
     actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
+    pre_tax_price = CharInFilter(field_name='pre_tax_price', lookup_expr='in')
             
     def get_cultivars(self, queryset, name, value):
         items = queryset.filter(
@@ -84,8 +85,9 @@ class DataFilter(FilterSet):
         'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
         'cf_quantity_estimate': ['gte', 'lte', 'gt', 'lt'],
         'labtest__Total_THC':['gte', 'lte', 'gt', 'lt'],
-        'labtest__Total_CBD':['gte', 'lte', 'gt', 'lt'],    
-        'actual_available_stock': ['gte', 'lte', 'gt', 'lt']
+        'labtest__Total_CBD':['gte', 'lte', 'gt', 'lt'],
+        'actual_available_stock': ['gte', 'lte', 'gt', 'lt'],
+        'pre_tax_price': ['gte', 'lte', 'gt', 'lt']
         }
 
 class CustomOrderFilter(OrderingFilter):

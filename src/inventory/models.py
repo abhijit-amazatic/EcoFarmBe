@@ -103,6 +103,7 @@ class Inventory(models.Model):
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
+    pre_tax_price = models.FloatField(_('pre_tax_price'), blank=True, null=True)
     
     def __str__(self):
         return self.name

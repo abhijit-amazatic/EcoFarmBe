@@ -10,6 +10,7 @@ from core.settings import (
     INVENTORY_EFL_ORGANIZATION_ID,
     INVENTORY_EFD_ORGANIZATION_ID,
     INVENTORY_BOX_ID,
+    INVENTORY_TAXES,
 )
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
@@ -117,6 +118,26 @@ def get_vendor_from_crm(vendor_name):
         return vendors.get('response')[0]
     return {}
 
+def get_pre_tax_price(record):
+    """
+    Get pre tax price.
+    """
+    if not isinstance(INVENTORY_TAXES, dict):
+        taxes = json.loads(INVENTORY_TAXES)
+    else:
+        taxes = INVENTORY_TAXES
+    if 'Flower' in record['category_name']:
+        return record['price'] - taxes['Flower']
+    elif 'Trim' in record['category_name']:
+        return record['price'] - taxes['Trim']
+
+    # Issue:- It will call Books API multiple times.
+    # taxes = get_tax_rates()
+    # if 'Flower' in record['category_name']:
+    #     return record['price'] - taxes[ESTIMATE_TAXES['Flower']]
+    # elif 'Trim' in record['category_name']:
+    #     return record['price'] - taxes[ESTIMATE_TAXES['Trim']]
+
 def check_documents(inventory_name, record):
     """
     Check if record has any documents.
@@ -169,6 +190,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
     for record in inventory_list:
         record = inventory_obj.get_inventory(item_id=record)
         try:
+            record['pre_tax_price'] = get_pre_tax_price(record)
             cultivar = get_cultivar_from_db(record['cf_strain_name'])
             if cultivar:
                 record['cultivar'] = cultivar
@@ -207,6 +229,7 @@ def fetch_inventory(inventory_name, days=1):
         page = records['page_context']['page'] + 1
         for record in records['items']:
             try:
+                record['pre_tax_price'] = get_pre_tax_price(record)
                 cultivar = get_cultivar_from_db(record['cf_strain_name'])
                 if cultivar:
                     record['cultivar'] = cultivar
@@ -235,6 +258,7 @@ def sync_inventory(inventory_name, response):
     record = json.loads(unquote(response))['item']
     record = inventory.parse_item(response=record, is_detail=True)
     try:
+        record['pre_tax_price'] = get_pre_tax_price(record)
         cultivar = get_cultivar_from_db(record['cf_strain_name'])
         if cultivar:
             record['cultivar'] = cultivar
