@@ -16,7 +16,7 @@ from django.utils import timezone
 from django_otp.oath import totp
 from phonenumber_field.modelfields import PhoneNumberField
 
-from integration.apps.twilio import (send_sms,)
+from integration.apps.twilio import (send_sms, verification_call)
 from utils.otp import (random_hex_str, key_validator)
 
 
@@ -141,6 +141,10 @@ class User(StatusFlagMixin,AbstractUser):
     def send_otp(self):
         token = self.generate_otp()
         send_sms(to=self.phone.as_e164, body="Your verification code for Thrive-Society is "+token)
+
+    def send_otp_call(self):
+        token = self.generate_otp()
+        verification_call(to=self.phone.as_e164, verification_code=token)
 
 
 class MemberCategory(models.Model):

@@ -297,7 +297,8 @@ class SendVerificationView(APIView):
             response = Response("false", status=400)
         return response
     
-class SendPhoneNumberVerificationCodeView(GenericAPIView):
+
+class GetPhoneNumberVerificationCodeSMSView(GenericAPIView):
     """
     Send Verification SMS
     """
@@ -314,6 +315,29 @@ class SendPhoneNumberVerificationCodeView(GenericAPIView):
             if not user.is_phone_verified:
                 user.send_otp()
                 return Response({"Verification SMS sent!"}, status=200)
+            else:
+                return Response("Phone is already Verified!", status=400)
+        except User.DoesNotExist:
+            return Response({"detail": "Phone number in not registered."}, status=404)
+
+
+class GetPhoneNumberVerificationCodeCallView(GenericAPIView):
+    """
+    Send Verification SMS
+    """
+    serializer_class = PhoneNumberSerializer
+    permission_classes = (AllowAny,)
+    def post(self, request):
+        """
+        Post method for verification SMS
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.get(phone=serializer.validated_data['phone_number'])
+            if not user.is_phone_verified:
+                user.send_otp_call()
+                return Response({"Verification call request made!"}, status=200)
             else:
                 return Response("Phone is already Verified!", status=400)
         except User.DoesNotExist:
