@@ -32,6 +32,7 @@ from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,)
 from slacker import Slacker
+from brand.models import (License,)
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)
@@ -68,7 +69,16 @@ class SearchQueryView(APIView):
         elif request.query_params.get('business_dba', None):
             result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA', True)
         elif request.query_params.get('license_number', None):
-            result = search_query('Licenses', request.query_params['license_number'], 'Name')
+            license_number = request.query_params['license_number']
+            try:
+                is_license_in_db = License.objects.filter(license_number=license_number).exists()
+            except License.DoesNotExist:
+                is_license_in_db = False
+            if is_license_in_db:
+                return Response({
+                    'error': 'License already in database.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            result = search_query('Licenses', license_number, 'Name')
         return Response(result)
 
 class UserViewSet(ModelViewSet):
