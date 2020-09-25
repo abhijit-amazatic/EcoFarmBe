@@ -279,11 +279,12 @@ def send_estimate_to_sign(estimate_id, customer_name):
         file_binary = BytesIO(base64.b64decode(file_obj['data']))
         file_type = 'application/pdf'
         file_obj = [[file_name, file_binary, file_type]]
+        if not contact.get('email'):
+            return {'code': 1003, 'error': 'Contact doesnot have email in zoho books.'}
         customer_dict = [{'name': contact['contact_name'], 'email': contact['email']}]
         return submit_estimate(
             file_obj=file_obj,
-            # recipients=customer_dict,
-            recipients=[{'name': 'harshal', 'email': 'harshal.c@amazatic.com'}],
+            recipients=customer_dict,
             notes="",
             expiry=10,
             reminder_period=15

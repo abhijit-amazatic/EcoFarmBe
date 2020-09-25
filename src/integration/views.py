@@ -36,8 +36,7 @@ from integration.books import (
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
-    mark_estimate, send_estimate_to_sign,
-    get_transportation_fees,)
+    mark_estimate, get_transportation_fees,)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -74,7 +73,7 @@ class GetBoxSharedLink(APIView):
         except Exception as exc:
             return Response({
                 "status_code": 400,
-                "error": exc})
+                "error": exc}, status=status.HTTP_400_BAD_REQUEST)
 
 class SearchCultivars(APIView):
     """

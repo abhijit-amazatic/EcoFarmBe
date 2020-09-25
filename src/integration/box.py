@@ -254,7 +254,7 @@ def parse_file(file_obj):
     response["shared_link"] = file_obj.get_shared_link_download_url()
     return response
 
-def get_shared_link(file_id, access=None, unshared_at=None, allow_download=None):
+def get_shared_link(file_id, access='open', unshared_at=None, allow_download=None):
     """
     Get shareable link for file
     """
