@@ -47,12 +47,19 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
     User item feedback serializer.
     """
     order_data = serializers.JSONField(allow_null=False)
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
-        return super().create(validated_data)
+        try:
+            instance = InTransitOrder.objects.get(
+                user=validated_data['user'],
+                profile_id=validated_data['profile_id']
+            )
+            return super().update(instance, validated_data)
+        except InTransitOrder.DoesNotExist:
+            return super().create(validated_data)
 
     class Meta:
         model = InTransitOrder
         fields = ('id', 'profile_id', 'order_data', 'created_on', 'updated_on')
         read_only_fields = ('id', 'created_on', 'updated_on')
-    
