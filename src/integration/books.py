@@ -68,7 +68,8 @@ def get_item_dict(book, inventory):
         'name': book.get('name'),
         'rate': inventory.get('rate', book.get('rate')),
         'quantity': inventory.get('quantity'),
-        'category_name': inventory.get('category_name')
+        'category_name': inventory.get('category_name'),
+        'item_custom_fields': inventory.get('item_custom_fields'),
     }
 
 def get_tax(obj, tax):
@@ -350,6 +351,22 @@ def list_vendor_payments(params=None):
     """
     obj = get_books_obj()
     po_obj = obj.VendorPayments()
+    return po_obj.list_payments(parameters=params)
+
+def get_customer_payment(payment_id, params=None):
+    """
+    Return customer payments made.
+    """
+    obj = get_books_obj()
+    vp_obj = obj.CustomerPayments()
+    return vp_obj.get_payment(payment_id=payment_id, parameters=params)
+
+def list_customer_payments(params=None):
+    """
+    List customer payments.
+    """
+    obj = get_books_obj()
+    po_obj = obj.CustomerPayments()
     return po_obj.list_payments(parameters=params)
 
 def get_invoice(invoice_id, params=None):

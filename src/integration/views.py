@@ -36,7 +36,8 @@ from integration.books import (
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
-    mark_estimate, get_transportation_fees,)
+    mark_estimate, get_transportation_fees,
+    get_customer_payment, list_customer_payments,)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -361,13 +362,29 @@ class VendorPaymentView(APIView):
     
     def get(self, request):
         """
-        Get PO.
+        Get payment made.
         """
         if request.query_params.get('payment_id', None):
             return Response(get_vendor_payment(
                 request.query_params.get('payment_id'),
                 params=request.query_params.dict()))
         return Response(list_vendor_payments(params=request.query_params.dict()))
+
+class CustomerPaymentView(APIView):
+    """
+    View class for Zoho books customer payments received.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get Payment received.
+        """
+        if request.query_params.get('payment_id', None):
+            return Response(get_customer_payment(
+                request.query_params.get('payment_id'),
+                params=request.query_params.dict()))
+        return Response(list_customer_payments(params=request.query_params.dict()))
 
 class InvoiceView(APIView):
     """

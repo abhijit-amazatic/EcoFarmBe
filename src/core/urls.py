@@ -41,7 +41,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                EstimateSignView, EstimateSignCompleteView,
                                GetDocumentStatus, GetSignURL,
                                TemplateSignView, GetDistanceView,
-                               GetSalesPersonView, GetTemplateStatus)
+                               GetSalesPersonView, GetTemplateStatus,
+                               CustomerPaymentView)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -95,6 +96,7 @@ urlpatterns = [
     path(r'books/contact-address/', ContactAddressView.as_view(), name='contact_address'),
     path(r'books/purchase-order/', PurchaseOrderView.as_view(), name='purchase_order'),
     path(r'books/vendor-payment/', VendorPaymentView.as_view(), name='vendor_payment'),
+    path(r'books/customer-payment/', CustomerPaymentView.as_view(), name='customer_payment'),
     path(r'books/invoice/', InvoiceView.as_view(), name='invoices'),
     path(r'books/vendor-credits/', VendorCreditView.as_view(), name='vendor_credits'),
     path(r'books/account-summary/', AccountSummaryView.as_view(), name='account_summary'),

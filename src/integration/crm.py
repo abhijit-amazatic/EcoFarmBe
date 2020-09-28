@@ -425,14 +425,14 @@ def update_license(name, license):
             moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
             license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
             license['uploaded_sellers_permit_to'] = license_url  + "?id=" + license.get('uploaded_sellers_permit_to')
-    if license.get('uploaded_w9_to') and license.get('uploaded_w9_to').isdigit():
-            moved_file = move_file(license['uploaded_w9_to'], documents)
-            license_url = get_shared_link(license.get('uploaded_w9_to'))
-            license['uploaded_w9_to'] = license_url + "?id=" + license.get('uploaded_w9_to')
+    # if license.get('uploaded_w9_to') and license.get('uploaded_w9_to').isdigit():
+    #         moved_file = move_file(license['uploaded_w9_to'], documents)
+    #         license_url = get_shared_link(license.get('uploaded_w9_to'))
+    #         license['uploaded_w9_to'] = license_url + "?id=" + license.get('uploaded_w9_to')
     license_obj = License.objects.filter(pk=license['license_db_id']).update(
         uploaded_license_to=license.get('uploaded_license_to'),
         uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
-        uploaded_w9_to=license.get('uploaded_w9_to')
+        # uploaded_w9_to=license.get('uploaded_w9_to')
     )
     data.append(license)
     response = update_records('Licenses', data)
