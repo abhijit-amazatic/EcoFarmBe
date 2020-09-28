@@ -11,8 +11,8 @@ from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
-from .serializers import (InventorySerializer, LogoutInventorySerializer, ItemFeedbackSerializer)
-from .models import (Inventory, ItemFeedback)
+from .serializers import (InventorySerializer, LogoutInventorySerializer, ItemFeedbackSerializer, InTransitOrderSerializer)
+from .models import (Inventory, ItemFeedback, InTransitOrder)
 from integration.inventory import (sync_inventory, )
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -234,3 +234,16 @@ class InventoryUpdateDateView(APIView):
                 'last_modified_time': items.first().last_modified_time},
             status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InTransitOrderViewSet(viewsets.ModelViewSet):
+    """
+    Inventory View
+    """
+    permission_classes = (IsAuthenticated, )
+    serializer_class = InTransitOrderSerializer
+    queryset = InTransitOrder.objects.all()
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user)

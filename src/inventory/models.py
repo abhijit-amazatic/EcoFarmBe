@@ -8,8 +8,7 @@ from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from user.models import (User, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
-
-
+from brand.models import (LicenseProfile,)
 class Inventory(models.Model):
     """
     Inventory Model Class
@@ -117,3 +116,17 @@ class ItemFeedback(TimeStampFlagModelMixin, models.Model):
     item = models.CharField(_('item_id'), blank=True, null=True, max_length=100)
     feedback = models.TextField(_('feedback'))
     estimate_number = models.CharField(_('Estimate Number'), blank=True, null=True, max_length=100)
+
+
+class InTransitOrder(TimeStampFlagModelMixin, models.Model):
+    """
+    In-transit order details.
+    """
+    user = models.ForeignKey(User, verbose_name=_('User'), related_name='in_transit_order', on_delete=models.CASCADE)
+    profile_id = models.IntegerField(_('profile_id'), null=False, blank=False)
+    order_data = JSONField(null=False, blank=False, default=dict)
+
+    class Meta:
+        unique_together = (('user', 'profile_id'), )
+        verbose_name = _('In Transit order')
+        verbose_name_plural = _('In Transit orders')

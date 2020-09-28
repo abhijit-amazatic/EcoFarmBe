@@ -44,7 +44,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetSalesPersonView, GetTemplateStatus)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
-                             ItemFeedbackViewSet, InventoryUpdateDateView)
+                             ItemFeedbackViewSet, InventoryUpdateDateView,
+                             InTransitOrderViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView,BrandViewSet,LicenseViewSet,KpiViewSet,ProfileReportViewSet,)
@@ -58,6 +59,7 @@ router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
+router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
 
 
 
