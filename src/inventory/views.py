@@ -243,7 +243,8 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     serializer_class = InTransitOrderSerializer
     queryset = InTransitOrder.objects.all()
-    
+    lookup_field = 'profile_id'
+
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(user=self.request.user)

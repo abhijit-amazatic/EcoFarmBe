@@ -59,7 +59,12 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
         except InTransitOrder.DoesNotExist:
             return super().create(validated_data)
 
+    def validate_order_data(self, value):
+        if value is None:
+            raise serializers.ValidationError('This field may not be null.', code=400)
+        return value
+
     class Meta:
         model = InTransitOrder
-        fields = ('id', 'profile_id', 'order_data', 'created_on', 'updated_on')
-        read_only_fields = ('id', 'created_on', 'updated_on')
+        fields = ('profile_id', 'order_data', 'created_on', 'updated_on')
+        read_only_fields = ('created_on', 'updated_on')
