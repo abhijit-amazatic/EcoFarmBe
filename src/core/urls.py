@@ -50,10 +50,16 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              DocumentView, DocumentStatusView, InventoryDeleteView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (ProfileCategoryView, BrandViewSet,
-                         LicenseViewSet, KpiViewSet, ProfileReportViewSet, FileUploadView)
-
+from brand.views import (ProfileCategoryView, BrandViewSet, LicenseViewSet, KpiViewSet, ProfileReportViewSet, FileUploadView)
+from two_factor.views import (
+    TwoFactorLoginEnableView,
+    TwoFactorLoginDisableView,
+    TwoFactoLogInViewSet,
+    AuthyAddUserRequestViewSet,
+    AuthyOneTouchRequestCallbackView,
+)
 router = SimpleRouter()
+router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
 router.register(r'item-feedback', ItemFeedbackViewSet, base_name="feedback")
@@ -62,28 +68,29 @@ router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
-router.register(r'in-transit-order', InTransitOrderViewSet,
-                base_name="in_transit_order")
+router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
+router.register(r'two-factor/authy/user', AuthyAddUserRequestViewSet, base_name="authy-user")
+
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'user/me/', MeView.as_view(), name='user-me'),
-    path(r'user/login/', LogInView.as_view(), name='login'),
+    # path(r'user/login/', LogInView.as_view(), name='login'),
     path(r'user/logout/', LogoutView.as_view(), name='logout'),
     path(r'user/change-password/',
          ChangePasswordView.as_view(), name='change-password'),
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
     path(r'user/reset-password/', ResetPasswordView.as_view(), name='reset'),
     path(r'user/verify/', VerificationView.as_view(), name='verify-user'),
-    path(r'user/send-verification/',
-         SendVerificationView.as_view(), name='verification-user'),
-    path(r'user/send-phone-verification-sms/', GetPhoneNumberVerificationCodeSMSView.as_view(),
-         name='send-phone-verification-code-sms'),
-    path(r'user/send-phone-verification-call/', GetPhoneNumberVerificationCodeCallView.as_view(),
-         name='send-phone-verification-code-call'),
-    path(r'user/phone-verify/', PhoneNumberVerificationView.as_view(),
-         name='phone-verification'),
+    path(r'user/send-verification/', SendVerificationView.as_view(), name='verification-user'),
+    path(r'user/send-phone-verification-sms/', GetPhoneNumberVerificationCodeSMSView.as_view(), name='send-phone-verification-code-sms'),
+    path(r'user/send-phone-verification-call/', GetPhoneNumberVerificationCodeCallView.as_view(), name='send-phone-verification-code-call'),
+    path(r'user/phone-verify/', PhoneNumberVerificationView.as_view(), name='phone-verification'),
+    path(r'two-factor/authy-callback/one-touch-request/', AuthyOneTouchRequestCallbackView.as_view(), name='authy-one-touch-request-callback'),
+    path(r'two-factor/enable-2fa-login/', TwoFactorLoginEnableView.as_view(), name='enable-2fa-login'),
+    path(r'two-factor/disable-2fa-login/', TwoFactorLoginDisableView.as_view(), name='enable-2fa-login'),
     path(r'category/', CategoryView.as_view(), name='category'),
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),

@@ -30,7 +30,7 @@ def send_sms(to, body, from_=DEFAULT_PHONE_NUMBER):
     except TwilioRestException as exc:
         return exc
 
-def make_call(to, from_, body_plain=None, body_xml=None):
+def make_call(to, from_=DEFAULT_PHONE_NUMBER, body_plain=None, body_xml=None):
     """
     Make a call to contact.
     

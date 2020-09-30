@@ -136,8 +136,16 @@ TWILIO_ACCOUNT=''
 TWILIO_AUTH_TOKEN=''
 DEFAULT_PHONE_NUMBER=''
 
+TMP_DIR = ''
+
 #AWS creds
 AWS_CLIENT_ID=''
 AWS_CLIENT_SECRET = ''
 AWS_BUCKET = ''
 AWS_REGION = ''
+
+# Authy Application Key
+# You can get/create one here: https://www.twilio.com/console/authy/applications
+AUTHY_ACCOUNT_SECURITY_API_KEY=''
+AUTHY_APP_ID=''
+AUTHY_APP_NAME=''

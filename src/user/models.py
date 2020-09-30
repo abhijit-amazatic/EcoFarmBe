@@ -1,24 +1,20 @@
 """
 User model defined here.
 """
-from binascii import unhexlify
-from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import (AbstractUser,)
-from django.utils.translation import ugettext_lazy as _
-from core.validators import full_domain_validator
-from core.mixins.models import (StatusFlagMixin, )
 from django.contrib.postgres.fields import (JSONField,)
-
+from django.db import models
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
-# from django_otp.models import Device
-from django_otp.oath import totp
 from phonenumber_field.modelfields import PhoneNumberField
 
+from core.validators import full_domain_validator
+from core.mixins.models import (StatusFlagMixin, )
 from integration.apps.twilio import (send_sms, verification_call)
-from utils.otp import (random_hex_str, key_validator)
-
+from two_factor.abstract_models import AbstractPhoneDevice
+from two_factor.utils import get_two_factor_devices
 
 
 class User(StatusFlagMixin,AbstractUser):
@@ -51,12 +47,7 @@ class User(StatusFlagMixin,AbstractUser):
         _('Zip code'), max_length=20, null=True)
     phone = PhoneNumberField(_('Phone'), unique=True,)
     is_phone_verified = models.BooleanField(_('Is Phone Verified'), default=False)
-    key = models.CharField(
-        max_length=40,
-        validators=[key_validator],
-        default=random_hex_str,
-        help_text="Hex-encoded secret key"
-    )
+    is_2fa_enabled = models.BooleanField(_('is Two Factor Enabled'), default=False, editable=False)
     legal_business_name = models.CharField(
         _('Legal Business Name'), max_length=150, null=True, blank=True)
     business_dba = models.CharField(
@@ -113,40 +104,11 @@ class User(StatusFlagMixin,AbstractUser):
         verbose_name = _('user')
         verbose_name_plural = _('users')
 
-    @property
-    def bin_key(self):
-        return unhexlify(self.key.encode())
+    def get_two_factor_devices(self, confirmed_only=True):
+        return get_two_factor_devices(self, confirmed_only)
 
-    def verify_otp(self, token):
-        # local import to avoid circular import
-        no_digits = getattr(settings, 'TOTP_DIGITS', 6)
-        try:
-            token = int(token)
-        except ValueError:
-            return False
-
-        for drift in range(-5, 1):
-            if totp(self.bin_key, drift=drift, digits=no_digits) == token:
-                return True
-        return False
-
-    def generate_otp(self):
-        # local import to avoid circular import
-
-        """
-        Return current TOTP token.
-        """
-        no_digits = getattr(settings, 'TOTP_DIGITS', 6)
-        token = str(totp(self.bin_key, digits=no_digits)).zfill(no_digits)
-        return token
-
-    def send_otp(self):
-        token = self.generate_otp()
-        send_sms(to=self.phone.as_e164, body="Your verification code for Thrive Society is "+token)
-
-    def send_otp_call(self):
-        token = self.generate_otp()
-        verification_call(to=self.phone.as_e164, verification_code=token)
+    def get_two_factor_device_dict(self, confirmed_only=True):
+        return dict((x.device_id, x.name,) for x in self.get_two_factor_devices(confirmed_only))
 
 
 class MemberCategory(models.Model):
@@ -163,6 +125,31 @@ class MemberCategory(models.Model):
         verbose_name_plural = _('Member Categories')
 
 
-        
-    
-        
+class PrimaryPhoneTOTPDevice(AbstractPhoneDevice):
+    user = models.OneToOneField(
+        User,
+        verbose_name=_('User'),
+        related_name='primary_phone_totp_device',
+        help_text="The user that this device belongs to.",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = _("Primary Phone TOTP Device")
+        verbose_name_plural = _("Primary Phone Totp Devices")
+
+    @property
+    def phone_number(self):
+        return self.user.phone
+
+    @phone_number.setter
+    def phone_number(self, value):
+        self.user.phone = value
+
+    @property
+    def confirmed(self):
+        return self.user.is_phone_verified
+
+    @confirmed.setter
+    def confirmed(self, value):
+        self.user.is_phone_verified = bool(value)

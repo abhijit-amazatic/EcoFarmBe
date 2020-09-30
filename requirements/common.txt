@@ -29,4 +29,7 @@ django-reverse-admin==2.8.4
 django-otp==1.0.0
 django-phonenumber-field==5.0.0
 phonenumbers==8.12.9
+authy==2.2.6
+qrcode==6.1
+pyjwt>=1.4.0
 -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho

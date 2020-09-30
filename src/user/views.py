@@ -14,7 +14,7 @@ from knox.models import AuthToken
 from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
-from .models import User, MemberCategory
+from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice,)
 from .serializers import (
     UserSerializer,
     CreateUserSerializer,
@@ -330,8 +330,9 @@ class GetPhoneNumberVerificationCodeSMSView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             user = User.objects.get(phone=serializer.validated_data['phone_number'])
-            if not user.is_phone_verified:
-                user.send_otp()
+            device, _ = PrimaryPhoneTOTPDevice.objects.get_or_create(user=user)
+            if not device.confirmed:
+                device.send_otp(event_code='phone_verification')
                 return Response({"Verification SMS sent!"}, status=200)
             else:
                 return Response("Phone is already Verified!", status=400)
@@ -353,8 +354,9 @@ class GetPhoneNumberVerificationCodeCallView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             user = User.objects.get(phone=serializer.validated_data['phone_number'])
-            if not user.is_phone_verified:
-                user.send_otp_call()
+            device, _ = PrimaryPhoneTOTPDevice.objects.get_or_create(user=user)
+            if not device.confirmed:
+                device.send_otp_call(event_code='phone_verification')
                 return Response({"Verification call request made!"}, status=200)
             else:
                 return Response("Phone is already Verified!", status=400)
@@ -376,7 +378,8 @@ class PhoneNumberVerificationView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             user = User.objects.get(phone=serializer.validated_data['phone_number'])
-            if user.verify_otp(serializer.validated_data['code']):
+            device, _ = PrimaryPhoneTOTPDevice.objects.get_or_create(user=user)
+            if device.verify_token(serializer.validated_data['code'], event_code='phone_verification'):
                 user.is_phone_verified = True
                 if user.is_verified:
                     user.is_approved = True

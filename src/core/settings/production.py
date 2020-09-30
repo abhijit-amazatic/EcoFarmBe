@@ -124,3 +124,10 @@ AWS_CLIENT_ID = os.environ.get('AWS_CLIENT_ID')
 AWS_CLIENT_SECRET = os.environ.get('AWS_CLIENT_SECRET')
 AWS_BUCKET = os.environ.get('AWS_BUCKET')
 AWS_REGION = os.environ.get('AWS_REGION')
+
+# Authy Application Key
+# You can get/create one here : https://www.twilio.com/console/authy/applications
+AUTHY_ACCOUNT_SECURITY_API_KEY = os.environ.get('AUTHY_ACCOUNT_SECURITY_API_KEY')
+AUTHY_APP_ID = os.environ.get('AUTHY_APP_ID')
+AUTHY_APP_NAME = os.environ.get('AUTHY_APP_NAME')
+

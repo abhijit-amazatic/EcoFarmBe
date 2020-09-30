@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'user',
+    'two_factor',
     'knox',
     'django_otp',
     'phonenumber_field',

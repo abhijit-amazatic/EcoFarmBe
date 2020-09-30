@@ -76,3 +76,7 @@ src/*/settings/local.py
 .vscode/*
 .vscode
 .idea/
+
+# direnv
+.envrc
+.env
