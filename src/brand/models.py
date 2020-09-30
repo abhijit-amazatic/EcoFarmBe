@@ -57,6 +57,12 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     premises_address = models.TextField(blank=True, null=True)
     premises_county = models.CharField(
         _('Premises County'), blank=True, null=True, max_length=255)
+    business_structure = models.CharField(
+        _('Business sructure'), blank=True, null=True, max_length=255)
+    tax_identification = models.CharField(
+        _('Tax Identification'), blank=True, null=True, max_length=255)
+    ein_or_ssn = models.CharField(
+        _('EIN or SSN'), blank=True, null=True, max_length=255)
     premises_city = models.CharField(
         _('Premises City'), blank=True, null=True, max_length=255)
     zip_code = models.CharField(
