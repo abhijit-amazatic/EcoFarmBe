@@ -20,7 +20,6 @@ from rest_framework import (permissions, viewsets, status, filters,)
 
 
 from core.permissions import IsAuthenticatedBrandPermission
-from integration.box import upload_from_tmp_dir
 
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile, CultivationOverview,
                      ProgramOverview, FinancialOverview, CropOverview, ProfileCategory, ProfileReport,)
@@ -145,7 +144,6 @@ class LicenseViewSet(viewsets.ModelViewSet):
                                        'request': request}, many=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

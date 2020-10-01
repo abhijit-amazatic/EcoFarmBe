@@ -158,37 +158,40 @@ def create_folder(parent_folder_id, new_folder_name):
             return exc.context_info.get('conflicts')[0]['id']
 
 
-@app.task(queue="general")
-def upload_from_tmp_dir():
-    tmp = settings.TMP_DIR if settings.TMP_DIR else '/tmp/'
-    files = os.listdir(tmp)
-    files = [x for x in files if '.pdf' in x]
-    for _file in files:
-        try:
-            license = License.objects.get(
-                legal_business_name=_file.split('-')[1])
-            if 'license' in _file.split('-')[-1]:
-                license.uploaded_license_to = upload_file(
-                    '111282192684', tmp+_file)
-            elif 'seller-permit' in _file.split('-')[-1]:
-                license.uploaded_sellers_permit_to = upload_file(
-                    '111282192684', tmp+_file)
-            license.save()
-            os.remove(tmp+_file)
-        except License.DoesNotExists:
-            pass
+# def upload_from_tmp_dir():
+#     tmp = settings.TMP_DIR if settings.TMP_DIR else '/tmp/'
+#     files = os.listdir(tmp)
+#     files = [x for x in files if '.pdf' in x]
+#     for _file in files:
+#         try:
+#             license = License.objects.get(
+#                 legal_business_name=_file.split('-')[1])
+#             if 'license' in _file.split('-')[-1]:
+#                 license.uploaded_license_to = upload_file(
+#                     '111282192684', tmp+_file)
+#             elif 'seller-permit' in _file.split('-')[-1]:
+#                 license.uploaded_sellers_permit_to = upload_file(
+#                     '111282192684', tmp+_file)
+#             license.save()
+#             os.remove(tmp+_file)
+#         except License.DoesNotExists:
+#             pass
 
 
-def upload_file(folder_id, file_path):
+def upload_file(folder_id, file_path, file_name='abc.pdf', license_id=None, key=None):
     """
     Upload file to parent folder.
 
     @param folder_id: Box folder id.
     @param file_path: file path to upload.
+    @param file_name: name of the file
+    @param license_id: license to update 
     @return file id.
     """
     client = get_box_client()
-    return client.folder(folder_id).upload(file_path)
+    box_id = client.folder(folder_id).upload(file_path, file_name=file_name)
+    if license_id:
+        License.objects.filter(id=license_id).update(**{key: box_id})
 
 
 def upload_file_stream(folder_id, stream, file_name):

@@ -4,6 +4,7 @@ Serializer to validate brand related modules.
 
 import requests
 from django.conf import settings
+from tempfile import TemporaryFile
 
 from rest_framework import serializers
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile,
@@ -11,6 +12,7 @@ from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile
 from user.models import User
 from core.utility import (notify_admins_on_profile_registration,)
 from integration.crm import (insert_vendors, insert_accounts,)
+from integration.box import upload_file
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -200,10 +202,11 @@ class ProfileReportSerializer(serializers.ModelSerializer):
 class FileUploadSerializer(serializers.Serializer):
     file = serializers.FileField(write_only=True)
     name = serializers.CharField(read_only=True)
+    license = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
-        tmp = settings.TMP_DIR if settings.TMP_DIR else '/tmp/'
-        with open(tmp+validated_data['file'].name, 'wb+') as destination:
-            for chunk in validated_data['file'].chunks():
-                destination.write(chunk)
+        key = 'uploaded_sellers_permit_to' if 'seller-permit' in validated_data['file'].name.split(
+            '-')[-1] else 'uploaded_license_to'
+        upload_file('111282192684', validated_data['file'].temporary_file_path(),
+                    validated_data['file'].name, validated_data['license'], key)
         return {'name': validated_data['file'].name}
