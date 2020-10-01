@@ -267,8 +267,15 @@ class TemplateSignView(APIView):
         recipient = request.data.get('recipient', None)
         licenses = request.data.get('licenses', None)
         legal_business_names = request.data.get('legal_business_names', None)
+        EIN = request.data.get('EIN', None)
+        SSN = request.data.get('SSN', None)
+        business_structure = request.data.get('business_structure', None)
         if template_id and licenses and recipient:
-            return Response(send_template(template_id, recipient, licenses, legal_business_names))
+            return Response(send_template(template_id,
+                                          recipient,
+                                          licenses,
+                                          legal_business_names,
+                                          EIN, SSN, business_structure))
         return Response({})
 
 class EstimateTaxView(APIView):
