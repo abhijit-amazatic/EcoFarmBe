@@ -189,9 +189,9 @@ def upload_file(folder_id, file_path, file_name='abc.pdf', license_id=None, key=
     @return file id.
     """
     client = get_box_client()
-    box_id = client.folder(folder_id).upload(file_path, file_name=file_name)
+    boxObj = client.folder(folder_id).upload(file_path, file_name=file_name)
     if license_id:
-        License.objects.filter(id=license_id).update(**{key: box_id})
+        License.objects.filter(id=license_id).update(**{key: boxObj.id})
 
 
 def upload_file_stream(folder_id, stream, file_name):

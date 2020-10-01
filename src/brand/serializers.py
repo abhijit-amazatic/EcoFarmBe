@@ -205,8 +205,8 @@ class FileUploadSerializer(serializers.Serializer):
     license = serializers.CharField(write_only=True)
 
     def create(self, validated_data):
-        key = 'uploaded_sellers_permit_to' if 'seller-permit' in validated_data['file'].name.split(
-            '-')[-1] else 'uploaded_license_to'
+        key = 'uploaded_sellers_permit_to' if 'seller-permit' in validated_data[
+            'file'].name else 'uploaded_license_to'
         upload_file('111282192684', validated_data['file'].temporary_file_path(),
                     validated_data['file'].name, validated_data['license'], key)
         return {'name': validated_data['file'].name}
