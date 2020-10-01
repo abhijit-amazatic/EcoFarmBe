@@ -51,10 +51,10 @@ INSTALLED_APPS = [
     'inventory',
     'cultivar',
     'labtest',
-    #'django_extensions',
-    #'rest_social_auth',
-    #'sslserver',
-    #'social_django',
+    # 'django_extensions',
+    # 'rest_social_auth',
+    # 'sslserver',
+    # 'social_django',
 ]
 
 MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []
@@ -126,18 +126,18 @@ STATICFILES_DIRS = [
 REST_KNOX = {
     'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
     'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-    'TOKEN_TTL':datetime.timedelta(hours=12),#None for never exp. token
+    'TOKEN_TTL': datetime.timedelta(hours=12),  # None for never exp. token
     'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 }
 
-#Custom user model
+# Custom user model
 AUTH_USER_MODEL = 'user.User'
 
 # Email setting
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
-#CORS_ORIGIN_ALLOW_ALL = True  # Make to True to bypass all whitelisting URLs.
+# CORS_ORIGIN_ALLOW_ALL = True  # Make to True to bypass all whitelisting URLs.
 
 
 REST_FRAMEWORK = {
@@ -146,7 +146,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'knox.auth.TokenAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',
@@ -161,15 +161,12 @@ REST_FRAMEWORK = {
 TIME_ZONE = "UTC"
 CELERY_TIMEZONE = TIME_ZONE
 
-#rest-social-auth settings.You can add auth for FB, Github etc.
+# rest-social-auth settings.You can add auth for FB, Github etc.
 AUTHENTICATION_BACKENDS = (
-    #'social_core.backends.google.GoogleOAuth2',
+    # 'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 
-
-
-
-
-
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler', ]
