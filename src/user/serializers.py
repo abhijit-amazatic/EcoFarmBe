@@ -152,8 +152,6 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
             raise serializers.ValidationError("User Does Not Exist")
         if not get_user.is_verified:
             raise serializers.ValidationError('Email not confirmed!Please click the confirmation link sent your registered email.')
-        elif not get_user.is_phone_verified:
-            raise serializers.ValidationError('Phone Number is not Verified!Please Verify your phone Number with OTP received on your Phone.')
         else:    
             try:
                 email = data.get('email')
