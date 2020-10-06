@@ -42,7 +42,7 @@ def notify_admins(email):
     """
     Notify admins on slack & email about new user registration.
     """
-    msg = "<!channel>User with the EmailID `%s`  is registered with us.Please review and approve from admin Panel!" % email
+    msg = "<!channel>User with the EmailID `%s`  is registered with us!" % email
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
     mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
 
