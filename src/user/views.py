@@ -30,7 +30,7 @@ from .serializers import (
 )
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
-from core.utility import (NOUN_PROCESS_MAP,send_verification_link,)
+from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,)
 from slacker import Slacker
 from brand.models import (License,)
 
@@ -374,6 +374,7 @@ class PhoneNumberVerificationView(GenericAPIView):
                     user.is_approved = True
                     user.approved_on = timezone.now()
                     user.approved_by = {'email':"connect@thrive-society.com(Automated-Bot)"}
+                    send_async_user_approval_mail.delay(user.id)
                 user.save()
                 return Response({"Phone Verified successfully!"}, status=200)
             else:

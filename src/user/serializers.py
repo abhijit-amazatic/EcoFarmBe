@@ -14,6 +14,7 @@ from Crypto import Random
 from phonenumber_field.serializerfields import PhoneNumberField
 from .models import User
 from integration.box import (get_preview_url, )
+from core.utility import send_async_user_approval_mail
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
@@ -270,6 +271,7 @@ class VerificationSerializer(serializers.Serializer):  # pylint: disable=W0223
             user.is_approved = True
             user.approved_on = timezone.now()
             user.approved_by = {'email':"connect@thrive-society.com(Automated-Bot)"}
+            send_async_user_approval_mail.delay(user.id)
         user.save()
         return user    
 
