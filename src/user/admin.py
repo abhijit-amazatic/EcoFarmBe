@@ -88,7 +88,7 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     list_per_page = 25
     search_fields = ('username', 'legal_business_name', 'email',)
     ordering = ('-date_joined',)
-    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified', 'phone']
+    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','email'] #'phone'
     actions = [approve_user, ] 
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified',)}),
