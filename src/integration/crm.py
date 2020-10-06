@@ -415,8 +415,9 @@ def update_license(name, license):
     response = None
     data = list()
     new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, name)
+    license_folder = create_folder(new_folder, 'Licenses')
     if license.get('uploaded_license_to') and license.get('uploaded_license_to').isdigit():
-        moved_file = move_file(license['uploaded_license_to'], new_folder)
+        moved_file = move_file(license['uploaded_license_to'], license_folder)
         license_url = get_shared_link(license.get('uploaded_license_to'))
         if license_url:
             license['uploaded_license_to'] = license_url  + "?id=" + license.get('uploaded_license_to')

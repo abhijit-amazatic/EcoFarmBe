@@ -11,12 +11,11 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import (TokenAuthentication,)
 
-from core.settings import (ESTIMATE_UPLOAD_FOLDER_ID, )
 from core.permissions import UserPermissions
 from .models import Integration
 from integration.box import(
     get_box_tokens, get_shared_link,
-    get_client_folder_id, )
+    get_client_folder_id, create_folder,)
 from integration.inventory import (
     get_inventory_item, get_inventory_items,)
 from integration.crm import (
@@ -525,12 +524,17 @@ class EstimateSignCompleteView(APIView):
         """
         request_id = request.data.get('request_id')
         client_id = request.data.get('client_id')
+        is_agreement = request.data.get('is_agreement')
         data = get_document(request_id)['requests']
         response = list()
         for document in data.get('document_ids'):
             filename = document.get('document_name')
             folder_id = get_client_folder_id(client_id)
-            response.append(upload_pdf_box(request_id, folder_id, filename))
+            if is_agreement:
+                new_folder = create_folder(folder_id, 'agreements')
+            else:
+                new_folder = create_folder(folder_id, 'estimates')
+            response.append(upload_pdf_box(request_id, new_folder, filename))
         return Response(response)
         
 class ClientCodeView(APIView):
