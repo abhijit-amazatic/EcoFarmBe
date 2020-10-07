@@ -103,13 +103,16 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
             obj.save()
         super().save_model(request, obj, form, change)
 
-        
+
+
+
 
 class MemberCategoryAdmin(admin.ModelAdmin):
     """
     MemberAdmin
     """
     #search_fields = ('',)
+
 
     
 #admin.site.unregister(User)

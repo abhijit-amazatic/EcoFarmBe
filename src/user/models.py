@@ -20,6 +20,7 @@ from integration.apps.twilio import (send_sms, verification_call)
 from utils.otp import (random_hex_str, key_validator)
 
 
+
 class User(StatusFlagMixin,AbstractUser):
     """
     Class implementing a custom user model.
@@ -159,6 +160,7 @@ class MemberCategory(models.Model):
     class Meta:
         verbose_name = _('Member Category')
         verbose_name_plural = _('Member Categories')
+
 
         
     
