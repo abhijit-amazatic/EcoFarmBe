@@ -186,7 +186,6 @@ class LogInView(APIView):
             data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             token = AuthToken.objects.create(request.user)
-            profile_count = License.objects.filter(created_by=request.user).count()
             response = Response({
                 "user": KNOXUSER_SERIALIZER(request.user).data,
                 "token": token,
@@ -194,8 +193,7 @@ class LogInView(APIView):
                 "is_verified":request.user.is_verified,
                 "is_approved":request.user.is_approved,
                 "is_phone_verified":request.user.is_phone_verified,
-                "status":request.user.status,
-                "profile_count":profile_count
+                "status":request.user.status
             })
         else:
             response = Response({"data": serializer.errors})

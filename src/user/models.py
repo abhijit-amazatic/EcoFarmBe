@@ -141,7 +141,7 @@ class User(StatusFlagMixin,AbstractUser):
 
     def send_otp(self):
         token = self.generate_otp()
-        send_sms(to=self.phone.as_e164, body="Your verification code for Thrive-Society is "+token)
+        send_sms(to=self.phone.as_e164, body="Your verification code for Thrive Society is "+token)
 
     def send_otp_call(self):
         token = self.generate_otp()
