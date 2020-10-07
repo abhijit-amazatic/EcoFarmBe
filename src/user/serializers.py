@@ -15,6 +15,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from .models import User
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
+from brand.models import (License,)
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
@@ -87,7 +88,8 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Adds vendors profiles kpis for 'my platform' to the user/me response.
         """
-        pass
+        profile_count = License.objects.filter(created_by=obj).count()
+        return {"profile_count":profile_count}
     
     
     class Meta:
