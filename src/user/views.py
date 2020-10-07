@@ -152,13 +152,21 @@ class CategoryView(APIView):
     Get Categories information.
     """
     permission_classes = (AllowAny,)
+
+    def search(self,name,items):
+        return [element for element in items if element['name'] == name]
     
     def get(self, request):
         """
         Display categories.    
         """
-        queryset = MemberCategory.objects.values('id','name')
-        return Response(queryset)
+        category_order = ['Cultivator','Nursery', 'Processor','Distributor','Manufacturer','Retailer','Testing','Transporter','Events', 'Brand', 'Hemp', 'Ancillary Products', 'Ancillary Services', 'Investor', 'Patient', 'Healthcare' ]
+        items = MemberCategory.objects.values()
+        ordered_response= []
+        for category in category_order:
+            ordered_response.append(self.search(category,items)[0])
+        return Response(ordered_response)
+    
 
 
 class LogInView(APIView):
