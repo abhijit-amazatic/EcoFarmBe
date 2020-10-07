@@ -64,9 +64,9 @@ def notify_admins_on_profile_user_registration(email,profile):
     """
     Notify admins on slack & email about new user registration under profile.
     """
-    msg = "<!channel>User with the EmailID `%s` is registered with us for the profile-%s.Please review and approve from admin Panel!" % (email, farm)
+    msg = "<!channel>User with the EmailID `%s` is registered with us for the profile-%s" % (email, farm)
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
-    mail_send("notify.html",{'link': email},"New Profile User registration.", recipient_list=settings.ADMIN_EMAIL)
+    #mail_send("notify.html",{'link': email},"New Profile User registration.", recipient_list=settings.ADMIN_EMAIL)
 
 
 def notify_admins_on_profile_registration(email,farm):

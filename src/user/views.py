@@ -44,7 +44,7 @@ def notify_admins(email):
     """
     msg = "<!channel>User with the EmailID `%s`  is registered with us!" % email
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
-    mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
+    #mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
 
     
 class GetBoxTokensView(APIView):
