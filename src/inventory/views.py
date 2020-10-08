@@ -276,7 +276,7 @@ class DocumentPreSignedView(APIView):
         sku = request.data.get('sku')
         object_name = request.data.get('object_name')
         expiry = request.data.get('expiration', 3600)
-        path = request.data.get('path')
+        path = f'inventroy/{sku}/{object_name}'
         try:
             item = Inventory.objects.get(sku=sku)
         except Inventory.DoesNotExist:
