@@ -46,7 +46,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
-                             InTransitOrderViewSet)
+                             InTransitOrderViewSet, DocumentPreSignedView,
+                             DocumentView, InventoryDeleteView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView, BrandViewSet,
@@ -129,6 +130,8 @@ urlpatterns = [
          name='get_status_types'),
     path(r'inventory/last-modified-time/',
          InventoryUpdateDateView.as_view(), name='get_last_modified_time'),
+    path(r'delete-item/<str:item_id>/',
+         InventoryDeleteView.as_view(), name='delete_inventory'),
     path(r'labtest/sync/', LabTestSyncViewSet.as_view(), name='sync_labtest'),
     path(r'sign/template/', TemplateSignView.as_view(), name='sign_template'),
     path(r'sign/template-status/',
@@ -138,9 +141,11 @@ urlpatterns = [
          name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
     path(r'platform-kpi/', KpiViewSet.as_view(), name='kpi'),
-    path(r'file-upload/', FileUploadView.as_view(), name='file-upload')
-
-
+    path(r'file-upload/', FileUploadView.as_view(), name='file-upload'),
+    path(r'document-url/<str:id>/', DocumentPreSignedView.as_view(), name='documents-url'),
+    path(r'document-url/', DocumentPreSignedView.as_view(), name='documents-url'),
+    path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
+    path(r'document/', DocumentView.as_view(), name='extra-documents')
 ] + router.urls
 
 

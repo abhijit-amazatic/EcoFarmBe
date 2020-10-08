@@ -3,7 +3,8 @@ Serializer for inventory
 """
 import json
 from rest_framework import serializers
-from .models import (Inventory, ItemFeedback, InTransitOrder)
+from .models import (Inventory, ItemFeedback, InTransitOrder,
+                     Documents)
 
 
 class InventorySerializer(serializers.ModelSerializer):

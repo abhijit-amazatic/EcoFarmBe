@@ -118,3 +118,9 @@ TWILIO_ACCOUNT = os.environ.get('TWILIO_ACCOUNT')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 DEFAULT_PHONE_NUMBER = os.environ.get('DEFAULT_PHONE_NUMBER')
 TMP_DIR = os.environ.get('TMP_DIR')
+
+#AWS Creds
+AWS_CLIENT_ID = os.environ.get('AWS_CLIENT_ID')
+AWS_CLIENT_SECRET = os.environ.get('AWS_CLIENT_SECRET')
+AWS_BUCKET = os.environ.get('AWS_BUCKET')
+AWS_REGION = os.environ.get('AWS_REGION')

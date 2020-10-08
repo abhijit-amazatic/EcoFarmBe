@@ -1,6 +1,7 @@
 """
 Views for Inventory
 """
+import os
 import django_filters
 from django.shortcuts import (render, )
 from rest_framework.views import APIView
@@ -11,9 +12,12 @@ from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
-from .serializers import (InventorySerializer, LogoutInventorySerializer, ItemFeedbackSerializer, InTransitOrderSerializer)
-from .models import (Inventory, ItemFeedback, InTransitOrder)
+from .serializers import (InventorySerializer, LogoutInventorySerializer,
+                          ItemFeedbackSerializer, InTransitOrderSerializer)
+from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
+from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, )
+from integration.apps.aws import (create_presigned_url, create_presigned_post)
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -124,7 +128,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     Inventory View
     """
     permission_classes = (AllowAny, )
-    filter_backends = (filters.DjangoFilterBackend,OrderingFilter,CustomOrderFilter) #
+    filter_backends = (filters.DjangoFilterBackend,OrderingFilter,CustomOrderFilter)
     filterset_class = DataFilter
     ordering_fields = '__all__'
     
@@ -235,7 +239,6 @@ class InventoryUpdateDateView(APIView):
             status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class InTransitOrderViewSet(viewsets.ModelViewSet):
     """
     Inventory View
@@ -248,3 +251,109 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(user=self.request.user)
+
+class DocumentPreSignedView(APIView):
+    """
+    Document pre signed view class.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        """
+        Get pre-signed url.
+        """
+        object_name = request.query_params.get('object_name')
+        expiry = request.query_params.get('expiration')
+        response = create_presigned_url(AWS_BUCKET, object_name, expiry)
+        if response.get('status_code') != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """
+        Get pre-signed post url.
+        """
+        sku = request.data.get('sku')
+        object_name = request.data.get('object_name')
+        expiry = request.data.get('expiration', 3600)
+        path = request.data.get('path')
+        try:
+            item = Inventory.objects.get(sku=sku)
+        except Inventory.DoesNotExist:
+            return Response({'error': 'Item not in database'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        _, type_ = os.path.splitext(object_name)
+        obj = Documents(content_object=item,
+                        sku=sku, name=object_name,
+                        path=path, file_type=type_)
+        obj.save()
+        response = create_presigned_post(AWS_BUCKET, object_name, expiry)
+        if response.get('status_code') != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_201_CREATED)
+
+class DocumentView(APIView):
+    """
+    Document view class.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, *args, **kwargs):
+        """
+        Get document.
+        """
+        id = kwargs.get('id', None)
+        sku = request.query_params.get('sku', None)
+        if id:
+            data = Documents.objects.filter(id=id).values()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+        elif sku:
+            data = Documents.objects.filter(sku=sku).values()
+            return Response(
+                data,
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            Documents.objects.values(),
+            status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        """
+        Update document fields.
+        """
+        status_ = request.data.get('status')
+        id = kwargs.get('id', None)
+        if status and id:
+            try:
+                obj = Documents.objects.get(id=id)
+                obj.status = status_
+                obj.save()
+                return Response(status=status.HTTP_201_CREATED)
+            except Documents.DoesNotExist:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class InventoryDeleteView(APIView):
+    """
+    Delete inventory item.
+    """
+    permission_classes = (TokenAuthentication, )
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete item.
+        """
+        item_id = kwargs.get('item_id', None)
+        if item_id:
+            try:
+                Inventory.objects.get(item_id=item_id).delete()
+                return Response(
+                    {'status': 'success'},
+                    status=status.HTTP_200_OK
+                )
+            except Inventory.DoesNotExist:
+                pass
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)

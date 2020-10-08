@@ -1,6 +1,8 @@
 """
 Inventory Model
 """
+from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRelation)
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
@@ -9,6 +11,36 @@ from labtest.models import (LabTest, )
 from user.models import (User, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
 from brand.models import (LicenseProfile,)
+
+
+class Documents(TimeStampFlagModelMixin, models.Model):
+    """
+    Documents model.
+    """
+    OPTIMIZING = 'OPTIMIZING' # File is compressing.
+    REQUESTED = 'REQUESTED' # Pre-Signed url requested.
+    AVAILABLE = 'AVAILABLE' # File is available.
+    UPLOADING = 'UPLOADING' # Uploading file to s3.
+    ERROR = 'ERROR'
+    STATUS_CHOICES = (
+        (OPTIMIZING, 'Optimizing'),
+        (REQUESTED, 'Requested'),
+        (AVAILABLE, 'Available'),
+        (UPLOADING, 'Uploading'),
+        (ERROR, 'Error'),
+    )
+    
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    object_id = models.CharField(max_length=255)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    sku = models.CharField(_('SKU'), max_length=255)
+    name = models.CharField(_('Name'), max_length=255)
+    size = models.CharField(_('File Size'), blank=True, null=True, max_length=100)
+    file_type = models.CharField(_('File Type'), blank=True, null=True, max_length=50)
+    path = models.CharField(_('File Path'), blank=True, null=True, max_length=500)
+    status = models.CharField(_('Status'), default=UPLOADING, max_length=50, choices=STATUS_CHOICES)
+
+
 class Inventory(models.Model):
     """
     Inventory Model Class
@@ -103,6 +135,7 @@ class Inventory(models.Model):
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
     pre_tax_price = models.FloatField(_('pre_tax_price'), blank=True, null=True)
+    extra_documents = GenericRelation(Documents)
     
     def __str__(self):
         return self.name

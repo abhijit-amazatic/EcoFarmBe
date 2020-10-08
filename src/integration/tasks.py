@@ -15,12 +15,12 @@ from .books import (send_estimate_to_sign, )
 
 
 @periodic_task(run_every=(crontab(hour=[9], minute=0)), options={'queue': 'general'})
-def fetch_inventory_efd_on_interval():
+def fetch_inventory_on_interval():
     """
     Update inventory on every interval from Zoho Inventory.
     """
     try:
-        inventory_before = Inventory.objects.all().delete()
+        # inventory_before = Inventory.objects.all().delete()
         fetch_labtests(days=150)
         labtests = LabTest.objects.all().count()
         fetch_inventory('inventory_efd', days=150)
@@ -28,7 +28,7 @@ def fetch_inventory_efd_on_interval():
         inventory_after = Inventory.objects.all().count()
         return {'status_code': 200,
                 'labtest': labtests,
-                'deleted': inventory_before[0],
+        #        'deleted': inventory_before[0],
                 'inserted': inventory_after}
     except Exception as exc:
         print(exc)
