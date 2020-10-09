@@ -198,7 +198,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
-    ordering = ('legal_business_name','status','-created_on','updated_on',)
+    ordering = ('-created_on','legal_business_name','status','updated_on',)
     actions = [approve_license_profile, ] 
     list_per_page = 50
 
