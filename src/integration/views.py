@@ -523,13 +523,15 @@ class EstimateSignCompleteView(APIView):
         Post data from zoho sign on sign.
         """
         request_id = request.data.get('request_id')
-        client_id = request.data.get('client_id')
+        business_dba = request.data.get('business_dba')
+        document_number = request.data.get('document_number')
+        dir_name = f'{business_dba}_{document_number}'
         is_agreement = request.data.get('is_agreement')
         data = get_document(request_id)['requests']
         response = list()
         for document in data.get('document_ids'):
             filename = document.get('document_name')
-            folder_id = get_client_folder_id(client_id)
+            folder_id = get_client_folder_id(dir_name)
             if is_agreement:
                 new_folder = create_folder(folder_id, 'agreements')
             else:

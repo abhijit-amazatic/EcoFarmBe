@@ -308,11 +308,8 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 d['id'] = record.zoho_crm_id
             elif id and is_single_user and is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
-            if is_single_user:
-                brand_name = license_db.license_profile.__dict__['name']
-            else:
-                brand_name = record.brand_name
-            response = update_license(brand_name, d)
+            farm_name = license_db.license_profile.__dict__['name']
+            response = update_license(farm_name, d)
             final_dict['license'] = response
             if response['status_code'] == 200:
                     record_response = response['response']['data']
@@ -408,13 +405,15 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
             final_list[record.id] = final_dict
         return final_list
 
-def update_license(name, license):
+def update_license(dba, license):
     """
     Update license with shareable link.
     """
     response = None
     data = list()
-    new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, name)
+    license_number = license['license_number']
+    dir_name = f'{dba}_{license_number}'
+    new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, dir_name)
     license_folder = create_folder(new_folder, 'Licenses')
     if license.get('uploaded_license_to') and license.get('uploaded_license_to').isdigit():
         moved_file = move_file(license['uploaded_license_to'], license_folder)
@@ -574,11 +573,8 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             d['id'] = record.zoho_crm_id
         elif id and is_single_user and is_update:
             d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
-        if is_single_user:
-            brand_name = license_db.license_profile.__dict__['name']
-        else:
-            brand_name = record.brand_name
-        response = update_license(brand_name, d)
+        farm_name = license_db.license_profile.__dict__['name']
+        response = update_license(farm_name, d)
         final_dict['license'] = response
         if response['status_code'] == 200:
             record_response = response['response']['data']

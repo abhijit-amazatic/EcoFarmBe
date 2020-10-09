@@ -248,7 +248,7 @@ CRM_FORMAT  = {
         "License_Phone": "license_phone",
         "Title": "title",
         #Cultivation Overview
-        "Types_of_Nutrients": "co.type_of_nutrients",
+        # "Types_of_Nutrients": "co.type_of_nutrients",
         "Canopy_Square_Feet_Mixed_Light": "co.0.canopy_sqf_parse",
         "Annual_Harvests_Mixed_Light": "co.0.no_of_harvest_parse",
         "Plants_per_Cycle_Mixed_Light": "co.0.plants_per_cycle_parse",
