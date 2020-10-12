@@ -47,7 +47,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
                              InTransitOrderViewSet, DocumentPreSignedView,
-                             DocumentView, InventoryDeleteView)
+                             DocumentView, DocumentStatusView, InventoryDeleteView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView, BrandViewSet,
@@ -146,7 +146,7 @@ urlpatterns = [
     path(r'file-upload/', FileUploadView.as_view(), name='file-upload'),
     path(r'document-url/<str:id>/', DocumentPreSignedView.as_view(), name='documents-url'),
     path(r'document-url/', DocumentPreSignedView.as_view(), name='documents-url'),
-    path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
+    path(r'document/<str:id>/', DocumentStatusView.as_view(), name='extra-documents'),
     path(r'document/', DocumentView.as_view(), name='extra-documents')
 ] + router.urls
 

@@ -9,6 +9,7 @@ from rest_framework.response import (Response, )
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework import (viewsets, status,)
 from rest_framework.filters import (OrderingFilter, )
+from rest_condition import (Or, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
@@ -321,12 +322,16 @@ class DocumentView(APIView):
             Documents.objects.values(),
             status=status.HTTP_200_OK)
 
+class DocumentStatusView(APIView):
+    """
+    Document view class.
+    """
+    authentication_classes = (TokenAuthentication, )
+
     def put(self, request, *args, **kwargs):
         """
         Update document fields.
         """
-        if not request.user.is_authenticated:
-            return Response(status=status.HTTP_403_FORBIDDEN)
         status_ = request.data.get('status')
         id = kwargs.get('id', None)
         if status and id:
@@ -343,7 +348,7 @@ class InventoryDeleteView(APIView):
     """
     Delete inventory item.
     """
-    permission_classes = (TokenAuthentication, )
+    authentication_classes = (TokenAuthentication, )
 
     def delete(self, request, *args, **kwargs):
         """
