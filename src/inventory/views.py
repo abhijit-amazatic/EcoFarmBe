@@ -276,7 +276,6 @@ class DocumentPreSignedView(APIView):
         sku = request.data.get('sku')
         object_name = request.data.get('object_name')
         expiry = request.data.get('expiration', 3600)
-        path = f'inventory/{sku}/{object_name}'
         try:
             item = Inventory.objects.get(sku=sku)
         except Inventory.DoesNotExist:
@@ -286,7 +285,10 @@ class DocumentPreSignedView(APIView):
         mime_type, _ = mime.guess_type(object_name)
         obj = Documents(content_object=item,
                         sku=sku, name=object_name,
-                        path=path, file_type=mime_type)
+                        file_type=mime_type)
+        obj.save()
+        path = f'inventory/{sku}/{obj.id}/{object_name}'
+        obj.path = path
         obj.save()
         response = create_presigned_post(AWS_BUCKET, path, expiry)
         if response.get('status_code') != 0:
