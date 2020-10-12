@@ -297,7 +297,7 @@ class DocumentView(APIView):
     """
     Document view class.
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AllowAny, )
 
     def get(self, request, *args, **kwargs):
         """
@@ -325,6 +325,8 @@ class DocumentView(APIView):
         """
         Update document fields.
         """
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         status_ = request.data.get('status')
         id = kwargs.get('id', None)
         if status and id:
