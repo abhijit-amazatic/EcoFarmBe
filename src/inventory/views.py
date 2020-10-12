@@ -9,7 +9,6 @@ from rest_framework.response import (Response, )
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework import (viewsets, status,)
 from rest_framework.filters import (OrderingFilter, )
-from rest_condition import (Or, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
