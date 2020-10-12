@@ -39,6 +39,7 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     file_type = models.CharField(_('File Type'), blank=True, null=True, max_length=50)
     path = models.CharField(_('File Path'), blank=True, null=True, max_length=500)
     status = models.CharField(_('Status'), default=UPLOADING, max_length=50, choices=STATUS_CHOICES)
+    # box_url = models.CharField(_('Box Url'), blank=True, null=True, max_length=500)
 
 
 class Inventory(models.Model):

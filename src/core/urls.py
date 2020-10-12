@@ -146,8 +146,9 @@ urlpatterns = [
     path(r'file-upload/', FileUploadView.as_view(), name='file-upload'),
     path(r'document-url/<str:id>/', DocumentPreSignedView.as_view(), name='documents-url'),
     path(r'document-url/', DocumentPreSignedView.as_view(), name='documents-url'),
-    path(r'document/<str:id>/', DocumentStatusView.as_view(), name='extra-documents'),
-    path(r'document/', DocumentView.as_view(), name='extra-documents')
+    path(r'document-status/<str:id>/', DocumentStatusView.as_view(), name='extra-documents'),
+    path(r'document/', DocumentView.as_view(), name='extra-documents'),
+    path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents')
 ] + router.urls
 
 

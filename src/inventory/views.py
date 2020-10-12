@@ -18,6 +18,7 @@ from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, )
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
+from .permissions import (DocumentPermission, )
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -299,7 +300,8 @@ class DocumentView(APIView):
     """
     Document view class.
     """
-    permission_classes = (AllowAny, )
+    permission_classes = (DocumentPermission, )
+
 
     def get(self, request, *args, **kwargs):
         """
@@ -322,6 +324,22 @@ class DocumentView(APIView):
         return Response(
             Documents.objects.values(),
             status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete document.
+        """
+        id = kwargs.get('id', None)
+        if id:
+            data = Documents.objects.get(id=id).delete()
+            print(data)
+            return Response(
+                {'status': 'Success'},
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            {'status': 'Failure'},
+            status=status.HTTP_400_BAD_REQUEST)
 
 class DocumentStatusView(APIView):
     """
