@@ -42,6 +42,10 @@ from integration.sign import (upload_pdf_box, get_document,
                               send_template)
 from integration.tasks import (send_estimate, )
 from integration.utils import (get_distance, )
+from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
+                           BOX_CLIENT_SECRET,
+    )
+
 
 class GetBoxTokensView(APIView):
     """
@@ -51,6 +55,19 @@ class GetBoxTokensView(APIView):
 
     def get(self, request):
         tokens = get_box_tokens()
+        return Response(tokens)
+
+class GetBoxTokenAuthenticationView(APIView):
+    """
+    Return Access and Refresh Tokens for Box.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def get(self, request):
+        tokens = get_box_tokens()
+        tokens['BOX_CLIENT_ID'] = BOX_CLIENT_ID
+        tokens['BOX_CLIENT_SECRET'] = BOX_CLIENT_SECRET
+        tokens['inventory_folder_id'] = INVENTORY_BOX_ID
         return Response(tokens)
 
 class GetBoxSharedLink(APIView):

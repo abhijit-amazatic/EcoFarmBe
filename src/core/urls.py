@@ -42,7 +42,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetDocumentStatus, GetSignURL,
                                TemplateSignView, GetDistanceView,
                                GetSalesPersonView, GetTemplateStatus,
-                               CustomerPaymentView)
+                               CustomerPaymentView, GetBoxTokenAuthenticationView)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -88,6 +88,8 @@ urlpatterns = [
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
+    path(r'integration/box-aws/',
+         GetBoxTokenAuthenticationView.as_view(), name='box-token-authentication'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
     path(r'crm/account-picklist/', GetPickListAccountView.as_view(),

@@ -1,7 +1,7 @@
 """
 Views for Inventory
 """
-import os
+from mimetypes import MimeTypes
 import django_filters
 from django.shortcuts import (render, )
 from rest_framework.views import APIView
@@ -282,10 +282,11 @@ class DocumentPreSignedView(APIView):
         except Inventory.DoesNotExist:
             return Response({'error': 'Item not in database'},
                             status=status.HTTP_400_BAD_REQUEST)
-        _, type_ = os.path.splitext(object_name)
+        mime = MimeTypes()
+        mime_type, _ = mime.guess_type(object_name)
         obj = Documents(content_object=item,
                         sku=sku, name=object_name,
-                        path=path, file_type=type_)
+                        path=path, file_type=mime_type)
         obj.save()
         response = create_presigned_post(AWS_BUCKET, object_name, expiry)
         if response.get('status_code') != 0:
