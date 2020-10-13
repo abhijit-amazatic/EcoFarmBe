@@ -163,6 +163,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
         _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    lab_test_issues = models.TextField(blank=True, null=True)
 
 
 class CultivationOverview(models.Model):
