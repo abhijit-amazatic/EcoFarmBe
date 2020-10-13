@@ -353,29 +353,20 @@ class DocumentStatusView(APIView):
         """
         Update document fields.
         """
-        status_ = request.data.get('status')
-        box_link = request.data.get('box_link')
-        box_id = request.data.get('box_id')
+        status_ = request.data.get('status', 'UPLOADING')
+        box_url = request.data.get('box_url', None)
+        box_id = request.data.get('box_id', None)
         id = kwargs.get('id', None)
-        if status and id:
-            try:
-                obj = Documents.objects.get(id=id)
-                obj.status = status_
-                obj.save()
-                return Response(status=status.HTTP_201_CREATED)
-            except Documents.DoesNotExist:
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        if id and box_link and box_id:
-            try:
-                obj = Documents.objects.get(id=id)
-                obj.box_url = box_link
-                obj.box_id = box_id
-                obj.save()
-                return Response(status=status.HTTP_201_CREATED)
-            except Documents.DoesNotExist:
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
+        try:
+            obj = Documents.objects.get(id=id)
+            obj.status = status_
+            obj.box_url = box_url
+            obj.box_id = box_id
+            obj.save()
+            return Response(status=status.HTTP_201_CREATED)
+        except Documents.DoesNotExist:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
 class InventoryDeleteView(APIView):
     """
     Delete inventory item.
