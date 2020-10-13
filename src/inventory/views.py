@@ -333,8 +333,9 @@ class DocumentView(APIView):
         """
         id = kwargs.get('id', None)
         if id:
-            Documents.objects.get(id=id).delete()
-            # Delete file from box after implementing box id.
+            document = Documents.objects.get(id=id)
+            delete_file(document.box_id)
+            document.delete()
             return Response(
                 {'status': 'Success'},
                 status=status.HTTP_200_OK

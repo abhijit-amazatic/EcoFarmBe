@@ -332,8 +332,11 @@ def delete_file(file_id):
     """
     Delete file from box.
     """
-    client = get_box_client()
-    return client.file(file_id=file_id).delete()
+    try:
+        client = get_box_client()
+        return client.file(file_id=file_id).delete()
+    except BoxException as exc:
+        return {'status': 1, 'error': 'Not found'}
 
 
 def get_embed_url(file_id):
