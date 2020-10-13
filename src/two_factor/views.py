@@ -220,8 +220,8 @@ class TwoFactoLogInViewSet(GenericViewSet):
                     method = serializer.validated_data['challenge_method']
 
                 device_message = {
-                    'phone': 'Your two-factor Login code for Thrive-Society is XXXX.',
-                    'one_touch': 'Verify your Thrive-Society account login.'
+                    'phone': 'Your two-factor Login code for Thrive Society is XXXX.',
+                    'one_touch': 'Verify your Thrive Society account login.'
                 }
                 params = {
                     'msg': device_message.get(device.type),

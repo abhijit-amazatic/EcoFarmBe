@@ -194,7 +194,7 @@ class AbstractPhoneDevice(ThrottlingMixin, AbstractDevice):
         if msg and 'XXXX' in msg:
             body_text = msg.replace('XXXX', token)
         else:
-            body_text = f'Your verification code for Thrive-Society is {token}.'
+            body_text = f'Your verification code for Thrive Society is {token}.'
         if hasattr(self, 'phone_number'):
             to = self.phone_number
             if hasattr(to, 'as_e164'):

@@ -197,7 +197,7 @@ class AuthyOneTouchDevice(AbstractDevice):
         :param str msg: Message to send on phone.
         """
         if not msg:
-            msg = 'Verification requested for Thrive-Society account.'
+            msg = 'Verification requested for Thrive Society account.'
         username_field = self.user.__class__.EMAIL_FIELD
         details = {
             'username': getattr(self.user, username_field,),
