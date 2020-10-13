@@ -19,6 +19,7 @@ from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, )
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
 from .permissions import (DocumentPermission, )
+from integration.box import (delete_file, )
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -294,6 +295,7 @@ class DocumentPreSignedView(APIView):
         response = create_presigned_post(AWS_BUCKET, path, expiry)
         if response.get('status_code') != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        response['document_id'] = obj.id
         return Response(response, status=status.HTTP_201_CREATED)
 
 class DocumentView(APIView):
@@ -331,8 +333,8 @@ class DocumentView(APIView):
         """
         id = kwargs.get('id', None)
         if id:
-            data = Documents.objects.get(id=id).delete()
-            print(data)
+            Documents.objects.get(id=id).delete()
+            # Delete file from box after implementing box id.
             return Response(
                 {'status': 'Success'},
                 status=status.HTTP_200_OK

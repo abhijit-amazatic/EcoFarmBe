@@ -328,6 +328,14 @@ def move_file(file_id, destination_folder_id):
     return moved_file
 
 
+def delete_file(file_id):
+    """
+    Delete file from box.
+    """
+    client = get_box_client()
+    return client.file(file_id=file_id).delete()
+
+
 def get_embed_url(file_id):
     """
     Return embed url for file.
