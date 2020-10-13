@@ -3,7 +3,7 @@ User related serializers defined here.
 Basically they are used for API representation & validation.
 """
 import binascii
-from django.contrib.auth import (authenticate, login)
+from django.contrib.auth import (authenticate, login, get_user_model)
 from rest_framework import serializers
 
 from user.models import (User, PrimaryPhoneTOTPDevice,)
@@ -19,6 +19,17 @@ from .models import (
     StaticToken,
 )
 from .conf import settings
+
+
+User = get_user_model()
+
+username_field = User.USERNAME_FIELD if hasattr(User, 'USERNAME_FIELD') else 'username'
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (username_field, 'is_2fa_enabled')
 
 
 class EmptySerializer(serializers.Serializer):  # pylint: disable=W0223

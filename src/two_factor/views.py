@@ -16,7 +16,6 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.viewsets import GenericViewSet
 from authy.api import AuthyApiClient
 from knox.models import AuthToken
-from knox.settings import knox_settings
 
 from user.models import (PrimaryPhoneTOTPDevice,)
 
@@ -37,6 +36,7 @@ from .models import (
     StaticToken,
 )
 from .serializers import (
+    UserSerializer,
     LogInSerializer,
     TwoFactorDevicesSerializer,
     DeviceIdSerializer,
@@ -48,14 +48,12 @@ from .serializers import (
 )
 
 authy_api = AuthyApiClient(settings.AUTHY_ACCOUNT_SECURITY_API_KEY)
-KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 
 
 def get_user_login_info(user):
     return {
-        "user":            KNOXUSER_SERIALIZER(user).data,
+        "user":            UserSerializer(user).data,
         "existing_member": user.existing_member,
-        "is_2fa_enabled":  user.is_2fa_enabled,
         "is_verified":     user.is_verified,
         "is_approved":     user.is_approved,
         "status":          user.status,
@@ -148,8 +146,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
                 response_data["token"] = AuthToken.objects.create(request.user)
             else:
                 response_data = {
-                    "user": KNOXUSER_SERIALIZER(request.user).data,
-                    "is_2fa_enabled":  request.user.is_2fa_enabled,
+                    "user": UserSerializer(request.user).data,
                 }
                 login_2fa_token = TwoFactorLoginToken.objects.create(
                     user=request.user)
