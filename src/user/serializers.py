@@ -70,6 +70,7 @@ class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField()
     member_categories = serializers.SerializerMethodField(read_only=True)
     is_verified = serializers.ReadOnlyField()
+    is_2fa_enabled = serializers.ReadOnlyField()
     is_approved = serializers.ReadOnlyField()
     approved_on = serializers.ReadOnlyField()
     approved_by = serializers.ReadOnlyField()
@@ -94,7 +95,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about')
     
 
     def validate_password(self, password):
