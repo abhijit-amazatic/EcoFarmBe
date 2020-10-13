@@ -353,16 +353,11 @@ class DocumentStatusView(APIView):
         """
         Update document fields.
         """
-        status_ = request.data.get('status', 'UPLOADING')
-        box_url = request.data.get('box_url', None)
-        box_id = request.data.get('box_id', None)
         id = kwargs.get('id', None)
         try:
-            obj = Documents.objects.get(id=id)
-            obj.status = status_
-            obj.box_url = box_url
-            obj.box_id = box_id
-            obj.save()
+            obj = Documents.objects.update_or_create(
+                    id=id,
+                    defaults=request.data)
             return Response(status=status.HTTP_201_CREATED)
         except Documents.DoesNotExist:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
