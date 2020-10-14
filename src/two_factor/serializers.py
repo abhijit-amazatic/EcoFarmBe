@@ -36,7 +36,7 @@ class EmptySerializer(serializers.Serializer):  # pylint: disable=W0223
     """
     Serializer.
     """
-
+    pass
 
 class CurrentPasswordSerializer(serializers.Serializer): # pylint: disable=W0223
     """

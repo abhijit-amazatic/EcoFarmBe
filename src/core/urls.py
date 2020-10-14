@@ -57,6 +57,7 @@ from two_factor.views import (
     TwoFactoLogInViewSet,
     AuthyAddUserRequestViewSet,
     AuthyOneTouchRequestCallbackView,
+    AuthyUserRegistrationCallbackView,
 )
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
@@ -69,7 +70,7 @@ router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
-router.register(r'two-factor/authy/user', AuthyAddUserRequestViewSet, base_name="authy-user")
+router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="authy-user")
 
 
 
@@ -89,6 +90,7 @@ urlpatterns = [
     path(r'user/send-phone-verification-call/', GetPhoneNumberVerificationCodeCallView.as_view(), name='send-phone-verification-code-call'),
     path(r'user/phone-verify/', PhoneNumberVerificationView.as_view(), name='phone-verification'),
     path(r'two-factor/authy-callback/one-touch-request/', AuthyOneTouchRequestCallbackView.as_view(), name='authy-one-touch-request-callback'),
+    path(r'two-factor/authy-callback/user-registration/', AuthyUserRegistrationCallbackView.as_view(), name='authy-user-registration-callback'),
     path(r'two-factor/enable-2fa-login/', TwoFactorLoginEnableView.as_view(), name='enable-2fa-login'),
     path(r'two-factor/disable-2fa-login/', TwoFactorLoginDisableView.as_view(), name='enable-2fa-login'),
     path(r'category/', CategoryView.as_view(), name='category'),

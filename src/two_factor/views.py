@@ -5,6 +5,7 @@ All views related to the two factor authorization defined here.
 import qrcode
 import qrcode.image.svg
 import json
+import jwt
 from django.http import HttpResponse
 from django.contrib.auth import login
 from rest_framework.decorators import action
@@ -271,7 +272,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
                 else:
                     response = Response({'detail': 'device request not fount'}, status=404)
             else:
-                response = Response({"detail": "Device verification failed"}, status=400)
+                response = Response({"detail": "device is not one_touch device."}, status=400)
         else:
             response = Response({"detail": "login_2fa_token expired."}, status=401)
         return response
@@ -427,63 +428,54 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
     @action(
         detail=True,
         methods=['get'],
-        name='Get Registration Status',
-        url_name='authy-user-registration-status',
-        url_path='registration-status',
+        name='Update Registration Status',
+        url_name='authy-user-registration-status-update',
+        url_path='update-registration-status',
         serializer_class=EmptySerializer,
     )
-    def registration_status(self, request, *args, **kwargs):
+    def update_registration_status(self, request, *args, **kwargs):
         """
         Get authy user registration status.
         """
         instance = self.get_object()
-        authy_user = authy_api.users.registration_status(
-            custom_user_id=instance.custom_user_id
-        )
+        if instance.status == 'pending':
+            authy_user = authy_api.users.registration_status(
+                custom_user_id=instance.custom_user_id
+            )
+            if authy_user.ok():
+                instance.authy_id = authy_user.content['registration']['authy_id']
+                instance.is_registered = authy_user.content['registration']['status'] == 'completed'
+                if instance.is_registered:
+                    authy_user, _ = AuthyUser.objects.get_or_create(
+                    authy_id=instance.authy_id)
+                    try:
+                        device = AuthyOneTouchDevice.objects.get(user=instance.user)
+                    except AuthyOneTouchDevice.DoesNotExist:
+                        device = AuthyOneTouchDevice.objects.create(
+                            user=instance.user, authy_user=authy_user, confirmed=True)
+                    else:
+                        device.authy_user = authy_user
+                        device.confirmed = True
+                        device.save()
+                    instance.save()
 
-        if authy_user.ok():
-            # {'registration': {'authy_id': 217244768, 'status': 'completed'}, 'success': True}
-            instance.authy_id = authy_user.content['registration']['authy_id']
-            instance.is_registered = authy_user.content['registration']['status'] == 'completed'
-            instance.save()
-            response = Response(authy_user.content, status=200)
-        else:
-            response = Response(authy_user.content, status=400)
+        response = Response({'status': instance.status}, status=200)
         return response
 
     @action(
         detail=True,
-        methods=['post'],
-        name='process authy user registration',
-        url_name='authy-add-user-request-process',
-        url_path='process',
+        methods=['get'],
+        name='Get Registration Status',
+        url_name='authy-user-registration-status',
+        url_path='get-registration-status',
         serializer_class=EmptySerializer,
     )
-    def create_authy_devices(self, request, *args, **kwargs):
+    def get_registration_status(self, request, *args, **kwargs):
         """
-        Process authy add user request.
+        Get authy user registration status.
         """
-        user = self.request.user
         instance = self.get_object()
-
-        if instance.is_registered:
-            authy_user, _ = AuthyUser.objects.get_or_create(
-                authy_id=instance.authy_id)
-            try:
-                device = AuthyOneTouchDevice.objects.get(user=user)
-            except AuthyOneTouchDevice.DoesNotExist:
-                device = AuthyOneTouchDevice.objects.create(
-                    user=user, authy_user=authy_user, confirmed=True)
-            else:
-                device.authy_user = authy_user
-                device.confirmed = True
-                device.save()
-            response = Response(
-                {'detail': 'authy User devices process successfully.'}, status=400)
-
-        else:
-            response = Response(
-                {'detail': 'authy User registration is not complete.'}, status=400)
+        response = Response({'status': instance.status}, status=200)
         return response
 
 
@@ -516,3 +508,52 @@ class AuthyOneTouchRequestCallbackView(APIView):
                     instance.save()
             return Response("", status=200)
         return Response("", status=400)
+
+
+class AuthyUserRegistrationCallbackView(APIView):
+    """
+    View
+    """
+    permission_classes = (AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Post method view.
+        """
+        if 'body' in request.data and 0:
+            try:
+                data = jwt.decode(
+                    request.data['body'],
+                    getattr(settings, 'AUTHY_USER_REGISTRATION_CALLBACK_SIGNING_KEY', ''),
+                    algorithms=['HS256']
+                )
+            except jwt.PyJWTError:
+                pass
+            else:
+                scheme = request.META.get('HTTP_X_FORWARDED_PROTO', request.scheme)
+                url = f'{scheme}://{request.get_host()}{request.path}'
+                if data['url'] == url:
+                    for event in data['params']['events']:
+                        if  event['event']=='user_registration_completed':
+                            registration = event['objects']['registration']
+                            req_instance = AuthyAddUserRequest.objects.filter(custom_user_id=registration['s_custom_id']).first()
+                            if req_instance and req_instance.status == 'pending':
+                                req_instance.is_registered = True
+                                req_instance.authy_id = str(registration['s_authy_id'])
+                                if req_instance.is_registered:
+                                    authy_user, _ = AuthyUser.objects.get_or_create(
+                                    authy_id=req_instance.authy_id)
+                                    try:
+                                        device = AuthyOneTouchDevice.objects.get(user=req_instance.user)
+                                    except AuthyOneTouchDevice.DoesNotExist:
+                                        device = AuthyOneTouchDevice.objects.create(
+                                            user=req_instance.user, authy_user=authy_user, confirmed=True)
+                                    else:
+                                        device.authy_user = authy_user
+                                        device.confirmed = True
+                                        device.save()
+                                    req_instance.save()
+
+
+                                return Response({}, status=200)
+        return Response({}, status=400)
