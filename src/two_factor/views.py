@@ -428,12 +428,12 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
     @action(
         detail=True,
         methods=['get'],
-        name='Update Registration Status',
+        name='Get Registration Status',
         url_name='authy-user-registration-status-update',
-        url_path='update-registration-status',
+        url_path='get-registration-status',
         serializer_class=EmptySerializer,
     )
-    def update_registration_status(self, request, *args, **kwargs):
+    def get_registration_status(self, request, *args, **kwargs):
         """
         Get authy user registration status.
         """
@@ -462,21 +462,21 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
         response = Response({'status': instance.status}, status=200)
         return response
 
-    @action(
-        detail=True,
-        methods=['get'],
-        name='Get Registration Status',
-        url_name='authy-user-registration-status',
-        url_path='get-registration-status',
-        serializer_class=EmptySerializer,
-    )
-    def get_registration_status(self, request, *args, **kwargs):
-        """
-        Get authy user registration status.
-        """
-        instance = self.get_object()
-        response = Response({'status': instance.status}, status=200)
-        return response
+    # @action(
+    #     detail=True,
+    #     methods=['get'],
+    #     name='Get Registration Status',
+    #     url_name='authy-user-registration-status',
+    #     url_path='get-registration-status',
+    #     serializer_class=EmptySerializer,
+    # )
+    # def get_registration_status(self, request, *args, **kwargs):
+    #     """
+    #     Get authy user registration status.
+    #     """
+    #     instance = self.get_object()
+    #     response = Response({'status': instance.status}, status=200)
+    #     return response
 
 
 class AuthyOneTouchRequestCallbackView(APIView):
