@@ -18,6 +18,7 @@ from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
 from core.utility import (send_async_approval_mail,add_users_to_system_and_license,)
+from integration.box import (delete_file,)
 
 
 class LicenseUpdatedForm(forms.ModelForm):
@@ -54,6 +55,36 @@ def approve_license_profile(modeladmin, request, queryset):
                 
     messages.success(request,'License Profiles Approved!')    
 approve_license_profile.short_description = 'Approve Selected License Profiles'
+
+
+
+def get_obj_file_ids(obj):
+    """
+    Extract box file ids
+    """
+    box_file_ids = []
+    doc_field = ['uploaded_license_to','uploaded_sellers_permit_to','uploaded_w9_to']
+    links = License.objects.filter(id=obj.id).values('uploaded_license_to','uploaded_sellers_permit_to','uploaded_w9_to')
+    try:
+        if links:
+            for doc in doc_field:
+                box_id = links[0].get(doc).split('?id=')[1]
+                box_file_ids.append(box_id)
+            return box_file_ids
+    except Exception as e:
+        print('exception',e)
+        
+            
+
+def delete_model(modeladmin, request, queryset):
+    for obj in queryset:
+        file_ids = get_obj_file_ids(obj)
+        if file_ids:
+            for file_id in file_ids:
+                print('FileID to delete from box:',file_id)
+                delete_file(file_id)
+        obj.delete()
+delete_model.short_description = "Delete selected License Profile and it's box files"
 
 
 class ProfileContactForm(forms.ModelForm):
@@ -199,7 +230,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
-    actions = [approve_license_profile, ] 
+    actions = [approve_license_profile, delete_model, ] 
     list_per_page = 50
 
     @transaction.atomic
