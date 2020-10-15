@@ -12,3 +12,9 @@ from .callback import (
     AuthyOneTouchRequestCallbackView,
     AuthyUserRegistrationCallbackView,
 )
+from .device import (
+    TwoFactorDeviceViewSet
+)
+from .add_phone import(
+    AddPhoneDeviceViewSet
+)

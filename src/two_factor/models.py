@@ -313,14 +313,15 @@ class PhoneTOTPDevice(AbstractPhoneDevice):
         help_text="The user that this device belongs to.",
         on_delete=models.CASCADE,
     )
-    phone_number = PhoneNumberField(_('Phone'), unique=True,)
+    phone_number = PhoneNumberField(_('Phone'),)
 
     class Meta(AbstractPhoneDevice.Meta):
+        unique_together = ['user', 'phone_number']
         verbose_name = _("Phone Totp Device")
         verbose_name_plural = _("Phone Totp Device")
 
     def __str__(self):
-        return "{0} | ({1})".format(self.name, self.user)
+        return "{0} | ({1})".format(self.phone_number, self.user)
 
 
 class AuthenticatorTOTPDevice(ThrottlingMixin, AbstractDevice):
@@ -478,6 +479,9 @@ class StaticDevice(ThrottlingMixin, AbstractDevice):
     @property
     def type(self):
         return 'backup_code'
+    @property
+    def is_removable(self):
+        return False
 
     @property
     def challenge_methods(self):

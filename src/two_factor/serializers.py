@@ -5,6 +5,7 @@ Basically they are used for API representation & validation.
 import binascii
 from django.contrib.auth import (authenticate, login, get_user_model)
 from rest_framework import serializers
+from phonenumber_field.serializerfields import PhoneNumberField
 
 from user.models import (User, PrimaryPhoneTOTPDevice,)
 
@@ -99,9 +100,13 @@ class TwoFactorLoginDevicesSerializer(serializers.Serializer):  # pylint: disabl
     is_interactive = serializers.BooleanField()
     challenge_methods = serializers.ListField()
 
-    # def get_device_id(self, obj):
-    #     return binascii.hexlify(obj.persistent_id.encode('utf-8'))
-
+class TwoFactorDevicesSerializer(TwoFactorLoginDevicesSerializer):
+    """
+    Serializer for users two factor devices.
+    """
+    confirmed = serializers.BooleanField(read_only=True)
+    is_removable = serializers.BooleanField(read_only=True)
+    phone_number = PhoneNumberField(read_only=True)
 
 class DeviceIdSerializer(serializers.Serializer):  # pylint: disable=W0223
     """
@@ -139,13 +144,32 @@ class TwoFactorDevicesChallengeSerializer(DeviceIdSerializer): # pylint: disable
                 )
         return data
 
-
-class TwoFactorLogInVerificationSerializer(DeviceIdSerializer): # pylint: disable=W0223
+class TwoFactorDevicesChallengeMethodSerializer(serializers.Serializer): # pylint: disable=W0223
     """
-    Serializer for users two login.
+    Serializer for users two factor devices interaction.
+    """
+    challenge_method = serializers.CharField(max_length=255, required=False)
+
+    def validate_challenge_method(self, value):
+        """
+        Check that start is before finish.
+        """
+        if self.instance.challenge_methods and value:
+            if value not in self.instance.challenge_methods:
+                raise serializers.ValidationError(f"method {value} is not supported")
+        return value
+
+class TokenSerializer(serializers.Serializer): # pylint: disable=W0223
+    """
+    Serializer for token.
     """
     token = serializers.CharField(max_length=255, required=False,)
 
+class TwoFactorLogInVerificationSerializer(TokenSerializer, DeviceIdSerializer): # pylint: disable=W0223
+    """
+    Serializer for users two login.
+    """
+    pass
 
 
 class AuthyAddUserRequestSerializer(serializers.ModelSerializer):
@@ -168,3 +192,17 @@ class AuthyAddUserRequestSerializer(serializers.ModelSerializer):
         model = AuthyAddUserRequest
         fields = ('request_id', 'issued_at', 'expire_at', 'status')
         read_only_fields = ('request_id', 'issued_at', 'expire_at', 'status')
+
+class AddPhoneDeviceSerializer(serializers.Serializer):  # pylint: disable=W0223
+    """
+    Serializer for requesting verification SMS
+    """
+    phone_number = PhoneNumberField(max_length=15)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if user.phone == data['phone_number']:
+            raise serializers.ValidationError({'phone_number': 'Already in use as a primary number'})
+        if PhoneTOTPDevice.objects.filter(user=user, phone_number=data['phone_number']).first():
+            raise serializers.ValidationError({'phone_number': 'Already exist'})
+        return data

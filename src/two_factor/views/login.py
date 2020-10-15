@@ -47,6 +47,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
     queryset = TwoFactorLoginToken.objects.all()
     lookup_field = 'token'
     lookup_url_kwarg = 'login_2fa_token'
+
     def create(self, request, *args, **kwargs):
         """"
         Post method for login.

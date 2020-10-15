@@ -17,6 +17,8 @@ from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
 from brand.models import (License,)
 
+from two_factor.serializers import TwoFactorDevicesSerializer
+
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
 
@@ -69,6 +71,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_superuser = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
     member_categories = serializers.SerializerMethodField(read_only=True)
+    two_factor_devices = serializers.SerializerMethodField(read_only=True)
     is_verified = serializers.ReadOnlyField()
     is_2fa_enabled = serializers.ReadOnlyField()
     is_approved = serializers.ReadOnlyField()
@@ -83,7 +86,15 @@ class UserSerializer(serializers.ModelSerializer):
         Adds ,member categories to response
         """
         return obj.categories.values()
-    
+
+    def get_two_factor_devices(self, obj):
+        """
+        Adds Two factor devices
+        """
+        return TwoFactorDevicesSerializer(
+            obj.get_two_factor_devices(confirmed_only=False),
+            many=True,
+        ).data
 
     def get_platform_kpi(self, obj):
         """
@@ -95,7 +106,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices')
     
 
     def validate_password(self, password):

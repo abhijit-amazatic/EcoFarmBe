@@ -153,3 +153,7 @@ class PrimaryPhoneTOTPDevice(AbstractPhoneDevice):
     @confirmed.setter
     def confirmed(self, value):
         self.user.is_phone_verified = bool(value)
+
+    @property
+    def is_removable(self):
+        return False

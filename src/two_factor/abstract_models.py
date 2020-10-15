@@ -29,6 +29,10 @@ class AbstractDevice(Device):
         return 'base_device'
 
     @property
+    def is_removable(self):
+        return True
+
+    @property
     def challenge_methods(self):
         return []
 
@@ -202,13 +206,13 @@ class AbstractPhoneDevice(ThrottlingMixin, AbstractDevice):
 
             if method == 'call':
                 ret = make_call(to=to, body_plain=body_text)
-                if not isinstance(ret, Exception) and not ret.error_code:
+                if not isinstance(ret, Exception)and not getattr(ret, 'error_code', None):
                     return (True, {'detail': 'Verification call request made.'})
                 else:
                     return (False, {'detail': 'Unable to make Verification call.'})
             elif method == 'sms':
                 ret = send_sms(to=to, body=body_text)
-                if not isinstance(ret, Exception) and not ret.error_code:
+                if not isinstance(ret, Exception) and not getattr(ret, 'error_code', None):
                     return (True, {'detail': 'Verification sms is sent.'})
                 else:
                     return (False, {'detail': 'Unable to send Verification sms.'})

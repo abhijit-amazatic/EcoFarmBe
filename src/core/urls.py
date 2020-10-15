@@ -58,6 +58,8 @@ from two_factor.views import (
     AuthyAddUserRequestViewSet,
     AuthyOneTouchRequestCallbackView,
     AuthyUserRegistrationCallbackView,
+    TwoFactorDeviceViewSet,
+    AddPhoneDeviceViewSet,
 )
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
@@ -70,7 +72,9 @@ router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
-router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="authy-user")
+router.register(r'two-factor/device', TwoFactorDeviceViewSet, base_name="two-factor-device")
+router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="add-authy-user")
+router.register(r'two-factor/add-device/phone', AddPhoneDeviceViewSet, base_name="add-phone-device")
 
 
 
