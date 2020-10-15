@@ -63,13 +63,17 @@ def get_obj_file_ids(obj):
     Extract box file ids
     """
     box_file_ids = []
-    doc_field = ['uploaded_license_to','uploaded_sellers_permit_to','uploaded_w9_to']
-    links = License.objects.filter(id=obj.id).values('uploaded_license_to','uploaded_sellers_permit_to','uploaded_w9_to')
+    doc_field = ['uploaded_license_to','uploaded_sellers_permit_to']
+    links = License.objects.filter(id=obj.id).values('uploaded_license_to','uploaded_sellers_permit_to')
     try:
         if links:
             for doc in doc_field:
-                box_id = links[0].get(doc).split('?id=')[1]
-                box_file_ids.append(box_id)
+                if '?id=' in links[0].get(doc):
+                    box_id = links[0].get(doc).split('?id=')[1]
+                else:
+                    box_id = links[0].get(doc)
+                if box_id:     
+                    box_file_ids.append(box_id)
             return box_file_ids
     except Exception as e:
         print('exception',e)
