@@ -63,15 +63,16 @@ def get_obj_file_ids(obj):
     Extract box file ids
     """
     box_file_ids = []
-    doc_field = ['uploaded_license_to','uploaded_sellers_permit_to']
+    #doc_field = ['uploaded_license_to','uploaded_sellers_permit_to']
     links = License.objects.filter(id=obj.id).values('uploaded_license_to','uploaded_sellers_permit_to')
+    to_be_removed = [ v for k, v in links[0].items() if v is not None]
     try:
         if links:
-            for doc in doc_field:
-                if '?id=' in links[0].get(doc):
-                    box_id = links[0].get(doc).split('?id=')[1]
+            for doc in to_be_removed:
+                if '?id=' in doc:
+                    box_id = doc.split('?id=')[1]
                 else:
-                    box_id = links[0].get(doc)
+                    box_id = doc
                 if box_id:     
                     box_file_ids.append(box_id)
             return box_file_ids
