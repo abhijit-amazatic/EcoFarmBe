@@ -89,7 +89,7 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
                 raise serializers.ValidationError('Invalid Email or Password.')
 
 
-class TwoFactorDevicesSerializer(serializers.Serializer):  # pylint: disable=W0223
+class TwoFactorLoginDevicesSerializer(serializers.Serializer):  # pylint: disable=W0223
     """
     Serializer for users two factor devices.
     """
