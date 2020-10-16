@@ -178,7 +178,7 @@ def create_folder(parent_folder_id, new_folder_name):
 #             pass
 
 
-def upload_file(folder_id, file_path, file_name='abc.pdf', license_id=None, key=None):
+def upload_file(folder_id, file_path, file_name, license_id=None, key=None):
     """
     Upload file to parent folder.
 
@@ -230,6 +230,16 @@ def get_client_folder_id(client_folder_name):
             return k
         else:
             return create_folder(FARM_FOLDER_ID, client_folder_name)
+
+
+def search(parent_dir, name):
+    """
+    Search folder/file in folder.
+    """
+    dirs = get_folder_items(parent_dir)
+    for k, v in dirs.items():
+        if v.lower() == name.lower():
+            return k
 
 
 def parse_folder(folder):
@@ -363,3 +373,20 @@ def get_preview_url(file_id):
     return client.file(file_id).get_shared_link_download_url(
         access='open',
         allow_preview=True)
+
+def get_document(document_type, client_dba, client_license, document_id):
+    """
+    Get estimate, SO, PO, Invoices from box.
+    """
+    if document_type.lower() in ['estimates', 'sales_orders', 'purchase_orders', 'invoices']:
+        dir_name = f'{client_dba}_{client_license}'
+        folder_id = get_client_folder_id(dir_name)
+        sub_folder_id = search(folder_id, document_type)
+        sub_folder_content = get_folder_items(sub_folder_id)
+        for k,v in sub_folder_content.items():
+            if v.split('.')[0] == document_id:
+                return get_preview_url(k)
+    return {
+        'status_code': 1,
+        'error': 'No document or folder found.'
+    }

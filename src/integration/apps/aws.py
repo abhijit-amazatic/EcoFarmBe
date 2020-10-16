@@ -41,7 +41,7 @@ def create_presigned_post(bucket_name, object_name, expiration=3600):
                 'status_code': 1}
     return {'status_code': 0, 'url': response}
 
-def create_presigned_url(bucket_name, object_name, expiration=3600):
+def create_presigned_url(bucket_name, object_name, expiration=604800):
     """
     Generate a presigned URL to share an S3 object
 
@@ -50,8 +50,7 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     @param expiration: Time in seconds for the presigned URL to remain valid
     @return: Presigned URL as string. If error, returns None.
     """
-    config = Config(s3={'addressing_style': 'path'}, signature_version='s3v4')
-    s3_client = get_boto_client('s3', config=config)
+    s3_client = get_boto_client('s3')
     try:
         response = s3_client.generate_presigned_url(
             'get_object',

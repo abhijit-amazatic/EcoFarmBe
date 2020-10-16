@@ -147,7 +147,7 @@ def check_documents(inventory_name, record):
         if record.get('image_name'):
             record = get_inventory_item(inventory_name, record['item_id'])
         if record.get('documents') and len(record['documents']) > 0:
-            folder_name = f"{record['name']}-{record['item_id']}"
+            folder_name = f"{record['sku']}"
             folder_id = create_folder(INVENTORY_BOX_ID, folder_name)
             for document in record['documents']:
                 if document['attachment_order'] == 1: # Limit upload image to primary.
