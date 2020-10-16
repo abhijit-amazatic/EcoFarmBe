@@ -42,7 +42,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetDocumentStatus, GetSignURL,
                                TemplateSignView, GetDistanceView,
                                GetSalesPersonView, GetTemplateStatus,
-                               CustomerPaymentView, GetBoxTokenAuthenticationView)
+                               CustomerPaymentView, GetBoxTokenAuthenticationView,
+                               BillView, )
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -125,6 +126,7 @@ urlpatterns = [
     path(r'books/customer-payment/',
          CustomerPaymentView.as_view(), name='customer_payment'),
     path(r'books/invoice/', InvoiceView.as_view(), name='invoices'),
+    path(r'books/bill/', BillView.as_view(), name='bills'),
     path(r'books/vendor-credits/',
          VendorCreditView.as_view(), name='vendor_credits'),
     path(r'books/account-summary/',

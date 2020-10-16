@@ -36,7 +36,8 @@ from integration.books import (
     update_estimate, delete_estimate,
     send_estimate_to_sign, get_contact_addresses,
     mark_estimate, get_transportation_fees,
-    get_customer_payment, list_customer_payments,)
+    get_customer_payment, list_customer_payments,
+    get_bill, list_bills,)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -424,6 +425,22 @@ class InvoiceView(APIView):
                 request.query_params.get('invoice_id'),
                 params=request.query_params.dict()))
         return Response(list_invoices(params=request.query_params.dict()))
+
+class BillView(APIView):
+    """
+    View class for Zoho books bills.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get/List bills.
+        """
+        if request.query_params.get('bill_id', None):
+            return Response(get_bill(
+                request.query_params.get('bill_id'),
+                params=request.query_params.dict()))
+        return Response(list_bills(params=request.query_params.dict()))
 
 class VendorCreditView(APIView):
     """

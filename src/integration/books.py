@@ -479,3 +479,19 @@ def get_contact_statement(contact_name):
 #     if result['code'] != 0:
 #         return result
 #     return po_obj.create_purchase_order(result['data'], parameters=params)
+
+def get_bill(bill_id, params=None):
+    """
+    Get a bill.
+    """
+    obj = get_books_obj()
+    bill_obj = obj.Bills()
+    return bill_obj.get_bill(bill_id=bill_id, parameters=params)
+
+def list_bills(params=None):
+    """
+    List bills.
+    """
+    obj = get_books_obj()
+    bill_obj = obj.Bills()
+    return bill_obj.list_bills(parameters=params)
