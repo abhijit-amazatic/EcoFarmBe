@@ -114,7 +114,7 @@ class TwoFactorDeviceViewSet(mixins.ListModelMixin,
             else:
                 response = Response({'detail': "Device in not interactive"}, status=400)
         else:
-            response = Response({"Device is already verified"}, status=400)
+            response = Response({'detail': "Device is already verified"}, status=400)
         return response
 
     # @action(
@@ -162,11 +162,11 @@ class TwoFactorDeviceViewSet(mixins.ListModelMixin,
             if device.verify_token(token=token, event_code=event_code):
                 device.confirmed = True
                 device.save()
-                response = Response({"Device verification successfull."}, status=200)
+                response = Response({'detail': "Device verification successfull."}, status=200)
             else:
-                response = Response({"Device verification failed"}, status=400)
+                response = Response({'detail': "Device verification failed"}, status=400)
         else:
-            response = Response({"Device is already verified"}, status=400)
+            response = Response({'detail': "Device is already verified"}, status=400)
         return response
 
     @action(
