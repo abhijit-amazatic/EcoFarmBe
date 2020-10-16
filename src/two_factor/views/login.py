@@ -158,7 +158,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
 
     @action(
         detail=True,
-        methods=['get'],
+        methods=['post'],
         name='One Touch Log In status',
         url_name='one-touch-log-in-status',
         url_path='one-touch-status',
