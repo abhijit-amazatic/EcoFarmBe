@@ -13,8 +13,11 @@ from .callback import (
     AuthyUserRegistrationCallbackView,
 )
 from .device import (
-    TwoFactorDeviceViewSet
+    TwoFactorDeviceViewSet,
 )
 from .add_phone import(
-    AddPhoneDeviceViewSet
+    AddPhoneDeviceViewSet,
+)
+from .add_authenticator import(
+    AddAuthenticatorRequestViewSet,
 )

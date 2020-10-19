@@ -33,6 +33,10 @@ class AbstractDevice(Device):
         return True
 
     @property
+    def is_interactive(self):
+        return super().is_interactive()
+
+    @property
     def challenge_methods(self):
         return []
 
@@ -48,6 +52,13 @@ class AbstractDevice(Device):
             return None
         else:
             return cls.from_persistent_id(persistent_id)
+    def generate_challenge(self, *args, **kwargs):
+        return None
+
+    generate_challenge.stub = True
+
+    def verify_token(self, token, *args, **kwargs):
+        return False
 
     class Meta(Device.Meta):
         abstract = True

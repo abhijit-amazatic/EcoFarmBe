@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.core import serializers
 from django_otp.models import ThrottlingMixin
 from django_otp.oath import (TOTP,)
 
@@ -343,7 +344,7 @@ class AuthySoftTOTPDevice(AbstractDevice):
 
     name = models.CharField(
         max_length=255,
-        default='Authy soft TOTP',
+        default='Authy Soft Token',
     )
 
     class Meta(AbstractDevice.Meta):
@@ -432,8 +433,8 @@ class AuthenticatorTOTPDevice(ThrottlingMixin, AbstractDevice):
         """
         return unhexlify(self.key.encode())
 
-    def verify_token(self, token, *args, **kwargs):
-        OTP_TOTP_SYNC = getattr(settings, 'OTP_TOTP_SYNC', True)
+    def verify_token(self, token, *args, commit=True, **kwargs):
+        totp_sync = getattr(settings, 'AUTHENTICATOR_TOTP_SYNC', True)
 
         verify_allowed, _ = self.verify_is_allowed()
         if not verify_allowed:
@@ -452,18 +453,19 @@ class AuthenticatorTOTPDevice(ThrottlingMixin, AbstractDevice):
             verified = totp.verify(token, self.tolerance, self.last_t + 1)
             if verified:
                 self.last_t = totp.t()
-                if OTP_TOTP_SYNC:
+                if totp_sync:
                     self.drift = totp.drift
-                self.throttle_reset(commit=False)
-                self.save()
+                if commit:
+                    self.throttle_reset(commit=False)
+                    self.save()
 
-        if not verified:
+        if not verified and commit:
             self.throttle_increment(commit=True)
 
         return verified
 
     def get_throttle_factor(self):
-        return getattr(settings, 'OTP_TOTP_THROTTLE_FACTOR', 1)
+        return getattr(settings, 'AUTHENTICATOR_TOTP_THROTTLE_FACTOR', 1)
 
     @property
     def config_url(self):
@@ -481,7 +483,7 @@ class AuthenticatorTOTPDevice(ThrottlingMixin, AbstractDevice):
         }
         urlencoded_params = urlencode(params)
 
-        issuer = getattr(settings, 'OTP_TOTP_ISSUER', None)
+        issuer = getattr(settings, 'AUTHENTICATOR_TOTP_ISSUER', None)
         if callable(issuer):
             issuer = issuer(self)
         if isinstance(issuer, str) and (issuer != ''):
@@ -493,6 +495,74 @@ class AuthenticatorTOTPDevice(ThrottlingMixin, AbstractDevice):
         url = 'otpauth://totp/{}?{}'.format(quote(label), urlencoded_params)
 
         return url
+
+
+class AddAuthenticatorRequest(models.Model):
+    user = models.OneToOneField(
+        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+        related_name='add_authenticator_request',
+        help_text="The user that this device belongs to.",
+        on_delete=models.CASCADE,
+        unique=True,
+    )
+    request_id = models.CharField(
+        _("Request Id"),
+        max_length=128,
+        validators=[key_validator],
+        default=random_hex_32,
+        db_index=True,
+    )
+    issued_at = models.DateTimeField(
+        _("Issued At"),
+        default=timezone.now
+    )
+    is_completed = models.BooleanField(
+        default=False,
+    )
+
+    # status = models.CharField(_("status"), max_length=50)
+    devices_data = JSONField(
+        _("Devices Data"),
+        default=list,
+        editable=False,
+    )
+
+    class Meta:
+        verbose_name = _("Add Authenticator Request")
+
+    @property
+    def expire_at(self):
+        return self.issued_at + timedelta(seconds=600)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expire_at
+
+    @property
+    def status(self):
+        if self.is_completed:
+            return 'completed'
+        else:
+            if self.is_expired:
+                return 'expired'
+            else:
+                return 'pending'
+
+
+    def get_device(self):
+        deserialize_obj_gen = serializers.deserialize("json", self.devices_data)
+        deserialize_obj = next(deserialize_obj_gen, None)
+        if deserialize_obj:
+            return deserialize_obj.object
+        return None
+
+    def save(self, *args, **kwargs):
+        if not self.devices_data:
+            self.devices_data = serializers.serialize(
+                'json',
+                [AuthenticatorTOTPDevice(user=self.user)]
+            )
+        super().save(*args, **kwargs)
 
 
 class StaticDevice(ThrottlingMixin, AbstractDevice):

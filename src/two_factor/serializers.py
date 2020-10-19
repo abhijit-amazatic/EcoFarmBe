@@ -18,6 +18,7 @@ from .models import (
     AuthenticatorTOTPDevice,
     StaticDevice,
     StaticToken,
+    AddAuthenticatorRequest,
 )
 from .conf import settings
 
@@ -206,3 +207,25 @@ class AddPhoneDeviceSerializer(serializers.Serializer):  # pylint: disable=W0223
         if PhoneTOTPDevice.objects.filter(user=user, phone_number=data['phone_number']).first():
             raise serializers.ValidationError({'phone_number': 'Already exist'})
         return data
+
+class AddAuthenticatorRequestSerializer(serializers.ModelSerializer):
+    """
+    Add Authy user request serializer
+    """
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['user'] = user
+        try:
+            add_user_request = AddAuthenticatorRequest.objects.get(user=user)
+        except AddAuthenticatorRequest.DoesNotExist:
+            pass
+        else:
+            add_user_request.delete()
+
+        return super().create(validated_data)
+
+    class Meta:
+        model = AddAuthenticatorRequest
+        fields = ('request_id', 'issued_at', 'expire_at', 'status')
+        read_only_fields = ('request_id', 'issued_at', 'expire_at', 'status')

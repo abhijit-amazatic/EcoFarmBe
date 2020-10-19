@@ -11,7 +11,8 @@ class Settings:
     defaults = {
         'PHONE_TOTP_DIGITS': 6, # The number of digits to expect in a token.
         'PHONE_TOTP_STEPS': 10,
-        'LOGIN_TOKEN_VALID_FOR_SEC': 1800, 
+        'LOGIN_TOKEN_VALID_FOR_SEC': 1800,
+        'AUTHENTICATOR_TOTP_ISSUER': 'thrive-society.com',
     }
 
     def __getattr__(self, name):
