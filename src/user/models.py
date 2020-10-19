@@ -158,3 +158,19 @@ class PrimaryPhoneTOTPDevice(AbstractPhoneDevice):
     @property
     def is_removable(self):
         return False
+
+
+@receiver(models.signals.pre_save, sender=User)
+def pre_save_user(sender, instance, **kwargs):
+    """
+    Deletes old file.
+    """
+    if not instance.pk:
+        return
+    try:
+        old_instance = sender.objects.get(pk=instance.pk)
+    except sender.DoesNotExist:
+        return
+
+    if not instance.phone == old_instance.phone:
+        instance.is_phone_verified = False
