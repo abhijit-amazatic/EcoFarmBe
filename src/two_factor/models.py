@@ -9,6 +9,8 @@ from django.contrib.postgres.fields import (JSONField,)
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django_otp.models import ThrottlingMixin
 from django_otp.oath import (TOTP,)
 
@@ -59,6 +61,27 @@ class TwoFactorLoginToken(TimeStampFlagModelMixin, models.Model):
     class Meta:
         verbose_name = _("User Two Factor Token")
         verbose_name_plural = _("User Two Factor Tokens")
+
+
+class PhoneTOTPDevice(AbstractPhoneDevice):
+    """
+    Phone TOTP device
+    """
+    user = models.ForeignKey(
+        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+        related_name='phone_totp_devices',
+        help_text="The user that this device belongs to.",
+        on_delete=models.CASCADE,
+    )
+    phone_number = PhoneNumberField(_('Phone'),)
+
+    class Meta(AbstractPhoneDevice.Meta):
+        unique_together = ['user', 'phone_number']
+        verbose_name = _("Phone Totp Device")
+        verbose_name_plural = _("Phone Totp Device")
+
+    def __str__(self):
+        return "{0} | ({1})".format(self.phone_number, self.user)
 
 
 class AuthyAddUserRequest(models.Model):
@@ -303,25 +326,44 @@ class AuthyOneTouchRequest(models.Model):
         verbose_name_plural = _("Authy One Touch Requests")
 
 
-class PhoneTOTPDevice(AbstractPhoneDevice):
+class AuthySoftTOTPDevice(AbstractDevice):
     """
-    Phone TOTP device
+    Authenticator TOTP device
     """
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
-        related_name='phone_totp_devices',
-        help_text="The user that this device belongs to.",
+        related_name='authy_soft_totp_device',
         on_delete=models.CASCADE,
     )
-    phone_number = PhoneNumberField(_('Phone'),)
+    authy_user = models.ForeignKey(
+        AuthyUser,
+        related_name='authy_soft_totp_devices',
+        on_delete=models.CASCADE,
+    )
 
-    class Meta(AbstractPhoneDevice.Meta):
-        unique_together = ['user', 'phone_number']
-        verbose_name = _("Phone Totp Device")
-        verbose_name_plural = _("Phone Totp Device")
+    name = models.CharField(
+        max_length=255,
+        default='Authy soft TOTP',
+    )
 
-    def __str__(self):
-        return "{0} | ({1})".format(self.phone_number, self.user)
+    class Meta(AbstractDevice.Meta):
+        verbose_name = _("Authy Soft TOTP Device")
+        verbose_name_plural = _("Authy Soft TOTP Devices")
+
+    @property
+    def type(self):
+        return 'authy_totp'
+
+    @property
+    def is_removable(self):
+        return False
+
+    def verify_token(self, token, **kwargs):
+        verification = authy_api.tokens.verify(self.authy_user.authy_id, token=token)
+        if verification.ok():
+            return True
+        return False
+
 
 
 class AuthenticatorTOTPDevice(ThrottlingMixin, AbstractDevice):
@@ -479,6 +521,7 @@ class StaticDevice(ThrottlingMixin, AbstractDevice):
     @property
     def type(self):
         return 'backup_code'
+
     @property
     def is_removable(self):
         return False
@@ -534,3 +577,25 @@ class StaticToken(models.Model):
     class Meta:
         verbose_name = _("Static Device Token")
         verbose_name_plural = _("Static Device Tokens")
+
+
+@receiver(post_delete, sender=AuthyOneTouchDevice)
+@receiver(post_delete, sender=AuthySoftTOTPDevice)
+def post_delete_authy_device(sender, instance, **kwargs):
+    if sender == AuthyOneTouchDevice:
+        qs = AuthySoftTOTPDevice.objects.all()
+    elif sender == AuthySoftTOTPDevice:
+        qs = AuthyOneTouchDevice.objects.all()
+    if qs:
+        qs.filter(user=instance.user, authy_user=instance.authy_user).delete()
+
+    if not AuthyOneTouchDevice.objects.filter(authy_user=instance.authy_user):
+        if not AuthySoftTOTPDevice.objects.filter(authy_user=instance.authy_user):
+            instance.authy_user.delete()
+
+
+@receiver(post_delete, sender=AuthyUser)
+def pre_delete_authy_user(sender, instance, **kwargs):
+    deleted = authy_api.users.delete(instance.authy_id)
+    if deleted.ok():
+        print(deleted.content)

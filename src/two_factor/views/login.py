@@ -100,7 +100,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
             response = Response(serializer.data, status=200)
         else:
             response = Response(
-                {"data": "login_2fa_token expired."}, status=401)
+                {"detail": "login_2fa_token expired."}, status=401)
         return response
 
     @action(
@@ -224,7 +224,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
                 response_data["token"] = AuthToken.objects.create(request.user)
                 response = Response(response_data)
             else:
-                response = Response({"Device verification failed"}, status=400)
+                response = Response({"detail": "Device verification failed"}, status=400)
         else:
             response = Response({"detail": "login_2fa_token expired."}, status=401)
         return response

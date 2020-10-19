@@ -17,6 +17,7 @@ from ..models import (
     AuthyUser,
     AuthyAddUserRequest,
     AuthyOneTouchDevice,
+    AuthySoftTOTPDevice,
 )
 from ..serializers import (
     AuthyAddUserRequestSerializer,
@@ -102,7 +103,6 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
         """
         Create authy user registration QRString.
         """
-
         instance = self.get_object()
         return Response(instance.get_qr_string(), status=400)
 
@@ -159,12 +159,19 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
                     try:
                         device = AuthyOneTouchDevice.objects.get(user=instance.user)
                     except AuthyOneTouchDevice.DoesNotExist:
-                        device = AuthyOneTouchDevice.objects.create(
-                            user=instance.user, authy_user=authy_user, confirmed=True)
+                        pass
                     else:
-                        device.authy_user = authy_user
-                        device.confirmed = True
-                        device.save()
+                        device.delete()
+                    device = AuthyOneTouchDevice.objects.create(
+                        user=instance.user, authy_user=authy_user, confirmed=True)
+                    try:
+                        device = AuthySoftTOTPDevice.objects.get(user=instance.user)
+                    except AuthySoftTOTPDevice.DoesNotExist:
+                        pass
+                    else:
+                        device.delete()
+                    device = AuthySoftTOTPDevice.objects.create(
+                        user=instance.user, authy_user=authy_user, confirmed=True)
                     instance.save()
 
         response = Response({'status': instance.status}, status=200)
