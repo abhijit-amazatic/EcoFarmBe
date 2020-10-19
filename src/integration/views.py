@@ -37,7 +37,8 @@ from integration.books import (
     send_estimate_to_sign, get_contact_addresses,
     mark_estimate, get_transportation_fees,
     get_customer_payment, list_customer_payments,
-    get_bill, list_bills,)
+    get_bill, list_bills,get_salesorder,
+    list_salesorders,)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -437,10 +438,38 @@ class BillView(APIView):
         Get/List bills.
         """
         if request.query_params.get('bill_id', None):
-            return Response(get_bill(
+            response = get_bill(
                 request.query_params.get('bill_id'),
-                params=request.query_params.dict()))
-        return Response(list_bills(params=request.query_params.dict()))
+                params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+        response = list_bills(params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)
+    
+class SalesOrderView(APIView):
+    """
+    View class for Zoho books sales order.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get/List sales orders.
+        """
+        if request.query_params.get('so_id', None):
+            response = get_salesorder(
+                request.query_params.get('so_id'),
+                params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+        response = list_salesorders(params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)
 
 class VendorCreditView(APIView):
     """

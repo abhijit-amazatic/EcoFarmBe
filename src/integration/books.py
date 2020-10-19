@@ -495,3 +495,19 @@ def list_bills(params=None):
     obj = get_books_obj()
     bill_obj = obj.Bills()
     return bill_obj.list_bills(parameters=params)
+
+def get_salesorder(so_id, params=None):
+    """
+    Get sales order
+    """
+    obj = get_books_obj()
+    bill_obj = obj.SalesOrders()
+    return bill_obj.get_sales_order(so_id=so_id, parameters=params)
+
+def list_salesorders(params=None):
+    """
+    List sales orders
+    """
+    obj = get_books_obj()
+    bill_obj = obj.SalesOrders()
+    return bill_obj.list_sales_orders(parameters=params)
