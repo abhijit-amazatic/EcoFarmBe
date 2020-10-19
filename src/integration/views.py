@@ -30,7 +30,7 @@ from integration.books import (
     get_purchase_order, list_purchase_orders,
     get_vendor_payment, list_vendor_payments,
     get_invoice, list_invoices,
-    get_unpaid_invoices, get_vendor_credit,
+    get_unpaid_bills, get_vendor_credit,
     list_vendor_credits,get_available_credit,
     calculate_tax, get_tax_rates,
     update_estimate, delete_estimate,
@@ -469,11 +469,11 @@ class AccountSummaryView(APIView):
         Get account summary.
         """
         vendor = request.query_params.get('vendor_name')
-        total_unpaid_invoices = get_unpaid_invoices(vendor)
+        total_unpaid_bills = get_unpaid_bills(vendor)
         total_credits = get_available_credit(vendor)
         return Response({
             "Available_Credits": total_credits,
-            "Overdue_Invoices": total_unpaid_invoices
+            "Overdue_Bills": total_unpaid_bills
             })
 
 class ContactView(APIView):

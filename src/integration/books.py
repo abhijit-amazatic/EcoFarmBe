@@ -401,14 +401,14 @@ def list_vendor_credits(params=None):
     invoice_obj = obj.VendorCredits()
     return invoice_obj.list_vendor_credits(parameters=params)
 
-def get_unpaid_invoices(vendor, status='unpaid'):
+def get_unpaid_bills(vendor, status='unpaid'):
     """
-    Return total unpaid invoices.
+    Return total unpaid bills.
     """
-    response = list_invoices({
+    response = list_bills({
         'customer_name': vendor,
         'status': status})['response']
-    unpaid = sum([i['total'] for i in response])
+    unpaid = sum([i['balance'] for i in response])
     return unpaid
 
 def get_available_credit(vendor, status='open'):
