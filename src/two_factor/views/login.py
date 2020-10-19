@@ -215,7 +215,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
             if device.type in ['one_touch',]:
                 token = login_2fa_token.devices_last_request.get(device.device_id, '')
             else:
-                token = serializer.validated_data['token']
+                token = serializer.validated_data.get('token', '')
 
             if device.verify_token(token=token, event_code=event_code):
                 response_data = get_user_login_info(request.user)
