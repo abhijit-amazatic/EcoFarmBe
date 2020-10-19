@@ -54,21 +54,19 @@ class TwoFactoLogInViewSet(GenericViewSet):
         """
         serializer = LogInSerializer(
             data=request.data, context={'request': request})
-        if serializer.is_valid(raise_exception=True):
-            if not request.user.is_2fa_enabled:
-                response_data = get_user_login_info(request.user)
-                response_data["token"] = AuthToken.objects.create(request.user)
-            else:
-                response_data = {
-                    "user": UserSerializer(request.user).data,
-                }
-                login_2fa_token = TwoFactorLoginToken.objects.create(
-                    user=request.user)
-                response_data["login_2fa_token"] = login_2fa_token.token
-
-            response = Response(response_data)
+        serializer.is_valid(raise_exception=True)
+        if not request.user.is_2fa_enabled:
+            response_data = get_user_login_info(request.user)
+            response_data["token"] = AuthToken.objects.create(request.user)
         else:
-            response = Response({"data": serializer.errors})
+            response_data = {
+                "user": UserSerializer(request.user).data,
+            }
+            login_2fa_token = TwoFactorLoginToken.objects.create(
+                user=request.user)
+            response_data["login_2fa_token"] = login_2fa_token.token
+
+        response = Response(response_data)
         return response
 
     def retrieve(self, request, *args, **kwargs):

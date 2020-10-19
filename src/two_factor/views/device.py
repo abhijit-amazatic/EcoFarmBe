@@ -117,29 +117,6 @@ class TwoFactorDeviceViewSet(mixins.ListModelMixin,
             response = Response({'detail': "Device is already verified"}, status=400)
         return response
 
-    # @action(
-    #     detail=True,
-    #     methods=['get'],
-    #     name='One Touch status',
-    #     url_name='one-touch-status',
-    #     url_path='one-touch-status',
-    #     serializer_class=EmptySerializer,
-    # )
-    # def one_touch_status(self, request, *args, **kwargs):
-    #     """
-    #     Action.
-    #     """
-    #     device = self.get_object()
-    #     if device.type in ['one_touch',]:
-    #         request_id = login_2fa_token.devices_last_request.get(device.device_id, '')
-    #         if request_id:
-    #             response = Response({'status': device.request_status(request_id)}, status=200)
-    #         else:
-    #             response = Response({'detail': 'device request not fount'}, status=404)
-    #     else:
-    #         response = Response({"detail": "device is not one_touch device."}, status=400)
-    # return response
-
 
     @action(
         detail=True,

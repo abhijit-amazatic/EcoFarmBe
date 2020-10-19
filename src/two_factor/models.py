@@ -9,7 +9,6 @@ from django.contrib.postgres.fields import (JSONField,)
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.core import serializers
 from django_otp.models import ThrottlingMixin
@@ -529,6 +528,7 @@ class AddAuthenticatorRequest(models.Model):
 
     class Meta:
         verbose_name = _("Add Authenticator Request")
+        verbose_name_plural = _("Add Authenticator Requests")
 
     @property
     def expire_at(self):
@@ -649,8 +649,8 @@ class StaticToken(models.Model):
         verbose_name_plural = _("Static Device Tokens")
 
 
-@receiver(post_delete, sender=AuthyOneTouchDevice)
-@receiver(post_delete, sender=AuthySoftTOTPDevice)
+@receiver(models.signals.post_delete, sender=AuthyOneTouchDevice)
+@receiver(models.signals.post_delete, sender=AuthySoftTOTPDevice)
 def post_delete_authy_device(sender, instance, **kwargs):
     if sender == AuthyOneTouchDevice:
         qs = AuthySoftTOTPDevice.objects.all()
@@ -664,7 +664,7 @@ def post_delete_authy_device(sender, instance, **kwargs):
             instance.authy_user.delete()
 
 
-@receiver(post_delete, sender=AuthyUser)
+@receiver(models.signals.post_delete, sender=AuthyUser)
 def pre_delete_authy_user(sender, instance, **kwargs):
     deleted = authy_api.users.delete(instance.authy_id)
     if deleted.ok():

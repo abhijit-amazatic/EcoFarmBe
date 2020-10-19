@@ -44,54 +44,6 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
         return qs.filter(user=self.request.user)
 
     @action(
-        detail=False,
-        methods=['post'],
-        name='Add Default User',
-        url_name='authy-user-registration-default',
-        url_path='add-default-user',
-        serializer_class=EmptySerializer,
-    )
-    def add_default_user(self, request, *args, **kwargs):
-        """
-        Add user using phone_number and email id.
-        """
-        user = request.user
-        if user.phone.is_valid:
-            if user.is_phone_verified:
-                authy_user = authy_api.users.create(
-                    email=user.email,
-                    phone=user.phone.national_number,
-                    country_code=user.phone.country_code,
-                )
-
-                if authy_user.ok():
-
-                    authy_user_instance, _ = AuthyUser.objects.get_or_create(
-                        user=user)
-                    authy_user_instance.authy_id = authy_user.id or authy_user.content[
-                        'user']['id']
-                    authy_user_instance.save()
-                    AuthyOneTouchDevice.objects.create(user=user)
-                    response = Response(
-                        {'detail': 'authy User devices process successfully.'}, status=400)
-
-                    response = Response(
-                        authy_user.content['message'], status=200)
-                else:
-                    errors = authy_user.errors()
-                    errors['detail'] = errors.pop(
-                        'message', 'error while creating user.')
-                    response = Response(errors, status=400)
-
-            else:
-                response = Response(
-                    {"detail": "users phone number is not verified."}, status=400)
-        else:
-            response = Response(
-                {"detail": "users phone number is not valid."}, status=400)
-        return response
-
-    @action(
         detail=True,
         methods=['get'],
         name='Get Resitration QRString',
@@ -176,19 +128,3 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
 
         response = Response({'status': instance.status}, status=200)
         return response
-
-    # @action(
-    #     detail=True,
-    #     methods=['get'],
-    #     name='Get Registration Status',
-    #     url_name='authy-user-registration-status',
-    #     url_path='get-registration-status',
-    #     serializer_class=EmptySerializer,
-    # )
-    # def get_registration_status(self, request, *args, **kwargs):
-    #     """
-    #     Get authy user registration status.
-    #     """
-    #     instance = self.get_object()
-    #     response = Response({'status': instance.status}, status=200)
-    #     return response

@@ -50,8 +50,8 @@ class AuthyOneTouchRequestCallbackView(APIView):
                             instance.event_code = event_code
                     instance.authy_response = request.data
                     instance.save()
-            return Response("", status=200)
-        return Response("", status=400)
+            return Response({}, status=200)
+        return Response({}, status=400)
 
 
 class AuthyUserRegistrationCallbackView(APIView):

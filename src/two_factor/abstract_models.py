@@ -102,6 +102,10 @@ class AbstractPhoneDevice(ThrottlingMixin, AbstractDevice):
         return 'phone'
 
     @property
+    def name(self):
+        return 'phone ' + phone_number_mask(self.phone_number.as_e164)
+
+    @property
     def challenge_methods(self):
         return ['sms', 'call']
 
@@ -177,11 +181,6 @@ class AbstractPhoneDevice(ThrottlingMixin, AbstractDevice):
 
     def get_throttle_factor(self):
         return getattr(settings, 'PHONE_TOTP_THROTTLE_FACTOR', 1)
-
-    def save(self, *args, **kwargs):
-        if hasattr(self, 'phone_number'):
-            self.name = 'phone ' + phone_number_mask(self.phone_number.as_e164)
-        super().save(*args, **kwargs)
 
     def send_otp(self, msg=None, event_code='',):
         """
