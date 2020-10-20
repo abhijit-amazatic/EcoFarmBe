@@ -50,8 +50,8 @@ GOOGLE_AUTH = {
 # REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'https://localhost:8000/api/login/social/knox/'
 
 #For persistence handler class.
-#import os
-#cwd = os.getcwd()
+import os
+cwd = os.getcwd()
 
 #Zoho Take credential from the team.
 PYZOHO_CONFIG = {
@@ -64,10 +64,10 @@ PYZOHO_CONFIG = {
 'client_secret':'',
 'redirect_uri':'',
 'accounts_url':'',
-'token_persistence_path':'',
-'access_type':'offline',
-#'persistence_handler_class' : 'ZohoOAuthHandler',
-#'persistence_handler_path': cwd + '/src/core/persist_crm_token.py'
+# 'token_persistence_path':'',
+# 'access_type':'offline',
+'persistence_handler_class' : 'ZohoOAuthHandler',
+'persistence_handler_path': cwd + '/src/core/persist_crm_token.py'
 }
 
 if DEBUG:
