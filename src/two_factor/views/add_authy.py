@@ -108,22 +108,30 @@ class AuthyAddUserRequestViewSet(mixins.CreateModelMixin,
                 instance.is_registered = authy_user.content['registration']['status'] == 'completed'
                 if instance.is_registered:
                     authy_user, _ = AuthyUser.objects.get_or_create(authy_id=instance.authy_id)
+
+                    app_device_name = None
+                    authy_user_status = authy_api.users.status(instance.authy_id)
+                    if authy_user_status.ok():
+                        app_devices = authy_user_status.content.get('status', {}).get('devices')
+                        if app_devices:
+                            app_device_name = app_devices[0]
+                    if app_device_name:
+                        authy_user.app_device_name = app_device_name
+                        authy_user.save()
+
                     try:
                         device = AuthyOneTouchDevice.objects.get(user=instance.user)
                     except AuthyOneTouchDevice.DoesNotExist:
-                        pass
+                        device = AuthyOneTouchDevice.objects.create(
+                            user=instance.user, authy_user=authy_user, confirmed=True)
                     else:
-                        device.delete()
-                    device = AuthyOneTouchDevice.objects.create(
-                        user=instance.user, authy_user=authy_user, confirmed=True)
-                    try:
-                        device = AuthySoftTOTPDevice.objects.get(user=instance.user)
-                    except AuthySoftTOTPDevice.DoesNotExist:
-                        pass
-                    else:
-                        device.delete()
-                    device = AuthySoftTOTPDevice.objects.create(
-                        user=instance.user, authy_user=authy_user, confirmed=True)
+                        if device.authy_user.pk != authy_user.pk:
+                            device.delete()
+                            device = AuthyOneTouchDevice.objects.create(
+                                user=instance.user,
+                                authy_user=authy_user,
+                                confirmed=True
+                            )
                     instance.save()
 
         response = Response({'status': instance.status}, status=200)

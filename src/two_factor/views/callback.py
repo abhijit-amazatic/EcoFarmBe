@@ -87,15 +87,30 @@ class AuthyUserRegistrationCallbackView(APIView):
                                 if req_instance.is_registered:
                                     authy_user, _ = AuthyUser.objects.get_or_create(
                                     authy_id=req_instance.authy_id)
+
+                                    app_device_name = None
+                                    authy_user_status = authy_api.users.status(req_instance.authy_id)
+                                    if authy_user_status.ok():
+                                        app_devices = authy_user_status.content.get('status', {}).get('devices')
+                                        if app_devices:
+                                            app_device_name = app_devices[0]
+                                    if app_device_name:
+                                        authy_user.app_device_name = app_device_name
+                                        authy_user.save()
+
                                     try:
                                         device = AuthyOneTouchDevice.objects.get(user=req_instance.user)
                                     except AuthyOneTouchDevice.DoesNotExist:
                                         device = AuthyOneTouchDevice.objects.create(
                                             user=req_instance.user, authy_user=authy_user, confirmed=True)
                                     else:
-                                        device.authy_user = authy_user
-                                        device.confirmed = True
-                                        device.save()
+                                        if device.authy_user.pk != authy_user.pk:
+                                            device.delete()
+                                            device = AuthyOneTouchDevice.objects.create(
+                                                user=req_instance.user,
+                                                authy_user=authy_user,
+                                                confirmed=True
+                                            )
                                     req_instance.save()
 
                                 return Response({}, status=200)

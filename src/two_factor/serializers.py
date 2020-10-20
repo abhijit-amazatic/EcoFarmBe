@@ -108,6 +108,9 @@ class TwoFactorDevicesSerializer(TwoFactorLoginDevicesSerializer):
     confirmed = serializers.BooleanField(read_only=True)
     is_removable = serializers.BooleanField(read_only=True)
     phone_number = PhoneNumberField(read_only=True)
+    app_device_name = serializers.CharField(read_only=True)
+    created_on = serializers.DateTimeField(read_only=True)
+    updated_on = serializers.DateTimeField(read_only=True)
 
 class DeviceIdSerializer(serializers.Serializer):  # pylint: disable=W0223
     """

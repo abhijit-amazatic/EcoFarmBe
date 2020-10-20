@@ -173,6 +173,10 @@ class AuthyUser(models.Model):
         _("Authy Id"),
         unique=True
     )
+    app_device_name = models.CharField(
+        max_length=255,
+        default='unknown',
+    )
 
     class Meta:
         verbose_name = _("Authy Add User Request")
@@ -209,6 +213,10 @@ class AuthyOneTouchDevice(AbstractDevice):
     @property
     def type(self):
         return 'one_touch'
+
+    @property
+    def app_device_name(self):
+        return self.authy_user.app_device_name
 
     @property
     def challenge_methods(self):
@@ -353,6 +361,10 @@ class AuthySoftTOTPDevice(AbstractDevice):
     @property
     def type(self):
         return 'authy_totp'
+
+    @property
+    def app_device_name(self):
+        return self.authy_user.app_device_name
 
     @property
     def is_removable(self):
@@ -662,6 +674,21 @@ def post_delete_authy_device(sender, instance, **kwargs):
     if not AuthyOneTouchDevice.objects.filter(authy_user=instance.authy_user):
         if not AuthySoftTOTPDevice.objects.filter(authy_user=instance.authy_user):
             instance.authy_user.delete()
+
+@receiver(models.signals.post_save, sender=AuthyOneTouchDevice)
+def post_save_authy_one_touch_device(sender, instance, created, **kwargs):
+    if created:
+        try:
+            device = AuthySoftTOTPDevice.objects.get(user=instance.user)
+        except AuthySoftTOTPDevice.DoesNotExist:
+            pass
+        else:
+            device.delete()
+        device = AuthySoftTOTPDevice.objects.create(
+            user=instance.user,
+            authy_user=instance.authy_user,
+            confirmed=instance.confirmed,
+        )
 
 @receiver(models.signals.post_delete, sender=AuthyUser)
 def pre_delete_authy_user(sender, instance, **kwargs):

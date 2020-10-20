@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_otp.models import Device, ThrottlingMixin
 from django_otp.oath import (TOTP,)
 from integration.apps.twilio import (send_sms, make_call,)
-
+from core.mixins.models import TimeStampFlagModelMixin
 from .conf import settings
 from .utils import (
     random_hex,
@@ -17,7 +17,7 @@ from .utils import (
 )
 
 
-class AbstractDevice(Device):
+class AbstractDevice(TimeStampFlagModelMixin, Device):
     """
     Abstract Device.
     """
@@ -132,6 +132,16 @@ class AbstractPhoneDevice(ThrottlingMixin, AbstractDevice):
         totp = self.get_totp_obj()
         return totp.token()
 
+    def generate_token_str(self, event_code='', commit=True):
+        """
+        return token in string.
+        """
+        token = self.generate_token(event_code=event_code, commit=commit)
+        _digits = getattr(settings, 'PHONE_TOTP_DIGITS')
+        f_str = '{:0'+str(_digits)+'d}'
+        token = f_str.format(token)
+        return token
+
     def get_totp_obj(self):
         """
         return TOTP object.
@@ -201,7 +211,7 @@ class AbstractPhoneDevice(ThrottlingMixin, AbstractDevice):
         send totp token
         :param str msg: Message to send on phone with place holder 'XXXX' for otp.
         """
-        token = str(self.generate_token(event_code=event_code))
+        token = self.generate_token_str(event_code=event_code)
         if method == 'call':
             token = ' '.join(list(token))
 
