@@ -182,8 +182,6 @@ def pre_save_user(sender, instance, **kwargs):
         instance.is_phone_verified = False
     if not instance.email == old_instance.email:
         instance.is_verified = False
-        instance.is_approved = False
-        instance.approved_by = dict()
 
 
 @receiver(models.signals.post_save, sender=User)
