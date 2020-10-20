@@ -88,8 +88,7 @@ class User(StatusFlagMixin,AbstractUser):
     about = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    
-   
+
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'phone']
@@ -146,6 +145,7 @@ class PrimaryPhoneTOTPDevice(AbstractPhoneDevice):
     @phone_number.setter
     def phone_number(self, value):
         self.user.phone = value
+        setattr(self, 'save_user', True)
 
     @property
     def confirmed(self):
@@ -154,11 +154,17 @@ class PrimaryPhoneTOTPDevice(AbstractPhoneDevice):
     @confirmed.setter
     def confirmed(self, value):
         self.user.is_phone_verified = bool(value)
+        setattr(self, 'save_user', True)
 
     @property
     def is_removable(self):
         return False
 
+    def save(self, *args, **kwargs):
+        if getattr(self, 'save_user', False):
+            self.user.save()
+            setattr(self, 'save_user', False)
+        return super().save(*args, **kwargs)
 
 @receiver(models.signals.pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
@@ -174,3 +180,13 @@ def pre_save_user(sender, instance, **kwargs):
 
     if not instance.phone == old_instance.phone:
         instance.is_phone_verified = False
+
+@receiver(models.signals.post_save, sender=User)
+def post_save_user(sender, instance, created, **kwargs):
+    """
+    Deletes old file.
+    """
+    try:
+        instance.primary_phone_totp_device
+    except sender.primary_phone_totp_device.RelatedObjectDoesNotExist:
+        PrimaryPhoneTOTPDevice.objects.create(user=instance)

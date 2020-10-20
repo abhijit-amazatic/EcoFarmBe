@@ -86,7 +86,7 @@ class TwoFactorDeviceViewSet(mixins.ListModelMixin,
         url_path='challenge-device-verification',
         serializer_class=TwoFactorDevicesChallengeMethodSerializer,
     )
-    def challenge_log_in_device(self, request, *args, **kwargs):
+    def challenge_device(self, request, *args, **kwargs):
         """
         Post method view.
         """

@@ -85,7 +85,7 @@ class AddAuthenticatorRequestViewSet(mixins.CreateModelMixin,
                 return resp
             return Response({'detail': 'unable to get device'}, status=400)
         else:
-            response = Response({"detail": f"request is {add_authenticator_request.status}."}, status=400)
+            return Response({"detail": f"request is {add_authenticator_request.status}."}, status=400)
 
     @action(
         detail=True,

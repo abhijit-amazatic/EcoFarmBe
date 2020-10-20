@@ -663,7 +663,6 @@ def post_delete_authy_device(sender, instance, **kwargs):
         if not AuthySoftTOTPDevice.objects.filter(authy_user=instance.authy_user):
             instance.authy_user.delete()
 
-
 @receiver(models.signals.post_delete, sender=AuthyUser)
 def pre_delete_authy_user(sender, instance, **kwargs):
     deleted = authy_api.users.delete(instance.authy_id)
