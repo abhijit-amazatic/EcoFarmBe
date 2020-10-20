@@ -106,8 +106,8 @@ class SearchCultivars(APIView):
         """
         data = search_query('Cultivars', request.query_params['cultivar_name'], 'Name', True)
         if data['status_code'] == 200:
-            return Response(data)
-        return Response({})
+            return Response(data, status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetPickListView(APIView):
     """
@@ -253,7 +253,9 @@ class EstimateView(APIView):
         Delete an estimate from Zoho books.
         """
         estimate_id = request.data['estimate_id']
-        return Response(delete_estimate(estimate_id=estimate_id, params=request.query_params.dict()))
+        if estimate_id:
+            return Response(delete_estimate(estimate_id=estimate_id, params=request.query_params.dict()))
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class EstimateSignView(APIView):
     """
@@ -269,7 +271,7 @@ class EstimateSignView(APIView):
         customer_name = request.query_params.get('customer_name', None)
         if estimate_id and customer_name:
             return Response(send_estimate_to_sign(estimate_id, customer_name))
-        return Response({})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class TemplateSignView(APIView):
     """
@@ -294,7 +296,7 @@ class TemplateSignView(APIView):
                                           licenses,
                                           legal_business_names,
                                           EIN, SSN, business_structure))
-        return Response({})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class EstimateTaxView(APIView):
     """
@@ -310,7 +312,7 @@ class EstimateTaxView(APIView):
         quantity = request.query_params.get('quantity', None)
         if product_category and quantity:
             return Response(calculate_tax(product_category, quantity))
-        return Response({})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class EstimateStatusView(APIView):
     """
@@ -326,7 +328,7 @@ class EstimateStatusView(APIView):
         status = request.query_params.get('status', None)
         if estimate_id and status:
             return Response(mark_estimate(estimate_id, status))
-        return Response({})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetTemplateStatus(APIView):
     """
@@ -615,7 +617,7 @@ class ClientCodeView(APIView):
         if request.query_params.get('legal_business_name'):
             account_data = get_accounts_from_crm(request.query_params.get('legal_business_name'))
             return Response({"client_code":account_data.get('basic_profile',{}).get('client_code')})
-        return Response({'error': 'Something went wrong!'})
+        return Response({'error': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetDocumentStatus(APIView):
     """
@@ -655,7 +657,7 @@ class GetSignURL(APIView):
                 return Response(response)
             else:
                 return Response({'code': 1, 'error': 'Incorrect request id or action id'})
-        return Response({'code': 1, 'error': 'No request id or action id provided.'})
+        return Response({'code': 1, 'error': 'No request id or action id provided.'}, status=status.HTTP_400_BAD_REQUEST)
     
 class GetDistanceView(APIView):
     """
