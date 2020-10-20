@@ -270,7 +270,10 @@ class EstimateSignView(APIView):
         estimate_id = request.query_params.get('estimate_id', None)
         customer_name = request.query_params.get('customer_name', None)
         if estimate_id and customer_name:
-            return Response(send_estimate_to_sign(estimate_id, customer_name))
+            response = send_estimate_to_sign(estimate_id, customer_name)
+            if response.get('code') and response.get('code') != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class TemplateSignView(APIView):
