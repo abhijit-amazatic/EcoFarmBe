@@ -18,14 +18,23 @@ from .utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout, get_overview_field,)
 from core.mailer import mail, mail_send
 from brand.models import (Brand, License, LicenseProfile, )
+from integration.models import (Integration,)
 
 def get_crm_obj():
     """
     Return ZCRM object.
     """
+    try:
+        oauth = Integration.objects.get(name='crm')
+        access_token = oauth.access_token
+        access_expiry = oauth.access_expiry
+    except Integration.DoesNotExist:
+        access_expiry = access_token = None
     return CRM(PYZOHO_CONFIG,
         PYZOHO_REFRESH_TOKEN,
-        PYZOHO_USER_IDENTIFIER)
+        PYZOHO_USER_IDENTIFIER,
+        access_token,
+        access_expiry)
 
 def get_picklist(module, field_name):
     """
