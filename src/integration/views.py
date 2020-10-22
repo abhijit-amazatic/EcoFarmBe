@@ -38,7 +38,10 @@ from integration.books import (
     mark_estimate, get_transportation_fees,
     get_customer_payment, list_customer_payments,
     get_bill, list_bills,get_salesorder,
-    list_salesorders,)
+    list_salesorders, update_estimate_address,
+    add_contact_address, edit_contact_address,
+    get_contact_person, list_contact_persons,
+    create_contact_person, update_contact_person)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -256,6 +259,27 @@ class EstimateView(APIView):
         if estimate_id:
             return Response(delete_estimate(estimate_id=estimate_id, params=request.query_params.dict()))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EstimateAddressView(APIView):
+    """
+    View class to sign for estimate.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def put(self, request):
+        """
+        Update estimate address.
+        """
+        estimate_id = request.data.get('estimate_id', None)
+        address_type = request.data.get('address_type', None)
+        if estimate_id and address_type:
+            response = update_estimate_address(estimate_id, address_type, request.data)
+            if response.get('code') and response.get('code') != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class EstimateSignView(APIView):
     """
@@ -543,6 +567,62 @@ class ContactAddressView(APIView):
         if request.query_params.get('contact_name', None):
             return Response(get_contact_addresses(request.query_params.get('contact_name')))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def post(self, request):
+        """
+        add contact addresses.
+        """
+        if request.data.get('contact_name', None):
+            contact_name = request.data.get('contact_name', None)
+            return Response(add_contact_address(contact_name, request.data))
+        return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request):
+        """
+        edit contact addresses.
+        """
+        if request.data.get('contact_name', None) and request.data.get('address_id', None):
+            contact_name = request.data.get('contact_name', None)
+            address_id = request.data.get('address_id', None)
+            return Response(edit_contact_address(contact_name, address_id, request.data))
+        return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactPersonView(APIView):
+    """
+    View class for Zoho books contacts persons.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get contact persons.
+        """
+        contact_id = request.query_params.get('contact_id', None)
+        contact_persons_id = request.query_params.get('contact_persons_id', None)
+        if contact_id:
+            return Response(get_contact_person(contact_id, contact_persons_id, request.query_params))
+        response = list_contact_persons(request.query_params)
+        return Response(response, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        """
+        add contact persons.
+        """
+        contact_id = request.data.get('contact_id', None)
+        if contact_id:
+            return Response(create_contact_person(request.data))
+        return Response({'error': 'Conact id not specified'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request):
+        """
+        edit contact persons.
+        """
+        if request.data.get('contact_person_id', None):
+            contact_person_id = request.data.get('contact_person_id', None)
+            return Response(update_contact_person(contact_person_id, request.data))
+        return Response({'error': 'Conact person id not specified'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LeadView(APIView):
     """
