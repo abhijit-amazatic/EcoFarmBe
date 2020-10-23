@@ -94,7 +94,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
     program_overview_path = 'program-overview(/(?P<program_overview_id>[0-9]*))?'
     filter_backends = [filters.SearchFilter,DjangoFilterBackend]
     search_fields = ['status', 'profile_category']
-    filterset_fields = ['profile_category']
+    filterset_fields = ['profile_category', 'legal_business_name']
 
 
     def get_queryset(self):

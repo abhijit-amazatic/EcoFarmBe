@@ -46,6 +46,8 @@ class User(StatusFlagMixin,AbstractUser):
         _('City'), max_length=150, blank=True, null=True)
     zip_code = models.CharField(
         _('Zip code'), max_length=20, null=True)
+    recovery_email = models.EmailField(_('Recovery Email address'), blank=True, null=True)
+    alternate_email = models.EmailField(_('Alternate Email address'), blank=True, null=True)
     phone = PhoneNumberField(_('Phone'), unique=True,)
     is_phone_verified = models.BooleanField(_('Is Phone Verified'), default=False)
     is_2fa_enabled = models.BooleanField(_('is Two Factor Enabled'), default=False, editable=False)
