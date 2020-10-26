@@ -22,6 +22,8 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Inventory
+        depth = 1
+        exclude = ()
         fields = (
             'item_id',
             'cf_strain_name',
@@ -33,7 +35,8 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'cf_status',
             'cf_quantity_estimate',
             'actual_available_stock',
-            'documents')
+            'documents',
+            'cultivar')
         
 class ItemFeedbackSerializer(serializers.ModelSerializer):
     """
