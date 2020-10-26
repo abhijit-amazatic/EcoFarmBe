@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 from .models import Integration
-from boxsdk import (OAuth2, Client)
+from boxsdk import (OAuth2, Client, JWTAuth)
 from boxsdk.exception import (BoxOAuthException,
                               BoxException, BoxAPIException)
 from core.celery import app
@@ -14,7 +14,9 @@ from core.settings import (
     BOX_CLIENT_SECRET,
     BOX_REFRESH_TOKEN,
     BOX_ACCESS_TOKEN,
-    FARM_FOLDER_ID,)
+    FARM_FOLDER_ID,
+    BOX_JWT_DICT,
+    BOX_JWT_USER)
 
 from brand.models import License
 
@@ -109,8 +111,24 @@ def get_box_client():
 
     @return boxsdk.Client object.
     """
-    obj = get_oauth2_obj()
-    return Client(obj)
+    return get_jwt_client()
+    # obj = get_oauth2_obj()
+    # return Client(obj)
+
+
+def get_jwt_client():
+    """
+    Return box jwt object.
+    """
+    try:
+        jwt_dict = json.loads(BOX_JWT_DICT)
+    except Exception:
+        jwt_dict = BOX_JWT_DICT
+    auth = JWTAuth.from_settings_dictionary(jwt_dict)
+    client = Client(auth)
+    service_account = client.user().get()
+    user = client.user(user_id=BOX_JWT_USER)
+    return client.as_user(user)
 
 # -------------------------------------
 # Box functions for folder.

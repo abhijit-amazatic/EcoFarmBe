@@ -1,7 +1,6 @@
 """
 Integration views
 """
-import json
 from datetime import (datetime, timedelta)
 from django.http import (QueryDict,)
 from rest_framework import (status,)
