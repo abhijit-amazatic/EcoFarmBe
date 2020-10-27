@@ -8,6 +8,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.postgres.fields import (ArrayField,)
 
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -51,8 +52,7 @@ class User(StatusFlagMixin,AbstractUser):
     phone = PhoneNumberField(_('Phone'), unique=True,)
     is_phone_verified = models.BooleanField(_('Is Phone Verified'), default=False)
     is_2fa_enabled = models.BooleanField(_('is Two Factor Enabled'), default=False, editable=False)
-    legal_business_name = models.CharField(
-        _('Legal Business Name'), max_length=150, null=True, blank=True)
+    legal_business_name = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     business_dba = models.CharField(
         _('Business DBA'), max_length=150, null=True, blank=True)
     existing_member = models.BooleanField('Account Existed', default=False)
