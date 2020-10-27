@@ -41,7 +41,7 @@ CELERY_BROKER_POOL_LIMIT = int(os.environ.get('CELERY_BROKER_POOL_LIMIT'))
 #REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI  = os.getenv('REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI')
 
 # For persistence handler class
-cwd = os.getcwd()
+# cwd = os.getcwd()
 
 PYZOHO_CONFIG = {
     'apiBaseUrl': 'https://www.zohoapis.com',
@@ -56,7 +56,7 @@ PYZOHO_CONFIG = {
     # 'token_persistence_path': os.environ.get('TOKEN_PERSISTENCE_PATH'),
     # 'access_type': 'offline',
     'persistence_handler_class' : 'ZohoOAuthHandler',
-    'persistence_handler_path': cwd + '/src/core/persist_crm_token.py'
+    'persistence_handler_path': '/app/src/core/persist_crm_token.py'
 }
 
 # if DEBUG:

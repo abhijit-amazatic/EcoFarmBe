@@ -8,7 +8,6 @@ from core.wsgi import APPLICATION
 
 
 BASE_DIR = os.path.join(os.path.dirname(__file__), 'src')
-print(BASE_DIR)
 sys.path.append(BASE_DIR)
 
 waitress.serve(
