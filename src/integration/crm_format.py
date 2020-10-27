@@ -1066,6 +1066,24 @@ CRM_FORMAT  = {
             "Currency":"Currency",
             "Exchange_Rate":"Exchange_Rate",
             "Record_Image":"Record_Image",
+        },
+    "Books_Customer":
+        {
+            # 'contact_id': 'contact_id',
+            'contact_name': 'name',
+            'company_name': 'brand_name',
+            'first_name': 'first_name',
+            'last_name': 'last_name',
+            'designation': 'designation',
+            'department': 'department',
+            'website': 'website',
+            'email': 'company_email',
+            'phone': 'company_phone',
+            'mobile': 'mobile',
+            'billing_address': 'billing_address_parse',
+            'shipping_address': 'mailing_address_parse',
+            'contact_persons': 'employees_parse',
+            'contact_type': 'contact_type_parse',
         }
 }
 

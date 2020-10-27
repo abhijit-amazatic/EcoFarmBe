@@ -11,8 +11,10 @@ from core.settings import (
     ESTIMATE_TAXES,
     TRANSPORTATION_FEES,
 )
+from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
 from .models import (Integration, )
+from .crm_format import (CRM_FORMAT, )
 from .inventory import (get_inventory_items, )
 from .sign import (submit_estimate, )
 
@@ -49,7 +51,100 @@ def get_books_obj():
                 "access_expiry":books_obj.access_expiry[0]}
     )
     return books_obj
+
+def get_format_dict(module):
+    """
+    Return Contact-CRM fields dictionary.
+    """
+    return CRM_FORMAT[module]
+
+def create_customer_in_books(id=None, is_update=False, is_single_user=False, params={}):
+    """
+    Create customer in the Zoho books.
+    """
+    response_list = list()
+    if is_single_user:
+        records = [License.objects.select_related().get(id=id).__dict__]
+    else:
+        if id:
+            records = Brand.objects.filter(id=id)
+        else:
+            records = Brand.objects.filter(is_updated_in_crm=False)
+    for record in records:
+        request = dict()
+        request.update(record.__dict__)
+        licenses = record.license_set.values()
+        for license in licenses:
+            request.update(license)
+            license_db = License.objects.select_related().get(id=license['id'])
+            request.update(license_db.license_profile.__dict__)
+            try:
+                request.update(license_db.profile_contact.profile_contact_details)
+            except Exception:
+                pass
+            books_dict = get_format_dict('Books_Customer')
+            record_dict = dict()
+            for k,v in books_dict.items():
+                if v.endswith('_parse'):
+                    v = v.split('_parse')[0]
+                    v = parse_books_fields(k, v, request)
+                    record_dict[k] = v
+                else:
+                    v = request.get(v)
+                    record_dict[k] = v
+            response = create_contact(record_dict, params=params)
+            response_list.append(response)
+    return response_list
+
+def parse_books_fields(k, v, request):
+    """
+    Parse books fields.
+    """
+    value = request.get(v, None)
+    if v in ['billing_address', 'mailing_address']:
+        return {
+            'address': value.get('street'),
+            'street2': value.get('street_line_2'),
+            'state_code': value.get('state'),
+            'city': value.get('city'),
+            'state': value.get('state'),
+            'zip': value.get('zip_code'),
+            'country': value.get('country'),
+            'phone': value.get('phone')
+        }
+    elif v == 'employees':
+        contact_persons = list()
+        for value in request.get(v, None):
+            email = value.get('employee_email')
+            is_duplicate = is_duplicate_contact(email, contact_persons)
+            if is_duplicate == False:
+                contact_persons.append({
+                    'first_name': value.get('employee_name'),
+                    'last_name': value.get('last_name'),
+                    'email': value.get('employee_email'),
+                    'phone': value.get('phone'),
+                    'mobile': value.get('phone'),
+                    'designation': value.get('roles')[0],
+                    'department': value.get('department'),
+                    # 'is_primary_contact': is_primary,
+                    'skype': value.get('skype'),
+                })
+        return contact_persons
+    elif v == 'contact_type':
+        if request.get('is_buyer'):
+            return 'customer'
+        elif request.get('is_seller'):
+            return 'vendor'
         
+def is_duplicate_contact(email, contact_persons):
+    """
+    Check if contact is duplicate.
+    """
+    for contact in contact_persons:
+        if email == contact.get('email'):
+            return True
+    return False
+
 def create_contact(data, params=None):
     """
     Create contact in Zoho Books.
