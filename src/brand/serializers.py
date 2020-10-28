@@ -13,6 +13,7 @@ from user.models import User
 from core.utility import (notify_admins_on_profile_registration,)
 from integration.crm import (insert_vendors, insert_accounts,)
 from integration.box import upload_file
+from integration.books import(create_customer_in_books, )
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -72,6 +73,15 @@ class LicenseSerializer(serializers.ModelSerializer):
                 profile = LicenseProfile.objects.get(license=instance.id)
                 notify_admins_on_profile_registration(
                     profile.license.created_by.email, profile.name)
+                #Create zoho books customer
+                if profile.license.created_by.membership_type == "personal":
+                    create_customer_in_books(profile.license.id, is_update=False, is_single_user=True, params={})
+                elif profile.license.created_by.membership_type == "business":
+                    if profile.license.brand:
+                        create_customer_in_books(profile.license.brand.id, is_update=False, is_single_user=False, params={})
+                    else:
+                        create_customer_in_books(id=None,is_update=False, is_single_user=False, params={})
+                #insert vendors        
                 if profile.license.profile_category == 'cultivation':
                     if instance.brand:
                         insert_vendors.delay(id=instance.brand.id)
