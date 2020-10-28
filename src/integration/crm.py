@@ -479,7 +479,7 @@ def get_records_from_crm(legal_business_name):
             licenses = [licenses['response'][0]]
             if vendor.get('Licenses'):
                 license_list = vendor.get('Licenses').split(',')
-                license_list.remove(license_number  )
+                license_list.remove(license_number)
                 for l in license_list:
                     license = search_query('Licenses', l.strip(), 'Name')
                     if license['status_code'] == 200:
@@ -496,15 +496,12 @@ def get_records_from_crm(legal_business_name):
             response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'], True)
             response['licenses'] = li
             for k,v in crm_dict.items():
-                r = dict()
-                for key,value in v.items():
-                    if value.endswith('_parse'):
-                        value = value.split('_parse')[0]
-                        value = parse_fields('Vendors', key, value, vendor, crm_obj)
-                        r[key] = value
-                    else:
-                        r[key] = vendor.get(value)
-                response[k] = r
+                if v.endswith('_parse'):
+                    value = v.split('_parse')[0]
+                    value = parse_fields('Vendors', k, value, vendor, crm_obj)
+                    response[k] = value
+                else:
+                    response[k] = vendor.get(v)
             return response
     return {}
 

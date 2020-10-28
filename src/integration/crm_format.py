@@ -470,7 +470,6 @@ CRM_FORMAT  = {
         'Drivers_License_Number': 'Drivers_License_Number',
         'Driver_s_Name': 'Driver_s_Name',
         'License_Plate_Number': 'License_Plate_Number',
-        'licenses': 'Licenses_List',
         'Sellers_Permit': 'Sellers_Permit',
         'W9_Box_Link': 'W9_Box_Link',
         'Sellers_Permit_Box_Link': 'Sellers_Permit_Box_Link',
