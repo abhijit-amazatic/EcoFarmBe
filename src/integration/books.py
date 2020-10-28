@@ -72,8 +72,11 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
             records = Brand.objects.filter(is_updated_in_crm=False)
     for record in records:
         request = dict()
-        request.update(record.__dict__)
-        licenses = record.license_set.values()
+        if not is_single_user:
+            request.update(record.__dict__)
+            licenses = record.license_set.values()
+        else:
+            licenses = records
         for license in licenses:
             request.update(license)
             license_db = License.objects.select_related().get(id=license['id'])
