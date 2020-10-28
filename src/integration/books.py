@@ -95,7 +95,10 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
                 else:
                     v = request.get(v)
                     record_dict[k] = v
-            response = create_contact(record_dict, params=params)
+            if is_update:
+                response = update_contact(record_dict, params=params)
+            else:
+                response = create_contact(record_dict, params=params)
             response_list.append(response)
     return response_list
 
@@ -155,6 +158,14 @@ def create_contact(data, params=None):
     obj = get_books_obj()
     contact_obj = obj.Contacts()
     return contact_obj.create_contact(data, parameters=params)
+
+def update_contact(data, params=None):
+    """
+    Update contact in Zoho Books.
+    """
+    obj = get_books_obj()
+    contact_obj = obj.Contacts()
+    return contact_obj.updatecontact(data, parameters=params)
 
 def get_contact(contact_id, params=None):
     """
