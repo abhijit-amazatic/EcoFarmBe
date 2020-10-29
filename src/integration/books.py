@@ -377,6 +377,8 @@ def get_customer(obj, data):
                 break
     else:
         return {"code": 1003, "message": "Contact not in zoho books."}
+    if customer.get('email') == '':
+        return {"code": 1003, "message": "Contact not in zoho books."}
     data['customer_id'] = customer['contact_id']
     return {"code": 0, "data": data}
 
