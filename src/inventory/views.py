@@ -327,6 +327,26 @@ class DocumentView(APIView):
             Documents.objects.values(),
             status=status.HTTP_200_OK)
     
+    def put(self, request, *args, **kwargs):
+        """
+        Update document fields.
+        """
+        id = kwargs.get('id', None)
+        try:
+            if request.data.get('is_primary'):
+                main_doc = Documents.objects.get(id=id)
+                documents = Documents.objects.filter(sku=main_doc.sku)
+                for doc in documents:
+                    if doc.id != id:
+                        doc.is_primary = False
+                        doc.save()
+            obj = Documents.objects.update_or_create(
+                        id=id,
+                        defaults=request.data)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        except Documents.DoesNotExist:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, *args, **kwargs):
         """
         Delete document.
@@ -359,7 +379,7 @@ class DocumentStatusView(APIView):
             obj = Documents.objects.update_or_create(
                     id=id,
                     defaults=request.data)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_202_ACCEPTED)
         except Documents.DoesNotExist:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         

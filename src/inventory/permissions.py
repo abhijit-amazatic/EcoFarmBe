@@ -9,6 +9,6 @@ class DocumentPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'GET':
             return True
-        elif request.method == 'DELETE' and request.user.is_authenticated:
+        elif request.method in ['PUT', 'DELETE'] and request.user.is_authenticated:
             return True
         return False

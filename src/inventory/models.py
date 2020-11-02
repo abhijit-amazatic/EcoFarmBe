@@ -41,6 +41,7 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     status = models.CharField(_('Status'), default=UPLOADING, max_length=50, choices=STATUS_CHOICES)
     box_url = models.CharField(_('Box Url'), blank=True, null=True, max_length=500)
     box_id = models.CharField(_('Box ID'), blank=True, null=True, max_length=100)
+    is_primary = models.BooleanField(_('Is Primary Image'), default=False)
 
 
 class Inventory(models.Model):
