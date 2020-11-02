@@ -30,7 +30,7 @@ from .serializers import (
 )
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
-from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,)
+from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
 from slacker import Slacker
 from brand.models import (License,)
 
@@ -115,9 +115,7 @@ class UserViewSet(ModelViewSet):
                 if not instance.existing_member:
                     pass
                 else:
-                    pass
-                #get_from_crm_insert_to_vendorprofile.delay(instance.id)
-                #get_from_crm_insert_to_account.delay(instance.id)
+                    get_from_crm_insert_to_vendor_or_account.delay(instance.id)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", instance.email)
                 notify_admins(instance.email)

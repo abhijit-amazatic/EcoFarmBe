@@ -152,6 +152,33 @@ def send_verification_link(email):
     """
     link = get_encrypted_data(email,reason='verify')
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
+
+
+    
+def insert_data_from_crm(user,vendor_type,data,profile_type):
+    """
+    """
+    pass
+
+    
+    
+@app.task(queue="general")
+def get_from_crm_insert_to_vendor_or_account(user_id):
+    """
+    async task for existing user.
+    """
+    instance = User.objects.filter(id=user_id)
+    if instance:
+        if instance[0].legal_business_name:
+            for business in instance[0].legal_business_name:
+                vendors_data = get_records_from_crm(business)
+                if not vendors_data.get('error'):
+                    insert_data_from_crm(instance[0],vendors_data.get('vendor_type'), vendors_data,profile_type)
+                accounts_data = get_accounts_from_crm(business)
+                if not accounts_data.get('error'):
+                    insert_data_from_crm(instance[0],accounts_data.get('basic_profile',{}).get('company_type'), accounts_data,profile_type)
+
+
     
 
 
