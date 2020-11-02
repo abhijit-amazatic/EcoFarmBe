@@ -132,7 +132,7 @@ def parse_fields(module, key, value, obj, crm_obj):
         return []
     if value.startswith('program_details'):
         d = obj.get('program_details')
-        if len(d) > 0:
+        if d and len(d) > 0:
             return d.get('program_name')
     if value.startswith('employees'):
         return create_employees(key, value, obj, crm_obj)
@@ -234,6 +234,36 @@ def update_records(module, records, is_return_orginal_data=False):
         request.append(record_dict)
     response = crm_obj.update_records(module, request, is_return_orginal_data)
     return response
+
+def get_program_selection(program):
+    """
+    Return program selection.
+    """
+    PROGRAM_SELECTION = {
+        'spot': 'Spot Market',
+        'silver': 'IFP - Silver - Right of First Refusal',
+        'gold': 'IFP - Gold - Exclusivity'
+    }
+    if "spot" in program:
+        return PROGRAM_SELECTION['spot']
+    elif "silver" in program:
+        return PROGRAM_SELECTION['silver']
+    elif "gold" in program:
+        return PROGRAM_SELECTION['gold']
+    else:
+        return None
+
+def update_vendor_tier(module, record):
+    if record.get('program_selection'):
+        crm_obj = get_crm_obj()
+        request = dict()
+        request['id'] = record.get('id')
+        request['Program_Selection'] = get_program_selection(record.get('program_selection').lower())
+        layout_name = record.get('Layout_Name')
+        request['Layout'] = get_layout(module, layout_name)
+        response = crm_obj.update_records(module, [request])
+        return response
+    return {'code': 1, 'status': 'Program selection not specified.'}
 
 def search_query(module, query, criteria, case_insensitive=False):
     crm_obj = CRM(PYZOHO_CONFIG,

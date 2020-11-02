@@ -21,7 +21,7 @@ from integration.crm import (
     search_query, get_picklist,
     list_crm_contacts, create_lead,
     get_records_from_crm,get_accounts_from_crm,
-    get_record,)
+    get_record, update_vendor_tier)
 from integration.books import (
     create_contact, create_estimate,
     get_estimate, list_estimates,
@@ -175,7 +175,27 @@ class CRMVendorView(APIView):
         """
         if request.query_params.get('legal_business_name'):
             return Response(get_records_from_crm(request.query_params.get('legal_business_name')))
-        return Response({})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CRMVendorTierView(APIView):
+    """
+    Update Tier selection in Zoho CRM Vendor module.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request):
+        """
+        Update vendor tier field.
+        """
+        id = request.data.get('id', None)
+        if id and request.data.get('program_selection'):
+            response = update_vendor_tier('Vendors', request.data)
+            if response.get('code') == 0:
+                return Response(response, status=status.HTTP_202_ACCEPTED)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            
 
 class InventoryView(APIView):
     """

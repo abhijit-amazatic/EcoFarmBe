@@ -44,7 +44,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetSalesPersonView, GetTemplateStatus,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
-                               ContactPersonView,)
+                               ContactPersonView, CRMVendorTierView)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -115,6 +115,7 @@ urlpatterns = [
     path(r'crm/lead/', LeadView.as_view(), name='create_lead'),
     path(r'crm/lead-sources/', LeadSourcesView.as_view(), name='get_lead_sources'),
     path(r'crm/vendor/', CRMVendorView.as_view(), name='get_vendor'),
+    path(r'crm/vendor-tier/', CRMVendorTierView.as_view(), name='update_tier'),
     path(r'crm/account-client-code/', ClientCodeView.as_view(),
          name='get_account_client_code'),
     path(r'cultivar/sync/', CultivarSyncView.as_view(), name='sync_cultivar'),
