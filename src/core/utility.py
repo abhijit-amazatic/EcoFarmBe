@@ -154,12 +154,48 @@ def send_verification_link(email):
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
 
 
+def create_license(user,profile_type,data):
+    """
+    create for accounts/vendors based on condition
+    """
+    #category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
+    License.objects.bulk_create([License(created_by=user,
+                                         license_type=key.get('license_type',''),
+                                         owner_or_manager='Owner' if key.get('Owner') else 'Manager',
+                                         legal_business_name=key.get('legal_business_name',''),
+                                         license_number=key.get('license_number',''),
+                                         expiration_date=key.get('expiration_date',''),
+                                         issue_date=key.get('issue_date',''),
+                                         premises_address=key.get('premises_address',''),
+                                         premises_county=key.get('premises_county',''),
+                                         premises_city = key.get('premises_city',''),
+                                         zip_code=key.get('zip_code',''),
+                                         premises_apn=key.get('premises_apn',''),
+                                         premises_state=key.get('premises_state',''),
+                                         uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
+                                         uploaded_w9_to=key.get('uploaded_w9_to',''),                               
+                                         uploaded_license_to=key.get('uploaded_license_to',''),
+                                         is_seller=True if profile_type=='seller' else False,
+                                         is_buyer=True if profile_type =='buyer' else False,
+                                         profile_category=data.get('vendor_type')[0].lower() if len(data.get('vendor_type')) and profile_type == 'seller' else None) for key in data.get('licenses')], ignore_conflicts=False)
     
-def insert_data_from_crm(user,vendor_type,data,profile_type):
+    
+def insert_data_from_crm(user,profile_category,data,profile_type):
     """
+    Insert available data from crm to database.
     """
-    pass
-
+    if profile_type == "seller":
+        with transaction.atomic():
+            #STEP 1:License create
+            if data.get('licenses'):
+                create_license(user,'seller', data)
+    elif profile_type == "buyer":
+        with transaction.atomic():
+            create_license(user,'buyer', data)
+        
+        
+        
+        
     
     
 @app.task(queue="general")
@@ -173,10 +209,10 @@ def get_from_crm_insert_to_vendor_or_account(user_id):
             for business in instance[0].legal_business_name:
                 vendors_data = get_records_from_crm(business)
                 if not vendors_data.get('error'):
-                    insert_data_from_crm(instance[0],vendors_data.get('vendor_type'), vendors_data,profile_type)
+                    insert_data_from_crm(instance[0],vendors_data.get('vendor_type'), vendors_data,'seller')
                 accounts_data = get_accounts_from_crm(business)
                 if not accounts_data.get('error'):
-                    insert_data_from_crm(instance[0],accounts_data.get('basic_profile',{}).get('company_type'), accounts_data,profile_type)
+                    insert_data_from_crm(instance[0],accounts_data.get('basic_profile',{}).get('company_type'), accounts_data,'buyer')
 
 
     
