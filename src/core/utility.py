@@ -13,7 +13,7 @@ from slacker import Slacker
 from django.db import transaction
 from user.models import *
 from core.celery import app
-from integration.crm import (get_records_from_crm,get_accounts_from_crm,)
+from integration.crm import (get_records_from_crm,)
 from brand.models import *
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -153,45 +153,54 @@ def send_verification_link(email):
     link = get_encrypted_data(email,reason='verify')
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
 
-
-def create_license(user,profile_type,data):
-    """
-    create for accounts/vendors based on condition
-    """
-    #category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
-    License.objects.bulk_create([License(created_by=user,
-                                         license_type=key.get('license_type',''),
-                                         owner_or_manager='Owner' if key.get('Owner') else 'Manager',
-                                         legal_business_name=key.get('legal_business_name',''),
-                                         license_number=key.get('license_number',''),
-                                         expiration_date=key.get('expiration_date',''),
-                                         issue_date=key.get('issue_date',''),
-                                         premises_address=key.get('premises_address',''),
-                                         premises_county=key.get('premises_county',''),
-                                         premises_city = key.get('premises_city',''),
-                                         zip_code=key.get('zip_code',''),
-                                         premises_apn=key.get('premises_apn',''),
-                                         premises_state=key.get('premises_state',''),
-                                         uploaded_sellers_permit_to=key.get('uploaded_sellers_permit_to',''),
-                                         uploaded_w9_to=key.get('uploaded_w9_to',''),                               
-                                         uploaded_license_to=key.get('uploaded_license_to',''),
-                                         is_seller=True if profile_type=='seller' else False,
-                                         is_buyer=True if profile_type =='buyer' else False,
-                                         profile_category=data.get('vendor_type')[0].lower() if len(data.get('vendor_type')) and profile_type == 'seller' else None) for key in data.get('licenses')], ignore_conflicts=False)
-    
-    
-def insert_data_from_crm(user,profile_category,data,profile_type):
+        
+def insert_data_from_crm(user,data):
     """
     Insert available data from crm to database.
     """
-    if profile_type == "seller":
-        with transaction.atomic():
-            #STEP 1:License create
-            if data.get('licenses'):
-                create_license(user,'seller', data)
-    elif profile_type == "buyer":
-        with transaction.atomic():
-            create_license(user,'buyer', data)
+    #category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
+    
+    license_list = list(data.keys())
+    if license_list:
+        for license_data in license_list:
+            with transaction.atomic():
+                #STEP1:insert/create license 
+                license_obj = License.objects.create(created_by=user,
+                                                     license_type=data.get(license_data).get('license').get('license_type',''),
+                                                     owner_or_manager='Owner' if data.get(license_data).get('license').get('Owner') else 'Manager',
+                                                     legal_business_name=data.get(license_data).get('license').get('legal_business_name',''),
+                                                     license_number=data.get(license_data).get('license').get('license_number',''),
+                                                     expiration_date=data.get(license_data).get('license').get('expiration_date',''),
+                                                     issue_date=data.get(license_data).get('license').get('issue_date',''),
+                                                     premises_address=data.get(license_data).get('license').get('premises_address',''),
+                                                     premises_county=data.get(license_data).get('license').get('premises_county',''),
+                                                     premises_city = data.get(license_data).get('license').get('premises_city',''),
+                                                     zip_code=data.get(license_data).get('license').get('zip_code',''),
+                                                     premises_apn=data.get(license_data).get('license').get('premises_apn',''),
+                                                     premises_state=data.get(license_data).get('license').get('premises_state',''),
+                                                     uploaded_sellers_permit_to=data.get(license_data).get('license').get('uploaded_sellers_permit_to',''),
+                                                     uploaded_w9_to=data.get(license_data).get('license').get('uploaded_w9_to',''),                               
+                                                     uploaded_license_to=data.get(license_data).get('license').get('uploaded_license_to',''),
+                                                     is_seller=data.get(license_data).get('is_seller'),
+                                                     is_buyer=data.get(license_data).get('is_buyer'),
+                                                     profile_category=data.get(license_data).get('vendor_type')[0] if len(data.get(license_data).get('vendor_type')) else None)
+                
+            with transaction.atomic():
+                #STEP2:create License profile
+                license_profile_obj = LicenseProfile.objects.create(license=license_obj,
+                                                                    name=data.get(license_data).get('license_profile').get('name',''),
+                                                                    appellation=data.get(license_data).get('license_profile').get('appellation',''),
+                                                                    county=data.get(license_data).get('license_profile').get('county',''),
+                                                                    region=data.get(license_data).get('license_profile').get('region',''),
+                                                                    ethics_and_certification=data.get(license_data).get('license_profile').get('ethics_and_certifications',None),
+                                                                    cultivars_of_interest=data.get(license_data).get('license_profile').get('cultivars_of_interest',None),
+                                                                    about=data.get(license_data).get('license_profile').get('about',''),
+                                                                    product_of_interest=data.get(license_data).get('license_profile').get('product_of_interest',None),
+                                                                    transportation=data.get(license_data).get('license_profile').get('transportation_methods',None),
+                                                                    issues_with_failed_labtest=data.get(license_data).get('license_profile').get('issues_with_failed_labtest',''),
+                                                                    lab_test_issues=data.get(license_data).get('license_profile').get('lab_test_issues',''),
+                                                                    agreement_link=data.get(license_data).get('license_profile').get('Contract_Box_Link',''))
+                
         
         
         
@@ -207,12 +216,9 @@ def get_from_crm_insert_to_vendor_or_account(user_id):
     if instance:
         if instance[0].legal_business_name:
             for business in instance[0].legal_business_name:
-                vendors_data = get_records_from_crm(business)
-                if not vendors_data.get('error'):
-                    insert_data_from_crm(instance[0],vendors_data.get('vendor_type'), vendors_data,'seller')
-                accounts_data = get_accounts_from_crm(business)
-                if not accounts_data.get('error'):
-                    insert_data_from_crm(instance[0],accounts_data.get('basic_profile',{}).get('company_type'), accounts_data,'buyer')
+                response_data = get_records_from_crm(business)
+                if not response_data.get('error'):
+                    insert_data_from_crm(instance[0],response_data)
 
 
     
