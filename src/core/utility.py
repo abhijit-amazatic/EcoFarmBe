@@ -153,7 +153,37 @@ def send_verification_link(email):
     link = get_encrypted_data(email,reason='verify')
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
 
-        
+
+def get_employee(data):
+    """
+    structure employee according to db format & insert empty data also.(currently insefrted empty contacts)
+    """
+    final_data = []
+    final_contacts = ["License Owner","Farm Manager","Logistics","Sales/Inventory","Billing"]
+
+    for i in final_contacts:
+        final_data.append({"employee_name":"",
+                           "employee_email":"",
+                           "phone":"",
+                           "roles":[i]})
+    return final_data 
+
+
+def get_address(company,street,street_2,city,zip_code,state,country):
+    """
+    ref function-to be edited:['billing_address', 'mailing_address']
+    """
+    return {
+	"company_name":company,
+	"street": street,
+	"street_line_2": street_2,
+	"city": city,
+	"zip_code": zip_code,
+	"state": state,
+	"country": country}
+
+
+
 def insert_data_from_crm(user,data):
     """
     Insert available data from crm to database.
@@ -163,6 +193,7 @@ def insert_data_from_crm(user,data):
     license_list = list(data.keys())
     if license_list:
         for license_data in license_list:
+            print('Inserting data for',license_data)
             with transaction.atomic():
                 #STEP1:insert/create license 
                 license_obj = License.objects.create(created_by=user,
@@ -202,7 +233,34 @@ def insert_data_from_crm(user,data):
                                                                     agreement_link=data.get(license_data).get('license_profile').get('Contract_Box_Link',''))
                 
         
-        
+            with transaction.atomic():
+                #STEP3:create License profile
+                formatted_data = {"company_email":data.get(license_data).get('license_profile').get('company_email',''),
+                                  "company_phone":data.get(license_data).get('license_profile').get('company_phone',''),
+                                  "website":data.get(license_data).get('license_profile').get('website',''),
+                                  "instagram":data.get(license_data).get('license_profile').get('instagram',''),
+                                  "facebook":data.get(license_data).get('license_profile').get('facebook',''),
+                                  "linkedin":data.get(license_data).get('license_profile').get('linkedIn',''),
+                                  "twitter":data.get(license_data).get('license_profile').get('twitter',''),
+                                  "no_of_employees":data.get(license_data).get('license_profile').get('no_of_employees',''),
+                                  "mailing_address":get_address(data.get(license_data).get('license_profile').get('name',''),
+                                                                data.get(license_data).get('license_profile').get('mailing_address_street',''),
+                                                                data.get(license_data).get('license_profile').get('mailing_address_street_line_2',''),
+                                                                data.get(license_data).get('license_profile').get('mailing_address_city',''),
+                                                                data.get(license_data).get('license_profile').get('mailing_address_zip_code',''),
+                                                                data.get(license_data).get('license_profile').get('mailing_address_state',''),
+                                                                data.get(license_data).get('license_profile').get('mailing_address_country','')),
+                                  "billing_address":get_address(data.get(license_data).get('license_profile').get('name',''),
+                                                                data.get(license_data).get('license_profile').get('billing_address_street',''),
+                                                                data.get(license_data).get('license_profile').get('billing_address_street_line_2',''),
+                                                                data.get(license_data).get('license_profile').get('billing_address_city',''),
+                                                                data.get(license_data).get('license_profile').get('billing_address_zip_code',''),
+                                                                data.get(license_data).get('license_profile').get('billing_address_state',''),
+                                                                data.get(license_data).get('license_profile').get('billing_address_country','')),
+                                  "employees":get_employee(data)}
+                
+                pc_obj = ProfileContact.objects.create(license=license_obj,is_draft=False,profile_contact_details=formatted_data)
+                
         
         
     
