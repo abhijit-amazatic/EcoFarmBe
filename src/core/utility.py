@@ -168,6 +168,11 @@ def get_employee(data):
                            "roles":[i]})
     return final_data 
 
+def get_crop_overview(data):
+    """
+    Format crop overview.
+    """
+    return [{}]
 
 def get_address(company,street,street_2,city,zip_code,state,country):
     """
@@ -271,9 +276,9 @@ def insert_data_from_crm(user,data):
                                                                      autoflower=data.get(license_data).get('license_profile').get('Cultivation_Style_Autoflower',False),
                                                                      lighting_type=data.get(license_data).get('license_profile').get('lighting_type',[]),
                                                                      type_of_nutrients=data.get(license_data).get('license_profile').get('type_of_nutrients',[]),
-                                                                     type_of_nutrients=[{"canopy_sqf":data.get(license_data).get('license_profile').get('canopy_square_feet',0),
-                                                                                         "no_of_harvest":data.get(license_data).get('license_profile').get('annual_harvests',0),
-                                                                                         "plants_per_cycle":data.get(license_data).get('license_profile').get('plants_per_cycle',0)}
+                                                                     overview=[{"canopy_sqf":data.get(license_data).get('license_profile').get('canopy_square_feet',0),
+                                                                                "no_of_harvest":data.get(license_data).get('license_profile').get('annual_harvests',0),
+                                                                                "plants_per_cycle":data.get(license_data).get('license_profile').get('plants_per_cycle',0)}
                                                                      ])
             with transaction.atomic():
                 #STEP5:FinancialOverview
@@ -296,10 +301,8 @@ def insert_data_from_crm(user,data):
                 #STEP6: CropOverview
                 print('Inserting Crop overview')
                 CropOverview.objects.create(license=license_obj,
-                                            process_on_site="",
-                                            need_processing_support="",
-                                            overview=""
-                )
+                                            process_on_site=data.get(license_data).get('license').get('Can_you_Process_Onsite',''),
+                                            overview=get_crop_overview(data))
     
     
 @app.task(queue="general")
