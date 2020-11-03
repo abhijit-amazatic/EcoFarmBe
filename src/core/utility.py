@@ -193,9 +193,10 @@ def insert_data_from_crm(user,data):
     license_list = list(data.keys())
     if license_list:
         for license_data in license_list:
-            print('Inserting data for',license_data)
+            print('Inserting data for:->',license_data)
             with transaction.atomic():
-                #STEP1:insert/create license 
+                #STEP1:insert/create license
+                print('Inserting license')
                 license_obj = License.objects.create(created_by=user,
                                                      license_type=data.get(license_data).get('license').get('license_type',''),
                                                      owner_or_manager='Owner' if data.get(license_data).get('license').get('Owner') else 'Manager',
@@ -218,6 +219,7 @@ def insert_data_from_crm(user,data):
                 
             with transaction.atomic():
                 #STEP2:create License profile
+                print('Inserting License profile')
                 license_profile_obj = LicenseProfile.objects.create(license=license_obj,
                                                                     name=data.get(license_data).get('license_profile').get('name',''),
                                                                     appellation=data.get(license_data).get('license_profile').get('appellation',''),
@@ -234,7 +236,8 @@ def insert_data_from_crm(user,data):
                 
         
             with transaction.atomic():
-                #STEP3:create License profile
+                #STEP3:create profile contact
+                print("Inserting Profle contacts")
                 formatted_data = {"company_email":data.get(license_data).get('license_profile').get('company_email',''),
                                   "company_phone":data.get(license_data).get('license_profile').get('company_phone',''),
                                   "website":data.get(license_data).get('license_profile').get('website',''),
@@ -261,8 +264,42 @@ def insert_data_from_crm(user,data):
                 
                 pc_obj = ProfileContact.objects.create(license=license_obj,is_draft=False,profile_contact_details=formatted_data)
                 
-        
-        
+            with transaction.atomic():
+                #STEP4:CultivationOverview
+                print('Inserting Cultivation overview')
+                cultivation_obj = CultivationOverview.objects.create(license=license_obj,
+                                                                     autoflower=data.get(license_data).get('license_profile').get('Cultivation_Style_Autoflower',False),
+                                                                     lighting_type=data.get(license_data).get('license_profile').get('lighting_type',[]),
+                                                                     type_of_nutrients=data.get(license_data).get('license_profile').get('type_of_nutrients',[]),
+                                                                     type_of_nutrients=[{"canopy_sqf":data.get(license_data).get('license_profile').get('canopy_square_feet',0),
+                                                                                         "no_of_harvest":data.get(license_data).get('license_profile').get('annual_harvests',0),
+                                                                                         "plants_per_cycle":data.get(license_data).get('license_profile').get('plants_per_cycle',0)}
+                                                                     ])
+            with transaction.atomic():
+                #STEP5:FinancialOverview
+                print('Inserting Financial overview')
+                FinancialOverview.objects.create(license=license_obj,
+                                                 know_annual_budget=data.get(license_data).get('license_profile').get('know_annual_budget',''),
+                                                 annual_budget=data.get(license_data).get('license_profile').get('annual_budget',''),
+                                                 overview=[{'cost_per_lbs':data.get(license_data).get('license').get('cost_per_lb',''),
+                                                            'cost_per_sqf':data.get(license_data).get('license').get('cost_per_square_foot',''),
+                                                            'avg_target_price':data.get(license_data).get('license').get('avg_target_price',''),
+                                                            'know_cost_per_lbs':data.get(license_data).get('license').get('know_your_cost_per_lb',''),
+                                                            'know_cost_per_sqf':data.get(license_data).get('license').get('know_your_cost_per_square_foot',''),
+                                                            'trim_target_price':data.get(license_data).get('license').get('price_target_lb_trim',''),
+                                                            'small_target_price':data.get(license_data).get('license').get('price_target_lb_flower_smalls',''),
+                                                            'bucked_target_price':data.get(license_data).get('license').get('price_target_lb_bucked_untrimmed',''),
+                                                            'target_profit_margin':data.get(license_data).get('license').get('profit_margin_target',''),
+                                                            'target_profit_percentage': data.get(license_data).get('license').get('target_profit_percentage','')}])
+                
+            with transaction.atomic():
+                #STEP6: CropOverview
+                print('Inserting Crop overview')
+                CropOverview.objects.create(license=license_obj,
+                                            process_on_site="",
+                                            need_processing_support="",
+                                            overview=""
+                )
     
     
 @app.task(queue="general")
