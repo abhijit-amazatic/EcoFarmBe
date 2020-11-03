@@ -541,7 +541,7 @@ def get_records_from_crm(legal_business_name):
                 elif account_id:
                     crm_dict = get_format_dict('Accounts_To_DB')
                     response['vendor_type'] = get_vendor_types(vendor['Company_Type'], True)
-                response['licenses'] = r
+                response['license'] = r
                 record_dict = dict()
                 for k,v in crm_dict.items():
                     if v.endswith('_parse'):
@@ -551,6 +551,12 @@ def get_records_from_crm(legal_business_name):
                     else:
                         record_dict[k] = vendor.get(v)
                 response['license_profile'] = record_dict
+                if vendor_id:
+                    response['is_seller'] = True
+                    response['is_buyer'] = False
+                elif account_id:
+                    response['is_seller'] = False
+                    response['is_buyer'] = True
                 final_response[license_number] = response
         return final_response
     return {}
