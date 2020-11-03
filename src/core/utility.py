@@ -168,11 +168,22 @@ def get_employee(data):
                            "roles":[i]})
     return final_data 
 
-def get_crop_overview(data):
+def get_crop_overview(license_data,data):
     """
     Format crop overview.
     """
-    return [{}]
+    return [{'cultivars':[{'harvest_date': '',
+	                   'cultivar_names': [],
+	                   'cultivation_type': ''}],
+	     'yield_per_plant':data.get(license_data).get('license').get('yield_per_plan',0),
+	     'avg_annual_yield':data.get(license_data).get('license').get('avg_annual_yield',''),
+	     'avg_yield_pr_sq_ft':data.get(license_data).get('license').get('yield_per_square_foot_average',0), 
+	     'know_yield_per_plant':data.get(license_data).get('license').get('know_yield_per_plant','No'), 
+	     'know_yield_per_sq_ft':data.get(license_data).get('license').get('know_yield_per_sq_ft','No'), 
+	     'trim_yield_percentage':data.get(license_data).get('license').get('yield_percentage_trim',''),
+	     'small_yield_percentage': data.get(license_data).get('license').get('yield_percentage_flower_smalls',''),
+	     'flower_yield_percentage':data.get(license_data).get('license').get('flower_yield_percentage','')
+    }]
 
 def get_address(company,street,street_2,city,zip_code,state,country):
     """
@@ -193,15 +204,13 @@ def insert_data_from_crm(user,data):
     """
     Insert available data from crm to database.
     """
-    #category = [v for k,v in NOUN_PROCESS_MAP.items() if v.lower() == account.lower()]
-    
     license_list = list(data.keys())
     if license_list:
         for license_data in license_list:
             print('Inserting data for:->',license_data)
             with transaction.atomic():
                 #STEP1:insert/create license
-                print('Inserting license')
+                print('1.Inserting license')
                 license_obj = License.objects.create(created_by=user,
                                                      license_type=data.get(license_data).get('license').get('license_type',''),
                                                      owner_or_manager='Owner' if data.get(license_data).get('license').get('Owner') else 'Manager',
@@ -224,7 +233,7 @@ def insert_data_from_crm(user,data):
                 
             with transaction.atomic():
                 #STEP2:create License profile
-                print('Inserting License profile')
+                print('2.Inserting License profile')
                 license_profile_obj = LicenseProfile.objects.create(license=license_obj,
                                                                     name=data.get(license_data).get('license_profile').get('name',''),
                                                                     appellation=data.get(license_data).get('license_profile').get('appellation',''),
@@ -242,7 +251,7 @@ def insert_data_from_crm(user,data):
         
             with transaction.atomic():
                 #STEP3:create profile contact
-                print("Inserting Profle contacts")
+                print("3.Inserting Profle contacts")
                 formatted_data = {"company_email":data.get(license_data).get('license_profile').get('company_email',''),
                                   "company_phone":data.get(license_data).get('license_profile').get('company_phone',''),
                                   "website":data.get(license_data).get('license_profile').get('website',''),
@@ -271,7 +280,7 @@ def insert_data_from_crm(user,data):
                 
             with transaction.atomic():
                 #STEP4:CultivationOverview
-                print('Inserting Cultivation overview')
+                print('4.Inserting Cultivation overview')
                 cultivation_obj = CultivationOverview.objects.create(license=license_obj,
                                                                      autoflower=data.get(license_data).get('license_profile').get('Cultivation_Style_Autoflower',False),
                                                                      lighting_type=data.get(license_data).get('license_profile').get('lighting_type',[]),
@@ -282,7 +291,7 @@ def insert_data_from_crm(user,data):
                                                                      ])
             with transaction.atomic():
                 #STEP5:FinancialOverview
-                print('Inserting Financial overview')
+                print('5.Inserting Financial overview')
                 FinancialOverview.objects.create(license=license_obj,
                                                  know_annual_budget=data.get(license_data).get('license_profile').get('know_annual_budget',''),
                                                  annual_budget=data.get(license_data).get('license_profile').get('annual_budget',''),
@@ -299,10 +308,10 @@ def insert_data_from_crm(user,data):
                 
             with transaction.atomic():
                 #STEP6: CropOverview
-                print('Inserting Crop overview')
+                print('6.Inserting Crop overview')
                 CropOverview.objects.create(license=license_obj,
                                             process_on_site=data.get(license_data).get('license').get('Can_you_Process_Onsite',''),
-                                            overview=get_crop_overview(data))
+                                            overview=get_crop_overview(license_data,data))
     
     
 @app.task(queue="general")
