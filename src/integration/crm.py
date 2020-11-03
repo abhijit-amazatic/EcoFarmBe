@@ -481,58 +481,78 @@ def get_vendors_from_licenses(field, licenses):
     """
     Get vendor id from licenses.
     """
-    for license in licenses['response']:
-        vendor_lookup = license.get(field)
-        if vendor_lookup:
-            return vendor_lookup.get('id')
+    vendor_lookup = licenses.get(field)
+    if vendor_lookup:
+        return vendor_lookup.get('id')
 
 @app.task(queue="general")
 def get_records_from_crm(legal_business_name):
     """
     Get records from Zoho CRM using legal business name.
     """
+    final_response = dict()
     licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
-        license_number = licenses['response'][0]['Name']
-        vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
-        if vendor['status_code'] != 200:
-            vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', licenses)
-        else:
-            vendor = vendor['response'][0]['Licenses_Module']
-            vendor_id = vendor['id']
-        if not vendor_id:
-            return {'error': 'No association found for legal business name'}
-        crm_obj = get_crm_obj()
-        vendor_record = crm_obj.get_record('Vendors', vendor_id)
-        if vendor_record['status_code'] == 200:
-            vendor = vendor_record['response'][vendor_id]
-            licenses = [licenses['response'][0]]
-            if vendor.get('Licenses'):
-                license_list = vendor.get('Licenses').split(',')
-                license_list.remove(license_number)
-                for l in license_list:
-                    license = search_query('Licenses', l.strip(), 'Name')
-                    if license['status_code'] == 200:
-                        licenses.append(license['response'][0])
-            crm_dict = get_format_dict('Licenses_To_DB')
-            li = list()
-            for license in licenses:
+        for license_dict in licenses.get('response'):
+            license_number = license_dict['Name']
+            vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+            if vendor['status_code'] != 200:
+                vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+            else:
+                vendor = vendor['response'][0]['Licenses_Module']
+                vendor_id = vendor['id']
+            if not vendor_id:
+                account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
+                if account['status_code'] != 200:
+                    account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
+                else:
+                    account = account['response'][0]['Licenses_Module']
+                    account_id = account['id']
+                if not account_id:
+                    final_response[license_number] = {'error': 'No association found for legal business name'}
+                    continue
+            crm_obj = get_crm_obj()
+            if vendor_id:
+                record = crm_obj.get_record('Vendors', vendor_id)
+            elif account_id:
+                record = crm_obj.get_record('Accounts', account_id)
+            if record['status_code'] == 200:
+                if vendor_id:
+                    vendor = record['response'][vendor_id]
+                elif account_id:
+                    vendor = record['response'][account_id]
+                # licenses = [licenses['response'][0]]
+                licenses = license_dict
+                if vendor.get('Licenses'):
+                    license_list = vendor.get('Licenses').split(',')
+                    license_list.remove(license_number)
+                    for l in license_list:
+                        license = search_query('Licenses', l.strip(), 'Name')
+                        if license['status_code'] == 200:
+                            license_dict.append(license['response'][0])
+                crm_dict = get_format_dict('Licenses_To_DB')
                 r = dict()
                 for k, v in crm_dict.items():
-                    r[k] = license.get(v)
-                li.append(r)
-            crm_dict = get_format_dict('Vendors_To_DB')
-            response = dict()
-            response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'], True)
-            response['licenses'] = li
-            for k,v in crm_dict.items():
-                if v.endswith('_parse'):
-                    value = v.split('_parse')[0]
-                    value = parse_fields('Vendors', k, value, vendor, crm_obj)
-                    response[k] = value
-                else:
-                    response[k] = vendor.get(v)
-            return response
+                    r[k] = licenses.get(v)
+                response = dict()
+                if vendor_id:
+                    crm_dict = get_format_dict('Vendors_To_DB')
+                    response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'], True)
+                elif account_id:
+                    crm_dict = get_format_dict('Accounts_To_DB')
+                    response['vendor_type'] = get_vendor_types(vendor['Company_Type'], True)
+                response['licenses'] = r
+                record_dict = dict()
+                for k,v in crm_dict.items():
+                    if v.endswith('_parse'):
+                        value = v.split('_parse')[0]
+                        value = parse_fields('Vendors', k, value, vendor, crm_obj)
+                        record_dict[k] = value
+                    else:
+                        record_dict[k] = vendor.get(v)
+                response['license_profile'] = record_dict
+                final_response[license_number] = response
+        return final_response
     return {}
 
 def get_vendor_from_contact(contact_email):
