@@ -127,7 +127,15 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
                 notify_profile_user(obj.email,license_obj[0].license_profile.name)
                     
-                                
+
+
+def get_profile_type(obj):
+    """
+    return buyer or seller based on condition.
+    """
+    return 'Buyer' if obj.is_buyer else 'Seller'
+    
+    
 @app.task(queue="general")
 def send_async_approval_mail(profile_id):
     """
@@ -136,7 +144,8 @@ def send_async_approval_mail(profile_id):
     license_obj = License.objects.filter(id=profile_id)
     if license_obj:
         ac_manager = license_obj[0].created_by.email
-        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+        profile_type = get_profile_type(license_obj[0])
+        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type},"Profile Approved.", ac_manager)
 
         
 @app.task(queue="general")        

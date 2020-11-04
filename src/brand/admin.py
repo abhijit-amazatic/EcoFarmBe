@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from core.utility import (send_async_approval_mail,add_users_to_system_and_license,)
+from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
 from integration.box import (delete_file,)
 
 
@@ -33,7 +33,8 @@ class LicenseUpdatedForm(forms.ModelForm):
                 license_obj = License.objects.filter(id=self.instance.id)
                 if license_obj:
                     ac_manager = license_obj[0].created_by.email
-                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Profile Approved.", ac_manager)
+                    profile_type = get_profile_type(license_obj[0])
+                    mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login', 'profile_type': profile_type},"Profile Approved.", ac_manager)
                     
 
 def approve_license_profile(modeladmin, request, queryset):
