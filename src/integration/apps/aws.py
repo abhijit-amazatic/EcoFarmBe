@@ -9,8 +9,7 @@ from core.settings import (AWS_CLIENT_ID, AWS_CLIENT_SECRET, AWS_REGION)
 def get_boto_client(resource,
                     aws_access_key_id=AWS_CLIENT_ID,
                     aws_secret_access_key=AWS_CLIENT_SECRET,
-                    region=AWS_REGION,
-                    config=None):
+                    region=AWS_REGION):
     """
     Return aws client for resource.
     
@@ -21,8 +20,7 @@ def get_boto_client(resource,
     return boto3.client(resource,
                         aws_access_key_id=aws_access_key_id,
                         aws_secret_access_key=aws_secret_access_key,
-                        region_name=region,
-                        config=config)
+                        region_name=region)
 
 def create_presigned_post(bucket_name, object_name, expiration=3600):
     """
