@@ -474,7 +474,7 @@ def update_license(dba, license):
     license_folder = create_folder(new_folder, 'Licenses')
     if license.get('uploaded_license_to') and license.get('uploaded_license_to'):
         try:
-            license_to = Documents.objects.filter(object_id=license['license_id'], doc_type='license').first()
+            license_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='license').first()
             license_to = license_to.path
             aws_bucket = license_to.split('/')[0]
             aws_key = '/'.join(license_to.split('/')[1:])
@@ -488,7 +488,7 @@ def update_license(dba, license):
     documents = create_folder(new_folder, 'documents')
     if license.get('uploaded_sellers_permit_to') and license.get('uploaded_sellers_permit_to'):
         try:
-            seller_to = Documents.objects.filter(object_id=license['license_id'], doc_type='seller_permit').first()
+            seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
             seller_to = seller_to.path
             aws_bucket = seller_to.split('/')[0]
             aws_key = '/'.join(seller_to.split('/')[1:])
