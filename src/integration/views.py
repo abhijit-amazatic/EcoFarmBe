@@ -302,7 +302,7 @@ class EstimateAddressView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
+    
 
 class EstimateSignView(APIView):
     """
@@ -322,6 +322,7 @@ class EstimateSignView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TemplateSignView(APIView):
     """

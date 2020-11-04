@@ -22,6 +22,7 @@ from core.mailer import mail, mail_send
 from brand.models import (Brand, License, LicenseProfile, )
 from integration.models import (Integration,)
 from integration.apps.aws import (get_boto_client, )
+from inventory.models import (Documents, )
 
 def get_crm_obj():
     """
@@ -471,16 +472,32 @@ def update_license(dba, license):
     dir_name = f'{dba}_{license_number}'
     new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, dir_name)
     license_folder = create_folder(new_folder, 'Licenses')
-    if license.get('uploaded_license_to') and license.get('uploaded_license_to').isdigit():
-        moved_file = move_file(license['uploaded_license_to'], license_folder)
-        license_url = get_shared_link(license.get('uploaded_license_to'))
-        if license_url:
-            license['uploaded_license_to'] = license_url  + "?id=" + license.get('uploaded_license_to')
+    if license.get('uploaded_license_to') and license.get('uploaded_license_to'):
+        try:
+            license_to = Documents.objects.filter(object_id=license['license_id'], doc_type='license').first()
+            license_to = license_to.path
+            aws_bucket = license_to.split('/')[0]
+            aws_key = '/'.join(license_to.split('/')[1:])
+            file_id = upload_file_s3_to_box(aws_bucket, aws_key)
+            moved_file = move_file(file_id, license_folder)
+            license_url = get_shared_link(file_id)
+            if license_url:
+                license['uploaded_license_to'] = license_url  + "?id=" + license.get('uploaded_license_to')
+        except Exception:
+            pass
     documents = create_folder(new_folder, 'documents')
-    if license.get('uploaded_sellers_permit_to') and license.get('uploaded_sellers_permit_to').isdigit():
-            moved_file = move_file(license['uploaded_sellers_permit_to'], documents)
-            license_url = get_shared_link(license.get('uploaded_sellers_permit_to'))
+    if license.get('uploaded_sellers_permit_to') and license.get('uploaded_sellers_permit_to'):
+        try:
+            seller_to = Documents.objects.filter(object_id=license['license_id'], doc_type='seller_permit').first()
+            seller_to = seller_to.path
+            aws_bucket = seller_to.split('/')[0]
+            aws_key = '/'.join(seller_to.split('/')[1:])
+            file_id = upload_file_s3_to_box(aws_bucket, aws_key)
+            moved_file = move_file(file_id, documents)
+            license_url = get_shared_link(file_id)
             license['uploaded_sellers_permit_to'] = license_url  + "?id=" + license.get('uploaded_sellers_permit_to')
+        except Exception:
+            pass
     # if license.get('uploaded_w9_to') and license.get('uploaded_w9_to').isdigit():
     #         moved_file = move_file(license['uploaded_w9_to'], documents)
     #         license_url = get_shared_link(license.get('uploaded_w9_to'))

@@ -21,6 +21,7 @@ from integration.inventory import (sync_inventory, )
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
 from .permissions import (DocumentPermission, )
 from integration.box import (delete_file, )
+from brand.models import (License, )
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -279,6 +280,7 @@ class DocumentPreSignedView(APIView):
         sku = request.data.get('sku')
         license_id = request.data.get('license_id')
         object_name = request.data.get('object_name')
+        doc_type = request.data.get('doc_type')
         expiry = request.data.get('expiration', 3600)
         if sku:
             try:
@@ -296,7 +298,7 @@ class DocumentPreSignedView(APIView):
         mime_type, _ = mime.guess_type(object_name)
         obj = Documents(content_object=obj,
                         sku=sku, name=object_name,
-                        file_type=mime_type)
+                        file_type=mime_type, doc_type=doc_type)
         obj.save()
         if sku:
             path = f'inventory/{sku}/{obj.id}/{object_name}'

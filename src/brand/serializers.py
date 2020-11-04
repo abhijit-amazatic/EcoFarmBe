@@ -10,10 +10,12 @@ from rest_framework import serializers
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile,
                      CultivationOverview, ProgramOverview, FinancialOverview, CropOverview, ProfileReport)
 from user.models import User
+from inventory.models import (Documents, )
 from core.utility import (notify_admins_on_profile_registration,)
 from integration.crm import (insert_vendors, insert_accounts,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
+from integration.apps.aws import (create_presigned_url, )
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -54,7 +56,41 @@ class LicenseSerializer(serializers.ModelSerializer):
     """
     This defines license serializer.
     """
+    license_url = serializers.SerializerMethodField()
+    seller_permit_url = serializers.SerializerMethodField()
+    
+    def get_license_url(self, obj):
+        """
+        Return s3 license url.
+        """
+        try:
+            license = Documents.objects.filter(object_id=obj.id, doc_type='license').first()
+            path = license.path
+            bucket = path.split('/')[0]
+            key = '/'.join(path.split('/')[1:])
+            url = create_presigned_url(bucket, key)
+            if url.get('response'):
+                return url
+            return None
+        except Exception:
+            return None
 
+    def get_seller_permit_url(self, obj):
+        """
+        Return s3 license url.
+        """
+        try:
+            seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').first()
+            path = seller.path
+            bucket = path.split('/')[0]
+            key = '/'.join(path.split('/')[1:])
+            url = create_presigned_url(bucket, key)['response']
+            if url.get('response'):
+                return url
+            return None
+        except Exception:
+            return None
+    
     def validate(self, obj):
         """
         Object level validation.Normal user should allowed to create license only with respective brand
