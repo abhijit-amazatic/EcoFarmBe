@@ -7,7 +7,8 @@ from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
     PYZOHO_USER_IDENTIFIER,
     LICENSE_PARENT_FOLDER_ID,
-    TEMP_LICENSE_FOLDER)
+    TEMP_LICENSE_FOLDER,
+    AWS_BUCKET)
 from user.models import (User, )
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
@@ -475,10 +476,9 @@ def update_license(dba, license):
     if not license.get('uploaded_license_to'):
         try:
             license_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='license').first()
-            license_to = license_to.path
-            aws_bucket = license_to.split('/')[0]
-            aws_key = '/'.join(license_to.split('/')[1:])
-            file_id = upload_file_s3_to_box(aws_bucket, aws_key)
+            license_to_path = license_to.path
+            aws_bucket = AWS_BUCKET
+            file_id = upload_file_s3_to_box(aws_bucket, license_to_path)
             moved_file = move_file(file_id, license_folder)
             license_url = get_shared_link(file_id)
             if license_url:
@@ -490,10 +490,9 @@ def update_license(dba, license):
     if not license.get('uploaded_sellers_permit_to'):
         try:
             seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
-            seller_to = seller_to.path
-            aws_bucket = seller_to.split('/')[0]
-            aws_key = '/'.join(seller_to.split('/')[1:])
-            file_id = upload_file_s3_to_box(aws_bucket, aws_key)
+            seller_to_path = seller_to.path
+            aws_bucket = AWS_BUCKET
+            file_id = upload_file_s3_to_box(aws_bucket, seller_to_path)
             moved_file = move_file(file_id, documents)
             license_url = get_shared_link(file_id)
             license['uploaded_sellers_permit_to'] = license_url  + "?id=" + moved_file.id
