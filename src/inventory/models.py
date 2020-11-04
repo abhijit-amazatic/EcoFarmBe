@@ -10,7 +10,7 @@ from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from user.models import (User, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
-from brand.models import (LicenseProfile,)
+# from brand.models import (LicenseProfile,)
 
 
 class Documents(TimeStampFlagModelMixin, models.Model):
@@ -33,15 +33,16 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.CharField(max_length=255)
     content_object = GenericForeignKey('content_type', 'object_id')
-    sku = models.CharField(_('SKU'), max_length=255)
+    sku = models.CharField(_('SKU'), max_length=255, blank=True, null=True, db_index=True)
     name = models.CharField(_('Name'), max_length=255)
     size = models.CharField(_('File Size'), blank=True, null=True, max_length=100)
     file_type = models.CharField(_('File Type'), blank=True, null=True, max_length=50)
     path = models.CharField(_('File Path'), blank=True, null=True, max_length=500)
-    status = models.CharField(_('Status'), default=UPLOADING, max_length=50, choices=STATUS_CHOICES)
+    status = models.CharField(_('Status'), default=UPLOADING, max_length=50, db_index=True, choices=STATUS_CHOICES)
     box_url = models.CharField(_('Box Url'), blank=True, null=True, max_length=500)
     box_id = models.CharField(_('Box ID'), blank=True, null=True, max_length=100)
     is_primary = models.BooleanField(_('Is Primary Image'), default=False)
+    doc_type = models.CharField(_('Doc Type'), blank=True, null=True, max_length=50)
 
 
 class Inventory(models.Model):

@@ -4,10 +4,12 @@ Brand related schemas defined here.
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
+from django.contrib.contenttypes.fields import (GenericRelation, )
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from django.conf import settings
 from user.models import User
+from inventory.models import (Documents, )
 
 class Brand(TimeStampFlagModelMixin,models.Model):
     """
@@ -85,6 +87,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    documents = GenericRelation(Documents)
     
     def __str__(self):
         return self.legal_business_name

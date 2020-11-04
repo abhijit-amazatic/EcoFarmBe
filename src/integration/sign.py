@@ -142,9 +142,9 @@ def get_template(template_id):
 def send_template(
     template_id,
     recipients,
-    licenses,
-    legal_business_names,
-    EIN, SSN, business_structure):
+    licenses=[],
+    legal_business_names=[],
+    EIN=None, SSN=None, business_structure=[]):
     """
     Send template to sign.
     """

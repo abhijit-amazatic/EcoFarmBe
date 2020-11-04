@@ -6,19 +6,22 @@ from pyzoho import CRM
 from core.settings import (PYZOHO_CONFIG,
     PYZOHO_REFRESH_TOKEN,
     PYZOHO_USER_IDENTIFIER,
-    LICENSE_PARENT_FOLDER_ID)
+    LICENSE_PARENT_FOLDER_ID,
+    TEMP_LICENSE_FOLDER)
 from user.models import (User, )
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
                          ACCOUNT_TYPES)
-from .box import (get_shared_link, move_file, create_folder)
+from .box import (get_shared_link, move_file,
+                  create_folder, upload_file_stream)
 from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout, get_overview_field,)
 from core.mailer import mail, mail_send
 from brand.models import (Brand, License, LicenseProfile, )
 from integration.models import (Integration,)
+from integration.apps.aws import (get_boto_client, )
 
 def get_crm_obj():
     """
@@ -443,6 +446,20 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         r = create_records('Brands_X_Vendors', [data])
             final_list[record.id] = final_dict
         return final_list
+
+def upload_file_s3_to_box(aws_bucket, aws_key):
+    """
+    Upload file from s3 to box.
+    """
+    from io import BytesIO
+    aws_client = get_boto_client('s3')
+    file_obj = aws_client.get_object(Bucket=aws_bucket, Key=aws_key)
+    if file_obj.get('Body'):
+       data = file_obj['Body'].read()
+       data = BytesIO(data)
+       box_file_obj = upload_file_stream(TEMP_LICENSE_FOLDER, data, aws_key.split('/')[-1])
+       return box_file_obj
+    return None
 
 def update_license(dba, license):
     """
