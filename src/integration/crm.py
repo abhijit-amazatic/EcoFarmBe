@@ -492,7 +492,6 @@ def update_license(dba, license):
             seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
             seller_to = seller_to.path
             aws_bucket = seller_to.split('/')[0]
-            aws_bucket = 'ecofarm-staging'
             aws_key = '/'.join(seller_to.split('/')[1:])
             file_id = upload_file_s3_to_box(aws_bucket, aws_key)
             moved_file = move_file(file_id, documents)
