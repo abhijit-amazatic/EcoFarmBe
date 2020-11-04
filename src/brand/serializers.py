@@ -18,6 +18,35 @@ from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 
 
+def insert_or_update_vendor_accounts(profile,instance):
+    """
+    Insert/update vendors/accounts based on existing user or not. 
+    """
+    if profile.license.created_by.existing_member:
+        if profile.license.profile_category == 'cultivation':
+            if instance.brand:
+                insert_vendors.delay(id=instance.brand.id,is_update=True)
+            else:
+                insert_vendors.delay(id=instance.id, is_single_user=True, is_update=True)
+        else:
+            if instance.brand:
+                insert_accounts.delay(id=instance.brand.id,is_update=True)
+            else:
+                insert_accounts.delay(id=instance.id, is_single_user=True,is_update=True)
+    elif not profile.license.created_by.existing_member:
+        if profile.license.profile_category == 'cultivation':
+            if instance.brand:
+                insert_vendors.delay(id=instance.brand.id)
+            else:
+                insert_vendors.delay(id=instance.id, is_single_user=True)
+        else:
+            if instance.brand:
+                insert_accounts.delay(id=instance.brand.id)
+            else:
+                insert_accounts.delay(
+                    id=instance.id, is_single_user=True)
+                
+        
 class BrandSerializer(serializers.ModelSerializer):
     """
     This defines Brand serializer.
@@ -117,19 +146,8 @@ class LicenseSerializer(serializers.ModelSerializer):
                         create_customer_in_books(profile.license.brand.id, is_update=False, is_single_user=False, params={})
                     else:
                         create_customer_in_books(id=None,is_update=False, is_single_user=False, params={})
-                #insert vendors        
-                if profile.license.profile_category == 'cultivation':
-                    if instance.brand:
-                        insert_vendors.delay(id=instance.brand.id)
-                    else:
-                        insert_vendors.delay(
-                            id=instance.id, is_single_user=True)
-                else:
-                    if instance.brand:
-                        insert_accounts.delay(id=instance.brand.id)
-                    else:
-                        insert_accounts.delay(
-                            id=instance.id, is_single_user=True)
+                #insert or update vendors/accounts
+                insert_or_update_vendor_accounts(profile,instance)
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)
