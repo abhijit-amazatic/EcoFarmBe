@@ -15,6 +15,7 @@ from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from .serializers import (InventorySerializer, LogoutInventorySerializer,
                           ItemFeedbackSerializer, InTransitOrderSerializer)
 from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
+from brand.models import (License,)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, )
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
@@ -276,20 +277,31 @@ class DocumentPreSignedView(APIView):
         Get pre-signed post url.
         """
         sku = request.data.get('sku')
+        license_id = request.data.get('license_id')
         object_name = request.data.get('object_name')
         expiry = request.data.get('expiration', 3600)
-        try:
-            item = Inventory.objects.get(sku=sku)
-        except Inventory.DoesNotExist:
-            return Response({'error': 'Item not in database'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if sku:
+            try:
+                obj = Inventory.objects.get(sku=sku)
+            except Inventory.DoesNotExist:
+                return Response({'error': 'Item not in database'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                obj = License.objects.get(id=license_id)
+            except License.DoesNotExist:
+                return Response({'error': 'License not in database'},
+                                status=status.HTTP_400_BAD_REQUEST)
         mime = MimeTypes()
         mime_type, _ = mime.guess_type(object_name)
-        obj = Documents(content_object=item,
+        obj = Documents(content_object=obj,
                         sku=sku, name=object_name,
                         file_type=mime_type)
         obj.save()
-        path = f'inventory/{sku}/{obj.id}/{object_name}'
+        if sku:
+            path = f'inventory/{sku}/{obj.id}/{object_name}'
+        else:
+            path = object_name
         obj.path = path
         obj.save()
         response = create_presigned_post(AWS_BUCKET, path, expiry)
