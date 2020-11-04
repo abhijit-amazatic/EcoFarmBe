@@ -202,7 +202,7 @@ class AuthyOneTouchDevice(AbstractDevice):
 
     name = models.CharField(
         max_length=255,
-        default='Authy Push Authentications',
+        default='Push-Notifications Via Authy',
         help_text="The human-readable name of this device.",
     )
 
