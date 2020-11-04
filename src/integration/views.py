@@ -239,15 +239,17 @@ class EstimateView(APIView):
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response)
-        estimate = create_estimate(data=request.data, params=request.query_params.dict())
-        if estimate.get('code') and estimate['code'] != 0:
-            return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
-        if estimate.get('estimate_id'):
-            estimate_id = estimate['estimate_id']
-            contact_id = estimate['customer_id']
-            mark_estimate(estimate_id, 'sent')
-            mark_estimate(estimate_id, 'accepted')
-        return Response(estimate)
+        else:
+            estimate = create_estimate(data=request.data, params=request.query_params.dict())
+            if estimate.get('code') and estimate['code'] != 0:
+                return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
+            # if estimate.get('estimate_id'):
+            #     estimate_id = estimate['estimate_id']
+            #     contact_id = estimate['customer_id']
+            #     mark_estimate(estimate_id, 'sent')
+            #     mark_estimate(estimate_id, 'accepted')
+            return Response(estimate)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
         """
@@ -260,15 +262,17 @@ class EstimateView(APIView):
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response)
-        estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
-        if estimate.get('code') and estimate['code'] != 0:
-            return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
-        if estimate.get('estimate_id'):
-            estimate_id = estimate['estimate_id']
-            contact_id = estimate['customer_id']
-            mark_estimate(estimate_id, 'sent')
-            mark_estimate(estimate_id, 'accepted')
-        return Response(estimate)
+        else:
+            estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            if estimate.get('code') and estimate['code'] != 0:
+                return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
+            # if estimate.get('estimate_id'):
+            #     estimate_id = estimate['estimate_id']
+            #     contact_id = estimate['customer_id']
+            #     mark_estimate(estimate_id, 'sent')
+            #     mark_estimate(estimate_id, 'accepted')
+            return Response(estimate)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request):
         """
@@ -375,6 +379,36 @@ class EstimateStatusView(APIView):
         if estimate_id and status:
             return Response(mark_estimate(estimate_id, status))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class EstimateSignCompleteView(APIView):
+    """
+    View class for sign completed.
+    """
+    permission_classess = (IsAuthenticated, )
+    
+    def post(self, request):
+        """
+        Post data from zoho sign on sign.
+        """
+        request_id = request.data.get('request_id')
+        estimate_id = request.data.get('estimate_id')
+        business_dba = request.data.get('business_dba')
+        document_number = request.data.get('document_number')
+        dir_name = f'{business_dba}_{document_number}'
+        is_agreement = request.data.get('is_agreement')
+        data = get_document(request_id)['requests']
+        response = list()
+        for document in data.get('document_ids'):
+            filename = document.get('document_name')
+            folder_id = get_client_folder_id(dir_name)
+            if is_agreement:
+                new_folder = create_folder(folder_id, 'agreements')
+            else:
+                a = mark_estimate(estimate_id, 'sent')
+                a = mark_estimate(estimate_id, 'accepted')
+                new_folder = create_folder(folder_id, 'estimates')
+            response.append(upload_pdf_box(request_id, new_folder, filename))
+        return Response(response)
 
 class GetTemplateStatus(APIView):
     """
@@ -678,33 +712,6 @@ class GetTaxView(APIView):
         Get tax.
         """
         return Response(get_tax_rates())
-
-class EstimateSignCompleteView(APIView):
-    """
-    View class for sign completed.
-    """
-    permission_classess = (IsAuthenticated, )
-    
-    def post(self, request):
-        """
-        Post data from zoho sign on sign.
-        """
-        request_id = request.data.get('request_id')
-        business_dba = request.data.get('business_dba')
-        document_number = request.data.get('document_number')
-        dir_name = f'{business_dba}_{document_number}'
-        is_agreement = request.data.get('is_agreement')
-        data = get_document(request_id)['requests']
-        response = list()
-        for document in data.get('document_ids'):
-            filename = document.get('document_name')
-            folder_id = get_client_folder_id(dir_name)
-            if is_agreement:
-                new_folder = create_folder(folder_id, 'agreements')
-            else:
-                new_folder = create_folder(folder_id, 'estimates')
-            response.append(upload_pdf_box(request_id, new_folder, filename))
-        return Response(response)
         
 class ClientCodeView(APIView):
     """
