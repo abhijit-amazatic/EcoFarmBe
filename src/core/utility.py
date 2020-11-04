@@ -4,6 +4,7 @@ Generic functions needed.
 
 import hashlib
 import base64
+import re
 from django.conf import settings
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -15,6 +16,7 @@ from user.models import *
 from core.celery import app
 from integration.crm import (get_records_from_crm,)
 from brand.models import *
+
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -320,13 +322,14 @@ def get_from_crm_insert_to_vendor_or_account(user_id):
     async task for existing user.
     """
     instance = User.objects.filter(id=user_id)
+    parsed_names = [ re.match(r"^(.*) -\d*$",i).group(1) for i in instance[0].legal_business_name]        
     if instance:
-        if instance[0].legal_business_name:
-            for business in instance[0].legal_business_name:
+        if parsed_names:
+            for business in parsed_names:
                 response_data = get_records_from_crm(business)
                 if not response_data.get('error'):
                     insert_data_from_crm(instance[0],response_data)
-
+                    
 
     
 
