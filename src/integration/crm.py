@@ -805,15 +805,12 @@ def get_accounts_from_crm(legal_business_name):
             response = dict()
             response['licenses'] = li
             for k,v in crm_dict.items():
-                r = dict()
-                for key,value in v.items():
-                    if value.endswith('_parse'):
-                        value = value.split('_parse')[0]
-                        value = parse_fields('Accounts', key, value, account, crm_obj)
-                        r[key] = value
-                    else:
-                        r[key] = account.get(value)
-                response[k] = r
+                if v.endswith('_parse'):
+                    value = v.split('_parse')[0]
+                    value = parse_fields('Accounts', k, value, account, crm_obj)
+                    response[k] = value
+                else:
+                    response[k] = account.get(v)
             return response
     return {}
 

@@ -726,7 +726,7 @@ class ClientCodeView(APIView):
         """
         if request.query_params.get('legal_business_name'):
             account_data = get_accounts_from_crm(request.query_params.get('legal_business_name'))
-            return Response({"client_code":account_data.get('basic_profile',{}).get('client_code')})
+            return Response({"client_code":account_data.get('client_code')})
         return Response({'error': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetDocumentStatus(APIView):
