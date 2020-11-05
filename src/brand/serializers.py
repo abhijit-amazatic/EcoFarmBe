@@ -7,6 +7,7 @@ from django.conf import settings
 from tempfile import TemporaryFile
 
 from rest_framework import serializers
+from core.settings import (AWS_BUCKET, )
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile,
                      CultivationOverview, ProgramOverview, FinancialOverview, CropOverview, ProfileReport)
 from user.models import User
@@ -95,11 +96,10 @@ class LicenseSerializer(serializers.ModelSerializer):
         try:
             license = Documents.objects.filter(object_id=obj.id, doc_type='license').first()
             path = license.path
-            bucket = path.split('/')[0]
             key = '/'.join(path.split('/')[1:])
-            url = create_presigned_url(bucket, key)
+            url = create_presigned_url(AWS_BUCKET, key)
             if url.get('response'):
-                return url
+                return url.get('response')
             return None
         except Exception:
             return None
@@ -111,11 +111,10 @@ class LicenseSerializer(serializers.ModelSerializer):
         try:
             seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').first()
             path = seller.path
-            bucket = path.split('/')[0]
             key = '/'.join(path.split('/')[1:])
-            url = create_presigned_url(bucket, key)['response']
+            url = create_presigned_url(AWS_BUCKET, key)['response']
             if url.get('response'):
-                return url
+                return url.get('response')
             return None
         except Exception:
             return None

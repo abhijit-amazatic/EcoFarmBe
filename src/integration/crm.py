@@ -1,5 +1,7 @@
 import ast
 import json
+from io import BytesIO
+import hashlib
 from datetime import (datetime, timedelta, )
 from urllib.parse import (unquote, )
 from pyzoho import CRM
@@ -453,13 +455,21 @@ def upload_file_s3_to_box(aws_bucket, aws_key):
     """
     Upload file from s3 to box.
     """
-    from io import BytesIO
     aws_client = get_boto_client('s3')
     file_obj = aws_client.get_object(Bucket=aws_bucket, Key=aws_key)
+    md5sum = aws_client.head_object(Bucket=aws_bucket,Key=aws_key)['ETag'][1:-1]
     if file_obj.get('Body'):
        data = file_obj['Body'].read()
+       aws_md5 = hashlib.md5(data).hexdigest()
+       aws_sha1 = hashlib.sha1(data).hexdigest()
        data = BytesIO(data)
        box_file_obj = upload_file_stream(TEMP_LICENSE_FOLDER, data, aws_key.split('/')[-1])
+       if isinstance(box_file_obj, str):
+           return box_file_obj
+       if (md5sum == aws_md5) and (box_file_obj.sha1 == aws_sha1):
+           aws_client.delete_object(Bucket=aws_bucket, Key=aws_key)
+       else:
+           print('Checksum didnot match.', aws_bucket, aws_key)
        return box_file_obj
     return None
 

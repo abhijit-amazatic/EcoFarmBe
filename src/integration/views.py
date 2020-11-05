@@ -408,7 +408,7 @@ class EstimateSignCompleteView(APIView):
                 a = mark_estimate(estimate_id, 'sent')
                 a = mark_estimate(estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
-            response.append(upload_pdf_box(request_id, new_folder, filename))
+            response.append(upload_pdf_box(request_id, new_folder, filename, is_agreement))
         return Response(response)
 
 class GetTemplateStatus(APIView):
