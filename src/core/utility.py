@@ -239,8 +239,8 @@ def insert_data_from_crm(user,data):
                                                      uploaded_w9_to=data.get(license_data).get('license').get('uploaded_w9_to',''),                               
                                                      uploaded_license_to=data.get(license_data).get('license').get('uploaded_license_to',''),
                                                      is_seller=data.get(license_data).get('is_seller'),
-                                                     is_buyer=data.get(license_data).get('is_buyer'),
-                                                     profile_category=data.get(license_data).get('vendor_type')[0] if len(data.get(license_data).get('vendor_type')) else None)
+                                                     is_buyer=data.get(license_data).get('is_buyer'))
+                                                     #profile_category=data.get(license_data).get('vendor_type')[0] if len(data.get(license_data).get('vendor_type')) else None)
                 
             with transaction.atomic():
                 #STEP2:create License profile
