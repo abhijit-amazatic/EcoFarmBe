@@ -516,12 +516,12 @@ def get_vendors_from_licenses(field, licenses):
         return vendor_lookup.get('id')
 
 @app.task(queue="general")
-def get_records_from_crm(legal_business_name):
+def get_records_from_crm(license_number):
     """
-    Get records from Zoho CRM using legal business name.
+    Get records from Zoho CRM using license number.
     """
     final_response = dict()
-    licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
+    licenses = search_query('Licenses', license_number, 'Name')
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         for license_dict in licenses.get('response'):
             license_number = license_dict['Name']
