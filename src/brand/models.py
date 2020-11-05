@@ -15,7 +15,7 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     """
     Stores Brand's details.
     """
-    brand_name = models.CharField(_('Brand Name'), blank=True, null=True, max_length=255)
+    brand_name = models.CharField(_('Brand Name'),max_length=255,unique=True)
     parent_brand = models.ForeignKey('self', blank=True, null=True, default=None, on_delete=models.CASCADE)
     ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
                                    related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)
