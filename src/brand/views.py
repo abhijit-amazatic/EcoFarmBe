@@ -35,9 +35,8 @@ def get_license_numbers(legal_business_names):
     return license numbers based on legal business names
     """
     license_nos = []
-    parsed_names = [ re.match(r"^(.*) -\d*$",i).group(1) for i in legal_business_names]
-    if parsed_names:
-        for business in parsed_names:
+    if legal_business_names:
+        for business in legal_business_names:
             response = get_licenses(business)
             license_nos.extend([i.get('Name') for i in response])
         return license_nos
@@ -170,7 +169,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
                                                           serializer.validated_data[0].get('license_number'),
                                                           instance[0].id)
             except Exception as e:
-                print('Exception while creating& pulling existing user license')
+                print('Exception while creating& pulling existing user license',e)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
