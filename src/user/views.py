@@ -115,7 +115,8 @@ class UserViewSet(ModelViewSet):
                 if not instance.existing_member:
                     pass
                 else:
-                    get_from_crm_insert_to_vendor_or_account.delay(instance.id)
+                    pass
+                    #get_from_crm_insert_to_vendor_or_account.delay(instance.id)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", instance.email)
                 notify_admins(instance.email)

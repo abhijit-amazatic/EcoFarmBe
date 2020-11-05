@@ -340,6 +340,16 @@ def get_from_crm_insert_to_vendor_or_account(user_id):
                     insert_data_from_crm(instance[0],response_data)
                     
 
+@app.task(queue="general")
+def get_license_from_crm_insert_to_db(user_id,license_number):
+    """
+    async task for existing user.Insert/create license based on license number.
+    """
+    instance = User.objects.filter(id=user_id)
+    if instance:
+        response_data = get_records_from_crm(license_number=license_number)
+        if not response_data.get('error'):
+            insert_data_from_crm(instance[0],response_data)                    
     
 
 
