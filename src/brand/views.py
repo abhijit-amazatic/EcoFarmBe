@@ -197,6 +197,15 @@ class LicenseViewSet(viewsets.ModelViewSet):
             ser.save(license=license)
             return Response(ser.data)
 
+    @action(detail=True, url_path='existing-user-data-status', methods=['get'])
+    def existing_user_data_status(self, request, pk):
+        """
+        existing user data status
+        """
+        license_obj = self.get_object()
+        return Response({"is_data_fetching_complete":license_obj.is_data_fetching_complete})
+
+    
     @action(detail=True, url_path=profile_contact_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def profile_contact(self, request, pk, profile_contact_id=None):
         """
