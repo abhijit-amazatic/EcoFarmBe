@@ -88,6 +88,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     documents = GenericRelation(Documents)
+    is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
     
     def __str__(self):
         return self.legal_business_name

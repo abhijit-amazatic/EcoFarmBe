@@ -88,7 +88,15 @@ class LicenseSerializer(serializers.ModelSerializer):
     """
     license_url = serializers.SerializerMethodField()
     seller_permit_url = serializers.SerializerMethodField()
-    
+    is_existing_user = serializers.SerializerMethodField()
+
+
+    def get_is_existing_user(self, obj):
+        """
+        return if user is existing user.
+        """
+        return obj.created_by.existing_member
+        
     def get_license_url(self, obj):
         """
         Return s3 license url.

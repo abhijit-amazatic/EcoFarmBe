@@ -211,7 +211,7 @@ def get_address(company,street,street_2,city,zip_code,state,country):
 
 
 
-def insert_data_from_crm(user,data):
+def insert_data_from_crm(user,data,license_id):
     """
     Insert available data from crm to database.
     """
@@ -222,30 +222,31 @@ def insert_data_from_crm(user,data):
             with transaction.atomic():
                 #STEP1:insert/create license
                 print('1.Inserting license')
-                license_obj = License.objects.create(created_by=user,
-                                                     license_type=data.get(license_data).get('license').get('license_type',''),
-                                                     owner_or_manager='Owner' if data.get(license_data).get('license').get('Owner') else 'Manager',
-                                                     legal_business_name=data.get(license_data).get('license').get('legal_business_name',''),
-                                                     license_number=data.get(license_data).get('license').get('license_number',''),
-                                                     expiration_date=data.get(license_data).get('license').get('expiration_date',''),
-                                                     issue_date=data.get(license_data).get('license').get('issue_date',''),
-                                                     premises_address=data.get(license_data).get('license').get('premises_address',''),
-                                                     premises_county=data.get(license_data).get('license').get('premises_county',''),
-                                                     premises_city = data.get(license_data).get('license').get('premises_city',''),
-                                                     zip_code=data.get(license_data).get('license').get('zip_code',''),
-                                                     premises_apn=data.get(license_data).get('license').get('premises_apn',''),
-                                                     premises_state=data.get(license_data).get('license').get('premises_state',''),
-                                                     uploaded_sellers_permit_to=data.get(license_data).get('license').get('uploaded_sellers_permit_to',''),
-                                                     uploaded_w9_to=data.get(license_data).get('license').get('uploaded_w9_to',''),                               
-                                                     uploaded_license_to=data.get(license_data).get('license').get('uploaded_license_to',''),
-                                                     is_seller=data.get(license_data).get('is_seller'),
-                                                     is_buyer=data.get(license_data).get('is_buyer'))
+                license_obj = license_id
+                # license_obj = License.objects.create(created_by=user,
+                #                                      license_type=data.get(license_data).get('license').get('license_type',''),
+                #                                      owner_or_manager='Owner' if data.get(license_data).get('license').get('Owner') else 'Manager',
+                #                                      legal_business_name=data.get(license_data).get('license').get('legal_business_name',''),
+                #                                      license_number=data.get(license_data).get('license').get('license_number',''),
+                #                                      expiration_date=data.get(license_data).get('license').get('expiration_date',''),
+                #                                      issue_date=data.get(license_data).get('license').get('issue_date',''),
+                #                                      premises_address=data.get(license_data).get('license').get('premises_address',''),
+                #                                      premises_county=data.get(license_data).get('license').get('premises_county',''),
+                #                                      premises_city = data.get(license_data).get('license').get('premises_city',''),
+                #                                      zip_code=data.get(license_data).get('license').get('zip_code',''),
+                #                                      premises_apn=data.get(license_data).get('license').get('premises_apn',''),
+                #                                      premises_state=data.get(license_data).get('license').get('premises_state',''),
+                #                                      uploaded_sellers_permit_to=data.get(license_data).get('license').get('uploaded_sellers_permit_to',''),
+                #                                      uploaded_w9_to=data.get(license_data).get('license').get('uploaded_w9_to',''),                               
+                #                                      uploaded_license_to=data.get(license_data).get('license').get('uploaded_license_to',''),
+                #                                      is_seller=data.get(license_data).get('is_seller'),
+                #                                      is_buyer=data.get(license_data).get('is_buyer'))
                                                      #profile_category=data.get(license_data).get('vendor_type')[0] if len(data.get(license_data).get('vendor_type')) else None)
                 
             with transaction.atomic():
                 #STEP2:create License profile
                 print('2.Inserting License profile')
-                license_profile_obj = LicenseProfile.objects.create(license=license_obj,
+                license_profile_obj = LicenseProfile.objects.create(license_id=license_obj,
                                                                     name=data.get(license_data).get('license_profile').get('name',''),
                                                                     appellation=data.get(license_data).get('license_profile').get('appellation',''),
                                                                     county=data.get(license_data).get('license_profile').get('county',''),
@@ -287,12 +288,12 @@ def insert_data_from_crm(user,data):
                                                                 data.get(license_data).get('license_profile').get('billing_address_country','')),
                                   "employees":get_employee(data)}
                 
-                pc_obj = ProfileContact.objects.create(license=license_obj,is_draft=False,profile_contact_details=formatted_data)
+                pc_obj = ProfileContact.objects.create(license_id=license_obj,is_draft=False,profile_contact_details=formatted_data)
                 
             with transaction.atomic():
                 #STEP4:CultivationOverview
                 print('4.Inserting Cultivation overview')
-                cultivation_obj = CultivationOverview.objects.create(license=license_obj,
+                cultivation_obj = CultivationOverview.objects.create(license_id=license_obj,
                                                                      autoflower=data.get(license_data).get('license_profile').get('Cultivation_Style_Autoflower',False),
                                                                      lighting_type=data.get(license_data).get('license_profile').get('lighting_type',[]),
                                                                      type_of_nutrients=data.get(license_data).get('license_profile').get('type_of_nutrients',[]),
@@ -303,7 +304,7 @@ def insert_data_from_crm(user,data):
             with transaction.atomic():
                 #STEP5:FinancialOverview
                 print('5.Inserting Financial overview')
-                FinancialOverview.objects.create(license=license_obj,
+                FinancialOverview.objects.create(license_id=license_obj,
                                                  know_annual_budget=data.get(license_data).get('license_profile').get('know_annual_budget',''),
                                                  annual_budget=data.get(license_data).get('license_profile').get('annual_budget',''),
                                                  overview=[{'cost_per_lbs':data.get(license_data).get('license').get('cost_per_lb',''),
@@ -320,9 +321,12 @@ def insert_data_from_crm(user,data):
             with transaction.atomic():
                 #STEP6: CropOverview
                 print('6.Inserting Crop overview')
-                CropOverview.objects.create(license=license_obj,
+                CropOverview.objects.create(license_id=license_obj,
                                             process_on_site=data.get(license_data).get('license').get('Can_you_Process_Onsite',''),
                                             overview=get_crop_overview(license_data,data))
+            print('Updating license is_data_fetching_complete flag')
+            License.objects.filter(id=license_obj).update(is_data_fetching_complete=True)
+        return {"success":"Data successfully fetched to DB"}     
     
     
 @app.task(queue="general")
@@ -341,7 +345,7 @@ def get_from_crm_insert_to_vendor_or_account(user_id):
                     
 
 @app.task(queue="general")
-def get_license_from_crm_insert_to_db(user_id,license_number):
+def get_license_from_crm_insert_to_db(user_id,license_number,license_id):
     """
     async task for existing user.Insert/create license based on license number.
     """
@@ -349,7 +353,7 @@ def get_license_from_crm_insert_to_db(user_id,license_number):
     if instance:
         response_data = get_records_from_crm(license_number=license_number)
         if not response_data.get('error'):
-            insert_data_from_crm(instance[0],response_data)                    
+            insert_data_from_crm(instance[0],response_data,license_id)                    
     
 
 

@@ -4,7 +4,7 @@ This module defines API views.
 """
 
 import json
-
+import re
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.db import transaction
@@ -25,7 +25,23 @@ from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile
                      ProgramOverview, FinancialOverview, CropOverview, ProfileCategory, ProfileReport,)
 from .serializers import (BrandSerializer, BrandCreateSerializer, LicenseSerializer, ProfileContactSerializer, CultivationOverviewSerializer,
                           LicenseProfileSerializer, FinancialOverviewSerializer, CropOverviewSerializer, ProgramOverviewSerializer, ProfileReportSerializer, FileUploadSerializer)
+from integration.crm import (get_licenses,)
+from core.utility import (get_license_from_crm_insert_to_db,)
 
+
+
+def get_license_numbers(legal_business_names):
+    """
+    return license numbers based on legal business names
+    """
+    license_nos = []
+    parsed_names = [ re.match(r"^(.*) -\d*$",i).group(1) for i in legal_business_names]
+    if parsed_names:
+        for business in parsed_names:
+            response = get_licenses(business)
+            license_nos.extend([i.get('Name') for i in response])
+        return license_nos
+    
 
 class CustomPagination(PageNumberPagination):
     page_size = 50
@@ -145,7 +161,16 @@ class LicenseViewSet(viewsets.ModelViewSet):
         serializer = LicenseSerializer(data=request.data, context={
                                        'request': request}, many=True)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            instance = serializer.save()
+            try:                
+                if serializer.validated_data[0].get('created_by').existing_member:
+                    existing_user_license_nos = get_license_numbers(serializer.validated_data[0].get('created_by').legal_business_name)
+                    if serializer.validated_data[0].get('license_number') in existing_user_license_nos:
+                        get_license_from_crm_insert_to_db(serializer.validated_data[0].get('created_by').id,
+                                                          serializer.validated_data[0].get('license_number'),
+                                                          instance[0].id)
+            except Exception as e:
+                print('Exception while creating& pulling existing user license')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -344,3 +369,23 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class SendVerificationView(APIView):
+#     """
+#     Send Verification link
+#     """
+#     serializer_class = Serializer
+#     permission_classes = (IsAuthenticatedBrandPermission,)
+    
+#     def post(self, request):
+#         """
+#         Post method for verification view link.
+#         """
+#         serializer = SendVerificationSerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             send_verification_link(request.data.get('email'))
+#             response = Response({"Verification link sent!"}, status=200)
+#         else:
+#             response = Response("false", status=400)
+#        return response    
