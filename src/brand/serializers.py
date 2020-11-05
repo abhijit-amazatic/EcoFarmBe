@@ -112,7 +112,7 @@ class LicenseSerializer(serializers.ModelSerializer):
             seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').first()
             path = seller.path
             key = '/'.join(path.split('/')[1:])
-            url = create_presigned_url(AWS_BUCKET, key)['response']
+            url = create_presigned_url(AWS_BUCKET, key)
             if url.get('response'):
                 return url.get('response')
             return None
