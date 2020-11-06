@@ -27,7 +27,8 @@ from user.views import (UserViewSet, MeView, LogInView,
                         SendVerificationView,
                         GetPhoneNumberVerificationCodeSMSView,
                         GetPhoneNumberVerificationCodeCallView,
-                        PhoneNumberVerificationView,)
+                        PhoneNumberVerificationView,
+                        TermsAndConditionAcceptanceView,)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView, SearchCultivars,
@@ -170,7 +171,8 @@ urlpatterns = [
     path(r'document-url/', DocumentPreSignedView.as_view(), name='documents-url'),
     path(r'document-status/<str:id>/', DocumentStatusView.as_view(), name='extra-documents'),
     path(r'document/', DocumentView.as_view(), name='extra-documents'),
-    path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents')
+    path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
+    path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
 ] + router.urls
 
 

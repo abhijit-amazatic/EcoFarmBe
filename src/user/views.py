@@ -14,7 +14,7 @@ from knox.models import AuthToken
 from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
-from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice,)
+from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance)
 from .serializers import (
     UserSerializer,
     CreateUserSerializer,
@@ -27,6 +27,7 @@ from .serializers import (
     SendVerificationSerializer,
     PhoneNumberSerializer,
     PhoneNumberVerificationSerializer,
+    TermsAndConditionAcceptanceSerializer,
 )
 from integration.crm import (search_query, create_records,)
 from integration.box import(get_box_tokens, )
@@ -391,3 +392,35 @@ class PhoneNumberVerificationView(GenericAPIView):
                 return Response({"detail": "Verification code dit not match."}, status=400)
         except User.DoesNotExist:
             return Response({"detail": "Phone number in not registered."}, status=404)
+
+
+class TermsAndConditionAcceptanceView(APIView):
+    """
+    Terms and condition acceptance view.
+    """
+    serializer_class = TermsAndConditionAcceptanceSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Post method for create terms and condition acceptance entry
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = TermsAndConditionAcceptance.objects.create(
+            user=self.request.user,
+            profile_type=serializer.validated_data['profile_type'],
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT'),
+            hostname=request.META.get('REMOTE_HOST'),
+        )
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data, status=201)
+
+    def get(self, request):
+        """
+        Get method list terms and condition acceptances
+        """
+        qs = TermsAndConditionAcceptance.objects.filter(user=self.request.user)
+        serializer = self.serializer_class(qs, many=True)
+        return Response(serializer.data, status=201)

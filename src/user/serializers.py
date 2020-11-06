@@ -308,3 +308,15 @@ class PhoneNumberVerificationSerializer(PhoneNumberSerializer):  # pylint: disab
     Serializer for requesting extracting & decoing code.
     """
     code = serializers.CharField(min_length=6, max_length=6)
+
+
+class TermsAndConditionAcceptanceSerializer(serializers.Serializer):  # pylint: disable=W0223
+    """
+    Serializer for terms and condition acceptance,
+    """
+    # user_id = serializers.IntegerField(read_only=True)
+    profile_type = serializers.CharField(max_length=255)
+    ip_address = serializers.IPAddressField(read_only=True)
+    user_agent = serializers.CharField(read_only=True)
+    hostname = serializers.CharField(read_only=True)
+    created_on = serializers.CharField(read_only=True)

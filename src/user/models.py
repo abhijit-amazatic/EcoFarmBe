@@ -13,7 +13,7 @@ from django.contrib.postgres.fields import (ArrayField,)
 from phonenumber_field.modelfields import PhoneNumberField
 
 from core.validators import full_domain_validator
-from core.mixins.models import (StatusFlagMixin, )
+from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin)
 from integration.apps.twilio import (send_sms, verification_call)
 from two_factor.abstract_models import AbstractPhoneDevice
 from two_factor.utils import get_two_factor_devices
@@ -195,3 +195,27 @@ def post_save_user(sender, instance, created, **kwargs):
         instance.primary_phone_totp_device
     except sender.primary_phone_totp_device.RelatedObjectDoesNotExist:
         PrimaryPhoneTOTPDevice.objects.create(user=instance)
+
+
+class TermsAndConditionAcceptance(TimeStampFlagModelMixin, models.Model):
+    """
+     Class implementing a terms and condition acceptance.
+    """
+    user = models.ForeignKey(
+        User,
+        verbose_name=_('User'),
+        related_name='terms_and_condition_acceptances',
+        on_delete=models.CASCADE,
+    )
+    profile_type = models.CharField(verbose_name=_("IP Address"), max_length=255)
+    ip_address = models.GenericIPAddressField(verbose_name=_("IP Address"))
+    user_agent = models.TextField(_("user_agent"),max_length=1000,)
+    hostname = models.CharField(verbose_name=_("Hostname"), max_length=255)
+
+
+    def __str__(self):
+        return f'{self.profile_type} | {self.user}'
+
+    class Meta:
+        verbose_name = _('Terms And Condition Acceptance')
+        verbose_name_plural = _('Terms And Condition Acceptances')
