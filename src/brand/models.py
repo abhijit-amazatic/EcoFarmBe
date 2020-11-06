@@ -34,6 +34,7 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.brand_name
@@ -87,6 +88,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
     documents = GenericRelation(Documents)
     is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
     

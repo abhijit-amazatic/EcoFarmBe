@@ -72,6 +72,7 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
             records = Brand.objects.filter(is_updated_in_crm=False)
     for record in records:
         request = dict()
+        record_id = record.id
         if not is_single_user:
             request.update(record.__dict__)
             licenses = record.license_set.values()
@@ -85,7 +86,16 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
                 request.update(license_db.profile_contact.profile_contact_details)
             except Exception:
                 pass
+            if is_update:
+                request.update({'id': request['zoho_books_id']})
             books_dict = get_format_dict('Books_Customer')
+            try:
+                if not is_update:
+                    del books_dict['contact_id']
+                else:
+                    del books_dict['contact_persons']
+            except KeyError:
+                pass
             record_dict = dict()
             for k,v in books_dict.items():
                 if v.endswith('_parse'):
@@ -99,6 +109,16 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
                 response = update_contact(record_dict, params=params)
             else:
                 response = create_contact(record_dict, params=params)
+            if response.get('contact_id'):
+                try:
+                    if is_single_user:
+                        record_obj = License.objects.get(id=record_id)
+                    else:
+                        record_obj = Brand.objects.get(id=record_id)
+                    record_obj.zoho_books_id = record['contact_id']
+                    record_obj.save()
+                except KeyError as exc:
+                    print(exc)
             response_list.append(response)
     return response_list
 
@@ -165,7 +185,7 @@ def update_contact(data, params=None):
     """
     obj = get_books_obj()
     contact_obj = obj.Contacts()
-    return contact_obj.updatecontact(data, parameters=params)
+    return contact_obj.update_contact(data.get('contact_id'), data, parameters=params)
 
 def get_contact(contact_id, params=None):
     """

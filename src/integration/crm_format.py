@@ -1062,7 +1062,7 @@ CRM_FORMAT  = {
         },
     "Books_Customer":
         {
-            # 'contact_id': 'contact_id',
+            'contact_id': 'contact_id',
             'contact_name': 'name',
             'company_name': 'brand_name',
             'first_name': 'first_name',
