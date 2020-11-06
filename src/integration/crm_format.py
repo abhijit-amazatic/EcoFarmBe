@@ -463,7 +463,7 @@ CRM_FORMAT  = {
         'Title': 'Title',
         'company_phone': 'Phone',
         'company_email': 'Email',
-        'employees': 'Owner1',
+        'employees': 'contact_from_crm_parse',
         'no_of_employees': 'Number_of_Employees',
         'Gate_Code': 'Gate_Code',
         'Vehicle_Make_Model': 'Vehicle_Make_Model',

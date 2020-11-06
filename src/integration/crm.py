@@ -128,6 +128,12 @@ def parse_fields(module, key, value, obj, crm_obj):
         if user['status_code'] in (201, 202):
             return user['response']['data'][0]['details']['id']
 
+    def get_employees(id):
+        data = get_record('Contacts', id)
+        if data.get('status_code') == 200:
+            return data.get('response').get(id)
+        return {}
+
     cultivator_starts_with = (
         "co.",
         "fo.",
@@ -190,6 +196,20 @@ def parse_fields(module, key, value, obj, crm_obj):
                 for j in i['cultivars']:
                     cultivars.extend(j['cultivar_names'])
         return list(set(cultivars))
+    if value.startswith('contact_from_crm'):
+        result = list()
+        contact_dict = {
+            'Owner1': 'License Owner',
+            'Contact_1': 'Farm Manager',
+            'Contact_2': 'Logistics',
+            'Contact3': 'Sales/Inventory'}
+        for i in contact_dict.keys():
+            r = obj.get(i)
+            if r:
+                data = get_employees(r['id'])
+                data['Role'] = contact_dict[i]
+                result.append(data)
+        return result
     
 def get_record(module, record_id, full=False):
     """
