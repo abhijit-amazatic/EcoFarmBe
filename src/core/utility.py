@@ -165,19 +165,30 @@ def send_verification_link(email):
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
 
 
-def get_employee(data):
+def get_employee(data,license_data):
     """
     structure employee according to db format & insert empty data also.(currently insefrted empty contacts)
     """
-    final_data = []
     final_contacts = ["License Owner","Farm Manager","Logistics","Sales/Inventory","Billing"]
-
-    for i in final_contacts:
-        final_data.append({"employee_name":"",
-                           "employee_email":"",
-                           "phone":"",
-                           "roles":[i]})
-    return final_data 
+    tmp_data = []
+    employees_list = data.get(license_data).get('license_profile').get('employees')
+    if employees_list:
+        for employee in employees_list:
+            tmp_data.append({"employee_name":employee.get('Full_Name'),
+                             "employee_email":employee.get('Email'),
+                             "phone":"",
+                             "roles":[employee.get('Role')]})
+            
+    existing_roles = [i.get('roles')[0] for i in tmp_data]
+    empty_inserts = list(set(final_contacts)-set(existing_roles))
+    if empty_inserts:
+        for i in empty_inserts:
+            tmp_data.append({"employee_name":"",
+                             "employee_email":"",
+                             "phone":"",
+                             "roles":[i]})
+            
+    return tmp_data
 
 def get_crop_overview(license_data,data):
     """
@@ -286,7 +297,7 @@ def insert_data_from_crm(user,data,license_id):
                                                                 data.get(license_data).get('license_profile').get('billing_address_zip_code',''),
                                                                 data.get(license_data).get('license_profile').get('billing_address_state',''),
                                                                 data.get(license_data).get('license_profile').get('billing_address_country','')),
-                                  "employees":get_employee(data)}
+                                  "employees":get_employee(data,license_data)}
                 
                 pc_obj = ProfileContact.objects.create(license_id=license_obj,is_draft=False,profile_contact_details=formatted_data)
                 
