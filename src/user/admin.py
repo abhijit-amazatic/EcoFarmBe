@@ -6,7 +6,7 @@ from django.contrib import admin
 from core.mailer import mail, mail_send
 from django.conf import settings
 from datetime import datetime
-from .models import (User, MemberCategory,)
+from .models import (User, MemberCategory, TermsAndConditionAcceptance)
 from core.utility import send_async_user_approval_mail
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
@@ -114,10 +114,17 @@ class MemberCategoryAdmin(admin.ModelAdmin):
     #search_fields = ('',)
 
 
+class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
+    """
+    TermsAndConditionAcceptanceAdmin
+    """
+    # list_display = ('created_on','updated_on',)
+    readonly_fields = ('ip_address', 'user_agent', 'hostname', 'created_on','updated_on',)
     
 #admin.site.unregister(User)
 admin.site.register(User, MyUserAdmin)
 admin.site.register(MemberCategory, MemberCategoryAdmin)
+admin.site.register(TermsAndConditionAcceptance, TermsAndConditionAcceptanceAdmin)
     
         
 # class UserForm(forms.ModelForm):

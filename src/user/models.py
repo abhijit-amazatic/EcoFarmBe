@@ -207,9 +207,9 @@ class TermsAndConditionAcceptance(TimeStampFlagModelMixin, models.Model):
         related_name='terms_and_condition_acceptances',
         on_delete=models.CASCADE,
     )
-    profile_type = models.CharField(verbose_name=_("IP Address"), max_length=255)
+    profile_type = models.CharField(verbose_name=_("Profile Type"), max_length=255)
     ip_address = models.GenericIPAddressField(verbose_name=_("IP Address"))
-    user_agent = models.TextField(_("user_agent"),max_length=1000,)
+    user_agent = models.TextField(_("User Agent"),max_length=1000,)
     hostname = models.CharField(verbose_name=_("Hostname"), max_length=255)
 
 
