@@ -326,13 +326,13 @@ class DocumentView(APIView):
         id = kwargs.get('id', None)
         sku = request.query_params.get('sku', None)
         if id:
-            data = Documents.objects.filter(id=id, status='AVAILABLE').values()
+            data = Documents.objects.filter(id=id, status='AVAILABLE').order_by('file_type').values()
             return Response(
                 data,
                 status=status.HTTP_200_OK
             )
         elif sku:
-            data = Documents.objects.filter(sku=sku, status='AVAILABLE').values()
+            data = Documents.objects.filter(sku=sku, status='AVAILABLE').order_by('file_type').values()
             return Response(
                 data,
                 status=status.HTTP_200_OK
