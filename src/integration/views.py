@@ -175,8 +175,12 @@ class CRMVendorView(APIView):
         """
         if request.query_params.get('legal_business_name'):
             return Response(get_records_from_crm(request.query_params.get('legal_business_name')))
-        return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
+        elif request.query_params.get('vendor_name'):
+            record_name = request.query_params.get('vendor_name')
+            response = search_query('Vendors', record_name, 'Vendor_Name', True)
+            return Response(response)
+        else:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class CRMVendorTierView(APIView):
     """
@@ -196,7 +200,6 @@ class CRMVendorTierView(APIView):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
             
-
 class InventoryView(APIView):
     """
     View class for Zoho inventory. Fetch data from Zoho Inventory.
