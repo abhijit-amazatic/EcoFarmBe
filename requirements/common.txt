@@ -32,4 +32,5 @@ phonenumbers==8.12.9
 authy==2.2.6
 qrcode==6.1
 pyjwt>=1.4.0
+django-ckeditor==6.0.0
 -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho

@@ -12,7 +12,7 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from phonenumber_field.serializerfields import PhoneNumberField
-from .models import User
+from .models import User, TermsAndCondition
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
 from brand.models import (License,)
@@ -316,7 +316,19 @@ class TermsAndConditionAcceptanceSerializer(serializers.Serializer):  # pylint: 
     """
     # user_id = serializers.IntegerField(read_only=True)
     profile_type = serializers.CharField(max_length=255)
+    is_accepted = serializers.BooleanField()
     ip_address = serializers.IPAddressField(read_only=True)
     user_agent = serializers.CharField(read_only=True)
     hostname = serializers.CharField(read_only=True)
     created_on = serializers.CharField(read_only=True)
+
+    def validate_profile_type(self, value):
+        qs = TermsAndCondition.objects.filter(
+            profile_type=value,
+            publish_from__lte=timezone.now().date(),
+        )
+        if qs.exists():
+            setattr(self, 'tac_obj', qs.latest('publish_from'))
+        else:
+            raise serializers.ValidationError(f"Terms And Condition not found for profile type '{value}'")
+        return value

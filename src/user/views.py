@@ -14,7 +14,7 @@ from knox.models import AuthToken
 from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
-from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance)
+from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance, TermsAndCondition)
 from .serializers import (
     UserSerializer,
     CreateUserSerializer,
@@ -407,20 +407,35 @@ class TermsAndConditionAcceptanceView(APIView):
         """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = TermsAndConditionAcceptance.objects.create(
+        TermsAndConditionAcceptance.objects.create(
             user=self.request.user,
-            profile_type=serializer.validated_data['profile_type'],
+            terms_and_condition=getattr(serializer, 'tac_obj'),
+            is_accepted=serializer.validated_data['is_accepted'],
             ip_address=request.META.get('REMOTE_ADDR'),
             user_agent=request.META.get('HTTP_USER_AGENT'),
             hostname=request.META.get('REMOTE_HOST'),
         )
-        serializer = self.serializer_class(instance)
-        return Response(serializer.data, status=201)
+        return Response(status=201)
 
     def get(self, request):
         """
         Get method list terms and condition acceptances
         """
-        qs = TermsAndConditionAcceptance.objects.filter(user=self.request.user)
-        serializer = self.serializer_class(qs, many=True)
-        return Response(serializer.data, status=201)
+        profile_type = request.GET.get('profile_type')
+        if profile_type:
+            qs = TermsAndConditionAcceptance.objects.filter(
+                user=self.request.user,
+                terms_and_condition__profile_type=profile_type,
+            )
+            if qs.exists():
+                instance = qs.latest('created_on')
+                return Response({'is_accepted': instance.is_accepted}, status=200)
+            qs = TermsAndCondition.objects.filter(
+                profile_type=profile_type,
+                publish_from__lte=timezone.now().date(),
+            )
+            if qs.exists():
+                instance = qs.latest('publish_from')
+                return Response({'terms_and_condition': instance.terms_and_condition}, status=200)
+            return Response({'detail': f"Terms And Condition not found for profile type '{profile_type}'"}, status=400)
+        return Response({'detail': 'Quey parameter "profile_type" not found'}, status=400)

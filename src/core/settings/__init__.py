@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'django_filters',
+    'ckeditor',
     'user',
     'two_factor',
     'knox',

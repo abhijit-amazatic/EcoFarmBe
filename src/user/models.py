@@ -11,6 +11,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField,)
 
 from phonenumber_field.modelfields import PhoneNumberField
+from ckeditor.fields import RichTextField
+
 
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin)
@@ -168,6 +170,53 @@ class PrimaryPhoneTOTPDevice(AbstractPhoneDevice):
             setattr(self, 'save_user', False)
         return super().save(*args, **kwargs)
 
+
+
+class TermsAndCondition(TimeStampFlagModelMixin, models.Model):
+    """
+    Class implementing terms and condition.
+    """
+    profile_type = models.CharField(verbose_name=_("Profile Type"), max_length=255)
+    terms_and_condition = RichTextField(verbose_name=_("Terms And Condition"))
+    publish_from = models.DateField(verbose_name=_("Publish From"))
+
+    def __str__(self):
+        return f'{self.profile_type} | {self.publish_from}'
+
+    class Meta:
+        verbose_name = _('Terms And Condition')
+
+
+class TermsAndConditionAcceptance(TimeStampFlagModelMixin, models.Model):
+    """
+    Class implementing a terms and condition acceptance.
+    """
+    user = models.ForeignKey(
+        User,
+        verbose_name=_('User'),
+        related_name='terms_and_condition_acceptances',
+        on_delete=models.CASCADE,
+    )
+    terms_and_condition = models.ForeignKey(
+        TermsAndCondition,
+        verbose_name=_('Terms And Condition'),
+        related_name='terms_and_condition_acceptances',
+        on_delete=models.PROTECT,
+    )
+    is_accepted = models.BooleanField(verbose_name=_("Is Accepted"),)
+    ip_address = models.GenericIPAddressField(verbose_name=_("IP Address"))
+    user_agent = models.TextField(_("User Agent"),max_length=1000,)
+    hostname = models.CharField(verbose_name=_("Hostname"), max_length=255)
+
+
+    def __str__(self):
+        return f'{self.user} | {self.terms_and_condition}'
+
+    class Meta:
+        verbose_name = _('Terms And Condition Acceptance')
+        verbose_name_plural = _('Terms And Condition Acceptances')
+
+
 @receiver(models.signals.pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
     """
@@ -195,27 +244,3 @@ def post_save_user(sender, instance, created, **kwargs):
         instance.primary_phone_totp_device
     except sender.primary_phone_totp_device.RelatedObjectDoesNotExist:
         PrimaryPhoneTOTPDevice.objects.create(user=instance)
-
-
-class TermsAndConditionAcceptance(TimeStampFlagModelMixin, models.Model):
-    """
-     Class implementing a terms and condition acceptance.
-    """
-    user = models.ForeignKey(
-        User,
-        verbose_name=_('User'),
-        related_name='terms_and_condition_acceptances',
-        on_delete=models.CASCADE,
-    )
-    profile_type = models.CharField(verbose_name=_("Profile Type"), max_length=255)
-    ip_address = models.GenericIPAddressField(verbose_name=_("IP Address"))
-    user_agent = models.TextField(_("User Agent"),max_length=1000,)
-    hostname = models.CharField(verbose_name=_("Hostname"), max_length=255)
-
-
-    def __str__(self):
-        return f'{self.profile_type} | {self.user}'
-
-    class Meta:
-        verbose_name = _('Terms And Condition Acceptance')
-        verbose_name_plural = _('Terms And Condition Acceptances')
