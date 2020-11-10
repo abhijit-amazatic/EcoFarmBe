@@ -344,12 +344,21 @@ class TemplateSignView(APIView):
         EIN = request.data.get('EIN', None)
         SSN = request.data.get('SSN', None)
         business_structure = request.data.get('business_structure', None)
-        if template_id and licenses and recipient:
+        company = request.data.get('company', None)
+        full_name = request.data.get('full_name', None)
+        premise_address = request.data.get('premise_address', None)
+        email = request.data.get('email', None)
+        total_sqft_allocated = request.data.get('total_sqft_allocated', None)
+
+        if template_id and recipient:
             return Response(send_template(template_id,
                                           recipient,
                                           licenses,
                                           legal_business_names,
-                                          EIN, SSN, business_structure))
+                                          EIN, SSN, business_structure,
+                                          company, full_name, premise_address,
+                                          email, total_sqft_allocated
+                                          ))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class EstimateTaxView(APIView):

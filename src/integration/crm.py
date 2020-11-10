@@ -216,14 +216,16 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
             data = get_contact_from_crm(obj, vendor_id, is_seller=True)
         elif account_id:
             data = get_contact_from_crm(obj, account_id, is_buyer=True)
-        for i in data:
-            if vendor_id:
-                contact = get_employees(i['Contact']['id'])
-            elif account_id:
-                contact = get_employees(i['Contacts']['id'])
-            contact.update(i)
-            result.append(contact)
-        return result
+        if data:
+            for i in data:
+                if vendor_id:
+                    contact = get_employees(i['Contact']['id'])
+                elif account_id:
+                    contact = get_employees(i['Contacts']['id'])
+                contact.update(i)
+                result.append(contact)
+            return result
+        return []
     
 def get_record(module, record_id, full=False):
     """
