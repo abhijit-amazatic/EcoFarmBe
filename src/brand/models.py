@@ -122,8 +122,8 @@ class LicenseUser(TimeStampFlagModelMixin,models.Model):
                              related_name='profile_roles', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              related_name='user_roles', on_delete=models.CASCADE)
-    role = models.CharField(verbose_name=_('Role'),max_length=60, choices=ROLE_CHOICES)
-
+    role = ArrayField(models.CharField(verbose_name=_('Role'),max_length=60, choices=ROLE_CHOICES,help_text='choice options are 1.license_owner 2.farm_manager 3.logistics 4.sales_or_inventory 5.billing'))
+    
     class Meta:
         unique_together = (('license', 'user'), )
         verbose_name = _('License Profile User')

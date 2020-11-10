@@ -120,12 +120,15 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
                                                                 'existing_member':True})
             
             if not LicenseUser.objects.filter(user_id=obj.id,license_id=license_obj_id).exists():
-                extracted_role = role_map.get(employee['roles'][0])
-                LicenseUser(user_id=obj.id,license_id=license_obj_id,role=extracted_role).save()
-                notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
-                link = get_encrypted_data(obj.email,reason='verify')
-                mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
-                notify_profile_user(obj.email,license_obj[0].license_profile.name)
+                try:
+                    extracted_role = [role_map.get(i) for i in employee['roles']] #role_map.get(employee['roles'])
+                    LicenseUser(user_id=obj.id,license_id=license_obj_id,role=extracted_role).save()
+                    notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
+                    link = get_encrypted_data(obj.email,reason='verify')
+                    mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
+                    notify_profile_user(obj.email,license_obj[0].license_profile.name)
+                except Exception as e:
+                    print("Exception while adding license user",e)
                     
 
 
@@ -177,17 +180,15 @@ def get_employee(data,license_data):
             tmp_data.append({"employee_name":employee.get('Full_Name'),
                              "employee_email":employee.get('Email'),
                              "phone":"",
-                             "roles":[employee.get('Role')]})
-            
-    existing_roles = [i.get('roles')[0] for i in tmp_data]
-    empty_inserts = list(set(final_contacts)-set(existing_roles))
-    if empty_inserts:
-        for i in empty_inserts:
-            tmp_data.append({"employee_name":"",
-                             "employee_email":"",
-                             "phone":"",
-                             "roles":[i]})
-            
+                             "roles":employee.get('Contact_Company_Role',[])})
+    # existing_roles = [i.get('roles')[0] for i in tmp_data]
+    # empty_inserts = list(set(final_contacts)-set(existing_roles))
+    # if empty_inserts:
+    #     for i in empty_inserts:
+    #         tmp_data.append({"employee_name":"",
+    #                          "employee_email":"",
+    #                          "phone":"",
+    #                          "roles":[i]})
     return tmp_data
 
 def get_crop_overview(license_data,data):
