@@ -315,7 +315,7 @@ class TermsAndConditionAcceptanceSerializer(serializers.Serializer):  # pylint: 
     Serializer for terms and condition acceptance,
     """
     # user_id = serializers.IntegerField(read_only=True)
-    profile_type = serializers.CharField(max_length=255)
+    profile_type = serializers.ChoiceField( choices=TermsAndCondition.PROFILE_TYPE_CHOICES)
     is_accepted = serializers.BooleanField()
     ip_address = serializers.IPAddressField(read_only=True)
     user_agent = serializers.CharField(read_only=True)

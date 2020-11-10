@@ -176,7 +176,15 @@ class TermsAndCondition(TimeStampFlagModelMixin, models.Model):
     """
     Class implementing terms and condition.
     """
-    profile_type = models.CharField(verbose_name=_("Profile Type"), max_length=255)
+    PROFILE_TYPE_SELLER = 'seller'
+    PROFILE_TYPE_BUYER = 'buyer'
+    PROFILE_TYPE_OTHER = 'other'
+    PROFILE_TYPE_CHOICES = (
+        (PROFILE_TYPE_SELLER, _('Seller')),
+        (PROFILE_TYPE_BUYER, _('Buyer')),
+        (PROFILE_TYPE_OTHER, _('Other')),
+    )
+    profile_type = models.CharField(verbose_name=_("Profile Type"), max_length=255, choices=PROFILE_TYPE_CHOICES)
     terms_and_condition = RichTextField(verbose_name=_("Terms And Condition"))
     publish_from = models.DateField(verbose_name=_("Publish From"))
 

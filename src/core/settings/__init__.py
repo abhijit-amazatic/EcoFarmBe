@@ -19,6 +19,7 @@ try:
     from .local import *  # (DEBUG, SECRET_KEY, DATABASES, ALLOWED_HOSTS)
 except ImportError:
     from .production import *  # (DEBUG, SECRET_KEY, DATABASES, ALLOWED_HOSTS)
+from .ckeditor import *
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 

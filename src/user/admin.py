@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.utils import timezone
 import nested_admin
 from ckeditor.fields import RichTextField       
-from ckeditor.widgets import CKEditorWidget
+from core.widgets import CKEditorWidget
 
 class MyUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
@@ -116,11 +116,21 @@ class MemberCategoryAdmin(admin.ModelAdmin):
     #search_fields = ('',)
 
 
+class TermsAndConditionForm(forms.ModelForm):
+    terms_and_condition = forms.CharField(widget=CKEditorWidget())
+    class Meta:
+        model = TermsAndCondition
+        fields = '__all__'
+        widgets = {
+            'terms_and_condition': CKEditorWidget(),
+        }
+
+
 class TermsAndConditionAdmin(admin.ModelAdmin):
     """
     TermsAndConditionAdmin
     """
-    # form = TermsAndConditionForm
+    form = TermsAndConditionForm
     list_display = ('profile_type', 'publish_from', 'created_on',)
     list_filter = ('profile_type',)
     list_per_page = 25
