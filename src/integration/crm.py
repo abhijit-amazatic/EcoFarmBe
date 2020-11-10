@@ -116,7 +116,7 @@ def create_employees(key, value, obj, crm_obj):
     except TypeError:
         return []
 
-def parse_fields(module, key, value, obj, crm_obj):
+def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     """
     Parse fields
     """
@@ -133,6 +133,13 @@ def parse_fields(module, key, value, obj, crm_obj):
         if data.get('status_code') == 200:
             return data.get('response').get(id)
         return {}
+
+    def get_contact_from_crm(obj, id, is_buyer=False, is_seller=False):
+        if is_buyer:
+            data = search_query('Accounts_X_Contacts', id, 'Accounts')
+        elif is_seller:
+            data = search_query('Vendors_X_Contacts', id, 'Vendor')
+        return data.get('response')
 
     cultivator_starts_with = (
         "co.",
@@ -202,13 +209,20 @@ def parse_fields(module, key, value, obj, crm_obj):
             'Owner1': 'License Owner',
             'Contact_1': 'Farm Manager',
             'Contact_2': 'Logistics',
-            'Contact3': 'Sales/Inventory'}
-        for i in contact_dict.keys():
-            r = obj.get(i)
-            if r:
-                data = get_employees(r['id'])
-                data['Role'] = contact_dict[i]
-                result.append(data)
+            'Contact_3': 'Sales/Inventory'}
+        vendor_id = kwargs.get('vendor_id')
+        account_id = kwargs.get('account_id')
+        if vendor_id:
+            data = get_contact_from_crm(obj, vendor_id, is_seller=True)
+        elif account_id:
+            data = get_contact_from_crm(obj, account_id, is_buyer=True)
+        for i in data:
+            if vendor_id:
+                contact = get_employees(i['Contact']['id'])
+            elif account_id:
+                contact = get_employees(i['Contacts']['id'])
+            contact.update(i)
+            result.append(contact)
         return result
     
 def get_record(module, record_id, full=False):
@@ -366,7 +380,10 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     d.update({'cr.' + k:v})
             except Exception:
                 pass
-            d.update(license_db.program_overview.__dict__)
+            try:
+                d.update(license_db.program_overview.__dict__)
+            except Exception:
+                pass
             d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
             l.append(d['license_id'])
             d.update({'licenses': l})
@@ -417,6 +434,36 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                             if r['status_code'] == 200:
                                 data['Cultivars'] = r['response'][0]['id']
                                 r = create_records('Vendors_X_Cultivars', [data])
+                request = list()
+                contact_dict = {
+                    'Owner1': 'Owner',
+                    'Contact_1': 'Cultivation Manager',
+                    'Contact_2': 'Logistics Manager',
+                    'Contact_3': 'Sales Manager'}
+                for contact in ['Owner1', 'Contact_1', 'Contact_2', 'Contact_3']:
+                    data = dict()
+                    user_id = result['response']['orignal_data'][0].get(contact)
+                    if user_id:
+                        if len(request) == 0:
+                            data['Contact'] = user_id
+                            data['Contact_Company_Role'] = [contact_dict[contact]]
+                            data['Vendor'] = record_response[0]['details']['id']
+                            request.append(data)
+                        else:
+                            inserted = False
+                            for j in request:
+                                if j.get('Contact') == user_id:
+                                    j['Contact_Company_Role'].append(contact_dict[contact])
+                                    inserted = True
+                            if not inserted:
+                                data['Contact'] = user_id
+                                data['Contact_Company_Role'] = [contact_dict[contact]]
+                                data['Vendor'] = record_response[0]['details']['id']
+                                request.append(data)
+                if is_update:
+                    contact_response = update_records('Vendors_X_Contacts', request)
+                else:
+                    contact_response = create_records('Vendors_X_Contacts', request)
         except Exception as exc:
             print(exc)
             final_dict['exception'] = exc
@@ -606,7 +653,10 @@ def get_records_from_crm(license_number):
                 for k,v in crm_dict.items():
                     if v.endswith('_parse'):
                         value = v.split('_parse')[0]
-                        value = parse_fields('Vendors', k, value, vendor, crm_obj)
+                        if vendor_id:
+                            value = parse_fields('Vendors', k, value, vendor, crm_obj, vendor_id=vendor_id)
+                        elif account_id:
+                            value = parse_fields('Vendors', k, value, vendor, crm_obj, account_id=account_id)
                         record_dict[k] = value
                     else:
                         record_dict[k] = vendor.get(v)
@@ -669,7 +719,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
         licenses = get_licenses(i['legal_business_name'])
         d.update(license_db.license_profile.__dict__)
         try:
-            d.update(license_db.profile_contact.__dict__)
+            d.update(license_db.profile_contact.profile_contact_details)
         except Exception:
                 pass
         vendor_id = license_db.license_profile.__dict__['id']
@@ -731,6 +781,36 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                         r = update_records('Accounts_X_Licenses', [data])
                     else:
                         r = create_records('Accounts_X_Licenses', [data])
+                request = list()
+                contact_dict = {
+                    'Owner1': 'Owner',
+                    'Contact_1': 'Cultivation Manager',
+                    'Contact_2': 'Logistics Manager',
+                    'Contact_3': 'Sales Manager'}
+                for contact in ['Owner1', 'Contact_1', 'Contact_2', 'Contact_3']:
+                    data = dict()
+                    user_id = result['response']['orignal_data'][0].get(contact)
+                    if user_id:
+                        if len(request) == 0:
+                            data['Contacts'] = user_id
+                            data['Contact_Company_Role'] = [contact_dict[contact]]
+                            data['Accounts'] = record_response[0]['details']['id']
+                            request.append(data)
+                        else:
+                            inserted = False
+                            for j in request:
+                                if j.get('Contacts') == user_id:
+                                    j['Contact_Company_Role'].append(contact_dict[contact])
+                                    inserted = True
+                            if not inserted:
+                                data['Contacts'] = user_id
+                                data['Contact_Company_Role'] = [contact_dict[contact]]
+                                data['Accounts'] = record_response[0]['details']['id']
+                                request.append(data)
+                if is_update:
+                    contact_response = update_records('Accounts_X_Contacts', request)
+                else:
+                    contact_response = create_records('Accounts_X_Contacts', request)
         final_list[license_db_id] = final_dict
     return final_list
 

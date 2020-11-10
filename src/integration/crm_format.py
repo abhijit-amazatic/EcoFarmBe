@@ -1,6 +1,7 @@
 #key- field from CRM, value- field from user model.
 CRM_FORMAT  = {
     "Contacts": {
+        "id": "id",
         "Email": "email",
         "First_Name": "first_name",
         "Last_Name": "last_name",
@@ -63,6 +64,24 @@ CRM_FORMAT  = {
         "Twitter":"Twitter",
         "Skype_ID":"Skype_ID",
     },
+    "Vendors_X_Contacts": {
+        "Currency": "Currency",
+        "Exchange_Rate": "Exchange_Rate",
+        "Record_Image": "Record_Image",
+        "Name": "Name",
+        "Contact_Company_Role": "Contact_Company_Role",
+        "Contact": "Contact",
+        "Vendor": "Vendor",
+    },
+    "Accounts_X_Contacts": {
+        "Currency": "Currency",
+        "Exchange_Rate": "Exchange_Rate",
+        "Record_Image": "Record_Image",
+        "Name": "Name",
+        "Contact_Company_Role": "Contact_Company_Role",
+        "Contacts": "Contacts",
+        "Accounts": "Accounts",
+    },
     "Brands": {
         "Brand_Category": "brand_category",
         "Name": "brand_name",
@@ -100,7 +119,7 @@ CRM_FORMAT  = {
         "Program_Selection": "program_details_parse",
         "About_Company": "about",
         "Have_you_ever_had_issues_with_failed_Lab_tests": "issues_with_failed_labtest",
-        "Preferred_Payment_Method": "preferred_payment",
+        # "Preferred_Payment_Method": "preferred_payment",
         #Farm contact
         "Farm_Contact_Name": "Farm_Contact_Name",
         "Last_Name": "Last_Name",
@@ -170,7 +189,7 @@ CRM_FORMAT  = {
         "Twitter": "twitter",
         "Facebook": "facebook",
         "LinkedIn": "linkedIn",
-        "Instagram": "instagram",
+        # "Instagram": "instagram",
         "Website": "website",
         #Other
         "IFP_Services_Provided": "IFP_Services_Provided",
@@ -356,6 +375,10 @@ CRM_FORMAT  = {
         "County": "county",
         "Phone": "phone",
         "Region": "region",
+        "Contact_1": "employees_parse",
+        "Contact_3": "employees_parse",
+        "Contact_2": "employees_parse",
+        "Owner1": "employees_parse",
         "On-boarded_Active_Client": "",
         "Company_Email": "company_email",
         "Dama_Financial_Approved": "",
@@ -414,7 +437,7 @@ CRM_FORMAT  = {
         "LinkedIn": "linked_in",
         "Twitter": "twitter",
         "Facebook": "facebook",
-        "Instagram": "instagram",
+        # "Instagram": "instagram",
         "Employees": "",
         "Ownership": "",
         "Ethics_Certifications": "ethics_and_certification_parse",
@@ -691,7 +714,8 @@ CRM_FORMAT  = {
             "bank_routing_number": "Bank_Routing_Number",
             "bank_state": "Bank_State",
             "bank_street": "Bank_Street",
-            "bank_zip_code": "Bank_Zip_Code"
+            "bank_zip_code": "Bank_Zip_Code",
+            'employees': 'contact_from_crm_parse',
         },
     "Leads":
         {
@@ -1042,23 +1066,6 @@ CRM_FORMAT  = {
             "Single_Line_136": "two_methyl_one_propanol",
             "Single_Line_127": "two_methyl_propane",
             "Single_Line_126": "two_propanol"
-        },
-    "Vendors_X_Contacts":
-        {
-            "Name":"Name",
-            "Owner":"Owner",
-            "Vendor":"Vendor",
-            "Contact":"Contact",
-            "Created_Time":"Created_Time",
-            "Modified_Time":"Modified_Time",
-            "Last_Activity_Time":"Last_Activity_Time",
-            "Tag":"Tag",
-            "Is_Record_Duplicate":"Is_Record_Duplicate",
-            "Unsubscribed_Mode":"Unsubscribed_Mode",
-            "Unsubscribed_Time":"Unsubscribed_Time",
-            "Currency":"Currency",
-            "Exchange_Rate":"Exchange_Rate",
-            "Record_Image":"Record_Image",
         },
     "Books_Customer":
         {

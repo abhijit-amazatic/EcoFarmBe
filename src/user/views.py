@@ -29,7 +29,7 @@ from .serializers import (
     PhoneNumberVerificationSerializer,
     TermsAndConditionAcceptanceSerializer,
 )
-from integration.crm import (search_query, create_records,)
+from integration.crm import (search_query, create_records, update_records)
 from integration.box import(get_box_tokens, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
 from slacker import Slacker
@@ -107,7 +107,13 @@ class UserViewSet(ModelViewSet):
             data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
-            response = create_records('Contacts', request.data)
+            if instance.existing_member:
+                contact = search_query('Contacts', request.data.get('email'), 'Email')
+                if contact['status_code'] == 200:
+                    request.data['id'] = contact.get('response')[0].get('id')
+                    response = update_records('Contacts', request.data)
+            else:
+                response = create_records('Contacts', request.data)
             if response['status_code'] == 201:
                 instance.is_updated_in_crm = True
                 instance.zoho_contact_id = response['response']['data'][0]['details']['id']
