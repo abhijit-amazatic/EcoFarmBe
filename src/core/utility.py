@@ -104,6 +104,7 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
     ->send email to set password, 
     """
     role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
+    #updated_role_map  =  {"Cultivation Manager":"farm_manager","Sales Manager":"sales_or_inventory","Logistics Manager":"logistics","Billing / Accounting":"billing","Owner":"owner"}
     
     pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
     license_obj = License.objects.filter(id=license_obj_id)
@@ -167,6 +168,13 @@ def send_verification_link(email):
     link = get_encrypted_data(email,reason='verify')
     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
 
+def extract_map_role(data):
+    role_map = {"Owner":"License Owner","Cultivation Manager":"Farm Manager","Sales Manager":"Sales/Inventory","Logistics Manager":"Logistics","Billing / Accounting":"Billing"}
+    if data:
+        return [role_map.get(i) for i in data]
+    else:
+        return []
+    
 
 def get_employee(data,license_data):
     """
@@ -180,7 +188,8 @@ def get_employee(data,license_data):
             tmp_data.append({"employee_name":employee.get('Full_Name'),
                              "employee_email":employee.get('Email'),
                              "phone":"",
-                             "roles":employee.get('Contact_Company_Role',[])})
+                             "roles":extract_map_role(employee.get('Contact_Company_Role',[])) })            
+    
     # existing_roles = [i.get('roles')[0] for i in tmp_data]
     # empty_inserts = list(set(final_contacts)-set(existing_roles))
     # if empty_inserts:
