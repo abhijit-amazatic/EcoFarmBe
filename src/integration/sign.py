@@ -157,8 +157,9 @@ def send_template(
     licenses=[],
     legal_business_names=[],
     EIN=None, SSN=None, business_structure=[],
-    company=None, full_name=None, premise_address=None,
-    email=None, total_sqft_allocated=None):
+    license_owner_name=None, premise_address=None,
+    premise_state=None, premise_city=None, premise_zip=None,
+    license_owner_email=None):
     """
     Send template to sign.
     """
@@ -172,8 +173,9 @@ def send_template(
             licenses,
             legal_business_names,
             EIN, SSN, business_structure,
-            company, full_name, premise_address,
-            email, total_sqft_allocated
+            license_owner_name, premise_address,
+            premise_state, premise_city, premise_zip,
+            license_owner_email
         )
         if response['code'] == 0:
             return get_embedded_url_from_sign(

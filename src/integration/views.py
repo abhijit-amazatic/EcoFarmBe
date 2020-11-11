@@ -344,11 +344,12 @@ class TemplateSignView(APIView):
         EIN = request.data.get('EIN', None)
         SSN = request.data.get('SSN', None)
         business_structure = request.data.get('business_structure', None)
-        company = request.data.get('company', None)
-        full_name = request.data.get('full_name', None)
+        license_owner_name = request.data.get('license_owner_name', None)
         premise_address = request.data.get('premise_address', None)
-        email = request.data.get('email', None)
-        total_sqft_allocated = request.data.get('total_sqft_allocated', None)
+        premise_state = request.data.get('premise_state', None)
+        premise_city = request.data.get('premise_city', None)
+        premise_zip = request.data.get('premise_zip', None)
+        license_owner_email = request.data.get('license_owner_email', None)
 
         if template_id and recipient:
             return Response(send_template(template_id,
@@ -356,8 +357,9 @@ class TemplateSignView(APIView):
                                           licenses,
                                           legal_business_names,
                                           EIN, SSN, business_structure,
-                                          company, full_name, premise_address,
-                                          email, total_sqft_allocated
+                                          license_owner_name, premise_address,
+                                          premise_state, premise_city, premise_zip,
+                                          license_owner_email
                                           ))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 

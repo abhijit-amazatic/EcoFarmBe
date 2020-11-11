@@ -205,11 +205,6 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         return list(set(cultivars))
     if value.startswith('contact_from_crm'):
         result = list()
-        contact_dict = {
-            'Owner1': 'License Owner',
-            'Contact_1': 'Farm Manager',
-            'Contact_2': 'Logistics',
-            'Contact_3': 'Sales/Inventory'}
         vendor_id = kwargs.get('vendor_id')
         account_id = kwargs.get('account_id')
         if vendor_id:
