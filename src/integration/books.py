@@ -115,7 +115,7 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
                         record_obj = License.objects.get(id=record_id)
                     else:
                         record_obj = Brand.objects.get(id=record_id)
-                    record_obj.zoho_books_id = record['contact_id']
+                    record_obj.zoho_books_id = response.get('contact_id')
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
