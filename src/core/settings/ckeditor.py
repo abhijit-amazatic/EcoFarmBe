@@ -36,6 +36,20 @@ CKEDITOR_CONFIGS = {
         # 'toolbarCanCollapse': True,
         # 'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
         'tabSpaces': 4,
-        # 'contentsCss': '/static/css/test.css',
+        'font_names': ';'.join([
+            'Arial/Arial, Helvetica, sans-serif',
+            'Times New Roman/Times New Roman, Times, serif',
+            'Verdana',
+            'serif',
+            'sans serif',
+            'monospace',
+            'cursive',
+            'Athelas-Reg',
+            'BrandonText-Regular',
+            'BrandonText-Grotesque',
+            'BrushScript-MT',
+            # 'fantasy',
+        ]),
+        'contentsCss': ['/static/css/terms_and_condition/main.css', '/static/css/terms_and_condition/style.css'],
     }
 }

@@ -189,7 +189,7 @@ class TermsAndCondition(TimeStampFlagModelMixin, models.Model):
     publish_from = models.DateField(verbose_name=_("Publish From"))
 
     def __str__(self):
-        return f'{self.profile_type} | {self.publish_from}'
+        return f'{self.id} | {self.profile_type} | {self.publish_from}'
 
     class Meta:
         verbose_name = _('Terms And Condition')

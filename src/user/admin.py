@@ -136,11 +136,13 @@ class TermsAndConditionAdmin(admin.ModelAdmin):
     list_per_page = 25
     ordering = ('-created_on', '-publish_from',)
     readonly_fields = ('created_on','updated_on',)
+    fields = ('profile_type', 'terms_and_condition','publish_from', 'created_on', 'updated_on')
 
-    def has_change_permission(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None):
+        fields = super().get_readonly_fields(request, obj=obj)
         if obj and obj.publish_from <= timezone.now().date():
-            return False
-        return super(TermsAndConditionAdmin, self).has_change_permission(request, obj)
+            fields = ('profile_type','publish_from') + fields
+        return fields
 
 
 class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
@@ -152,7 +154,17 @@ class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
     list_per_page = 25
     search_fields = ('user',)
     ordering = ('-created_on',)
-    readonly_fields = ('ip_address', 'user_agent', 'hostname', 'created_on','updated_on',)
+    readonly_fields = ('terms_and_condition_id', 'ip_address', 'user_agent', 'hostname', 'created_on','updated_on',)
+    fields = ('user', 'terms_and_condition_id', 'terms_and_condition', 'is_accepted', 'ip_address', 'user_agent', 'hostname', 'created_on','updated_on',)
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 #admin.site.unregister(User)
