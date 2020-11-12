@@ -136,13 +136,39 @@ class TermsAndConditionAdmin(admin.ModelAdmin):
     list_per_page = 25
     ordering = ('-created_on', '-publish_from',)
     readonly_fields = ('created_on','updated_on',)
-    fields = ('profile_type', 'terms_and_condition','publish_from', 'created_on', 'updated_on')
+    fields = ('profile_type', 'terms_and_condition', 'publish_from', 'created_on', 'updated_on')
 
-    def get_readonly_fields(self, request, obj=None):
-        fields = super().get_readonly_fields(request, obj=obj)
+    # def get_readonly_fields(self, request, obj=None):
+    #     fields = super().get_readonly_fields(request, obj=obj)
+    #     if obj and obj.publish_from <= timezone.now().date():
+    #         fields = ('profile_type', 'terms_and_condition', 'publish_from') + fields
+    #     return fields
+
+    def has_change_permission(self, request, obj=None):
         if obj and obj.publish_from <= timezone.now().date():
-            fields = ('profile_type','publish_from') + fields
-        return fields
+            return False
+        return super(TermsAndConditionAdmin, self).has_change_permission(request, obj)
+
+    # def get_form(self, request, obj=None, **kwargs):
+    #     form = super().get_form(request, obj, **kwargs)
+    #     if obj and obj.publish_from <= timezone.now().date():
+    #         form.base_fields['terms_and_condition'] = forms.CharField(widget=CKEditorWidget())
+    #         form.base_fields['terms_and_condition'].widget = CKEditorWidget()
+    #         form.base_fields['terms_and_condition'].widget.attrs["disabled"] = "disabled"
+    #         form.base_fields['terms_and_condition'].disabled = True
+    #     return form
+
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        admin_form = context['adminform']
+        form = admin_form.form
+        if 'terms_and_condition' in admin_form.readonly_fields:
+            form.fields['terms_and_condition'] = forms.CharField(widget=CKEditorWidget())
+            form.fields['terms_and_condition'].widget = CKEditorWidget()
+            form.fields['terms_and_condition'].disabled = True
+            form.initial['terms_and_condition'] = form.instance.terms_and_condition
+            admin_form.readonly_fields = tuple(x for x in context['adminform'].readonly_fields if x !='terms_and_condition')
+        return super().render_change_form(request, context, add=add, change=change, obj=obj, form_url=form_url)
 
 
 class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
