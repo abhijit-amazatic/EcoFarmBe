@@ -13,6 +13,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 from django.db import transaction
 from django.contrib import messages
+from django.shortcuts import reverse
 from django.utils import timezone
 import nested_admin
 from ckeditor.fields import RichTextField       
@@ -190,7 +191,10 @@ class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        if isinstance(obj, TermsAndConditionAcceptance):
+            if request.path == reverse("admin:user_termsandconditionacceptance_change", args=[obj.id]):
+                return False
+        return True
 
 
 #admin.site.unregister(User)
