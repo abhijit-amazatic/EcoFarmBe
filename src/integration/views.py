@@ -439,7 +439,7 @@ class GetTemplateStatus(APIView):
         recipient_email = request.query_params.get('recipient_email')
         if request_id:
             response = get_document(request_id)
-            status = response['requests']['request_status']
+            status_ = response['requests']['request_status']
             actions = response['requests']['actions']
             for action in actions:
                 if action['recipient_email'] == recipient_email:
@@ -452,7 +452,7 @@ class GetTemplateStatus(APIView):
             if response['code'] == 0:
                 return Response({
                     'code': 0,
-                    'status': status,
+                    'status': status_,
                     'is_singed_by_user': is_signed})
             else:
                 return Response({'code': 1, 'error': 'Incorrect request id or Document not in Zoho sign'},
