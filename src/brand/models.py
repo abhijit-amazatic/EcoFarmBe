@@ -153,8 +153,8 @@ class LicenseUser(TimeStampFlagModelMixin,models.Model):
     license = models.ForeignKey(License, verbose_name=_('License'),
                              related_name='profile_roles', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
-                             related_name='user_roles', on_delete=models.CASCADE)
-    role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'),related_name='license_users')
+                             related_name='license_roles', on_delete=models.CASCADE)
+    role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'), related_name='license_users')
 
     def __str__(self):
         return f'{self.license} | {self.user}'

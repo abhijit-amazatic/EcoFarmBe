@@ -4,10 +4,12 @@ Admin related customization.
 
 import json
 from django.contrib import admin
+from django.db import models
 from django import forms
 from core.mailer import mail, mail_send
 from django.conf import settings
 from django.contrib.postgres import fields
+from django.contrib.admin import widgets
 from django.db import transaction
 from django_json_widget.widgets import JSONEditorWidget
 import nested_admin
@@ -281,6 +283,10 @@ class LicenseRoleAdmin(admin.ModelAdmin):
     """
     ProfileCategoryAdmin
     """
+    formfield_overrides = {
+        models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+    }
+
 
 
 admin.site.register(LicenseRole,LicenseRoleAdmin)
