@@ -157,7 +157,7 @@ class LicenseUser(TimeStampFlagModelMixin,models.Model):
     role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'),related_name='license_users')
 
     def __str__(self):
-        return f'{self.license} | {self.role}'
+        return f'{self.license} | {self.user}'
 
     class Meta:
         unique_together = (('license', 'user'), )
