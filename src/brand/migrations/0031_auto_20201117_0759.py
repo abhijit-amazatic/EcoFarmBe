@@ -2,7 +2,15 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from brand.models import LicenseRole as LicenseRoleModel
 
+def create_roles(apps, schema_editor):
+    LicenseRole = apps.get_model("brand", "LicenseRole")
+    for role_name, _ in LicenseRoleModel.ROLE_CHOICES:
+        LicenseRole.objects.get_or_create(name=role_name)
+
+def create_roles_reverse(apps, schema_editor):
+    pass
 
 def forward_func(apps, schema_editor):
     LicenseUser = apps.get_model("brand", "LicenseUser")
@@ -43,6 +51,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'License Roles',
             },
         ),
+        migrations.RunPython(create_roles, reverse_code=create_roles_reverse),
         migrations.AlterModelOptions(
             name='licenseuser',
             options={'verbose_name': 'License Profile User', 'verbose_name_plural': 'License Profile Users'},
