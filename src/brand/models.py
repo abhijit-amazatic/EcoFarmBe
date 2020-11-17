@@ -119,6 +119,7 @@ class LicenseRole(TimeStampFlagModelMixin,models.Model):
         (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
         (ROLE_BILLING, _('Billing')),
     )
+    ROLE_CHOICES_DICT = dict(ROLE_CHOICES)
     name = models.CharField(
         verbose_name=_('Name'),
         max_length=60,
@@ -132,8 +133,9 @@ class LicenseRole(TimeStampFlagModelMixin,models.Model):
         limit_choices_to=Q(content_type__app_label='brand'),
     )
 
+
     def __str__(self):
-        return self.name
+        return str(self.ROLE_CHOICES_DICT.get(self.name, ''))
 
     def natural_key(self):
         return (self.name,)
