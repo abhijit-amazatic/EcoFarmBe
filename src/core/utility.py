@@ -94,6 +94,17 @@ def notify_profile_user(recipient_email,farm):
             'farm':farm
         }, subject, recipient_email
     )
+
+
+def extract_all_roles_from_email(email,data):
+    """
+    Extract all roles if same email for existing user.
+    """
+    final_roles = []
+    for i in data.get('employees'):
+        if i.get('employee_email') == email:            
+            final_roles.extend(i.get('roles'))
+    return final_roles
     
 @app.task(queue="general")
 def add_users_to_system_and_license(profile_contact_id,license_obj_id):
@@ -122,8 +133,12 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
             
             if not LicenseUser.objects.filter(user_id=obj.id,license_id=license_obj_id).exists():
                 try:
-                    extracted_role = [role_map.get(i) for i in employee['roles']] #role_map.get(employee['roles'])
-                    LicenseUser(user_id=obj.id,license_id=license_obj_id,role=extracted_role).save()
+                    all_roles = list(set(extract_all_roles_from_email(employee['employee_email'],employee_data)))
+                    extracted_role = [role_map.get(i) for i in all_roles] #role_map.get(employee['roles'])
+                    role_ids = LicenseRole.objects.filter(name__in=extracted_role).values_list(flat=True)
+                    license_user = LicenseUser(user_id=obj.id,license_id=license_obj_id)
+                    license_user.role.set(list(role_ids))
+                    license_user.save()
                     notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
                     link = get_encrypted_data(obj.email,reason='verify')
                     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
