@@ -5,6 +5,7 @@ This module defines API views.
 
 import json
 import re
+import datetime
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework import (permissions, viewsets, status, filters,)
@@ -494,13 +495,14 @@ class LicenseSyncView(APIView):
         """
         license_number = request.data.get('license_number')
         expiry = request.data.get('expiry')
+        print("expiry-->",expiry, 'type>>>\n',type(expiry))
         issue = request.data.get('issue')
         if license_number and expiry:
             license_obj = License.objects.get(license_number=license_number)
             license_obj.expiration_date = expiry
             license_obj.issue_date = issue
             license_obj.save()
-            if license_obj.expiration_date >=timezone.now().date():
+            if license_obj.expiration_date >= timezone.now().date():
                 if license_obj.status_before_expiry:
                     license_obj.status = status_before_expiry
                     license_obj.save()
