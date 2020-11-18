@@ -93,6 +93,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
     documents = GenericRelation(Documents)
     is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
+    status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.legal_business_name

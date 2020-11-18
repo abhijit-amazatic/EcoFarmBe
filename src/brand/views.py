@@ -500,5 +500,6 @@ class LicenseSyncView(APIView):
             license_obj.expiration_date = expiry
             license_obj.issue_date = issue
             license_obj.save()
+            #if license_obj.expiration_date <=timezone.now().date():   
             return Response(status=status.HTTP_202_ACCEPTED)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)

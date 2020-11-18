@@ -15,3 +15,12 @@ def update_expired_licence_status():
     """
     qs = License.objects.filter(expiration_date__lt=timezone.now())
     qs.update(status='expired')
+
+
+def update_before_expire():
+    """
+    Update/send notification to user before expiry.  
+    """
+    pass
+    # qs = License.objects.filter(expiration_date__lt=timezone.now())
+    # qs.update(status='expired')   
