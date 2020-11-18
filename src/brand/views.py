@@ -494,12 +494,12 @@ class LicenseSyncView(APIView):
         Update license.
         """
         license_number = request.data.get('license_number')
-        expiry = request.data.get('expiry')
-        print("expiry-->",expiry, 'type>>>\n',type(expiry))
         issue = request.data.get('issue')
+        expiry = request.data.get('expiry')
         if license_number and expiry:
             license_obj = License.objects.get(license_number=license_number)
-            license_obj.expiration_date = expiry
+            date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
+            license_obj.expiration_date = date_time_obj.date()
             license_obj.issue_date = issue
             license_obj.save()
             if license_obj.expiration_date >= timezone.now().date():
