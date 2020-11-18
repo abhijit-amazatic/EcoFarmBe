@@ -500,6 +500,12 @@ class LicenseSyncView(APIView):
             license_obj.expiration_date = expiry
             license_obj.issue_date = issue
             license_obj.save()
-            #if license_obj.expiration_date <=timezone.now().date():   
+            if license_obj.expiration_date >=timezone.now().date():
+                if license_obj.status_before_expiry:
+                    license_obj.status = status_before_expiry
+                    license_obj.save()
+                else:
+                    license_obj.status = 'in_progress'
+                    license_obj.save()
             return Response(status=status.HTTP_202_ACCEPTED)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
