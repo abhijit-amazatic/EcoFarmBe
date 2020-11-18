@@ -149,7 +149,8 @@ class LicenseViewSet(viewsets.ModelViewSet):
         #license = license.filter(brand__ac_manager=self.request.user)
         license = License.objects.filter(
             Q(brand__ac_manager=self.request.user) |
-            Q(id__in=accessible_licenses)
+            Q(id__in=accessible_licenses) |
+            Q(created_by=self.request.user)
         )
         return license
 
