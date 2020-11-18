@@ -53,7 +53,10 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              DocumentView, DocumentStatusView, InventoryDeleteView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (ProfileCategoryView, BrandViewSet, LicenseViewSet, KpiViewSet, ProfileReportViewSet, FileUploadView)
+from brand.views import (ProfileCategoryView, BrandViewSet, 
+                         LicenseViewSet, KpiViewSet, 
+                         ProfileReportViewSet, FileUploadView,
+                         LicenseSyncView,)
 from two_factor.views import (
     TwoFactorLoginEnableView,
     TwoFactorLoginDisableView,
@@ -175,6 +178,7 @@ urlpatterns = [
     path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
     path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
+    path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
 ] + router.urls
 
 

@@ -21,6 +21,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import (permissions, viewsets, status, filters,)
+from rest_framework.authentication import (TokenAuthentication, )
 
 
 from core.permissions import IsAuthenticatedBrandPermission
@@ -479,3 +480,25 @@ class InviteUserView(CreateAPIView):
 
         headers = self.get_success_headers(serializer.data)
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+#        return response    
+
+class LicenseSyncView(APIView):
+    """
+    Sync licenses from crm to db.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def put(self, request):
+        """
+        Update license.
+        """
+        license_number = request.data.get('license_number')
+        expiry = request.data.get('expiry')
+        issue = request.data.get('issue')
+        if license_number and expiry:
+            license_obj = License.objects.get(license_number=license_number)
+            license_obj.expiration_date = expiry
+            license_obj.issue_date = issue
+            license_obj.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
