@@ -5,6 +5,7 @@ All periodic tasks related to brand.
 from celery.task import periodic_task
 from celery.schedules import crontab
 from django.utils import  timezone
+from core.mailer import mail, mail_send
 import datetime
 
 from .models import License
@@ -29,4 +30,5 @@ def update_before_expire():
                 obj.status_before_expiry = obj.status
                 obj.save()
                 print('updated license before status for ',obj.license_number)
+            mail_send("license-expiry.html",{'license_number':obj.license_number,'expiration_date': obj.expiration_date.strftime('%Y-%m-%d')},"Your license will expire soon.", obj.created_by.email)   
         
