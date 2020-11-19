@@ -119,7 +119,9 @@ FARM_FOLDER_ID = ''
 
 #Slack config
 SLACK_TOKEN = ''
-SLACK_CHANNEL_NAME = '' #tech_new_website_users #tech_dev_slack_testing
+SLACK_CHANNEL_NAME = 'tech_dev_slack_testing' #PROD: 'tech_new_website_users'
+#sales channel
+SLACK_SALES_CHANNEL = 'tech_dev_slack_testing' #PROD:'sales_leads'
 
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'
