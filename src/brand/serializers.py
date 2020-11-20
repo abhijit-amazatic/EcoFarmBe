@@ -54,6 +54,21 @@ class BrandSerializer(serializers.ModelSerializer):
     """
     This defines Brand serializer.
     """
+    document_url = serializers.SerializerMethodField()
+
+    def get_document_url(self, obj):
+        """
+        Return s3 document url.
+        """
+        try:
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            path = document.path
+            url = create_presigned_url(AWS_BUCKET, path)
+            if url.get('response'):
+                return url.get('response')
+            return None
+        except Exception:
+            return None
 
     def validate(self, data):
         if self.partial:
@@ -90,6 +105,7 @@ class LicenseSerializer(serializers.ModelSerializer):
     """
     license_url = serializers.SerializerMethodField()
     seller_permit_url = serializers.SerializerMethodField()
+    license_profile_url = serializers.SerializerMethodField()
     is_existing_user = serializers.SerializerMethodField()
 
 
@@ -98,13 +114,27 @@ class LicenseSerializer(serializers.ModelSerializer):
         return if user is existing user.
         """
         return obj.created_by.existing_member
-        
+    
+    def get_license_profile_url(self, obj):
+        """
+        Return s3 license url.
+        """
+        try:
+            license = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            path = license.path
+            url = create_presigned_url(AWS_BUCKET, path)
+            if url.get('response'):
+                return url.get('response')
+            return None
+        except Exception:
+            return None
+    
     def get_license_url(self, obj):
         """
         Return s3 license url.
         """
         try:
-            license = Documents.objects.filter(object_id=obj.id, doc_type='license').first()
+            license = Documents.objects.filter(object_id=obj.id, doc_type='license').latest('-created_on')
             path = license.path
             url = create_presigned_url(AWS_BUCKET, path)
             if url.get('response'):
@@ -118,7 +148,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         Return s3 license url.
         """
         try:
-            seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').first()
+            seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').latest('-created_on')
             path = seller.path
             url = create_presigned_url(AWS_BUCKET, path)
             if url.get('response'):

@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.password_validation import validate_password as default_validate_password
 from django.contrib.auth import (authenticate, login)
+from core.settings import (AWS_BUCKET, )
 from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -16,6 +17,9 @@ from .models import User, TermsAndCondition
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
 from brand.models import (License,)
+from inventory.models import (Documents, )
+from integration.apps.aws import (create_presigned_url, )
+
 
 from two_factor.serializers import TwoFactorDevicesSerializer
 
@@ -79,8 +83,21 @@ class UserSerializer(serializers.ModelSerializer):
     approved_by = serializers.ReadOnlyField()
     profile_photo_sharable_link = serializers.ReadOnlyField()
     platform_kpi = serializers.SerializerMethodField(read_only=True)
-    
-    
+    document_url = serializers.SerializerMethodField()
+
+    def get_document_url(self, obj):
+        """
+        Return s3 document url.
+        """
+        try:
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            path = document.path
+            url = create_presigned_url(AWS_BUCKET, path)
+            if url.get('response'):
+                return url.get('response')
+            return None
+        except Exception:
+            return None
     def get_member_categories(self, obj):
         """
         Adds ,member categories to response
@@ -106,7 +123,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url')
     
 
     def validate_password(self, password):

@@ -23,7 +23,6 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
         depth = 1
-        exclude = ()
         fields = (
             'item_id',
             'cf_strain_name',

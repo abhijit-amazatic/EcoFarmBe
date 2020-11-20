@@ -15,13 +15,13 @@ from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from .serializers import (InventorySerializer, LogoutInventorySerializer,
                           ItemFeedbackSerializer, InTransitOrderSerializer)
 from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
-from brand.models import (License,)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, )
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
 from .permissions import (DocumentPermission, )
 from integration.box import (delete_file, )
-from brand.models import (License, )
+from brand.models import (License, Brand, LicenseProfile)
+from user.models import (User, )
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -280,6 +280,8 @@ class DocumentPreSignedView(APIView):
         sku = request.data.get('sku')
         license_id = request.data.get('license_id')
         object_name = request.data.get('object_name')
+        user_id = request.data.get('user_id')
+        brand_id = request.data.get('brand_id')
         doc_type = request.data.get('doc_type')
         expiry = request.data.get('expiration', 3600)
         if sku:
@@ -287,6 +289,18 @@ class DocumentPreSignedView(APIView):
                 obj = Inventory.objects.get(sku=sku)
             except Inventory.DoesNotExist:
                 return Response({'error': 'Item not in database'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        elif user_id:
+            try:
+                obj = User.objects.get(id=user_id)
+            except Inventory.DoesNotExist:
+                return Response({'error': 'User not in database'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        elif brand_id:
+            try:
+                obj = Brand.objects.get(id=brand_id)
+            except Inventory.DoesNotExist:
+                return Response({'error': 'Brand not in database'},
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             try:

@@ -8,9 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
-from user.models import (User, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
-# from brand.models import (LicenseProfile,)
+from user.models import (User, )
 
 
 class Documents(TimeStampFlagModelMixin, models.Model):

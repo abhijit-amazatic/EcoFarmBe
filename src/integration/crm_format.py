@@ -719,6 +719,7 @@ CRM_FORMAT  = {
         },
     "Leads":
         {
+            "id": "id",
             "Layout": "layout_parse",
             "Layout_Name": "Layout_Name",
             "Company": "company_name",
@@ -726,6 +727,7 @@ CRM_FORMAT  = {
             "Company_Name": "company_name",
             "First_Name": "first_name",
             "Lead_Source": "heard_from",
+            "Lead_Origin": "Lead_Origin",
             "Owner": "Owner",
             "Company_Type": "Company_Type",
             "Legal_Entity_Name": "Legal_Entity_Name",

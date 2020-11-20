@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField,)
+from django.contrib.contenttypes.fields import (GenericRelation, )
 
 from phonenumber_field.modelfields import PhoneNumberField
 from ckeditor.fields import RichTextField
@@ -19,7 +20,7 @@ from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin)
 from integration.apps.twilio import (send_sms, verification_call)
 from two_factor.abstract_models import AbstractPhoneDevice
 from two_factor.utils import get_two_factor_devices
-
+# from inventory.models import (Documents, )
 
 class User(StatusFlagMixin,AbstractUser):
     """
@@ -92,6 +93,7 @@ class User(StatusFlagMixin,AbstractUser):
     about = models.TextField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    documents = GenericRelation('inventory.Documents')
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
