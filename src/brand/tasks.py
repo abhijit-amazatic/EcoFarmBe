@@ -23,7 +23,7 @@ def update_before_expire():
     """
     Update/send notification to user before expiry.(now within 2 days)  
     """
-    license_obj = License.objects.filter(expiration_date__range=(timezone.now().date(),timezone.now().date()+datetime.timedelta(days=2)))
+    license_obj = License.objects.filter(expiration_date__range=(timezone.now().date(),timezone.now().date()+datetime.timedelta(days=7)))
     if license_obj:
         for obj in license_obj:
             if not obj.status_before_expiry:
