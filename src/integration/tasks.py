@@ -13,6 +13,7 @@ from .crm import (insert_users, insert_vendors,
 from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, )
+from integration.apps.bcc import (post_licenses_to_crm, )
 
 
 def get_price_data():
@@ -54,3 +55,11 @@ def send_estimate(estimate_id, contact_id):
     Send estimate for sign.
     """
     return send_estimate_to_sign(estimate_id, contact_id)
+
+# @periodic_task(run_every=(crontab(day_of_week='Sunday', hour=[10], minute=0)), options={'queue': 'general'})
+@app.task(queue="general")
+def fetch_bcc_licenses():
+    """
+    Fetch BCC licenses and post to crm.
+    """
+    return post_licenses_to_crm()
