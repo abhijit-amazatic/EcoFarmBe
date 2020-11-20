@@ -916,13 +916,17 @@ def get_accounts_from_crm(legal_business_name):
     return {}
 
 
-def post_leads_on_slack(record):
+def post_leads_to_slack_and_email(record,response):
     """
     Post New leads on slack.
     """
-    lead_crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Leads/"+record.get("id")+"/"
-    msg = """New lead is added via connect page with the details as:\n- First Name:%s\n- Last Name:%s\n- Company Name:%s\n -Title:%s\n- Vendor Category:%s\n- Heard From:%s\n- Phone:%s\n- Message:%s\n- Email:%s\n- Lead Origin:%s\n- Lead CRM Link:<%s> """ %(record.get("first_name"),record.get("last_name"),record.get("company_name"),record.get("title"),','.join(record.get("vendor_category")),record.get("heard_from"),record.get("phone"),record.get("message"),record.get("email"),record.get("Lead_Origin"),lead_crm_link)
-    slack.chat.post_message(settings.SLACK_SALES_CHANNEL,msg, as_user=True)
+    try:
+        lead_crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Leads/"+response.get('response')['data'][0]['details']['id']+"/"
+        msg = """New lead is added via connect page with the details as:\n- First Name:%s\n- Last Name:%s\n- Company Name:%s\n -Title:%s\n- Vendor Category:%s\n- Heard From:%s\n- Phone:%s\n- Message:%s\n- Email:%s\n- Lead Origin:%s\n- Lead CRM Link:<%s> """ %(record.get("first_name"),record.get("last_name"),record.get("company_name"),record.get("title"),','.join(record.get("vendor_category")),record.get("heard_from"),record.get("phone"),record.get("message"),record.get("email"),record.get("Lead_Origin"),lead_crm_link)
+        slack.chat.post_message(settings.SLACK_SALES_CHANNEL,msg, as_user=True)
+        mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':','.join(record.get("vendor_category")),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message"),'lead_origin':record.get("Lead_Origin"),'lead_crm_link':lead_crm_link},"New lead via connect page.",'connect@thrive-society.com')
+    except Exception as e:
+        print("Exception while posting to slack & email on lead creation.")
     
 
 @app.task(queue="general")
@@ -930,10 +934,9 @@ def create_lead(record):
     """
     Create lead in Zoho CRM.
     """
-    record = record.update({"Lead_Origin":"Connect Form"})
+    record.update({"Lead_Origin":"Connect Form"})
     response = create_records('Leads', record)
-    mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':','.join(record.get("vendor_category")),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message"),'lead_origin':record.get("Lead_Origin"),'lead_crm_link':settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Leads/"+record.get("id")+"/"},"New lead via connect page.",'connect@thrive-society.com')
-    post_leads_on_slack(record)
+    post_leads_to_slack_and_email(record,response)
     return response
 
 def get_field(record, key, field):
