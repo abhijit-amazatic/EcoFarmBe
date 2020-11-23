@@ -82,6 +82,23 @@ def get_inventory_document(inventory_name, item_id, document_id, params={}):
     inventory = get_inventory_obj(inventory_name)
     return inventory.get_item_documents(item_id, document_id, params=params)
 
+def upload_inventory_document(inventory_name, item_id, files, params={}):
+    """
+    Upload inventory document.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    return inventory.upload_item_document(item_id, files, params=params)
+
+def get_inventory_name(item_id):
+    """
+    Get inventory name.
+    """
+    for name in ['inventory_efd', 'inventory_efl']:
+        inventory = get_inventory_obj(name)
+        item = inventory.get_inventory(item_id=item_id)
+        if item.get('item_id'):
+            return name
+
 def get_cultivar_from_db(cultivar_name):
     """
     Return cultivar from db.

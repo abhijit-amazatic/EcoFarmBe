@@ -1,6 +1,7 @@
 """
 Views for Inventory
 """
+from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
 import django_filters
 from django.shortcuts import (render, )
@@ -16,10 +17,11 @@ from .serializers import (InventorySerializer, LogoutInventorySerializer,
                           ItemFeedbackSerializer, InTransitOrderSerializer)
 from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
 from core.settings import (AWS_BUCKET,)
-from integration.inventory import (sync_inventory, )
+from integration.inventory import (sync_inventory, upload_inventory_document,
+                                   get_inventory_name)
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
 from .permissions import (DocumentPermission, )
-from integration.box import (delete_file, )
+from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 
@@ -369,7 +371,20 @@ class DocumentView(APIView):
                     if doc.id != id:
                         doc.is_primary = False
                         doc.save()
-            obj = Documents.objects.update_or_create(
+                box_id = main_doc.box_id
+                item_id = main_doc.object_id
+                file_obj = get_file_obj(box_id)
+                file_ = file_obj.content()
+                file_ = BufferedReader(BytesIO(file_))
+                inventory_name = get_inventory_name(item_id)
+                response = upload_inventory_document(inventory_name, item_id, {
+                    'image': (
+                        file_obj.name,
+                        file_,
+                        main_doc.file_type)})
+                if response.get('code') != 0:
+                    print(response)
+            obj, _ = Documents.objects.update_or_create(
                         id=id,
                         defaults=request.data)
             return Response(status=status.HTTP_202_ACCEPTED)
