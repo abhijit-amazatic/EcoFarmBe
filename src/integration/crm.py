@@ -174,7 +174,7 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     if value.startswith('Cultivars'):
         if obj.get(value):
             return obj.get(value).split(', ')
-        return ''
+        return []
     list_fields = (
         'transportation',
         'cultivation_type',

@@ -288,7 +288,7 @@ def insert_data_from_crm(user,data,license_id):
                                                                     county=data.get(license_data).get('license_profile').get('county',''),
                                                                     region=data.get(license_data).get('license_profile').get('region',''),
                                                                     ethics_and_certification=data.get(license_data).get('license_profile').get('ethics_and_certifications',None),
-                                                                    cultivars_of_interest=data.get(license_data).get('license_profile').get('cultivars_of_interest',None).split(', '),
+                                                                    cultivars_of_interest=data.get(license_data).get('license_profile').get('cultivars_of_interest',None),
                                                                     about=data.get(license_data).get('license_profile').get('about',''),
                                                                     product_of_interest=data.get(license_data).get('license_profile').get('product_of_interest',None),
                                                                     transportation=data.get(license_data).get('license_profile').get('transportation_methods',None),
