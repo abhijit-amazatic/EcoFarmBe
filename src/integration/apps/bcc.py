@@ -75,6 +75,7 @@ def post_licenses_to_crm():
             request_update.append(req)
         else:
             request_create.append(req)
+    crm_obj = get_crm_obj()
     response_create = crm_obj.insert_records("Licenses", request_create)
     response_update = crm_obj.update_records("Licenses", request_update)
     return response_create, response_update
