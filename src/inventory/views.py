@@ -25,6 +25,7 @@ from .permissions import (DocumentPermission, )
 from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
+from labtest.models import (LabTest, )
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -462,7 +463,10 @@ class InventorySummaryView(APIView):
         Get inventory summary.
         """
         response = dict()
-        inventory = Inventory.objects.filter(cf_status='Available')
+        inventory = Inventory.objects.filter(cf_cfi_published=True, cf_status='Available')
+        labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
+        response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
+        response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
         response['total_quantity'] = inventory.aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
         response['total_value'] = inventory.filter(
             category_name__contains='Flower').aggregate(
