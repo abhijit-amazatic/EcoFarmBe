@@ -350,8 +350,9 @@ class DocumentView(APIView):
         elif sku:
             data_1 = Documents.objects.filter(sku=sku, status='OPTIMIZING').order_by('file_type').values()
             data_2 = Documents.objects.filter(sku=sku, status='AVAILABLE').order_by('file_type').values()
+            data_3 = data_1 | data_2
             return Response(
-                data_2 | data_1,
+                data_3.order_by('status'),
                 status=status.HTTP_200_OK
             )
         return Response(
