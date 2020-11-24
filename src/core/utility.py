@@ -164,7 +164,7 @@ def send_async_approval_mail(profile_id):
     if license_obj:
         ac_manager = license_obj[0].created_by.email
         profile_type = get_profile_type(license_obj[0])
-        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type},"Profile Approved.", ac_manager)
+        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type},"%s Profile Approved."% profile_type, ac_manager)
 
         
 @app.task(queue="general")        
