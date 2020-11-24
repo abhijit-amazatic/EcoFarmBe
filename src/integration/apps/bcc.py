@@ -75,8 +75,15 @@ def post_licenses_to_crm():
             request_update.append(req)
         else:
             request_create.append(req)
-    crm_obj = get_crm_obj()
-    response_create = crm_obj.insert_records("Licenses", request_create)
-    response_update = crm_obj.update_records("Licenses", request_update)
+    i = 0
+    response_create = response_update = list()
+    while len(request_create) > i:
+        response_create.append(crm_obj.insert_records("Licenses", request_create[i: i+99]))
+        i += 100
+    i = 0
+    response_create = response_update = list()
+    while len(request_update) > i:
+        response_update.append(crm_obj.update_records("Licenses", request_update[i: i+99]))
+        i += 99
     return response_create, response_update
     
