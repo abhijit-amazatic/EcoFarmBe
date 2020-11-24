@@ -62,10 +62,8 @@ class BrandSerializer(serializers.ModelSerializer):
         """
         try:
             document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
-            path = document.path
-            url = create_presigned_url(AWS_BUCKET, path)
-            if url.get('response'):
-                return url.get('response')
+            if document.box_url:
+                return document.box_url
             return None
         except Exception:
             return None
@@ -120,11 +118,9 @@ class LicenseSerializer(serializers.ModelSerializer):
         Return s3 license url.
         """
         try:
-            license = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
-            path = license.path
-            url = create_presigned_url(AWS_BUCKET, path)
-            if url.get('response'):
-                return url.get('response')
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            if document.box_url:
+                return document.box_url
             return None
         except Exception:
             return None
@@ -135,10 +131,8 @@ class LicenseSerializer(serializers.ModelSerializer):
         """
         try:
             license = Documents.objects.filter(object_id=obj.id, doc_type='license').latest('-created_on')
-            path = license.path
-            url = create_presigned_url(AWS_BUCKET, path)
-            if url.get('response'):
-                return url.get('response')
+            if document.box_url:
+                return document.box_url
             return None
         except Exception:
             return None
@@ -149,10 +143,8 @@ class LicenseSerializer(serializers.ModelSerializer):
         """
         try:
             seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').latest('-created_on')
-            path = seller.path
-            url = create_presigned_url(AWS_BUCKET, path)
-            if url.get('response'):
-                return url.get('response')
+            if document.box_url:
+                return document.box_url
             return None
         except Exception:
             return None

@@ -91,13 +91,12 @@ class UserSerializer(serializers.ModelSerializer):
         """
         try:
             document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
-            path = document.path
-            url = create_presigned_url(AWS_BUCKET, path)
-            if url.get('response'):
-                return url.get('response')
+            if document.box_url:
+                return document.box_url
             return None
         except Exception:
             return None
+        
     def get_member_categories(self, obj):
         """
         Adds ,member categories to response
