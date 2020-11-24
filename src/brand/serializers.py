@@ -64,7 +64,11 @@ class BrandSerializer(serializers.ModelSerializer):
             document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
             if document.box_url:
                 return document.box_url
-            return None
+            else:
+                path = document.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
         except Exception:
             return None
 
@@ -121,7 +125,11 @@ class LicenseSerializer(serializers.ModelSerializer):
             document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
             if document.box_url:
                 return document.box_url
-            return None
+            else:
+                path = document.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
         except Exception:
             return None
     
@@ -131,9 +139,13 @@ class LicenseSerializer(serializers.ModelSerializer):
         """
         try:
             license = Documents.objects.filter(object_id=obj.id, doc_type='license').latest('-created_on')
-            if document.box_url:
-                return document.box_url
-            return None
+            if license.box_url:
+                return license.box_url
+            else:
+                path = license.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
         except Exception:
             return None
 
@@ -143,9 +155,13 @@ class LicenseSerializer(serializers.ModelSerializer):
         """
         try:
             seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').latest('-created_on')
-            if document.box_url:
-                return document.box_url
-            return None
+            if seller.box_url:
+                return seller.box_url
+            else:
+                path = seller.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
         except Exception:
             return None
     

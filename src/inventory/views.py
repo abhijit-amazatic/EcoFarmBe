@@ -464,7 +464,9 @@ class InventorySummaryView(APIView):
         response = dict()
         inventory = Inventory.objects.filter(cf_status='Available')
         response['total_quantity'] = inventory.aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
-        response['total_value'] = inventory.aggregate(total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
+        response['total_value'] = inventory.filter(
+            category_name__contains='Flower').aggregate(
+                total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
         for category in ['Tops', 'Smalls', 'Trim']:
             response[category.lower() + '_quantity'] = inventory.filter(
                 cf_cannabis_grade_and_category__contains=category).aggregate(

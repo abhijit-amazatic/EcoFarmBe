@@ -93,7 +93,11 @@ class UserSerializer(serializers.ModelSerializer):
             document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
             if document.box_url:
                 return document.box_url
-            return None
+            else:
+                path = document.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
         except Exception:
             return None
         
