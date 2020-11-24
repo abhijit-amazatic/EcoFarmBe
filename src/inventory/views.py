@@ -351,7 +351,7 @@ class DocumentView(APIView):
             data_1 = Documents.objects.filter(sku=sku, status='OPTIMIZING').order_by('file_type').values()
             data_2 = Documents.objects.filter(sku=sku, status='AVAILABLE').order_by('file_type').values()
             return Response(
-                data_1 | data_2,
+                data_2 | data_1,
                 status=status.HTTP_200_OK
             )
         return Response(
