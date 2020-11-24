@@ -50,7 +50,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
                              InTransitOrderViewSet, DocumentPreSignedView,
-                             DocumentView, DocumentStatusView, InventoryDeleteView)
+                             DocumentView, DocumentStatusView, InventoryDeleteView,
+                             InventorySummaryView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView, BrandViewSet, 
@@ -179,6 +180,7 @@ urlpatterns = [
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
     path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
     path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
+    path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
 ] + router.urls
 
 

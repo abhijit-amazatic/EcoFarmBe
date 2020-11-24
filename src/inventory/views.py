@@ -5,6 +5,7 @@ from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
 import django_filters
 from django.shortcuts import (render, )
+from django.db.models import (Sum, F, Min, Max, Avg)
 from rest_framework.views import APIView
 from rest_framework.response import (Response, )
 from rest_framework.authentication import (TokenAuthentication, )
@@ -449,3 +450,24 @@ class InventoryDeleteView(APIView):
             except Inventory.DoesNotExist:
                 pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+    
+class InventorySummaryView(APIView):
+    """
+    Return Inventory summary.
+    """
+    permission_classes = (IsAuthenticated, )
+    
+    def get(self, request):
+        """
+        Get inventory summary.
+        """
+        response = dict()
+        inventory = Inventory.objects.filter(cf_status='Available')
+        response['total_quantity'] = inventory.aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
+        response['total_value'] = inventory.aggregate(total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
+        for category in ['Tops', 'Smalls', 'Trim']:
+            response[category.lower() + '_quantity'] = inventory.filter(
+                cf_cannabis_grade_and_category__contains=category).aggregate(
+                    Sum('actual_available_stock'))['actual_available_stock__sum']
+        response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
+        return Response(response)
