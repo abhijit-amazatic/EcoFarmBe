@@ -456,8 +456,7 @@ class InventorySummaryView(APIView):
     """
     Return Inventory summary.
     """
-    permission_classes = (IsAuthenticated, )
-    
+    permission_classes = (AllowAny, )
     def get(self, request):
         """
         Get inventory summary.
