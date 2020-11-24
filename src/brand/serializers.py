@@ -61,7 +61,7 @@ class BrandSerializer(serializers.ModelSerializer):
         Return s3 document url.
         """
         try:
-            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('created_on')
             if document.box_url:
                 return document.box_url
             else:
@@ -122,7 +122,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         Return s3 license url.
         """
         try:
-            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('created_on')
             if document.box_url:
                 return document.box_url
             else:
@@ -138,7 +138,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         Return s3 license url.
         """
         try:
-            license = Documents.objects.filter(object_id=obj.id, doc_type='license').latest('-created_on')
+            license = Documents.objects.filter(object_id=obj.id, doc_type='license').latest('created_on')
             if license.box_url:
                 return license.box_url
             else:
@@ -154,7 +154,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         Return s3 license url.
         """
         try:
-            seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').latest('-created_on')
+            seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').latest('created_on')
             if seller.box_url:
                 return seller.box_url
             else:
