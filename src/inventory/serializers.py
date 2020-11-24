@@ -24,6 +24,7 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
         model = Inventory
         depth = 1
         fields = (
+            'created_time',
             'item_id',
             'cf_strain_name',
             'cf_cultivation_type',
