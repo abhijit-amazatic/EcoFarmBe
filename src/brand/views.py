@@ -508,17 +508,20 @@ class LicenseSyncView(APIView):
         issue = request.data.get('issue')
         expiry = request.data.get('expiry')
         if license_number and expiry:
-            license_obj = License.objects.get(license_number=license_number)
-            date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
-            license_obj.expiration_date = date_time_obj.date()
-            license_obj.issue_date = issue
-            license_obj.save()
-            if license_obj.expiration_date >= timezone.now().date():
-                if license_obj.status_before_expiry:
-                    license_obj.status = status_before_expiry
-                    license_obj.save()
-                else:
-                    license_obj.status = 'in_progress'
-                    license_obj.save()
-            return Response(status=status.HTTP_202_ACCEPTED)
+            try:
+                license_obj = License.objects.get(license_number=license_number)
+                date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
+                license_obj.expiration_date = date_time_obj.date()
+                license_obj.issue_date = issue
+                license_obj.save()
+                if license_obj.expiration_date >= timezone.now().date():
+                    if license_obj.status_before_expiry:
+                        license_obj.status = license_obj.status_before_expiry
+                        license_obj.save()
+                    else:
+                        license_obj.status = 'in_progress'
+                        license_obj.save()
+                return Response(status=status.HTTP_202_ACCEPTED)
+            except License.DoesNotExist:
+                pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
