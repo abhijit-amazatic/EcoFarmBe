@@ -908,7 +908,7 @@ def get_accounts_from_crm(legal_business_name):
             for k,v in crm_dict.items():
                 if v.endswith('_parse'):
                     value = v.split('_parse')[0]
-                    value = parse_fields('Accounts', k, value, account, crm_obj)
+                    value = parse_fields('Accounts', k, value, account, crm_obj, account_id=account_id)
                     response[k] = value
                 else:
                     response[k] = account.get(v)

@@ -394,7 +394,7 @@ def get_customer(obj, data):
         customer = customer[0]
     elif len(customer) > 1:
         for i in customer:
-            if i['contact_name'] == data['customer_name']:
+            if i['contact_name'] == data['customer_name'] and i['contact_type'] == 'customer':
                 customer = i
                 break
     else:
