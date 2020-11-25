@@ -1073,7 +1073,7 @@ CRM_FORMAT  = {
         {
             'contact_id': 'contact_id',
             'contact_name': 'name',
-            'company_name': 'brand_name',
+            'company_name': 'legal_business_name',
             'first_name': 'first_name',
             'last_name': 'last_name',
             'designation': 'designation',

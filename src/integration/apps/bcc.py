@@ -53,6 +53,22 @@ def parse_field(license, key, value):
     if value.startswith('issuedDate') or value.startswith('expiryDate'):
         return datetime.strptime(v, "%m/%d/%Y").date()
 
+def get_all_licenses():
+    """
+    Get all licenses from crm.
+    """
+    crm_obj = get_crm_obj()
+    response = dict()
+    records = crm_obj.get_records('Licenses')
+    page = 1
+    if records.get('status_code') == 200:
+        while records.get('response').get('info').get('more_records'):
+            for i in records.get('response').get('data'):
+                response[i['Name']] = i['id']
+            records = crm_obj.get_records('Licenses', page=page)
+            page += 1
+    return response
+
 def post_licenses_to_crm():
     """
     Post licenses from BCC to CRM.
@@ -62,28 +78,29 @@ def post_licenses_to_crm():
     request_create = list()
     licenses = get_licenses()
     license_dict = get_license_dict()
+    license_data_dict = get_all_licenses()
     for license in licenses:
-        data = crm_obj.search_record('Licenses', license.get('licenseNumber'), 'Name')
         req = dict()
         for k, v in license_dict.items():
             if v.endswith('_parse'):
                 req[k] = parse_field(license, k, v.split('_parse')[0])
             else:
                 req[k] = license.get(v)
-        if data.get('response') and len(data.get('response')) > 0:
-            req['id'] = data.get('response')[0].get('id')
+        license_id = license_data_dict.get(license.get('licenseNumber'))
+        if license_id:
+            req['id'] = license_id
             request_update.append(req)
         else:
             request_create.append(req)
     i = 0
     response_create = response_update = list()
     while len(request_create) > i:
-        response_create.append(crm_obj.insert_records("Licenses", request_create[i: i+99]))
+        response_create.append(crm_obj.insert_records("Licenses", request_create[i: i+100]))
         i += 100
     i = 0
     response_create = response_update = list()
     while len(request_update) > i:
-        response_update.append(crm_obj.update_records("Licenses", request_update[i: i+99]))
-        i += 99
+        response_update.append(crm_obj.update_records("Licenses", request_update[i: i+100]))
+        i += 100
     return response_create, response_update
     
