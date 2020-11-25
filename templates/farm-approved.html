@@ -1,9 +1,9 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
 
-<p style='font-size:16px !important;color: #013c48;'>Hi {{ email }},</p>
+<p style='font-size:16px !important;color: #013c48;'>Hi {{ legal_business_name }},</p>
 <div>
-    <div ><p style='font-size:16px !important;color: #013c48;'>Your {{ profile_type }} Profile has been approved by the Thrive Society Team.You can now access your Dashboard with the following link.<br>
+    <div ><p style='font-size:16px !important;color: #013c48;'>Your {{ profile_type }} Profile has been approved by the Thrive Society Team.You can now access your {{ profile_type }} Dashboard with the following link.<br>
         {{ link }}</p></div>
     <div>
     </div>

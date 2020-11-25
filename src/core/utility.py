@@ -29,6 +29,17 @@ NOUN_PROCESS_MAP = {"cultivator":"cultivation","nursery":"nursery","manufacturer
                     "ancillary products":"ancillary products","ancillary services":"ancillary services",
                     "investor":"investment","patient":"patient","healthcare":"healthcare"}
 
+
+def get_key(val):
+    """
+    function to return key for any value.
+    """ 
+    for key, value in NOUN_PROCESS_MAP.items(): 
+         if val == value: 
+             return key 
+  
+    return "farm"
+
 def pad(s):
     """
     to adding padding in string for encryption purpose
@@ -151,9 +162,9 @@ def add_users_to_system_and_license(profile_contact_id,license_obj_id):
 def get_profile_type(obj):
     """
     return buyer or seller based on condition.
+    #return 'Buyer' if obj.is_buyer else 'Seller'
     """
-    return 'Buyer' if obj.is_buyer else 'Seller'
-    
+    return get_key(obj.profile_category).capitalize()
     
 @app.task(queue="general")
 def send_async_approval_mail(profile_id):
@@ -164,7 +175,7 @@ def send_async_approval_mail(profile_id):
     if license_obj:
         ac_manager = license_obj[0].created_by.email
         profile_type = get_profile_type(license_obj[0])
-        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type},"%s Profile Approved."% profile_type, ac_manager)
+        mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type,'legal_business_name': license_obj[0].legal_business_name},"Your %s profile has been approved."% profile_type, ac_manager)
 
         
 @app.task(queue="general")        
