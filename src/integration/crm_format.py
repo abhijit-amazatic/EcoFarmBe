@@ -1086,6 +1086,7 @@ CRM_FORMAT  = {
             'shipping_address': 'mailing_address_parse',
             'contact_persons': 'employees_parse',
             'contact_type': 'contact_type_parse',
+            'cf_legal_business_name': 'legal_business_name'
         }
 }
 
