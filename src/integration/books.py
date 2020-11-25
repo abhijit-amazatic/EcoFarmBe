@@ -544,6 +544,13 @@ def list_purchase_orders(params=None):
     """
     obj = get_books_obj()
     po_obj = obj.PurchaseOrders()
+    legal_business_name = params.get('vendor_name')
+    contact_obj = obj.Contacts()
+    contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
+    for contact in contacts['response']:
+        if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
+            params['vendor_name'] = contact['contact_name']
+            break
     return po_obj.list_purchase_orders(parameters=params)
 
 def get_vendor_payment(payment_id, params=None):
@@ -691,6 +698,13 @@ def list_bills(params=None):
     """
     obj = get_books_obj()
     bill_obj = obj.Bills()
+    contact_obj = obj.Contacts()
+    legal_business_name = params.get('vendor_name')
+    contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
+    for contact in contacts['response']:
+        if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
+            params['vendor_name'] = contact['contact_name']
+            break
     return bill_obj.list_bills(parameters=params)
 
 def get_salesorder(so_id, params=None):
