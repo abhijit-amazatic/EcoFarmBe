@@ -7,11 +7,44 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Permission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
+from django.dispatch import receiver
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from django.conf import settings
 from user.models import User
 from inventory.models import (Documents, )
+
+class Organization(TimeStampFlagModelMixin,models.Model):
+    """
+    Stores Organization's details.
+    """
+    name = models.CharField(_('Organization Name'), max_length=255)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Created By'),
+        related_name='organizations',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        unique_together = (('name', 'created_by'), )
+        verbose_name = _('Organization')
+        verbose_name_plural = _('Organizations')
+
+    def __str__(self):
+        return f'{self.name} | {self.created_by}'
+
+@receiver(models.signals.post_save, sender=User)
+def post_save_user(sender, instance, created, **kwargs):
+    """
+    Deletes old file.
+    """
+    if created:
+        Organization.objects.get_or_create(
+            name='My Organization',
+            created_by=instance,
+        )
+
 
 class Brand(TimeStampFlagModelMixin,models.Model):
     """

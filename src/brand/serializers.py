@@ -10,7 +10,8 @@ from rest_framework import serializers
 from phonenumber_field.serializerfields import PhoneNumberField
 from core.settings import (AWS_BUCKET, )
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile,
-                     CultivationOverview, ProgramOverview, FinancialOverview, CropOverview, ProfileReport)
+                     CultivationOverview, ProgramOverview, FinancialOverview, CropOverview,
+                     ProfileReport, Organization)
 from .models import (LicenseRole,)
 from user.models import User
 from inventory.models import (Documents, )
@@ -48,8 +49,42 @@ def insert_or_update_vendor_accounts(profile,instance):
             else:
                 insert_accounts.delay(
                     id=instance.id, is_single_user=True)
-                
-        
+
+
+class OrganizationUserSerializer(serializers.ModelSerializer):
+    """
+    This defines ProgramOverviewSerializer
+    """
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'full_name', 'email', 'phone')
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    """
+    This defines ProgramOverviewSerializer
+    """
+    created_by = OrganizationUserSerializer(read_only=True)
+
+    class Meta:
+        model = Organization
+        fields = ('__all__')
+        read_only_fields = ('created_by', 'created_on', 'updated_on')
+
+    def validate_name(self, value):
+        qs = self.context['view'].get_queryset()
+        if qs.filter(name=value).exists():
+            raise serializers.ValidationError("Organization name already exist.")
+        return value
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if request:
+            validated_data['created_by'] = request.user
+        return super().create(validated_data)
+
+
 class BrandSerializer(serializers.ModelSerializer):
     """
     This defines Brand serializer.

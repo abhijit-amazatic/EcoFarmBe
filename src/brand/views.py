@@ -28,11 +28,13 @@ from django_filters import (BaseInFilter, CharFilter, FilterSet)
 
 from core.permissions import IsAuthenticatedBrandPermission
 
-from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile, CultivationOverview,
-                     ProgramOverview, FinancialOverview, CropOverview, ProfileCategory, ProfileReport,)
-from .models import (LicenseRole,)
-from .serializers import (BrandSerializer, BrandCreateSerializer, LicenseSerializer, ProfileContactSerializer, CultivationOverviewSerializer,
-                          LicenseProfileSerializer, FinancialOverviewSerializer, CropOverviewSerializer, ProgramOverviewSerializer, ProfileReportSerializer, FileUploadSerializer)
+from .models import (Organization, Brand, License, LicenseUser, ProfileContact, LicenseProfile,
+                     CultivationOverview, ProgramOverview, FinancialOverview, CropOverview,
+                     ProfileCategory, ProfileReport, LicenseRole,)
+from .serializers import (OrganizationSerializer, BrandSerializer, BrandCreateSerializer, LicenseSerializer,
+                          ProfileContactSerializer, CultivationOverviewSerializer, LicenseProfileSerializer,
+                          FinancialOverviewSerializer, CropOverviewSerializer, ProgramOverviewSerializer,
+                          ProfileReportSerializer, FileUploadSerializer)
 from .serializers import (InviteUserSerializer,)
 from integration.crm import (get_licenses,)
 from integration.books import  get_buyer_summary
@@ -61,6 +63,22 @@ def get_license_numbers(legal_business_names):
 class CustomPagination(PageNumberPagination):
     page_size = 50
     page_size_query_param = 'page_size'
+
+
+class OrganizationViewSet(viewsets.ModelViewSet):
+    """
+    All Brand related endpoint's view is defined here.
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    serializer_class = OrganizationSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'created_by']
+
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        return Organization.objects.filter(created_by=self.request.user)
 
 
 class BrandViewSet(viewsets.ModelViewSet):

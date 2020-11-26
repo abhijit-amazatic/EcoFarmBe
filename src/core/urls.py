@@ -56,7 +56,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventorySummaryView, InventoryCountyView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (ProfileCategoryView, BrandViewSet, 
+from brand.views import (OrganizationViewSet, ProfileCategoryView, BrandViewSet,
                          LicenseViewSet, KpiViewSet, 
                          ProfileReportViewSet, FileUploadView,
                          LicenseSyncView,)
@@ -80,6 +80,7 @@ router.register(r'inventory', InventoryViewSet, base_name="inventory")
 router.register(r'item-feedback', ItemFeedbackViewSet, base_name="feedback")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
+router.register(r'organization', OrganizationViewSet, base_name="organization")
 router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")

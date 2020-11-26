@@ -18,7 +18,7 @@ from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
-from .models import (Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
+from .models import (Organization, Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
 from .models import (LicenseRole,)
 from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
 from integration.box import (delete_file,)
@@ -256,6 +256,19 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
             
         super().save_model(request, obj, form, change)
 
+class OrganizationAdmin(admin.ModelAdmin):
+    """
+    Configuring brand
+    """
+    model = Organization
+    list_display = ('name', 'created_by', 'created_on', 'updated_on',)
+    search_fields = ('name', 'created_by',)
+    list_filter = (
+        ('created_on', DateRangeFilter),
+        ('updated_on', DateRangeFilter),
+    )
+    ordering = ('-created_on', 'updated_on',)
+
         
 class MyBrandAdmin(admin.ModelAdmin):
     """
@@ -290,6 +303,7 @@ class LicenseRoleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(LicenseRole,LicenseRoleAdmin)
+admin.site.register(Organization,OrganizationAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)
 admin.site.register(ProfileCategory, ProfileCategoryAdmin)
