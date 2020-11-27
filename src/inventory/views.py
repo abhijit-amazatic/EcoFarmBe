@@ -467,7 +467,8 @@ class InventorySummaryView(APIView):
         response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
         response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
         response['total_quantity'] = inventory.aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
-        response['total_value'] = inventory.aggregate(
+        response['total_value'] = inventory.filter(
+            category_name__contains='Flower').aggregate(
                 total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
         for category in ['Tops', 'Smalls', 'Trim']:
             response[category.lower() + '_quantity'] = inventory.filter(
