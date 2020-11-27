@@ -91,20 +91,23 @@ def get_distance(location_a, location_b):
     """
     Get distance between two locations.
     """
-    if location_a and location_b:
-        gmaps = googlemaps.Client(key=GOOGLEMAPS_API_KEY)
-        response = gmaps.distance_matrix(location_a, location_b)['rows'][0]['elements'][0]
+    try:
+        if location_a and location_b:
+            gmaps = googlemaps.Client(key=GOOGLEMAPS_API_KEY)
+            response = gmaps.distance_matrix(location_a, location_b)['rows'][0]['elements'][0]
+            return response
+        response = {
+            'code': 1
+        }
+        if not location_a and location_b:
+            response['error'] = 'Both addresses are not valid.'
+        if not location_a:
+            response['error'] = 'location_a is not valid.'
+        elif not location_b:
+            response['error'] = 'location_b is not valid.'
         return response
-    response = {
-        'code': 1
-    }
-    if not location_a and location_b:
-        response['error'] = 'Both addresses are not valid.'
-    if not location_a:
-        response['error'] = 'location_a is not valid.'
-    elif not location_b:
-        response['error'] = 'location_b is not valid.'
-    return response
+    except googlemaps.exceptions.ApiError as exc:
+        return {'code':1, 'Error': exc}
 
 def get_cultivars_date(key, value, obj, crm_obj):
     """
