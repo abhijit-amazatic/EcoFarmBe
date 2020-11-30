@@ -3,26 +3,40 @@ Serializer to validate brand related modules.
 """
 
 import requests
-from django.conf import settings
 from tempfile import TemporaryFile
 
+from django.conf import settings
 from rest_framework import serializers
 from phonenumber_field.serializerfields import PhoneNumberField
+
 from core.settings import (AWS_BUCKET, )
-from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile,
-                     CultivationOverview, ProgramOverview, FinancialOverview, CropOverview,
-                     ProfileReport, Organization)
-from .models import (LicenseRole,)
 from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (notify_admins_on_profile_registration,)
+from inventory.models import (Documents, )
 from integration.crm import (insert_vendors, insert_accounts,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
+from user.models import (User,)
+
+from .models import (
+    Organization,
+    Brand,
+    License,
+    ProfileContact,
+    LicenseProfile,
+    CultivationOverview,
+    ProgramOverview,
+    FinancialOverview,
+    CropOverview,
+    ProfileReport,
+    LicenseUser,
+    LicenseRole,
+)
 
 
-def insert_or_update_vendor_accounts(profile,instance):
+def insert_or_update_vendor_accounts(profile, instance):
     """
     Insert/update vendors/accounts based on existing user or not. 
     """
@@ -150,7 +164,7 @@ class LicenseSerializer(serializers.ModelSerializer):
         """
         return if user is existing user.
         """
-        return obj.created_by.existing_member
+        return obj.organization.created_by.existing_member
     
     def get_license_profile_url(self, obj):
         """
@@ -233,11 +247,21 @@ class LicenseSerializer(serializers.ModelSerializer):
         user = super().update(instance, validated_data)
         return user
 
+    def create(self, validated_data):
+        view = self.context['view']
+        if hasattr(view , 'get_parents_query_dict'):
+            parents_query_dict = view.get_parents_query_dict(**view.kwargs)
+            organization = parents_query_dict.get('organization')
+            if organization:
+                validated_data['organization_id'] = organization
+        return super().create(validated_data)
+
     class Meta:
         model = License
-        fields = ('__all__')
+        # fields = ('__all__')
         read_only_fields = ['approved_on', 'approved_by',
                             'uploaded_sellers_permit_to', 'uploaded_license_to']
+        exclude = ('organization', )
 
 
 class ProfileContactSerializer(serializers.ModelSerializer):
@@ -293,7 +317,6 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = LicenseProfile
         fields = ('__all__')
-
 
 class FinancialOverviewSerializer(serializers.ModelSerializer):
     """

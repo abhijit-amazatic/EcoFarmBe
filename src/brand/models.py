@@ -51,9 +51,17 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     Stores Brand's details.
     """
     brand_name = models.CharField(_('Brand Name'),max_length=255,unique=True)
-    parent_brand = models.ForeignKey('self', blank=True, null=True, default=None, on_delete=models.CASCADE)
+    # parent_brand = models.ForeignKey('self', blank=True, null=True, default=None, on_delete=models.CASCADE)
     ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
                                    related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name=_('Organization'),
+        related_name='brands',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     brand_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     product_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     brand_county = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
@@ -81,7 +89,13 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), on_delete=models.CASCADE)
+    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), on_delete=models.CASCADE,)
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name=_('Organization'),
+        related_name='licenses',
+        on_delete=models.CASCADE,
+    )
     license_type = models.CharField(
         _('License Type'), blank=True, null=True, max_length=255)
     owner_or_manager = models.CharField(

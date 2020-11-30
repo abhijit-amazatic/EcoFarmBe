@@ -35,7 +35,7 @@ class LicenseUpdatedForm(forms.ModelForm):
             if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved':
                 license_obj = License.objects.filter(id=self.instance.id)
                 if license_obj:
-                    ac_manager = license_obj[0].created_by.email
+                    ac_manager = license_obj[0].organization.created_by.email
                     profile_type = get_profile_type(license_obj[0])
                     mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login', 'profile_type': profile_type,'legal_business_name': license_obj[0].legal_business_name},"Your %s profile has been approved."% profile_type, ac_manager)
                     
@@ -231,10 +231,10 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('name','brand','legal_business_name','status','profile_category','approved_on','approved_by','created_by','created_on','updated_on',)
+    list_display = ('name','brand','legal_business_name','status','profile_category','approved_on','approved_by','created_on','updated_on',)
     list_select_related = ['brand__ac_manager']
     search_fields = ('brand__brand_name','brand__ac_manager__email','status')
-    readonly_fields = ('created_on','updated_on','created_by',)
+    readonly_fields = ('created_on','updated_on',)
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
     )
@@ -277,8 +277,8 @@ class MyBrandAdmin(admin.ModelAdmin):
     extra = 0
     model = Brand
     #inlines = [InlineAccountLicenseAdmin,InlineAccountBasicProfileAdmin,InlineAccountContactInfoAdmin, InlineAccountUserAdmin]
-    list_display = ('brand_name','ac_manager','appellation','created_on', 'updated_on',)
-    search_fields = ('brand_name', 'ac_manager', 'appellation')
+    list_display = ('brand_name','organization', 'ac_manager','appellation','created_on', 'updated_on',)
+    search_fields = ('brand_name', 'organization', 'appellation')
     list_filter = (
         ('created_on', DateRangeFilter),('updated_on',DateRangeFilter ),
     )

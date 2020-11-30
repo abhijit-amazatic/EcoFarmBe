@@ -83,6 +83,11 @@ router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'organization', OrganizationViewSet, base_name="organization")
 router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
+router.registry.extend([
+    ('organization/(?P<parent_organization>[^/.]+)/brand', BrandViewSet, 'brand'),
+    ('organization/(?P<parent_organization>[^/.]+)/license', LicenseViewSet, 'license'),
+])
+
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
 router.register(r'help-documentation', HelpDocumentationView, base_name="help-documentation")
@@ -91,7 +96,6 @@ router.register(r'two-factor/device', TwoFactorDeviceViewSet, base_name="two-fac
 router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="add-authy-user")
 router.register(r'two-factor/add-device/phone', AddPhoneDeviceViewSet, base_name="add-phone-device")
 router.register(r'two-factor/add-device/authenticator', AddAuthenticatorRequestViewSet, base_name="add-authenticator-device")
-
 
 
 

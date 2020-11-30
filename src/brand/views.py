@@ -6,43 +6,62 @@ This module defines API views.
 import json
 import re
 import datetime
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework.response import Response
-from rest_framework import (permissions, viewsets, status, filters,)
-from rest_framework.generics import (CreateAPIView,)
+from django.db import transaction
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from django.db import transaction
-from django.conf import settings
-from django.db.models import Q
-from rest_framework.views import APIView
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.exceptions import NotFound
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
 from rest_framework import (permissions, viewsets, status, filters,)
 from rest_framework.authentication import (TokenAuthentication, )
+from rest_framework.decorators import action
+from rest_framework.exceptions import (NotFound, PermissionDenied,)
+from rest_framework.generics import (CreateAPIView,)
+from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
 
-
 from core.permissions import IsAuthenticatedBrandPermission
-
-from .models import (Organization, Brand, License, LicenseUser, ProfileContact, LicenseProfile,
-                     CultivationOverview, ProgramOverview, FinancialOverview, CropOverview,
-                     ProfileCategory, ProfileReport, LicenseRole,)
-from .serializers import (OrganizationSerializer, BrandSerializer, BrandCreateSerializer, LicenseSerializer,
-                          ProfileContactSerializer, CultivationOverviewSerializer, LicenseProfileSerializer,
-                          FinancialOverviewSerializer, CropOverviewSerializer, ProgramOverviewSerializer,
-                          ProfileReportSerializer, FileUploadSerializer)
-from .serializers import (InviteUserSerializer,)
-from integration.crm import (get_licenses,)
 from integration.books import  get_buyer_summary
 from core.utility import (get_license_from_crm_insert_to_db,)
-
+from core.mailer import (mail, mail_send,)
+from integration.crm import (get_licenses,)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
-from core.mailer import (mail, mail_send,)
+
+from .models import (
+    Organization,
+    Brand, License,
+    LicenseUser,
+    ProfileContact,
+    LicenseProfile,
+    CultivationOverview,
+    ProgramOverview,
+    FinancialOverview,
+    CropOverview,
+    ProfileCategory,
+    ProfileReport,
+    LicenseRole,
+)
+from .serializers import (
+    OrganizationSerializer,
+    BrandSerializer,
+    BrandCreateSerializer,
+    LicenseSerializer,
+    ProfileContactSerializer,
+    CultivationOverviewSerializer,
+    LicenseProfileSerializer,
+    FinancialOverviewSerializer,
+    CropOverviewSerializer,
+    ProgramOverviewSerializer,
+    ProfileReportSerializer,
+    FileUploadSerializer,
+    InviteUserSerializer,
+)
+from .views_mixin import (NestedViewSetMixin, )
+from .permissions import filterQuerySet
 
 Auth_User = get_user_model()
 
@@ -70,6 +89,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     All Brand related endpoint's view is defined here.
     """
     permission_classes = (IsAuthenticatedBrandPermission, )
+    queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'created_by']
@@ -78,14 +98,18 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Return queryset based on action.
         """
-        return Organization.objects.filter(created_by=self.request.user)
+        return filterQuerySet.for_user(
+            super().get_queryset(),
+            self.request.user,
+        )
 
 
-class BrandViewSet(viewsets.ModelViewSet):
+class BrandViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
     permission_classes = (IsAuthenticatedBrandPermission, )
+    queryset = Brand.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     search_fields = ['brand_name', ]
 
@@ -101,11 +125,10 @@ class BrandViewSet(viewsets.ModelViewSet):
         """
         Return queryset based on action.
         """
-        brands = Brand.objects.filter()
-        if self.action == "list":
-            brands = brands.select_related('ac_manager')
-        brands = brands.filter(ac_manager=self.request.user)
-        return brands
+        return filterQuerySet.for_user(
+            super().get_queryset(),
+            self.request.user,
+        )
 
     def create(self, request):
         """
@@ -150,11 +173,12 @@ class DataFilter(FilterSet):
             'premises_county__in':['icontains', 'exact']
         }
         
-class LicenseViewSet(viewsets.ModelViewSet):
+class LicenseViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All LicenseViewSet
     """
     permission_classes = (IsAuthenticatedBrandPermission, )
+    queryset = License.objects.get_queryset()
     profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
     cultivation_overview_path = 'cultivation-overview(/(?P<cultivation_overview_id>[0-9]*))?'
     license_profile_path = 'license-profile(/(?P<license_profile_id>[0-9]*))?'
@@ -166,35 +190,27 @@ class LicenseViewSet(viewsets.ModelViewSet):
     filterset_fields = ['profile_category', 'legal_business_name']
     filterset_class = DataFilter
 
+    action_select_related_fields_map = {
+        'list':                 ('brand',),
+        'profile_contact':      ('profile_contact',),
+        'cultivation_overview': ('cultivation_overview',),
+        'license_profile':      ('license_profile',),
+        'financial_overview':   ('financial_overview',),
+        'crop_overview':        ('crop_overview',),
+        'program_overview':     ('program_overview',),
+    }
 
     def get_queryset(self):
         """
-        Return queryset based on action.
+        Return queryset.
         """
-        license_user = self.request.user.license_roles.get_queryset()
-        accessible_licenses = [x.license.id for x in license_user]
-
-        license = License.objects.filter()
-        if self.action == "list":
-            license = license.select_related('brand')
-        elif self.action == "profile_contact":
-            license = license.select_related('profile_contact')
-        elif self.action == "cultivation_overview":
-            license = license.select_related('cultivation_overview')
-        elif self.action == "license_profile":
-            license = license.select_related('license_profile')
-        elif self.action == "financial_overview":
-            license = license.select_related('financial_overview')
-        elif self.action == "crop_overview":
-            license = license.select_related('crop_overview')
-        elif self.action == "program_overview":
-            license = license.select_related('program_overview')
-        #license = license.filter(brand__ac_manager=self.request.user)
-        license = License.objects.filter(
-            Q(brand__ac_manager=self.request.user) |
-            Q(id__in=accessible_licenses) |
-            Q(created_by=self.request.user)
+        license = filterQuerySet.for_user(
+            super().get_queryset(),
+            self.request.user,
         )
+        select_related_fields = self.action_select_related_fields_map.get(self.action)
+        if select_related_fields:
+            license = license.select_related(*select_related_fields)
         return license
 
     def get_serializer_class(self):
@@ -215,28 +231,23 @@ class LicenseViewSet(viewsets.ModelViewSet):
             return ProgramOverviewSerializer
         return LicenseSerializer
 
-    def create(self, request):
+    def perform_create(self, serializer):
         """
-        This is used to create Licensse.
+        This is used to create License.
         """
-        serializer = LicenseSerializer(data=request.data, context={
-                                       'request': request}, many=True)
-        if serializer.is_valid(raise_exception=True):
-            instance = serializer.save()
-            try:                
-                if serializer.validated_data[0].get('created_by').existing_member:
-                    existing_user_license_nos = get_license_numbers(serializer.validated_data[0].get('created_by').legal_business_name)
-                    if serializer.validated_data[0].get('license_number') in existing_user_license_nos:
-                        get_license_from_crm_insert_to_db(serializer.validated_data[0].get('created_by').id,
-                                                          serializer.validated_data[0].get('license_number'),
-                                                          instance[0].id)
-                    elif serializer.validated_data[0].get('license_number') not in existing_user_license_nos:
-                        instance[0].is_data_fetching_complete = True
-                        instance[0].save()
-            except Exception as e:
-                print('Exception while creating& pulling existing user license',e)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        instance = serializer.save()
+        try:
+            if serializer.validated_data[0].get('created_by').existing_member:
+                existing_user_license_nos = get_license_numbers(serializer.validated_data[0].get('created_by').legal_business_name)
+                if serializer.validated_data[0].get('license_number') in existing_user_license_nos:
+                    get_license_from_crm_insert_to_db(serializer.validated_data[0].get('created_by').id,
+                                                        serializer.validated_data[0].get('license_number'),
+                                                        instance[0].id)
+                elif serializer.validated_data[0].get('license_number') not in existing_user_license_nos:
+                    instance[0].is_data_fetching_complete = True
+                    instance[0].save()
+        except Exception as e:
+            print('Exception while creating & pulling existing user license',e)
 
     def extra_info(self, request, pk, model, serializer, extra_info_attribute):
         """
@@ -262,7 +273,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
             return Response(ser.data)
 
     @action(detail=True, url_path='existing-user-data-status', methods=['get'])
-    def existing_user_data_status(self, request, pk):
+    def existing_user_data_status(self, request, pk, *args, **kwargs):
         """
         existing user data status
         """
@@ -271,42 +282,42 @@ class LicenseViewSet(viewsets.ModelViewSet):
 
     
     @action(detail=True, url_path=profile_contact_path, methods=['get', 'patch'], pagination_class=CustomPagination)
-    def profile_contact(self, request, pk, profile_contact_id=None):
+    def profile_contact(self, request, pk, profile_contact_id=None, *args, **kwargs):
         """
         Detail route CRUD operations on profile_contact.
         """
         return self.extra_info(request, pk, ProfileContact, ProfileContactSerializer, 'profile_contact')
 
     @action(detail=True, url_path=cultivation_overview_path, methods=['get', 'patch'], pagination_class=CustomPagination)
-    def cultivation_overview(self, request, pk, cultivation_overview_id=None):
+    def cultivation_overview(self, request, pk, cultivation_overview_id=None, *args, **kwargs):
         """
         Detail route CRUD operations on cultivation_overview.
         """
         return self.extra_info(request, pk, CultivationOverview, CultivationOverviewSerializer, 'cultivation_overview')
 
     @action(detail=True, url_path=financial_overview_path, methods=['get', 'delete', 'patch'], pagination_class=CustomPagination)
-    def financial_overview(self, request, pk, financial_overview_id=None):
+    def financial_overview(self, request, pk, financial_overview_id=None, *args, **kwargs):
         """
         Detail route CRUD operations on financial_overview.
         """
         return self.extra_info(request, pk, FinancialOverview, FinancialOverviewSerializer, 'financial_overview')
 
     @action(detail=True, url_path=crop_overview_path, methods=['get', 'patch'], pagination_class=CustomPagination)
-    def crop_overview(self, request, pk, crop_overview_id=None):
+    def crop_overview(self, request, pk, crop_overview_id=None, *args, **kwargs):
         """
         Detail route CRUD operations on crop_overview.
         """
         return self.extra_info(request, pk, CropOverview, CropOverviewSerializer, 'crop_overview')
 
     @action(detail=True, url_path=program_overview_path, methods=['get', 'patch'], pagination_class=CustomPagination)
-    def program_overview(self, request, pk, program_overview_id=None):
+    def program_overview(self, request, pk, program_overview_id=None, *args, **kwargs):
         """
         Detail route CRUD operations on program_overview.
         """
         return self.extra_info(request, pk, ProgramOverview, ProgramOverviewSerializer, 'program_overview')
 
     @action(detail=True, url_path=license_profile_path, methods=['get', 'patch'], pagination_class=CustomPagination)
-    def license_profile(self, request, pk, license_profile_id=None):
+    def license_profile(self, request, pk, license_profile_id=None, *args, **kwargs):
         """
         Detail route CRUD operations on license_profile.
         """
