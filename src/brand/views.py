@@ -352,22 +352,23 @@ class ProfileCategoryView(APIView):
         return Response(queryset)
 
 
-class KpiViewSet(APIView):
+class KpiViewSet(NestedViewSetMixin, APIView):
     """
     All KPI view set
     """
     permission_classes = (IsAuthenticatedBrandPermission, )
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         """
         Return QuerySet.
         """
-        value_list = License.objects.filter(created_by=self.request.user).values_list(
-            'profile_category', flat=True).distinct()
+        qs = License.objects.all()
+        qs = self.filter_queryset_by_parents_lookups(qs)
+        qs = filterQuerySet.for_user(qs, request.user)
+        value_list = qs.values_list('profile_category', flat=True).distinct()
         group_by_value = {}
         for value in value_list:
-            license_obj = License.objects.filter(
-                created_by=self.request.user, profile_category=value).select_related()
+            license_obj = qs.filter(profile_category=value).select_related()
             #license_profile_kpis = license_obj.values()
             license_profile_kpis = []
             for license in license_obj:

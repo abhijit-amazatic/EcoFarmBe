@@ -182,6 +182,7 @@ urlpatterns = [
          name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
     path(r'platform-kpi/', KpiViewSet.as_view(), name='kpi'),
+    path('organization/<int:parent_organization>/platform-kpi/', KpiViewSet.as_view(), name='organization-kpi'),
     path(r'file-upload/', FileUploadView.as_view(), name='file-upload'),
     path(r'document-url/<str:id>/', DocumentPreSignedView.as_view(), name='documents-url'),
     path(r'document-url/', DocumentPreSignedView.as_view(), name='documents-url'),
