@@ -20,8 +20,9 @@ from brand.models import (License,)
 from inventory.models import (Documents, )
 from integration.apps.aws import (create_presigned_url, )
 
-
 from two_factor.serializers import TwoFactorDevicesSerializer
+from brand.serializers import OrganizationSerializer
+from brand.permissions import filterQuerySet
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]
@@ -76,6 +77,7 @@ class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField()
     member_categories = serializers.SerializerMethodField(read_only=True)
     two_factor_devices = serializers.SerializerMethodField(read_only=True)
+    organizations = OrganizationSerializer(many=True, read_only=True)
     is_verified = serializers.ReadOnlyField()
     is_2fa_enabled = serializers.ReadOnlyField()
     is_approved = serializers.ReadOnlyField()
@@ -120,14 +122,16 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Adds vendors profiles kpis for 'my platform' to the user/me response.
         """
-        profile_count = License.objects.filter(created_by=obj).count()
+        qs  = License.objects.all()
+        qs = filterQuerySet.for_user(qs, obj)
+        profile_count = qs.count()
         return {"profile_count":profile_count}
     
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url','crm_link')
-    
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations')
+
 
     def validate_password(self, password):
         if password:

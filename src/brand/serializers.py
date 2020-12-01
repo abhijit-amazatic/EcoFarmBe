@@ -65,7 +65,7 @@ def insert_or_update_vendor_accounts(profile, instance):
                     id=instance.id, is_single_user=True)
 
 
-class OrganizationUserSerializer(serializers.ModelSerializer):
+class OrganizationUserInfoSerializer(serializers.ModelSerializer):
     """
     This defines ProgramOverviewSerializer
     """
@@ -79,12 +79,10 @@ class OrganizationSerializer(serializers.ModelSerializer):
     """
     This defines ProgramOverviewSerializer
     """
-    created_by = OrganizationUserSerializer(read_only=True)
-
     class Meta:
         model = Organization
-        fields = ('__all__')
-        read_only_fields = ('created_by', 'created_on', 'updated_on')
+        exclude = ('created_by',)
+        read_only_fields = ('created_on', 'updated_on')
 
     def validate_name(self, value):
         qs = self.context['view'].get_queryset()
@@ -97,6 +95,17 @@ class OrganizationSerializer(serializers.ModelSerializer):
         if request:
             validated_data['created_by'] = request.user
         return super().create(validated_data)
+
+class OrganizationWithUserInfoSerializer(OrganizationSerializer):
+    """
+    This defines ProgramOverviewSerializer
+    """
+    created_by = OrganizationUserInfoSerializer(read_only=True)
+
+    class Meta:
+        model = Organization
+        fields = ('__all__')
+        read_only_fields = ('created_by', 'created_on', 'updated_on')
 
 
 class BrandSerializer(serializers.ModelSerializer):
