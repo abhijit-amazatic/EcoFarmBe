@@ -48,7 +48,6 @@ from .models import (
 from .serializers import (
     OrganizationSerializer,
     BrandSerializer,
-    BrandCreateSerializer,
     LicenseSerializer,
     ProfileContactSerializer,
     CultivationOverviewSerializer,
@@ -111,15 +110,8 @@ class BrandViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedBrandPermission, )
     queryset = Brand.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
+    serializer_class =BrandSerializer
     search_fields = ['brand_name', ]
-
-    def get_serializer_class(self):
-        """
-        Return serializer on the basis of action.
-        """
-        if self.action == 'create':
-            return BrandCreateSerializer
-        return BrandSerializer
 
     def get_queryset(self):
         """
@@ -129,17 +121,6 @@ class BrandViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
             super().get_queryset(),
             self.request.user,
         )
-
-    def create(self, request):
-        """
-        This endpoint is used to create Brand.
-        """
-        serializer = BrandCreateSerializer(
-            data=request.data, context={'request': request}, many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FileUploadView(APIView):

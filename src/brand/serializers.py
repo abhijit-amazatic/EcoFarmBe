@@ -135,29 +135,19 @@ class BrandSerializer(serializers.ModelSerializer):
             pass
         return data
 
-    class Meta:
-        model = Brand
-        fields = ('__all__')
-
-
-class BrandCreateSerializer(serializers.ModelSerializer):
-    """
-    This defines Brand creation serializer and related validation
-    """
-
-    def validate(self, obj):
-        """
-        Object level validation.Normal user should allowed to create Brand only with self foreign key.
-        """
-        if not (obj['ac_manager'] == self.context['request'].user) and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
-            raise serializers.ValidationError(
-                "You are not allowed to create brand with another user!")
-        return obj
+    def create(self, validated_data):
+        view = self.context['view']
+        if hasattr(view , 'get_parents_query_dict'):
+            parents_query_dict = view.get_parents_query_dict(**view.kwargs)
+            organization = parents_query_dict.get('organization')
+            if organization:
+                validated_data['organization_id'] = organization
+        return super().create(validated_data)
 
     class Meta:
         model = Brand
-        fields = ('__all__')
-
+        #fields = ('__all__')
+        exclude = ('organization',)
 
 class LicenseSerializer(serializers.ModelSerializer):
     """
