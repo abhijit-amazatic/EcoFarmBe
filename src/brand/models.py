@@ -52,15 +52,11 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     """
     brand_name = models.CharField(_('Brand Name'),max_length=255,unique=True)
     # parent_brand = models.ForeignKey('self', blank=True, null=True, default=None, on_delete=models.CASCADE)
-    ac_manager = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Account Manager'),
-                                   related_name='manages', null=True, blank=True, default=None, on_delete=models.CASCADE)
     organization = models.ForeignKey(
         Organization,
         verbose_name=_('Organization'),
         related_name='brands',
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     brand_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     product_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)

@@ -53,7 +53,7 @@ class filterQuerySet:
 
     def brand_brand_for_user(self):
         return self.queryset.filter(
-            created_by=self.user
+            organization__created_by=self.user
         )
 
     def brand_license_for_user(self):

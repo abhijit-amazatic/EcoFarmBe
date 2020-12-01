@@ -232,8 +232,8 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     extra = 0
     model = License
     list_display = ('name','brand','legal_business_name','status','profile_category','approved_on','approved_by','created_on','updated_on',)
-    list_select_related = ['brand__ac_manager']
-    search_fields = ('brand__brand_name','brand__ac_manager__email','status')
+    list_select_related = ['brand__organization__ac_manager']
+    search_fields = ('brand__brand_name','brand__organization__ac_manager__email','status')
     readonly_fields = ('created_on','updated_on',)
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
@@ -277,7 +277,7 @@ class MyBrandAdmin(admin.ModelAdmin):
     extra = 0
     model = Brand
     #inlines = [InlineAccountLicenseAdmin,InlineAccountBasicProfileAdmin,InlineAccountContactInfoAdmin, InlineAccountUserAdmin]
-    list_display = ('brand_name','organization', 'ac_manager','appellation','created_on', 'updated_on',)
+    list_display = ('brand_name','organization', 'appellation','created_on', 'updated_on',)
     search_fields = ('brand_name', 'organization', 'appellation')
     list_filter = (
         ('created_on', DateRangeFilter),('updated_on',DateRangeFilter ),
