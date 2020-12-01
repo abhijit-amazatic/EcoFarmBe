@@ -218,15 +218,15 @@ class LicenseViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         """
         instance = serializer.save()
         try:
-            if serializer.validated_data[0].get('created_by').existing_member:
-                existing_user_license_nos = get_license_numbers(serializer.validated_data[0].get('created_by').legal_business_name)
-                if serializer.validated_data[0].get('license_number') in existing_user_license_nos:
-                    get_license_from_crm_insert_to_db(serializer.validated_data[0].get('created_by').id,
-                                                        serializer.validated_data[0].get('license_number'),
-                                                        instance[0].id)
-                elif serializer.validated_data[0].get('license_number') not in existing_user_license_nos:
-                    instance[0].is_data_fetching_complete = True
-                    instance[0].save()
+            user = instance.organization.created_by
+            if user.existing_member:
+                existing_user_license_nos = get_license_numbers(user.legal_business_name)
+                if instance.license_number in existing_user_license_nos:
+                    get_license_from_crm_insert_to_db(user.id,instance.license_number,instance.id)
+                elif instance.license_number not in existing_user_license_nos:
+                    instance.is_data_fetching_complete = True
+                    instance.save()
+                pass
         except Exception as e:
             print('Exception while creating & pulling existing user license',e)
 
