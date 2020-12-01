@@ -475,4 +475,5 @@ class InventorySummaryView(APIView):
                 cf_cannabis_grade_and_category__contains=category).aggregate(
                     Sum('actual_available_stock'))['actual_available_stock__sum']
         response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
+        response['batch_varities'] = inventory.distinct('sku').count()
         return Response(response)
