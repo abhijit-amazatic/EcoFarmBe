@@ -146,7 +146,6 @@ class BrandSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Brand
-        #fields = ('__all__')
         exclude = ('organization',)
 
 class LicenseSerializer(serializers.ModelSerializer):
@@ -213,28 +212,16 @@ class LicenseSerializer(serializers.ModelSerializer):
         except Exception:
             return None
     
-    def validate(self, obj):
-        """
-        Object level validation.Normal user should allowed to create license only with respective brand
-        """
-        if self.context['request'].method == 'POST':
-            pass
-            # user_brands = Brand.objects.filter(ac_manager=self.context['request'].user)
-            # if obj['license'] not in user_brands and not (self.context['request'].user.is_staff or self.context['request'].user.is_superuser):
-            #     raise serializers.ValidationError(
-            #         "You can only add/update license related to your brand only!")
-        return obj
-
     def update(self, instance, validated_data):
         if validated_data.get('status') == 'completed':
             try:
                 profile = LicenseProfile.objects.get(license=instance.id)
                 notify_admins_on_profile_registration(
-                    profile.license.created_by.email, profile.name,instance)
+                    profile.license.organization.created_by.email, profile.name, instance)
                 #Create zoho books customer
-                if profile.license.created_by.membership_type == "personal":
+                if profile.license.organization.created_by.membership_type == "personal":
                     create_customer_in_books(profile.license.id, is_update=False, is_single_user=True, params={})
-                elif profile.license.created_by.membership_type == "business":
+                elif profile.license.organization.created_by.membership_type == "business":
                     if profile.license.brand:
                         create_customer_in_books(profile.license.brand.id, is_update=False, is_single_user=False, params={})
                     else:
