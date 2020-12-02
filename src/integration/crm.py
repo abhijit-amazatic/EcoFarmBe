@@ -603,6 +603,16 @@ def get_records_from_crm(license_number):
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         for license_dict in licenses.get('response'):
             license_number = license_dict['Name']
+            org = search_query('Orgs_X_Licenses', license_number, 'License')
+            if org.get('status_code') == 200:
+                org_list = list()
+                for o in org.get('response'):
+                    r = dict()
+                    r['Org'] = o['Org']['name']
+                    org_list.append(r)
+                final_response['organization'] = org_list
+            else:
+                final_response['organization'] = None
             vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
             if vendor['status_code'] != 200:
                 vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)

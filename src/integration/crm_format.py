@@ -463,6 +463,22 @@ CRM_FORMAT  = {
         "Cultivar_Associations": "Cultivar_Associations",
         "Cultivars": "Cultivars"
     },
+    "Orgs_X_Brands":{
+      "Org": "Org",
+      "Brand": "Brand"
+    },
+    "Orgs_X_Vendors": {
+        "Org": "Org",
+        "Vendor": "Vendor"
+    },
+    "Orgs_X_Accounts": {
+        "Org": "Org",
+        "Account": "Account"
+    },
+    "Orgs_X_Licenses": {
+        "Org": "Org",
+        "License": "License"
+    },
     "Vendors_To_DB" : {
         'db_id': 'db_id',
         'id': 'id',
