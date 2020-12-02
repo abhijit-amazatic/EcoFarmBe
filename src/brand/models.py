@@ -4,7 +4,7 @@ Brand related schemas defined here.
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission as DjPermission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
 from django.dispatch import receiver
@@ -14,6 +14,7 @@ from django.conf import settings
 from user.models import User
 from inventory.models import (Documents, )
 from .utils import get_unique_org_name
+
 
 class Organization(TimeStampFlagModelMixin,models.Model):
     """
@@ -47,7 +48,101 @@ def post_save_user(sender, instance, created, **kwargs):
         )
 
 
-class Brand(TimeStampFlagModelMixin,models.Model):
+class Permission(models.Model):
+    """
+    The permissions.
+    """
+    GROUP_CHOICES = (
+        ('orders', _('orders')),
+        ('profile', _('Profile')),
+        ('compliance', _('Compliance')),
+        ('marketplace', _('Marketplace')),
+        ('billing_and_accounting', _('Billing & Accounting')),
+        ('billing_and_accounting', _('Billing & Accounting')),
+    )
+
+    name = models.CharField(_('name'), max_length=255)
+    codename = models.CharField(
+        _('codename'),
+        max_length=100,
+        unique=True
+        )
+    group = models.CharField(_('Group'), choices=GROUP_CHOICES, max_length=100)
+
+    class Meta:
+        verbose_name = _('permission')
+        verbose_name_plural = _('permissions')
+        ordering = ('group', 'codename')
+
+    def __str__(self):
+        return "%s | %s" % (
+            self.group,
+            self.name,
+        )
+
+    def natural_key(self):
+        return (self.codename,)
+
+
+class OrganizationRole(TimeStampFlagModelMixin, models.Model):
+    """
+    Stores Organization User's Roles.
+    """
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name=_('Organization'),
+        related_name='roles',
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(
+        verbose_name=_('Name'),
+        max_length=60,
+    )
+    permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_('Permissions'),
+        blank=True,
+    )
+
+    def __str__(self):
+        return str(self.ROLE_CHOICES_DICT.get(self.name, ''))
+
+    def natural_key(self):
+        return (self.name,)
+
+    class Meta:
+        unique_together = (('organization', 'name'), )
+        verbose_name = _('Organization Role')
+        verbose_name_plural = _('Organization Roles')
+
+
+class OrganizationUser(TimeStampFlagModelMixin, models.Model):
+    """
+    Stores Brand's details.
+    """
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name=_('Organization'),
+        related_name='organization_user',
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        related_name='organization_user',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        unique_together = (('organization', 'user'), )
+        verbose_name = _('Organization User')
+        verbose_name_plural = _('Organization Users')
+
+    def __str__(self):
+        return f'{self.organization} | {self.user}'
+
+
+class Brand(TimeStampFlagModelMixin, models.Model):
     """
     Stores Brand's details.
     """
@@ -70,18 +165,18 @@ class Brand(TimeStampFlagModelMixin,models.Model):
     have_marketing = models.CharField(blank=True, null=True, max_length=255)
     featured_on_our_site = models.CharField(blank=True, null=True, max_length=255)
     profile_category = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    is_buyer = models.BooleanField(_('Is Buyer/accounts'), default=False)    
+    is_buyer = models.BooleanField(_('Is Buyer/accounts'), default=False)
     is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
     documents = GenericRelation(Documents)
-    
+
     def __str__(self):
         return self.brand_name
-    
 
-class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
+
+class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     """
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
@@ -131,7 +226,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     associated_program = models.CharField(
         _('Associated_program'), blank=True, null=True, max_length=255)
     profile_category = models.CharField(_('Profile Category'), blank=True, null=True, max_length=255)
-    is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)    
+    is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
@@ -140,7 +235,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
     is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
     status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
-    
+
     def __str__(self):
         return self.legal_business_name
 
@@ -148,7 +243,37 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin,models.Model):
         verbose_name = _('License/Profile')
 
 
-class LicenseRole(TimeStampFlagModelMixin,models.Model):
+class OrganizationUserRole(TimeStampFlagModelMixin, models.Model):
+    """
+    Stores Brand's details.
+    """
+    organization_user = models.ForeignKey(
+        OrganizationUser,
+        verbose_name=_('Organization User'),
+        related_name='organization_user_role',
+        on_delete=models.CASCADE,
+    )
+    role = models.ForeignKey(
+        OrganizationRole,
+        verbose_name=_('Organization Role'),
+        related_name='organization_user_role',
+        on_delete=models.CASCADE,
+    )
+    licenses = models.ManyToManyField(
+        License,
+        verbose_name=_('Licenses'),
+    )
+
+    class Meta:
+        unique_together = (('organization_user', 'role'), )
+        verbose_name = _('OrganizationUserRole')
+        verbose_name_plural = _('OrganizationUserRoles')
+
+    def __str__(self):
+        return f'{self.organization_user} | {self.role}'
+
+
+class LicenseRole(TimeStampFlagModelMixin, models.Model):
     """
     Stores License Profile User's User's Roles.
     """
@@ -174,7 +299,7 @@ class LicenseRole(TimeStampFlagModelMixin,models.Model):
         unique=True,
     )
     default_permissions = models.ManyToManyField(
-        Permission,
+        DjPermission,
         verbose_name=_('Default Permissions'),
         blank=True,
         limit_choices_to=Q(content_type__app_label='brand'),
@@ -221,7 +346,7 @@ class LicenseRolePermissions(TimeStampFlagModelMixin,models.Model):
     role = models.ForeignKey(LicenseRole, verbose_name=_('Role'),
                              related_name='license_role_permissions', on_delete=models.CASCADE)
     permissions = models.ManyToManyField(
-        Permission,
+        DjPermission,
         verbose_name=_('License Role Permissions'),
         blank=True,
         limit_choices_to=Q(content_type__app_label='brand'),
@@ -253,7 +378,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     """
     license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='license_profile', on_delete=models.CASCADE)
-    brand_association = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)  
+    brand_association = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(_('Name'), blank=True, null=True, max_length=255)
     county = models.CharField(
         _('County'), blank=True, null=True, max_length=255)
@@ -292,8 +417,8 @@ class CultivationOverview(models.Model):
     lighting_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     type_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     overview = ArrayField(HStoreField(blank=True, null=True), blank=True, null=True,default=list)
-    is_draft = models.BooleanField(_('Is Draft'), default=False)    
-    
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+
 class ProgramOverview(models.Model):
     """
     Stores program overview.
@@ -323,8 +448,8 @@ class CropOverview(models.Model):
     process_on_site = models.CharField(blank=True, null=True, max_length=255)
     need_processing_support = models.CharField(blank=True, null=True, max_length=255)
     overview = ArrayField(JSONField(blank=True,null=True), blank=True, null=True, default=list)
-    is_draft = models.BooleanField(_('Is Draft'), default=False)    
-    
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+
 class ProfileCategory(models.Model):
     """
     Class implementing  Vendor/Profile categories.
@@ -333,7 +458,7 @@ class ProfileCategory(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = _('Vendor/Profile Category')
         verbose_name_plural = _('Vendor/Profile Categories')
@@ -345,8 +470,5 @@ class ProfileReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Report Manager'),on_delete=models.CASCADE)
     profile = models.CharField( _('Vendor Profile'), blank=True, null=True, max_length=255)
     report_name = models.CharField( _('Report Name'), blank=True, null=True, max_length=255)
-    profile_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    profile_type = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
     profile_reports = JSONField(null=False, blank=False, default=dict)
-        
-
-    
