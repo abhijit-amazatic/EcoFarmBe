@@ -13,6 +13,7 @@ from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from django.conf import settings
 from user.models import User
 from inventory.models import (Documents, )
+from .utils import get_unique_org_name
 
 class Organization(TimeStampFlagModelMixin,models.Model):
     """
@@ -41,7 +42,7 @@ def post_save_user(sender, instance, created, **kwargs):
     """
     if created:
         Organization.objects.get_or_create(
-            name='My Organization',
+            name=get_unique_org_name(Organization),
             created_by=instance,
         )
 

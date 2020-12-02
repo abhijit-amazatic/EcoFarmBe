@@ -73,6 +73,7 @@ target/
 
 # Local settings file
 src/*/settings/local.py
+src/*/local_settings.py
 .vscode/*
 .vscode
 .idea/

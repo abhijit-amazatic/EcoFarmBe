@@ -365,6 +365,29 @@ class FileUploadSerializer(serializers.Serializer):
         return {'name': validated_data['file'].name}
 
 
+class CurrentPasswordSerializer(serializers.Serializer): # pylint: disable=W0223
+    """
+    Serializer class to Check current password
+    """
+    current_password = serializers.CharField(
+        label="Current Password",
+        required=True,
+        max_length=128,
+        style={'input_type': 'password'},
+        write_only=True,
+    )
+
+    def validate_current_password(self, value):
+        """
+        Check current password.
+        """
+        user = self.context['request'].user
+        if user.is_authenticated:
+            if user.check_password(value):
+                return value
+        raise serializers.ValidationError("wrong current password.")
+
+
 class InviteUserRelatedLicenceField(serializers.RelatedField):
     queryset = License.objects.all()
 

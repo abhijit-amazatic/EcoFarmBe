@@ -58,6 +58,7 @@ from .serializers import (
     ProfileReportSerializer,
     FileUploadSerializer,
     InviteUserSerializer,
+    CurrentPasswordSerializer,
 )
 from .views_mixin import (NestedViewSetMixin, )
 from .permissions import filterQuerySet
@@ -101,6 +102,19 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             super().get_queryset(),
             self.request.user,
         )
+
+    def get_serializer_class(self):
+        """
+        Return serializer on the basis of action.
+        """
+        if self.action == 'destroy':
+            return CurrentPasswordSerializer
+        return super().get_serializer_class()
+
+    def destroy(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return super().destroy(request, *args, **kwargs)
 
 
 class BrandViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
