@@ -94,6 +94,7 @@ class User(StatusFlagMixin,AbstractUser):
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     documents = GenericRelation('inventory.Documents')
+    crm_link = models.CharField(_('CRM link'), max_length=255, blank=True, null=True)
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'

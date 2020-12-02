@@ -39,11 +39,11 @@ KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)
 
 
-def notify_admins(email):
+def notify_admins(email,crm_link):
     """
     Notify admins on slack & email about new user registration.
     """
-    msg = "<!channel>User with the EmailID `%s`  is registered with us!" % email
+    msg = "<!channel>*User with the EmailID `%s`  is registered with us!*\n* Contact CRM Link is:* <%s>" % (email,crm_link)
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
     #mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
 
@@ -117,6 +117,7 @@ class UserViewSet(ModelViewSet):
             if response['status_code'] == 201:
                 instance.is_updated_in_crm = True
                 instance.zoho_contact_id = response['response']['data'][0]['details']['id']
+                instance.crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Contacts/"+response['response']['data'][0]['details']['id']+"/"
                 instance.save()
             try:
                 if not instance.existing_member:
@@ -126,7 +127,7 @@ class UserViewSet(ModelViewSet):
                     #get_from_crm_insert_to_vendor_or_account.delay(instance.id)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", instance.email)
-                notify_admins(instance.email)
+                notify_admins(instance.email,instance.crm_link)
             except Exception as e:
                 print(e)
                 pass        

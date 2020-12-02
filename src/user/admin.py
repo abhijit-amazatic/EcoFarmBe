@@ -91,10 +91,10 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     list_per_page = 25
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
-    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','email'] #'phone'
+    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','email','crm_link'] #'phone'
     actions = [approve_user, ] 
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified',)}),
+            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link',)}),
     )     
     
     @transaction.atomic

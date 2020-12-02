@@ -126,7 +126,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url','crm_link')
     
 
     def validate_password(self, password):
