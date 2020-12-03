@@ -42,6 +42,7 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     box_id = models.CharField(_('Box ID'), blank=True, null=True, max_length=100)
     is_primary = models.BooleanField(_('Is Primary Image'), default=False)
     doc_type = models.CharField(_('Doc Type'), blank=True, null=True, max_length=50)
+    order = models.IntegerField(_('Order'), blank=True, null=True)
 
 
 class Inventory(models.Model):
