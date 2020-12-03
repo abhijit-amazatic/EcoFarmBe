@@ -12,7 +12,7 @@ from .crm import (insert_users, insert_vendors,
                   fetch_labtests, )
 from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
-from .crm import (fetch_cultivars, )
+from .crm import (fetch_cultivars, fetch_licenses)
 from integration.apps.bcc import (post_licenses_to_crm, )
 
 
@@ -36,6 +36,7 @@ def fetch_inventory_on_interval():
         # inventory_before = Inventory.objects.all().delete()
         fetch_cultivars(days=150)
         fetch_labtests(days=150)
+        licenses = fetch_licenses()
         labtests = LabTest.objects.all().count()
         fetch_inventory('inventory_efd', days=150, price_data=price_data)
         fetch_inventory('inventory_efl', days=150, price_data=price_data)
@@ -43,7 +44,8 @@ def fetch_inventory_on_interval():
         return {'status_code': 200,
                 'labtest': labtests,
         #        'deleted': inventory_before[0],
-                'inserted': inventory_after}
+                'inserted': inventory_after,
+                'licenses': licenses}
     except Exception as exc:
         print(exc)
         return {'status_code': 400,

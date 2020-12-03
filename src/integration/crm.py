@@ -1109,3 +1109,35 @@ def sync_labtest(record):
     except Exception as exc:
         print(exc)
         return {}
+
+def fetch_licenses():
+    """
+    Fetch licenses and update in database.
+    """
+    success_count = 0
+    error_count = 0
+    error_licenses = list()
+    success_licenses = list()
+    licenses = License.objects.all()
+    for license in licenses:
+        crm_license = search_query('Licenses', license.license_number, 'Name')
+        crm_license = crm_license.get('response')
+        if crm_license and len(crm_license) > 0:
+            for l in crm_license:
+                try:
+                    if l['Name'] == license.license_number and l['id'] == license.zoho_crm_id:
+                        if license.expiration_date != l['Expiration_Date'] and \
+                            license.issue_date != l['Issue_Date']:
+                            license.expiration_date = l['Expiration_Date']
+                            license.issue_date = l['Issue_Date']
+                            license.save()
+                            success_count += 1
+                            success_licenses.append(license.license_number)
+                except Exception as exc:
+                    print(exc)
+                    continue
+        else:
+            print('license not found in database -', license.license_number)
+            error_count += 1
+            error_licenses.append(license.license_number)
+    return {'success_count': success_count, 'error_count': error_count}
