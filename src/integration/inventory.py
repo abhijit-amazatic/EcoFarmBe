@@ -290,7 +290,6 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                    record['documents'] = documents
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
-                    name=record['name'],
                     defaults=record)
                 update_price_change(price_data, record)
             except Exception as exc:
@@ -326,7 +325,6 @@ def sync_inventory(inventory_name, response):
                 record['documents'] = documents
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
-            name=record['name'],
             defaults=record)
         update_price_change(price_data, record)
         return obj.item_id
