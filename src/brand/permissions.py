@@ -1,8 +1,10 @@
 from rest_framework.permissions import BasePermission
+from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 from django.db.models.query import QuerySet
 
 from user.models import (User, )
+
 
 class ObjectPermissions(BasePermission):
 
@@ -40,7 +42,7 @@ class filterQuerySet:
             instance = cls(queryset, user)
             model = queryset.model.__name__.lower()
             app_label = queryset.model._meta.app_label 
-            method = getattr(instance, f'{app_label}_{model}_for_user')
+            method = getattr(instance, f'{app_label}_{model}_for_user', None)
             if method and callable(method):
                 return method()
             queryset.none()

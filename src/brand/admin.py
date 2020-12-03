@@ -18,11 +18,13 @@ from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
+from multiselectfield import MultiSelectField
+
 from .models import (Organization, Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from .models import (LicenseRole,)
+from .models import (LicenseRole, OrganizationRole, Permission, OrganizationUser, OrganizationUserRole)
 from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
 from integration.box import (delete_file,)
-
+from .widgets import PermissionSelectMultipleWidget
 
 class LicenseUpdatedForm(forms.ModelForm):
 
@@ -256,7 +258,34 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
             
         super().save_model(request, obj, form, change)
 
-class OrganizationAdmin(admin.ModelAdmin):
+class OrganizationRoleNestedAdmin(nested_admin.NestedTabularInline):
+    """
+    OrganizationRoleAdmin
+    """
+    extra = 0
+    model = OrganizationRole
+    readonly_fields = ('created_on','updated_on',)
+    formfield_overrides = {
+        # models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
+        models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+    }
+
+class OrganizationUserRoleNestedAdmin(nested_admin.NestedTabularInline):
+    extra = 0
+    model = OrganizationUserRole
+    readonly_fields = ('created_on','updated_on',)
+    formfield_overrides = {
+        models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+    }
+
+class OrganizationUserNestedAdmin(nested_admin.NestedTabularInline):
+    extra = 0
+    model = OrganizationUser
+    readonly_fields = ('created_on','updated_on',)
+    inlines = [OrganizationUserRoleNestedAdmin]
+
+
+class OrganizationAdmin(nested_admin.NestedModelAdmin):
     """
     Configuring brand
     """
@@ -268,8 +297,9 @@ class OrganizationAdmin(admin.ModelAdmin):
         ('updated_on', DateRangeFilter),
     )
     ordering = ('-created_on', 'updated_on',)
+    inlines = [OrganizationRoleNestedAdmin, OrganizationUserNestedAdmin]
 
-        
+
 class MyBrandAdmin(admin.ModelAdmin):
     """
     Configuring brand
@@ -301,9 +331,30 @@ class LicenseRoleAdmin(admin.ModelAdmin):
     }
 
 
+class OrganizationRoleAdmin(admin.ModelAdmin):
+    """
+    OrganizationRoleAdmin
+    """
+    readonly_fields = ('created_on','updated_on',)
+
+    formfield_overrides = {
+        # models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
+        models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+    }
+
+
+class PermissionAdmin(admin.ModelAdmin):
+    """
+    OrganizationRoleAdmin
+    """
+    readonly_fields = ('group','created_on','updated_on',)
+
+
 
 admin.site.register(LicenseRole,LicenseRoleAdmin)
 admin.site.register(Organization,OrganizationAdmin)
+admin.site.register(OrganizationRole,OrganizationRoleAdmin)
+admin.site.register(Permission,PermissionAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)
 admin.site.register(ProfileCategory, ProfileCategoryAdmin)

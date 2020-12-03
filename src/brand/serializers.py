@@ -20,6 +20,7 @@ from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 from user.models import (User,)
 
+from .serializers_mixin import NestedModelSerializer
 from .models import (
     Organization,
     Brand,
@@ -33,6 +34,10 @@ from .models import (
     ProfileReport,
     LicenseUser,
     LicenseRole,
+    OrganizationRole,
+    OrganizationUser,
+    OrganizationUserRole,
+    Permission,
 )
 
 
@@ -72,7 +77,7 @@ class OrganizationUserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'full_name', 'email', 'phone')
+        fields = ('id','first_name', 'last_name', 'full_name', 'email', 'phone')
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -388,57 +393,103 @@ class CurrentPasswordSerializer(serializers.Serializer): # pylint: disable=W0223
         raise serializers.ValidationError("wrong current password.")
 
 
-class InviteUserRelatedLicenceField(serializers.RelatedField):
-    queryset = License.objects.all()
-
-    def to_representation(self, obj):
-        return obj.pk
-
-    def to_internal_value(self, data):
-        queryset = self.get_queryset()
-        try:
-            return queryset.get(pk=data)
-        except License.DoesNotExist:
-            raise serializers.ValidationError(
-            f'License id {data} does not exist or you do not have access.'
-            )
-
-    def display_value(self, obj):
-        return f'{obj.license_number} | {obj.legal_business_name}'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        # queryset = queryset.filter(created_by=self.context['request'].user)
-        return queryset
-
-
-class InviteUserSerializer(serializers.Serializer):
+class PermissionSerializer(serializers.ModelSerializer):
     """
-    This defines Brand serializer.
+    This defines organization role serializer.
     """
+    display_name = serializers.CharField(
+        source='get_codename_display'
+    )
+    class Meta:
+        model = Permission
+        fields = ('id', 'codename', 'display_name')
+
+
+class OrganizationRoleSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+
+    class Meta:
+        model = OrganizationRole
+        exclude = ('organization',)
+
+
+class OrganizationUserRoleSerializer(serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+    role = OrganizationRoleSerializer(read_only=True)
+    class Meta:
+        model = OrganizationUserRole
+        exclude = ('organization_user',)
+
+
+class OrganizationUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+    user = OrganizationUserInfoSerializer(read_only=True)
+    organization_user_role = OrganizationUserRoleSerializer(many=True, read_only=True)
+    class Meta:
+        model = OrganizationUser
+        exclude = ('organization',)
+
+
+
+
+
+# class InviteUserRelatedLicenceField(serializers.RelatedField):
+#     queryset = License.objects.all()
+
+#     def to_representation(self, obj):
+#         return obj.pk
+
+#     def to_internal_value(self, data):
+#         queryset = self.get_queryset()
+#         try:
+#             return queryset.get(pk=data)
+#         except License.DoesNotExist:
+#             raise serializers.ValidationError(
+#             f'License id {data} does not exist or you do not have access.'
+#             )
+
+#     def display_value(self, obj):
+#         return f'{obj.license_number} | {obj.legal_business_name}'
+
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         # queryset = queryset.filter(created_by=self.context['request'].user)
+#         return queryset
+
+
+# class InviteUserSerializer(serializers.Serializer):
+#     """
+#     This defines Brand serializer.
+#     """
     
-    full_name = serializers.CharField(max_length=200)
-    phone = PhoneNumberField(max_length=15)
-    email = serializers.EmailField()
-    role = serializers.ChoiceField(choices=LicenseRole.ROLE_CHOICES)
-    licenses = InviteUserRelatedLicenceField(many=True,)
+#     full_name = serializers.CharField(max_length=200)
+#     phone = PhoneNumberField(max_length=15)
+#     email = serializers.EmailField()
+#     role = serializers.ChoiceField(choices=LicenseRole.ROLE_CHOICES)
+#     licenses = InviteUserRelatedLicenceField(many=True,)
 
-    def validate_licenses(self, value):
-        """
-        Check that license is selected.
-        """
-        if not value:
-            raise serializers.ValidationError("At leat one License must be selected.")
-        return value
+#     def validate_licenses(self, value):
+#         """
+#         Check that license is selected.
+#         """
+#         if not value:
+#             raise serializers.ValidationError("At leat one License must be selected.")
+#         return value
 
-    def validate_phone(self, value):
-        """
-        nonfield validation.
-        """
-        try:
-            user = User.objects.get(phone=self.initial_data['phone'])
-            if user.email != self.initial_data['email']:
-                raise serializers.ValidationError("Phone number already in usefor another account.")
-        except User.DoesNotExist:
-            pass
-        return value
+#     def validate_phone(self, value):
+#         """
+#         nonfield validation.
+#         """
+#         try:
+#             user = User.objects.get(phone=self.initial_data['phone'])
+#             if user.email != self.initial_data['email']:
+#                 raise serializers.ValidationError("Phone number already in usefor another account.")
+#         except User.DoesNotExist:
+#             pass
+#         return value

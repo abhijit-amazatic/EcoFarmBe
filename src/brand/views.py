@@ -44,6 +44,10 @@ from .models import (
     ProfileCategory,
     ProfileReport,
     LicenseRole,
+    OrganizationRole,
+    OrganizationUser,
+    OrganizationUserRole,
+    Permission
 )
 from .serializers import (
     OrganizationSerializer,
@@ -57,8 +61,12 @@ from .serializers import (
     ProgramOverviewSerializer,
     ProfileReportSerializer,
     FileUploadSerializer,
-    InviteUserSerializer,
+    # InviteUserSerializer,
     CurrentPasswordSerializer,
+    OrganizationRoleSerializer,
+    OrganizationUserSerializer,
+    OrganizationUserRoleSerializer,
+    PermissionSerializer,
 )
 from .views_mixin import (NestedViewSetMixin, )
 from .permissions import filterQuerySet
@@ -443,6 +451,64 @@ class KpiViewSet(NestedViewSetMixin, APIView):
         return Response({"kpis": group_by_value})
 
 
+class PermissionListView(NestedViewSetMixin, APIView):
+    """
+    All KPI view set
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+
+    def get(self, request, *args, **kwargs):
+        """
+        Return QuerySet.
+        """
+        qs = Permission.objects.all()
+        value_list = qs.values_list('group', flat=True).distinct()
+        group_by_value = {}
+        for value in value_list:
+            group_by_value[value] = PermissionSerializer(qs.filter(group=value), many=True).data
+        return Response({"permission": group_by_value})
+
+
+class OrganizationRoleViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    """
+    All Brand related endpoint's view is defined here.
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    queryset = OrganizationRole.objects.get_queryset()
+    filter_backends = [filters.SearchFilter]
+    serializer_class = OrganizationRoleSerializer
+    search_fields = ['name', ]
+
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        return filterQuerySet.for_user(
+            super().get_queryset(),
+            self.request.user,
+        )
+
+
+class OrganizationUserViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    """
+    All Brand related endpoint's view is defined here.
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    queryset = OrganizationUser.objects.get_queryset()
+    filter_backends = [filters.SearchFilter]
+    serializer_class = OrganizationUserSerializer
+    search_fields = ['name', ]
+
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        return filterQuerySet.for_user(
+            super().get_queryset(),
+            self.request.user,
+        )
+
+
 class ProfileReportViewSet(viewsets.ModelViewSet):
     """
     All Vendor/account profile related report data stored here.
@@ -495,65 +561,65 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
 #        return response
 
 
-class InviteUserView(CreateAPIView):
-    """
-    Invite User view
-    """
-    permission_classes = (IsAuthenticatedBrandPermission, )
-    serializer_class = InviteUserSerializer
+# class InviteUserView(CreateAPIView):
+#     """
+#     Invite User view
+#     """
+#     permission_classes = (IsAuthenticatedBrandPermission, )
+#     serializer_class = InviteUserSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.get_validated_data()
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         validated_data = serializer.get_validated_data()
 
-        try:
-            invite_user  = Auth_User.objects.get(email=validated_data['email'])
-        except Auth_User.DoesNotExist:
-            invite_user  = Auth_User.objects.create(
-                email=validated_data['email'],
-                phone=validated_data['phone'],
-            )
-            invite_user.full_name = validated_data['full_name']
-            invite_user.phone = validated_data['phone']
-            invite_user.save()
-            invite_user.set_unusable_password()
-            try:
-                link = get_encrypted_data(invite_user.email)
-                mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", invite_user.email)
-                notify_admins(invite_user.email)
-            except Exception as e:
-                print(e)
-                pass
+#         try:
+#             invite_user  = Auth_User.objects.get(email=validated_data['email'])
+#         except Auth_User.DoesNotExist:
+#             invite_user  = Auth_User.objects.create(
+#                 email=validated_data['email'],
+#                 phone=validated_data['phone'],
+#             )
+#             invite_user.full_name = validated_data['full_name']
+#             invite_user.phone = validated_data['phone']
+#             invite_user.save()
+#             invite_user.set_unusable_password()
+#             try:
+#                 link = get_encrypted_data(invite_user.email)
+#                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", invite_user.email)
+#                 notify_admins(invite_user.email)
+#             except Exception as e:
+#                 print(e)
+#                 pass
 
-        invite_role, invite_role_created = LicenseRole.objects.get_or_create(name=validated_data['role'])
-        response_data = {
-            'user': {
-                'id': invite_user.id,
-                'email': invite_user.email,
-            },
-            'role': {
-                'id': invite_role.id,
-                'name': invite_role.name,
-            },
-            'licenses': [],
-        }
+#         invite_role, invite_role_created = LicenseRole.objects.get_or_create(name=validated_data['role'])
+#         response_data = {
+#             'user': {
+#                 'id': invite_user.id,
+#                 'email': invite_user.email,
+#             },
+#             'role': {
+#                 'id': invite_role.id,
+#                 'name': invite_role.name,
+#             },
+#             'licenses': [],
+#         }
 
-        for license in validated_data['licenses']:
-            license_user, license_user_created =  LicenseUser.objects.update_or_create(
-                license=license,
-                role=invite_role,
-                user=invite_user,
-            )
-            response_data['licenses'].append({
-                'id': license_user.license.id,
-                'legal_business_name': license_user.license.legal_business_name,
-                'license_number': license_user.license.license_number,
-            })
+#         for license in validated_data['licenses']:
+#             license_user, license_user_created =  LicenseUser.objects.update_or_create(
+#                 license=license,
+#                 role=invite_role,
+#                 user=invite_user,
+#             )
+#             response_data['licenses'].append({
+#                 'id': license_user.license.id,
+#                 'legal_business_name': license_user.license.legal_business_name,
+#                 'license_number': license_user.license.license_number,
+#             })
 
-        headers = self.get_success_headers(serializer.data)
-        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
-#        return response    
+#         headers = self.get_success_headers(serializer.data)
+#         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+# #        return response    
 
 class LicenseSyncView(APIView):
     """

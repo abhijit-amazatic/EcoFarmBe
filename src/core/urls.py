@@ -56,10 +56,19 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventorySummaryView, InventoryCountyView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
-from brand.views import (OrganizationViewSet, ProfileCategoryView, BrandViewSet,
-                         LicenseViewSet, KpiViewSet, 
-                         ProfileReportViewSet, FileUploadView,
-                         LicenseSyncView,)
+from brand.views import (
+    OrganizationViewSet,
+    ProfileCategoryView,
+    BrandViewSet,
+    LicenseViewSet,
+    KpiViewSet,
+    ProfileReportViewSet,
+    FileUploadView,
+    LicenseSyncView,
+    OrganizationRoleViewSet,
+    OrganizationUserViewSet,
+    PermissionListView,
+)
 from two_factor.views import (
     TwoFactorLoginEnableView,
     TwoFactorLoginDisableView,
@@ -71,8 +80,7 @@ from two_factor.views import (
     AddPhoneDeviceViewSet,
     AddAuthenticatorRequestViewSet,
 )
-from brand.views import (InviteUserView,)
-
+# from brand.views import (InviteUserView,)
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
@@ -83,9 +91,13 @@ router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'organization', OrganizationViewSet, base_name="organization")
 router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
+router.register(r'role', OrganizationRoleViewSet, base_name="organization-role")
+router.register(r'organization-user', OrganizationUserViewSet, base_name="organization-role")
 router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/brand', BrandViewSet, 'brand'),
     ('organization/(?P<parent_organization>[^/.]+)/license', LicenseViewSet, 'license'),
+    ('organization/(?P<parent_organization>[^/.]+)/role', OrganizationRoleViewSet, 'organization-role'),
+    ('organization/(?P<parent_organization>[^/.]+)/user', OrganizationUserViewSet, 'organization-user'),
 ])
 
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
@@ -190,15 +202,14 @@ urlpatterns = [
     path(r'document/', DocumentView.as_view(), name='extra-documents'),
     path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
-    #path(r'help-documentation/', HelpDocumentationView.as_view(), name='help-documentation'),
-    path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
+#     path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
     path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
     path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
     path(r'news/', GetNewsFeedView.as_view(), name='news-feed'),
     path(r'crm/labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     path(r'inventory/county/', InventoryCountyView.as_view(), name='get-county'),
-
+    path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
 ] + router.urls
 
 

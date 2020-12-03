@@ -11,6 +11,8 @@ from django.dispatch import receiver
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from django.conf import settings
+from multiselectfield import MultiSelectField
+
 from user.models import User
 from inventory.models import (Documents, )
 from .utils import get_unique_org_name
@@ -48,26 +50,61 @@ def post_save_user(sender, instance, created, **kwargs):
         )
 
 
-class Permission(models.Model):
+class Permission(TimeStampFlagModelMixin, models.Model):
     """
     The permissions.
     """
-    GROUP_CHOICES = (
-        ('orders', _('orders')),
-        ('profile', _('Profile')),
-        ('compliance', _('Compliance')),
-        ('marketplace', _('Marketplace')),
-        ('billing_and_accounting', _('Billing & Accounting')),
-        ('billing_and_accounting', _('Billing & Accounting')),
-    )
+    GROUP_ORDERS = 'orders'
+    GROUP_PROFILE = 'profile'
+    GROUP_COMPLIANCE = 'comliance'
+    GROUP_MARKETPLACE = 'marketplce'
+    GROUP_BILLING_AND_ACCOUNTING = 'billing_and_accounting'
 
-    name = models.CharField(_('name'), max_length=255)
+    GROUP_CHOICES = (
+        (GROUP_ORDERS, _('orders')),
+        (GROUP_PROFILE, _('Profile')),
+        (GROUP_COMPLIANCE, _('Compliance')),
+        (GROUP_MARKETPLACE, _('Marketplace')),
+        (GROUP_BILLING_AND_ACCOUNTING, _('Billing & Accounting')),
+    )
+    PERMISSION_CHOICES_ORG = (
+        (GROUP_ORDERS, (
+            ('create_order', _('Create Order')),
+            ('sign_order', _('Sign Order')),
+        )),
+        (GROUP_PROFILE, (
+            ('view_profile', _('View Profile')),
+        )),
+        (GROUP_COMPLIANCE, (
+            ('view_license', _('View License')),
+        )),
+        (GROUP_MARKETPLACE, (
+            ('view_pricing', _('View Pricing')),
+            ('view_labtest', _('View Lab Test')),
+        )),
+        (GROUP_BILLING_AND_ACCOUNTING, (
+            ('view_bills', _('View Bills')),
+        )),
+    )
+    GROUP_CHOICES_DICT = dict(GROUP_CHOICES)
+    PERMISSION_CHOICES = list()
+    for x in PERMISSION_CHOICES_ORG:
+        PERMISSION_CHOICES.append((GROUP_CHOICES_DICT[x[0]], x[1]))
+    PERMISSION_CHOICES = tuple(PERMISSION_CHOICES)
+    PERMISSION_CHOICES_DICT = dict((x for y, z in PERMISSION_CHOICES for x in z))
+    PERMISSION_GROUP_MAP = dict((a, x) for x, y in PERMISSION_CHOICES_ORG for a, b in y)
     codename = models.CharField(
         _('codename'),
         max_length=100,
+        choices=PERMISSION_CHOICES,
         unique=True
         )
-    group = models.CharField(_('Group'), choices=GROUP_CHOICES, max_length=100)
+    description = models.TextField(_('description'), null=True, blank=True)
+    group = models.CharField(_('Group'), choices=GROUP_CHOICES, max_length=100, default='', editable=False)
+
+    def save(self, *args, **kwargs):
+        self.group = self.PERMISSION_GROUP_MAP[self.codename]
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _('permission')
@@ -76,8 +113,8 @@ class Permission(models.Model):
 
     def __str__(self):
         return "%s | %s" % (
-            self.group,
-            self.name,
+            self.GROUP_CHOICES_DICT[self.group],
+            self.PERMISSION_CHOICES_DICT[self.codename],
         )
 
     def natural_key(self):
@@ -105,7 +142,7 @@ class OrganizationRole(TimeStampFlagModelMixin, models.Model):
     )
 
     def __str__(self):
-        return str(self.ROLE_CHOICES_DICT.get(self.name, ''))
+        return self.name
 
     def natural_key(self):
         return (self.name,)
