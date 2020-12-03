@@ -254,7 +254,6 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
                 record['documents'] = documents
             obj = InventoryModel.objects.update_or_create(
                 item_id=record['item_id'],
-                name=record['name'],
                 defaults=record)
         except Exception as exc:
             print({
