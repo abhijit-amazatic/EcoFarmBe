@@ -225,6 +225,8 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
                 result.append(contact)
             return result
         return []
+    if value.startswith('Created_By'):
+        return value
     
 def get_record(module, record_id, full=False):
     """
@@ -275,6 +277,14 @@ def update_records(module, records, is_return_orginal_data=False):
                 record_dict[k] = v
         request.append(record_dict)
     response = crm_obj.update_records(module, request, is_return_orginal_data)
+    return response
+
+def delete_record(module, record_id):
+    """
+    Delete record from module.
+    """
+    crm_obj = get_crm_obj()
+    response = crm_obj.update_records(module, record_id)
     return response
 
 def get_program_selection(program):
@@ -954,13 +964,13 @@ def get_field(record, key, field):
     Parse crm fields.
     """
     date_fields = [
-        'Date_Harvested',
+        # 'Date_Harvested',
         'Date_Received',
         'Date_Reported',
         'Date_Tested',
-        'Created_Time',
+        # 'Created_Time',
         'Last_Activity_Time',
-        'Modified_Time',
+        # 'Modified_Time',
     ]
     labtest_float_values = ['THC', 'CBD', 'THCA',
                             'THCVA', 'THCV', 'CBDA',
@@ -980,10 +990,12 @@ def get_field(record, key, field):
         elif v == 'NT':
             v = "-3"
         return float(v)
-    if field in ('created_by', 'modified_by'):
-        return record.get(key).get('id')
+    if field in ('Created_By', 'Modified_By'):
+        return record.get(key)
     if field in ('parent_1', 'parent_2'):
         return [record.get(key).get('id')]
+    if field in ('Created_Time', 'Date_Harvested', 'Modified_Time'):
+        return datetime.strptime(record.get(key), '%Y-%m-%dT%H:%M:%S%z').date()
     if field in date_fields:
         return datetime.strptime(record.get(key), '%Y-%m-%d')
 
@@ -1004,7 +1016,7 @@ def parse_crm_record(module, records):
                     record_dict[key[0]] = value
                 else:
                     record_dict[v] = record.get(k)
-            except Exception:
+            except Exception as exc:
                 continue
         record_list.append(record_dict)
     return record_list
@@ -1057,12 +1069,15 @@ def get_labtest(id=None, sku=None):
     """
     crm_obj = get_crm_obj()
     if id:
-        response = crm_obj.get_record('Testing', id)
+        response = crm_obj.get_full_record('Testing', id)
     else:
         response = search_query('Testing', sku, 'Inventory_SKU')
     if response['status_code'] != 200:
         return response
-    response = parse_crm_record('Testing', [response['response'][id]])
+    if id:
+        response = parse_crm_record('Testing', [response['response']])
+    elif sku:
+        response = parse_crm_record('Testing', [response['response'][id]])
     return {'status_code': 200,
             'response': response}
     
