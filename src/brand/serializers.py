@@ -421,6 +421,12 @@ class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.Mo
             # 'organization',
         )
 
+    def validate_user(self, value):
+        qs = self.context['view'].get_queryset()
+        if qs.filter(user_id=value).exists():
+            raise serializers.ValidationError("user already exist.")
+        return value
+
 
 class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
     """
@@ -437,7 +443,17 @@ class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
     licenses = OrganizationUserRoleRelatedField(
         queryset=License.objects.all(),
         many=True,
+        required=True,
     )
+
+    def validate_licenses(self, value):
+        """
+        Check that license is selected.
+        """
+        if not value:
+            raise serializers.ValidationError("At leat one License must be selected.")
+        return value
+
     class Meta:
         model = OrganizationUserRole
         fields = (
@@ -470,8 +486,8 @@ class OrganizationUserRoleSerializer(serializers.ModelSerializer):
             'role',
             # 'role_info',
             'licenses',
-            'created_on',
-            'updated_on',
+            # 'created_on',
+            # 'updated_on',
             # 'organization',
         )
 
@@ -491,12 +507,27 @@ class OrganizationUserSerializer(serializers.ModelSerializer):
             'user',
             'user_info',
             'roles',
-            'created_on',
-            'updated_on',
+            # 'created_on',
+            # 'updated_on',
             # 'organization',
         )
 
 
+class OrganizationRoleNestedSerializer(serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+
+    class Meta:
+        model = OrganizationRole
+        fields = (
+            'id',
+            'name',
+            'permissions',
+            # 'created_on',
+            # 'updated_on',
+            # 'organization',
+        )
 
 
 class OrganizationDetailSerializer(OrganizationSerializer):
@@ -504,7 +535,7 @@ class OrganizationDetailSerializer(OrganizationSerializer):
     This defines ProgramOverviewSerializer
     """
     created_by = OrganizationUserInfoSerializer(read_only=True)
-    roles = OrganizationRoleSerializer(many=True, read_only=True)
+    roles = OrganizationRoleNestedSerializer(many=True, read_only=True)
     users = OrganizationUserSerializer(source='organization_user', many=True, read_only=True)
     class Meta:
         model = Organization
