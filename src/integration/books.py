@@ -553,7 +553,7 @@ def list_purchase_orders(params=None):
             break
     return po_obj.list_purchase_orders(parameters=params)
 
-def get_vendor_payment(payment_id, params=None):
+def get_vendor_payment(payment_id, params={}):
     """
     Return vendor payments made.
     """
@@ -567,9 +567,15 @@ def list_vendor_payments(params=None):
     """
     obj = get_books_obj()
     po_obj = obj.VendorPayments()
-    return po_obj.list_payments(parameters=params)
+    payments = po_obj.list_payments(parameters=params)
+    for payment in payments.get('response'):
+        data = get_vendor_payment(payment['payment_id'])
+        payment['balance'] = 0
+        for record in data.get('bills'):
+            payment['balance'] += record['balance']
+    return payments
 
-def get_customer_payment(payment_id, params=None):
+def get_customer_payment(payment_id, params={}):
     """
     Return customer payments made.
     """
@@ -583,7 +589,13 @@ def list_customer_payments(params=None):
     """
     obj = get_books_obj()
     po_obj = obj.CustomerPayments()
-    return po_obj.list_payments(parameters=params)
+    payments = po_obj.list_payments(parameters=params)
+    for payment in payments.get('response'):
+        data = get_customer_payment(payment['payment_id'])
+        payment['balance'] = 0
+        for record in data.get('invoices'):
+            payment['balance'] += record['balance']
+    return payments
 
 def get_invoice(invoice_id, params=None):
     """
