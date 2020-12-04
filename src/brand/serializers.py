@@ -20,7 +20,7 @@ from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 from user.models import (User,)
 
-from .serializers_mixin import NestedModelSerializer
+from .serializers_mixin import (NestedModelSerializer, OrganizationUserRoleRelatedField)
 from .models import (
     Organization,
     Brand,
@@ -70,16 +70,6 @@ def insert_or_update_vendor_accounts(profile, instance):
                     id=instance.id, is_single_user=True)
 
 
-class OrganizationUserInfoSerializer(serializers.ModelSerializer):
-    """
-    This defines ProgramOverviewSerializer
-    """
-
-    class Meta:
-        model = User
-        fields = ('id','first_name', 'last_name', 'full_name', 'email', 'phone')
-
-
 class OrganizationSerializer(serializers.ModelSerializer):
     """
     This defines ProgramOverviewSerializer
@@ -100,17 +90,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
         if request:
             validated_data['created_by'] = request.user
         return super().create(validated_data)
-
-class OrganizationWithUserInfoSerializer(OrganizationSerializer):
-    """
-    This defines ProgramOverviewSerializer
-    """
-    created_by = OrganizationUserInfoSerializer(read_only=True)
-
-    class Meta:
-        model = Organization
-        fields = ('__all__')
-        read_only_fields = ('created_by', 'created_on', 'updated_on')
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -405,6 +384,16 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = ('id', 'codename', 'display_name')
 
 
+class OrganizationUserInfoSerializer(serializers.ModelSerializer):
+    """
+    This defines ProgramOverviewSerializer
+    """
+
+    class Meta:
+        model = User
+        fields = ('id','first_name', 'last_name', 'full_name', 'email', 'phone')
+
+
 class OrganizationRoleSerializer(NestedModelSerializer, serializers.ModelSerializer):
     """
     This defines organization role serializer.
@@ -415,52 +404,122 @@ class OrganizationRoleSerializer(NestedModelSerializer, serializers.ModelSeriali
         exclude = ('organization',)
 
 
+class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+    user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
+    # organization_user_role = OrganizationUserRoleSerializer(many=True, read_only=True)
+    class Meta:
+        model = OrganizationUser
+        fields = (
+            'id',
+            'user',
+            'user_info',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )
+
+
+class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+    organization_user = OrganizationUserRoleRelatedField(
+        queryset=OrganizationUser.objects.all(),
+    )
+    organization_user_info = OrganizationUserNestedViewSerializer(source='organization_user', read_only=True)
+    role = OrganizationUserRoleRelatedField(
+        queryset=OrganizationRole.objects.all(),
+    )
+    role_info = OrganizationRoleSerializer(source='role', read_only=True)
+    licenses = OrganizationUserRoleRelatedField(
+        queryset=License.objects.all(),
+        many=True,
+    )
+    class Meta:
+        model = OrganizationUserRole
+        fields = (
+            'id',
+            'organization_user',
+            'organization_user_info',
+            'role',
+            'role_info',
+            'licenses',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )
+
+
+
 class OrganizationUserRoleSerializer(serializers.ModelSerializer):
     """
     This defines organization role serializer.
     """
-    role = OrganizationRoleSerializer(read_only=True)
+    # role_info = OrganizationRoleSerializer(source='role', read_only=True)
+    licenses = OrganizationUserRoleRelatedField(
+        queryset=License.objects.all(),
+        many=True,
+    )
     class Meta:
         model = OrganizationUserRole
-        exclude = ('organization_user',)
+        fields = (
+            'id',
+            'role',
+            # 'role_info',
+            'licenses',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )
 
 
-class OrganizationUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
+
+
+class OrganizationUserSerializer(serializers.ModelSerializer):
     """
     This defines organization role serializer.
     """
-    user = OrganizationUserInfoSerializer(read_only=True)
-    organization_user_role = OrganizationUserRoleSerializer(many=True, read_only=True)
+    user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
+    roles = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
     class Meta:
         model = OrganizationUser
-        exclude = ('organization',)
+        fields = (
+            'id',
+            'user',
+            'user_info',
+            'roles',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )
 
 
 
 
+class OrganizationDetailSerializer(OrganizationSerializer):
+    """
+    This defines ProgramOverviewSerializer
+    """
+    created_by = OrganizationUserInfoSerializer(read_only=True)
+    roles = OrganizationRoleSerializer(many=True, read_only=True)
+    users = OrganizationUserSerializer(source='organization_user', many=True, read_only=True)
+    class Meta:
+        model = Organization
+        read_only_fields = ('id', 'licenses', 'created_by', 'created_on', 'updated_on')
+        fields = (
+            'id',
+            'name',
+            'created_by',
+            'roles',
+            'users',
+            'licenses',
+            'created_on',
+            'updated_on',
+        )
 
-# class InviteUserRelatedLicenceField(serializers.RelatedField):
-#     queryset = License.objects.all()
-
-#     def to_representation(self, obj):
-#         return obj.pk
-
-#     def to_internal_value(self, data):
-#         queryset = self.get_queryset()
-#         try:
-#             return queryset.get(pk=data)
-#         except License.DoesNotExist:
-#             raise serializers.ValidationError(
-#             f'License id {data} does not exist or you do not have access.'
-#             )
-
-#     def display_value(self, obj):
-#         return f'{obj.license_number} | {obj.legal_business_name}'
-
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         # queryset = queryset.filter(created_by=self.context['request'].user)
-#         return queryset
 
 
 # class InviteUserSerializer(serializers.Serializer):

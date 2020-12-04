@@ -36,7 +36,7 @@ class Organization(TimeStampFlagModelMixin,models.Model):
         verbose_name_plural = _('Organizations')
 
     def __str__(self):
-        return f'{self.name} | {self.created_by}'
+        return self.name
 
 @receiver(models.signals.post_save, sender=User)
 def post_save_user(sender, instance, created, **kwargs):
@@ -303,8 +303,8 @@ class OrganizationUserRole(TimeStampFlagModelMixin, models.Model):
 
     class Meta:
         unique_together = (('organization_user', 'role'), )
-        verbose_name = _('OrganizationUserRole')
-        verbose_name_plural = _('OrganizationUserRoles')
+        verbose_name = _('Organization User Role')
+        verbose_name_plural = _('Organization User Roles')
 
     def __str__(self):
         return f'{self.organization_user} | {self.role}'

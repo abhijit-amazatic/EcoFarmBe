@@ -64,9 +64,10 @@ from .serializers import (
     # InviteUserSerializer,
     CurrentPasswordSerializer,
     OrganizationRoleSerializer,
-    OrganizationUserSerializer,
-    OrganizationUserRoleSerializer,
+    OrganizationUserNestedViewSerializer,
+    OrganizationUserRoleNestedSerializer,
     PermissionSerializer,
+    OrganizationDetailSerializer,
 )
 from .views_mixin import (NestedViewSetMixin, )
 from .permissions import filterQuerySet
@@ -98,7 +99,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     """
     permission_classes = (IsAuthenticatedBrandPermission, )
     queryset = Organization.objects.all()
-    serializer_class = OrganizationSerializer
+    serializer_class = OrganizationDetailSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'created_by']
 
@@ -106,10 +107,12 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Return queryset based on action.
         """
-        return filterQuerySet.for_user(
+        qs = filterQuerySet.for_user(
             super().get_queryset(),
             self.request.user,
         )
+        qs.select_related('roles', 'licenses')
+        return qs
 
     def get_serializer_class(self):
         """
@@ -496,7 +499,7 @@ class OrganizationUserViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedBrandPermission, )
     queryset = OrganizationUser.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
-    serializer_class = OrganizationUserSerializer
+    serializer_class = OrganizationUserNestedViewSerializer
     search_fields = ['name', ]
 
     def get_queryset(self):
@@ -507,6 +510,35 @@ class OrganizationUserViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
             super().get_queryset(),
             self.request.user,
         )
+
+class OrganizationUserRoleViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+    """
+    All Brand related endpoint's view is defined here.
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    queryset = OrganizationUserRole.objects.get_queryset()
+    filter_backends = [filters.SearchFilter]
+    serializer_class = OrganizationUserRoleNestedSerializer
+    search_fields = ['name', ]
+
+    def get_queryset(self):
+        """
+        Return queryset based on action.
+        """
+        qs = super(viewsets.ModelViewSet, self).get_queryset()
+        qs = qs.filter(
+            organization_user__organization=self.context_parent['organization'])
+
+        return filterQuerySet.for_user(
+            qs,
+            self.request.user,
+        )
+
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(self.context_parent)
+        return context
 
 
 class ProfileReportViewSet(viewsets.ModelViewSet):

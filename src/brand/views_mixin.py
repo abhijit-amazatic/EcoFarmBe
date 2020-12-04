@@ -42,10 +42,9 @@ class NestedViewSetMixin:
                 result[query_lookup] = query_value
         return result
 
-    def create(self, request, *args, **kwargs):
-        """
-        This is used to create Licensse.
-        """
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        setattr(self, 'context_parent', {})
         lookup_param = self.get_parents_query_dict()
         for key, value in lookup_param.items():
             model = self.url_params_model_map.get(key)
@@ -54,6 +53,8 @@ class NestedViewSetMixin:
                     model.objects.all(),
                     self.request.user,
                 )
-                if not qs.filter(pk=value).exists():
-                    raise PermissionDenied(f'{key} does not exist or not accessible.')
-        return super().create(request, *args, **kwargs)
+                qs = qs.filter(pk=value)
+                if not qs.exists():
+                    raise PermissionDenied(detail=f'{key} does not exist or not accessible.')
+                else:
+                    self.context_parent[key] = qs.first()

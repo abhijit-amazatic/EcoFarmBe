@@ -67,7 +67,8 @@ from brand.views import (
     LicenseSyncView,
     OrganizationRoleViewSet,
     OrganizationUserViewSet,
-    PermissionListView,
+    OrganizationUserRoleViewSet,
+    PermissionListView,    
 )
 from two_factor.views import (
     TwoFactorLoginEnableView,
@@ -98,6 +99,7 @@ router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/license', LicenseViewSet, 'license'),
     ('organization/(?P<parent_organization>[^/.]+)/role', OrganizationRoleViewSet, 'organization-role'),
     ('organization/(?P<parent_organization>[^/.]+)/user', OrganizationUserViewSet, 'organization-user'),
+    ('organization/(?P<parent_organization>[^/.]+)/user-role', OrganizationUserRoleViewSet, 'organization-user-role'),
 ])
 
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
