@@ -284,7 +284,24 @@ def delete_record(module, record_id):
     Delete record from module.
     """
     crm_obj = get_crm_obj()
-    response = crm_obj.update_records(module, record_id)
+    response = crm_obj.delete_record(module, record_id)
+    return response
+
+def disassociate_brand(brand_name, vendor_name):
+    """
+    Disassociate brand from license.
+    """
+    response = search_query('Brands_X_Vendors', vendor_name, 'Vendor')
+    if response.get('status_code') != 200:
+        response = search_query('Brands_X_Accounts', vendor_name, 'Account')
+    if response.get('status_code') == 200:
+        for record in response.get('response'):
+            if (record.get('Vendor') and record.get('Vendor').get('name') == vendor_name and
+                record.get('Brand').get('name') == brand_name):
+                return delete_record('Brands_X_Vendors', record.get('id'))
+            elif (record.get('Account') and record.get('Account').get('name') == vendor_name and
+                record.get('Brand').get('name') == brand_name):
+                return delete_record('Brands_X_Accounts', record.get('id'))
     return response
 
 def get_program_selection(program):
