@@ -103,10 +103,11 @@ class DataFilter(FilterSet):
         }
 
 class CustomOrderFilter(OrderingFilter):
-    allowed_custom_filters = ['Total_THC', 'Total_CBD', 'Box_Link']
+    allowed_custom_filters = ['Total_THC', 'Total_CBD', 'Box_Link','Created_Time']
     fields_related = {
         'Total_THC': 'labtest__Total_THC', # ForeignKey Field lookup for ordering
-        'Box_Link': 'labtest__Box_Link', 
+        'Box_Link': 'labtest__Box_Link',
+        'Created_Time':'labtest__Created_Time',
         'Total_CBD': 'labtest__Total_CBD'
     }
     def get_ordering(self, request, queryset, view):
