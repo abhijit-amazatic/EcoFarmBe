@@ -36,7 +36,8 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'cf_quantity_estimate',
             'actual_available_stock',
             'documents',
-            'cultivar')
+            'cultivar',
+            'labtest')
         
 class ItemFeedbackSerializer(serializers.ModelSerializer):
     """
