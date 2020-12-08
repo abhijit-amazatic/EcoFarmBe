@@ -23,7 +23,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import (permissions, viewsets, status, filters,)
 from rest_framework.authentication import (TokenAuthentication, )
-
+from django_filters import (BaseInFilter, CharFilter, FilterSet)
 
 from core.permissions import IsAuthenticatedBrandPermission
 
@@ -110,6 +110,24 @@ class FileUploadView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CharInFilter(BaseInFilter,CharFilter):
+    pass
+
+class DataFilter(FilterSet):   
+    owner_or_manager__in = CharInFilter(field_name='owner_or_manager', lookup_expr='in')
+    status__in = CharInFilter(field_name='status', lookup_expr='in')
+    premises_county__in = CharInFilter(field_name='premises_county', lookup_expr='in')
+    
+    class Meta:
+        model = License
+        fields = {
+            'profile_category':['icontains', 'exact'],
+            'legal_business_name':['icontains', 'exact'],
+            'owner_or_manager__in':['icontains', 'exact'],
+            'status__in':['icontains', 'exact'],
+            'premises_county__in':['icontains', 'exact']
+        }
+        
 class LicenseViewSet(viewsets.ModelViewSet):
     """
     All LicenseViewSet
@@ -124,6 +142,7 @@ class LicenseViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter,DjangoFilterBackend]
     search_fields = ['status', 'profile_category']
     filterset_fields = ['profile_category', 'legal_business_name']
+    filterset_class = DataFilter
 
 
     def get_queryset(self):
