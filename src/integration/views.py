@@ -49,6 +49,7 @@ from integration.utils import (get_distance, )
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
+from integration.apps.scrapper import (Scrapper, )
 
 
 class GetBoxTokensView(APIView):
@@ -823,3 +824,16 @@ class GetSalesPersonView(APIView):
         if response['status_code'] == 200:
             return Response(response.get('response').get('Owner'))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetNewsFeedView(APIView):
+    """
+    View class for news feed.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        """
+        Get news feed.
+        """
+        scrapper = Scrapper()
+        return Response(scrapper.get_news())
