@@ -835,5 +835,6 @@ class GetNewsFeedView(APIView):
         """
         Get news feed.
         """
+        type_ = request.query_params.get('type')
         scrapper = Scrapper()
-        return Response(scrapper.get_news())
+        return Response(scrapper.get_news(type_))

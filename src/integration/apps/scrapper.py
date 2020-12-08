@@ -8,18 +8,17 @@ class Scrapper(object):
     """
     def __init__(self):
         self.urls = {
-            'div.col-md-8 dl.dl-horizontal': [
-                'http://calcannabis.cdfa.ca.gov/news/',
+            'CDFA': ['http://calcannabis.cdfa.ca.gov/news/',
                 ('dt', 'dd'),
-                'http://calcannabis.cdfa.ca.gov'],
-            'main.main-primary article': [
-                'https://www.bcc.ca.gov/media/press_releases.html',
+                'http://calcannabis.cdfa.ca.gov',
+                'div.col-md-8 dl.dl-horizontal'],
+            'BCC': ['https://www.bcc.ca.gov/media/press_releases.html',
                 ('li', 'li'),
-                'https://www.bcc.ca.gov'],
-            'div.ms-rtestate-field tbody': [
-                'https://www.cdph.ca.gov/Programs/CEH/DFDCS/MCSB/Pages/News.aspx',(
+                'https://www.bcc.ca.gov',
+                'main.main-primary article',],
+            'CDPH': ['https://www.cdph.ca.gov/Programs/CEH/DFDCS/MCSB/Pages/News.aspx',(
                     'td.ms-rteTableLastCol-5', 'td.ms-rteTableFirstCol-5'),
-                '']
+                '', 'div.ms-rtestate-field tbody']
         }
     
     def get_html(self, url):
@@ -32,14 +31,15 @@ class Scrapper(object):
         body = self.get_html(url)
         return BeautifulSoup(body, 'html.parser')
     
-    def get_news(self):
+    def get_news(self, type_):
         """
         Get news.
         """
         news_list = list()
-        for tag, data in self.urls.items():
+        data = self.urls.get(type_)
+        if data:
             soup = self.get_bs4_object(data[0])
-            news = soup.select(tag)
+            news = soup.select(data[3])
             for row in news:
                 if '.' in data[1][0]:
                     d = data[1][0].split('.')
