@@ -117,6 +117,7 @@ class DataFilter(FilterSet):
     owner_or_manager__in = CharInFilter(field_name='owner_or_manager', lookup_expr='in')
     status__in = CharInFilter(field_name='status', lookup_expr='in')
     premises_county__in = CharInFilter(field_name='premises_county', lookup_expr='in')
+    license_type__in = CharInFilter(field_name='license_type', lookup_expr='in')
     
     class Meta:
         model = License
@@ -125,6 +126,7 @@ class DataFilter(FilterSet):
             'legal_business_name':['icontains', 'exact'],
             'owner_or_manager__in':['icontains', 'exact'],
             'status__in':['icontains', 'exact'],
+            'license_type__in':['icontains', 'exact'],
             'premises_county__in':['icontains', 'exact']
         }
         
