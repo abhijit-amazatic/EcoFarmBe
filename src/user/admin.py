@@ -86,7 +86,7 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     
     #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
-    list_display = ('email', 'is_approved', 'phone', 'approved_on','approved_by_member','date_joined',)
+    list_display = ('email', 'is_approved', 'phone', 'approved_on','last_login','approved_by_member','date_joined',)
     list_filter = ('is_approved', 'is_verified',)
     list_per_page = 25
     search_fields = ('username','email',)
