@@ -364,6 +364,7 @@ CRM_FORMAT  = {
     },
     "Accounts":{
         "id": "id",
+        # "Account_Business_DBA": "Legal_Entity_Names",
         "Account_Name": "name",
         "Website": "website",
         "Client_Code": "client_code",
@@ -441,7 +442,8 @@ CRM_FORMAT  = {
         "Employees": "",
         "Ownership": "",
         "Ethics_Certifications": "ethics_and_certification_parse",
-        "Annual_Revenue": ""
+        "Annual_Revenue": "",
+        "Tier_Selection": "Tier_Selection"
     },
     "Brands_X_Vendors": {
         "Brand": "brands",

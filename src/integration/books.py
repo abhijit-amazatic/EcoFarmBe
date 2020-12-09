@@ -634,7 +634,7 @@ def get_unpaid_bills(vendor, status='unpaid'):
     Return total unpaid bills.
     """
     response = list_bills({
-        'customer_name': vendor,
+        'vendor_name': vendor,
         'status': status})['response']
     unpaid = sum([i['balance'] for i in response])
     return unpaid

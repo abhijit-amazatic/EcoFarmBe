@@ -112,6 +112,31 @@ class SearchCultivars(APIView):
             return Response(data, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
+class GetRecordView(APIView):
+    """
+    Return record from crm.
+    """
+    permission_class = (IsAuthenticated, )
+    
+    def get(self, request):
+        """
+        Get recrod.
+        """
+        module = request.query_params.get('module')
+        record_id = request.query_params.get('id')
+        legal_business_name = request.query_params.get('legal_business_name')
+        if module and record_id:
+            record = get_record(module, record_id)
+            if record['status_code'] == 200:
+                return Response(record, status=status.HTTP_200_OK)
+            return Response(record, status=status.HTTP_400_BAD_REQUEST)
+        elif module and legal_business_name:
+            record = search_query('Accounts', legal_business_name, 'Account_Business_DBA')
+            if record['status_code'] == 200:
+                return Response(record, status=status.HTTP_200_OK)
+            return Response(record, status=status.HTTP_400_BAD_REQUEST)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
 class GetPickListView(APIView):
     """
     Get field dropdowns from Zoho CRM.
