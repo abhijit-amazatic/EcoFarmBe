@@ -1162,6 +1162,7 @@ def fetch_licenses():
                             license.issue_date != l['Issue_Date']:
                             license.expiration_date = l['Expiration_Date']
                             license.issue_date = l['Issue_Date']
+                            license.is_updated_via_trigger = True
                             license.save()
                             success_count += 1
                             success_licenses.append(license.license_number)

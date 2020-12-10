@@ -116,6 +116,7 @@ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 # layouts
 VENDOR_LAYOUT = os.environ.get("VENDOR_LAYOUT")
 LEADS_LAYOUT = os.environ.get("LEADS_LAYOUT")
+LICENSE_LAYOUT = os.environ.get("LICENSE_LAYOUT")
 
 GOOGLEMAPS_API_KEY = os.environ.get('GOOGLEMAPS_API_KEY')
 TWILIO_ACCOUNT = os.environ.get('TWILIO_ACCOUNT')

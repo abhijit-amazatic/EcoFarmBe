@@ -533,6 +533,7 @@ class LicenseSyncView(APIView):
                 license_obj = License.objects.get(license_number=license_number)
                 date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
                 license_obj.expiration_date = date_time_obj.date()
+                license_obj.is_updated_via_trigger = True
                 license_obj.issue_date = issue
                 license_obj.save()
                 if license_obj.expiration_date >= timezone.now().date():

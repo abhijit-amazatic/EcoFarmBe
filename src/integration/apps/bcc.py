@@ -3,7 +3,7 @@ BCC license library.
 """
 import requests
 from datetime import (datetime, )
-from core.settings import (BCC_APP_ID, BCC_APP_KEY)
+from core.settings import (BCC_APP_ID, BCC_APP_KEY, LICENSE_LAYOUT)
 from integration.crm import (search_query, get_crm_obj, )
 
 def get_licenses():
@@ -19,8 +19,9 @@ def get_licenses():
 
 def get_license_dict():
     return {
+    "Layout": "layout_parse",
     "Name": "licenseNumber",
-	"License_Type": "licenseType",
+	"License_Type": "licenseType_parse",
 	"Issue_Date": "issuedDate_parse",
 	"Premises_City": "premiseCity",
 	"Premises_State": "premiseState",
@@ -36,6 +37,7 @@ def get_license_dict():
 	"License_Website": "website",
 	"Phone_Number": "phone",
 	"License_Email": "email",
+    "Verified_Date": "verified_date_parse"
     }
 
 def parse_field(license, key, value):
@@ -52,6 +54,23 @@ def parse_field(license, key, value):
             return v.split(' ')[1]
     if value.startswith('issuedDate') or value.startswith('expiryDate'):
         return datetime.strptime(v, "%m/%d/%Y").date()
+    if value.startswith('licenseType'):
+        license_types = {
+            "Cannabis - Retailer License":"Retailer - Storefront",
+            "Cannabis - Retailer Nonstorefront License":"Retailer - Delivery",
+            "Cannabis - Microbusiness License":"Microbusiness",
+            "Cannabis - Distributor License":"Distributor",
+            "Cannabis - Distributor-Transport Only License":"Distributor Transport Only",
+            "Cannabis - Event Organizer License":"Event Organizer",
+            "Cannabis - Testing Laboratory License":"Testing Laboratory",
+        }
+        if license_types.get(v):
+            return license_types.get(v)
+        return value
+    if value.startswith('layout'):
+        return LICENSE_LAYOUT['cultivar']
+    if value.startswith('verified_date'):
+        return datetime.now().date()
 
 def get_all_licenses():
     """

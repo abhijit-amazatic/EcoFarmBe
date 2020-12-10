@@ -135,6 +135,10 @@ LEADS_LAYOUT = {
     "vendor_cannabis_non_cultivator": "4230236000001229442",
     "vendor_non_cannabis": "4230236000001229443",
     }
+LICENSE_LAYOUT = {
+    "cultivar": "4230236000002267946",
+    "non-cultivar": "4230236000002267947"
+}
 
 GOOGLEMAPS_API_KEY=''
 TWILIO_ACCOUNT=''

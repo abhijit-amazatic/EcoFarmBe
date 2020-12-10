@@ -242,7 +242,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
     for record in inventory_list:
         record = inventory_obj.get_inventory(item_id=record)
         try:
-            record['pre_tax_price'] = get_pre_tax_price(record)
+            # record['pre_tax_price'] = get_pre_tax_price(record)
             cultivar = get_cultivar_from_db(record['cf_strain_name'])
             if cultivar:
                 record['cultivar'] = cultivar
@@ -278,7 +278,7 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
         page = records['page_context']['page'] + 1
         for record in records['items']:
             try:
-                record['pre_tax_price'] = get_pre_tax_price(record)
+                # record['pre_tax_price'] = get_pre_tax_price(record)
                 cultivar = get_cultivar_from_db(record['cf_strain_name'])
                 if cultivar:
                     record['cultivar'] = cultivar
@@ -287,11 +287,11 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                     record['labtest'] = labtest
                 documents = check_documents(inventory_name, record)
                 if documents and len(documents) > 0:
-                   record['documents'] = documents
+                    record['documents'] = documents
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     defaults=record)
-                update_price_change(price_data, record)
+                # update_price_change(price_data, record)
             except Exception as exc:
                 print({
                     'item_id': record['item_id'],
@@ -308,12 +308,12 @@ def sync_inventory(inventory_name, response):
     record = json.loads(unquote(response))['item']
     record = inventory.parse_item(response=record, is_detail=True)
     try:
-        record['pre_tax_price'] = get_pre_tax_price(record)
-        try:
-            item = InventoryModel.objects.get(item_id=record['item_id'])
-            price_data[record['item_id']] = item.price
-        except InventoryModel.DoesNotExist:
-            price_data[record['item_id']] = 0
+        # record['pre_tax_price'] = get_pre_tax_price(record)
+        # try:
+        #     item = InventoryModel.objects.get(item_id=record['item_id'])
+        #     price_data[record['item_id']] = item.price
+        # except InventoryModel.DoesNotExist:
+        #     price_data[record['item_id']] = 0
         cultivar = get_cultivar_from_db(record['cf_strain_name'])
         if cultivar:
             record['cultivar'] = cultivar
@@ -326,7 +326,7 @@ def sync_inventory(inventory_name, response):
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
             defaults=record)
-        update_price_change(price_data, record)
+        # update_price_change(price_data, record)
         return obj.item_id
     except Exception as exc:
         print(exc)
