@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'inventory',
     'cultivar',
     'labtest',
+    'multiselectfield'
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',
