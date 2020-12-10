@@ -1,6 +1,7 @@
 """
 BCC license library.
 """
+import json
 import requests
 from datetime import (datetime, )
 from core.settings import (BCC_APP_ID, BCC_APP_KEY, LICENSE_LAYOUT)
@@ -68,7 +69,11 @@ def parse_field(license, key, value):
             return license_types.get(v)
         return value
     if value.startswith('layout'):
-        return LICENSE_LAYOUT['cultivar']
+        try:
+            license_layout = json.loads(LICENSE_LAYOUT)
+        except Exception:
+            license_layout = LICENSE_LAYOUT
+        return license_layout['cultivar']
     if value.startswith('verified_date'):
         return datetime.now().date()
 
