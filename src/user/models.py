@@ -227,6 +227,20 @@ class TermsAndConditionAcceptance(TimeStampFlagModelMixin, models.Model):
         verbose_name = _('Terms And Condition Acceptance')
         verbose_name_plural = _('Terms And Condition Acceptances')
 
+class HelpDocumentation(TimeStampFlagModelMixin, models.Model):
+    """
+    Class implementing Help documentation.
+    """
+    title = models.CharField(verbose_name=_("Title"), max_length=255,blank=True, null=True)
+    url = models.CharField(verbose_name=_("URL"), max_length=255,blank=True, null=True)
+    page = models.CharField(verbose_name=_("Page"), max_length=255,blank=True, null=True)
+    content = RichTextField(verbose_name=_("Terms And Condition"))
+  
+    def __str__(self):
+        return f'{self.id} | {self.url} | {self.title}'
+
+    class Meta:
+        verbose_name = _('Help Documentation')        
 
 @receiver(models.signals.pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):

@@ -8,13 +8,15 @@ from rest_framework.response import Response
 from rest_framework.viewsets import (ModelViewSet,)
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
+from rest_framework.pagination import PageNumberPagination
+from utils.pagination import PaginationHandlerMixin
 from django.conf import settings
 from django.utils import timezone
 from knox.models import AuthToken
 from knox.settings import knox_settings
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
-from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance, TermsAndCondition)
+from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance, TermsAndCondition, HelpDocumentation,)
 from .serializers import (
     UserSerializer,
     CreateUserSerializer,
@@ -28,6 +30,7 @@ from .serializers import (
     PhoneNumberSerializer,
     PhoneNumberVerificationSerializer,
     TermsAndConditionAcceptanceSerializer,
+    HelpDocumentationSerializer,
 )
 from integration.crm import (search_query, create_records, update_records)
 from integration.box import(get_box_tokens, )
@@ -38,6 +41,13 @@ from brand.models import (License,)
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)
 
+
+class BasicPagination(PageNumberPagination):
+    """
+    Pagination class. 
+    """
+    page_size_query_param = 'limit'
+    page_size = 50
 
 def notify_admins(email,crm_link):
     """
@@ -446,3 +456,26 @@ class TermsAndConditionAcceptanceView(APIView):
                 return Response({'terms_and_condition': instance.terms_and_condition}, status=200)
             return Response({'detail': f"Terms And Condition not found for profile type '{profile_type}'"}, status=400)
         return Response({'detail': 'Quey parameter "profile_type" not found'}, status=400)
+
+class HelpDocumentationView(APIView, PaginationHandlerMixin):
+    """
+    Return help docs.
+    """
+    pagination_class = BasicPagination
+    serializer_class = HelpDocumentationSerializer
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None, *args, **kwargs):
+        """
+        get docs obj
+        """
+        instance =  HelpDocumentation.objects.all()
+        page = self.paginate_queryset(instance)
+        if page is not None:
+            serializer = self.get_paginated_response(self.serializer_class(page,
+ many=True).data)
+        else:
+            serializer = self.serializer_class(instance, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+

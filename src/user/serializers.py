@@ -13,7 +13,7 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from phonenumber_field.serializerfields import PhoneNumberField
-from .models import User, TermsAndCondition
+from .models import User, TermsAndCondition, HelpDocumentation
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
 from brand.models import (License,)
@@ -352,3 +352,13 @@ class TermsAndConditionAcceptanceSerializer(serializers.Serializer):  # pylint: 
         else:
             raise serializers.ValidationError(f"Terms And Condition not found for profile type '{value}'")
         return value
+
+
+class HelpDocumentationSerializer(serializers.ModelSerializer):
+    """
+    This defines HelpDocumentationSerializer
+    """
+    class Meta:
+        model = HelpDocumentation
+        fields = ('__all__')
+    

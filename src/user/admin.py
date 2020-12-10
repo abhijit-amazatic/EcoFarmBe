@@ -7,7 +7,7 @@ from core.mailer import mail, mail_send
 from django.conf import settings
 from django.db import models
 from datetime import datetime
-from .models import (User, MemberCategory,TermsAndCondition, TermsAndConditionAcceptance)
+from .models import (User, MemberCategory,TermsAndCondition, TermsAndConditionAcceptance, HelpDocumentation)
 from core.utility import send_async_user_approval_mail
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
@@ -196,13 +196,24 @@ class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
                 return False
         return True
 
+class HelpDocumentationAdmin(admin.ModelAdmin):
+    """
+    HelpDocumentationAdmin
+    """
+    list_display = ('title', 'url', 'page','created_on',)
+    list_filter = ('title',)
+    list_per_page = 25
+    ordering = ('-created_on',)
+    readonly_fields = ('created_on','updated_on',)
+    fields = ('title', 'url', 'page', 'content','created_on', 'updated_on')
 
+    
 #admin.site.unregister(User)
 admin.site.register(User, MyUserAdmin)
 admin.site.register(MemberCategory, MemberCategoryAdmin)
 admin.site.register(TermsAndCondition, TermsAndConditionAdmin)
 admin.site.register(TermsAndConditionAcceptance, TermsAndConditionAcceptanceAdmin)
-    
+admin.site.register(HelpDocumentation, HelpDocumentationAdmin)    
         
 # class UserForm(forms.ModelForm):
 #     manual_activation = forms.BooleanField()  # a flag which determines if the user should be manually activated
