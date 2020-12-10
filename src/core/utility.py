@@ -82,11 +82,11 @@ def notify_admins_on_profile_user_registration(email,profile):
     #mail_send("notify.html",{'link': email},"New Profile User registration.", recipient_list=settings.ADMIN_EMAIL)
 
 
-def notify_admins_on_profile_registration(email,farm):
+def notify_admins_on_profile_registration(email,farm,license_instance):
     """
     Notify admins on slack & email about new farm registration under farm.
     """
-    msg = "<!channel>New Vendor/Account profile is registered with us with the Profile name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!" % (farm, email)
+    msg = "<!channel>New Vendor/Account profile is registered with us with the Profile name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n" % (farm, email, license_instance.legal_business_name,license_instance.profile_category,license_instance.license_number,license_instance.premises_county)
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
     mail_send("farm-register.html",{'link': farm,'mail':email},"Profile registration.", recipient_list=settings.ADMIN_EMAIL)
     

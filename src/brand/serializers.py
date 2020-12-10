@@ -182,7 +182,7 @@ class LicenseSerializer(serializers.ModelSerializer):
             try:
                 profile = LicenseProfile.objects.get(license=instance.id)
                 notify_admins_on_profile_registration(
-                    profile.license.created_by.email, profile.name)
+                    profile.license.created_by.email, profile.name,instance)
                 #Create zoho books customer
                 if profile.license.created_by.membership_type == "personal":
                     create_customer_in_books(profile.license.id, is_update=False, is_single_user=True, params={})
