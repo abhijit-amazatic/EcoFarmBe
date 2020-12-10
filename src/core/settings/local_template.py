@@ -122,7 +122,8 @@ SLACK_TOKEN = ''
 SLACK_CHANNEL_NAME = 'tech_dev_slack_testing' #PROD: 'tech_new_website_users'
 #sales channel
 SLACK_SALES_CHANNEL = 'tech_dev_slack_testing' #PROD:'sales_leads'
-
+#profile channel
+SLACK_PROFILE_CHANNEL = 'tech_dev_slack_testing' #PROD: '﻿tech_new_website_onboarding_profiles'
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'
 

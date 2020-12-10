@@ -110,6 +110,8 @@ SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL_NAME = os.environ.get("SLACK_CHANNEL_NAME")
 #sales
 SLACK_SALES_CHANNEL = os.environ.get("SLACK_SALES_CHANNEL")
+#PROFILE
+SLACK_PROFILE_CHANNEL = os.environ.get("SLACK_PROFILE_CHANNEL")
 # Admin Email
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 
