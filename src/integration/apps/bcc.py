@@ -67,7 +67,7 @@ def parse_field(license, key, value):
         }
         if license_types.get(v):
             return license_types.get(v)
-        return value
+        return v
     if value.startswith('layout'):
         try:
             license_layout = json.loads(LICENSE_LAYOUT)
