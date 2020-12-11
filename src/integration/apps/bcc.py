@@ -73,7 +73,7 @@ def parse_field(license, key, value):
             license_layout = json.loads(LICENSE_LAYOUT)
         except Exception:
             license_layout = LICENSE_LAYOUT
-        return license_layout['cultivar']
+        return license_layout['non-cultivar']
     if value.startswith('verified_date'):
         return datetime.now().date()
 
