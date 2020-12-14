@@ -103,7 +103,7 @@ class DataFilter(FilterSet):
         }
 
 class CustomOrderFilter(OrderingFilter):
-    allowed_custom_filters = ['Total_THC', 'Total_CBD', 'Box_Link','Created_Time']
+    allowed_custom_filters = ['Total_THC', 'Total_CBD', 'Box_Link','Created_Time'] #
     fields_related = {
         'Total_THC': 'labtest__Total_THC', # ForeignKey Field lookup for ordering
         'Box_Link': 'labtest__Box_Link',
@@ -137,7 +137,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     Inventory View
     """
     permission_classes = (AllowAny, )
-    filter_backends = (filters.DjangoFilterBackend,OrderingFilter,CustomOrderFilter)
+    filter_backends = (filters.DjangoFilterBackend, CustomOrderFilter, OrderingFilter, )
     filterset_class = DataFilter
     ordering_fields = '__all__'
     
