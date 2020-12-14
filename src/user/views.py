@@ -5,10 +5,12 @@ import json
 from rest_framework import (status,)
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 from rest_framework.response import Response
-from rest_framework.viewsets import (ModelViewSet,)
+from rest_framework.viewsets import (ModelViewSet, ReadOnlyModelViewSet)
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
+from django_filters import (FilterSet)
+from django_filters.rest_framework import DjangoFilterBackend
 from utils.pagination import PaginationHandlerMixin
 from django.conf import settings
 from django.utils import timezone
@@ -457,25 +459,17 @@ class TermsAndConditionAcceptanceView(APIView):
             return Response({'detail': f"Terms And Condition not found for profile type '{profile_type}'"}, status=400)
         return Response({'detail': 'Quey parameter "profile_type" not found'}, status=400)
 
-class HelpDocumentationView(APIView, PaginationHandlerMixin):
+class HelpDocumentationView(ReadOnlyModelViewSet):
     """
     Return help docs.
     """
-    pagination_class = BasicPagination
+    #pagination_class = BasicPagination
+    #PaginationHandlerMixin
+    queryset = HelpDocumentation.objects.all()
     serializer_class = HelpDocumentationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title', 'url', 'for_page']
     permission_classes = (AllowAny,)
 
-    def get(self, request, format=None, *args, **kwargs):
-        """
-        get docs obj
-        """
-        instance =  HelpDocumentation.objects.all()
-        page = self.paginate_queryset(instance)
-        if page is not None:
-            serializer = self.get_paginated_response(self.serializer_class(page,
- many=True).data)
-        else:
-            serializer = self.serializer_class(instance, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 

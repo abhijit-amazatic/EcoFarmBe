@@ -83,6 +83,8 @@ router.register(r'brand', BrandViewSet, base_name="brand")
 router.register(r'license', LicenseViewSet, base_name="license")
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
+router.register(r'help-documentation', HelpDocumentationView, base_name="help-documentation")
+
 router.register(r'two-factor/device', TwoFactorDeviceViewSet, base_name="two-factor-device")
 router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="add-authy-user")
 router.register(r'two-factor/add-device/phone', AddPhoneDeviceViewSet, base_name="add-phone-device")
@@ -181,7 +183,7 @@ urlpatterns = [
     path(r'document/', DocumentView.as_view(), name='extra-documents'),
     path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
-    path(r'help-documentation/', HelpDocumentationView.as_view(), name='help-documentation'),
+    #path(r'help-documentation/', HelpDocumentationView.as_view(), name='help-documentation'),
     path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
     path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
     path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),

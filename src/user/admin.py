@@ -200,12 +200,12 @@ class HelpDocumentationAdmin(admin.ModelAdmin):
     """
     HelpDocumentationAdmin
     """
-    list_display = ('title', 'url', 'page','created_on',)
+    list_display = ('title', 'url', 'for_page','created_on',)
     list_filter = ('title',)
     list_per_page = 25
     ordering = ('-created_on',)
     readonly_fields = ('created_on','updated_on',)
-    fields = ('title', 'url', 'page', 'content','created_on', 'updated_on')
+    fields = ('title', 'url', 'for_page', 'content','created_on', 'updated_on')
 
     
 #admin.site.unregister(User)

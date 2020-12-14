@@ -233,7 +233,7 @@ class HelpDocumentation(TimeStampFlagModelMixin, models.Model):
     """
     title = models.CharField(verbose_name=_("Title"), max_length=255,blank=True, null=True)
     url = models.CharField(verbose_name=_("URL"), max_length=255,blank=True, null=True)
-    page = models.CharField(verbose_name=_("Page"), max_length=255,blank=True, null=True)
+    for_page = models.CharField(verbose_name=_("Page"), max_length=255,blank=True, null=True)
     content = RichTextField(verbose_name=_("Content"))
   
     def __str__(self):
