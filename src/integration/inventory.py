@@ -233,6 +233,18 @@ def update_price_change(price_data, record):
         item.save()
     return True
 
+def get_county(vendor_name):
+    """
+    Get county grown for inventory item.
+    """
+    try:
+        response = search_query('Vendors', vendor_name, 'Vendor_Name', True)
+        if response.get('status_code') == 200:
+            return response.get('response')[0].get('County')
+        return None
+    except Exception:
+        return None
+ 
 def fetch_inventory_from_list(inventory_name, inventory_list):
     """
     Fetch list of inventory from Zoho Inventory.
@@ -252,6 +264,8 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
             documents = check_documents(inventory_name, record)
             if documents and len(documents) > 0:
                 record['documents'] = documents
+            if record['cf_vendor_name']:
+                record['county_grown'] = get_county(record['cf_vendor_name'])
             obj = InventoryModel.objects.update_or_create(
                 item_id=record['item_id'],
                 defaults=record)
@@ -288,6 +302,8 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                 documents = check_documents(inventory_name, record)
                 if documents and len(documents) > 0:
                     record['documents'] = documents
+                if record['cf_vendor_name']:
+                    record['county_grown'] = get_county(record['cf_vendor_name'])
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     defaults=record)
@@ -323,6 +339,8 @@ def sync_inventory(inventory_name, response):
         documents = check_documents(inventory_name, record)
         if documents and len(documents) > 0:
                 record['documents'] = documents
+        if record['cf_vendor_name']:
+            record['county_grown'] = get_county(record['cf_vendor_name'])
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
             defaults=record)

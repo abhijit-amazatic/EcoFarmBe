@@ -98,6 +98,7 @@ class Inventory(models.Model):
     cf_cfi_published = models.BooleanField(_('CFI_Published'), blank=True, null=True)
     cf_ifp_farm = models.BooleanField(_('IFP_Farm'), blank=True, null=True)
     cf_vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=50)
+    county_grown = models.CharField(_('County Grown'), blank=True, null=True, max_length=50)
     cf_procurement_confirmed = models.CharField(_('PnC'), blank=True, null=True, max_length=50)
     cf_marge_per_unit = models.FloatField(_('Margin Per Unit'), blank=True, null=True)
     cf_lpn = models.CharField(_('LPN'), blank=True, null=True, max_length=50)
