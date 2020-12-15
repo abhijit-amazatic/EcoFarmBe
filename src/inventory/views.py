@@ -34,6 +34,7 @@ class DataFilter(FilterSet):
     name__in = CharInFilter(field_name='name', lookup_expr='in')
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
+    county_grown__in = CharInFilter(field_name='county_grown', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
@@ -71,6 +72,7 @@ class DataFilter(FilterSet):
         'sku':['icontains', 'exact'],
         'category_name':['icontains', 'exact'],
         'cf_cultivar_type':['icontains', 'exact'],
+        'county_grown':['icontains', 'exact'],   
         'cf_strain_name':['icontains', 'exact'],
         'price':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
@@ -132,6 +134,26 @@ class CustomOrderFilter(OrderingFilter):
 
         return queryset
 
+
+class NullsAlwaysLastOrderingFilter(OrderingFilter):
+    """ nulls_last feature to force nulls to bottom in all orderings. """
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+
+        if ordering:
+            f_ordering = []
+            for o in ordering:
+                if not o:
+                    continue
+                if o[0] == '-':
+                    f_ordering.append(F(o[1:]).desc(nulls_last=True))
+                else:
+                    f_ordering.append(F(o).asc(nulls_last=True))
+
+            return queryset.order_by(*f_ordering)
+
+        return queryset    
+
 class InventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
@@ -153,7 +175,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True)
+        return Inventory.objects.filter(cf_cfi_published=True).order_by('-labtest__Created_Time')
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
