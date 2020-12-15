@@ -159,7 +159,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     Inventory View
     """
     permission_classes = (AllowAny, )
-    filter_backends = (filters.DjangoFilterBackend, CustomOrderFilter, OrderingFilter, )
+    filter_backends = (CustomOrderFilter,filters.DjangoFilterBackend,OrderingFilter, )
     filterset_class = DataFilter
     ordering_fields = '__all__'
     
@@ -175,7 +175,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True).order_by('-labtest__Created_Time')
+        return Inventory.objects.filter(cf_cfi_published=True) #.order_by('-labtest__Created_Time')
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
