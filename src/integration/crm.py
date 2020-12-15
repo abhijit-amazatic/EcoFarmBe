@@ -23,7 +23,7 @@ from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout, get_overview_field,)
 from core.mailer import mail, mail_send
-from brand.models import (Brand, License, LicenseProfile, )
+from brand.models import (Brand, License, LicenseProfile, Organization)
 from integration.models import (Integration,)
 from integration.apps.aws import (get_boto_client, )
 from inventory.models import (Documents, )
@@ -420,6 +420,8 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             elif id and is_single_user and is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
             farm_name = license_db.license_profile.__dict__['name']
+            if d['is_buyer'] == True:
+                continue
             response = update_license(farm_name, d)
             final_dict['license'] = response
             if response['status_code'] == 200:
@@ -435,7 +437,9 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             if is_update:
                 result = update_records('Vendors', d, True)
             else:
-                result = create_records('Vendors', d, True)
+                result = search_query('Vendors', d['name'], 'Vendor_Name')
+                if result.get('status_code') != 200:
+                    result = create_records('Vendors', d, True)
             final_dict['vendor'] = result
             if response['status_code'] == 200 and result['status_code'] == 201:
                 record_response = result['response']['response']['data']
@@ -514,15 +518,36 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
         for record in records:
             final_dict = dict()
             if is_update:
+                result = update_records('Orgs', record.organization.__dict__, True)
+            else:
+                result = search_query('Orgs', record.organization.name, 'Name')
+                if result.get('status_code') == 200:
+                    organization_id = result['response'][0]['id']
+                else:
+                    result = create_records('Orgs', record.organization.__dict__, True)
+                    if result.get('status_code') == 201:
+                        organization_id = result['response']['response']['data'][0]['details']['id']
+            if is_update:
                 record.id = record.zoho_crm_id
                 result = update_records('Brands', record.__dict__, True)
             else:
-                result = create_records('Brands', record.__dict__, True)
-            final_dict['brand'] = result['response']
-            if result['status_code'] == 201:
+                result = search_query('Brands', record.brand_name, 'Name')
+                if result.get('status_code') == 200:
+                    brand_id = result['response'][0]['id']
+                else:
+                    result = create_records('Brands', record.__dict__, True)
+                    if result.get('status_code') == 201:
+                        brand_id = result['response']['response']['data'][0]['details']['id']
+            final_dict['org'] = organization_id
+            final_dict['brand'] = brand_id
+            if brand_id and organization_id:
                 try:
                     record_obj = Brand.objects.get(id=id)
-                    record_obj.zoho_crm_id = result['response']['response']['data'][0]['details']['id']
+                    record_obj.zoho_crm_id = brand_id
+                    record_obj.is_updated_in_crm = True
+                    record_obj.save()
+                    record_obj = Organization.objects.get(id=record.organization_id)
+                    record_obj.zoho_crm_id = organization_id
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
                 except KeyError as exc:
@@ -531,17 +556,23 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
             record_response = insert_record(record=record, is_update=is_update)
             final_dict.update(record_response)
             for k,response in record_response.items():
-                if (result['status_code'] == 201 and \
+                if (brand_id and \
                     response['license']['status_code'] == 200 and \
-                    response['vendor']['status_code'] == 201):
+                    response['vendor']['status_code'] == 201 and \
+                    organization_id):
                     data = dict()
-                    resp_brand = result['response']['response']['data']
+                    resp_brand = brand_id
                     resp_vendor = response['vendor']['response']['response']['data']
-                    data['brands'] = resp_brand[0]['details']['id']
-                    data['vendors'] = resp_vendor[0]['details']['id']
+                    data['Org'] = organization_id
+                    data['Vendor'] = resp_vendor[0]['details']['id']
+                    data['Brand'] = brand_id
                     if is_update:
+                        r = update_records('Orgs_X_Vendors', [data])
+                        r = update_records('Orgs_X_Brands', [data])
                         r = update_records('Brands_X_Vendors', [data])
                     else:
+                        r = create_records('Orgs_X_Vendors', [data])
+                        r = create_records('Orgs_X_Brands', [data])
                         r = create_records('Brands_X_Vendors', [data])
             final_list[record.id] = final_dict
         return final_list
@@ -784,6 +815,8 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
         elif id and is_single_user and is_update:
             d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
         farm_name = license_db.license_profile.__dict__['name']
+        if d['is_seller'] == True:
+                continue
         response = update_license(farm_name, d)
         final_dict['license'] = response
         if response['status_code'] == 200:
@@ -797,8 +830,10 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 print(exc)
         if is_update:
             result = update_records('Accounts', d, is_return_orginal_data=True)
-        else:    
-            result = create_records('Accounts', d, is_return_orginal_data=True)
+        else:
+            result = search_query('Accounts', d['name'], 'Account_Name')
+            if result.get('status_code') != 200:
+                result = create_records('Accounts', d, is_return_orginal_data=True)
         final_dict['account'] = result
         if response['status_code'] == 200 and result['status_code'] == 201:
             record_response = result['response']['response']['data']
@@ -869,14 +904,35 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
             final_dict = dict()
             try:
                 if is_update:
+                    result = update_records('Orgs', record.organization.__dict__, True)
+                else:
+                    result = search_query('Orgs', record.organization.name, 'Name')
+                    if result.get('status_code') == 200:
+                        organization_id = result['response'][0]['id']
+                    else:
+                        result = create_records('Orgs', record.organization.__dict__, True)
+                        if result.get('status_code') == 201:
+                            organization_id = result['response']['response']['data'][0]['details']['id']
+                if is_update:
                     result = update_records('Brands', record.__dict__, True)
                 else:
                     result = create_records('Brands', record.__dict__, True)
-                final_dict['brand'] = result
-                if result['status_code'] == 201:
+                    if result.get('status_code') == 200:
+                        brand_id = result['response'][0]['id']
+                    else:
+                        result = create_records('Brands', record.__dict__, True)
+                        if result.get('status_code') == 201:
+                            brand_id = result['response']['response']['data'][0]['details']['id']
+                final_dict['org'] = organization_id
+                final_dict['brand'] = brand_id
+                if brand_id and organization_id:
                     try:
                         record_obj = Brand.objects.get(id=id)
-                        record_obj.zoho_crm_id = result['response']['response']['data'][0]['details']['id']
+                        record_obj.zoho_crm_id = brand_id
+                        record_obj.is_updated_in_crm = True
+                        record_obj.save()
+                        record_obj = Organization.objects.get(id=record.organization_id)
+                        record_obj.zoho_crm_id = organization_id
                         record_obj.is_updated_in_crm = True
                         record_obj.save()
                     except KeyError as exc:
@@ -885,17 +941,22 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 record_response = insert_account_record(record=record, is_update=is_update)
                 final_dict.update(record_response)
                 for k, response in record_response.items():
-                    if (result['status_code'] == 201 and \
+                    if (brand_id and \
                         response['license']['status_code'] == 200 and \
-                        response['account']['status_code'] == 201):
+                        response['account']['status_code'] == 201 and organization_id):
                         data = dict()
-                        resp_brand = result['response']['response']['data']
+                        resp_brand = brand_id
                         resp_account = response['account']['response']['response']['data']
-                        data['brands'] = resp_brand[0]['details']['id']
-                        data['accounts'] = resp_account[0]['details']['id']
+                        data['Org'] = organization_id
+                        data['Account'] = resp_account[0]['details']['id']
+                        data['Brand'] = brand_id
                         if is_update:
+                            r = update_records('Orgs_X_Accounts', [data])
+                            r = update_records('Orgs_X_Brands', [data])
                             r = update_records('Brands_X_Accounts', [data])
                         else:
+                            r = create_records('Orgs_X_Accounts', [data])
+                            r = create_records('Orgs_X_Brands', [data])
                             r = create_records('Brands_X_Accounts', [data])
             except Exception as exc:
                 print(exc)

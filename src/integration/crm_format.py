@@ -446,12 +446,12 @@ CRM_FORMAT  = {
         "Tier_Selection": "Tier_Selection"
     },
     "Brands_X_Vendors": {
-        "Brand": "brands",
-        "Vendor": "vendors"
+        "Brand": "Brand",
+        "Vendor": "Vendor"
     },
     "Brands_X_Accounts": {
-        "Brand": "brands",
-        "Account": "accounts"
+        "Brand": "Brand",
+        "Account": "Account"
     },
     "Vendors_X_Licenses": {
         "Licenses_Module": "Licenses_Module",
@@ -464,6 +464,11 @@ CRM_FORMAT  = {
     "Vendors_X_Cultivars": {
         "Cultivar_Associations": "Cultivar_Associations",
         "Cultivars": "Cultivars"
+    },
+    "Orgs":{
+        "id": "zoho_crm_id",
+        "Name": "name",
+        "Email": "email"
     },
     "Orgs_X_Brands":{
       "Org": "Org",

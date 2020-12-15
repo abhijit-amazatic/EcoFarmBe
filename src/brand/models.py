@@ -30,6 +30,8 @@ class Organization(TimeStampFlagModelMixin,models.Model):
         related_name='organizations',
         on_delete=models.CASCADE
     )
+    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
 
     class Meta:
         unique_together = (('name', 'created_by'), )
