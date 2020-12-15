@@ -266,7 +266,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
                 license_id=self.context['request'].parser_context["kwargs"]["pk"])
             if self.context['request'].data.get('brand_association'):
                 user_brands = Brand.objects.filter(
-                    ac_manager=self.context['request'].user).values_list('id', flat=True)
+                    organization__created_by=self.context['request'].user).values_list('id', flat=True)
                 if self.context['request'].data.get('brand_association') not in user_brands:
                     raise serializers.ValidationError(
                         "You can only associate/update license related to your brand only!")
