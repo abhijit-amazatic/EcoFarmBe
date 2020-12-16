@@ -47,7 +47,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
-                               GetRecordView,)
+                               GetRecordView, LabTestView)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -72,6 +72,7 @@ from two_factor.views import (
     AddAuthenticatorRequestViewSet,
 )
 from brand.views import (InviteUserView,)
+
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
@@ -188,6 +189,7 @@ urlpatterns = [
     path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
     path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
     path(r'news/', GetNewsFeedView.as_view(), name='news-feed'),
+    path(r'crm/labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
 ] + router.urls
 
 

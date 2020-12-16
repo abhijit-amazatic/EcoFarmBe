@@ -452,7 +452,7 @@ class DocumentStatusView(APIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         except Documents.DoesNotExist:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 class InventoryDeleteView(APIView):
     """
     Delete inventory item.

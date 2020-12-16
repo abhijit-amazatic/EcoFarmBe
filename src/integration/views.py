@@ -50,6 +50,7 @@ from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
 from integration.apps.scrapper import (Scrapper, )
+from labtest.models import (LabTest,)
 
 
 class GetBoxTokensView(APIView):
@@ -863,3 +864,25 @@ class GetNewsFeedView(APIView):
         type_ = request.query_params.get('type')
         scrapper = Scrapper()
         return Response(scrapper.get_news(type_))
+
+class LabTestView(APIView):
+    """
+    Delete LabTest.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete LabTest.
+        """
+        labtest_id = kwargs.get('labtest_id', None)
+        if labtest_id:
+            try:
+                LabTest.objects.get(labtest_crm_id=labtest_id).delete()
+                return Response(
+                    {'status': 'success'},
+                    status=status.HTTP_200_OK
+                )
+            except LabTest.DoesNotExist:
+                pass
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
