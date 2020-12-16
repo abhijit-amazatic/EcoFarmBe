@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'django_filters',
+    'ckeditor_uploader',
     'ckeditor',
     'user',
     'two_factor',
@@ -173,5 +174,14 @@ AUTHENTICATION_BACKENDS = (
 
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.TemporaryFileUploadHandler', ]
+
+#For image upload ckeditor
+AWS_QUERYSTRING_AUTH = False
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_BROWSE_SHOW_DIRS = True
+CKEDITOR_RESTRICT_BY_DATE = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#CKEDITOR_IMAGE_BACKEND = 'storages.backends.s3boto3.S3Boto3Storage'
 
 

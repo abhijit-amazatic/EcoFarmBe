@@ -190,6 +190,9 @@ urlpatterns = [
     path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
     path(r'news/', GetNewsFeedView.as_view(), name='news-feed'),
     path(r'crm/labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls'))
+    
+
 ] + router.urls
 
 
@@ -197,4 +200,5 @@ if not settings.DEBUG:
     urlpatterns += [
         url(r'^static\/(?P<path>.*)$', serve,
             {'document_root': settings.STATIC_ROOT})
+        
     ]

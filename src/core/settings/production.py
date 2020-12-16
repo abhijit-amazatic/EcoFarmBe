@@ -146,3 +146,8 @@ BCC_APP_KEY = os.environ.get('BCC_APP_KEY')
 
 ZOHO_CRM_URL = os.environ.get('ZOHO_CRM_URL')
 CRM_ORGANIZATION_ID = os.environ.get('CRM_ORGANIZATION_ID')
+
+#AWS for ckeditor
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')

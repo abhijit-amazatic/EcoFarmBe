@@ -51,5 +51,21 @@ CKEDITOR_CONFIGS = {
             # 'fantasy',
         ]),
         'contentsCss': ['/static/css/terms_and_condition/main.css', '/static/css/terms_and_condition/style.css'],
+        'extraPlugins': ','.join([
+            'uploadimage' # the upload image feature
+            # your extra plugins here
+            # 'div',
+            # 'autolink',
+            # 'autoembed',
+            # 'embedsemantic',
+            # 'autogrow',
+            # # 'devtools',
+            # 'widget',
+            # 'lineutils',
+            # 'clipboard',
+            # 'dialog',
+            # 'dialogui',
+            # 'elementspath'
+        ]),
     }
 }

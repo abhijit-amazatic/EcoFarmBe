@@ -34,4 +34,5 @@ authy==2.2.6
 qrcode==6.1
 pyjwt>=1.4.0
 django-ckeditor==6.0.0
+django-storages==1.10.1
 -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho

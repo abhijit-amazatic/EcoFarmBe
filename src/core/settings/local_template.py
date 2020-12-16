@@ -166,3 +166,8 @@ BCC_APP_KEY = ''
 
 ZOHO_CRM_URL = ''
 CRM_ORGANIZATION_ID = ''
+
+#AWS for ckeditor(keynames are different than above used aws)
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_STORAGE_BUCKET_NAME = 'help-documentation'
