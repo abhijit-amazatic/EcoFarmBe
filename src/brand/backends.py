@@ -5,13 +5,18 @@ from .models import (
     LicenseUser,
     LicenseRole,
     LicenseRolePermissions,
+    Organization,
+    Permission,
 )
 
 class LicensePermissionBackend:
+
+    all_perm_set = set(Permission.objects.all().values_list('codename').order_by())
+
     def has_perm(self, user_obj, perm, obj=None):
         if obj:
             return user_obj.is_active and perm in self.get_all_permissions(user_obj, obj)
-        return False
+        return user_obj.is_active and perm in self.get_all_permissions(user_obj, obj)
 
     def get_all_permissions(self, user_obj, obj=None):
         if not user_obj.is_active or user_obj.is_anonymous or obj is None:
@@ -22,7 +27,9 @@ class LicensePermissionBackend:
             for o in obj_ls:
                 if isinstance(o, models.Model):
                     if o.__class__ == License:
-                        return self.get_license_user_role_perm(user_obj, o)
+                        return self.get_license_role_perm(user_obj, o)
+                    if o.__class__ == Organization:
+                        return self.get_organization_user_perm(user_obj, o)
                     opts = o.__class__._meta.concrete_model._meta
                     fk_ref = model_meta._get_forward_relationships(opts)
                     for field_name in fk_ref:
@@ -31,22 +38,29 @@ class LicensePermissionBackend:
             obj_ls = new_ls
         return set()
 
-    def get_license_user_role_perm(self, user_obj, license_obj):
-        license_users = LicenseUser.objects.filter(license=license_obj, user=user_obj)
+    def get_license_role_perm(self, user_obj, license_obj):
+        organization_user_role_qs = license_obj.organizationuserrole_set.filter(
+            organization_user__user=user_obj,
+            organization_user__organization=license_obj.organization,
+        )
+        if license_obj.organization.created_by.id == user_obj.id:
+            return self.all_perm_set
         user_perm_set = set()
         perm_cache_name = '_license_role_perm_cache'
-        for license_user in license_users:
-            if not hasattr(license_user, perm_cache_name):
-                role = license_user.role
-                try:
-                    license_role_perm = LicenseRolePermissions.objects.get(license=license_obj, role=role)
-                    permissions = license_role_perm.permissions
-                except LicenseRolePermissions.DoesNotExist:
-                    permissions = role.default_permissions
-                perms = permissions.all().values_list('content_type__app_label', 'codename').order_by()  
-                setattr(license_user, perm_cache_name, {"%s.%s" % (ct, name) for ct, name in perms})
-            user_perm_set.update(getattr(license_user, perm_cache_name))
+        for organization_user_role in organization_user_role_qs:
+            if not hasattr(organization_user_role, perm_cache_name):
+                role = organization_user_role.role
+                permissions = role.permissions
+                perms = permissions.all().values_list('codename').order_by()
+                setattr(organization_user_role, perm_cache_name, set(perms))
+            user_perm_set.update(getattr(organization_user_role, perm_cache_name))
         return user_perm_set
+
+    def get_organization_user_perm(self, user_obj, organization_obj):
+        if organization_obj.created_by.id == user_obj.id:
+            return self.all_perm_set
+        return set()
+
 
     def authenticate(self, request, **kwargs):
         return None

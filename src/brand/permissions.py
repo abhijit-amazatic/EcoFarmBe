@@ -6,28 +6,65 @@ from django.db.models.query import QuerySet
 from user.models import (User, )
 
 
-class ObjectPermissions(BasePermission):
 
+class ViewSetPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         """
         related to objects
         """
-        action_perm_map = {
-        'retrieve':       'view',
-        'create':         'add',
-        'update':         'change',
-        'partial_update': 'change',
-        'destroy':        'delete',
-        }
-        if view.action in action_perm_map:
-            perm = '{}.{}_{}'.format(
-                obj._meta.app_label,
-                action_perm_map[view.action],
-                obj.__class__.__name__.lower(),
-            )
-            return request.user.has_perm(perm) or request.user.has_perm(perm, obj)
-        else:
-            return False
+        perm = self.action_perm_map.get(view.action, {}).get(request.method.lower(), '')
+        if perm:
+            return request.user.has_perm(perm, obj)
+        elif request.method.lower() == 'options':
+            return True
+        return False
+
+
+class LicenseViewSetPermission(ViewSetPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_license',
+        },
+        'create': {
+            'post': 'add_license',
+        },
+        'update': {
+            'put': 'change_license',
+        },
+        'partial_update': {
+            'patch': 'change_license',
+        },
+        'destroy': {
+            'delete':'delete_license',
+        },
+        'existing_user_data_status': {
+            'get': 'view_license',
+        },
+        'profile_contact': {
+            'get': 'view_profile_contact',
+            'patch': 'change_profile_contact',
+        },
+        'cultivation_overview': {
+            'get': 'view_cultivation_overview',
+            'patch': 'change_cultivation_overview',
+        },
+        'financial_overview': {
+            'get': 'view_financial_overview',
+            'patch': 'change_financial_overview',
+        },
+        'crop_overview': {
+            'get': 'view_crop_overview',
+            'patch': 'change_crop_overview',
+        },
+        'program_overview': {
+            'get': 'view_program_overview',
+            'patch': 'change_program_overview',
+        },
+        'license_profile': {
+            'get': 'view_license_profile',
+            'patch': 'change_license_profile',
+        },
+    }
 
 
 class filterQuerySet:
