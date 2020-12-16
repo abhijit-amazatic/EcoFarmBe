@@ -838,7 +838,7 @@ class GetDistanceView(APIView):
                 response = get_distance(location_a, location_b)
                 if response.get('code'):
                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
-                mileage = int(response.get('distance').get('text').strip(' km'))
+                mileage = float(response.get('distance').get('text').strip(' km'))
         fees = get_transportation_fees()
         if fees.get('response'):
             res = dict()
