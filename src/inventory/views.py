@@ -14,6 +14,7 @@ from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
+from core.pagination import PageNumberPagination
 from .serializers import (InventorySerializer, LogoutInventorySerializer,
                           ItemFeedbackSerializer, InTransitOrderSerializer)
 from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
@@ -154,6 +155,15 @@ class NullsAlwaysLastOrderingFilter(OrderingFilter):
 
         return queryset    
 
+    
+class BasicPagination(PageNumberPagination):
+    """
+    Pagination class. 
+    """
+    #page_size_query_param = 'limit'
+    page_size_query_param = 'page_size'
+    page_size = 50
+
 class InventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
@@ -162,6 +172,8 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filter_backends = (CustomOrderFilter,filters.DjangoFilterBackend,OrderingFilter, )
     filterset_class = DataFilter
     ordering_fields = '__all__'
+    pagination_class = BasicPagination
+
     
     def get_serializer_class(self):
         """
@@ -175,7 +187,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True) #.order_by('-labtest__Created_Time')
+        return Inventory.objects.filter(cf_cfi_published=True,labtest__Created_Time__isnull=False).order_by(F('labtest__Created_Time').desc(nulls_last=True))
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
