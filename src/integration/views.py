@@ -40,7 +40,8 @@ from integration.books import (
     list_salesorders, update_estimate_address,
     add_contact_address, edit_contact_address,
     get_contact_person, list_contact_persons,
-    create_contact_person, update_contact_person)
+    create_contact_person, update_contact_person,
+    get_unpaid_invoices)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
@@ -624,9 +625,11 @@ class AccountSummaryView(APIView):
         vendor = request.query_params.get('vendor_name')
         total_unpaid_bills = get_unpaid_bills(vendor)
         total_credits = get_available_credit(vendor)
+        total_unpaid_invoices = get_unpaid_invoices(vendor)
         return Response({
             "Available_Credits": total_credits,
-            "Overdue_Bills": total_unpaid_bills
+            "Overdue_Bills": total_unpaid_bills,
+            "Outstanding_Invoices": total_unpaid_invoices
             })
 
 class ContactView(APIView):

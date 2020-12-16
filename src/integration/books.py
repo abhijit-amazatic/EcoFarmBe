@@ -649,6 +649,16 @@ def get_available_credit(vendor, status='open'):
     credits = sum([i['total'] for i in response])
     return credits
 
+def get_unpaid_invoices(customer, status='unpaid'):
+    """
+    Return outstanding invoices.
+    """
+    response = list_invoices({
+        'customer_name': customer,
+        'status': status})['response']
+    unpaid = sum([i['balance'] for i in response])
+    return unpaid
+
 def get_contact_id(obj, contact_name):
     """
     Get contact id using contact name.
