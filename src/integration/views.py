@@ -823,17 +823,29 @@ class GetDistanceView(APIView):
         """
         Get distance.
         """
-        location_a = request.data.get('location_a')
-        location_b = request.data.get('location_b')
-        if location_a and location_b:
-            response = get_distance(location_a, location_b)
-            if response.get('code'):
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            fees = get_transportation_fees()
-            if fees.get('response'):
-                data = fees['response'][0]
-                response['transportation'] = data
-                return Response(response)
+        account_name = request.data.get('account_name')
+        response = search_query('Accounts', account_name, 'Account_Name')
+        mileage = None
+        if response.get('status_code') == 200:
+            for resp in response.get('response'):
+                if resp.get('Round_Trip_Mileage_from_Todd_Rd'):
+                    mileage = resp.get('Round_Trip_Mileage_from_Todd_Rd')
+                    break
+        if not mileage:
+            location_a = request.data.get('location_a')
+            location_b = request.data.get('location_b')
+            if location_a and location_b:
+                response = get_distance(location_a, location_b)
+                if response.get('code'):
+                    return Response(response, status=status.HTTP_400_BAD_REQUEST)
+                mileage = int(response.get('distance').get('text').strip(' km'))
+        fees = get_transportation_fees()
+        if fees.get('response'):
+            res = dict()
+            data = fees['response'][0]
+            res['transportation'] = data
+            res['mileage'] = mileage
+            return Response(res)
         return Response(
             {'code': 1, 'error': 'No location_a or location_b provided.'},
             status=status.HTTP_400_BAD_REQUEST)
