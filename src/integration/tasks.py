@@ -58,7 +58,7 @@ def send_estimate(estimate_id, contact_id):
     """
     return send_estimate_to_sign(estimate_id, contact_id)
 
-@periodic_task(run_every=(crontab(day_of_week='Sunday', hour=[8], minute=0)), options={'queue': 'general'})
+@periodic_task(run_every=(crontab(day_of_week='thu', hour=[5], minute=0)), options={'queue': 'general'})
 def fetch_bcc_licenses():
     """
     Fetch BCC licenses and post to crm.
