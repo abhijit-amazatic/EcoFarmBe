@@ -378,6 +378,7 @@ class DocumentView(APIView):
         """
         id = kwargs.get('id', None)
         sku = request.query_params.get('sku', None)
+        display = request.query_params.get('display', None)
         if id:
             data = Documents.objects.filter(id=id, status='AVAILABLE').order_by('file_type').values()
             return Response(
@@ -385,9 +386,12 @@ class DocumentView(APIView):
                 status=status.HTTP_200_OK
             )
         elif sku:
-            data_1 = Documents.objects.filter(sku=sku, status='OPTIMIZING').order_by('file_type').values()
-            data_2 = Documents.objects.filter(sku=sku, status='AVAILABLE').order_by('file_type').values()
-            data_3 = data_1 | data_2
+            if display == 'all':
+                data_1 = Documents.objects.filter(sku=sku, status='OPTIMIZING').order_by('file_type').values()
+                data_2 = Documents.objects.filter(sku=sku, status='AVAILABLE').order_by('file_type').values()
+                data_3 = data_1 | data_2
+            else:
+                data_3 = Documents.objects.filter(sku=sku, status='AVAILABLE').order_by('file_type').values()
             return Response(
                 data_3.order_by('order', 'status'),
                 status=status.HTTP_200_OK
@@ -512,3 +516,20 @@ class InventorySummaryView(APIView):
         response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
         response['batch_varities'] = inventory.distinct('sku').count()
         return Response(response)
+
+class InventoryCountyView(APIView):
+    """
+    Return Inventory county.
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory county.
+        """
+        categories = Inventory.objects.filter(
+                cf_cfi_published=True
+                ).values('county_grown').distinct()
+        return Response({
+            'status_code': 200,
+            'response': [i['county_grown'] for i in categories if i['county_grown'] != None]})

@@ -53,7 +53,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
                              InTransitOrderViewSet, DocumentPreSignedView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
-                             InventorySummaryView)
+                             InventorySummaryView, InventoryCountyView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (ProfileCategoryView, BrandViewSet, 
@@ -190,8 +190,8 @@ urlpatterns = [
     path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
     path(r'news/', GetNewsFeedView.as_view(), name='news-feed'),
     path(r'crm/labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
-    url(r'^ckeditor/', include('ckeditor_uploader.urls'))
-    
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+    path(r'inventory/county/', InventoryCountyView.as_view(), name='get-county'),
 
 ] + router.urls
 
