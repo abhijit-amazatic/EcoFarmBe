@@ -9,6 +9,7 @@ from rest_framework.viewsets import (ModelViewSet, ReadOnlyModelViewSet)
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import (filters,)
 from django_filters import (FilterSet)
 from django_filters.rest_framework import DjangoFilterBackend
 from utils.pagination import PaginationHandlerMixin
@@ -467,9 +468,9 @@ class HelpDocumentationView(ReadOnlyModelViewSet):
     #PaginationHandlerMixin
     queryset = HelpDocumentation.objects.all()
     serializer_class = HelpDocumentationSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['title', 'url', 'for_page']
+    filter_backends = [filters.OrderingFilter,DjangoFilterBackend]
+    filterset_fields = ['title', 'url', 'for_page','ordering']
     permission_classes = (AllowAny,)
-
+    #ordering = 'title'
 
 

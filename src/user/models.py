@@ -234,8 +234,10 @@ class HelpDocumentation(TimeStampFlagModelMixin, models.Model):
     """
     title = models.CharField(verbose_name=_("Title"), max_length=255,blank=True, null=True)
     url = models.CharField(verbose_name=_("URL"), max_length=255,blank=True, null=True)
+    ordering = models.PositiveIntegerField(verbose_name=_("Ordering"),blank=True, null=True)
     for_page = models.CharField(verbose_name=_("Page"), max_length=255,blank=True, null=True)
     content = RichTextUploadingField(verbose_name=_("Content"))
+    
   
     def __str__(self):
         return f'{self.id} | {self.url} | {self.title}'
