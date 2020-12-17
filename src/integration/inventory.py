@@ -250,9 +250,8 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
     Fetch list of inventory from Zoho Inventory.
     """
     cultivar = None
-    inventory_obj = get_inventory_obj(inventory_name)
     for record in inventory_list:
-        record = inventory_obj.get_inventory(item_id=record)
+        record = get_inventory_item(inventory_name=inventory_name, item_id=record)
         try:
             record['pre_tax_price'] = get_pre_tax_price(record)
             cultivar = get_cultivar_from_db(record['cf_strain_name'])
@@ -285,9 +284,8 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
     date = datetime.strftime(yesterday, '%Y-%m-%dT%H:%M:%S-0000')
     has_more = True
     page = 0
-    inventory_obj = get_inventory_obj(inventory_name)
     while has_more:
-        records = inventory_obj.get_inventory(params={'page': page, 'last_modified_time': date})
+        records = get_inventory_items(inventory_name, params={'page': page, 'last_modified_time': date})
         has_more = records['page_context']['has_more_page']
         page = records['page_context']['page'] + 1
         for record in records['items']:
@@ -309,6 +307,8 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                     defaults=record)
                 # update_price_change(price_data, record)
             except Exception as exc:
+                import traceback
+                traceback.print_exc()
                 print({
                     'item_id': record['item_id'],
                     'error': exc
