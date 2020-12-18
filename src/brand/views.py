@@ -70,7 +70,7 @@ from .serializers import (
     OrganizationDetailSerializer,
 )
 from .views_mixin import (NestedViewSetMixin, )
-from .permissions import filterQuerySet
+from .permissions import (LicenseViewSetPermission, filterQuerySet,)
 
 Auth_User = get_user_model()
 
@@ -183,7 +183,7 @@ class LicenseViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All LicenseViewSet
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, LicenseViewSetPermission)
     queryset = License.objects.get_queryset()
     profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
     cultivation_overview_path = 'cultivation-overview(/(?P<cultivation_overview_id>[0-9]*))?'
