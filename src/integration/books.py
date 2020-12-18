@@ -17,6 +17,7 @@ from .models import (Integration, )
 from .crm_format import (CRM_FORMAT, )
 from .inventory import (get_inventory_items, )
 from .sign import (submit_estimate, )
+from inventory.models import Inventory
 
 
 def get_books_obj():
@@ -658,6 +659,50 @@ def get_unpaid_invoices(customer, status='unpaid'):
         'status': status})['response']
     unpaid = sum([i['balance'] for i in response])
     return unpaid
+
+def get_buyer_summary(customer):
+    """
+    Get buyer summary for books.
+    """
+    if not customer:
+        return {}
+    total_quantity = 0
+    total_items = 0
+    category_count = {
+        'flower': 0,
+        'trim': 0,
+        'smalls': 0
+    }
+    invoices = list_invoices(params={'customer_name': customer})
+    invoices = invoices.get('response', [])
+    invoices_count = len(invoices)
+    invoices_total = sum([i['total'] for i in invoices])
+    invoices_detail = list()
+    for invoice in invoices:
+        resp = get_invoice(invoice.get('invoice_id'), params={})
+        invoices_detail.append(resp)
+        for item in resp['line_items']:
+            total_quantity += item['quantity']
+            try:
+                inventory = Inventory.objects.get(sku=item['sku'], name=item['name'])
+            except Inventory.DoesNotExist:
+                continue
+            total_items += 1
+            if 'Flower' in inventory.category_name:
+                category_count['flower'] += 1
+            elif 'Trim' in inventory.category_name:
+                category_count['trim'] += 1
+            elif 'Smalls' in inventory.category_name:
+                category_count['smalls'] += 1
+    for k, v in category_count.items():
+        category_count[k] = (v/total_items) * 100
+    return {
+        "total_invoice_price": invoices_total,
+        "total_quantity": total_quantity,
+        "average_invoice_price": invoices_total/invoices_count,
+        "outstanding_bills": get_unpaid_bills(customer),
+        "category_percentage": category_count
+        }
 
 def get_contact_id(obj, contact_name):
     """
