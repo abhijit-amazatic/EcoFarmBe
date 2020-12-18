@@ -90,7 +90,7 @@ class UserSerializer(serializers.ModelSerializer):
         Return s3 document url.
         """
         try:
-            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('-created_on')
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('created_on')
             if document.box_url:
                 return document.box_url
             else:

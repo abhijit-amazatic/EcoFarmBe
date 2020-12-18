@@ -1,5 +1,6 @@
 import os
 import json
+from io import BytesIO
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
@@ -16,7 +17,8 @@ from core.settings import (
     BOX_ACCESS_TOKEN,
     FARM_FOLDER_ID,
     BOX_JWT_DICT,
-    BOX_JWT_USER)
+    BOX_JWT_USER,
+    INVENTORY_BOX_ID)
 
 from brand.models import License
 
@@ -249,6 +251,16 @@ def get_client_folder_id(client_folder_name):
         else:
             return create_folder(FARM_FOLDER_ID, client_folder_name)
 
+def get_inventory_folder_id(client_folder_name):
+    """
+    upload file to specific client folder on box.
+    """
+    dirs = get_folder_items(INVENTORY_BOX_ID)
+    for k, v in dirs.items():
+        if v.lower() == client_folder_name.lower():
+            return k
+        else:
+            return create_folder(INVENTORY_BOX_ID, client_folder_name)
 
 def search(parent_dir, name):
     """
@@ -408,3 +420,16 @@ def get_document(document_type, client_dba, client_license, document_id):
         'status_code': 1,
         'error': 'No document or folder found.'
     }
+
+def get_thumbnail_url(file_id, folder_id, file_name):
+    """
+    Get thumbnail url.
+    """
+    client = get_box_client()
+    data = BytesIO(client.file(file_id).get_thumbnail(
+        extension='jpg',
+        min_width=50, min_height=50))
+    file_name = file_name.split('.')
+    file_name = file_name[0] + '-thumbnail.' + file_name[1]
+    thumbnail_id = upload_file_stream(folder_id, data, file_name)
+    return get_preview_url(thumbnail_id)

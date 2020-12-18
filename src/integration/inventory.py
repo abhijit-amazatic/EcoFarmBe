@@ -15,11 +15,12 @@ from core.settings import (
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
 from labtest.models import (LabTest, )
-from inventory.models import PriceChange, Inventory as InventoryModel
+from inventory.models import PriceChange, Inventory as InventoryModel, Documents
 from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, search_query,)
 from integration.box import (upload_file_stream, create_folder,
-                             get_preview_url, update_file_version)
+                             get_preview_url, update_file_version,
+                             get_thumbnail_url, get_inventory_folder_id)
 
 
 def get_inventory_obj(inventory_name):
@@ -349,3 +350,15 @@ def sync_inventory(inventory_name, response):
     except Exception as exc:
         print(exc)
         return {}
+
+def update_inventory_thumbnail():
+    """
+    Update  inventory thumbnail urls.
+    """
+    inventory = Documents.objects.filter(status='AVAILABLE', file_type__in=['image/jpeg', 'image/png'])
+    for item in inventory:
+        folder_id = get_inventory_folder_id(item.sku)
+        url = get_thumbnail_url(item.box_id, folder_id, item.name)
+        item.thumbnail_url = url
+        item.save()
+    return inventory
