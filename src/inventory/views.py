@@ -188,7 +188,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True,labtest__Created_Time__isnull=False).order_by(F('labtest__Created_Time').desc(nulls_last=True))
+        return Inventory.objects.filter(cf_cfi_published=True).order_by(F('labtest__Created_Time').desc(nulls_last=True))
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
