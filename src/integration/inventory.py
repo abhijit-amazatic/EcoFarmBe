@@ -319,6 +319,9 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
                 record['documents'] = documents
             if record['cf_vendor_name']:
                 record['county_grown'] = get_county(record['cf_vendor_name'])
+            if record['category_name']:
+                record['parent_category_name'] = get_parent_category(record['category_name'])
+            record['inventory_name'] = get_inventory_name(inventory_name)
             obj = InventoryModel.objects.update_or_create(
                 item_id=record['item_id'],
                 defaults=record)
