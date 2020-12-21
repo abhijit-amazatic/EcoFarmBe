@@ -5,7 +5,7 @@ from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
 import django_filters
 from django.shortcuts import (render, )
-from django.db.models import (Sum, F, Min, Max, Avg)
+from django.db.models import (Sum, F, Min, Max, Avg, Q)
 from rest_framework.views import APIView
 from rest_framework.response import (Response, )
 from rest_framework.authentication import (TokenAuthentication, )
@@ -183,12 +183,26 @@ class InventoryViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             return LogoutInventorySerializer
         return InventorySerializer
+
+    def list(self, request):
+        """
+        get resp
+        """
+        queryset = self.get_queryset()
+        null_entries = Inventory.objects.filter(Q(labtest__isnull=True) | Q(labtest__Created_Time__isnull=True),cf_cfi_published=True)
+        results = queryset | null_entries
+        queryset = self.filter_queryset(results).order_by(F('labtest__Created_Time').desc(nulls_last=True))
+        page = self.paginate_queryset(queryset)
+        ser = self.get_serializer_class()
+        serializer = self.get_paginated_response(ser(page,many=True).data)        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     
     def get_queryset(self):
         """
         Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True).order_by(F('labtest__Created_Time').desc(nulls_last=True))
+        return Inventory.objects.filter(cf_cfi_published=True,labtest__isnull=False,labtest__Created_Time__isnull=False)
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
