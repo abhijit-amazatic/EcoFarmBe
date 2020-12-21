@@ -694,8 +694,9 @@ def get_buyer_summary(customer):
                 category_count['trim'] += 1
             elif 'Smalls' in inventory.category_name:
                 category_count['smalls'] += 1
-    for k, v in category_count.items():
-        category_count[k] = (v/total_items) * 100
+    if total_items:
+        for k, v in category_count.items():
+            category_count[k] = (v/total_items) * 100
     return {
         "total_invoice_price": invoices_total,
         "total_quantity": total_quantity,
