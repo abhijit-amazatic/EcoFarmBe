@@ -25,6 +25,7 @@ from rest_framework import (permissions, viewsets, status, filters,)
 from rest_framework.authentication import (TokenAuthentication, )
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
 
+
 from core.permissions import IsAuthenticatedBrandPermission
 
 from .models import (Brand, License, LicenseUser, ProfileContact, LicenseProfile, CultivationOverview,
@@ -34,6 +35,7 @@ from .serializers import (BrandSerializer, BrandCreateSerializer, LicenseSeriali
                           LicenseProfileSerializer, FinancialOverviewSerializer, CropOverviewSerializer, ProgramOverviewSerializer, ProfileReportSerializer, FileUploadSerializer)
 from .serializers import (InviteUserSerializer,)
 from integration.crm import (get_licenses,)
+from integration.books import  get_buyer_summary
 from core.utility import (get_license_from_crm_insert_to_db,)
 
 from user.serializers import (get_encrypted_data,)
@@ -292,6 +294,19 @@ class LicenseViewSet(viewsets.ModelViewSet):
         """
         return self.extra_info(request, pk, LicenseProfile, LicenseProfileSerializer, 'license_profile')
 
+    @action(detail=True, url_path='buyer-summary', methods=['get'])
+    def buyer_summary(self, request, pk):
+        """
+        get buyer summary
+        """
+        license_obj = self.get_object()
+        if license_obj.is_buyer:
+            return Response({'buyer_summary':get_buyer_summary(license_obj.legal_business_name)},status=200)
+        else:
+            return Response({'detail':"License is not asscoaited with buyer account or couldn't fetch summary!"}, status=400)
+    
+
+
 
 class ProfileCategoryView(APIView):
 
@@ -547,3 +562,4 @@ class LicenseSyncView(APIView):
             except License.DoesNotExist:
                 pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
