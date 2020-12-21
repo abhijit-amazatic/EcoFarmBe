@@ -432,4 +432,7 @@ def get_thumbnail_url(file_id, folder_id, file_name):
     file_name = file_name.split('.')
     file_name = file_name[0] + '-thumbnail.' + file_name[1]
     thumbnail_id = upload_file_stream(folder_id, data, file_name)
-    return get_preview_url(thumbnail_id)
+    try:
+        return get_preview_url(thumbnail_id.id)
+    except AttributeError:
+        return get_preview_url(thumbnail_id)

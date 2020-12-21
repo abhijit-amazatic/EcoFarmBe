@@ -477,9 +477,16 @@ class DocumentStatusView(APIView):
         """
         id = kwargs.get('id', None)
         try:
-            obj = Documents.objects.update_or_create(
+            obj, created = Documents.objects.update_or_create(
                     id=id,
                     defaults=request.data)
+            if request.data.get('thumbnail_url') and obj.is_primary:
+                try:
+                    item = Inventory.objects.get(item_id=obj.object_id)
+                    item.thumbnail_url = request.data.get('thumbnail_url')
+                    item.save()
+                except Inventory.DoesNotExist:
+                    return Response({}, status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_202_ACCEPTED)
         except Documents.DoesNotExist:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)

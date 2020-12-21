@@ -417,10 +417,16 @@ def update_inventory_thumbnail():
     """
     Update  inventory thumbnail urls.
     """
-    inventory = Documents.objects.filter(status='AVAILABLE', file_type__in=['image/jpeg', 'image/png'])
+    inventory = Documents.objects.filter(
+        status='AVAILABLE',
+        file_type__in=['image/jpeg', 'image/png'],
+        thumbnail_url=None)
     for item in inventory:
         folder_id = get_inventory_folder_id(item.sku)
         url = get_thumbnail_url(item.box_id, folder_id, item.name)
+        inv = Inventory.objects.get(item_id=item.object_id)
         item.thumbnail_url = url
+        inv.thumbnail_url = url
         item.save()
+        inv.save()
     return inventory

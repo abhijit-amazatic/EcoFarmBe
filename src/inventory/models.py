@@ -149,6 +149,7 @@ class Inventory(models.Model):
     current_price_change = models.FloatField(_('Current Price Change'), blank=True, null=True)
     parent_category_name = models.CharField(_('Parent Category Name'), blank=True, null=True, max_length=50)
     inventory_name = models.CharField(_('Inventory Name'), max_length=50, blank=True, null=True)
+    thumbnail_url = models.CharField(_('Thumbnail Url'), blank=True, null=True, max_length=500)
     
     def __str__(self):
         return self.name
