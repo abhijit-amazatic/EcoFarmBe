@@ -700,7 +700,7 @@ def get_buyer_summary(customer):
     return {
         "total_invoice_price": invoices_total,
         "total_quantity": total_quantity,
-        "average_invoice_price": invoices_total/invoices_count,
+        "average_invoice_price": invoices_total/invoices_count if invoices_count else 0,
         "outstanding_bills": get_unpaid_bills(customer),
         "category_percentage": category_count
         }
