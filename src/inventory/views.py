@@ -72,6 +72,7 @@ class DataFilter(FilterSet):
         fields = {
         'sku':['icontains', 'exact'],
         'category_name':['icontains', 'exact'],
+        'parent_category_name':['icontains', 'exact'],
         'cf_cultivar_type':['icontains', 'exact'],
         'county_grown':['icontains', 'exact'],   
         'cf_strain_name':['icontains', 'exact'],

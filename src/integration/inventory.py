@@ -234,6 +234,51 @@ def update_price_change(price_data, record):
         item.save()
     return True
 
+def get_parent_category(category_name):
+    """
+    Return parent category name.
+    """
+    category_dict = {
+        'Wholesale - Flower': [
+            'Tops', 'Tops - THC', 'Smalls','In the Field',
+            'Flower - Tops',
+            'Flower - Bucked Untrimmed',
+            'Flower - Bucked Untrimmed - Seeded',
+            'Flower - Bucked Untrimmed - Contaminated'],
+        'Wholesale - Trim': ['Trim - THC', 'Trim - CBD', 'Trim'],
+        'Bucked Untrimmed': ['Bucked Untrimmed'],
+        'Wholesale - Concentrates': [
+            'Crude Oil',
+            'Crude Oil - THC',
+            'Crude Oil - CBD',
+            'Distillate Oil',
+            'Distillate Oil - THC',
+            'Distillate Oil - THC - First Pass',
+            'Distillate Oil - THC - Second Pass',
+            'Distillate Oil - CBD',
+            'Shatter',
+            'Sauce',
+            'Crumbe',
+            'Crumble',
+            'Kief',
+            'Hash'],
+        'Waste': ['Distillate Waste'],
+        'Lab Testing': ['Lab Testing'],
+        'Wholesale - Terpenes': ['Terpenes - Cultivar Specific', 'Terpenes - Cultivar Blended'],
+        'Wholesale - Isolates': [
+            'Isolates - CBD',
+            'Isolates - THC',
+            'Isolates - CBG',
+            'Isolates - CBN'],
+        'Services': ['QC', 'Transport', 'Secure Cash Handling', 'Services'],
+        'Packaged Goods': ['Packaged Goods'],}
+    for k, v in category_dict.items():
+        if category_name in v:
+            return k
+    if category_name in category_dict.keys():
+        return category_name
+    return None
+
 def get_county(vendor_name):
     """
     Get county grown for inventory item.
@@ -245,7 +290,15 @@ def get_county(vendor_name):
         return None
     except Exception:
         return None
- 
+
+def get_inventory_name(inventory_name):
+    """
+    Return inventory name
+    """
+    if 'efl' in inventory_name:
+        return 'EFL'
+    return 'EFD'
+
 def fetch_inventory_from_list(inventory_name, inventory_list):
     """
     Fetch list of inventory from Zoho Inventory.
@@ -303,6 +356,9 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                     record['documents'] = documents
                 if record['cf_vendor_name']:
                     record['county_grown'] = get_county(record['cf_vendor_name'])
+                if record['category_name']:
+                    record['parent_category_name'] = get_parent_category(record['category_name'])
+                record['inventory_name'] = get_inventory_name(inventory_name)
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     defaults=record)
@@ -339,9 +395,12 @@ def sync_inventory(inventory_name, response):
             record['labtest'] = labtest
         documents = check_documents(inventory_name, record)
         if documents and len(documents) > 0:
-                record['documents'] = documents
+            record['documents'] = documents
         if record['cf_vendor_name']:
             record['county_grown'] = get_county(record['cf_vendor_name'])
+        if record['category_name']:
+            record['parent_category_record'] = get_parent_category(record['category_name'])
+        record['inventory_name'] = get_inventory_name(inventory_name)
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
             defaults=record)
