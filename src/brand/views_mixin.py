@@ -58,3 +58,10 @@ class NestedViewSetMixin:
                     raise PermissionDenied(detail=f'{key} does not exist or not accessible.')
                 else:
                     self.context_parent[key] = qs.first()
+
+
+class PermissionQuerysetFilterMixin:
+
+    def filter_queryset(self, queryset):
+        queryset = filterQuerySet.filter_queryset(self.request, queryset, self)
+        return super().filter_queryset(queryset)

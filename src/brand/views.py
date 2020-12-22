@@ -69,8 +69,19 @@ from .serializers import (
     PermissionSerializer,
     OrganizationDetailSerializer,
 )
-from .views_mixin import (NestedViewSetMixin, )
-from .permissions import (LicenseViewSetPermission, filterQuerySet,)
+from .views_mixin import (
+    NestedViewSetMixin,
+    PermissionQuerysetFilterMixin,
+)
+from .permissions import (
+    LicenseViewSetPermission,
+    OrganizationViewSetPermission,
+    BrandViewSetPermission,
+    OrganizationRoleViewSetPermission,
+    OrganizationUserViewSetPermission,
+    OrganizationUserRoleViewSetPermission,
+    filterQuerySet,
+)
 
 Auth_User = get_user_model()
 
@@ -93,11 +104,12 @@ class CustomPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationViewSet(PermissionQuerysetFilterMixin,
+                                    viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (OrganizationViewSetPermission, )
     queryset = Organization.objects.all()
     serializer_class = OrganizationDetailSerializer
     filter_backends = [filters.SearchFilter]
@@ -107,10 +119,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         """
         Return queryset based on action.
         """
-        qs = filterQuerySet.for_user(
-            super().get_queryset(),
-            self.request.user,
-        )
+        qs = super().get_queryset()
         qs.select_related('roles', 'licenses')
         return qs
 
@@ -128,24 +137,16 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class BrandViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+class BrandViewSet(PermissionQuerysetFilterMixin,
+                    NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (BrandViewSetPermission, )
     queryset = Brand.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class =BrandSerializer
     search_fields = ['brand_name', ]
-
-    def get_queryset(self):
-        """
-        Return queryset based on action.
-        """
-        return filterQuerySet.for_user(
-            super().get_queryset(),
-            self.request.user,
-        )
 
 
 class FileUploadView(APIView):
@@ -162,12 +163,12 @@ class FileUploadView(APIView):
 class CharInFilter(BaseInFilter,CharFilter):
     pass
 
-class DataFilter(FilterSet):   
+class DataFilter(FilterSet):
     owner_or_manager__in = CharInFilter(field_name='owner_or_manager', lookup_expr='in')
     status__in = CharInFilter(field_name='status', lookup_expr='in')
     premises_county__in = CharInFilter(field_name='premises_county', lookup_expr='in')
     license_type__in = CharInFilter(field_name='license_type', lookup_expr='in')
-    
+
     class Meta:
         model = License
         fields = {
@@ -178,12 +179,13 @@ class DataFilter(FilterSet):
             'license_type__in':['icontains', 'exact'],
             'premises_county__in':['icontains', 'exact']
         }
-        
-class LicenseViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+
+class LicenseViewSet(PermissionQuerysetFilterMixin,
+                        NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All LicenseViewSet
     """
-    permission_classes = (IsAuthenticatedBrandPermission, LicenseViewSetPermission)
+    permission_classes = (LicenseViewSetPermission, )
     queryset = License.objects.get_queryset()
     profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
     cultivation_overview_path = 'cultivation-overview(/(?P<cultivation_overview_id>[0-9]*))?'
@@ -210,14 +212,11 @@ class LicenseViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         """
         Return queryset.
         """
-        license = filterQuerySet.for_user(
-            super().get_queryset(),
-            self.request.user,
-        )
+        qs = super().get_queryset()
         select_related_fields = self.action_select_related_fields_map.get(self.action)
         if select_related_fields:
-            license = license.select_related(*select_related_fields)
-        return license
+            qs = qs.select_related(*select_related_fields)
+        return qs
 
     def get_serializer_class(self):
         """
@@ -454,7 +453,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
         return Response({"kpis": group_by_value})
 
 
-class PermissionListView(NestedViewSetMixin, APIView):
+class PermissionListView(APIView):
     """
     All KPI view set
     """
@@ -472,54 +471,38 @@ class PermissionListView(NestedViewSetMixin, APIView):
         return Response({"permission": group_by_value})
 
 
-class OrganizationRoleViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+class OrganizationRoleViewSet(PermissionQuerysetFilterMixin,
+                                NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (OrganizationRoleViewSetPermission, )
     queryset = OrganizationRole.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class = OrganizationRoleSerializer
     search_fields = ['name', ]
 
-    def get_queryset(self):
-        """
-        Return queryset based on action.
-        """
-        return filterQuerySet.for_user(
-            super().get_queryset(),
-            self.request.user,
-        )
-
-
-class OrganizationUserViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+class OrganizationUserViewSet(PermissionQuerysetFilterMixin,
+                                NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (OrganizationUserViewSetPermission, )
     queryset = OrganizationUser.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class = OrganizationUserNestedViewSerializer
-    search_fields = ['name', ]
+    search_fields = ['user__email', ]
 
-    def get_queryset(self):
-        """
-        Return queryset based on action.
-        """
-        return filterQuerySet.for_user(
-            super().get_queryset(),
-            self.request.user,
-        )
-
-class OrganizationUserRoleViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
+class OrganizationUserRoleViewSet(PermissionQuerysetFilterMixin,
+                                NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (OrganizationUserRoleViewSetPermission, )
     queryset = OrganizationUserRole.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class = OrganizationUserRoleNestedSerializer
-    search_fields = ['name', ]
+    search_fields = ['organization_user__user__email', 'role__name']
 
     def get_queryset(self):
         """
@@ -528,12 +511,7 @@ class OrganizationUserRoleViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
         qs = super(viewsets.ModelViewSet, self).get_queryset()
         qs = qs.filter(
             organization_user__organization=self.context_parent['organization'])
-
-        return filterQuerySet.for_user(
-            qs,
-            self.request.user,
-        )
-
+        return  qs
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

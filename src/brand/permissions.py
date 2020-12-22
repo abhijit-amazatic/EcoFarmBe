@@ -73,35 +73,148 @@ class LicenseViewSetPermission(ViewPermission):
     }
 
 
-class filterQuerySet:
+class OrganizationViewSetPermission(ViewPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_organization',
+        },
+        'create': {
+            'post': 'add_organization',
+        },
+        'update': {
+            'put': 'edit_organization',
+        },
+        'partial_update': {
+            'patch': 'edit_organization',
+        },
+        'destroy': {
+            'delete':'delete_organization',
+        },
+    }
 
-    def __init__(self, queryset, user):
+class BrandViewSetPermission(ViewPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_brand',
+        },
+        'create': {
+            'post': 'add_brand',
+        },
+        'update': {
+            'put': 'edit_brand',
+        },
+        'partial_update': {
+            'patch': 'edit_brand',
+        },
+        'destroy': {
+            'delete':'delete_brand',
+        },
+    }
+
+class OrganizationRoleViewSetPermission(ViewPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_organization_role',
+        },
+        'create': {
+            'post': 'add_organization_role',
+        },
+        'update': {
+            'put': 'edit_organization_role',
+        },
+        'partial_update': {
+            'patch': 'edit_organization_role',
+        },
+        'destroy': {
+            'delete':'delete_organization_role',
+        },
+    }
+
+class OrganizationUserViewSetPermission(ViewPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_organization_user',
+        },
+        'create': {
+            'post': 'add_organization_user',
+        },
+        'update': {
+            'put': 'edit_organization_user',
+        },
+        'partial_update': {
+            'patch': 'edit_organization_user',
+        },
+        'destroy': {
+            'delete':'delete_organization_user',
+        },
+    }
+
+class OrganizationUserRoleViewSetPermission(ViewPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_organization_user_role',
+        },
+        'create': {
+            'post': 'add_organization_user_role',
+        },
+        'update': {
+            'put': 'edit_organization_user_role',
+        },
+        'partial_update': {
+            'patch': 'edit_organization_user_role',
+        },
+        'destroy': {
+            'delete':'delete_organization_user_role',
+        },
+    }
+
+
+class filterQuerySet:
+    queryset = None
+    user = None
+    request = None
+    view = None
+
+    def __init__(self, queryset, user, request=None, view=None):
         self.queryset = queryset
         self.user = user
+        self.request = request
+        self.view = view
 
     @classmethod
-    def for_user(cls, queryset, user):
+    def filter_queryset(cls, request, queryset, view):
+        return cls.for_user(queryset, request.user, request=request, view=view)
+
+    @classmethod
+    def for_user(cls, queryset, user, **kwargs):
         if isinstance(queryset, QuerySet) and isinstance(user, User):
-            instance = cls(queryset, user)
+            instance = cls(queryset, user, **kwargs)
             model = queryset.model.__name__.lower()
             app_label = queryset.model._meta.app_label 
-            method = getattr(instance, f'{app_label}_{model}_for_user', None)
+            method = getattr(instance, f'{app_label}_{model}', None)
             if method and callable(method):
                 return method()
             queryset.none()
         return queryset
 
-    def brand_organization_for_user(self):
-        return self.queryset.filter(
-            created_by=self.user
-        )
 
-    def brand_brand_for_user(self):
-        return self.queryset.filter(
-            organization__created_by=self.user
-        )
+    def brand_organization(self):
+        q = Q()
+        q |= Q(created_by=self.user)
+        q |= Q(organization_user__user=self.user)
+        return self.queryset.filter(q)
 
-    def brand_license_for_user(self):
-        return self.queryset.filter(
-            organization__created_by=self.user,
-        )
+    def brand_brand(self):
+        q = Q()
+        q |= Q(organization__created_by=self.user)
+        return self.queryset.filter(q)
+
+    def brand_license(self):
+        q = Q()
+        q |= Q(organization__created_by=self.user)
+        if self.view and self.view.action == 'list':
+            q |= Q(organizationuserrole__organization_user__user=self.user)&Q(organizationuserrole__role__permissions__codename='view_license')
+        else:
+            q |= Q(organizationuserrole__organization_user__user=self.user)
+        print(q)
+        return self.queryset.filter(q)
