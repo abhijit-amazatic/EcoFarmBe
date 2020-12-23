@@ -21,7 +21,7 @@ from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
 from .models import (Organization, Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from .models import (LicenseRole, OrganizationRole, Permission, OrganizationUser, OrganizationUserRole)
+from .models import (LicenseRole, OrganizationRole, Permission, OrganizationUser, OrganizationUserRole, PermissionGroup)
 from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
 from integration.box import (delete_file,)
 from .widgets import PermissionSelectMultipleWidget
@@ -378,13 +378,14 @@ class PermissionAdmin(admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
-    readonly_fields = ('group','created_on','updated_on',)
+    readonly_fields = ()
 
 
 
 admin.site.register(LicenseRole,LicenseRoleAdmin)
 admin.site.register(Organization,OrganizationAdmin)
 admin.site.register(OrganizationRole,OrganizationRoleAdmin)
+admin.site.register(PermissionGroup,admin.ModelAdmin)
 admin.site.register(Permission,PermissionAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)

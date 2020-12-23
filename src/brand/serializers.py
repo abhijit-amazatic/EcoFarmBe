@@ -376,12 +376,12 @@ class PermissionSerializer(serializers.ModelSerializer):
     """
     This defines organization role serializer.
     """
-    display_name = serializers.CharField(
-        source='get_codename_display'
-    )
+    # display_name = serializers.CharField(
+    #     source='get_codename_display'
+    # )
     class Meta:
         model = Permission
-        fields = ('id', 'codename', 'display_name')
+        fields = ('id', 'codename', 'displayname')
 
 
 class OrganizationUserInfoSerializer(serializers.ModelSerializer):

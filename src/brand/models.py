@@ -53,33 +53,58 @@ def post_save_user(sender, instance, created, **kwargs):
         )
 
 
-class Permission(TimeStampFlagModelMixin, models.Model):
+class PermissionGroup(models.Model):
+    """
+    The permission Group.
+    """
+    name = models.CharField(
+        _('codename'),
+        max_length=100,
+        unique=True
+    )
+
+    class Meta:
+        verbose_name = _('Permission Group')
+        verbose_name_plural = _('Permission Groups')
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class Permission(models.Model):
     """
     The permissions.
     """
     codename = models.CharField(
         _('codename'),
         max_length=100,
-        choices=PERMISSION_CHOICES,
         unique=True
         )
-    description = models.TextField(_('description'), null=True, blank=True)
-    group = models.CharField(_('Group'), choices=GROUP_CHOICES, max_length=100, default='', editable=False)
+    displayname = models.CharField(
+        _('displayname'),
+        max_length=100,
+    )
 
-    def save(self, *args, **kwargs):
-        self.group = PERMISSION_GROUP_MAP[self.codename]
-        return super().save(*args, **kwargs)
+    description = models.TextField(_('description'), null=True, blank=True)
+    group = models.ForeignKey(
+        PermissionGroup,
+        verbose_name=_('Group'),
+        related_name='permissions',
+        on_delete=models.PROTECT
+    )
+
+    # def save(self, *args, **kwargs):
+    #     self.group = PERMISSION_GROUP_MAP[self.codename]
+    #     return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _('permission')
         verbose_name_plural = _('permissions')
-        ordering = ('group', 'codename')
+        ordering = ('group__name', 'codename')
 
     def __str__(self):
-        return "%s | %s" % (
-            GROUP_CHOICES_DICT[self.group],
-            PERMISSION_CHOICES_DICT[self.codename],
-        )
+        return f"{self.group} | {self.displayname}"
 
     def natural_key(self):
         return (self.codename,)

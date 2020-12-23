@@ -1,0 +1,362 @@
+[
+  {
+    "model": "brand.permission",
+    "pk": 1,
+    "fields": {
+      "codename": "view_organization",
+      "displayname": "View Organization",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 2,
+    "fields": {
+      "codename": "add_organization",
+      "displayname": "Add Organization",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 3,
+    "fields": {
+      "codename": "edit_organization",
+      "displayname": "Edit Organization",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 4,
+    "fields": {
+      "codename": "delete_organization",
+      "displayname": "Delete Organization",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 5,
+    "fields": {
+      "codename": "view_brand",
+      "displayname": "View Brand",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 6,
+    "fields": {
+      "codename": "add_brand",
+      "displayname": "Add Brand",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 7,
+    "fields": {
+      "codename": "edit_brand",
+      "displayname": "Edit Brand",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 8,
+    "fields": {
+      "codename": "delete_brand",
+      "displayname": "Delete Brand",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 9,
+    "fields": {
+      "codename": "view_organization_role",
+      "displayname": "View Organization Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 10,
+    "fields": {
+      "codename": "add_organization_role",
+      "displayname": "Add Organization Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 11,
+    "fields": {
+      "codename": "edit_organization_role",
+      "displayname": "Edit Organization Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 12,
+    "fields": {
+      "codename": "delete_organization_role",
+      "displayname": "Delete Organization Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 13,
+    "fields": {
+      "codename": "view_organization_user",
+      "displayname": "View Organization User",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 14,
+    "fields": {
+      "codename": "add_organization_user",
+      "displayname": "Add Organization User",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 15,
+    "fields": {
+      "codename": "edit_organization_user",
+      "displayname": "Edit Organization User",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 16,
+    "fields": {
+      "codename": "delete_organization_user",
+      "displayname": "Delete Organization User",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 17,
+    "fields": {
+      "codename": "view_organization_user_role",
+      "displayname": "View Organization User Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 18,
+    "fields": {
+      "codename": "add_organization_user_role",
+      "displayname": "Add Organization User Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 19,
+    "fields": {
+      "codename": "edit_organization_user_role",
+      "displayname": "Edit Organization User Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 20,
+    "fields": {
+      "codename": "delete_organization_user_role",
+      "displayname": "Delete Organization User Role",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 21,
+    "fields": {
+      "codename": "view_license",
+      "displayname": "View License",
+      "description": "",
+      "group": 2
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 22,
+    "fields": {
+      "codename": "add_license",
+      "displayname": "Add License",
+      "description": "",
+      "group": 2
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 23,
+    "fields": {
+      "codename": "edit_license",
+      "displayname": "Edit License",
+      "description": "",
+      "group": 2
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 24,
+    "fields": {
+      "codename": "delete_license",
+      "displayname": "Delete License",
+      "description": "",
+      "group": 2
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 25,
+    "fields": {
+      "codename": "view_license_profile",
+      "displayname": "View License Profile",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 26,
+    "fields": {
+      "codename": "edit_license_profile",
+      "displayname": "Edit License Profile",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 27,
+    "fields": {
+      "codename": "view_profile_contact",
+      "displayname": "View Profile Contact",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 28,
+    "fields": {
+      "codename": "edit_profile_contact",
+      "displayname": "Edit Profile Contact",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 29,
+    "fields": {
+      "codename": "view_cultivation_overview",
+      "displayname": "View Cultivation Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 30,
+    "fields": {
+      "codename": "edit_cultivation_overview",
+      "displayname": "Edit Cultivation Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 31,
+    "fields": {
+      "codename": "view_financial_overview",
+      "displayname": "View Financial Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 32,
+    "fields": {
+      "codename": "edit_financial_overview",
+      "displayname": "Edit Financial Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 33,
+    "fields": {
+      "codename": "view_crop_overview",
+      "displayname": "View Crop Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 34,
+    "fields": {
+      "codename": "edit_crop_overview",
+      "displayname": "Edit Crop Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 35,
+    "fields": {
+      "codename": "view_program_overview",
+      "displayname": "View Program Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": 36,
+    "fields": {
+      "codename": "edit_program_overview",
+      "displayname": "Edit Program Overview",
+      "description": "",
+      "group": 3
+    }
+  }
+]

@@ -112,6 +112,7 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
     permission_classes = (OrganizationViewSetPermission, )
     queryset = Organization.objects.all()
     serializer_class = OrganizationDetailSerializer
+    pagination_class = None
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'created_by']
 
@@ -464,10 +465,10 @@ class PermissionListView(APIView):
         Return QuerySet.
         """
         qs = Permission.objects.all()
-        value_list = qs.values_list('group', flat=True).distinct()
+        value_list = qs.values_list('group__id', 'group__name').distinct()
         group_by_value = {}
         for value in value_list:
-            group_by_value[value] = PermissionSerializer(qs.filter(group=value), many=True).data
+            group_by_value[value[1]] = PermissionSerializer(qs.filter(group=value[0]), many=True).data
         return Response({"permission": group_by_value})
 
 

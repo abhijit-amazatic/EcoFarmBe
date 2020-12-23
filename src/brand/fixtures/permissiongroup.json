@@ -1,0 +1,17 @@
+[
+  {
+    "model": "brand.permissiongroup",
+    "pk": 1,
+    "fields": { "name": "Organization"}
+  },
+  {
+    "model": "brand.permissiongroup",
+    "pk": 2,
+    "fields": { "name": "Compliance"}
+  },
+  {
+    "model": "brand.permissiongroup",
+    "pk": 3,
+    "fields": { "name": "Profile"}
+  }
+]

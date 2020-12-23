@@ -57,7 +57,7 @@ class LicensePermissionBackend:
         return user_perm_set
 
     def get_organization_user_perm(self, user_obj, organization_obj):
-        if organization_obj.created_by.id == user_obj.id:
+        if organization_obj.created_by_id == user_obj.id:
             return self.all_perm_set
         return set()
 
