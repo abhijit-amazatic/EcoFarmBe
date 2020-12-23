@@ -395,6 +395,7 @@ def get_from_crm_insert_to_vendor_or_account(user_id):
 def get_license_from_crm_insert_to_db(user_id,license_number,license_id):
     """
     async task for existing user.Insert/create license based on license number.
+    We use this while fetching data after first step(license creation).
     """
     instance = User.objects.filter(id=user_id)
     if instance:
