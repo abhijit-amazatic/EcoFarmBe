@@ -37,7 +37,8 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'actual_available_stock',
             'documents',
             'cultivar',
-            'labtest')
+            'labtest',
+            'thumbnail_url')
         
 class ItemFeedbackSerializer(serializers.ModelSerializer):
     """
