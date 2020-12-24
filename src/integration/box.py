@@ -436,3 +436,10 @@ def get_thumbnail_url(file_id, folder_id, file_name):
         return get_preview_url(thumbnail_id.id)
     except AttributeError:
         return get_preview_url(thumbnail_id)
+
+def get_file_from_link(link):
+    """
+    Return file information using shared link.
+    """
+    client = get_box_client()
+    return client.get_shared_item(link)

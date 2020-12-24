@@ -20,7 +20,8 @@ from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, search_query,)
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
-                             get_thumbnail_url, get_inventory_folder_id)
+                             get_thumbnail_url, get_inventory_folder_id,
+                             get_file_from_link, get_thumbnail_url)
 
 
 def get_inventory_obj(inventory_name):
@@ -162,6 +163,7 @@ def check_documents(inventory_name, record):
     """
     try:
         response = list()
+        thumbnail_url = None
         if record.get('image_name'):
             record = get_inventory_item(inventory_name, record['item_id'])
         if record.get('documents') and len(record['documents']) > 0:
@@ -175,10 +177,12 @@ def check_documents(inventory_name, record):
                     new_file = upload_file_stream(folder_id, file_obj, file_name)
                     try:
                         link = get_preview_url(new_file.id)
+                        thumbnail_url = get_thumbnail_url(new_file.id, folder_id, file_name)
                     except Exception:
                         link = get_preview_url(new_file)
+                        thumbnail_url = get_thumbnail_url(new_file, folder_id, file_name)
                     response.append(link)
-            return response
+            return response, thumbnail_url
         return response
     except Exception as exc:
         print(exc)
@@ -314,9 +318,11 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
             labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
             if labtest:
                 record['labtest'] = labtest
-            documents = check_documents(inventory_name, record)
+            documents, thumbnail_url = check_documents(inventory_name, record)
             if documents and len(documents) > 0:
                 record['documents'] = documents
+            if thumbnail_url:
+                record['thumbnail_url'] = thumbnail_url
             if record['cf_vendor_name']:
                 record['county_grown'] = get_county(record['cf_vendor_name'])
             if record['category_name']:
@@ -354,9 +360,11 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                 labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
                 if labtest:
                     record['labtest'] = labtest
-                documents = check_documents(inventory_name, record)
+                documents, thumbnail_url = check_documents(inventory_name, record)
                 if documents and len(documents) > 0:
                     record['documents'] = documents
+                if thumbnail_url:
+                    record['thumbnail_url'] = thumbnail_url
                 if record['cf_vendor_name']:
                     record['county_grown'] = get_county(record['cf_vendor_name'])
                 if record['category_name']:
@@ -396,9 +404,11 @@ def sync_inventory(inventory_name, response):
         labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
         if labtest:
             record['labtest'] = labtest
-        documents = check_documents(inventory_name, record)
+        documents, thumbnail_url = check_documents(inventory_name, record)
         if documents and len(documents) > 0:
             record['documents'] = documents
+        if thumbnail_url:
+            record['thumbnail_url'] = thumbnail_url
         if record['cf_vendor_name']:
             record['county_grown'] = get_county(record['cf_vendor_name'])
         if record['category_name']:
@@ -417,16 +427,14 @@ def update_inventory_thumbnail():
     """
     Update  inventory thumbnail urls.
     """
-    inventory = Documents.objects.filter(
-        status='AVAILABLE',
-        file_type__in=['image/jpeg', 'image/png'],
-        thumbnail_url=None)
+    inventory = InventoryModel.objects.filter(documents__isnull=False)
     for item in inventory:
         folder_id = get_inventory_folder_id(item.sku)
+        file_info = get_file_from_link(item.documents[0])
         url = get_thumbnail_url(item.box_id, folder_id, item.name)
         inv = Inventory.objects.get(item_id=item.object_id)
         item.thumbnail_url = url
         inv.thumbnail_url = url
         item.save()
         inv.save()
-    return inventory
+    return documents
