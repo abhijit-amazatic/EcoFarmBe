@@ -14,6 +14,8 @@ from rest_framework.filters import (OrderingFilter, )
 from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
+from django.shortcuts import get_object_or_404
+
 from core.pagination import PageNumberPagination
 from .serializers import (InventorySerializer, LogoutInventorySerializer,
                           ItemFeedbackSerializer, InTransitOrderSerializer)
@@ -183,6 +185,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             return LogoutInventorySerializer
         return InventorySerializer
+    
 
     def list(self, request):
         """
@@ -196,13 +199,12 @@ class InventoryViewSet(viewsets.ModelViewSet):
         ser = self.get_serializer_class()
         serializer = self.get_paginated_response(ser(page,many=True).data)        
         return Response(serializer.data, status=status.HTTP_200_OK)
-
     
     def get_queryset(self):
         """
-        Return QuerySet.
+         Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True,labtest__isnull=False,labtest__Created_Time__isnull=False)
+        return Inventory.objects.filter(cf_cfi_published=True)
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
