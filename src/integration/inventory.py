@@ -183,9 +183,10 @@ def check_documents(inventory_name, record):
                         thumbnail_url = get_thumbnail_url(new_file, folder_id, file_name)
                     response.append(link)
             return response, thumbnail_url
-        return response
+        return response, thumbnail_url
     except Exception as exc:
         print(exc)
+        return None, None
 
 def upload_file_to_box(item_name, item_id, file_obj):
     """
