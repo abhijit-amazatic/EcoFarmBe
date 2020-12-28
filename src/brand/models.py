@@ -1,6 +1,9 @@
 """
 Brand related schemas defined here.
 """
+from datetime import timedelta
+from base64 import urlsafe_b64encode
+
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
@@ -8,15 +11,25 @@ from django.contrib.auth.models import Permission as DjPermission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
 from django.dispatch import receiver
-from core.validators import full_domain_validator
-from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from django.conf import settings
-from multiselectfield import MultiSelectField
+from django.utils import timezone
 
+from multiselectfield import MultiSelectField
+from phonenumber_field.modelfields import PhoneNumberField
+from cryptography.fernet import Fernet
+
+from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
+from core.validators import full_domain_validator
 from user.models import User
 from inventory.models import (Documents, )
-from .permission_choises import (PERMISSION_CHOICES, PERMISSION_CHOICES_DICT, GROUP_CHOICES, GROUP_CHOICES_DICT, PERMISSION_GROUP_MAP)
+# from .permission_choises import (PERMISSION_CHOICES, PERMISSION_CHOICES_DICT, GROUP_CHOICES, GROUP_CHOICES_DICT, PERMISSION_GROUP_MAP)
 from .utils import get_unique_org_name
+
+
+
+FERNET_KEY = (settings.SECRET_KEY * int(1 + 32//len(settings.SECRET_KEY)))[:32]
+FERNET_KEY = urlsafe_b64encode((FERNET_KEY.encode('utf-8'))).decode('utf-8')
+fernet = Fernet(FERNET_KEY)
 
 
 class Organization(TimeStampFlagModelMixin,models.Model):
@@ -297,6 +310,79 @@ class OrganizationUserRole(TimeStampFlagModelMixin, models.Model):
 
     def __str__(self):
         return f'{self.organization_user} | {self.role}'
+
+
+class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
+    """
+    Stores Brand's details.
+    """
+    organization = models.ForeignKey(
+        Organization,
+        verbose_name=_('Organization'),
+        related_name='invites',
+        on_delete=models.CASCADE,
+    )
+    full_name = models.CharField(_('Full Name'), max_length=200)
+    email = models.EmailField(_('Email Address'), )
+    phone = PhoneNumberField(_('Phone'), )
+    role = models.ForeignKey(
+        OrganizationRole,
+        verbose_name=_('Organization Role'),
+        related_name='invites',
+        on_delete=models.CASCADE,
+    )
+    licenses = models.ManyToManyField(
+        License,
+        verbose_name=_('Licenses'),
+        blank=True,
+    )
+    is_accepted = models.BooleanField(_('Is Accepted'), default=False)
+    is_completed = models.BooleanField(_('Is Completed'), default=False)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Created By'),
+        related_name='invited_users',
+        on_delete=models.CASCADE
+    )
+    expires_at = models.DateTimeField(default=timezone.now() + timedelta(hours=48))
+
+    @property
+    def is_expired(self):
+        return self.expires_at < timezone.now()
+
+    @property
+    def status(self):
+        if self.is_completed:
+            return 'completed'
+        elif self.is_accepted:
+            return 'accepted'
+        elif self.is_expired:
+            return 'expired'
+        else:
+            return 'pending'
+
+    class Meta:
+        verbose_name = _('Organization User Invite')
+        verbose_name_plural = _('Organization User Invites')
+
+    def __str__(self):
+        return f'{self.email} | {self.role}'
+
+    def get_invite_token(self):
+        context="{0}|{1}".format(self.id, self.email)
+        return urlsafe_b64encode(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
+
+    @classmethod
+    def get_object_from_invite_token(cls, token):
+        try:
+            context = fernet.decrypt(token.encode('utf-8')).decode('utf-8')
+            obj_id, email = context.split('')
+            obj = cls.objects.get(id=obj_id, email=email)
+        except Exception as e:
+            print(e)
+            return None
+        else:
+            return obj
 
 
 class LicenseRole(TimeStampFlagModelMixin, models.Model):

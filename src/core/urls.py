@@ -68,7 +68,8 @@ from brand.views import (
     OrganizationRoleViewSet,
     OrganizationUserViewSet,
     OrganizationUserRoleViewSet,
-    PermissionListView,    
+    PermissionListView,
+    InviteUserViewSet,
 )
 from two_factor.views import (
     TwoFactorLoginEnableView,
@@ -100,6 +101,7 @@ router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/role', OrganizationRoleViewSet, 'organization-role'),
     ('organization/(?P<parent_organization>[^/.]+)/user', OrganizationUserViewSet, 'organization-user'),
     ('organization/(?P<parent_organization>[^/.]+)/user-role', OrganizationUserRoleViewSet, 'organization-user-role'),
+    ('organization/(?P<parent_organization>[^/.]+)/invite-user', InviteUserViewSet, 'organization-invite-user'),
 ])
 
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
@@ -204,7 +206,6 @@ urlpatterns = [
     path(r'document/', DocumentView.as_view(), name='extra-documents'),
     path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
-#     path(r'invite-user/', InviteUserView.as_view(), name='invite_user'),
     path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
     path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
     path(r'news/', GetNewsFeedView.as_view(), name='news-feed'),

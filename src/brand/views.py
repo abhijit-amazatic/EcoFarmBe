@@ -12,7 +12,7 @@ from django.db import transaction
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from rest_framework import (permissions, viewsets, status, filters,)
+from rest_framework import (permissions, viewsets, status, filters, mixins)
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.decorators import action
 from rest_framework.exceptions import (NotFound, PermissionDenied,)
@@ -43,11 +43,11 @@ from .models import (
     CropOverview,
     ProfileCategory,
     ProfileReport,
-    LicenseRole,
     OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
-    Permission
+    Permission,
+    OrganizationUserInvite
 )
 from .serializers import (
     OrganizationSerializer,
@@ -61,7 +61,7 @@ from .serializers import (
     ProgramOverviewSerializer,
     ProfileReportSerializer,
     FileUploadSerializer,
-    # InviteUserSerializer,
+    InviteUserSerializer,
     CurrentPasswordSerializer,
     OrganizationRoleSerializer,
     OrganizationUserNestedViewSerializer,
@@ -136,6 +136,41 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return super().destroy(request, *args, **kwargs)
+
+
+    # @action(
+    #     detail=True,
+    #     methods=['post'],
+    #     name='Invite User',
+    #     url_name='invite-user',
+    #     url_path='invite-user',
+    #     serializer_class=InviteUserSerializer,
+    # )
+    # def get_qrcode(self, request, *args, **kwargs):
+    #     """
+    #     Authy user registration QRCode.
+    #     """
+    #     add_authenticator_request = self.get_object()
+    #     if add_authenticator_request.status == 'pending':
+    #         device = add_authenticator_request.get_device()
+    #         if device and isinstance(device, AuthenticatorTOTPDevice):
+    #             image_content_types = {
+    #                 'PNG': 'image/png',
+    #                 'SVG': 'image/svg+xml; charset=utf-8',
+    #             }
+    #             image_factory = qrcode.image.svg.SvgPathFillImage
+
+    #             img = qrcode.make(
+    #                 device.config_url,
+    #                 image_factory=image_factory
+    #             )
+    #             resp = HttpResponse(
+    #                 content_type=image_content_types[image_factory.kind])
+    #             img.save(resp)
+    #             return resp
+    #         return Response({'detail': 'unable to get device'}, status=400)
+    #     else:
+    #         return Response({"detail": f"request is {add_authenticator_request.status}."}, status=400)
 
 
 class BrandViewSet(PermissionQuerysetFilterMixin,
@@ -514,11 +549,6 @@ class OrganizationUserRoleViewSet(PermissionQuerysetFilterMixin,
             organization_user__organization=self.context_parent['organization'])
         return  qs
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update(self.context_parent)
-        return context
-
 
 class ProfileReportViewSet(viewsets.ModelViewSet):
     """
@@ -572,65 +602,105 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
 #        return response
 
 
-# class InviteUserView(CreateAPIView):
+class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
+                                            viewsets.GenericViewSet):
+    """
+    Invite User view
+    """
+    queryset=OrganizationUserInvite.objects.all()
+    permission_classes = (IsAuthenticatedBrandPermission, )
+    serializer_class = InviteUserSerializer
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     validated_data = serializer.get_validated_data()
+
+    #     try:
+    #         invite_user  = Auth_User.objects.get(email=validated_data['email'])
+    #     except Auth_User.DoesNotExist:
+    #         invite_user  = Auth_User.objects.create(
+    #             email=validated_data['email'],
+    #             phone=validated_data['phone'],
+    #         )
+    #         invite_user.full_name = validated_data['full_name']
+    #         invite_user.phone = validated_data['phone']
+    #         invite_user.save()
+    #         invite_user.set_unusable_password()
+    #         try:
+    #             link = get_encrypted_data(invite_user.email)
+    #             mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", invite_user.email)
+    #             notify_admins(invite_user.email)
+    #         except Exception as e:
+    #             print(e)
+    #             pass
+
+    #     invite_role, invite_role_created = LicenseRole.objects.get_or_create(name=validated_data['role'])
+    #     response_data = {
+    #         'user': {
+    #             'id': invite_user.id,
+    #             'email': invite_user.email,
+    #         },
+    #         'role': {
+    #             'id': invite_role.id,
+    #             'name': invite_role.name,
+    #         },
+    #         'licenses': [],
+    #     }
+
+    #     for license in validated_data['licenses']:
+    #         license_user, license_user_created =  LicenseUser.objects.update_or_create(
+    #             license=license,
+    #             role=invite_role,
+    #             user=invite_user,
+    #         )
+    #         response_data['licenses'].append({
+    #             'id': license_user.license.id,
+    #             'legal_business_name': license_user.license.legal_business_name,
+    #             'license_number': license_user.license.license_number,
+    #         })
+
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        try:
+            link = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME, instance.get_invite_token())
+            mail_send(
+                "user-invitation-mail.html",
+                {   'full_name': instance.full_name,
+                    'email': instance.email,
+                    'link': link,
+                },
+                "Thrive Society Verification.",
+                instance.email,
+            )
+            # notify_admins(instance.email)
+        except Exception as e:
+            print(e)
+            pass
+
+
+# class SendVerificationView(APIView):
 #     """
-#     Invite User view
+#     Send Verification link
 #     """
-#     permission_classes = (IsAuthenticatedBrandPermission, )
-#     serializer_class = InviteUserSerializer
+#     serializer_class = Serializer
+#     permission_classes = (IsAuthenticatedBrandPermission,)
+    
+#     def post(self, request, *args, **kwargs):
+#         """
+#         Post method for verification view link.
+#         """
+#         serializer = SendVerificationSerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             send_verification_link(request.data.get('email'))
+#             response = Response({"Verification link sent!"}, status=200)
+#         else:
+#             response = Response("false", status=400)
+#         return response
 
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         validated_data = serializer.get_validated_data()
-
-#         try:
-#             invite_user  = Auth_User.objects.get(email=validated_data['email'])
-#         except Auth_User.DoesNotExist:
-#             invite_user  = Auth_User.objects.create(
-#                 email=validated_data['email'],
-#                 phone=validated_data['phone'],
-#             )
-#             invite_user.full_name = validated_data['full_name']
-#             invite_user.phone = validated_data['phone']
-#             invite_user.save()
-#             invite_user.set_unusable_password()
-#             try:
-#                 link = get_encrypted_data(invite_user.email)
-#                 mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", invite_user.email)
-#                 notify_admins(invite_user.email)
-#             except Exception as e:
-#                 print(e)
-#                 pass
-
-#         invite_role, invite_role_created = LicenseRole.objects.get_or_create(name=validated_data['role'])
-#         response_data = {
-#             'user': {
-#                 'id': invite_user.id,
-#                 'email': invite_user.email,
-#             },
-#             'role': {
-#                 'id': invite_role.id,
-#                 'name': invite_role.name,
-#             },
-#             'licenses': [],
-#         }
-
-#         for license in validated_data['licenses']:
-#             license_user, license_user_created =  LicenseUser.objects.update_or_create(
-#                 license=license,
-#                 role=invite_role,
-#                 user=invite_user,
-#             )
-#             response_data['licenses'].append({
-#                 'id': license_user.license.id,
-#                 'legal_business_name': license_user.license.legal_business_name,
-#                 'license_number': license_user.license.license_number,
-#             })
-
-#         headers = self.get_success_headers(serializer.data)
-#         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
-# #        return response    
 
 class LicenseSyncView(APIView):
     """

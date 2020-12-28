@@ -20,7 +20,11 @@ from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 from user.models import (User,)
 
-from .serializers_mixin import (NestedModelSerializer, OrganizationUserRoleRelatedField)
+from .serializers_mixin import (
+    NestedModelSerializer,
+    OrganizationUserRoleRelatedField,
+    InviteUserRelatedField
+)
 from .models import (
     Organization,
     Brand,
@@ -32,12 +36,11 @@ from .models import (
     FinancialOverview,
     CropOverview,
     ProfileReport,
-    LicenseUser,
-    LicenseRole,
     OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
     Permission,
+    OrganizationUserInvite,
 )
 
 
@@ -443,7 +446,7 @@ class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
     licenses = OrganizationUserRoleRelatedField(
         queryset=License.objects.all(),
         many=True,
-        required=True,
+        # required=True,
     )
 
     def validate_licenses(self, value):
@@ -552,34 +555,56 @@ class OrganizationDetailSerializer(OrganizationSerializer):
         )
 
 
+class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines Brand serializer.
+    """
 
-# class InviteUserSerializer(serializers.Serializer):
-#     """
-#     This defines Brand serializer.
-#     """
-    
-#     full_name = serializers.CharField(max_length=200)
-#     phone = PhoneNumberField(max_length=15)
-#     email = serializers.EmailField()
-#     role = serializers.ChoiceField(choices=LicenseRole.ROLE_CHOICES)
-#     licenses = InviteUserRelatedLicenceField(many=True,)
+    # full_name = serializers.CharField(max_length=200)
+    phone = PhoneNumberField(max_length=15)
+    # email = serializers.EmailField()
+    role = InviteUserRelatedField(
+        queryset=OrganizationRole.objects.all(),
+    )
+    licenses = InviteUserRelatedField(
+        queryset=License.objects.all(),
+        many=True,
+    )
 
-#     def validate_licenses(self, value):
-#         """
-#         Check that license is selected.
-#         """
-#         if not value:
-#             raise serializers.ValidationError("At leat one License must be selected.")
-#         return value
+    def validate_licenses(self, value):
+        """
+        Check that license is selected.
+        """
+        if not value:
+            raise serializers.ValidationError("At leat one License must be selected.")
+        return value
 
-#     def validate_phone(self, value):
-#         """
-#         nonfield validation.
-#         """
-#         try:
-#             user = User.objects.get(phone=self.initial_data['phone'])
-#             if user.email != self.initial_data['email']:
-#                 raise serializers.ValidationError("Phone number already in usefor another account.")
-#         except User.DoesNotExist:
-#             pass
-#         return value
+    def validate_phone(self, value):
+        """
+        nonfield validation.
+        """
+        try:
+            user = User.objects.get(phone=self.initial_data['phone'])
+            if user.email != self.initial_data['email']:
+                raise serializers.ValidationError("Phone number already in usefor another account.")
+        except User.DoesNotExist:
+            pass
+        return value
+
+    def create(self, validated_data):
+        view = self.context['view']
+        validated_data['created_by'] = view.request.user
+        return super().create(validated_data)
+
+    class Meta:
+        model = OrganizationUserInvite
+        fields = (
+            'full_name',
+            'email',
+            'phone',
+            'role',
+            'licenses',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )

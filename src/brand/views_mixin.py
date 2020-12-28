@@ -59,6 +59,10 @@ class NestedViewSetMixin:
                 else:
                     self.context_parent[key] = qs.first()
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(self.context_parent)
+        return context
 
 class PermissionQuerysetFilterMixin:
 

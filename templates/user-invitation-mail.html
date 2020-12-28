@@ -1,0 +1,12 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;color: #013c48;'>Hi {{ full_name }} {{email}},</p>
+<div>
+    <div ><p style='font-size:16px !important;color: #013c48;'>Please click the link below to accept invitation your email:<br>
+        {{ link }}</p></div>
+    <div>
+    </div>
+
+</div>
+{% endblock %}

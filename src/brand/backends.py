@@ -2,9 +2,6 @@ from django.db import models
 from rest_framework.utils import model_meta
 from .models import (
     License,
-    LicenseUser,
-    LicenseRole,
-    LicenseRolePermissions,
     Organization,
     Permission,
 )
