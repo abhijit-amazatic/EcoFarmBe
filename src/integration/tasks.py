@@ -5,6 +5,7 @@ All periodic tasks related to integrations.
 from celery.task import periodic_task
 from celery.schedules import crontab
 from core.celery import app
+from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
 
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
@@ -34,12 +35,12 @@ def fetch_inventory_on_interval():
     try:
         price_data = get_price_data()
         # inventory_before = Inventory.objects.all().delete()
-        fetch_cultivars(days=150)
-        fetch_labtests(days=150)
+        fetch_cultivars(days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
+        fetch_labtests(days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
         licenses = fetch_licenses()
         labtests = LabTest.objects.all().count()
-        fetch_inventory('inventory_efd', days=150, price_data=price_data)
-        fetch_inventory('inventory_efl', days=150, price_data=price_data)
+        fetch_inventory('inventory_efd', days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY, price_data=price_data)
+        fetch_inventory('inventory_efl', days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY, price_data=price_data)
         inventory_after = Inventory.objects.all().count()
         return {'status_code': 200,
                 'labtest': labtests,
