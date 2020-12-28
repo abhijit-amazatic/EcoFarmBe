@@ -16,12 +16,13 @@ from rest_framework import (permissions, viewsets, status, filters, mixins)
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.decorators import action
 from rest_framework.exceptions import (NotFound, PermissionDenied,)
-from rest_framework.generics import (CreateAPIView,)
+from rest_framework.generics import (GenericAPIView, CreateAPIView,)
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
+from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 
 from core.permissions import IsAuthenticatedBrandPermission
 from integration.books import  get_buyer_summary
@@ -68,6 +69,7 @@ from .serializers import (
     OrganizationUserRoleNestedSerializer,
     PermissionSerializer,
     OrganizationDetailSerializer,
+    InviteUserVerificationSerializer,
 )
 from .views_mixin import (
     NestedViewSetMixin,
@@ -681,25 +683,49 @@ class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
             print(e)
             pass
 
+class UserInvitationVerificationView(GenericAPIView):
+    """
+    User Invitation Verification View.
+    """
+    permission_classes = (AllowAny, )
+    serializer_class = InviteUserVerificationSerializer
+    # authentication_classes = (TokenAuthentication, )
 
-# class SendVerificationView(APIView):
-#     """
-#     Send Verification link
-#     """
-#     serializer_class = Serializer
-#     permission_classes = (IsAuthenticatedBrandPermission,)
-    
-#     def post(self, request, *args, **kwargs):
-#         """
-#         Post method for verification view link.
-#         """
-#         serializer = SendVerificationSerializer(data=request.data)
-#         if serializer.is_valid(raise_exception=True):
-#             send_verification_link(request.data.get('email'))
-#             response = Response({"Verification link sent!"}, status=200)
-#         else:
-#             response = Response("false", status=400)
-#         return response
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.validated_data['token']
+        if instance.status == 'pending' or instance.status == 'accepted':
+            instance.is_accepted = True
+            try:
+                user = Auth_User.objects.get(email=instance.email)
+            except Auth_User.DoesNotExist:
+                pass
+            else:
+                organization_user, _ = OrganizationUser.objects.get_or_create(
+                    organization=instance.organization,
+                    user=user,
+                )
+                organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
+                    organization_user=organization_user,
+                    role=instance.role,
+                )
+                organization_user_role.licenses.add(*instance.licenses.all())
+
+                instance.is_completed = True
+            response = Response(status=status.HTTP_202_ACCEPTED)
+        elif instance.status == 'completed':
+            response = Response(
+                {'detail': 'Already accepted'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        elif instance.status == 'expired':
+            response = Response(
+                {'detail': 'Token expired'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        instance.save()
+        return response
 
 
 class LicenseSyncView(APIView):

@@ -23,7 +23,8 @@ from user.models import (User,)
 from .serializers_mixin import (
     NestedModelSerializer,
     OrganizationUserRoleRelatedField,
-    InviteUserRelatedField
+    InviteUserRelatedField,
+    InviteUserTokenField,
 )
 from .models import (
     Organization,
@@ -631,4 +632,16 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
             'created_on',
             'updated_on',
             # 'organization',
+        )
+
+
+class InviteUserVerificationSerializer(serializers.Serializer):
+    """
+    This defines serializer.
+    """
+    token = InviteUserTokenField()
+
+    class Meta:
+        fields = (
+            'token',
         )

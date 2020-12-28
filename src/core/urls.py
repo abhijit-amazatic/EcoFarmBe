@@ -70,6 +70,7 @@ from brand.views import (
     OrganizationUserRoleViewSet,
     PermissionListView,
     InviteUserViewSet,
+    UserInvitationVerificationView,
 )
 from two_factor.views import (
     TwoFactorLoginEnableView,
@@ -213,6 +214,8 @@ urlpatterns = [
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     path(r'inventory/county/', InventoryCountyView.as_view(), name='get-county'),
     path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
+    path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),
+
 ] + router.urls
 
 

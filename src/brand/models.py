@@ -2,7 +2,7 @@
 Brand related schemas defined here.
 """
 from datetime import timedelta
-from base64 import urlsafe_b64encode
+from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
 from django.db import models
 from django.db.models import Q
@@ -317,6 +317,8 @@ class OrganizationUserRole(TimeStampFlagModelMixin, models.Model):
     def __str__(self):
         return f'{self.organization_user} | {self.role}'
 
+def get_invite_expiration_time():
+    return timezone.now() + timedelta(hours=48)
 
 class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
     """
@@ -350,7 +352,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         related_name='invited_users',
         on_delete=models.CASCADE
     )
-    expires_at = models.DateTimeField(default=timezone.now() + timedelta(hours=48))
+    expires_at = models.DateTimeField(default=get_invite_expiration_time)
 
     @property
     def is_expired(self):
@@ -381,14 +383,42 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
     @classmethod
     def get_object_from_invite_token(cls, token):
         try:
-            context = fernet.decrypt(token.encode('utf-8')).decode('utf-8')
-            obj_id, email = context.split('')
-            obj = cls.objects.get(id=obj_id, email=email)
+            context = fernet.decrypt(
+                urlsafe_b64decode(token.encode('utf-8'))
+            ).decode('utf-8')
+            obj_id, email = context.split('|')
+            obj = cls.objects.get(id=int(obj_id), email=email)
         except Exception as e:
             print(e)
             return None
         else:
             return obj
+
+
+@receiver(models.signals.post_save, sender=User)
+def post_save_user(sender, instance, created, **kwargs):
+    """
+    Deletes old file.
+    """
+    if created:
+        invites = OrganizationUserInvite.objects.filter(
+            email=instance.email,
+            is_accepted=True,
+            is_completed=False,
+        )
+        for invite in invites:
+            organization_user = OrganizationUser.objects.get_or_create(
+                organization=invite.organization,
+                user=instance,
+            )
+            organization_user_role = OrganizationUserRole.objects.get(
+                organization_user=organization_user,
+                role=invite.role,
+            )
+            organization_user_role.licenses.add(*invite.licenses.all())
+            invite.is_completed = True
+            invite.save()
+
 
 
 # class LicenseRole(TimeStampFlagModelMixin, models.Model):

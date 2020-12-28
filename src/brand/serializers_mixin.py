@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from .models import OrganizationUserInvite
 
 class NestedModelSerializer:
     """
@@ -52,3 +52,15 @@ class InviteUserRelatedField(serializers.RelatedField):
         queryset = super().get_queryset()
         queryset = queryset.filter(organization=self.context.get('organization'))
         return queryset
+
+
+class InviteUserTokenField(serializers.Field):
+
+    def to_representation(self, obj):
+        return obj.get_invite_token()
+
+    def to_internal_value(self, data):
+        instance = OrganizationUserInvite.get_object_from_invite_token(data)
+        if not instance:
+            raise serializers.ValidationError('invalid token.')
+        return instance
