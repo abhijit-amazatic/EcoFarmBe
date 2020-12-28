@@ -20,8 +20,8 @@ from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
-from .models import (Organization, Brand,License,LicenseUser,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from .models import (LicenseRole, OrganizationRole, Permission, OrganizationUser, OrganizationUserRole, PermissionGroup)
+from .models import (Organization, Brand,License,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
+from .models import (OrganizationRole, Permission, OrganizationUser, OrganizationUserRole, PermissionGroup)
 from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
 from integration.box import (delete_file,)
 from .widgets import PermissionSelectMultipleWidget
@@ -191,18 +191,18 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
     can_delete = False
     readonly_fields = ('is_draft',)   
     
-class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
-    extra = 0
-    model = LicenseUser
+# class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
+#     extra = 0
+#     model = LicenseUser
 
-def get_user_data(request):
-    """
-    return user info dict.
-    """
-    return {'id':request.user.id,
-            'email':request.user.email,
-            'first_name':request.user.first_name,
-            'last_name':request.user.last_name}
+# def get_user_data(request):
+#     """
+#     return user info dict.
+#     """
+#     return {'id':request.user.id,
+#             'email':request.user.email,
+#             'first_name':request.user.first_name,
+#             'last_name':request.user.last_name}
 
 
 class MyLicenseAdmin(nested_admin.NestedModelAdmin):
@@ -229,7 +229,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         queryset |= self.model.objects.select_related('license_profile').filter(license_profile__name__contains={'name':search_term})
         return queryset, use_distinct
     
-    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin, InlineLicenseUserAdmin]
+    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin,]
     form = LicenseUpdatedForm
     extra = 0
     model = License
@@ -353,13 +353,13 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
     #search_fields = ('',)
 
 
-class LicenseRoleAdmin(admin.ModelAdmin):
-    """
-    ProfileCategoryAdmin
-    """
-    formfield_overrides = {
-        models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
-    }
+# class LicenseRoleAdmin(admin.ModelAdmin):
+#     """
+#     ProfileCategoryAdmin
+#     """
+#     formfield_overrides = {
+#         models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+#     }
 
 
 class OrganizationRoleAdmin(admin.ModelAdmin):
@@ -382,7 +382,7 @@ class PermissionAdmin(admin.ModelAdmin):
 
 
 
-admin.site.register(LicenseRole,LicenseRoleAdmin)
+# admin.site.register(LicenseRole,LicenseRoleAdmin)
 admin.site.register(Organization,OrganizationAdmin)
 admin.site.register(OrganizationRole,OrganizationRoleAdmin)
 admin.site.register(PermissionGroup,admin.ModelAdmin)

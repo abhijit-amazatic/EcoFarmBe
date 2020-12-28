@@ -2,11 +2,19 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from brand.models import LicenseRole as LicenseRoleModel
+
+ROLE_CHOICES = (
+    'owner',
+    'license_owner',
+    'farm_manager',
+    'logistics',
+    'sales_or_inventory',
+    'billing',
+)
 
 def create_roles(apps, schema_editor):
     LicenseRole = apps.get_model("brand", "LicenseRole")
-    for role_name, _ in LicenseRoleModel.ROLE_CHOICES:
+    for role_name in ROLE_CHOICES:
         LicenseRole.objects.get_or_create(name=role_name)
 
 def create_roles_reverse(apps, schema_editor):

@@ -391,92 +391,92 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
             return obj
 
 
-class LicenseRole(TimeStampFlagModelMixin, models.Model):
-    """
-    Stores License Profile User's User's Roles.
-    """
-    ROLE_OWNER = 'owner'
-    ROLE_LICENSE_OWNER = 'license_owner'
-    ROLE_FARM_MANAGER = 'farm_manager'
-    ROLE_LOGISTICS = 'logistics'
-    ROLE_SALES_OR_INVENTORY = 'sales_or_inventory'
-    ROLE_BILLING = 'billing'
-    ROLE_CHOICES = (
-        (ROLE_OWNER, _('Owner')),
-        (ROLE_LICENSE_OWNER, _('License Owner')),
-        (ROLE_FARM_MANAGER, _('Farm Manager')),
-        (ROLE_LOGISTICS, _('Logistics')),
-        (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
-        (ROLE_BILLING, _('Billing')),
-    )
-    ROLE_CHOICES_DICT = dict(ROLE_CHOICES)
-    name = models.CharField(
-        verbose_name=_('Name'),
-        max_length=60,
-        choices=ROLE_CHOICES,
-        unique=True,
-    )
-    default_permissions = models.ManyToManyField(
-        DjPermission,
-        verbose_name=_('Default Permissions'),
-        blank=True,
-        limit_choices_to=Q(content_type__app_label='brand'),
-    )
+# class LicenseRole(TimeStampFlagModelMixin, models.Model):
+#     """
+#     Stores License Profile User's User's Roles.
+#     """
+#     ROLE_OWNER = 'owner'
+#     ROLE_LICENSE_OWNER = 'license_owner'
+#     ROLE_FARM_MANAGER = 'farm_manager'
+#     ROLE_LOGISTICS = 'logistics'
+#     ROLE_SALES_OR_INVENTORY = 'sales_or_inventory'
+#     ROLE_BILLING = 'billing'
+#     ROLE_CHOICES = (
+#         (ROLE_OWNER, _('Owner')),
+#         (ROLE_LICENSE_OWNER, _('License Owner')),
+#         (ROLE_FARM_MANAGER, _('Farm Manager')),
+#         (ROLE_LOGISTICS, _('Logistics')),
+#         (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
+#         (ROLE_BILLING, _('Billing')),
+#     )
+#     ROLE_CHOICES_DICT = dict(ROLE_CHOICES)
+#     name = models.CharField(
+#         verbose_name=_('Name'),
+#         max_length=60,
+#         choices=ROLE_CHOICES,
+#         unique=True,
+#     )
+#     default_permissions = models.ManyToManyField(
+#         DjPermission,
+#         verbose_name=_('Default Permissions'),
+#         blank=True,
+#         limit_choices_to=Q(content_type__app_label='brand'),
+#     )
 
 
-    def __str__(self):
-        return str(self.ROLE_CHOICES_DICT.get(self.name, ''))
+#     def __str__(self):
+#         return str(self.ROLE_CHOICES_DICT.get(self.name, ''))
 
-    def natural_key(self):
-        return (self.name,)
+#     def natural_key(self):
+#         return (self.name,)
 
-    class Meta:
-        verbose_name = _('License Role')
-        verbose_name_plural = _('License Roles')
-
-
-class LicenseUser(TimeStampFlagModelMixin,models.Model):
-    """
-    Stores License Profile User's details #combined roles for all accounts & vendors.
-    Only farm manager is extra in vendors/sellers.
-    """
-    license = models.ForeignKey(License, verbose_name=_('License'),
-                             related_name='profile_roles', on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
-                             related_name='license_roles', on_delete=models.CASCADE)
-    role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'), related_name='license_users')
-
-    def __str__(self):
-        return f'{self.license} | {self.user}'
-
-    class Meta:
-        unique_together = (('license', 'user'), )
-        verbose_name = _('License Profile User')
-        verbose_name_plural = _('License Profile Users')
+#     class Meta:
+#         verbose_name = _('License Role')
+#         verbose_name_plural = _('License Roles')
 
 
-class LicenseRolePermissions(TimeStampFlagModelMixin,models.Model):
-    """
-    Stores License Profile Role's Permissions.
-    """
-    license = models.ForeignKey(License, verbose_name=_('License'),
-                             related_name='license_role_permissions', on_delete=models.CASCADE)
-    role = models.ForeignKey(LicenseRole, verbose_name=_('Role'),
-                             related_name='license_role_permissions', on_delete=models.CASCADE)
-    permissions = models.ManyToManyField(
-        DjPermission,
-        verbose_name=_('License Role Permissions'),
-        blank=True,
-        limit_choices_to=Q(content_type__app_label='brand'),
-    )
+# class LicenseUser(TimeStampFlagModelMixin,models.Model):
+#     """
+#     Stores License Profile User's details #combined roles for all accounts & vendors.
+#     Only farm manager is extra in vendors/sellers.
+#     """
+#     license = models.ForeignKey(License, verbose_name=_('License'),
+#                              related_name='profile_roles', on_delete=models.CASCADE)
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
+#                              related_name='license_roles', on_delete=models.CASCADE)
+#     role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'), related_name='license_users')
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return f'{self.license} | {self.user}'
 
-    class Meta:
-        unique_together = (('license', 'role'), )
-        verbose_name = _('License Role Permissions')
-        verbose_name_plural = _('License Roles Permissions')
+#     class Meta:
+#         unique_together = (('license', 'user'), )
+#         verbose_name = _('License Profile User')
+#         verbose_name_plural = _('License Profile Users')
+
+
+# class LicenseRolePermissions(TimeStampFlagModelMixin,models.Model):
+#     """
+#     Stores License Profile Role's Permissions.
+#     """
+#     license = models.ForeignKey(License, verbose_name=_('License'),
+#                              related_name='license_role_permissions', on_delete=models.CASCADE)
+#     role = models.ForeignKey(LicenseRole, verbose_name=_('Role'),
+#                              related_name='license_role_permissions', on_delete=models.CASCADE)
+#     permissions = models.ManyToManyField(
+#         DjPermission,
+#         verbose_name=_('License Role Permissions'),
+#         blank=True,
+#         limit_choices_to=Q(content_type__app_label='brand'),
+#     )
+
+#     def __str__(self):
+#         return self.name
+
+#     class Meta:
+#         unique_together = (('license', 'role'), )
+#         verbose_name = _('License Role Permissions')
+#         verbose_name_plural = _('License Roles Permissions')
 
 
 

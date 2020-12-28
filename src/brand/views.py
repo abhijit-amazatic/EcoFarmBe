@@ -34,7 +34,7 @@ from user.views import (notify_admins,)
 from .models import (
     Organization,
     Brand, License,
-    LicenseUser,
+    # LicenseUser,
     ProfileContact,
     LicenseProfile,
     CultivationOverview,
