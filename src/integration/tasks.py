@@ -33,6 +33,7 @@ def fetch_inventory_on_interval():
     Update inventory on every interval from Zoho Inventory.
     """
     try:
+        NUMBER_OF_DAYS_TO_FETCH_INVENTORY = int(NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
         price_data = get_price_data()
         # inventory_before = Inventory.objects.all().delete()
         fetch_cultivars(days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
