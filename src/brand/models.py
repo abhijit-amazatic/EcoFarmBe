@@ -45,6 +45,12 @@ class Organization(TimeStampFlagModelMixin,models.Model):
     )
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
+    email = models.EmailField(_('Email Address'), null=True, blank=True)
+    phone = PhoneNumberField(_('Phone'), null=True, blank=True)
+    category = models.CharField(_('Category'), max_length=255, null=True, blank=True)
+    about = models.TextField(_('description'), null=True, blank=True)
+    ethics_and_certifications = ArrayField(models.CharField(_('Ethics And Certifications'), max_length=255, blank=True), blank=True, null=True, default=list)
+    documents = GenericRelation(Documents)
 
     class Meta:
         unique_together = (('name', 'created_by'), )

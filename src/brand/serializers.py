@@ -540,19 +540,43 @@ class OrganizationDetailSerializer(OrganizationSerializer):
     created_by = OrganizationUserInfoSerializer(read_only=True)
     roles = OrganizationRoleNestedSerializer(many=True, read_only=True)
     users = OrganizationUserSerializer(source='organization_user', many=True, read_only=True)
+    profile_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Organization
         read_only_fields = ('id', 'licenses', 'created_by', 'created_on', 'updated_on')
         fields = (
             'id',
             'name',
+            'profile_image_url',
+            'email',
+            'phone',
+            'category',
+            'about',
             'created_by',
             'roles',
             'users',
             'licenses',
+            'ethics_and_certifications',
             'created_on',
             'updated_on',
         )
+
+    def get_profile_image_url(self, obj):
+        """
+        Return s3 document url.
+        """
+        try:
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('created_on')
+            if document.box_url:
+                return document.box_url
+            else:
+                path = document.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
+        except Exception:
+            return None
 
 
 class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
