@@ -376,8 +376,6 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                     defaults=record)
                 # update_price_change(price_data, record)
             except Exception as exc:
-                import traceback
-                traceback.print_exc()
                 print({
                     'item_id': record['item_id'],
                     'error': exc
