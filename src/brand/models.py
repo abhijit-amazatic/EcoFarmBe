@@ -22,7 +22,6 @@ from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
 from user.models import User
 from inventory.models import (Documents, )
-# from .permission_choises import (PERMISSION_CHOICES, PERMISSION_CHOICES_DICT, GROUP_CHOICES, GROUP_CHOICES_DICT, PERMISSION_GROUP_MAP)
 from .utils import get_unique_org_name
 
 

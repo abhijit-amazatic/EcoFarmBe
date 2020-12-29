@@ -253,9 +253,27 @@
   },
   {
     "model": "brand.permission",
+    "pk": "add_profile_contact",
+    "fields": {
+      "name": "Add Profile Contact",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
     "pk": "edit_profile_contact",
     "fields": {
       "name": "Edit Profile Contact",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "delete_profile_contact",
+    "fields": {
+      "name": "Delete Profile Contact",
       "description": "",
       "group": 3
     }
@@ -271,9 +289,27 @@
   },
   {
     "model": "brand.permission",
+    "pk": "add_cultivation_overview",
+    "fields": {
+      "name": "Add Cultivation Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
     "pk": "edit_cultivation_overview",
     "fields": {
       "name": "Edit Cultivation Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "delete_cultivation_overview",
+    "fields": {
+      "name": "Delete Cultivation Overview",
       "description": "",
       "group": 3
     }
@@ -289,9 +325,27 @@
   },
   {
     "model": "brand.permission",
+    "pk": "add_financial_overview",
+    "fields": {
+      "name": "Add Financial Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
     "pk": "edit_financial_overview",
     "fields": {
       "name": "Edit Financial Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "delete_financial_overview",
+    "fields": {
+      "name": "Delete Financial Overview",
       "description": "",
       "group": 3
     }
@@ -307,9 +361,27 @@
   },
   {
     "model": "brand.permission",
+    "pk": "add_crop_overview",
+    "fields": {
+      "name": "Add Crop Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
     "pk": "edit_crop_overview",
     "fields": {
       "name": "Edit Crop Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "delete_crop_overview",
+    "fields": {
+      "name": "Delete Crop Overview",
       "description": "",
       "group": 3
     }
@@ -325,11 +397,110 @@
   },
   {
     "model": "brand.permission",
+    "pk": "add_program_overview",
+    "fields": {
+      "name": "Add Program Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
     "pk": "edit_program_overview",
     "fields": {
       "name": "Edit Program Overview",
       "description": "",
       "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "delete_program_overview",
+    "fields": {
+      "name": "Delete Program Overview",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "Invite_licence_user",
+    "fields": {
+      "name": "Invite Licence User",
+      "description": "",
+      "group": 3
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "view_billing_address",
+    "fields": {
+      "name": "View Billing Address",
+      "description": "",
+      "group": 4
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "edit_billing_address",
+    "fields": {
+      "name": "Edit Billing Address",
+      "description": "",
+      "group": 4
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "view_shipping_address",
+    "fields": {
+      "name": "View Shipping Address",
+      "description": "",
+      "group": 4
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "edit_shipping_address",
+    "fields": {
+      "name": "Edit Shipping Address",
+      "description": "",
+      "group": 4
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "view_mailing_address",
+    "fields": {
+      "name": "View Mailing Address",
+      "description": "",
+      "group": 4
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "edit_mailing_address",
+    "fields": {
+      "name": "Edit Mailing Address",
+      "description": "",
+      "group": 4
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "view_sales",
+    "fields": {
+      "name": "View Sales",
+      "description": "",
+      "group": 5
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "view_inventory",
+    "fields": {
+      "name": "View Inventory",
+      "description": "",
+      "group": 5
     }
   }
 ]
