@@ -84,8 +84,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
         read_only_fields = ('created_on', 'updated_on')
 
     def validate_name(self, value):
-        qs = self.context['view'].get_queryset()
-        if qs.filter(name=value).exists():
+        view = self.context['view']
+        qs = view.get_queryset()
+        if view.action=='create' and qs.filter(name=value).exists():
             raise serializers.ValidationError("Organization name already exist.")
         return value
 
@@ -594,15 +595,8 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
     licenses = InviteUserRelatedField(
         queryset=License.objects.all(),
         many=True,
-    )
 
-    def validate_licenses(self, value):
-        """
-        Check that license is selected.
-        """
-        if not value:
-            raise serializers.ValidationError("At leat one License must be selected.")
-        return value
+    )
 
     def validate_phone(self, value):
         """
