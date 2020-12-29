@@ -77,9 +77,9 @@ class PermissionGroup(models.Model):
     The permission Group.
     """
     name = models.CharField(
-        _('codename'),
+        _('Name'),
         max_length=100,
-        unique=True
+        unique=True,
     )
 
     class Meta:
@@ -95,13 +95,14 @@ class Permission(models.Model):
     """
     The permissions.
     """
-    codename = models.CharField(
-        _('codename'),
+    id = models.CharField(
+        _('Id'),
         max_length=100,
-        unique=True
-        )
-    displayname = models.CharField(
-        _('displayname'),
+        unique=True,
+        primary_key=True,
+    )
+    name = models.CharField(
+        _('Name'),
         max_length=100,
     )
 
@@ -120,13 +121,13 @@ class Permission(models.Model):
     class Meta:
         verbose_name = _('permission')
         verbose_name_plural = _('permissions')
-        ordering = ('group__name', 'codename')
+        ordering = ('group__name', 'id')
 
     def __str__(self):
-        return f"{self.group} | {self.displayname}"
+        return f"{self.group} | {self.name}"
 
     def natural_key(self):
-        return (self.codename,)
+        return (self.name,)
 
 
 class OrganizationRole(TimeStampFlagModelMixin, models.Model):

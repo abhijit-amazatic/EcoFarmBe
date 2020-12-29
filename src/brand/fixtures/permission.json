@@ -1,360 +1,333 @@
 [
   {
     "model": "brand.permission",
-    "pk": 1,
+    "pk": "view_organization",
     "fields": {
-      "codename": "view_organization",
-      "displayname": "View Organization",
+      "name": "View Organization",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 2,
+    "pk": "add_organization",
     "fields": {
-      "codename": "add_organization",
-      "displayname": "Add Organization",
+      "name": "Add Organization",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 3,
+    "pk": "edit_organization",
     "fields": {
-      "codename": "edit_organization",
-      "displayname": "Edit Organization",
+      "name": "Edit Organization",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 4,
+    "pk": "delete_organization",
     "fields": {
-      "codename": "delete_organization",
-      "displayname": "Delete Organization",
+      "name": "Delete Organization",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 5,
+    "pk": "view_brand",
     "fields": {
-      "codename": "view_brand",
-      "displayname": "View Brand",
+      "name": "View Brand",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 6,
+    "pk": "add_brand",
     "fields": {
-      "codename": "add_brand",
-      "displayname": "Add Brand",
+      "name": "Add Brand",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 7,
+    "pk": "edit_brand",
     "fields": {
-      "codename": "edit_brand",
-      "displayname": "Edit Brand",
+      "name": "Edit Brand",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 8,
+    "pk": "delete_brand",
     "fields": {
-      "codename": "delete_brand",
-      "displayname": "Delete Brand",
+      "name": "Delete Brand",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 9,
+    "pk": "view_organization_role",
     "fields": {
-      "codename": "view_organization_role",
-      "displayname": "View Organization Role",
+      "name": "View Organization Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 10,
+    "pk": "add_organization_role",
     "fields": {
-      "codename": "add_organization_role",
-      "displayname": "Add Organization Role",
+      "name": "Add Organization Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 11,
+    "pk": "edit_organization_role",
     "fields": {
-      "codename": "edit_organization_role",
-      "displayname": "Edit Organization Role",
+      "name": "Edit Organization Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 12,
+    "pk": "delete_organization_role",
     "fields": {
-      "codename": "delete_organization_role",
-      "displayname": "Delete Organization Role",
+      "name": "Delete Organization Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 13,
+    "pk": "view_organization_user",
     "fields": {
-      "codename": "view_organization_user",
-      "displayname": "View Organization User",
+      "name": "View Organization User",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 14,
+    "pk": "add_organization_user",
     "fields": {
-      "codename": "add_organization_user",
-      "displayname": "Add Organization User",
+      "name": "Add Organization User",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 15,
+    "pk": "edit_organization_user",
     "fields": {
-      "codename": "edit_organization_user",
-      "displayname": "Edit Organization User",
+      "name": "Edit Organization User",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 16,
+    "pk": "delete_organization_user",
     "fields": {
-      "codename": "delete_organization_user",
-      "displayname": "Delete Organization User",
+      "name": "Delete Organization User",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 17,
+    "pk": "view_organization_user_role",
     "fields": {
-      "codename": "view_organization_user_role",
-      "displayname": "View Organization User Role",
+      "name": "View Organization User Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 18,
+    "pk": "add_organization_user_role",
     "fields": {
-      "codename": "add_organization_user_role",
-      "displayname": "Add Organization User Role",
+      "name": "Add Organization User Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 19,
+    "pk": "edit_organization_user_role",
     "fields": {
-      "codename": "edit_organization_user_role",
-      "displayname": "Edit Organization User Role",
+      "name": "Edit Organization User Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 20,
+    "pk": "delete_organization_user_role",
     "fields": {
-      "codename": "delete_organization_user_role",
-      "displayname": "Delete Organization User Role",
+      "name": "Delete Organization User Role",
       "description": "",
       "group": 1
     }
   },
   {
     "model": "brand.permission",
-    "pk": 21,
+    "pk": "invite_user_to_organization",
     "fields": {
-      "codename": "view_license",
-      "displayname": "View License",
+      "name": "Invite User To Organization",
+      "description": "",
+      "group": 1
+    }
+  },
+  {
+    "model": "brand.permission",
+    "pk": "view_license",
+    "fields": {
+      "name": "View License",
       "description": "",
       "group": 2
     }
   },
   {
     "model": "brand.permission",
-    "pk": 22,
+    "pk": "add_license",
     "fields": {
-      "codename": "add_license",
-      "displayname": "Add License",
+      "name": "Add License",
       "description": "",
       "group": 2
     }
   },
   {
     "model": "brand.permission",
-    "pk": 23,
+    "pk": "edit_license",
     "fields": {
-      "codename": "edit_license",
-      "displayname": "Edit License",
+      "name": "Edit License",
       "description": "",
       "group": 2
     }
   },
   {
     "model": "brand.permission",
-    "pk": 24,
+    "pk": "delete_license",
     "fields": {
-      "codename": "delete_license",
-      "displayname": "Delete License",
+      "name": "Delete License",
       "description": "",
       "group": 2
     }
   },
   {
     "model": "brand.permission",
-    "pk": 25,
+    "pk": "view_license_profile",
     "fields": {
-      "codename": "view_license_profile",
-      "displayname": "View License Profile",
+      "name": "View License Profile",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 26,
+    "pk": "edit_license_profile",
     "fields": {
-      "codename": "edit_license_profile",
-      "displayname": "Edit License Profile",
+      "name": "Edit License Profile",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 27,
+    "pk": "view_profile_contact",
     "fields": {
-      "codename": "view_profile_contact",
-      "displayname": "View Profile Contact",
+      "name": "View Profile Contact",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 28,
+    "pk": "edit_profile_contact",
     "fields": {
-      "codename": "edit_profile_contact",
-      "displayname": "Edit Profile Contact",
+      "name": "Edit Profile Contact",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 29,
+    "pk": "view_cultivation_overview",
     "fields": {
-      "codename": "view_cultivation_overview",
-      "displayname": "View Cultivation Overview",
+      "name": "View Cultivation Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 30,
+    "pk": "edit_cultivation_overview",
     "fields": {
-      "codename": "edit_cultivation_overview",
-      "displayname": "Edit Cultivation Overview",
+      "name": "Edit Cultivation Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 31,
+    "pk": "view_financial_overview",
     "fields": {
-      "codename": "view_financial_overview",
-      "displayname": "View Financial Overview",
+      "name": "View Financial Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 32,
+    "pk": "edit_financial_overview",
     "fields": {
-      "codename": "edit_financial_overview",
-      "displayname": "Edit Financial Overview",
+      "name": "Edit Financial Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 33,
+    "pk": "view_crop_overview",
     "fields": {
-      "codename": "view_crop_overview",
-      "displayname": "View Crop Overview",
+      "name": "View Crop Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 34,
+    "pk": "edit_crop_overview",
     "fields": {
-      "codename": "edit_crop_overview",
-      "displayname": "Edit Crop Overview",
+      "name": "Edit Crop Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 35,
+    "pk": "view_program_overview",
     "fields": {
-      "codename": "view_program_overview",
-      "displayname": "View Program Overview",
+      "name": "View Program Overview",
       "description": "",
       "group": 3
     }
   },
   {
     "model": "brand.permission",
-    "pk": 36,
+    "pk": "edit_program_overview",
     "fields": {
-      "codename": "edit_program_overview",
-      "displayname": "Edit Program Overview",
+      "name": "Edit Program Overview",
       "description": "",
       "group": 3
     }

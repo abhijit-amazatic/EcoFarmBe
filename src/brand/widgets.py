@@ -61,7 +61,7 @@ class PermissionSelectMultipleWidget(forms.CheckboxSelectMultiple):
 
         for permission in permissions:
             # get permission type from codename
-            codename = permission.codename
+            codename = permission.id
             model_part = "_" + permission.codename.split('_', 1)[1]
             permission_type = codename
             if permission_type.endswith(model_part):

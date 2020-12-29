@@ -385,7 +385,7 @@ class PermissionSerializer(serializers.ModelSerializer):
     # )
     class Meta:
         model = Permission
-        fields = ('id', 'codename', 'displayname')
+        fields = ('id', 'name',)
 
 
 class OrganizationUserInfoSerializer(serializers.ModelSerializer):

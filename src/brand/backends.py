@@ -8,7 +8,7 @@ from .models import (
 
 class LicensePermissionBackend:
 
-    all_perm_set = set(Permission.objects.all().values_list('codename', flat=True).order_by())
+    all_perm_set = set(Permission.objects.all().values_list('id', flat=True).order_by())
 
     def has_perm(self, user_obj, perm, obj=None):
         if obj:
@@ -48,7 +48,7 @@ class LicensePermissionBackend:
             if not hasattr(organization_user_role, perm_cache_name):
                 role = organization_user_role.role
                 permissions = role.permissions
-                perms = permissions.all().values_list('codename', flat=True)
+                perms = permissions.all().values_list('id', flat=True)
                 setattr(organization_user_role, perm_cache_name, set(perms))
             user_perm_set.update(getattr(organization_user_role, perm_cache_name))
         return user_perm_set

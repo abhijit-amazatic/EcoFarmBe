@@ -202,19 +202,19 @@ class filterQuerySet:
         q = Q()
         q |= Q(created_by=self.user)
         q |= Q(organization_user__user=self.user)
-        return self.queryset.filter(q)
+        return self.queryset.filter(q).distinct()
 
     def brand_brand(self):
         q = Q()
         q |= Q(organization__created_by=self.user)
-        return self.queryset.filter(q)
+        return self.queryset.filter(q).distinct()
 
     def brand_license(self):
         q = Q()
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':
-            q |= Q(organizationuserrole__organization_user__user=self.user)&Q(organizationuserrole__role__permissions__codename='view_license')
+            q |= Q(organizationuserrole__organization_user__user=self.user)&Q(organizationuserrole__role__permissions='view_license')
         else:
             q |= Q(organizationuserrole__organization_user__user=self.user)
         print(q)
-        return self.queryset.filter(q)
+        return self.queryset.filter(q).distinct()
