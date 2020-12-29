@@ -31,6 +31,7 @@ from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses,)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
+from .tasks import (send_async_invitation, )
 
 from .models import (
     Organization,
@@ -613,75 +614,19 @@ class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
     permission_classes = (IsAuthenticatedBrandPermission, )
     serializer_class = InviteUserSerializer
 
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     validated_data = serializer.get_validated_data()
-
-    #     try:
-    #         invite_user  = Auth_User.objects.get(email=validated_data['email'])
-    #     except Auth_User.DoesNotExist:
-    #         invite_user  = Auth_User.objects.create(
-    #             email=validated_data['email'],
-    #             phone=validated_data['phone'],
-    #         )
-    #         invite_user.full_name = validated_data['full_name']
-    #         invite_user.phone = validated_data['phone']
-    #         invite_user.save()
-    #         invite_user.set_unusable_password()
-    #         try:
-    #             link = get_encrypted_data(invite_user.email)
-    #             mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", invite_user.email)
-    #             notify_admins(invite_user.email)
-    #         except Exception as e:
-    #             print(e)
-    #             pass
-
-    #     invite_role, invite_role_created = LicenseRole.objects.get_or_create(name=validated_data['role'])
-    #     response_data = {
-    #         'user': {
-    #             'id': invite_user.id,
-    #             'email': invite_user.email,
-    #         },
-    #         'role': {
-    #             'id': invite_role.id,
-    #             'name': invite_role.name,
-    #         },
-    #         'licenses': [],
-    #     }
-
-    #     for license in validated_data['licenses']:
-    #         license_user, license_user_created =  LicenseUser.objects.update_or_create(
-    #             license=license,
-    #             role=invite_role,
-    #             user=invite_user,
-    #         )
-    #         response_data['licenses'].append({
-    #             'id': license_user.license.id,
-    #             'legal_business_name': license_user.license.legal_business_name,
-    #             'license_number': license_user.license.license_number,
-    #         })
-
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
-
     def perform_create(self, serializer):
         instance = serializer.save()
-        try:
-            link = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME, instance.get_invite_token())
-            mail_send(
-                "user-invitation-mail.html",
-                {   'full_name': instance.full_name,
-                    'email': instance.email,
-                    'link': link,
-                },
-                "Thrive Society Verification.",
-                instance.email,
-            )
-            # notify_admins(instance.email)
-        except Exception as e:
-            print(e)
-            pass
+        context ={
+            'full_name': instance.full_name,
+            'email': instance.email,
+            'organizarion': instance.organization.name,
+            'role': instance.role.name,
+            'licenses': [ f"{x.license_number} | {x.legal_business_name}" for x in instance.licenses.all()],
+            'phone': instance.phone.as_e164,
+            'token': instance.get_invite_token(),
+            # 'link':  '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME, instance.get_invite_token()),
+        }
+        send_async_invitation.delay(context)
 
 class UserInvitationVerificationView(GenericAPIView):
     """

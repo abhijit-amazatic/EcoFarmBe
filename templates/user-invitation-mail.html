@@ -1,9 +1,18 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
 
-<p style='font-size:16px !important;color: #013c48;'>Hi {{ full_name }} {{email}},</p>
+<p style='font-size:16px !important;color: #013c48;'>Hi {{ full_name }},</p>
 <div>
-    <div ><p style='font-size:16px !important;color: #013c48;'>Please click the link below to accept invitation your email:<br>
+    <div ><p style='font-size:16px !important;color: #013c48;'>
+    You have been invited to join organization <strong>{{organization}}</strong> as <strong>{{role}}</strong>
+    {% if licenses %} for 
+        <ul>
+            {% for lic in licenses %}
+            <li>lic</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    Please click the link below to accept invitation.<br>
         {{ link }}</p></div>
     <div>
     </div>
