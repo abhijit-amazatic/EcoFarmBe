@@ -8,8 +8,6 @@ from .models import (
 
 class LicensePermissionBackend:
 
-    all_perm_set = set(Permission.objects.all().values_list('id', flat=True).order_by())
-
     def has_perm(self, user_obj, perm, obj=None):
         if obj:
             return user_obj.is_active and perm in self.get_all_permissions(user_obj, obj)
@@ -41,7 +39,7 @@ class LicensePermissionBackend:
             organization_user__organization=license_obj.organization,
         )
         if license_obj.organization.created_by.id == user_obj.id:
-            return self.all_perm_set
+            return self.get_all_perm_set()
         user_perm_set = set()
         perm_cache_name = '_license_role_perm_cache'
         for organization_user_role in organization_user_role_qs:
@@ -55,10 +53,11 @@ class LicensePermissionBackend:
 
     def get_organization_user_perm(self, user_obj, organization_obj):
         if organization_obj.created_by_id == user_obj.id:
-            return self.all_perm_set
+            return self.get_all_perm_set()
         return set()
 
-
+    def get_all_perm_set(self):
+        return set(Permission.objects.all().values_list('id', flat=True).order_by())
     def authenticate(self, request, **kwargs):
         return None
 
