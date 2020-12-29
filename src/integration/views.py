@@ -826,14 +826,16 @@ class GetDistanceView(APIView):
         Get distance.
         """
         account_name = request.data.get('account_name')
-        response = search_query('Accounts', account_name, 'Account_Name')
+        is_ship_changed = request.data.get('is_ship_changed')
         mileage = None
-        if response.get('status_code') == 200:
-            for resp in response.get('response'):
-                if resp.get('Round_Trip_Mileage_from_Todd_Rd'):
-                    mileage = resp.get('Round_Trip_Mileage_from_Todd_Rd')
-                    break
-        if not mileage:
+        if not is_ship_changed:
+            response = search_query('Accounts', account_name, 'Account_Name')
+            if response.get('status_code') == 200:
+                for resp in response.get('response'):
+                    if resp.get('Round_Trip_Mileage_from_Todd_Rd'):
+                        mileage = resp.get('Round_Trip_Mileage_from_Todd_Rd')
+                        break
+        if not mileage or is_ship_changed:
             location_a = request.data.get('location_a')
             location_b = request.data.get('location_b')
             if location_a and location_b:
@@ -849,7 +851,7 @@ class GetDistanceView(APIView):
             res['mileage'] = mileage
             return Response(res)
         return Response(
-            {'code': 1, 'error': 'No location_a or location_b provided.'},
+            {'code': 1, 'error': fees},
             status=status.HTTP_400_BAD_REQUEST)
 
 class GetSalesPersonView(APIView):

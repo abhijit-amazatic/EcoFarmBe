@@ -33,15 +33,15 @@ def fetch_inventory_on_interval():
     Update inventory on every interval from Zoho Inventory.
     """
     try:
-        NUMBER_OF_DAYS_TO_FETCH_INVENTORY = int(NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
+        days = int(NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
         price_data = get_price_data()
         # inventory_before = Inventory.objects.all().delete()
-        fetch_cultivars(days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
-        fetch_labtests(days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
+        fetch_cultivars(days=days)
+        fetch_labtests(days=days)
         licenses = fetch_licenses()
         labtests = LabTest.objects.all().count()
-        fetch_inventory('inventory_efd', days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY, price_data=price_data)
-        fetch_inventory('inventory_efl', days=NUMBER_OF_DAYS_TO_FETCH_INVENTORY, price_data=price_data)
+        fetch_inventory('inventory_efd', days=days, price_data=price_data)
+        fetch_inventory('inventory_efl', days=days, price_data=price_data)
         inventory_after = Inventory.objects.all().count()
         return {'status_code': 200,
                 'labtest': labtests,
