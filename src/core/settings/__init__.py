@@ -170,6 +170,7 @@ CELERY_TIMEZONE = TIME_ZONE
 AUTHENTICATION_BACKENDS = (
     # 'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'brand.backends.LicensePermissionBackend',
 )
 
 
