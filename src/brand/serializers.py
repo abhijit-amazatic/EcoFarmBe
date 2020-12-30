@@ -145,7 +145,13 @@ class LicenseSerializer(serializers.ModelSerializer):
     seller_permit_url = serializers.SerializerMethodField()
     license_profile_url = serializers.SerializerMethodField()
     is_existing_user = serializers.SerializerMethodField()
+    approved_on = serializers.SerializerMethodField()
 
+    def get_approved_on(self, obj):
+        """
+        return license profile approve datetime.
+        """
+        return obj.license_profile.approved_on
 
     def get_is_existing_user(self, obj):
         """
