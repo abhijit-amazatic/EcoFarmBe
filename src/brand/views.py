@@ -111,7 +111,7 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (OrganizationViewSetPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, OrganizationViewSetPermission, )
     queryset = Organization.objects.all()
     serializer_class = OrganizationDetailSerializer
     pagination_class = None
@@ -180,7 +180,7 @@ class BrandViewSet(PermissionQuerysetFilterMixin,
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (BrandViewSetPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, BrandViewSetPermission, )
     queryset = Brand.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class =BrandSerializer
@@ -223,7 +223,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
     """
     All LicenseViewSet
     """
-    permission_classes = (LicenseViewSetPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, LicenseViewSetPermission, )
     queryset = License.objects.get_queryset()
     profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
     cultivation_overview_path = 'cultivation-overview(/(?P<cultivation_overview_id>[0-9]*))?'
@@ -495,7 +495,7 @@ class PermissionListView(APIView):
     """
     All KPI view set
     """
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, IsAuthenticatedBrandPermission, )
 
     def get(self, request, *args, **kwargs):
         """
@@ -514,7 +514,7 @@ class OrganizationRoleViewSet(PermissionQuerysetFilterMixin,
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (OrganizationRoleViewSetPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, OrganizationRoleViewSetPermission, )
     queryset = OrganizationRole.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class = OrganizationRoleSerializer
@@ -525,7 +525,7 @@ class OrganizationUserViewSet(PermissionQuerysetFilterMixin,
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (OrganizationUserViewSetPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, OrganizationUserViewSetPermission, )
     queryset = OrganizationUser.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class = OrganizationUserNestedViewSerializer
@@ -536,7 +536,7 @@ class OrganizationUserRoleViewSet(PermissionQuerysetFilterMixin,
     """
     All Brand related endpoint's view is defined here.
     """
-    permission_classes = (OrganizationUserRoleViewSetPermission, )
+    permission_classes = (IsAuthenticated, OrganizationUserRoleViewSetPermission, )
     queryset = OrganizationUserRole.objects.get_queryset()
     filter_backends = [filters.SearchFilter]
     serializer_class = OrganizationUserRoleNestedSerializer
