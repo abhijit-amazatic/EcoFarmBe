@@ -151,7 +151,12 @@ class LicenseSerializer(serializers.ModelSerializer):
         """
         return license profile approve datetime.
         """
-        return obj.license_profile.approved_on
+        try:
+            approved_on = obj.license_profile.approved_on
+        except License.license_profile.RelatedObjectDoesNotExist:
+            return None
+        else:
+            return approved_on
 
     def get_is_existing_user(self, obj):
         """
