@@ -10,7 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Permission as DjPermission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
-from django.dispatch import receiver
 from django.conf import settings
 from django.utils import timezone
 
@@ -22,7 +21,6 @@ from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
 from user.models import User
 from inventory.models import (Documents, )
-from .utils import get_unique_org_name
 
 
 
@@ -58,17 +56,6 @@ class Organization(TimeStampFlagModelMixin,models.Model):
 
     def __str__(self):
         return self.name
-
-@receiver(models.signals.post_save, sender=User)
-def post_save_user(sender, instance, created, **kwargs):
-    """
-    Deletes old file.
-    """
-    if created:
-        Organization.objects.get_or_create(
-            name=get_unique_org_name(Organization),
-            created_by=instance,
-        )
 
 
 class PermissionGroup(models.Model):
@@ -393,31 +380,6 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
             return None
         else:
             return obj
-
-
-@receiver(models.signals.post_save, sender=User)
-def post_save_user(sender, instance, created, **kwargs):
-    """
-    Deletes old file.
-    """
-    if created:
-        invites = OrganizationUserInvite.objects.filter(
-            email=instance.email,
-            is_accepted=True,
-            is_completed=False,
-        )
-        for invite in invites:
-            organization_user = OrganizationUser.objects.get_or_create(
-                organization=invite.organization,
-                user=instance,
-            )
-            organization_user_role = OrganizationUserRole.objects.get(
-                organization_user=organization_user,
-                role=invite.role,
-            )
-            organization_user_role.licenses.add(*invite.licenses.all())
-            invite.is_completed = True
-            invite.save()
 
 
 

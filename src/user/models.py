@@ -244,31 +244,3 @@ class HelpDocumentation(TimeStampFlagModelMixin, models.Model):
 
     class Meta:
         verbose_name = _('Help Documentation')        
-
-@receiver(models.signals.pre_save, sender=User)
-def pre_save_user(sender, instance, **kwargs):
-    """
-    Deletes old file.
-    """
-    if not instance.pk:
-        return
-    try:
-        old_instance = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
-        return
-
-    if not instance.phone == old_instance.phone:
-        instance.is_phone_verified = False
-    if not instance.email == old_instance.email:
-        instance.is_verified = False
-
-
-@receiver(models.signals.post_save, sender=User)
-def post_save_user(sender, instance, created, **kwargs):
-    """
-    Deletes old file.
-    """
-    try:
-        instance.primary_phone_totp_device
-    except sender.primary_phone_totp_device.RelatedObjectDoesNotExist:
-        PrimaryPhoneTOTPDevice.objects.create(user=instance)

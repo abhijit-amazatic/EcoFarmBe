@@ -9,7 +9,6 @@ from django.contrib.postgres.fields import (JSONField,)
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.dispatch import receiver
 from django.core import serializers
 from django_otp.models import ThrottlingMixin
 from django_otp.oath import (TOTP,)
@@ -661,37 +660,3 @@ class StaticToken(models.Model):
         verbose_name_plural = _("Static Device Tokens")
 
 
-@receiver(models.signals.post_delete, sender=AuthyOneTouchDevice)
-@receiver(models.signals.post_delete, sender=AuthySoftTOTPDevice)
-def post_delete_authy_device(sender, instance, **kwargs):
-    if sender == AuthyOneTouchDevice:
-        qs = AuthySoftTOTPDevice.objects.all()
-    elif sender == AuthySoftTOTPDevice:
-        qs = AuthyOneTouchDevice.objects.all()
-    if qs:
-        qs.filter(user=instance.user, authy_user=instance.authy_user).delete()
-
-    if not AuthyOneTouchDevice.objects.filter(authy_user=instance.authy_user):
-        if not AuthySoftTOTPDevice.objects.filter(authy_user=instance.authy_user):
-            instance.authy_user.delete()
-
-@receiver(models.signals.post_save, sender=AuthyOneTouchDevice)
-def post_save_authy_one_touch_device(sender, instance, created, **kwargs):
-    if created:
-        try:
-            device = AuthySoftTOTPDevice.objects.get(user=instance.user)
-        except AuthySoftTOTPDevice.DoesNotExist:
-            pass
-        else:
-            device.delete()
-        device = AuthySoftTOTPDevice.objects.create(
-            user=instance.user,
-            authy_user=instance.authy_user,
-            confirmed=instance.confirmed,
-        )
-
-@receiver(models.signals.post_delete, sender=AuthyUser)
-def pre_delete_authy_user(sender, instance, **kwargs):
-    deleted = authy_api.users.delete(instance.authy_id)
-    if deleted.ok():
-        print(deleted.content)
