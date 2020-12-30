@@ -7,7 +7,7 @@ from .permissions import filterQuerySet
 from . import models
 
 class NestedViewSetMixin:
-
+    context_parent = dict()
     url_params_model_map = {
         'organization': models.Organization,
         'brand': models.Brand,
@@ -44,7 +44,6 @@ class NestedViewSetMixin:
 
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
-        setattr(self, 'context_parent', {})
         lookup_param = self.get_parents_query_dict()
         for key, value in lookup_param.items():
             model = self.url_params_model_map.get(key)
