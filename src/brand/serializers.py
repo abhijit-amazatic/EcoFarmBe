@@ -595,7 +595,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
     licenses = InviteUserRelatedField(
         queryset=License.objects.all(),
         many=True,
-
+        required=False,
     )
 
     def validate_phone(self, value):
@@ -617,7 +617,9 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationUserInvite
+        read_only_fields = ('id',)
         fields = (
+            'id',
             'full_name',
             'email',
             'phone',

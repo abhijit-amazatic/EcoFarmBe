@@ -311,6 +311,11 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
     """
     Stores Brand's details.
     """
+    STATUS_CHOICES = (
+        ('pending', _('Pending')),
+        ('accepted', _('Accepted')),
+        ('completed', _('Completed')),
+    )
     organization = models.ForeignKey(
         Organization,
         verbose_name=_('Organization'),
@@ -331,30 +336,17 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         verbose_name=_('Licenses'),
         blank=True,
     )
-    is_accepted = models.BooleanField(_('Is Accepted'), default=False)
-    is_completed = models.BooleanField(_('Is Completed'), default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('Created By'),
         related_name='invited_users',
         on_delete=models.CASCADE
     )
-    expires_at = models.DateTimeField(default=get_invite_expiration_time)
-
-    @property
-    def is_expired(self):
-        return self.expires_at < timezone.now()
-
-    @property
-    def status(self):
-        if self.is_completed:
-            return 'completed'
-        elif self.is_accepted:
-            return 'accepted'
-        elif self.is_expired:
-            return 'expired'
-        else:
-            return 'pending'
+    status = models.CharField(
+        max_length=60,
+        choices=STATUS_CHOICES,
+        default='pending',
+    )
 
     class Meta:
         verbose_name = _('Organization User Invite')

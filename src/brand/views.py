@@ -31,8 +31,7 @@ from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses,)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
-from .tasks import (send_async_invitation, )
-
+from .utils import send_invitation
 from .models import (
     Organization,
     Brand, License,
@@ -606,7 +605,7 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
 
 
 class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
-                                            viewsets.GenericViewSet):
+                                mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     Invite User view
     """
@@ -616,17 +615,7 @@ class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        context ={
-            'full_name': instance.full_name,
-            'email': instance.email,
-            'organizarion': instance.organization.name,
-            'role': instance.role.name,
-            'licenses': [ f"{x.license_number} | {x.legal_business_name}" for x in instance.licenses.all()],
-            'phone': instance.phone.as_e164,
-            'token': instance.get_invite_token(),
-            # 'link':  '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME, instance.get_invite_token()),
-        }
-        send_async_invitation.delay(context)
+        send_invitation(instance)
 
 class UserInvitationVerificationView(GenericAPIView):
     """
@@ -634,14 +623,13 @@ class UserInvitationVerificationView(GenericAPIView):
     """
     permission_classes = (AllowAny, )
     serializer_class = InviteUserVerificationSerializer
-    # authentication_classes = (TokenAuthentication, )
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.validated_data['token']
-        if instance.status == 'pending' or instance.status == 'accepted':
-            instance.is_accepted = True
+        if instance.status == 'pending':
+            instance.status = 'accepted'
             try:
                 user = Auth_User.objects.get(email=instance.email)
             except Auth_User.DoesNotExist:
@@ -657,14 +645,19 @@ class UserInvitationVerificationView(GenericAPIView):
                 )
                 organization_user_role.licenses.add(*instance.licenses.all())
 
-                instance.is_completed = True
-            response = Response(status=status.HTTP_202_ACCEPTED)
+                instance.status = 'completed'
+            response = Response(status=status.HTTP_200_OK)
         elif instance.status == 'completed':
             response = Response(
                 {'detail': 'Already accepted'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        elif instance.status == 'expired':
+        elif instance.status == 'completed':
+            response = Response(
+                {'detail': 'Already completed'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        else:
             response = Response(
                 {'detail': 'Token expired'},
                 status=status.HTTP_400_BAD_REQUEST,

@@ -46,8 +46,7 @@ def post_save_user(sender, instance, created, **kwargs):
         ###################### user invite #####################
         invites = OrganizationUserInvite.objects.filter(
             email=instance.email,
-            is_accepted=True,
-            is_completed=False,
+            status='accepted',
         )
         for invite in invites:
             organization_user = OrganizationUser.objects.get_or_create(
@@ -59,5 +58,5 @@ def post_save_user(sender, instance, created, **kwargs):
                 role=invite.role,
             )
             organization_user_role.licenses.add(*invite.licenses.all())
-            invite.is_completed = True
+            invite.status = 'completed'
             invite.save()
