@@ -26,7 +26,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 
 from core.permissions import IsAuthenticatedBrandPermission
 from integration.books import  get_buyer_summary
-from core.utility import (get_license_from_crm_insert_to_db,)
+from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,)
 from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses,)
 from user.serializers import (get_encrypted_data,)
@@ -281,6 +281,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         instance = serializer.save()
         try:
             user = instance.organization.created_by
+            notify_admins_on_slack(user.email,instance)
             if user.existing_member:
                 existing_user_license_nos = get_license_numbers(user.legal_business_name)
                 if instance.license_number in existing_user_license_nos:

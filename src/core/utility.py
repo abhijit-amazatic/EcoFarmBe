@@ -84,13 +84,18 @@ def notify_admins_on_profile_user_registration(email,profile):
 
 def notify_admins_on_profile_registration(email,farm,license_instance):
     """
-    Notify admins on slack & email about new farm registration under farm.
+    Notify admins on email about new farm registration under farm.
     """
-    msg = "<!channel>New Vendor/Account profile is registered with us with the Profile name as  - %s under the EmailID `%s`.Please review and approve from admin Panel!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n" % (farm, email, license_instance.legal_business_name,license_instance.profile_category,license_instance.license_number,license_instance.premises_county)
-    slack.chat.post_message(settings.SLACK_PROFILE_CHANNEL,msg, as_user=True)
+    
     mail_send("farm-register.html",{'link': farm,'mail':email},"Profile registration.", recipient_list=settings.ADMIN_EMAIL)
     
-    
+def notify_admins_on_slack(email,license_instance):
+    """
+    as license onboarded, inform admin on slack.
+    """
+    msg = "<!channel>New License is registered with us (step 1) under the organization  - *%s*, associated with the EmailID `%s`.Please review/check whether they need any assistance!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n" % (license_instance.organization.name, email, license_instance.legal_business_name,license_instance.profile_category,license_instance.license_number,license_instance.premises_county)
+    slack.chat.post_message(settings.SLACK_PROFILE_CHANNEL,msg, as_user=True)
+        
 def notify_profile_user(recipient_email,farm):
     """
      Notify farm/profile user.
