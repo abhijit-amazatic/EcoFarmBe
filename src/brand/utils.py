@@ -11,7 +11,7 @@ def get_invitation_context(invite_obj):
     context = {
         'full_name': invite_obj.full_name,
         'email': invite_obj.email,
-        'organizarion': invite_obj.organization.name,
+        'organization': invite_obj.organization.name,
         'role': invite_obj.role.name,
         'licenses': [ f"{x.license_number} | {x.legal_business_name}" for x in invite_obj.licenses.all()],
         'phone': invite_obj.phone.as_e164,

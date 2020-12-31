@@ -609,17 +609,17 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
         required=False,
     )
 
-    def validate_phone(self, value):
-        """
-        nonfield validation.
-        """
-        try:
-            user = User.objects.get(phone=self.initial_data['phone'])
-            if user.email != self.initial_data['email']:
-                raise serializers.ValidationError("Phone number already in usefor another account.")
-        except User.DoesNotExist:
-            pass
-        return value
+    # def validate_phone(self, value):
+    #     """
+    #     nonfield validation.
+    #     """
+    #     try:
+    #         user = User.objects.get(phone=self.initial_data['phone'])
+    #         if user.email != self.initial_data['email']:
+    #             raise serializers.ValidationError("Phone number already in usefor another account.")
+    #     except User.DoesNotExist:
+    #         pass
+    #     return value
 
     def create(self, validated_data):
         view = self.context['view']

@@ -41,7 +41,7 @@ def send_async_invitation(context):
     """
     Async send organization user invitation.
     """
-    context['link'] = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME, context['token'])
+    context['link'] = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), context['token'])
 
     try:
         mail_send(
@@ -53,5 +53,5 @@ def send_async_invitation(context):
     except Exception as e:
         print(e.with_traceback)
     else:
-        msg = 'You have been invited to join organization "{organizarion}" as {role}.\nPlease check your email {email}'.format(**context)
+        msg = 'You have been invited to join organization "{organization}" as {role}.\nPlease check your email {email}'.format(**context)
         send_sms(context['phone'], msg)
