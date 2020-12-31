@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
-from cryptography.fernet import Fernet
+from cryptography.fernet import (Fernet, InvalidToken)
 
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
@@ -356,19 +356,22 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         return f'{self.email} | {self.role}'
 
     def get_invite_token(self):
-        context="{0}|{1}".format(self.id, self.email)
+        context = "{0}|{1}".format(self.id, self.email)
         return urlsafe_b64encode(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
 
     @classmethod
     def get_object_from_invite_token(cls, token):
         try:
             context = fernet.decrypt(
-                urlsafe_b64decode(token.encode('utf-8'))
+                urlsafe_b64decode(token.encode('utf-8')),
+                ttl=timedelta(hours=48).total_seconds(),
             ).decode('utf-8')
             obj_id, email = context.split('|')
             obj = cls.objects.get(id=int(obj_id), email=email)
+        except InvalidToken:
+            return None
         except Exception as e:
-            print(e)
+            print(e.with_traceback)
             return None
         else:
             return obj

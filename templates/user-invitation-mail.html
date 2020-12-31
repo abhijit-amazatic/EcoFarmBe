@@ -3,19 +3,24 @@
 
 <p style='font-size:16px !important;color: #013c48;'>Hi {{ full_name }},</p>
 <div>
-    <div ><p style='font-size:16px !important;color: #013c48;'>
-    You have been invited to join organization <strong>{{organization}}</strong> as <strong>{{role}}</strong>
-    {% if licenses %} for 
-        <ul>
+    <div >
+        <p style='font-size:16px !important;color: #013c48;'>
+            You have been invited to join organization <strong>{{organization}}</strong> as <strong>{{role}}</strong>
+        {% if licenses %} for 
+        </p>
+        <ul <p style='font-size:16px !important;color: #013c48;'>
             {% for lic in licenses %}
             <li>{{lic}}</li>
             {% endfor %}
         </ul>
-    {% endif %}
-    Please click the link below to accept invitation.<br>
-        {{ link }}</p></div>
-    <div>
+        <p style='font-size:16px !important;color: #013c48;'>
+        {% else %}
+            <br>
+        {% endif %}
+            Please click the link below to accept invitation.<br>
+            <span style="font-size:12px !important;color: #013c48;">(Link is valid for 24 hours.)</span><br>
+            <a style="font-size:16px !important;color: #90835c;" href="{{link}}">{{link}}</a>
+        </p>
     </div>
-
 </div>
 {% endblock %}
