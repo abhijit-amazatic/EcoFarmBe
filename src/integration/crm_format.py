@@ -83,6 +83,7 @@ CRM_FORMAT  = {
         "Accounts": "Accounts",
     },
     "Brands": {
+        "id": "id",
         "Brand_Category": "brand_category",
         "Name": "brand_name",
         "Owner": "brand_owner",
@@ -235,7 +236,7 @@ CRM_FORMAT  = {
         "Services_Provided": "Services_Provided",
     },
     "Licenses":{
-        "id": "license_id",
+        "id": "id",
         "Name": "license_number",
         "Legal_Business_Name": "legal_business_name",
         "License_Type": "license_type",

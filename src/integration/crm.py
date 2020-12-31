@@ -279,6 +279,31 @@ def update_records(module, records, is_return_orginal_data=False):
     response = crm_obj.update_records(module, request, is_return_orginal_data)
     return response
 
+def update_in_crm(module, record_id):
+    """
+    Update record in zoho crm.
+    """
+    try:
+        if module == 'Licenses':
+            request = License.objects.get(id=record_id)
+            request = request.__dict__
+        elif module in ['Vendors', 'Accounts']:
+            request = LicenseProfile.objects.get(id=record_id)
+            request = request.__dict__
+        elif module == 'Orgs':
+            request = Organization.objects.get(id=record_id)
+            request = request.__dict__
+        elif module == 'Brands':
+            request = Brand.objects.get(id=record_id)
+            request = request.__dict__
+    except Exception as exc:
+        print(exc)
+        return {'error': 'Record not in database'}
+    if request.get('zoho_crm_id'):
+        request['id'] = request.get('zoho_crm_id')
+        return update_records(module, request)
+    return {'error': 'Record not in CRM'}
+
 def delete_record(module, record_id):
     """
     Delete record from module.
@@ -412,8 +437,8 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 d.update(license_db.program_overview.__dict__)
             except Exception:
                 pass
-            d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
-            l.append(d['license_id'])
+            d.update({'id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
+            l.append(d['id'])
             d.update({'licenses': l})
             if record and is_update:
                 d['id'] = record.zoho_crm_id
@@ -807,8 +832,8 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 d.update({'cr.' + k:v})
         except Exception:
             pass
-        d.update({'license_id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
-        l.append(d['license_id'])
+        d.update({'id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
+        l.append(d['id'])
         d.update({'licenses': l})    
         if record and is_update:
             d['id'] = record.zoho_crm_id
