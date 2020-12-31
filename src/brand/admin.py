@@ -20,10 +20,11 @@ from django.utils import timezone
 from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
+from integration.box import (delete_file,)
+from core.utility import (send_async_approval_mail, get_profile_type,)
 from .models import (Organization, Brand,License,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
 from .models import (OrganizationRole, Permission, OrganizationUser, OrganizationUserRole, PermissionGroup)
-from core.utility import (send_async_approval_mail,add_users_to_system_and_license,get_profile_type,)
-from integration.box import (delete_file,)
+from .tasks import (invite_profile_contacts,)
 from .widgets import PermissionSelectMultipleWidget
 
 class LicenseUpdatedForm(forms.ModelForm):
@@ -57,6 +58,7 @@ def approve_license_profile(modeladmin, request, queryset):
                 license_profile[0].save()
             send_async_approval_mail.delay(profile.id)
             if hasattr(profile, 'profile_contact'):
+                invite_profile_contacts.delay(profile.profile_contact.id)
                 pass#add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
                 
     messages.success(request,'License Profiles Approved!')    
@@ -195,14 +197,14 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
 #     extra = 0
 #     model = LicenseUser
 
-# def get_user_data(request):
-#     """
-#     return user info dict.
-#     """
-#     return {'id':request.user.id,
-#             'email':request.user.email,
-#             'first_name':request.user.first_name,
-#             'last_name':request.user.last_name}
+def get_user_data(request):
+    """
+    return user info dict.
+    """
+    return {'id':request.user.id,
+            'email':request.user.email,
+            'first_name':request.user.first_name,
+            'last_name':request.user.last_name}
 
 
 class MyLicenseAdmin(nested_admin.NestedModelAdmin):
@@ -254,6 +256,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
                 license_profile[0].approved_by = get_user_data(request)
                 license_profile[0].save()
             if hasattr(obj, 'profile_contact'):
+                invite_profile_contacts.delay(obj.profile_contact.id)
                 pass #add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
             
         super().save_model(request, obj, form, change)

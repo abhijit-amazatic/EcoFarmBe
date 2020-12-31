@@ -112,55 +112,55 @@ def notify_profile_user(recipient_email,farm):
     )
 
 
-def extract_all_roles_from_email(email,data):
-    """
-    Extract all roles if same email for existing user.
-    """
-    final_roles = []
-    for i in data:
-        if i.get('employee_email') == email:            
-            final_roles.extend(i.get('roles'))
-    return final_roles
+# def extract_all_roles_from_email(email,data):
+#     """
+#     Extract all roles if same email for existing user.
+#     """
+#     final_roles = []
+#     for i in data:
+#         if i.get('employee_email') == email:            
+#             final_roles.extend(i.get('roles'))
+#     return final_roles
     
-@app.task(queue="general")
-def add_users_to_system_and_license(profile_contact_id,license_obj_id):
-    """
-    ->create users into system(if not exist)+add then unser licese,
-    ->notify admins(email& slack) about new user addition,
-    ->send newly addd users a verification link
-    ->send email to set password, 
-    """
-    role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
-    #updated_role_map  =  {"Cultivation Manager":"farm_manager","Sales Manager":"sales_or_inventory","Logistics Manager":"logistics","Billing / Accounting":"billing","Owner":"owner"}
+# @app.task(queue="general")
+# def add_users_to_system_and_license(profile_contact_id,license_obj_id):
+#     """
+#     ->create users into system(if not exist)+add then unser licese,
+#     ->notify admins(email& slack) about new user addition,
+#     ->send newly addd users a verification link
+#     ->send email to set password, 
+#     """
+#     role_map = {"License Owner":"license_owner","Farm Manager":"farm_manager","Sales/Inventory":"sales_or_inventory","Logistics":"logistics","Billing":"billing","Owner":"owner"}
+#     #updated_role_map  =  {"Cultivation Manager":"farm_manager","Sales Manager":"sales_or_inventory","Logistics Manager":"logistics","Billing / Accounting":"billing","Owner":"owner"}
     
-    pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
-    license_obj = License.objects.filter(id=license_obj_id)
-    if pro_contact_obj:
-        employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
-        extracted_employee = [i for i in employee_data if i.get('employee_email')]      
-        for employee in extracted_employee:
-            obj, created = User.objects.get_or_create(email=employee['employee_email'],
-                                                      defaults={'email':employee['employee_email'],
-                                                                'username':employee['employee_name'],
-                                                                'phone':employee['phone'],
-                                                                'is_verified':False,
-                                                                'membership_type':"personal",
-                                                                'existing_member':True})
+#     pro_contact_obj = ProfileContact.objects.filter(id=profile_contact_id)
+#     license_obj = License.objects.filter(id=license_obj_id)
+#     if pro_contact_obj:
+#         employee_data = pro_contact_obj[0].profile_contact_details.get('employees')
+#         extracted_employee = [i for i in employee_data if i.get('employee_email')]      
+#         for employee in extracted_employee:
+#             obj, created = User.objects.get_or_create(email=employee['employee_email'],
+#                                                       defaults={'email':employee['employee_email'],
+#                                                                 'username':employee['employee_name'],
+#                                                                 'phone':employee['phone'],
+#                                                                 'is_verified':False,
+#                                                                 'membership_type':"personal",
+#                                                                 'existing_member':True})
             
-            if not LicenseUser.objects.filter(user_id=obj.id,license_id=license_obj_id).exists():
-                try:
-                    all_roles = list(set(extract_all_roles_from_email(employee['employee_email'],employee_data)))
-                    extracted_role = [role_map.get(i) for i in all_roles] #role_map.get(employee['roles'])
-                    role_ids = LicenseRole.objects.filter(name__in=extracted_role).values_list(flat=True)
-                    license_user = LicenseUser.objects.create(user_id=obj.id,license_id=license_obj_id)
-                    license_user.role.set(list(role_ids))
-                    license_user.save()
-                    notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
-                    link = get_encrypted_data(obj.email,reason='verify')
-                    mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
-                    notify_profile_user(obj.email,license_obj[0].license_profile.name)
-                except Exception as e:
-                    print("Exception while adding license user",e)
+#             if not LicenseUser.objects.filter(user_id=obj.id,license_id=license_obj_id).exists():
+#                 try:
+#                     all_roles = list(set(extract_all_roles_from_email(employee['employee_email'],employee_data)))
+#                     extracted_role = [role_map.get(i) for i in all_roles] #role_map.get(employee['roles'])
+#                     role_ids = LicenseRole.objects.filter(name__in=extracted_role).values_list(flat=True)
+#                     license_user = LicenseUser.objects.create(user_id=obj.id,license_id=license_obj_id)
+#                     license_user.role.set(list(role_ids))
+#                     license_user.save()
+#                     notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
+#                     link = get_encrypted_data(obj.email,reason='verify')
+#                     mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",obj.email)
+#                     notify_profile_user(obj.email,license_obj[0].license_profile.name)
+#                 except Exception as e:
+#                     print("Exception while adding license user",e)
                     
 
 
@@ -178,7 +178,7 @@ def send_async_approval_mail(profile_id):
     """
     license_obj = License.objects.filter(id=profile_id)
     if license_obj:
-        ac_manager = license_obj[0].created_by.email
+        ac_manager = license_obj[0].organization.created_by.email
         profile_type = get_profile_type(license_obj[0])
         mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type,'legal_business_name': license_obj[0].legal_business_name},"Your %s profile has been approved."% profile_type, ac_manager)
 

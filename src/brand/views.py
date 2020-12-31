@@ -31,7 +31,7 @@ from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses,)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
-from .utils import send_invitation
+from .tasks import send_async_invitation
 from .models import (
     Organization,
     Brand, License,
@@ -616,7 +616,7 @@ class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        send_invitation(instance)
+        send_async_invitation.delay(instance.id)
 
 class UserInvitationVerificationView(GenericAPIView):
     """

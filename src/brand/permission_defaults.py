@@ -1,3 +1,12 @@
+role_map = {
+    "License Owner": "license_owner",
+    "Farm Manager": "farm_manager",
+    "Sales/Inventory": "sales_or_inventory",
+    "Logistics": "logistics",
+    "Billing": "billing",
+    "Owner": "owner",
+}
+
 
 DEFAULT_ROLE_PERM = {
     'License Owner': [
