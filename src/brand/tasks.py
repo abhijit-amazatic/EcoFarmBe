@@ -83,16 +83,6 @@ def send_async_invitation(invite_obj_id):
             send_sms(context['phone'], msg)
 
 
-def extract_all_roles_from_email(email,data):
-    """
-    Extract all roles if same email for existing user.
-    """
-    final_roles = []
-    for i in data:
-        if i.get('employee_email') == email:
-            final_roles.extend(i.get('roles'))
-    return final_roles
-
 @app.task(queue="general")
 def invite_profile_contacts(profile_contact_id):
     """
@@ -107,37 +97,37 @@ def invite_profile_contacts(profile_contact_id):
         employee_data = pro_contact_obj.profile_contact_details.get('employees')
         extracted_employee = [i for i in employee_data if i.get('employee_email')]
         for employee in extracted_employee:
-                for role_name in employee['roles']:
-                    role, _ = OrganizationRole.objects.get_or_create(
+            for role_name in employee['roles']:
+                role, _ = OrganizationRole.objects.get_or_create(
+                    organization=license_obj.organization,
+                    name=role_name,
+                )
+                if not license_obj.organization.created_by.email == employee['employee_email']:
+                    invite = OrganizationUserInvite.objects.create(
+                        full_name=employee['employee_name'],
+                        email=employee['employee_email'],
+                        phone=employee['phone'],
                         organization=license_obj.organization,
-                        name=role_name,
+                        role=role,
+                        created_by_id=license_obj.organization.created_by_id
                     )
-                    if not license_obj.organization.created_by.email == employee['employee_email']:
-                        invite = OrganizationUserInvite.objects.create(
-                            full_name=employee['employee_name'],
-                            email=employee['employee_email'],
-                            phone=employee['phone'],
-                            organization=license_obj.organization,
-                            role=role,
-                            created_by_id=license_obj.organization.created_by_id
-                        )
-                        invite.licenses.set([license_obj])
-                        invite.save()
-                        send_async_invitation.delay(invite.id)
-                    else:
-                        user = license_obj.organization.created_by
-                        organization_user, _ = OrganizationUser.objects.get_or_create(
-                            organization=license_obj.organization,
-                            user=user,
-                        )
-                        organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
-                            organization_user=organization_user,
-                            role=role,
-                        )
-                        organization_user_role.licenses.add(license_obj)
-                        organization_user.save()
+                    invite.licenses.set([license_obj])
+                    invite.save()
+                    send_async_invitation.delay(invite.id)
+                else:
+                    user = license_obj.organization.created_by
+                    organization_user, _ = OrganizationUser.objects.get_or_create(
+                        organization=license_obj.organization,
+                        user=user,
+                    )
+                    organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
+                        organization_user=organization_user,
+                        role=role,
+                    )
+                    organization_user_role.licenses.add(license_obj)
+                    organization_user.save()
 
-                #         notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
-                #         notify_profile_user(obj.email,license_obj[0].license_profile.name)
+                    # notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
+                    # notify_profile_user(obj.email,license_obj[0].license_profile.name)
 
 

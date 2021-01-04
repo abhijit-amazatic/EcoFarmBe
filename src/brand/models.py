@@ -1,6 +1,7 @@
 """
 Brand related schemas defined here.
 """
+import time
 from datetime import timedelta
 from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
@@ -21,7 +22,7 @@ from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
 from user.models import User
 from inventory.models import (Documents, )
-
+from .exceptions import (InvalidInviteToken, ExpiredInviteToken,)
 
 
 FERNET_KEY = (settings.SECRET_KEY * int(1 + 32//len(settings.SECRET_KEY)))[:32]
@@ -361,18 +362,27 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
 
     @classmethod
     def get_object_from_invite_token(cls, token):
+        TTL = timedelta(hours=48).total_seconds()
+        # TTL = 10
+        _MAX_CLOCK_SKEW = 60
+        current_time = int(time.time())
         try:
-            context = fernet.decrypt(
-                urlsafe_b64decode(token.encode('utf-8')),
-                ttl=timedelta(hours=48).total_seconds(),
-            ).decode('utf-8')
+            token_data = urlsafe_b64decode(token.encode('utf-8'))
+            timestamp = fernet.extract_timestamp(token_data)
+            if timestamp + TTL < current_time:
+                raise ExpiredInviteToken
+            if current_time + _MAX_CLOCK_SKEW < timestamp:
+                raise InvalidInviteToken
+            context = fernet.decrypt(token_data).decode('utf-8')
             obj_id, email = context.split('|')
             obj = cls.objects.get(id=int(obj_id), email=email)
         except InvalidToken:
-            return None
+            raise InvalidInviteToken
+        except (InvalidInviteToken, ExpiredInviteToken) as e:
+            raise e
         except Exception as e:
             print(e.with_traceback)
-            return None
+            raise InvalidInviteToken
         else:
             return obj
 

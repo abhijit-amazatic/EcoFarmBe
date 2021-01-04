@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import OrganizationUserInvite
+from .exceptions import (InvalidInviteToken, ExpiredInviteToken)
 
 class NestedModelSerializer:
     """
@@ -60,7 +61,11 @@ class InviteUserTokenField(serializers.Field):
         return obj.get_invite_token()
 
     def to_internal_value(self, data):
-        instance = OrganizationUserInvite.get_object_from_invite_token(data)
-        if not instance:
-            raise serializers.ValidationError('invalid token.')
-        return instance
+        try:
+            instance = OrganizationUserInvite.get_object_from_invite_token(data)
+        except ExpiredInviteToken:
+                    raise serializers.ValidationError('Expired.')
+        except InvalidInviteToken:
+                    raise serializers.ValidationError('Invalid.')
+        else:
+            return instance

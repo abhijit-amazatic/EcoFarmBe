@@ -660,7 +660,7 @@ class UserInvitationVerificationView(GenericAPIView):
             )
         else:
             response = Response(
-                {'detail': 'expired'},
+                {'detail': 'invalid token'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         instance.save()
