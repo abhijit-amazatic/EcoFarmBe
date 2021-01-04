@@ -357,7 +357,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         return f'{self.email} | {self.role}'
 
     def get_invite_token(self):
-        context = "{0}|{1}".format(self.id, self.email)
+        context = "{0}|{1}|{2}".format(self.id, self.email, 'inviteToken')
         return urlsafe_b64encode(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
 
     @classmethod
@@ -374,7 +374,9 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
             if current_time + _MAX_CLOCK_SKEW < timestamp:
                 raise InvalidInviteToken
             context = fernet.decrypt(token_data).decode('utf-8')
-            obj_id, email = context.split('|')
+            obj_id, email, event_code = context.split('|')
+            if not event_code == 'inviteToken':
+                raise InvalidInviteToken
             obj = cls.objects.get(id=int(obj_id), email=email)
         except InvalidToken:
             raise InvalidInviteToken

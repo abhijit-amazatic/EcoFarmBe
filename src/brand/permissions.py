@@ -4,12 +4,17 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.views.generic import View
-
 from user.models import (User, )
+from .permission_defaults import (
+    SALES_REP_GROUP_NAME,
+)
 
 
 
 class ViewPermission(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
         """
         related to objects
@@ -18,7 +23,7 @@ class ViewPermission(BasePermission):
         if isinstance(view, ViewSetMixin):
             perm = self.action_perm_map.get(view.action, {}).get(request.method.lower(), '')
         elif isinstance(view, View):
-            perm = self.action_perm_map.get(request.method.lower(), '')
+            perm = self.method_perm_map.get(request.method.lower(), '')
         if perm:
             return request.user.has_perm(perm, obj)
         elif request.method.lower() == 'options':
@@ -190,7 +195,7 @@ class filterQuerySet:
         if isinstance(queryset, QuerySet) and isinstance(user, User):
             instance = cls(queryset, user, **kwargs)
             model = queryset.model.__name__.lower()
-            app_label = queryset.model._meta.app_label 
+            app_label = queryset.model._meta.app_label
             method = getattr(instance, f'{app_label}_{model}', None)
             if method and callable(method):
                 return method()
@@ -199,17 +204,23 @@ class filterQuerySet:
 
 
     def brand_organization(self):
+        if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
+            return self.queryset
         q = Q()
         q |= Q(created_by=self.user)
         q |= Q(organization_user__user=self.user)
         return self.queryset.filter(q).distinct()
 
     def brand_brand(self):
+        if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
+            return self.queryset
         q = Q()
         q |= Q(organization__created_by=self.user)
         return self.queryset.filter(q).distinct()
 
     def brand_license(self):
+        if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
+            return self.queryset
         q = Q()
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':
