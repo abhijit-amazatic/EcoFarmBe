@@ -359,12 +359,14 @@ def update_vendor_tier(module, record):
         return response
     return {'code': 1, 'status': 'Program selection not specified.'}
 
-def search_query(module, query, criteria, case_insensitive=False):
+def search_query(module, query, criteria, case_insensitive=False, is_license=False):
     crm_obj = CRM(PYZOHO_CONFIG,
         PYZOHO_REFRESH_TOKEN,
         PYZOHO_USER_IDENTIFIER)
     if case_insensitive:
         return crm_obj.isearch_record(module, query, criteria)
+    if is_license:
+        return crm_obj.search_license(module, query, criteria)
     return crm_obj.search_record(module, query, criteria)
 
 def insert_users():
@@ -639,7 +641,11 @@ def update_license(dba, license):
             license_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='license').first()
             license_to_path = license_to.path
             aws_bucket = AWS_BUCKET
-            file_id = upload_file_s3_to_box(aws_bucket, license_to_path)
+            box_file = upload_file_s3_to_box(aws_bucket, license_to_path)
+            if isinstance(box_file, str):
+                file_id = box_file
+            else:
+                file_id = box_file.id
             moved_file = move_file(file_id, license_folder)
             license_url = get_shared_link(file_id)
             if license_url:
@@ -653,7 +659,11 @@ def update_license(dba, license):
             seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
             seller_to_path = seller_to.path
             aws_bucket = AWS_BUCKET
-            file_id = upload_file_s3_to_box(aws_bucket, seller_to_path)
+            box_file = upload_file_s3_to_box(aws_bucket, seller_to_path)
+            if isinstance(box_file, str):
+                file_id = box_file
+            else:
+                file_id = box_file.id
             moved_file = move_file(file_id, documents)
             license_url = get_shared_link(file_id)
             license['uploaded_sellers_permit_to'] = license_url  + "?id=" + moved_file.id

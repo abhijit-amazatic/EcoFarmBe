@@ -92,7 +92,7 @@ class SearchQueryView(APIView):
                 return Response({
                     'error': 'License already in database.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            result = search_query('Licenses', license_number, 'Name')
+            result = search_query('Licenses', license_number, 'Name', is_license=True)
         return Response(result)
 
 class UserViewSet(ModelViewSet):
