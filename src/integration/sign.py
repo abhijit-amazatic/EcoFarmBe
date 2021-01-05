@@ -103,12 +103,12 @@ def upload_pdf_box(request_id, folder_id, file_name, is_agreement=False):
             for f in zip_file.namelist():
                 if file_name in f:
                     file_name = f
-            file_obj = zip_file.open(file_name).read()
+            file_obj_o = zip_file.open(file_name).read()
         except Exception:
-            file_obj = BytesIO(file_obj_o)
-            file_obj = file_obj.read()
+            file_obj = BytesIO(file_obj)
+            file_obj_o = file_obj.read()
     # box_sha1 = hashlib.sha1(file_obj).hexdigest()
-    file_obj = BytesIO(file_obj)
+    file_obj = BytesIO(file_obj_o)
     new_file = upload_file_stream(folder_id, file_obj, file_name)
     # if box_sha1 != new_file.sha1:
     #     print('Error in upload pdf to box wrong checksum', request_id)
