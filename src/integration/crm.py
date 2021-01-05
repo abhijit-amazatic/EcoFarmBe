@@ -449,7 +449,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             farm_name = license_db.license_profile.__dict__['name']
             if d['is_buyer'] == True:
                 continue
-            response = update_license(farm_name, d)
+            response = update_license(dba=farm_name, license=d)
             final_dict['license'] = response
             if response['status_code'] == 200:
                     record_response = response['response']['data']
@@ -626,12 +626,20 @@ def upload_file_s3_to_box(aws_bucket, aws_key):
        return box_file_obj
     return None
 
-def update_license(dba, license):
+def update_license(dba, license=None, license_id=None):
     """
     Update license with shareable link.
     """
     response = None
     data = list()
+    if not license and license_id:
+        try:
+            license = License.objects.get(id=license_id)
+        except License.DoesNotExist:
+            return {'error': f'License {license_id} not in database'}
+        license = license.__dict__
+        license['license_db_id'] = license['id']
+        license['id'] = license['zoho_crm_id']
     license_number = license['license_number']
     dir_name = f'{dba}_{license_number}'
     new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, dir_name)
@@ -852,7 +860,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
         farm_name = license_db.license_profile.__dict__['name']
         if d['is_seller'] == True:
                 continue
-        response = update_license(farm_name, d)
+        response = update_license(dba=farm_name, license=d)
         final_dict['license'] = response
         if response['status_code'] == 200:
             record_response = response['response']['data']

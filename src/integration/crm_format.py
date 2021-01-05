@@ -237,6 +237,7 @@ CRM_FORMAT  = {
     },
     "Licenses":{
         "id": "id",
+        "license_db_id": "license_db_id",
         "Name": "license_number",
         "Legal_Business_Name": "legal_business_name",
         "License_Type": "license_type",
