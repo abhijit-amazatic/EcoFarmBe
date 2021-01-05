@@ -194,7 +194,8 @@ class InventoryViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         null_entries = Inventory.objects.filter(Q(labtest__isnull=True) | Q(labtest__Created_Time__isnull=True),cf_cfi_published=True)
         results = queryset | null_entries
-        queryset = self.filter_queryset(results).order_by(F('labtest__Created_Time').desc(nulls_last=True))
+        queryset = results.order_by(F('labtest__Created_Time').desc(nulls_last=True))
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         ser = self.get_serializer_class()
         serializer = self.get_paginated_response(ser(page,many=True).data)        
