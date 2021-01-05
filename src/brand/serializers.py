@@ -36,6 +36,7 @@ from .models import (
     ProgramOverview,
     FinancialOverview,
     CropOverview,
+    BillingInformation,
     ProfileReport,
     OrganizationRole,
     OrganizationUser,
@@ -330,6 +331,14 @@ class ProgramOverviewSerializer(serializers.ModelSerializer):
         model = ProgramOverview
         fields = ('__all__')
 
+class BillingInformationSerializer(serializers.ModelSerializer):
+    """
+    This defines BillingInformationSerializer
+    """
+    class Meta:
+        model = BillingInformation
+        fields = ('__all__')
+
 
 class ProfileReportSerializer(serializers.ModelSerializer):
     """
@@ -451,11 +460,11 @@ class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
     organization_user = OrganizationUserRoleRelatedField(
         queryset=OrganizationUser.objects.all(),
     )
-    organization_user_info = OrganizationUserNestedViewSerializer(source='organization_user', read_only=True)
+    # organization_user_info = OrganizationUserNestedViewSerializer(source='organization_user', read_only=True)
     role = OrganizationUserRoleRelatedField(
         queryset=OrganizationRole.objects.all(),
     )
-    role_info = OrganizationRoleSerializer(source='role', read_only=True)
+    # role_info = OrganizationRoleSerializer(source='role', read_only=True)
     licenses = OrganizationUserRoleRelatedField(
         queryset=License.objects.all(),
         many=True,
@@ -475,9 +484,9 @@ class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'organization_user',
-            'organization_user_info',
+            # 'organization_user_info',
             'role',
-            'role_info',
+            # 'role_info',
             'licenses',
             'created_on',
             'updated_on',
@@ -551,13 +560,13 @@ class OrganizationDetailSerializer(OrganizationSerializer):
     This defines ProgramOverviewSerializer
     """
     created_by = OrganizationUserInfoSerializer(read_only=True)
-    roles = OrganizationRoleNestedSerializer(many=True, read_only=True)
-    users = OrganizationUserSerializer(source='organization_user', many=True, read_only=True)
+    # roles = OrganizationRoleNestedSerializer(many=True, read_only=True)
+    # users = OrganizationUserSerializer(source='organization_user', many=True, read_only=True)
     profile_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Organization
-        read_only_fields = ('id', 'licenses', 'created_by', 'created_on', 'updated_on')
+        read_only_fields = ('id', 'created_by', 'created_on', 'updated_on')
         fields = (
             'id',
             'name',
@@ -567,9 +576,9 @@ class OrganizationDetailSerializer(OrganizationSerializer):
             'category',
             'about',
             'created_by',
-            'roles',
-            'users',
-            'licenses',
+            # 'roles',
+            # 'users',
+            # 'licenses',
             'ethics_and_certifications',
             'created_on',
             'updated_on',

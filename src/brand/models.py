@@ -567,6 +567,19 @@ class CropOverview(models.Model):
     overview = ArrayField(JSONField(blank=True,null=True), blank=True, null=True, default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
+
+class BillingInformation(models.Model):
+    """
+    Stores farm's  farm's Processing overview i.e. crop overview.
+    """
+    license = models.OneToOneField(License, verbose_name=_('License'),
+                                related_name='billing_information', on_delete=models.CASCADE)
+    preferred_payment = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    routing = models.CharField(_('Routing'), blank=True, null=True, max_length=255)
+    checking = models.CharField(_('Checking'), blank=True, null=True, max_length=255)
+    bank_address = models.TextField(_('Bank Address'), null=True, blank=True)
+
+
 class ProfileCategory(models.Model):
     """
     Class implementing  Vendor/Profile categories.

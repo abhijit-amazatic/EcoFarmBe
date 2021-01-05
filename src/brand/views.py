@@ -39,9 +39,10 @@ from .models import (
     ProfileContact,
     LicenseProfile,
     CultivationOverview,
-    ProgramOverview,
-    FinancialOverview,
     CropOverview,
+    FinancialOverview,
+    ProgramOverview,
+    BillingInformation,
     ProfileCategory,
     ProfileReport,
     OrganizationRole,
@@ -60,6 +61,7 @@ from .serializers import (
     FinancialOverviewSerializer,
     CropOverviewSerializer,
     ProgramOverviewSerializer,
+    BillingInformationSerializer,
     ProfileReportSerializer,
     FileUploadSerializer,
     InviteUserSerializer,
@@ -231,6 +233,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
     financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
     crop_overview_path = 'crop-overview(/(?P<crop_overview_id>[0-9]*))?'
     program_overview_path = 'program-overview(/(?P<program_overview_id>[0-9]*))?'
+    billing_information_path = 'billing_information(/(?P<billing_information_id>[0-9]*))?'
     filter_backends = [filters.SearchFilter,DjangoFilterBackend]
     search_fields = ['status', 'profile_category']
     filterset_fields = ['profile_category', 'legal_business_name']
@@ -272,6 +275,8 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
             return CropOverviewSerializer
         elif self.action == 'program_overview':
             return ProgramOverviewSerializer
+        elif self.action == 'billing_information':
+            return BillingInformationSerializer
         return LicenseSerializer
 
     def perform_create(self, serializer):
@@ -359,6 +364,18 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         Detail route CRUD operations on program_overview.
         """
         return self.extra_info(request, pk, ProgramOverview, ProgramOverviewSerializer, 'program_overview')
+
+    @action(
+        detail=True,
+        url_path=billing_information_path,
+        methods=['get', 'patch'],
+        pagination_class=CustomPagination,
+    )
+    def billing_information(self, request, pk, program_overview_id=None, *args, **kwargs):
+        """
+        Detail route CRUD operations on billing_information.
+        """
+        return self.extra_info(request, pk, BillingInformation, BillingInformationSerializer, 'billing_information')
 
     @action(detail=True, url_path=license_profile_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def license_profile(self, request, pk, license_profile_id=None, *args, **kwargs):

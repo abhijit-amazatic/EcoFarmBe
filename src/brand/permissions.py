@@ -71,6 +71,10 @@ class LicenseViewSetPermission(ViewPermission):
             'get': 'view_program_overview',
             'patch': 'edit_program_overview',
         },
+        'billing_information': {
+            'get': 'view_program_overview',
+            'patch': 'edit_program_overview',
+        },
         'license_profile': {
             'get': 'view_license_profile',
             'patch': 'edit_license_profile',
