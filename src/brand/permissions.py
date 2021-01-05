@@ -72,8 +72,8 @@ class LicenseViewSetPermission(ViewPermission):
             'patch': 'edit_program_overview',
         },
         'billing_information': {
-            'get': 'view_program_overview',
-            'patch': 'edit_program_overview',
+            'get': 'view_billing_information',
+            'patch': 'edit_billing_information',
         },
         'license_profile': {
             'get': 'view_license_profile',
@@ -231,5 +231,12 @@ class filterQuerySet:
             q |= Q(organizationuserrole__organization_user__user=self.user)&Q(organizationuserrole__role__permissions='view_license')
         else:
             q |= Q(organizationuserrole__organization_user__user=self.user)
-        print(q)
+        return self.queryset.filter(q).distinct()
+
+    def brand_organizationuser(self):
+        # if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
+        #     return self.queryset
+        q = Q()
+        q |= Q(organization__created_by=self.user)
+        q |= Q(organization_user_role__role__permissions='view_organization_user')
         return self.queryset.filter(q).distinct()

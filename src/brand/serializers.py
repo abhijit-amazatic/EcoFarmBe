@@ -428,39 +428,13 @@ class OrganizationRoleSerializer(NestedModelSerializer, serializers.ModelSeriali
         model = OrganizationRole
         exclude = ('organization',)
 
-
-class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.ModelSerializer):
+class OrganizationUserRoleSerializer(serializers.ModelSerializer):
     """
     This defines organization role serializer.
     """
-    user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
-    # organization_user_role = OrganizationUserRoleSerializer(many=True, read_only=True)
-    class Meta:
-        model = OrganizationUser
-        fields = (
-            'id',
-            'user',
-            'user_info',
-            'created_on',
-            'updated_on',
-            # 'organization',
-        )
-
-    def validate_user(self, value):
-        qs = self.context['view'].get_queryset()
-        if qs.filter(user_id=value).exists():
-            raise serializers.ValidationError("user already exist.")
-        return value
-
-
-class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
-    """
-    This defines organization role serializer.
-    """
-    organization_user = OrganizationUserRoleRelatedField(
-        queryset=OrganizationUser.objects.all(),
-    )
-    # organization_user_info = OrganizationUserNestedViewSerializer(source='organization_user', read_only=True)
+    # organization_user = OrganizationUserRoleRelatedField(
+    #     queryset=OrganizationUser.objects.all(),
+    # )
     role = OrganizationUserRoleRelatedField(
         queryset=OrganizationRole.objects.all(),
     )
@@ -483,7 +457,74 @@ class OrganizationUserRoleNestedSerializer(serializers.ModelSerializer):
         model = OrganizationUserRole
         fields = (
             'id',
-            'organization_user',
+            # 'organization_user',
+            # 'organization_user_info',
+            'role',
+            # 'role_info',
+            'licenses',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )
+
+
+
+class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+    user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
+    roles = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
+    class Meta:
+        model = OrganizationUser
+        fields = (
+            'id',
+            'user',
+            'user_info',
+            'roles',
+            'created_on',
+            'updated_on',
+            # 'organization',
+        )
+
+    def validate_user(self, value):
+        qs = self.context['view'].get_queryset()
+        if qs.filter(user_id=value).exists():
+            raise serializers.ValidationError("user already exist.")
+        return value
+
+
+class OrganizationUserRoleNestedSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+    # organization_user = OrganizationUserRoleRelatedField(
+    #     queryset=OrganizationUser.objects.all(),
+    # )
+    # # organization_user_info = OrganizationUserNestedViewSerializer(source='organization_user', read_only=True)
+    role = OrganizationUserRoleRelatedField(
+        queryset=OrganizationRole.objects.all(),
+    )
+    # role_info = OrganizationRoleSerializer(source='role', read_only=True)
+    licenses = OrganizationUserRoleRelatedField(
+        queryset=License.objects.all(),
+        many=True,
+        # required=True,
+    )
+
+    def validate_licenses(self, value):
+        """
+        Check that license is selected.
+        """
+        if not value:
+            raise serializers.ValidationError("At leat one License must be selected.")
+        return value
+
+    class Meta:
+        model = OrganizationUserRole
+        fields = (
+            'id',
+            # 'organization_user',
             # 'organization_user_info',
             'role',
             # 'role_info',

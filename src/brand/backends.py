@@ -23,8 +23,8 @@ class LicensePermissionBackend:
         perm_set = set()
         if user_obj.groups.filter(name=SALES_REP_GROUP_NAME).exists():
             perm_set.update(set(SALES_REP_PERM))
-        perm_set.update(self._get_all_permissions(self, user_obj, obj=None))
-        return set()
+        perm_set.update(self._get_all_permissions(user_obj, obj=None))
+        return perm_set
 
     def _get_all_permissions(self, user_obj, obj=None):
         if not user_obj.is_active or user_obj.is_anonymous or obj is None:
