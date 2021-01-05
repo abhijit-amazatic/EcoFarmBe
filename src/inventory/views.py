@@ -127,23 +127,33 @@ class CustomOrderFilter(OrderingFilter):
         'Created_Time':'labtest__Created_Time',
         'Total_CBD': 'labtest__Total_CBD'
     }
-    def get_ordering(self, request, queryset, view):
-        params = request.query_params.get(self.ordering_param)
-        if params:
-            fields = [param.strip() for param in params.split(',')]
-            ordering = [f for f in fields if f.lstrip('-') in self.allowed_custom_filters]
-            if ordering:
-                return ordering
+    # def get_ordering(self, request, queryset, view):
+    #     params = request.query_params.get(self.ordering_param)
+    #     if params:
+    #         fields = [param.strip() for param in params.split(',')]
+    #         ordering = [f for f in fields if f.lstrip('-') in self.allowed_custom_filters]
+    #         if ordering:
+    #             return ordering
 
-        return self.get_default_ordering(view)
+    #     return self.get_default_ordering(view)
+
+    def get_valid_fields(self, queryset, view, context={}):
+        valid_fields = super().get_valid_fields(queryset, view, context=context)
+        valid_fields += [(field, ' '.join(field.split('_'))) for field in self.fields_related]
+        return valid_fields
+
 
     def filter_queryset(self, request, queryset, view):
         order_fields = []
         ordering = self.get_ordering(request, queryset, view)
         if ordering:
             for field in ordering:
-                symbol = "-" if "-" in field else ""
-                order_fields.append(symbol+self.fields_related[field.lstrip('-')])
+                    if field[0] == '-':
+                        f = field.lstrip('-')
+                        order_fields.append(F(self.fields_related.get(f, f)).desc(nulls_last=True))
+                    else:
+                        f = field.lstrip('+')
+                        order_fields.append(F(self.fields_related.get(f, f)).asc(nulls_last=True))
         if order_fields:
             return queryset.order_by(*order_fields)
 
@@ -183,7 +193,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     Inventory View
     """
     permission_classes = (AllowAny, )
-    filter_backends = (CustomOrderFilter,filters.DjangoFilterBackend,OrderingFilter, )
+    filter_backends = (CustomOrderFilter,filters.DjangoFilterBackend,)
     filterset_class = DataFilter
     ordering_fields = '__all__'
     pagination_class = BasicPagination
