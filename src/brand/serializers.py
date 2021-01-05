@@ -14,7 +14,7 @@ from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (notify_admins_on_profile_registration,)
 from inventory.models import (Documents, )
-from integration.crm import (insert_vendors, insert_accounts,)
+from integration.crm import (insert_vendors, insert_accounts, update_license,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
@@ -230,8 +230,9 @@ class LicenseSerializer(serializers.ModelSerializer):
                 #insert or update vendors/accounts
                 insert_or_update_vendor_accounts(profile,instance)
             except Exception as e:
-                print(e)
+                print(e)        
         user = super().update(instance, validated_data)
+        update_license(dba=instance.license_profile.name, license_id=instance.id)
         return user
 
     def create(self, validated_data):
