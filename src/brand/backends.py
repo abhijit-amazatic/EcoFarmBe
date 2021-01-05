@@ -17,13 +17,13 @@ class LicensePermissionBackend:
             return False
         if obj:
             return user_obj.is_active and perm in self.get_all_permissions(user_obj, obj)
-        return user_obj.is_active and perm in self.get_all_permissions(user_obj, obj)
+        return False
 
     def get_all_permissions(self, user_obj, obj=None):
         perm_set = set()
         if user_obj.groups.filter(name=SALES_REP_GROUP_NAME).exists():
             perm_set.update(set(SALES_REP_PERM))
-        perm_set.update(self._get_all_permissions(user_obj, obj=None))
+        perm_set.update(self._get_all_permissions(user_obj, obj))
         return perm_set
 
     def _get_all_permissions(self, user_obj, obj=None):
