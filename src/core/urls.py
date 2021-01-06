@@ -71,6 +71,7 @@ from brand.views import (
     PermissionListView,
     InviteUserViewSet,
     UserInvitationVerificationView,
+    ProgramSelectionSyncView,
 )
 from two_factor.views import (
     TwoFactorLoginEnableView,
@@ -216,6 +217,7 @@ urlpatterns = [
     path(r'inventory/county/', InventoryCountyView.as_view(), name='get-county'),
     path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
     path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),
+    path(r'update-program-selection/', ProgramSelectionSyncView.as_view(), name="update-program"),
 
 ] + router.urls
 

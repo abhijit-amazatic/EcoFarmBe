@@ -28,7 +28,7 @@ from core.permissions import IsAuthenticatedBrandPermission
 from integration.books import  get_buyer_summary
 from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,)
 from core.mailer import (mail, mail_send,)
-from integration.crm import (get_licenses,)
+from integration.crm import (get_licenses, update_program_selection)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
 from .tasks import send_async_invitation
@@ -717,3 +717,19 @@ class LicenseSyncView(APIView):
                 pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
+class ProgramSelectionSyncView(APIView):
+    """
+    Sync program selection from crm to db.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def put(self, request):
+        """
+        Update program selection.
+        """
+        record_id = request.data.get('record_id')
+        tier_selection = request.data.get('tier_selection')
+        response = update_program_selection(record_id, tier_selection)
+        if response['code'] == 0:
+            return Response(response)
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
