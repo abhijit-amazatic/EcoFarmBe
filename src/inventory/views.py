@@ -39,7 +39,8 @@ class DataFilter(FilterSet):
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
     county_grown__in = CharInFilter(field_name='county_grown', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
-    cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
+    # cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
+    cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
     cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
     cf_quantity_estimate__in = CharInFilter(field_name='cf_quantity_estimate', lookup_expr='in')
@@ -63,12 +64,84 @@ class DataFilter(FilterSet):
     labtest__Box_Link__in = CharInFilter(field_name='labtest__Box_Link', lookup_expr='in')
     actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
     pre_tax_price = CharInFilter(field_name='pre_tax_price', lookup_expr='in')
-            
+
     def get_cultivars(self, queryset, name, value):
         items = queryset.filter(
             cf_strain_name__icontains=value).filter(cf_cfi_published=True)
         return items
-    
+
+    def filter_cf_pesticide_summary__in(self, queryset, name, values):
+        values = ['ND' if val == 'Non-Detect' else val for val in values ]
+        queryset.select_related('labtest')
+        qs = queryset.filter(
+            Q(labtest__Acephate__in=values),
+            Q(labtest__Acequinocyl__in=values),
+            Q(labtest__Acetamiprid__in=values),
+            Q(labtest__Aldicarb__in=values),
+            Q(labtest__Azoxystrobin__in=values),
+            Q(labtest__Bifenazate__in=values),
+            Q(labtest__Bifenthrin__in=values),
+            Q(labtest__Boscalid__in=values),
+            Q(labtest__Captan__in=values),
+            Q(labtest__Carbaryl__in=values),
+            Q(labtest__Carbofuran__in=values),
+            Q(labtest__Chlordane__in=values),
+            Q(labtest__Chlorfenapyr__in=values),
+            Q(labtest__Chlorpyrifos__in=values),
+            Q(labtest__Chlortraniliprole__in=values),
+            Q(labtest__Clofentazine__in=values),
+            Q(labtest__Coumaphos__in=values),
+            Q(labtest__Cyfluthrin__in=values),
+            Q(labtest__Cypermethrin__in=values),
+            Q(labtest__Daminozide__in=values),
+            Q(labtest__Diazinon__in=values),
+            Q(labtest__Dichlorvos__in=values),
+            Q(labtest__Dimethoate__in=values),
+            Q(labtest__Dimethomorph__in=values),
+            Q(labtest__Ethoprop__in=values),
+            Q(labtest__Etofenprox__in=values),
+            Q(labtest__Etoxazole__in=values),
+            Q(labtest__Fenhexamid__in=values),
+            Q(labtest__Fenoxycarb__in=values),
+            Q(labtest__Fenpyroximate__in=values),
+            Q(labtest__Fipronil__in=values),
+            Q(labtest__Flonicamid__in=values),
+            Q(labtest__Fludoxinil__in=values),
+            Q(labtest__Hexythiazox__in=values),
+            Q(labtest__Imazilil__in=values),
+            Q(labtest__Imidacloprid__in=values),
+            Q(labtest__Kresoxim_methyl__in=values),
+            Q(labtest__Malathion__in=values),
+            Q(labtest__Metalaxyl__in=values),
+            Q(labtest__Methiocarb__in=values),
+            Q(labtest__Methomyl__in=values),
+            Q(labtest__Mevinphos__in=values),
+            Q(labtest__Myclobutanil__in=values),
+            Q(labtest__Naled__in=values),
+            Q(labtest__Oxamyl__in=values),
+            Q(labtest__Paclobutrazole__in=values),
+            Q(labtest__Parathion_methyl__in=values),
+            Q(labtest__Pentachloronitrobenzene__in=values),
+            Q(labtest__Permethrin__in=values),
+            Q(labtest__Phosmet__in=values),
+            Q(labtest__Piperonyl_butoxide__in=values),
+            Q(labtest__Prallethrin__in=values),
+            Q(labtest__Propiconazole__in=values),
+            Q(labtest__Propoxur__in=values),
+            Q(labtest__Pyrethrins__in=values),
+            Q(labtest__Pyridaben__in=values),
+            Q(labtest__Spinatoram__in=values),
+            Q(labtest__Spinosad__in=values),
+            Q(labtest__Spiromesifen__in=values),
+            Q(labtest__Spirotetramat__in=values),
+            Q(labtest__Spiroxamine__in=values),
+            Q(labtest__Tebuconazole__in=values),
+            Q(labtest__Thiacloprid__in=values),
+            Q(labtest__Thiamethoxam__in=values),
+            Q(labtest__Trifloxystrobin__in=values),
+        ).distinct()
+        return qs
+
     class Meta:
         model = Inventory
         fields = {
