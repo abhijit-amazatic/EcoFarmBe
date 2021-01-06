@@ -120,22 +120,12 @@ class DataFilter(FilterSet):
         }
 
 class CustomOrderFilter(OrderingFilter):
-    allowed_custom_filters = ['Total_THC', 'Total_CBD', 'Box_Link','Created_Time'] #
     fields_related = {
         'Total_THC': 'labtest__Total_THC', # ForeignKey Field lookup for ordering
         'Box_Link': 'labtest__Box_Link',
         'Created_Time':'labtest__Created_Time',
         'Total_CBD': 'labtest__Total_CBD'
     }
-    # def get_ordering(self, request, queryset, view):
-    #     params = request.query_params.get(self.ordering_param)
-    #     if params:
-    #         fields = [param.strip() for param in params.split(',')]
-    #         ordering = [f for f in fields if f.lstrip('-') in self.allowed_custom_filters]
-    #         if ordering:
-    #             return ordering
-
-    #     return self.get_default_ordering(view)
 
     def get_valid_fields(self, queryset, view, context={}):
         valid_fields = super().get_valid_fields(queryset, view, context=context)
@@ -148,45 +138,26 @@ class CustomOrderFilter(OrderingFilter):
         ordering = self.get_ordering(request, queryset, view)
         if ordering:
             for field in ordering:
-                    if field[0] == '-':
-                        f = field.lstrip('-')
-                        order_fields.append(F(self.fields_related.get(f, f)).desc(nulls_last=True))
-                    else:
-                        f = field.lstrip('+')
-                        order_fields.append(F(self.fields_related.get(f, f)).asc(nulls_last=True))
+                if field[0] == '-':
+                    f = field.lstrip('-')
+                    order_fields.append(F(self.fields_related.get(f, f)).desc(nulls_last=True))
+                else:
+                    f = field.lstrip('+')
+                    order_fields.append(F(self.fields_related.get(f, f)).asc(nulls_last=True))
         if order_fields:
             return queryset.order_by(*order_fields)
 
         return queryset
 
 
-class NullsAlwaysLastOrderingFilter(OrderingFilter):
-    """ nulls_last feature to force nulls to bottom in all orderings. """
-    def filter_queryset(self, request, queryset, view):
-        ordering = self.get_ordering(request, queryset, view)
-
-        if ordering:
-            f_ordering = []
-            for o in ordering:
-                if not o:
-                    continue
-                if o[0] == '-':
-                    f_ordering.append(F(o[1:]).desc(nulls_last=True))
-                else:
-                    f_ordering.append(F(o).asc(nulls_last=True))
-
-            return queryset.order_by(*f_ordering)
-
-        return queryset    
-
-    
 class BasicPagination(PageNumberPagination):
     """
-    Pagination class. 
+    Pagination class.
     """
     #page_size_query_param = 'limit'
     page_size_query_param = 'page_size'
     page_size = 50
+
 
 class InventoryViewSet(viewsets.ModelViewSet):
     """
@@ -197,8 +168,8 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filterset_class = DataFilter
     ordering_fields = '__all__'
     pagination_class = BasicPagination
+    ordering = ('-Created_Time',)
 
-    
     def get_serializer_class(self):
         """
         Return serializer.
@@ -206,27 +177,13 @@ class InventoryViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             return LogoutInventorySerializer
         return InventorySerializer
-    
 
-    def list(self, request):
-        """
-        get resp
-        """
-        queryset = self.get_queryset()
-        null_entries = Inventory.objects.filter(Q(labtest__isnull=True) | Q(labtest__Created_Time__isnull=True),cf_cfi_published=True)
-        results = queryset | null_entries
-        queryset = results.order_by(F('labtest__Created_Time').desc(nulls_last=True))
-        queryset = self.filter_queryset(queryset)
-        page = self.paginate_queryset(queryset)
-        ser = self.get_serializer_class()
-        serializer = self.get_paginated_response(ser(page,many=True).data)        
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
     def get_queryset(self):
         """
          Return QuerySet.
         """
         return Inventory.objects.filter(cf_cfi_published=True)
+
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
@@ -235,25 +192,26 @@ class ItemFeedbackViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     ordering_fields = '__all__'
-    
+
     def get_serializer_class(self):
         """
         Return serializer.
         """
         return ItemFeedbackSerializer
-    
+
     def get_queryset(self):
         """
         Return QuerySet.
         """
         return ItemFeedback.objects.all()
 
+
 class InventorySyncView(APIView):
     """
     Real time inventory sync.
     """
     authentication_classes = (TokenAuthentication, )
-    
+
     def post(self, request):
         """
         Post realtime inventory updates.
@@ -262,6 +220,7 @@ class InventorySyncView(APIView):
             request.data.get('inventory_name'),
             request.data.get('JSONString'))
         return Response(record)
+
 
 class CultivarCategoryView(APIView):
     """
@@ -288,6 +247,7 @@ class CultivarCategoryView(APIView):
                 'label': i['cf_strain_name'],
                 'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None]})
 
+
 class InventoryStatusTypeView(APIView):
     """
     Return distinct status types.
@@ -302,7 +262,8 @@ class InventoryStatusTypeView(APIView):
         return Response({
             'status_code': 200,
             'response': [i['cf_status'] for i in categories]})
-        
+
+
 class InventoryUpdateDateView(APIView):
     """
     Return inventory update date.
@@ -321,6 +282,7 @@ class InventoryUpdateDateView(APIView):
             status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class InTransitOrderViewSet(viewsets.ModelViewSet):
     """
     Inventory View
@@ -333,6 +295,7 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(user=self.request.user)
+
 
 class DocumentPreSignedView(APIView):
     """
@@ -404,12 +367,12 @@ class DocumentPreSignedView(APIView):
         response['document_id'] = obj.id
         return Response(response, status=status.HTTP_201_CREATED)
 
+
 class DocumentView(APIView):
     """
     Document view class.
     """
     permission_classes = (DocumentPermission, )
-
 
     def get(self, request, *args, **kwargs):
         """
@@ -438,7 +401,7 @@ class DocumentView(APIView):
         return Response(
             Documents.objects.values(),
             status=status.HTTP_200_OK)
-    
+
     def put(self, request, *args, **kwargs):
         """
         Update document fields.
@@ -489,6 +452,7 @@ class DocumentView(APIView):
             {'status': 'Failure'},
             status=status.HTTP_400_BAD_REQUEST)
 
+
 class DocumentStatusView(APIView):
     """
     Document view class.
@@ -515,6 +479,7 @@ class DocumentStatusView(APIView):
         except Documents.DoesNotExist:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class InventoryDeleteView(APIView):
     """
     Delete inventory item.
@@ -536,12 +501,14 @@ class InventoryDeleteView(APIView):
             except Inventory.DoesNotExist:
                 pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class InventorySummaryView(APIView):
     """
     Return Inventory summary.
     """
     permission_classes = (AllowAny, )
+
     def get(self, request):
         """
         Get inventory summary.
@@ -562,6 +529,7 @@ class InventorySummaryView(APIView):
         response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
         response['batch_varities'] = inventory.distinct('sku').count()
         return Response(response)
+
 
 class InventoryCountyView(APIView):
     """
