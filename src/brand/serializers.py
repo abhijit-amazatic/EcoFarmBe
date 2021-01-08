@@ -50,7 +50,7 @@ def insert_or_update_vendor_accounts(profile, instance):
     """
     Insert/update vendors/accounts based on existing user or not. 
     """
-    if profile.license.created_by.existing_member:
+    if profile.license.organization.created_by.existing_member:
         if profile.license.profile_category == 'cultivation':
             if instance.brand:
                 insert_vendors.delay(id=instance.brand.id,is_update=True)
@@ -61,7 +61,7 @@ def insert_or_update_vendor_accounts(profile, instance):
                 insert_accounts.delay(id=instance.brand.id,is_update=True)
             else:
                 insert_accounts.delay(id=instance.id, is_single_user=True,is_update=True)
-    elif not profile.license.created_by.existing_member:
+    elif not profile.license.organization.created_by.existing_member:
         if profile.license.profile_category == 'cultivation':
             if instance.brand:
                 insert_vendors.delay(id=instance.brand.id)
