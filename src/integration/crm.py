@@ -644,7 +644,7 @@ def update_license(dba, license=None, license_id=None):
     dir_name = f'{dba}_{license_number}'
     new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, dir_name)
     license_folder = create_folder(new_folder, 'Licenses')
-    if not license.get('uploaded_license_to'):
+    if not license.get('uploaded_license_to') or license_id:
         try:
             license_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='license').first()
             license_to_path = license_to.path
@@ -662,7 +662,7 @@ def update_license(dba, license=None, license_id=None):
             print('Error in update license', exc)
             pass
     documents = create_folder(new_folder, 'documents')
-    if not license.get('uploaded_sellers_permit_to'):
+    if not license.get('uploaded_sellers_permit_to') or license_id:
         try:
             seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
             seller_to_path = seller_to.path
@@ -1055,7 +1055,6 @@ def get_accounts_from_crm(legal_business_name):
                     response[k] = account.get(v)
             return response
     return {}
-
 
 def post_leads_to_slack_and_email(record,response):
     """

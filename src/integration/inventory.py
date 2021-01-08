@@ -296,7 +296,7 @@ def get_county(vendor_name):
     except Exception:
         return None
 
-def get_inventory_name(inventory_name):
+def get_inventory_name_from_db(inventory_name):
     """
     Return inventory name
     """
@@ -328,7 +328,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
                 record['county_grown'] = get_county(record['cf_vendor_name'])
             if record['category_name']:
                 record['parent_category_name'] = get_parent_category(record['category_name'])
-            record['inventory_name'] = get_inventory_name(inventory_name)
+            record['inventory_name'] = get_inventory_name_from_db(inventory_name)
             obj = InventoryModel.objects.update_or_create(
                 item_id=record['item_id'],
                 defaults=record)
@@ -370,7 +370,7 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                     record['county_grown'] = get_county(record['cf_vendor_name'])
                 if record['category_name']:
                     record['parent_category_name'] = get_parent_category(record['category_name'])
-                record['inventory_name'] = get_inventory_name(inventory_name)
+                record['inventory_name'] = get_inventory_name_from_db(inventory_name)
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
                     defaults=record)
@@ -412,7 +412,7 @@ def sync_inventory(inventory_name, response):
             record['county_grown'] = get_county(record['cf_vendor_name'])
         if record['category_name']:
             record['parent_category_record'] = get_parent_category(record['category_name'])
-        record['inventory_name'] = get_inventory_name(inventory_name)
+        record['inventory_name'] = get_inventory_name_from_db(inventory_name)
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
             defaults=record)
