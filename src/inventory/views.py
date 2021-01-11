@@ -205,6 +205,31 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         return Inventory.objects.filter(cf_cfi_published=True)
 
+    def list(self, request):
+        """
+        Return inventory list queryset with summary.
+        """
+        from integration.inventory import (get_inventory_summary,)
+        from django.core.paginator import Paginator
+
+        summary = self.filter_queryset(self.get_queryset())
+        summary = get_inventory_summary(summary)
+        queryset = Paginator(self.filter_queryset(self.get_queryset()), 10)
+        page = int(request.query_params.get('page', 1))
+        if page > queryset.num_pages:
+            return Response({
+                "status": "Result only have {} number of pages".format(applicants.num_pages)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(queryset.page(page), many=True)
+        data = {}
+        data['meta'] = {
+            "pages": queryset.num_pages,
+            "current_page": page
+        }
+        data['summary'] = summary
+        data['results'] = serializer.data
+        return Response(data)
+
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):
     """
@@ -432,10 +457,6 @@ class DocumentView(APIView):
             if request.data.get('is_primary'):
                 main_doc = Documents.objects.get(id=id)
                 documents = Documents.objects.filter(sku=main_doc.sku).update(is_primary=False)
-                # for doc in documents:
-                #     if doc.id != id:
-                #         doc.is_primary = False
-                #         doc.save()
                 box_id = main_doc.box_id
                 item_id = main_doc.object_id
                 file_obj = get_file_obj(box_id)

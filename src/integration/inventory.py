@@ -12,6 +12,7 @@ from core.settings import (
     INVENTORY_BOX_ID,
     INVENTORY_TAXES,
 )
+from django.db.models import (Sum, F, Min, Max, Avg, Q)
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
 from labtest.models import (LabTest, )
@@ -434,3 +435,26 @@ def update_inventory_thumbnail():
         item.save()
         inv.save()
     return documents
+
+def get_inventory_summary(inventory):
+    """
+    Return inventory summary
+    """
+    try:
+        response = dict()
+        labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
+        response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
+        response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
+        response['total_quantity'] = inventory.filter(inventory_name='EFD').aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
+        response['total_value'] = inventory.filter(
+            category_name__contains='Flower').aggregate(
+                total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
+        for category in ['Tops', 'Smalls', 'Trim']:
+            response[category.lower() + '_quantity'] = inventory.filter(
+                cf_cannabis_grade_and_category__contains=category).aggregate(
+                    Sum('actual_available_stock'))['actual_available_stock__sum']
+        response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
+        response['batch_varities'] = inventory.order_by().distinct('sku').count()
+        return response
+    except Exception as exc:
+        return {'error': f'{exc}'}
