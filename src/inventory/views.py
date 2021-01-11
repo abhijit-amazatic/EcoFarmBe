@@ -431,11 +431,11 @@ class DocumentView(APIView):
         try:
             if request.data.get('is_primary'):
                 main_doc = Documents.objects.get(id=id)
-                documents = Documents.objects.filter(sku=main_doc.sku)
-                for doc in documents:
-                    if doc.id != id:
-                        doc.is_primary = False
-                        doc.save()
+                documents = Documents.objects.filter(sku=main_doc.sku).update(is_primary=False)
+                # for doc in documents:
+                #     if doc.id != id:
+                #         doc.is_primary = False
+                #         doc.save()
                 box_id = main_doc.box_id
                 item_id = main_doc.object_id
                 file_obj = get_file_obj(box_id)
