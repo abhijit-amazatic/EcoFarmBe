@@ -473,6 +473,8 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                         'is_buyer': "N/A" if not hasattr(license.brand, 'is_buyer') else license.brand.is_buyer,
                         'is_seller': "N/A" if not hasattr(license.brand, 'is_seller') else license.brand.is_seller,
                         'document_url': brand_data.get('document_url'),
+                        'brand_image': brand_data.get('brand_image'),
+                        
                     },
                     'license': {
                         'id': license.id,
