@@ -575,10 +575,13 @@ class BillingInformation(models.Model):
     """
     license = models.OneToOneField(License, verbose_name=_('License'),
                                 related_name='billing_information', on_delete=models.CASCADE)
-    preferred_payment = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    routing = models.CharField(_('Routing'), blank=True, null=True, max_length=255)
-    checking = models.CharField(_('Checking'), blank=True, null=True, max_length=255)
-    bank_address = models.TextField(_('Bank Address'), null=True, blank=True)
+    preferred_payment = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
+    bank_routing_number = models.CharField(_('Bank Routing Number'), blank=True, null=True, max_length=255)
+    bank_account_number = models.CharField(_('Bank Account Number'), blank=True, null=True, max_length=255)
+    bank_name = models.CharField(_('Bank Name'), null=True, blank=True, max_length=255)
+    bank_street = models.CharField(_('Bank Street'), null=True, blank=True, max_length=255)
+    bank_city  = models.CharField(_('Bank City'), null=True, blank=True, max_length=255)
+    bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
 
 
 class ProfileCategory(models.Model):
