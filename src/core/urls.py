@@ -53,7 +53,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
                              InTransitOrderViewSet, DocumentPreSignedView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
-                             InventorySummaryView, InventoryCountyView)
+                             InventoryCountyView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (
@@ -210,7 +210,6 @@ urlpatterns = [
     path(r'document/<str:id>/', DocumentView.as_view(), name='extra-documents'),
     path(r'terms-and-condition-acceptance/', TermsAndConditionAcceptanceView.as_view(), name='terms-and-condition-acceptance'),
     path(r'license/sync/', LicenseSyncView.as_view(), name='license-sync'),
-    path(r'inventory/summary/', InventorySummaryView.as_view(), name='inventory-summary'),
     path(r'news/', GetNewsFeedView.as_view(), name='news-feed'),
     path(r'crm/labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),

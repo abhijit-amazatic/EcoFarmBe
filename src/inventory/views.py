@@ -544,35 +544,6 @@ class InventoryDeleteView(APIView):
                 pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class InventorySummaryView(APIView):
-    """
-    Return Inventory summary.
-    """
-    permission_classes = (AllowAny, )
-
-    def get(self, request):
-        """
-        Get inventory summary.
-        """
-        response = dict()
-        inventory = Inventory.objects.filter(cf_cfi_published=True, cf_status='Available')
-        labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
-        response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
-        response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
-        response['total_quantity'] = inventory.filter(inventory_name='EFD').aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
-        response['total_value'] = inventory.filter(
-            category_name__contains='Flower').aggregate(
-                total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
-        for category in ['Tops', 'Smalls', 'Trim']:
-            response[category.lower() + '_quantity'] = inventory.filter(
-                cf_cannabis_grade_and_category__contains=category).aggregate(
-                    Sum('actual_available_stock'))['actual_available_stock__sum']
-        response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
-        response['batch_varities'] = inventory.distinct('sku').count()
-        return Response(response)
-
-
 class InventoryCountyView(APIView):
     """
     Return Inventory county.
