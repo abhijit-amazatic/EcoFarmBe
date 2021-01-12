@@ -16,6 +16,7 @@ from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from django.shortcuts import get_object_or_404
 
+from django.core.paginator import Paginator
 from core.pagination import PageNumberPagination
 from .serializers import (InventorySerializer, LogoutInventorySerializer,
                           ItemFeedbackSerializer, InTransitOrderSerializer)
@@ -29,6 +30,7 @@ from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
+from integration.inventory import (get_inventory_summary,)
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -209,9 +211,6 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return inventory list queryset with summary.
         """
-        from integration.inventory import (get_inventory_summary,)
-        from django.core.paginator import Paginator
-
         summary = self.filter_queryset(self.get_queryset())
         summary = get_inventory_summary(summary)
         queryset = Paginator(self.filter_queryset(self.get_queryset()), 10)
