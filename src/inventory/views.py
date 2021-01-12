@@ -211,9 +211,10 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         Return inventory list queryset with summary.
         """
+        page_size = request.query_params.get('page_size', 50)
         summary = self.filter_queryset(self.get_queryset())
         summary = get_inventory_summary(summary)
-        queryset = Paginator(self.filter_queryset(self.get_queryset()), 10)
+        queryset = Paginator(self.filter_queryset(self.get_queryset()), page_size)
         page = int(request.query_params.get('page', 1))
         if page > queryset.num_pages:
             return Response({
@@ -222,8 +223,10 @@ class InventoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset.page(page), many=True)
         data = {}
         data['meta'] = {
-            "pages": queryset.num_pages,
-            "current_page": page
+            "number_of_pages": queryset.num_pages,
+            "page": page,
+            "number_of_records": queryset.count,
+            "page_size": page_size
         }
         data['summary'] = summary
         data['results'] = serializer.data
