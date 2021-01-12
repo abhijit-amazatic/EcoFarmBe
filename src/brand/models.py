@@ -203,8 +203,8 @@ class Brand(TimeStampFlagModelMixin, models.Model):
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
-    brand_image = models.CharField( _('Brand Image'), blank=True, null=True, max_length=255)
     documents = GenericRelation(Documents)
+    #brand_image = models.CharField( _('Brand Image'), blank=True, null=True, max_length=255)
 
     def __str__(self):
         return self.brand_name

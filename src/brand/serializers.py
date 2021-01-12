@@ -103,6 +103,7 @@ class BrandSerializer(serializers.ModelSerializer):
     This defines Brand serializer.
     """
     document_url = serializers.SerializerMethodField()
+    brand_image = serializers.SerializerMethodField()
 
     def get_document_url(self, obj):
         """
@@ -119,6 +120,13 @@ class BrandSerializer(serializers.ModelSerializer):
                     return url.get('response')
         except Exception:
             return None
+
+    def get_brand_image(self,obj):
+        """
+        Return brand image link
+        """
+        return self.get_document_url(obj)
+            
 
     def validate(self, data):
         if self.partial:
