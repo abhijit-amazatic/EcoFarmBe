@@ -1,12 +1,12 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
 
-<p style='font-size:16px !important;color: #013c48;'>Hi {{ full_name }},</p>
-<div>
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi {{ full_name }},</p>
+<div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
             You have been invited to join organization <strong>{{organization}}</strong> as <strong>{{role}}</strong>
-        {% if licenses %} for 
+        {% if licenses %} for
         </p>
         <ul <p style='font-size:16px !important;color: #013c48;'>
             {% for lic in licenses %}

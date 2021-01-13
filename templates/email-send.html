@@ -1,8 +1,8 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
 
-<p style='font-size:16px !important;'>Hi {{ email }},</p>
-<div [hidden]={{ forgotpassword }}>
+<p style='font-size:16px !important; padding-left:15px;'>Hi {{ email }},</p>
+<div [hidden]={{ forgotpassword }} style="padding-left:15px;">
     <div ><p style='font-size:16px !important;color: #013c48;'>Did you forget your password? Please click the link below to reset your password.<br>
         {{ link }}</p></div>
     <div>
