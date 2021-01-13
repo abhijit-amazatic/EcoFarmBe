@@ -9,14 +9,17 @@ def preferred_payment_to_array(apps, schema_editor):
         if profile.preferred_payment:
             if isinstance(profile.preferred_payment, str):
                 profile.preferred_payments = [profile.preferred_payment,]
+                profile.save()
             elif isinstance(profile.preferred_payment, list):
                 profile.preferred_payments = profile.preferred_payment
+                profile.save()
 
 def preferred_payment_to_array_reverse(apps, schema_editor):
     LicenseProfile = apps.get_model("brand", "LicenseProfile")
     for profile in LicenseProfile.objects.all():
         if profile.preferred_payments:
-            profile.preferred_payment = profile.preferred_payment[0]
+            profile.preferred_payment = profile.preferred_payments[0]
+            profile.save()
 
 class Migration(migrations.Migration):
 
