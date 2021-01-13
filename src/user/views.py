@@ -139,7 +139,7 @@ class UserViewSet(ModelViewSet):
                     pass
                     #get_from_crm_insert_to_vendor_or_account.delay(instance.id)
                 link = get_encrypted_data(instance.email)
-                mail_send("verification-send.html",{'link': link},"Thrive Society Verification.", instance.email)
+                mail_send("verification-send.html",{'link': link,'full_name': instance.full_name},"Thrive Society Verification.", instance.email)
                 notify_admins(instance.email,instance.crm_link)
             except Exception as e:
                 print(e)

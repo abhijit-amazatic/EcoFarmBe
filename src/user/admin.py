@@ -100,7 +100,7 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     @transaction.atomic
     def save_model(self, request, obj, form, change):
         if 'is_approved' in form.changed_data and obj.is_approved:
-            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", obj.email)
+            mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': obj.full_name},"Account Approved.", obj.email)
             obj.approved_on  = timezone.now()
             obj.approved_by = get_user_data(request)
             obj.save()

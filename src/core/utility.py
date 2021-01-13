@@ -189,15 +189,16 @@ def send_async_user_approval_mail(user_id):
     Async email send for after user approval.
     """
     user = User.objects.filter(id=user_id)    
-    mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login'},"Account Approved.", user[0].email)
+    mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': user[0].full_name},"Account Approved.", user[0].email)
 
     
 def send_verification_link(email):
     """
     Send verification link to user.
     """
+    user = User.objects.filter(email=email)
     link = get_encrypted_data(email,reason='verify')
-    mail_send("verification-send.html",{'link': link},"Thrive Society Verification.",email)
+    mail_send("verification-send.html",{'link': link,'full_name': user[0].full_name},"Thrive Society Verification.",email)
 
 def extract_map_role(data):
     role_map = {"Owner":"License Owner","Cultivation Manager":"Farm Manager","Sales Manager":"Sales/Inventory","Logistics Manager":"Logistics","Billing / Accounting":"Billing"}
