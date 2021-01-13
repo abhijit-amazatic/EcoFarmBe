@@ -72,6 +72,7 @@ from brand.views import (
     InviteUserViewSet,
     UserInvitationVerificationView,
     ProgramSelectionSyncView,
+    OnboardingDataFetchViewSet,
 )
 from two_factor.views import (
     TwoFactorLoginEnableView,
@@ -102,7 +103,6 @@ router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/license', LicenseViewSet, 'license'),
     ('organization/(?P<parent_organization>[^/.]+)/role', OrganizationRoleViewSet, 'organization-role'),
     ('organization/(?P<parent_organization>[^/.]+)/user', OrganizationUserViewSet, 'organization-user'),
-#     ('organization/(?P<parent_organization>[^/.]+)/user-role', OrganizationUserRoleViewSet, 'organization-user-role'),
     ('organization/(?P<parent_organization>[^/.]+)/user/(?P<parent_organization_user>[^/.]+)/role', OrganizationUserRoleViewSet, 'organization-user-role-nest'),
     ('organization/(?P<parent_organization>[^/.]+)/invite-user', InviteUserViewSet, 'organization-invite-user'),
 ])
@@ -110,6 +110,7 @@ router.registry.extend([
 router.register(r'profile-report', ProfileReportViewSet, base_name="report")
 router.register(r'in-transit-order', InTransitOrderViewSet, base_name="in_transit_order")
 router.register(r'help-documentation', HelpDocumentationView, base_name="help-documentation")
+router.register(r'onboarding-data-fetch', OnboardingDataFetchViewSet, base_name="onboarding-data-fetch")
 
 router.register(r'two-factor/device', TwoFactorDeviceViewSet, base_name="two-factor-device")
 router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="add-authy-user")

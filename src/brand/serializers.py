@@ -43,6 +43,7 @@ from .models import (
     OrganizationUserRole,
     Permission,
     OrganizationUserInvite,
+    OnboardingDataFetch,
 )
 
 
@@ -711,3 +712,46 @@ class InviteUserVerificationSerializer(serializers.Serializer):
         fields = (
             'token',
         )
+
+class OTPSerializer(serializers.Serializer):
+    """
+    This defines serializer.
+    """
+    otp = serializers.CharField(min_length=6, max_length=8)
+
+    class Meta:
+        fields = (
+            'otp',
+        )
+
+    def validate_otp(self, value):
+        if not value:
+            raise serializers.ValidationError('OTP is required.')
+        try:
+            return int(value)
+        except ValueError:
+            raise serializers.ValidationError('OTP must be integer value')
+        else:
+            return value
+
+class OnboardingDataFetchSerializer(serializers.ModelSerializer):
+    """
+    This defines serializer.
+    """
+    class Meta:
+        model = OnboardingDataFetch
+        read_only_fields = ('data_fetch_token', 'status', 'owner_email')
+        fields = (
+            'data_fetch_token',
+            'license_number',
+            'status',
+            'owner_email',
+        )
+
+    def validate_otp(self, value):
+        if not value:
+            raise serializers.ValidationError('license_number is required.')
+        if License.objects.filter(license_number=value).exists():
+            raise serializers.ValidationError(f'license ${value} already in system.')
+        else:
+            return value

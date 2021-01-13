@@ -5,6 +5,7 @@ This module defines API views.
 
 import json
 import re
+import traceback
 import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -31,7 +32,7 @@ from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses, update_program_selection)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
-from .tasks import send_async_invitation
+from .tasks import (send_async_invitation, send_onboarding_data_fetch_verification)
 from .models import (
     Organization,
     Brand, License,
@@ -49,7 +50,8 @@ from .models import (
     OrganizationUser,
     OrganizationUserRole,
     Permission,
-    OrganizationUserInvite
+    OrganizationUserInvite,
+    OnboardingDataFetch,
 )
 from .serializers import (
     OrganizationSerializer,
@@ -72,6 +74,8 @@ from .serializers import (
     PermissionSerializer,
     OrganizationDetailSerializer,
     InviteUserVerificationSerializer,
+    OTPSerializer,
+    OnboardingDataFetchSerializer,
 )
 from .views_mixin import (
     NestedViewSetMixin,
@@ -140,41 +144,6 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return super().destroy(request, *args, **kwargs)
-
-
-    # @action(
-    #     detail=True,
-    #     methods=['post'],
-    #     name='Invite User',
-    #     url_name='invite-user',
-    #     url_path='invite-user',
-    #     serializer_class=InviteUserSerializer,
-    # )
-    # def get_qrcode(self, request, *args, **kwargs):
-    #     """
-    #     Authy user registration QRCode.
-    #     """
-    #     add_authenticator_request = self.get_object()
-    #     if add_authenticator_request.status == 'pending':
-    #         device = add_authenticator_request.get_device()
-    #         if device and isinstance(device, AuthenticatorTOTPDevice):
-    #             image_content_types = {
-    #                 'PNG': 'image/png',
-    #                 'SVG': 'image/svg+xml; charset=utf-8',
-    #             }
-    #             image_factory = qrcode.image.svg.SvgPathFillImage
-
-    #             img = qrcode.make(
-    #                 device.config_url,
-    #                 image_factory=image_factory
-    #             )
-    #             resp = HttpResponse(
-    #                 content_type=image_content_types[image_factory.kind])
-    #             img.save(resp)
-    #             return resp
-    #         return Response({'detail': 'unable to get device'}, status=400)
-    #     else:
-    #         return Response({"detail": f"request is {add_authenticator_request.status}."}, status=400)
 
 
 class BrandViewSet(PermissionQuerysetFilterMixin,
@@ -297,6 +266,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
                 pass
         except Exception as e:
             print('Exception while creating & pulling existing user license',e)
+            traceback.print_tb(e.__traceback__)
 
     def extra_info(self, request, pk, model, serializer, extra_info_attribute):
         """
@@ -329,7 +299,6 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         license_obj = self.get_object()
         return Response({"is_data_fetching_complete":license_obj.is_data_fetching_complete})
 
-    
     @action(detail=True, url_path=profile_contact_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def profile_contact(self, request, pk, profile_contact_id=None, *args, **kwargs):
         """
@@ -394,7 +363,6 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
             return Response({'buyer_summary':get_buyer_summary(license_obj.legal_business_name)},status=200)
         else:
             return Response({'detail':"License is not asscoaited with buyer account or couldn't fetch summary!"}, status=400)
-    
 
 
 
@@ -735,3 +703,57 @@ class ProgramSelectionSyncView(APIView):
         if response['code'] == 0:
             return Response(response)
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+class OnboardingDataFetchViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+                                                        viewsets.GenericViewSet):
+    """
+    All Brand related endpoint's view is defined here.
+    """
+    permission_classes = (IsAuthenticated,)
+    queryset = OnboardingDataFetch.objects.get_queryset()
+    filter_backends = [filters.SearchFilter]
+    serializer_class = OnboardingDataFetchSerializer
+    lookup_field = 'data_fetch_token'
+
+
+    def get_serializer_class(self):
+        if self.action == 'retrive':
+            return 
+        else:
+            return super().get_serializer_class()
+
+    def perform_create(self, serializer):
+        """
+        This is used to create License.
+        """
+        instance = serializer.save()
+        try:
+            send_onboarding_data_fetch_verification.delay(instance.id, self.request.user.id)
+        except Exception as e:
+            print('Exception while creating & pulling existing user license',e)
+            traceback.print_tb(e.__traceback__)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        name='Otp Verification',
+        url_name='verify-datafetch-otp',
+        url_path='verify-otp',
+        serializer_class=OTPSerializer,
+    )
+    def verify_otp(self, request, *args, **kwargs):
+        """
+        Verify License Datafetch Otp
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = self.get_object()
+        if instance.status == 'owner_verification_sent':
+            if instance.verify_otp(serializer.validated_data['otp']):
+                instance.status = 'verified'
+                instance.save()
+                return Response({}, status=status.HTTP_200_OK,)
+            else:
+                return Response({"otp": "Invalid OTP,"}, status=400)
+        else:
+            return Response({"detail": "Invalid step,"}, status=400)

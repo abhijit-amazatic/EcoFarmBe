@@ -2,6 +2,8 @@
 Brand related schemas defined here.
 """
 import time
+import traceback
+from binascii import unhexlify
 from datetime import timedelta
 from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
@@ -14,6 +16,8 @@ from django.contrib.contenttypes.fields import (GenericRelation, )
 from django.conf import settings
 from django.utils import timezone
 
+from django_otp.models import Device, ThrottlingMixin
+from django_otp.oath import (TOTP, hotp)
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from cryptography.fernet import (Fernet, InvalidToken)
@@ -21,6 +25,7 @@ from cryptography.fernet import (Fernet, InvalidToken)
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
 from user.models import User
+from two_factor.utils import (random_hex, random_hex_32, key_validator,)
 from inventory.models import (Documents, )
 from .exceptions import (InvalidInviteToken, ExpiredInviteToken,)
 
@@ -276,6 +281,98 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     class Meta:
         verbose_name = _('License/Profile')
 
+class OnboardingDataFetch(ThrottlingMixin, models.Model):
+    OTP_DIGITS = 8
+    STATUS_CHOICES = (
+        ('not_started', _('Not Started')),
+        ('licence_data_not_found', _('Licence Data Not Found')),
+        ('owner_email_not_found', _('Owner Email Not Found')),
+        ('owner_verification_sent', _('Owner Verification Sent')),
+        ('verified', _('Verified')),
+        # ('skiped', _('Skiped')),
+        # ('fetching', _('Fetching')),
+        ('inserting', _('Inserting')),
+        ('complete', _('Complete')),
+    )
+    data_fetch_token = models.CharField(
+        max_length=128,
+        validators=[key_validator],
+        default=random_hex_32,
+        db_index=True,
+        unique=True,
+    )
+    license_number = models.CharField(_('License Number'), max_length=255)
+    legal_business_name = models.CharField(_('Legal Business Name'), blank=True, null=True, max_length=255)
+    owner_email = models.EmailField(_('Owner Email'), blank=True, null=True, max_length=255)
+    owner_name = models.EmailField(_('Owner Email'), blank=True, null=True, max_length=255)
+    crm_data = JSONField(_('CRM Data'), null=False, blank=False, default=dict)
+    last_otp_time = models.DateTimeField(_('Last Token Time'), default=timezone.now,)
+    key = models.CharField(max_length=80, validators=[key_validator], default=random_hex,)
+    counter = models.BigIntegerField(default=0,)
+    status = models.CharField(
+        _('Data From CRM Status'), choices=STATUS_CHOICES, default='not_started', max_length=255)
+
+    class Meta(Device.Meta):
+        verbose_name = "Owner Verification HOTP Device"
+
+    @property
+    def bin_key(self):
+        """
+        The secret key as a binary string.
+        """
+        return unhexlify(self.key.encode())
+
+    def verify_otp(self, otp):
+        verify_allowed, _ = self.verify_is_allowed()
+        if not verify_allowed:
+            return False
+
+        try:
+            otp = int(otp)
+        except Exception:
+            verified = False
+        else:
+            key = self.bin_key
+            if hotp(key, self.counter, self.OTP_DIGITS) == otp:
+                verified = True
+                self.counter = self.counter + 1
+                self.throttle_reset(commit=False)
+                self.save()
+            else:
+                verified = False
+
+        if not verified:
+            self.throttle_increment(commit=True)
+
+        return verified
+
+    def generate_otp(self, commit=True):
+        otp = hotp(self.bin_key, self.counter+1, self.OTP_DIGITS)
+        self.counter = self.counter + 1
+        self.last_otp_time = timezone.now()
+        if commit:
+            self.save()
+        return otp
+
+    def generate_otp_str(self, commit=True):
+        """
+        return otp in string.
+        """
+        otp = self.generate_otp(commit=commit)
+        f_str = '{:0'+str(self.OTP_DIGITS)+'d}'
+        otp = f_str.format(otp)
+        return otp
+
+    def verify_is_allowed(self):
+        try:
+            return super().verify_is_allowed()
+        except Exception:
+            return (True, None)
+
+    def get_throttle_factor(self):
+        # return getattr(settings, 'OTP_HOTP_THROTTLE_FACTOR', 1)
+        return 1
+
 
 class OrganizationUserRole(TimeStampFlagModelMixin, models.Model):
     """
@@ -384,7 +481,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         except (InvalidInviteToken, ExpiredInviteToken) as e:
             raise e
         except Exception as e:
-            print(e.with_traceback)
+            traceback.print_tb(e.__traceback__)
             raise InvalidInviteToken
         else:
             return obj

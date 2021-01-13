@@ -406,7 +406,5 @@ def get_license_from_crm_insert_to_db(user_id,license_number,license_id):
     if instance:
         response_data = get_records_from_crm(license_number=license_number)
         if not response_data.get('error'):
-            insert_data_from_crm(instance[0],response_data,license_id)                    
-    
-
+            insert_data_from_crm(instance[0],response_data,license_id)
 
