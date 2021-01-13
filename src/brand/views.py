@@ -354,7 +354,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         return self.extra_info(request, pk, LicenseProfile, LicenseProfileSerializer, 'license_profile')
 
     @action(detail=True, url_path='buyer-summary', methods=['get'])
-    def buyer_summary(self, request, pk):
+    def buyer_summary(self, request, pk, *args, **kwargs):
         """
         get buyer summary
         """

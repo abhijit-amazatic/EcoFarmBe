@@ -754,6 +754,7 @@ class OnboardingDataFetchSerializer(serializers.ModelSerializer):
             'license_number',
             'status',
             'owner_email',
+            'owner_name',
         )
 
     def validate_otp(self, value):

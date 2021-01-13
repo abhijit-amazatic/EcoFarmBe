@@ -79,6 +79,10 @@ class LicenseViewSetPermission(ViewPermission):
             'get': 'view_license_profile',
             'patch': 'edit_license_profile',
         },
+        'buyer_summary': {
+            'get': 'view_license',
+            'patch': 'edit_license',
+        },
     }
 
 
