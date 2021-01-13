@@ -18,6 +18,7 @@ from integration.crm import (insert_vendors, insert_accounts, update_license,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
+from integration.tasks import (update_in_crm_task, )
 from user.models import (User,)
 
 from .serializers_mixin import (
@@ -308,8 +309,13 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         """
         Update for licenseprofile
         """
-        user = super().update(instance, validated_data)
-        return user
+        updated_instance = super().update(instance, validated_data)
+        if updated_instance.license.is_buyer:
+            module_name = 'Accounts'
+        else:
+            module_name = 'Vendors'
+        update_in_crm_task.delay(module_name, instance.id)
+        return updated_instance
 
     class Meta:
         model = LicenseProfile

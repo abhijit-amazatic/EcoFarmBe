@@ -311,9 +311,15 @@ def insert_data_from_crm(user,data,license_id):
                                                                     transportation=data.get(license_data).get('license_profile').get('transportation_methods',None),
                                                                     issues_with_failed_labtest=data.get(license_data).get('license_profile').get('issues_with_failed_labtest',''),
                                                                     lab_test_issues=data.get(license_data).get('license_profile').get('lab_test_issues',''),
-                                                                    agreement_link=data.get(license_data).get('license_profile').get('Contract_Box_Link',''))
-                
-        
+                                                                    agreement_link=data.get(license_data).get('license_profile').get('Contract_Box_Link',''),
+                                                                    preferred_payment=data.get(license_data).get('license_profile').get('preferred_payment',''),
+                                                                    bank_routing_number=data.get(license_data).get('license_profile').get('bank_routing_number',''),
+                                                                    bank_account_number=data.get(license_data).get('license_profile').get('bank_account_number',''),
+                                                                    bank_name=data.get(license_data).get('license_profile').get('bank_name',''),
+                                                                    bank_street=data.get(license_data).get('license_profile').get('bank_street',''),
+                                                                    bank_city=data.get(license_data).get('license_profile').get('bank_city',''),
+                                                                    bank_zip_code=data.get(license_data).get('license_profile').get('bank_zip_code',''),)
+
             with transaction.atomic():
                 #STEP3:create profile contact
                 print("3.Inserting Profle contacts")

@@ -10,7 +10,7 @@ from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
 from .crm import (insert_users, insert_vendors,
-                  fetch_labtests, )
+                  fetch_labtests, update_in_crm)
 from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses)
@@ -66,3 +66,7 @@ def fetch_bcc_licenses():
     Fetch BCC licenses and post to crm.
     """
     return post_licenses_to_crm()
+
+@app.task(queue="general")
+def update_in_crm_task(module, record_id):
+    update_in_crm(module, record_id)
