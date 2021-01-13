@@ -36,7 +36,7 @@ from .models import (
     ProgramOverview,
     FinancialOverview,
     CropOverview,
-    BillingInformation,
+    # BillingInformation,
     ProfileReport,
     OrganizationRole,
     OrganizationUser,
@@ -346,8 +346,16 @@ class BillingInformationSerializer(serializers.ModelSerializer):
     This defines BillingInformationSerializer
     """
     class Meta:
-        model = BillingInformation
-        fields = ('__all__')
+        model = LicenseProfile
+        fields = (
+            'preferred_payment',
+            'bank_routing_number',
+            'bank_account_number',
+            'bank_name',
+            'bank_street',
+            'bank_city',
+            'bank_zip_code',
+        )
 
 
 class ProfileReportSerializer(serializers.ModelSerializer):

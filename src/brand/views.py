@@ -43,7 +43,7 @@ from .models import (
     CropOverview,
     FinancialOverview,
     ProgramOverview,
-    BillingInformation,
+    # BillingInformation,
     ProfileCategory,
     ProfileReport,
     OrganizationRole,
@@ -344,7 +344,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         """
         Detail route CRUD operations on billing_information.
         """
-        return self.extra_info(request, pk, BillingInformation, BillingInformationSerializer, 'billing_information')
+        return self.extra_info(request, pk, LicenseProfile, BillingInformationSerializer, 'license_profile')
 
     @action(detail=True, url_path=license_profile_path, methods=['get', 'patch'], pagination_class=CustomPagination)
     def license_profile(self, request, pk, license_profile_id=None, *args, **kwargs):

@@ -606,8 +606,8 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     other_distributors = models.CharField(blank=True, null=True, max_length=255)
     transportation = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     issues_with_failed_labtest = models.CharField(blank=True, null=True, max_length=255)
-    preferred_payment = models.CharField(_('Preferred Payment'), blank=True, null=True, max_length=255)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
+    # preferred_payment = models.CharField(_('Preferred Payment'), blank=True, null=True, max_length=255)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
     agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
@@ -619,6 +619,14 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     lab_test_issues = models.TextField(blank=True, null=True)
+
+    preferred_payment = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
+    bank_routing_number = models.CharField(_('Bank Routing Number'), blank=True, null=True, max_length=255)
+    bank_account_number = models.CharField(_('Bank Account Number'), blank=True, null=True, max_length=255)
+    bank_name = models.CharField(_('Bank Name'), null=True, blank=True, max_length=255)
+    bank_street = models.CharField(_('Bank Street'), null=True, blank=True, max_length=255)
+    bank_city  = models.CharField(_('Bank City'), null=True, blank=True, max_length=255)
+    bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
 
 
 class CultivationOverview(models.Model):
@@ -666,19 +674,19 @@ class CropOverview(models.Model):
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
 
-class BillingInformation(models.Model):
-    """
-    Stores farm's  farm's Processing overview i.e. crop overview.
-    """
-    license = models.OneToOneField(License, verbose_name=_('License'),
-                                related_name='billing_information', on_delete=models.CASCADE)
-    preferred_payment = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
-    bank_routing_number = models.CharField(_('Bank Routing Number'), blank=True, null=True, max_length=255)
-    bank_account_number = models.CharField(_('Bank Account Number'), blank=True, null=True, max_length=255)
-    bank_name = models.CharField(_('Bank Name'), null=True, blank=True, max_length=255)
-    bank_street = models.CharField(_('Bank Street'), null=True, blank=True, max_length=255)
-    bank_city  = models.CharField(_('Bank City'), null=True, blank=True, max_length=255)
-    bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
+# class BillingInformation(models.Model):
+#     """
+#     Stores farm's  farm's Processing overview i.e. crop overview.
+#     """
+#     license = models.OneToOneField(License, verbose_name=_('License'),
+#                                 related_name='billing_information', on_delete=models.CASCADE)
+#     preferred_payment = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
+#     bank_routing_number = models.CharField(_('Bank Routing Number'), blank=True, null=True, max_length=255)
+#     bank_account_number = models.CharField(_('Bank Account Number'), blank=True, null=True, max_length=255)
+#     bank_name = models.CharField(_('Bank Name'), null=True, blank=True, max_length=255)
+#     bank_street = models.CharField(_('Bank Street'), null=True, blank=True, max_length=255)
+#     bank_city  = models.CharField(_('Bank City'), null=True, blank=True, max_length=255)
+#     bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
 
 
 class ProfileCategory(models.Model):
