@@ -627,6 +627,8 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     bank_street = models.CharField(_('Bank Street'), null=True, blank=True, max_length=255)
     bank_city  = models.CharField(_('Bank City'), null=True, blank=True, max_length=255)
     bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
+    bank_state  = models.CharField(_('Bank State'), null=True, blank=True, max_length=255)
+    bank_country  = models.CharField(_('Bank Country'), null=True, blank=True, max_length=255)
 
 
 class CultivationOverview(models.Model):

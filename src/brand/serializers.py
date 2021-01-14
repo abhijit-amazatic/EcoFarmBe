@@ -361,6 +361,8 @@ class BillingInformationSerializer(serializers.ModelSerializer):
             'bank_street',
             'bank_city',
             'bank_zip_code',
+            'bank_state',
+            'bank_country',
         )
 
 
