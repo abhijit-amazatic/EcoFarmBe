@@ -519,6 +519,24 @@ class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.Mo
     """
     user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
     roles = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
+    document_url = serializers.SerializerMethodField()
+
+    def get_document_url(self, obj):
+        """
+        Return s3 document url.
+        """
+        try:
+            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('created_on')
+            if document.box_url:
+                return document.box_url
+            else:
+                path = document.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
+        except Exception:
+            return None
+
     class Meta:
         model = OrganizationUser
         fields = (
@@ -529,6 +547,7 @@ class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.Mo
             'created_on',
             'updated_on',
             # 'organization',
+            'document_url',
         )
 
     def validate_user(self, value):
