@@ -99,8 +99,16 @@ class OrganizationSerializer(serializers.ModelSerializer):
             validated_data['created_by'] = request.user
         return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        """
+        Update
+        """
+        updated_instance = super().update(instance, validated_data)
+        update_in_crm_task.delay('Orgs', instance.id)
+        return updated_instance
 
-class BrandSerializer(serializers.ModelSerializer):
+
+class BrandSerializer(NestedModelSerializer, serializers.ModelSerializer):
     """
     This defines Brand serializer.
     """
@@ -128,21 +136,19 @@ class BrandSerializer(serializers.ModelSerializer):
         Return brand image link
         """
         return self.get_document_url(obj)
-            
 
     def validate(self, data):
         if self.partial:
             pass
         return data
 
-    def create(self, validated_data):
-        view = self.context['view']
-        if hasattr(view , 'get_parents_query_dict'):
-            parents_query_dict = view.get_parents_query_dict(**view.kwargs)
-            organization = parents_query_dict.get('organization')
-            if organization:
-                validated_data['organization_id'] = organization
-        return super().create(validated_data)
+    def update(self, instance, validated_data):
+        """
+        Update
+        """
+        updated_instance = super().update(instance, validated_data)
+        update_in_crm_task.delay('Brands', instance.id)
+        return updated_instance
 
     class Meta:
         model = Brand
@@ -310,10 +316,10 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         Update for licenseprofile
         """
         updated_instance = super().update(instance, validated_data)
-        if updated_instance.license.is_buyer:
-            module_name = 'Accounts'
-        else:
+        if updated_instance.license.is_seller:
             module_name = 'Vendors'
+        else:
+            module_name = 'Accounts'
         update_in_crm_task.delay(module_name, instance.id)
         return updated_instance
 
@@ -364,6 +370,18 @@ class BillingInformationSerializer(serializers.ModelSerializer):
             'bank_state',
             'bank_country',
         )
+
+    def update(self, instance, validated_data):
+        """
+        Update for licenseprofile
+        """
+        updated_instance = super().update(instance, validated_data)
+        if updated_instance.license.is_seller:
+            module_name = 'Vendors'
+        else:
+            module_name = 'Accounts'
+        update_in_crm_task.delay(module_name, instance.id)
+        return updated_instance
 
 
 class ProfileReportSerializer(serializers.ModelSerializer):
