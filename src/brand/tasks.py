@@ -15,7 +15,6 @@ from integration.crm import (get_records_from_crm,)
 from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
-    insert_data_from_crm,
 )
 from user.models import (User,)
 from .models import (
@@ -28,6 +27,9 @@ from .models import (
     OrganizationUserRole,
     OrganizationUserInvite,
     OnboardingDataFetch,
+)
+from .task_helpers import (
+    insert_data_from_crm,
 )
 
 
