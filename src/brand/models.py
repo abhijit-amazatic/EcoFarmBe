@@ -346,19 +346,20 @@ class OnboardingDataFetch(ThrottlingMixin, models.Model):
 
         return verified
 
-    def generate_otp(self, commit=True):
+    def generate_otp(self, commit=True, counter_increment=True):
         otp = hotp(self.bin_key, self.counter+1, self.OTP_DIGITS)
-        self.counter = self.counter + 1
-        self.last_otp_time = timezone.now()
-        if commit:
-            self.save()
+        if counter_increment:
+            self.counter = self.counter + 1
+            self.last_otp_time = timezone.now()
+            if commit:
+                self.save()
         return otp
 
-    def generate_otp_str(self, commit=True):
+    def generate_otp_str(self, commit=True, counter_increment=True):
         """
         return otp in string.
         """
-        otp = self.generate_otp(commit=commit)
+        otp = self.generate_otp(commit=commit, counter_increment=counter_increment)
         f_str = '{:0'+str(self.OTP_DIGITS)+'d}'
         otp = f_str.format(otp)
         return otp

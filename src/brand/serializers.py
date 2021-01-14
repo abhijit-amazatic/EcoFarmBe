@@ -20,7 +20,7 @@ from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 from integration.tasks import (update_in_crm_task, update_license_task)
 from user.models import (User,)
-
+from .tasks import (onboarding_fetched_data_insert_to_db,)
 from .serializers_mixin import (
     NestedModelSerializer,
     OrganizationUserRoleRelatedField,
@@ -154,7 +154,8 @@ class BrandSerializer(NestedModelSerializer, serializers.ModelSerializer):
         model = Brand
         exclude = ('organization',)
 
-class LicenseSerializer(serializers.ModelSerializer):
+
+class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
     """
     This defines license serializer.
     """
@@ -163,6 +164,7 @@ class LicenseSerializer(serializers.ModelSerializer):
     license_profile_url = serializers.SerializerMethodField()
     is_existing_user = serializers.SerializerMethodField()
     approved_on = serializers.SerializerMethodField()
+    data_fetch_token = serializers.CharField(write_only=True)
 
     def get_approved_on(self, obj):
         """
@@ -228,7 +230,25 @@ class LicenseSerializer(serializers.ModelSerializer):
                     return url.get('response')
         except Exception:
             return None
-    
+
+    def validate_data_fetch_token(self, value):
+        if not value:
+            raise serializers.ValidationError('Token is required.')
+        return value
+
+    def validate(self, attrs):
+        data_fetch_token = attrs['data_fetch_token']
+        fetch_instance = OnboardingDataFetch.objects.filter(data_fetch_token=data_fetch_token).first()
+        if not fetch_instance:
+            raise serializers.ValidationError({'data_fetch_token': ['Invalid Token.']})
+        else:
+            if not fetch_instance.license_number == attrs.get('license_number'):
+                raise serializers.ValidationError({'data_fetch_token': 'Token is not generated for current license number.'})
+            if not fetch_instance.status in ('verified', 'licence_data_not_found'):
+                raise serializers.ValidationError({'data_fetch_token': 'Token status not fulfilled'})
+
+        return super().validate(attrs)
+
     def update(self, instance, validated_data):
         if validated_data.get('status') == 'completed':
             try:
@@ -246,7 +266,7 @@ class LicenseSerializer(serializers.ModelSerializer):
                 #insert or update vendors/accounts
                 insert_or_update_vendor_accounts(profile,instance)
             except Exception as e:
-                print(e)        
+                print(e)
         user = super().update(instance, validated_data)
         try:
             update_license_task.delay(dba=instance.license_profile.name, license_id=instance.id)
@@ -256,13 +276,12 @@ class LicenseSerializer(serializers.ModelSerializer):
         return user
 
     def create(self, validated_data):
-        view = self.context['view']
-        if hasattr(view , 'get_parents_query_dict'):
-            parents_query_dict = view.get_parents_query_dict(**view.kwargs)
-            organization = parents_query_dict.get('organization')
-            if organization:
-                validated_data['organization_id'] = organization
-        return super().create(validated_data)
+        data_fetch_token = validated_data.pop('data_fetch_token')
+        fetch_instance = OnboardingDataFetch.objects.filter(data_fetch_token=data_fetch_token).first()
+        instance = super().create(validated_data)
+        if fetch_instance.status == 'verified':
+            onboarding_fetched_data_insert_to_db.delay(self.context['request'].user.id, fetch_instance.id, instance.id)
+        return instance
 
     class Meta:
         model = License
@@ -797,7 +816,7 @@ class OnboardingDataFetchSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = OnboardingDataFetch
-        read_only_fields = ('data_fetch_token', 'status', 'owner_email')
+        read_only_fields = ('data_fetch_token', 'status', 'owner_email', 'owner_name')
         fields = (
             'data_fetch_token',
             'license_number',
@@ -806,10 +825,10 @@ class OnboardingDataFetchSerializer(serializers.ModelSerializer):
             'owner_name',
         )
 
-    def validate_otp(self, value):
+    def validate_license_number(self, value):
         if not value:
             raise serializers.ValidationError('license_number is required.')
         if License.objects.filter(license_number=value).exists():
-            raise serializers.ValidationError(f'license ${value} already in system.')
+            raise serializers.ValidationError(f'license {value} already in system.')
         else:
             return value

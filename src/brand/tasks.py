@@ -137,6 +137,32 @@ def invite_profile_contacts(profile_contact_id):
                     # notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
                     # notify_profile_user(obj.email,license_obj[0].license_profile.name)
 
+def send_onboarding_data_fetch_verification_mail(instance, user_obj,):
+    """
+    docstring
+    """
+    if instance.status in ['not_started', 'owner_verification_sent']:
+        full_name = user_obj.full_name or f'{user_obj.first_name} {user_obj.last_name}'
+        context = {
+            'owner_full_name':  instance.owner_name,
+            'user_full_name':  full_name,
+            'user_email': user_obj.email,
+            'license': f"{instance.license_number} | {instance.legal_business_name}",
+            'otp': instance.generate_otp_str(counter_increment=False),
+        }
+        try:
+            mail_send(
+                "license_owner_datapoputalaion_otp.html",
+                context,
+                "Thrive Society License Data Population verification.",
+                settings.ONBOARDING_LICENSE_DATA_FETCH_OWNER_EMAIL_OVERIDE or instance.owner_email,
+            )
+        except Exception as e:
+            traceback.print_tb(e.__traceback__)
+        else:
+            instance.status = 'owner_verification_sent'
+            instance.save()
+
 
 @app.task(queue="general")
 def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
@@ -161,7 +187,7 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
                         except User.DoesNotExist:
                             pass
                         else:
-                            full_name = user_obj.full_name or f'${user_obj.first_name} ${user_obj.last_name}'
+                            full_name = user_obj.full_name or f'{user_obj.first_name} {user_obj.last_name}'
                             context = {
                                 'owner_full_name':  instance.owner_name,
                                 'user_full_name':  full_name,
@@ -212,6 +238,7 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
                 try:
                     insert_data_from_crm(user, instance.crm_data, license_id)
                 except Exception as e:
+                    print('Error in insert_data_from_crm')
                     traceback.print_tb(e.__traceback__)
                 else:
                     instance.status = 'complete'

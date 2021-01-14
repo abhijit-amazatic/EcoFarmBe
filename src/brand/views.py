@@ -258,14 +258,14 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         try:
             user = instance.organization.created_by
             notify_admins_on_slack(user.email,instance)
-            if user.existing_member:
-                existing_user_license_nos = get_license_numbers(user.legal_business_name)
-                if instance.license_number in existing_user_license_nos:
-                    get_license_from_crm_insert_to_db(user.id,instance.license_number,instance.id)
-                elif instance.license_number not in existing_user_license_nos:
-                    instance.is_data_fetching_complete = True
-                    instance.save()
-                pass
+            # if user.existing_member:
+            #     existing_user_license_nos = get_license_numbers(user.legal_business_name)
+            #     if instance.license_number in existing_user_license_nos:
+            #         get_license_from_crm_insert_to_db(user.id,instance.license_number,instance.id)
+            #     elif instance.license_number not in existing_user_license_nos:
+            #         instance.is_data_fetching_complete = True
+            #         instance.save()
+            #     pass
         except Exception as e:
             print('Exception while creating & pulling existing user license',e)
             traceback.print_tb(e.__traceback__)
