@@ -1,4 +1,6 @@
 from django.db import transaction
+from core.mailer import mail, mail_send
+from django.conf import settings
 from brand.models import (
     License,
     LicenseProfile,
@@ -80,6 +82,7 @@ def insert_data_from_crm(user, response_data, license_id):
                 license_obj = license_id
                 # license_obj = License.objects.create(
                 #     created_by=user,
+                #     zoho_crm_id=data_l.get('license_id',''),
                 #     license_type=data_l.get('license_type',''),
                 #     owner_or_manager='Owner' if data_l.get('Owner') else 'Manager',
                 #     legal_business_name=data_l.get('legal_business_name',''),
@@ -107,6 +110,7 @@ def insert_data_from_crm(user, response_data, license_id):
                 print('2.Inserting License profile')
                 LicenseProfile.objects.create(
                     license_id=license_obj,
+                    zoho_crm_id=data_l_p.get('profile_id', ''),
                     name=data_l_p.get('name', ''),
                     appellation=data_l_p.get('appellation', ''),
                     county=data_l_p.get('county', ''),
@@ -227,3 +231,23 @@ def insert_data_from_crm(user, response_data, license_id):
             print('Updating license is_data_fetching_complete flag')
             License.objects.filter(id=license_obj).update(is_data_fetching_complete=True)
         return {"success":"Data successfully fetched to DB"}
+
+
+def send_onboarding_data_fetch_verification_mail(instance, user_obj,):
+    """
+    docstring
+    """
+    full_name = user_obj.full_name or f'{user_obj.first_name} {user_obj.last_name}'
+    context = {
+        'owner_full_name':  instance.owner_name,
+        'user_full_name':  full_name,
+        'user_email': user_obj.email,
+        'license': f"{instance.license_number} | {instance.legal_business_name}",
+        'otp': instance.generate_otp_str(),
+    }
+    mail_send(
+        "license_owner_datapoputalaion_otp.html",
+        context,
+        "Thrive Society License Data Population verification.",
+        settings.ONBOARDING_LICENSE_DATA_FETCH_OWNER_EMAIL_OVERIDE or instance.owner_email,
+    )

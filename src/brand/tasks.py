@@ -30,6 +30,7 @@ from .models import (
 )
 from .task_helpers import (
     insert_data_from_crm,
+    send_onboarding_data_fetch_verification_mail,
 )
 
 
@@ -139,33 +140,6 @@ def invite_profile_contacts(profile_contact_id):
                     # notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
                     # notify_profile_user(obj.email,license_obj[0].license_profile.name)
 
-def send_onboarding_data_fetch_verification_mail(instance, user_obj,):
-    """
-    docstring
-    """
-    if instance.status in ['not_started', 'owner_verification_sent']:
-        full_name = user_obj.full_name or f'{user_obj.first_name} {user_obj.last_name}'
-        context = {
-            'owner_full_name':  instance.owner_name,
-            'user_full_name':  full_name,
-            'user_email': user_obj.email,
-            'license': f"{instance.license_number} | {instance.legal_business_name}",
-            'otp': instance.generate_otp_str(counter_increment=False),
-        }
-        try:
-            mail_send(
-                "license_owner_datapoputalaion_otp.html",
-                context,
-                "Thrive Society License Data Population verification.",
-                settings.ONBOARDING_LICENSE_DATA_FETCH_OWNER_EMAIL_OVERIDE or instance.owner_email,
-            )
-        except Exception as e:
-            traceback.print_tb(e.__traceback__)
-        else:
-            instance.status = 'owner_verification_sent'
-            instance.save()
-
-
 @app.task(queue="general")
 def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
     """
@@ -183,27 +157,14 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
                 instance.owner_name = response_data.get(license_number, {}).get("license", {}).get("Owner", {}).get("name")
                 instance.legal_business_name = response_data.get(license_number, {}).get("license", {}).get("legal_business_name")
                 if instance.owner_email:
-                    if instance.status in ['not_started', 'owner_verification_sent']:
+                    if instance.status in ['not_started',]:
                         try:
                             user_obj = User.objects.get(id=user_id)
                         except User.DoesNotExist:
                             pass
                         else:
-                            full_name = user_obj.full_name or f'{user_obj.first_name} {user_obj.last_name}'
-                            context = {
-                                'owner_full_name':  instance.owner_name,
-                                'user_full_name':  full_name,
-                                'user_email': user_obj.email,
-                                'license': f"{instance.license_number} | {instance.legal_business_name}",
-                                'otp': instance.generate_otp_str(),
-                            }
                             try:
-                                mail_send(
-                                    "license_owner_datapoputalaion_otp.html",
-                                    context,
-                                    "Thrive Society License Data Population verification.",
-                                    settings.ONBOARDING_LICENSE_DATA_FETCH_OWNER_EMAIL_OVERIDE or instance.owner_email,
-                                )
+                                send_onboarding_data_fetch_verification_mail(instance, user_obj,)
                             except Exception as e:
                                 traceback.print_tb(e.__traceback__)
                             else:
@@ -219,6 +180,25 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
             print(response_data.get('error'))
             instance.status = 'licence_data_not_found'
             instance.save()
+
+@app.task(queue="general")
+def resend_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
+    """
+    async task for existing user.Insert/create license based on license number.
+    We use this while fetching data after first step(license creation).
+    """
+    instance = OnboardingDataFetch.objects.filter(id=onboarding_data_fetch_id).first()
+    if instance:
+        if instance.status == 'owner_verification_sent':
+            try:
+                user_obj = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                pass
+            else:
+                try:
+                    send_onboarding_data_fetch_verification_mail(instance, user_obj,)
+                except Exception as e:
+                    traceback.print_tb(e.__traceback__)
 
 @app.task(queue="general")
 def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, license_id):

@@ -13,6 +13,7 @@ from django.db import transaction
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
+from rest_framework import serializers
 from rest_framework import (permissions, viewsets, status, filters, mixins)
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.decorators import action
@@ -34,7 +35,11 @@ from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses, update_program_selection)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
-from .tasks import (send_async_invitation, send_onboarding_data_fetch_verification)
+from .tasks import (
+    send_async_invitation,
+    send_onboarding_data_fetch_verification,
+    resend_onboarding_data_fetch_verification,
+)
 from .models import (
     Organization,
     Brand, License,
@@ -796,3 +801,19 @@ class OnboardingDataFetchViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMi
                 return Response({"otp": "Invalid OTP,"}, status=400)
         else:
             return Response({"detail": "Invalid step,"}, status=400)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        name='Resend Verification',
+        url_name='resend-otp',
+        url_path='resend-otp',
+        serializer_class=serializers.Serializer,
+    )
+    def resend_otp(self, request, *args, **kwargs):
+        """
+        Verify License Datafetch Otp
+        """
+        instance = self.get_object()
+        resend_onboarding_data_fetch_verification.delay(instance.id, self.request.user.id)
+        return Response({}, status=status.HTTP_200_OK,)
