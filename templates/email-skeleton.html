@@ -11,11 +11,13 @@
         <div class="container" style="max-width: 1000px; margin: 0 auto 50px; font-size: 20px;">
             <!-- -<img src="{% static "img/thrive.png" %}" alt="logo" style="margin: 20px 0 80px;" /> -->
             <img src="https://www.thrive-society.com/static/media/new_logo.4ae646fa.png" alt="logo" style="margin: 20px 0 50px;"/>
-            {% block body %}{% endblock %}
-            <p style="color: #013c48; margin-bottom: 0;font-size:16px;padding-left:15px;">
-                With Gratitude,
-            </p>
-            <p style="color: #013c48;font-size:16px;padding-left:15px;">Thrive Society Team</p>
+            <div style="padding-left:15px !important;">
+                {% block body %}{% endblock %}
+            </div>
+            <div style="padding-left:30px !important;color: #013c48; margin-bottom: 0;font-size:16px;">
+                <p>With Gratitude,</p>
+                <p>Thrive Society Team</p>
+            </div>
         </div>
         <footer
             style="text-transform: uppercase; background-color: #013c48; color: #c1d7db; padding: 10px 0 20px; text-align: center; font-size: 16px; font-family: Arial, Helvetica, sans-serif;">
