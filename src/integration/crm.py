@@ -704,16 +704,6 @@ def get_records_from_crm(license_number):
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         for license_dict in licenses.get('response'):
             license_number = license_dict['Name']
-            org = search_query('Orgs_X_Licenses', license_number, 'License')
-            if org.get('status_code') == 200:
-                org_list = list()
-                for o in org.get('response'):
-                    r = dict()
-                    r['Org'] = o['Org']['name']
-                    org_list.append(r)
-                final_response['organization'] = org_list
-            else:
-                final_response['organization'] = None
             vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
             if vendor['status_code'] != 200:
                 vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
@@ -730,6 +720,38 @@ def get_records_from_crm(license_number):
                 if not account_id:
                     final_response[license_number] = {'error': 'No association found for legal business name'}
                     continue
+            if vendor_id:
+                org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
+            elif account_id:
+                org = search_query('Orgs_X_Accounts', account_id, 'Account')
+            else:
+                org = dict()
+            if org.get('status_code') == 200:
+                org_list = list()
+                for o in org.get('response'):
+                    r = dict()
+                    r['name'] = o['Org']['name']
+                    r['id'] = o['Org']['id']
+                    org_list.append(r)
+                final_response['organization'] = org_list
+            else:
+                final_response['organization'] = org
+            if vendor_id:
+                brand = search_query('Brands_X_Vendors', vendor_id, 'Vendor')
+            elif account_id:
+                brand = search_query('Brands_X_Accounts', account_id, 'Account')
+            else:
+                brand = dict()
+            if brand.get('status_code') == 200:
+                brand_list = list()
+                for b in brand.get('response'):
+                    r = dict()
+                    r['name'] = b['Brand']['name']
+                    r['id'] = b['Brand']['id']
+                    brand_list.append(r)
+                final_response['Brand'] = brand_list
+            else:
+                final_response['Brand'] = brand
             crm_obj = get_crm_obj()
             if vendor_id:
                 record = crm_obj.get_record('Vendors', vendor_id)
@@ -749,6 +771,8 @@ def get_records_from_crm(license_number):
                         license = search_query('Licenses', l.strip(), 'Name')
                         if license['status_code'] == 200:
                             license_dict.append(license['response'][0])
+                        else:
+                            license_dict.append(license)
                 crm_dict = get_format_dict('Licenses_To_DB')
                 r = dict()
                 for k, v in crm_dict.items():
@@ -768,20 +792,22 @@ def get_records_from_crm(license_number):
                         if vendor_id:
                             value = parse_fields('Vendors', k, value, vendor, crm_obj, vendor_id=vendor_id)
                         elif account_id:
-                            value = parse_fields('Vendors', k, value, vendor, crm_obj, account_id=account_id)
+                            value = parse_fields('Accounts', k, value, vendor, crm_obj, account_id=account_id)
                         record_dict[k] = value
                     else:
                         record_dict[k] = vendor.get(v)
-                response['license_profile'] = record_dict
                 if vendor_id:
+                    record_dict['profile_id'] = vendor_id
                     response['is_seller'] = True
                     response['is_buyer'] = False
                 elif account_id:
+                    record_dict['profile_id'] = account_id
                     response['is_seller'] = False
                     response['is_buyer'] = True
+                response['license_profile'] = record_dict
                 final_response[license_number] = response
         return final_response
-    return {}
+    return licenses
 
 def get_vendor_from_contact(contact_email):
     """

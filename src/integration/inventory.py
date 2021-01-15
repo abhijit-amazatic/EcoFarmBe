@@ -282,14 +282,17 @@ def get_parent_category(category_name):
         return category_name
     return None
 
-def get_county(vendor_name):
+def get_record_data(vendor_name):
     """
-    Get county grown for inventory item.
+    Get  record data for inventory item from crm.
     """
     try:
+        data = dict()
         response = search_query('Vendors', vendor_name, 'Vendor_Name', True)
         if response.get('status_code') == 200:
-            return response.get('response')[0].get('County')
+            data['county_grown'] = response.get('response')[0].get('County')
+            data['nutrients'] = response.get('response')[0].get('Types_of_Nutrients_Used')
+            return data
         return None
     except Exception:
         return None
@@ -323,7 +326,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
             if thumbnail_url:
                 record['thumbnail_url'] = thumbnail_url
             if record['cf_vendor_name']:
-                record['county_grown'] = get_county(record['cf_vendor_name'])
+                record.update(get_record_data(record['cf_vendor_name']))
             if record['category_name']:
                 record['parent_category_name'] = get_parent_category(record['category_name'])
             record['inventory_name'] = get_inventory_name_from_db(inventory_name)
@@ -365,7 +368,7 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                 if thumbnail_url:
                     record['thumbnail_url'] = thumbnail_url
                 if record['cf_vendor_name']:
-                    record['county_grown'] = get_county(record['cf_vendor_name'])
+                    record.update(get_record_data(record['cf_vendor_name']))
                 if record['category_name']:
                     record['parent_category_name'] = get_parent_category(record['category_name'])
                 record['inventory_name'] = get_inventory_name_from_db(inventory_name)
@@ -407,7 +410,7 @@ def sync_inventory(inventory_name, response):
         if thumbnail_url:
             record['thumbnail_url'] = thumbnail_url
         if record['cf_vendor_name']:
-            record['county_grown'] = get_county(record['cf_vendor_name'])
+            record.update(get_record_data(record['cf_vendor_name']))
         if record['category_name']:
             record['parent_category_record'] = get_parent_category(record['category_name'])
         record['inventory_name'] = get_inventory_name_from_db(inventory_name)

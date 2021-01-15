@@ -150,6 +150,7 @@ class Inventory(models.Model):
     parent_category_name = models.CharField(_('Parent Category Name'), blank=True, null=True, max_length=50)
     inventory_name = models.CharField(_('Inventory Name'), max_length=50, blank=True, null=True)
     thumbnail_url = models.CharField(_('Thumbnail Url'), blank=True, null=True, max_length=500)
+    nutrients = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     
     def __str__(self):
         return self.name
