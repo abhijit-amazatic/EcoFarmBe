@@ -147,39 +147,34 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
     We use this while fetching data after first step(license creation).
     """
     instance = OnboardingDataFetch.objects.filter(id=onboarding_data_fetch_id).first()
-    if instance:
-        license_number = instance.license_number
-        response_data = get_records_from_crm(license_number=license_number)
-        if not response_data.get('error'):
-            if response_data:
+    if instance and instance.status in ['not_started',]:
+        response_data = get_records_from_crm(license_number=instance.license_number)
+        status_code = response_data.get('status_code')
+        if not status_code:
+            data = response_data.get(instance.license_number, {})
+            if data and not data.get('error'):
+                data_l = data.get("license", {})
                 instance.crm_data = response_data
-                instance.owner_email = response_data.get(license_number, {}).get("license", {}).get("Owner", {}).get("email")
-                instance.owner_name = response_data.get(license_number, {}).get("license", {}).get("Owner", {}).get("name")
-                instance.legal_business_name = response_data.get(license_number, {}).get("license", {}).get("legal_business_name")
+                instance.owner_email = data_l.get("Owner", {}).get("email")
+                instance.owner_name = data_l.get("Owner", {}).get("name")
+                instance.legal_business_name = data_l.get("legal_business_name")
                 if instance.owner_email:
-                    if instance.status in ['not_started',]:
-                        try:
-                            user_obj = User.objects.get(id=user_id)
-                        except User.DoesNotExist:
-                            pass
-                        else:
-                            try:
-                                send_onboarding_data_fetch_verification_mail(instance, user_obj,)
-                            except Exception as e:
-                                traceback.print_tb(e.__traceback__)
-                            else:
-                                instance.status = 'owner_verification_sent'
-                                instance.save()
+                    try:
+                        send_onboarding_data_fetch_verification_mail(instance, user_id)
+                    except Exception as e:
+                        traceback.print_tb(e.__traceback__)
+                    else:
+                        instance.status = 'owner_verification_sent'
                 else:
                     instance.status = 'owner_email_not_found'
-                    instance.save()
             else:
-                instance.status = 'licence_data_not_found'
-                instance.save()
-        else:
-            print(response_data.get('error'))
+                instance.status = 'licence_association_not_found'
+        elif status_code == '204':
             instance.status = 'licence_data_not_found'
-            instance.save()
+        else:
+            print(response_data)
+            instance.status = 'error'
+        instance.save()
 
 @app.task(queue="general")
 def resend_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
@@ -189,16 +184,13 @@ def resend_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id)
     """
     instance = OnboardingDataFetch.objects.filter(id=onboarding_data_fetch_id).first()
     if instance:
+        if instance.status == 'not_started':
+            send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id)
         if instance.status == 'owner_verification_sent':
             try:
-                user_obj = User.objects.get(id=user_id)
-            except User.DoesNotExist:
-                pass
-            else:
-                try:
-                    send_onboarding_data_fetch_verification_mail(instance, user_obj,)
-                except Exception as e:
-                    traceback.print_tb(e.__traceback__)
+                send_onboarding_data_fetch_verification_mail(instance, user_id)
+            except Exception as e:
+                traceback.print_tb(e.__traceback__)
 
 @app.task(queue="general")
 def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, license_id):
@@ -218,7 +210,7 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
         else:
             if instance  and instance.status == 'verified':
                 try:
-                    insert_data_from_crm(user, instance.crm_data, license_id)
+                    insert_data_from_crm(user, instance.crm_data, license_id, instance.license_number)
                 except Exception as e:
                     print('Error in insert_data_from_crm')
                     traceback.print_tb(e.__traceback__)

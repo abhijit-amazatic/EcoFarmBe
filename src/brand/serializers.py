@@ -244,7 +244,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         else:
             if not fetch_instance.license_number == attrs.get('license_number'):
                 raise serializers.ValidationError({'data_fetch_token': 'Token is not generated for current license number.'})
-            if not fetch_instance.status in ('verified', 'licence_data_not_found'):
+            if not fetch_instance.status in ('verified', 'licence_data_not_found', 'licence_association_not_found'):
                 raise serializers.ValidationError({'data_fetch_token': 'Token status not fulfilled'})
 
         return super().validate(attrs)

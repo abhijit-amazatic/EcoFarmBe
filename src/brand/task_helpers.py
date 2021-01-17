@@ -1,5 +1,6 @@
 from django.db import transaction
 from core.mailer import mail, mail_send
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from brand.models import (
     License,
@@ -9,6 +10,8 @@ from brand.models import (
     FinancialOverview,
     CropOverview,
 )
+
+User = get_user_model()
 
 class ErrorDataNotFound(Exception):
     pass
@@ -62,7 +65,7 @@ def get_address(company, street, street_2, city, zip_code, state, country):
 
 
 
-def insert_data_from_crm(user, response_data, license_id):
+def insert_data_from_crm(user, response_data, license_id, license_number):
     """
     Insert available data from crm to database.
     """
@@ -70,9 +73,10 @@ def insert_data_from_crm(user, response_data, license_id):
         organization = response_data.pop('organization')
     except KeyError:
         organization = None
-    # license_list = list(response_data.items())
     if response_data and isinstance(response_data, dict):
-        for license_number, data in response_data.items():
+        data =  response_data.get(license_number)
+        if data:
+        # for license_number, data in response_data.items():
             data_l = data.get('license', {})
             data_l_p = data.get('license_profile', {})
             print(f'Inserting data for:-> {license_number}')
@@ -233,10 +237,11 @@ def insert_data_from_crm(user, response_data, license_id):
         return {"success":"Data successfully fetched to DB"}
 
 
-def send_onboarding_data_fetch_verification_mail(instance, user_obj,):
+def send_onboarding_data_fetch_verification_mail(instance, user_id):
     """
     docstring
     """
+    user_obj = User.objects.get(id=user_id)
     full_name = user_obj.full_name or f'{user_obj.first_name} {user_obj.last_name}'
     context = {
         'owner_full_name':  instance.owner_name,
