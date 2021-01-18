@@ -285,12 +285,12 @@ class OnboardingDataFetch(ThrottlingMixin, models.Model):
     OTP_DIGITS = 8
     STATUS_CHOICES = (
         ('not_started', _('Not Started')),
+        ('error', _('Error')),
         ('licence_data_not_found', _('Licence Data Not Found')),
+        ('licence_association_not_found', _('Fetching')),
         ('owner_email_not_found', _('Owner Email Not Found')),
         ('owner_verification_sent', _('Owner Verification Sent')),
         ('verified', _('Verified')),
-        # ('skiped', _('Skiped')),
-        # ('fetching', _('Fetching')),
         ('inserting', _('Inserting')),
         ('complete', _('Complete')),
     )
