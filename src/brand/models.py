@@ -3,7 +3,7 @@ Brand related schemas defined here.
 """
 import time
 import traceback
-from binascii import unhexlify
+from binascii import (unhexlify, hexlify)
 from datetime import timedelta
 from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
@@ -456,7 +456,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
 
     def get_invite_token(self):
         context = "{0}|{1}|{2}".format(self.id, self.email, 'inviteToken')
-        return urlsafe_b64encode(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
+        return hexlify(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
 
     @classmethod
     def get_object_from_invite_token(cls, token):
@@ -465,7 +465,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         _MAX_CLOCK_SKEW = 60
         current_time = int(time.time())
         try:
-            token_data = urlsafe_b64decode(token.encode('utf-8'))
+            token_data = unhexlify(token.encode('utf-8'))
             timestamp = fernet.extract_timestamp(token_data)
             if timestamp + TTL < current_time:
                 raise ExpiredInviteToken
