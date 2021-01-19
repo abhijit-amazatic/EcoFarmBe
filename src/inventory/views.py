@@ -39,6 +39,8 @@ class DataFilter(FilterSet):
     name__in = CharInFilter(field_name='name', lookup_expr='in')
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
+    vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
+    cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     county_grown__in = CharInFilter(field_name='county_grown', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     # cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
@@ -97,6 +99,8 @@ class DataFilter(FilterSet):
         fields = {
         'sku':['icontains', 'exact'],
         'category_name':['icontains', 'exact'],
+        'vendor_name': ['icontains', 'exact'],
+        'cf_vendor_name': ['icontains', 'exact'],
         'parent_category_name':['icontains', 'exact'],
         'cf_cultivar_type':['icontains', 'exact'],
         'county_grown':['icontains', 'exact'],   
