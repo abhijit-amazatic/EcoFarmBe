@@ -292,6 +292,7 @@ def get_record_data(vendor_name):
         if response.get('status_code') == 200:
             data['county_grown'] = response.get('response')[0].get('County')
             data['nutrients'] = response.get('response')[0].get('Types_of_Nutrients_Used')
+            data['ethics_and_certification'] = response.get('response')[0].get('Special_Certifications')
             return data
         return None
     except Exception:
