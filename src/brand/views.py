@@ -26,7 +26,9 @@ from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 
 from core.permissions import IsAuthenticatedBrandPermission
+from inventory.models import (Documents, )
 from integration.books import  get_buyer_summary
+from integration.apps.aws import (create_presigned_url, )
 from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,)
 from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses, update_program_selection)
@@ -275,10 +277,15 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         license = self.get_object()
         if request.method == 'GET':
             try:
-                return Response(serializer(
-                    getattr(license, extra_info_attribute)).data)
+                instance = getattr(license, extra_info_attribute)
+                data = serializer(instance).data
+                if extra_info_attribute == 'profile_contact':
+                    data = self.add_user_profile_image_to_cantacts(data)
             except model.DoesNotExist:
                 return Response({})
+            else:
+                return Response(data)
+
         else:
             try:
                 ser = serializer(
@@ -290,6 +297,32 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
             ser.is_valid(raise_exception=True)
             ser.save(license=license)
             return Response(ser.data)
+
+    def add_user_profile_image_to_cantacts(self, data):
+        employees =  data.get('profile_contact_details', {}).get('employees')
+        if employees and isinstance(employees, list):
+            for employee in employees:
+                if isinstance(employee, dict):
+                    if employee.get('employee_email'):
+                        document_url = None
+                        try:
+                            user = Auth_User.objects.get(email=employee.get('employee_email'))
+                        except Auth_User.DoesNotExists:
+                            pass
+                        else:
+                            try:
+                                document = Documents.objects.filter(object_id=user.id, doc_type='profile_image').latest('created_on')
+                                if document.box_url:
+                                    document_url = document.box_url
+                                else:
+                                    path = document.path
+                                    url = create_presigned_url(settings.AWS_BUCKET, path)
+                                    if url.get('response'):
+                                        document_url = url.get('response')
+                            except Exception:
+                                pass
+                        employee['document_url'] = document_url
+        return data
 
     @action(detail=True, url_path='existing-user-data-status', methods=['get'])
     def existing_user_data_status(self, request, pk, *args, **kwargs):
