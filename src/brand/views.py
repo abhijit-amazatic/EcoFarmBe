@@ -300,28 +300,34 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
 
     def add_user_profile_image_to_cantacts(self, data):
         employees =  data.get('profile_contact_details', {}).get('employees')
+        profile_images_dict = {}
         if employees and isinstance(employees, list):
             for employee in employees:
                 if isinstance(employee, dict):
+                    document_url = None
                     if employee.get('employee_email'):
-                        document_url = None
-                        try:
-                            user = Auth_User.objects.get(email=employee.get('employee_email'))
-                        except Auth_User.DoesNotExists:
-                            pass
+                        email = employee.get('employee_email', '')
+                        if email in profile_images_dict:
+                            document_url = profile_images_dict.get(email)
                         else:
                             try:
-                                document = Documents.objects.filter(object_id=user.id, doc_type='profile_image').latest('created_on')
-                                if document.box_url:
-                                    document_url = document.box_url
-                                else:
-                                    path = document.path
-                                    url = create_presigned_url(settings.AWS_BUCKET, path)
-                                    if url.get('response'):
-                                        document_url = url.get('response')
-                            except Exception:
+                                user = Auth_User.objects.get(email=email)
+                            except Auth_User.DoesNotExist:
                                 pass
-                        employee['document_url'] = document_url
+                            else:
+                                try:
+                                    document = Documents.objects.filter(object_id=user.id, doc_type='profile_image').latest('created_on')
+                                    if document.box_url:
+                                        document_url = document.box_url
+                                    else:
+                                        path = document.path
+                                        url = create_presigned_url(settings.AWS_BUCKET, path)
+                                        if url.get('response'):
+                                            document_url = url.get('response')
+                                except Exception:
+                                    pass
+                            profile_images_dict[email] = document_url
+                    employee['document_url'] = document_url
         return data
 
     @action(detail=True, url_path='existing-user-data-status', methods=['get'])
