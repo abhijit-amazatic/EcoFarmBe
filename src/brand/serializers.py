@@ -14,11 +14,11 @@ from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (notify_admins_on_profile_registration,)
 from inventory.models import (Documents, )
-from integration.crm import (insert_vendors, insert_accounts, update_license,)
+from integration.crm import (insert_vendors, insert_accounts,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
-from integration.tasks import (update_in_crm_task, )
+from integration.tasks import (update_in_crm_task, update_license_task)
 from user.models import (User,)
 
 from .serializers_mixin import (
@@ -248,7 +248,11 @@ class LicenseSerializer(serializers.ModelSerializer):
             except Exception as e:
                 print(e)        
         user = super().update(instance, validated_data)
-        update_license(dba=instance.license_profile.name, license_id=instance.id)
+        try:
+            update_license_task.delay(dba=instance.license_profile.name, license_id=instance.id)
+        except License.license_profile.RelatedObjectDoesNotExist:
+            print('License Profile does not exist.')
+            pass
         return user
 
     def create(self, validated_data):

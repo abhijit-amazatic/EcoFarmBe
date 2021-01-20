@@ -70,3 +70,7 @@ def fetch_bcc_licenses():
 @app.task(queue="general")
 def update_in_crm_task(module, record_id):
     update_in_crm(module, record_id)
+
+@app.task(queue="general")
+def update_license_task(dba, license=None, license_id=None):
+    update_license_task(dba=dba, license=license, license_id=license_id)
