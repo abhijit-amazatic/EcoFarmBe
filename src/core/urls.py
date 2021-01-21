@@ -94,10 +94,6 @@ router.register(r'item-feedback', ItemFeedbackViewSet, base_name="feedback")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'organization', OrganizationViewSet, base_name="organization")
-router.register(r'brand', BrandViewSet, base_name="brand")
-router.register(r'license', LicenseViewSet, base_name="license")
-router.register(r'role', OrganizationRoleViewSet, base_name="organization-role")
-router.register(r'organization-user', OrganizationUserViewSet, base_name="organization-role")
 router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/brand', BrandViewSet, 'brand'),
     ('organization/(?P<parent_organization>[^/.]+)/license', LicenseViewSet, 'license'),
