@@ -6,6 +6,10 @@ class Cultivar(models.Model):
     """
     Model for cultivar.
     """
+    STATUS_CHOICES = (
+        ('pending_for_approval', _('Pending For Approval')),
+        ('approved', _('Approved')),
+    )
     cultivar_crm_id = models.CharField(_('Cultivar ID'), blank=True, null=True, max_length=255)
     cultivar_name = models.CharField(_('Cultivar Name'), blank=True, null=True, max_length=255)
     cultivar_type = models.CharField(_('Cultivar Type'), blank=True, null=True, max_length=50)
@@ -26,6 +30,7 @@ class Cultivar(models.Model):
     created_by = models.CharField(_('Created By'), blank=True, null=True, max_length=255)
     create_time = models.DateTimeField(auto_now=False, blank=True, null=True)
     modify_time = models.DateTimeField(auto_now=False, blank=True, null=True)
-    
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+
     def __str__(self):
         return self.cultivar_name

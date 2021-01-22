@@ -157,6 +157,25 @@ class Inventory(models.Model):
         return self.name
 
 
+class CustomInventory(models.Model):
+    """
+    Custom Inventory Model Class
+    """
+    STATUS_CHOICES = (
+        ('pending_for_approval', _('Pending For Approval')),
+        ('approved', _('Approved')),
+    )
+    cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), blank=True, null=True,
+                                related_name='custom_inventory', on_delete=models.PROTECT)
+    # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
+    harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
+    quantity_available = models.DecimalField(_('Quantity Available'), blank=True, null=True, max_digits=4, decimal_places=2)
+    need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
+    grade_estimate = models.CharField(_('Grade Estimate'), max_length=255, blank=True, null=True)
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    extra_documents = GenericRelation(Documents)
+
+
 class ItemFeedback(TimeStampFlagModelMixin, models.Model):
     """
     Inventory item feedbacks by user.
