@@ -46,7 +46,7 @@ from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               send_template)
 from integration.tasks import (send_estimate, )
-from integration.utils import (get_distance, )
+from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
@@ -905,3 +905,21 @@ class LabTestView(APIView):
             except LabTest.DoesNotExist:
                 pass
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+    
+class GetAutoComplete(APIView):
+    """
+    Autocomplete address using google api.
+    """
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        """
+        Get autocomplete address.
+        """
+        address = request.query_params.get('address')
+        if address:
+            response = get_places(address)
+            if isinstance(response, dict) and response.get('code') == 1:
+               Response(response, status=status.HTTP_400_BAD_REQUEST) 
+            return Response(response)
+        return Response({'code':1, 'error': 'address missing.'}, status=status.HTTP_400_BAD_REQUEST)

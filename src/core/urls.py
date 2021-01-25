@@ -47,7 +47,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
-                               GetRecordView, LabTestView)
+                               GetRecordView, LabTestView, GetAutoComplete)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -214,6 +214,7 @@ urlpatterns = [
     path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
     path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),
     path(r'update-program-selection/', ProgramSelectionSyncView.as_view(), name="update-program"),
+    path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
 
 ] + router.urls
 

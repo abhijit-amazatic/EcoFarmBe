@@ -10,7 +10,8 @@ from pdfminer.converter import PDFPageAggregator
 
 from .crm_format import (ACCOUNT_TYPES, )
 from core.settings import (
-    VENDOR_LAYOUT, LEADS_LAYOUT, GOOGLEMAPS_API_KEY)
+    VENDOR_LAYOUT, LEADS_LAYOUT, GOOGLEMAPS_API_KEY,
+    GOOGLEPLACES_API_KEY,)
 
 def get_vendor_contacts(key, value, obj, crm_obj):
     """
@@ -106,6 +107,19 @@ def get_distance(location_a, location_b):
         elif not location_b:
             response['error'] = 'location_b is not valid.'
         return response
+    except googlemaps.exceptions.ApiError as exc:
+        return {'code':1, 'Error': exc}
+
+def get_places(address):
+    """
+    Get autocompleted address.
+    """
+    try:
+        if address:
+            gmaps = googlemaps.Client(key=GOOGLEPLACES_API_KEY)
+            response = gmaps.places_autocomplete(address)
+            return response
+        return []
     except googlemaps.exceptions.ApiError as exc:
         return {'code':1, 'Error': exc}
 
