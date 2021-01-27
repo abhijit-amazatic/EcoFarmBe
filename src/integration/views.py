@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import (TokenAuthentication,)
+from django.conf import settings
 
 from core.permissions import UserPermissions
 from .models import Integration
@@ -50,6 +51,7 @@ from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
+from core.mailer import (mail, mail_send,)
 from integration.apps.scrapper import (Scrapper, )
 from labtest.models import (LabTest,)
 
@@ -439,6 +441,7 @@ class EstimateSignCompleteView(APIView):
         estimate_id = request.data.get('estimate_id')
         business_dba = request.data.get('business_dba')
         document_number = request.data.get('document_number')
+        order_number = request.data.get('order_number')
         dir_name = f'{business_dba}_{document_number}'
         is_agreement = request.data.get('is_agreement')
         data = get_document(request_id)['requests']
@@ -453,6 +456,7 @@ class EstimateSignCompleteView(APIView):
                 a = mark_estimate(estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
             response.append(upload_pdf_box(request_id, new_folder, filename, is_agreement))
+        mail_send("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number},"Your Thrive Society Order %s." %order_number, request.user.email)   
         return Response(response)
 
 class GetTemplateStatus(APIView):

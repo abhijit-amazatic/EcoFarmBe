@@ -190,8 +190,7 @@ def send_async_user_approval_mail(user_id):
     """
     user = User.objects.filter(id=user_id)    
     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': user[0].full_name},"Account Approved.", user[0].email)
-
-    
+        
 def send_verification_link(email):
     """
     Send verification link to user.
