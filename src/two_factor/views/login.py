@@ -115,7 +115,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
         """
         login_2fa_token = self.get_object()
         if login_2fa_token.is_valid:
-            login(request, login_2fa_token.user)
+            login(request, login_2fa_token.user, backend='django.contrib.auth.backends.ModelBackend')
             serializer_context = self.get_serializer_context()
             serializer = self.serializer_class(
                 data=request.data,
@@ -168,7 +168,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
         """
         login_2fa_token = self.get_object()
         if login_2fa_token.is_valid:
-            login(request, login_2fa_token.user)
+            login(request, login_2fa_token.user, backend='django.contrib.auth.backends.ModelBackend')
             serializer_context = self.get_serializer_context()
             serializer = self.serializer_class(
                 data=request.data,
@@ -202,7 +202,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
         """
         login_2fa_token = self.get_object()
         if login_2fa_token.is_valid:
-            login(request, login_2fa_token.user)
+            login(request, login_2fa_token.user, backend='django.contrib.auth.backends.ModelBackend')
             serializer_context = self.get_serializer_context()
             serializer = self.serializer_class(
                 data=request.data,

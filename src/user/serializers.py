@@ -196,7 +196,7 @@ class LogInSerializer(serializers.Serializer):  # pylint: disable=W0223
                 email = data.get('email')
                 password = data.get('password')
                 user = authenticate(email=email, password=password)
-                login(self.context['request'], user)
+                login(self.context['request'], user, backend='django.contrib.auth.backends.ModelBackend')
                 return user
             except Exception:
                 raise serializers.ValidationError('Invalid Email or Password.')
