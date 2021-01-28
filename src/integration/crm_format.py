@@ -83,7 +83,7 @@ CRM_FORMAT  = {
         "Accounts": "Accounts",
     },
     "Brands": {
-        "id": "id",
+        "id": "zoho_crm_id",
         "Brand_Category": "brand_category",
         "Name": "brand_name",
         "Owner": "brand_owner",
