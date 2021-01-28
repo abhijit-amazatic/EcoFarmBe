@@ -172,8 +172,10 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
                     instance.owner_verification_status = 'owner_email_not_found'
             else:
                 instance.owner_verification_status = 'licence_data_not_found'
+                instance.data_fetch_status = 'licence_data_not_found'
         elif status_code == 204:
             instance.owner_verification_status = 'licence_data_not_found'
+            instance.data_fetch_status = 'licence_data_not_found'
         else:
             print(response_data)
             instance.owner_verification_status = 'error'

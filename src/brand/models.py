@@ -295,6 +295,7 @@ class OnboardingDataFetch(ThrottlingMixin, models.Model):
 
     DATA_FETCH_STATUS_CHOICES = (
         ('not_started', _('Not Started')),
+        ('licence_data_not_found', _('Licence Data Not Found')),
         ('licence_association_not_found', _('Licence Association Not Found')),
         ('fetched', _('Fetched')),
         ('complete', _('Complete')),
