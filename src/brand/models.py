@@ -283,16 +283,22 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
 
 class OnboardingDataFetch(ThrottlingMixin, models.Model):
     OTP_DIGITS = 8
-    STATUS_CHOICES = (
+
+    OWNER_VERIFICATION_STATUS_CHOICES = (
         ('not_started', _('Not Started')),
-        ('error', _('Error')),
         ('licence_data_not_found', _('Licence Data Not Found')),
-        ('licence_association_not_found', _('Fetching')),
         ('owner_email_not_found', _('Owner Email Not Found')),
-        ('owner_verification_sent', _('Owner Verification Sent')),
+        ('verification_code_sent', _('Verification Code Sent')),
         ('verified', _('Verified')),
-        ('inserting', _('Inserting')),
+        ('error', _('Error')),
+    )
+
+    DATA_FETCH_STATUS_CHOICES = (
+        ('not_started', _('Not Started')),
+        ('licence_association_not_found', _('Licence Association Not Found')),
+        ('fetched', _('Fetched')),
         ('complete', _('Complete')),
+        ('error', _('Error')),
     )
     data_fetch_token = models.CharField(
         max_length=128,
@@ -305,12 +311,13 @@ class OnboardingDataFetch(ThrottlingMixin, models.Model):
     legal_business_name = models.CharField(_('Legal Business Name'), blank=True, null=True, max_length=255)
     owner_email = models.EmailField(_('Owner Email'), blank=True, null=True, max_length=255)
     owner_name = models.EmailField(_('Owner Email'), blank=True, null=True, max_length=255)
-    crm_data = JSONField(_('CRM Data'), null=False, blank=False, default=dict)
+    crm_license_data = JSONField(_('CRM License Data'), null=False, blank=False, default=dict)
+    crm_profile_data = JSONField(_('CRM Data'), null=False, blank=False, default=dict)
     last_otp_time = models.DateTimeField(_('Last Token Time'), default=timezone.now,)
     key = models.CharField(max_length=80, validators=[key_validator], default=random_hex,)
     counter = models.BigIntegerField(default=0,)
-    status = models.CharField(
-        _('Data From CRM Status'), choices=STATUS_CHOICES, default='not_started', max_length=255)
+    owner_verification_status = models.CharField(_('Owner Verification Status'), choices=OWNER_VERIFICATION_STATUS_CHOICES, default='not_started', max_length=255)
+    data_fetch_status = models.CharField(_('Data From CRM Status'), choices=DATA_FETCH_STATUS_CHOICES, default='not_started', max_length=255)
 
     class Meta(Device.Meta):
         verbose_name = "Owner Verification HOTP Device"

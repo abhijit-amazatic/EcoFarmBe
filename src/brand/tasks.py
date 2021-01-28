@@ -11,7 +11,7 @@ from celery.schedules import crontab
 from django.utils import  timezone
 
 from integration.apps.twilio import (send_sms,)
-from integration.crm import (get_records_from_crm,)
+from integration.crm import (get_records_from_crm, search_query)
 from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
@@ -147,34 +147,53 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
     We use this while fetching data after first step(license creation).
     """
     instance = OnboardingDataFetch.objects.filter(id=onboarding_data_fetch_id).first()
-    if instance and instance.status in ['not_started',]:
-        response_data = get_records_from_crm(license_number=instance.license_number)
+    if instance and instance.owner_verification_status in ['not_started',]:
+        response_data = search_query('Licenses', instance.license_number, 'Name', is_license=True)
+
         status_code = response_data.get('status_code')
-        if not status_code:
-            data = response_data.get(instance.license_number, {})
-            if data and not data.get('error'):
-                data_l = data.get("license", {})
-                instance.crm_data = response_data
-                instance.owner_email = data_l.get("Owner", {}).get("email")
-                instance.owner_name = data_l.get("Owner", {}).get("name")
-                instance.legal_business_name = data_l.get("legal_business_name")
+        if status_code == 200:
+            data = response_data.get('response', {})
+            if data:
+                if isinstance(data, list):
+                    data = data[0]
+                instance.crm_license_data = data
+                instance.owner_email = data.get("License_Email")
+                owner_name = data.get("Owner_First_Name")+' '+data.get("Owner_Last_Name")
+                instance.owner_name = owner_name.strip()
+                instance.legal_business_name = data.get("Legal_Business_Name")
                 if instance.owner_email:
                     try:
                         send_onboarding_data_fetch_verification_mail(instance, user_id)
                     except Exception as e:
                         traceback.print_tb(e.__traceback__)
                     else:
-                        instance.status = 'owner_verification_sent'
+                        instance.owner_verification_status = 'verification_code_sent'
                 else:
-                    instance.status = 'owner_email_not_found'
+                    instance.owner_verification_status = 'owner_email_not_found'
             else:
-                instance.status = 'licence_association_not_found'
-        elif status_code == '204':
-            instance.status = 'licence_data_not_found'
+                instance.owner_verification_status = 'licence_data_not_found'
+        elif status_code == 204:
+            instance.owner_verification_status = 'licence_data_not_found'
         else:
             print(response_data)
-            instance.status = 'error'
+            instance.owner_verification_status = 'error'
         instance.save()
+
+        if instance.owner_verification_status == 'verification_code_sent':
+            response_data = get_records_from_crm(license_number=instance.license_number)
+            status_code = response_data.get('status_code')
+            if not status_code:
+                data = response_data.get(instance.license_number, {})
+                if data and not data.get('error'):
+                    instance.crm_profile_data = response_data
+                    instance.data_fetch_status = 'fetched'
+                else:
+                    instance.data_fetch_status = 'licence_association_not_found'
+            else:
+                print(response_data)
+                instance.data_fetch_status = 'error'
+            instance.save()
+
 
 @app.task(queue="general")
 def resend_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
@@ -184,13 +203,15 @@ def resend_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id)
     """
     instance = OnboardingDataFetch.objects.filter(id=onboarding_data_fetch_id).first()
     if instance:
-        if instance.status == 'not_started':
+        status = instance.owner_verification_status
+        if status == 'not_started':
             send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id)
-        if instance.status == 'owner_verification_sent':
+        if status == 'verification_code_sent' or (status == 'licence_association_not_found' and instance.email):
             try:
                 send_onboarding_data_fetch_verification_mail(instance, user_id)
             except Exception as e:
                 traceback.print_tb(e.__traceback__)
+
 
 @app.task(queue="general")
 def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, license_id):
@@ -208,12 +229,28 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
         except User.DoesNotExist:
             pass
         else:
-            if instance  and instance.status == 'verified':
-                try:
-                    insert_data_from_crm(user, instance.crm_data, license_id, instance.license_number)
-                except Exception as e:
-                    print('Error in insert_data_from_crm')
-                    traceback.print_tb(e.__traceback__)
-                else:
-                    instance.status = 'complete'
+            if instance  and instance.owner_verification_status == 'verified':
+                if instance.data_fetch_status == 'not_started':
+                    response_data = get_records_from_crm(license_number=instance.license_number)
+                    status_code = response_data.get('status_code')
+                    if not status_code:
+                        data = response_data.get(instance.license_number, {})
+                        if data and not data.get('error'):
+                            instance.crm_profile_data = response_data
+                            instance.data_fetch_status = 'fetched'
+                        else:
+                            instance.data_fetch_status = 'licence_association_not_found'
+                    else:
+                        print(response_data)
+                        instance.data_fetch_status = 'error'
                     instance.save()
+
+                if instance.data_fetch_status == 'fetched':
+                    try:
+                        insert_data_from_crm(user, instance.crm_profile_data, license_id, instance.license_number)
+                    except Exception as e:
+                        print('Error in insert_data_from_crm')
+                        traceback.print_tb(e.__traceback__)
+                    else:
+                        instance.data_fetch_status = 'complete'
+                        instance.save()
