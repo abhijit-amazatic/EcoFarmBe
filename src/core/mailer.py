@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 
-def mail(template, context_data, subject, recipient_list, ):
+def mail(template, context_data, subject, recipient_list, file_path=None,):
     """
     Mail function to send mail.
     """
@@ -17,10 +17,12 @@ def mail(template, context_data, subject, recipient_list, ):
 
     content = template.render(context_data)
     msg = EmailMessage(
-        subject, content, from_email="Eco-farm <%s>" % (settings.DEFAULT_FROM_EMAIL), to=[
+        subject, content, from_email="Thrive Society <support@thrive-society.com>", to=[
             recipient_list]
     )
     msg.content_subtype = "html"
+    if file_path:
+        msg.attach_file(file_path)
     msg.send()
 
 
