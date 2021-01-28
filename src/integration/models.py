@@ -21,3 +21,30 @@ class Integration(models.Model):
     class Meta:
         verbose_name = _('integration')
         verbose_name_plural = _('integrations')
+
+
+class OrderVariable(models.Model):
+    """
+    Class implementing  order variables
+    """
+    PROGRAM_TYPE_GOLD = 'gold'
+    PROGRAM_TYPE_SILVER = 'silver'
+    PROGRAM_TYPE_CHOICES = (
+        (PROGRAM_TYPE_GOLD, _('Gold')),
+        (PROGRAM_TYPE_SILVER, _('Silver')),
+    )
+    program_type = models.CharField(verbose_name=_("Program"), max_length=255, choices=PROGRAM_TYPE_CHOICES)
+    mcsp_fee = models.CharField(verbose_name=_("MCSP Fee(%)"), max_length=255,blank=True, null=True)
+    net_7_14 = models.CharField(verbose_name=_("Net 7-14(%)"), max_length=255,blank=True, null=True)
+    net_14_30 = models.CharField(verbose_name=_("Net 14-30(%)"), max_length=255,blank=True, null=True)
+    cash = models.CharField(verbose_name=_("Cash(%)"), max_length=255,blank=True, null=True)
+    transportation_fee = models.CharField(verbose_name=_("Transportation Fee/Mile($)"), max_length=255,blank=True, null=True)
+    
+    def __str__(self):
+        return self.program_type
+
+    class Meta:
+        verbose_name = _('Order Variable')
+      
+
+        

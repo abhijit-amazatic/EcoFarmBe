@@ -12,7 +12,7 @@ from rest_framework.authentication import (TokenAuthentication,)
 from django.conf import settings
 
 from core.permissions import UserPermissions
-from .models import Integration
+from .models import (Integration,OrderVariable)
 from integration.box import(
     get_box_tokens, get_shared_link,
     get_client_folder_id, create_folder,)
@@ -927,3 +927,19 @@ class GetAutoComplete(APIView):
                Response(response, status=status.HTTP_400_BAD_REQUEST) 
             return Response(response)
         return Response({'code':1, 'error': 'address missing.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderVariableView(APIView):
+
+    """
+    Get Order Variables information.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        Display variables.    
+        """
+        queryset = OrderVariable.objects.values()
+        return Response(queryset)
+    

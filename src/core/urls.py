@@ -47,7 +47,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
-                               GetRecordView, LabTestView, GetAutoComplete)
+                               GetRecordView, LabTestView, GetAutoComplete, OrderVariableView,)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -194,6 +194,7 @@ urlpatterns = [
     path(r'sign/template-status/',
          GetTemplateStatus.as_view(), name='template_status'),
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
+    path(r'order-variables/', OrderVariableView.as_view(), name='order-variables'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(),
          name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
