@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 
-def mail(template, context_data, subject, recipient_list, file_path=None,):
+def mail(template, context_data, subject, recipient_list, file_data=None,):
     """
     Mail function to send mail.
     """
@@ -21,8 +21,9 @@ def mail(template, context_data, subject, recipient_list, file_path=None,):
             recipient_list]
     )
     msg.content_subtype = "html"
-    if file_path:
-        msg.attach_file(file_path)
+    if file_data:
+        #msg.attach_file(file_path)
+        msg.attach("order.pdf", file_data, "application/pdf")
     msg.send()
 
 
