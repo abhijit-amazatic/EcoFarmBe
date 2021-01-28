@@ -746,9 +746,10 @@ def get_records_from_crm(license_number):
                 org_list = list()
                 for o in org.get('response'):
                     r = dict()
-                    r['name'] = o['Org']['name']
-                    r['id'] = o['Org']['id']
-                    org_list.append(r)
+                    if o.get('Org'):
+                        r['name'] = o['Org']['name']
+                        r['id'] = o['Org']['id']
+                        org_list.append(r)
                 final_response['organization'] = org_list
             else:
                 final_response['organization'] = org
