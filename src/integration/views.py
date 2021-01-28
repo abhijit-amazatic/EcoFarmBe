@@ -45,6 +45,7 @@ from integration.books import (
     get_unpaid_invoices)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
+                              download_pdf,
                               send_template)
 from integration.tasks import (send_estimate, )
 from integration.utils import (get_distance, get_places)
@@ -456,7 +457,7 @@ class EstimateSignCompleteView(APIView):
                 a = mark_estimate(estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
             response.append(upload_pdf_box(request_id, new_folder, filename, is_agreement))
-        mail_send("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number},"Your Thrive Society Order %s." %order_number, request.user.email)   
+        mail("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number},"Your Thrive Society Order %s." %order_number, request.user.email,file_data=download_pdf(request_id))   
         return Response(response)
 
 class GetTemplateStatus(APIView):

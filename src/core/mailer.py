@@ -23,7 +23,7 @@ def mail(template, context_data, subject, recipient_list, file_data=None,):
     msg.content_subtype = "html"
     if file_data:
         #msg.attach_file(file_path)
-        msg.attach("order.pdf", file_data, "application/pdf")
+        msg.attach("Order.pdf", file_data, "application/pdf")
     msg.send()
 
 
