@@ -3,6 +3,7 @@ from django.db.models import signals
 from django.apps import apps
 
 from brand.utils import get_unique_org_name
+from core.utility import (send_verification_link_user_instance,)
 
 PrimaryPhoneTOTPDevice = apps.get_model('user', 'PrimaryPhoneTOTPDevice')
 Organization = apps.get_model('brand', 'Organization')
@@ -27,6 +28,7 @@ def pre_save_user(sender, instance, **kwargs):
         instance.is_phone_verified = False
     if not instance.email == old_instance.email:
         instance.is_verified = False
+        send_verification_link_user_instance(instance)
 
 
 @receiver(signals.post_save, sender=apps.get_model('user', 'User'))

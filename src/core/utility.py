@@ -199,6 +199,14 @@ def send_verification_link(email):
     link = get_encrypted_data(email,reason='verify')
     mail_send("verification-send.html",{'link': link,'full_name': user[0].full_name},"Thrive Society Verification.",email)
 
+def send_verification_link_user_instance(user):
+    """
+    Send verification link to user.
+    """
+    link = get_encrypted_data(user.email,reason='verify')
+    mail_send("verification-send.html",{'link': link,'full_name': user.full_name},"Thrive Society Verification.",user.email)
+
+
 def extract_map_role(data):
     role_map = {"Owner":"License Owner","Cultivation Manager":"Farm Manager","Sales Manager":"Sales/Inventory","Logistics Manager":"Logistics","Billing / Accounting":"Billing"}
     if data:
