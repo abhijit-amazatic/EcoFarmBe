@@ -176,22 +176,23 @@ class CustomInventory(models.Model):
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), blank=True, null=True,
                                 related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
-    harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
+    product_category = models.CharField(_('Item Category'), choices=ITEM_CATEGORY_CHOICES, blank=True, null=True, max_length=255)
     quantity_available = models.DecimalField(_('Quantity Available'), blank=True, null=True, max_digits=4, decimal_places=2)
+    harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
+    product_availability_date = models.DateField(_('Product Availability Date'), auto_now=False, blank=True, null=True, default=None)
     grade_estimate = models.CharField(_('Grade Estimate'), max_length=255, blank=True, null=True)
-    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    product_quality_notes = models.TextField(_('Product Quality Notes'), blank=True, null=True)
+
 
     cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
-    item_category = models.CharField(_('Item Category'), choices=ITEM_CATEGORY_CHOICES, blank=True, null=True, max_length=255)
-    # cpg_category = models.CharField(_('CPG Category'), blank=True, null=True, max_length=255)
-    product_availability_date = models.DateField(_('Product Availability Date'), auto_now=False, blank=True, null=True, default=None)
+    pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
+    minimum_order_quantity = models.DecimalField(_('Minimum Order Quantity'), blank=True, null=True, max_digits=4, decimal_places=2)
+
     best_contact_window_start = models.DateField(_('Best Contact Window Start'), auto_now=False, blank=True, null=True, default=None)
     best_contact_window_end = models.DateField(_('Best Contact Window End'), auto_now=False, blank=True, null=True, default=None)
-    minimum_order_quantity = models.DecimalField(_('Minimum Order Quantity'), blank=True, null=True, max_digits=4, decimal_places=2)
-    pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
-    product_quality_notes_or_misc = models.TextField(_('Product Quality Notes Or Misc'), blank=True, null=True)
 
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
     extra_documents = GenericRelation(Documents)
 
 
