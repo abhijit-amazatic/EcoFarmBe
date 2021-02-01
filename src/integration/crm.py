@@ -23,7 +23,7 @@ from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout, get_overview_field,)
 from core.mailer import mail, mail_send
-from brand.models import (Brand, License, LicenseProfile, Organization)
+from brand.models import (Brand, License, LicenseProfile, Organization, ProgramOverview)
 from integration.models import (Integration,)
 from integration.apps.aws import (get_boto_client, )
 from inventory.models import (Documents, )
@@ -1344,6 +1344,10 @@ def update_program_selection(record_id, tier_selection):
     """
     try:
         license_profile = LicenseProfile.objects.get(zoho_crm_id=record_id)
+        try:
+            license_profile.license.program_overview
+        except License.program_overview.RelatedObjectDoesNotExist:
+            ProgramOverview.objects.create(license=license_profile.license)
         license_profile.license.program_overview.program_details = {'program_name': tier_selection}
         license_profile.license.program_overview.save()
         return {'code': 0, 'message': 'Success'}
