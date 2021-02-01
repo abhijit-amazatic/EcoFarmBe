@@ -24,6 +24,8 @@ from .tasks import (onboarding_fetched_data_insert_to_db,)
 from .serializers_mixin import (
     NestedModelSerializer,
     OrganizationUserRoleRelatedField,
+    OrganizationUserRoleRelatedRoleField,
+    OrganizationUserRoleRelatedLicenseField,
     InviteUserRelatedField,
     InviteUserTokenField,
     LicenseProfileBrandAssociationField,
@@ -484,11 +486,11 @@ class OrganizationUserRoleSerializer(serializers.ModelSerializer):
     # organization_user = OrganizationUserRoleRelatedField(
     #     queryset=OrganizationUser.objects.all(),
     # )
-    role = OrganizationUserRoleRelatedField(
+    role = OrganizationUserRoleRelatedRoleField(
         queryset=OrganizationRole.objects.all(),
     )
     # role_info = OrganizationRoleSerializer(source='role', read_only=True)
-    licenses = OrganizationUserRoleRelatedField(
+    licenses = OrganizationUserRoleRelatedLicenseField(
         queryset=License.objects.all(),
         many=True,
         # required=True,
@@ -523,7 +525,7 @@ class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.Mo
     This defines organization role serializer.
     """
     user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
-    roles = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
+    roles_licenses = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
     document_url = serializers.SerializerMethodField()
 
     def get_document_url(self, obj):
@@ -548,7 +550,7 @@ class OrganizationUserNestedViewSerializer(NestedModelSerializer, serializers.Mo
             'id',
             'user',
             'user_info',
-            'roles',
+            'roles_licenses',
             'created_on',
             'updated_on',
             # 'organization',
@@ -604,64 +606,64 @@ class OrganizationUserRoleNestedSerializer(NestedModelSerializer, serializers.Mo
 
 
 
-class OrganizationUserRoleSerializer(serializers.ModelSerializer):
-    """
-    This defines organization role serializer.
-    """
-    # role_info = OrganizationRoleSerializer(source='role', read_only=True)
-    licenses = OrganizationUserRoleRelatedField(
-        queryset=License.objects.all(),
-        many=True,
-    )
-    class Meta:
-        model = OrganizationUserRole
-        fields = (
-            'id',
-            'role',
-            # 'role_info',
-            'licenses',
-            # 'created_on',
-            # 'updated_on',
-            # 'organization',
-        )
+# class OrganizationUserRoleSerializer(serializers.ModelSerializer):
+#     """
+#     This defines organization role serializer.
+#     """
+#     # role_info = OrganizationRoleSerializer(source='role', read_only=True)
+#     licenses = OrganizationUserRoleRelatedField(
+#         queryset=License.objects.all(),
+#         many=True,
+#     )
+#     class Meta:
+#         model = OrganizationUserRole
+#         fields = (
+#             'id',
+#             'role',
+#             # 'role_info',
+#             'licenses',
+#             # 'created_on',
+#             # 'updated_on',
+#             # 'organization',
+#         )
 
 
 
 
-class OrganizationUserSerializer(serializers.ModelSerializer):
-    """
-    This defines organization role serializer.
-    """
-    user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
-    roles = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
-    class Meta:
-        model = OrganizationUser
-        fields = (
-            'id',
-            'user',
-            'user_info',
-            'roles',
-            # 'created_on',
-            # 'updated_on',
-            # 'organization',
-        )
+# class OrganizationUserSerializer(serializers.ModelSerializer):
+#     """
+#     This defines organization role serializer.
+#     """
+#     user_info = OrganizationUserInfoSerializer(source='user', read_only=True)
+#     roles = OrganizationUserRoleSerializer(source='organization_user_role', many=True, read_only=True)
+#     class Meta:
+#         model = OrganizationUser
+#         fields = (
+#             'id',
+#             'user',
+#             'user_info',
+#             'roles',
+#             # 'created_on',
+#             # 'updated_on',
+#             # 'organization',
+#         )
 
 
-class OrganizationRoleNestedSerializer(serializers.ModelSerializer):
-    """
-    This defines organization role serializer.
-    """
+# class OrganizationRoleNestedSerializer(serializers.ModelSerializer):
+#     """
+#     This defines organization role serializer.
+#     """
 
-    class Meta:
-        model = OrganizationRole
-        fields = (
-            'id',
-            'name',
-            'permissions',
-            # 'created_on',
-            # 'updated_on',
-            # 'organization',
-        )
+#     class Meta:
+#         model = OrganizationRole
+#         fields = (
+#             'id',
+#             'name',
+#             'permissions',
+#             # 'created_on',
+#             # 'updated_on',
+#             # 'organization',
+#         )
 
 
 class OrganizationDetailSerializer(OrganizationSerializer):

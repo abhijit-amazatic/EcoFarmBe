@@ -2,8 +2,10 @@ from rest_framework import serializers
 from .permissions import (filterQuerySet,)
 from .exceptions import (InvalidInviteToken, ExpiredInviteToken)
 from .models import (
+    License,
     Brand,
     OrganizationUserInvite,
+    OrganizationRole,
 )
 
 class NestedModelSerializer:
@@ -25,6 +27,7 @@ class NestedModelSerializer:
         return super().create(validated_data)
 
 
+
 class OrganizationUserRoleRelatedField(serializers.RelatedField):
 
     def to_representation(self, obj):
@@ -44,6 +47,38 @@ class OrganizationUserRoleRelatedField(serializers.RelatedField):
         queryset = queryset.filter(organization=self.context.get('organization'))
         return queryset
 
+class OrganizationRoleInfoSerializer(serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+
+    class Meta:
+        model = OrganizationRole
+        fields = (
+            'id',
+            'name',
+        )
+
+class OrganizationUserRoleRelatedRoleField(OrganizationUserRoleRelatedField):
+    def to_representation(self, obj):
+        return OrganizationRoleInfoSerializer(obj).data
+
+class LicenseInfoSerializer(serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+
+    class Meta:
+        model = License
+        fields = (
+            'id',
+            'license_number',
+            'legal_business_name',
+        )
+
+class OrganizationUserRoleRelatedLicenseField(OrganizationUserRoleRelatedField):
+    def to_representation(self, obj):
+        return LicenseInfoSerializer(obj).data
 
 class InviteUserRelatedField(serializers.RelatedField):
 
