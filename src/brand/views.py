@@ -662,11 +662,17 @@ class UserInvitationVerificationView(GenericAPIView):
         instance = serializer.validated_data['token']
         if instance.status == 'pending':
             instance.status = 'accepted'
+            response_data = {
+                'new_user': True,
+                'email': instance.email,
+                'full_name': instance.full_name,
+            }
             try:
                 user = Auth_User.objects.get(email=instance.email)
             except Auth_User.DoesNotExist:
                 pass
             else:
+                response['new_user'] = False
                 organization_user, _ = OrganizationUser.objects.get_or_create(
                     organization=instance.organization,
                     user=user,
@@ -678,7 +684,7 @@ class UserInvitationVerificationView(GenericAPIView):
                 organization_user_role.licenses.add(*instance.licenses.all())
 
                 instance.status = 'completed'
-            response = Response(status=status.HTTP_200_OK)
+            response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'completed':
             response = Response(
                 {'detail': 'Already accepted'},
