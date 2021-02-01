@@ -26,6 +26,7 @@ from .serializers_mixin import (
     OrganizationUserRoleRelatedField,
     InviteUserRelatedField,
     InviteUserTokenField,
+    LicenseProfileBrandAssociationField,
 )
 from .models import (
     Organization,
@@ -313,32 +314,15 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     """
     This defines LicenseProfileSerializer
     """
-
-    def validate(self, attrs):
-        """
-        Object level validation.after brand Associated properly associate brand with license
-        """
-        if self.context['request'].method == 'PATCH':
-            profile = LicenseProfile.objects.filter(
-                license_id=self.context['request'].parser_context["kwargs"]["pk"])
-            if self.context['request'].data.get('brand_association'):
-                user_brands = Brand.objects.filter(
-                    organization__created_by=self.context['request'].user).values_list('id', flat=True)
-                if self.context['request'].data.get('brand_association') not in user_brands:
-                    raise serializers.ValidationError(
-                        "You can only associate/update license related to your brand only!")
-                license_obj = License.objects.filter(
-                    id=self.context['request'].parser_context["kwargs"]["pk"])
-                if license_obj:
-                    license_obj[0].brand_id = attrs.get('brand_association')
-                    license_obj[0].save()
-        return attrs
+    brand_association = LicenseProfileBrandAssociationField()
 
     def update(self, instance, validated_data):
         """
         Update for licenseprofile
         """
         updated_instance = super().update(instance, validated_data)
+        updated_instance.license.brand = updated_instance.brand_association
+        updated_instance.license.save()
         if updated_instance.license.is_seller:
             module_name = 'Vendors'
         else:

@@ -1,6 +1,10 @@
 from rest_framework import serializers
-from .models import OrganizationUserInvite
+from .permissions import (filterQuerySet,)
 from .exceptions import (InvalidInviteToken, ExpiredInviteToken)
+from .models import (
+    Brand,
+    OrganizationUserInvite,
+)
 
 class NestedModelSerializer:
     """
@@ -75,3 +79,24 @@ class InviteUserTokenField(serializers.Field):
                     raise serializers.ValidationError('Invalid.')
         else:
             return instance
+
+class LicenseProfileBrandAssociationField(serializers.RelatedField):
+    queryset=Brand.objects.all()
+
+    def to_representation(self, obj):
+        return obj.brand_name
+
+    def to_internal_value(self, data):
+        queryset = self.get_queryset()
+        try:
+            brand_obj = queryset.get(brand_name=data)
+        except Brand.DoesNotExist:
+            raise serializers.ValidationError(
+                f'Brand name \'{data} does\' not exist or you do not have access.')
+        else:
+            return brand_obj
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = filterQuerySet.for_user(queryset, self.context['request'].user)
+        return queryset
