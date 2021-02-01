@@ -165,7 +165,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
     license_profile_url = serializers.SerializerMethodField()
     is_existing_user = serializers.SerializerMethodField()
     approved_on = serializers.SerializerMethodField()
-    data_fetch_token = serializers.CharField(write_only=True)
+    data_fetch_token = serializers.CharField(write_only=True, allow_null=True)
 
     def get_approved_on(self, obj):
         """
@@ -232,21 +232,19 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         except Exception:
             return None
 
-    def validate_data_fetch_token(self, value):
-        if not value:
-            raise serializers.ValidationError('Token is required.')
-        return value
-
     def validate(self, attrs):
-        data_fetch_token = attrs['data_fetch_token']
-        fetch_instance = OnboardingDataFetch.objects.filter(data_fetch_token=data_fetch_token).first()
-        if not fetch_instance:
-            raise serializers.ValidationError({'data_fetch_token': ['Invalid Token.']})
-        else:
-            if not fetch_instance.license_number == attrs.get('license_number'):
-                raise serializers.ValidationError({'data_fetch_token': 'Token is not generated for current license number.'})
-            if not fetch_instance.owner_verification_status in ('verified', 'licence_data_not_found',):
-                raise serializers.ValidationError({'data_fetch_token': 'Token status not fulfilled'})
+        if self.context['view'].action == 'create':
+            data_fetch_token = attrs.get('data_fetch_token')
+            if not data_fetch_token:
+                raise serializers.ValidationError({'data_fetch_token': 'Token is required.'})
+            fetch_instance = OnboardingDataFetch.objects.filter(data_fetch_token=data_fetch_token).first()
+            if not fetch_instance:
+                raise serializers.ValidationError({'data_fetch_token': 'Invalid Token.'})
+            else:
+                if not fetch_instance.license_number == attrs.get('license_number'):
+                    raise serializers.ValidationError({'data_fetch_token': 'Token is not generated for current license number.'})
+                if not fetch_instance.owner_verification_status in ('verified', 'licence_data_not_found',):
+                    raise serializers.ValidationError({'data_fetch_token': 'Token status not fulfilled'})
 
         return super().validate(attrs)
 

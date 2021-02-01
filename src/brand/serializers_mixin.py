@@ -89,10 +89,14 @@ class LicenseProfileBrandAssociationField(serializers.RelatedField):
     def to_internal_value(self, data):
         queryset = self.get_queryset()
         try:
+            int(data)
+        except ValueError:
+            raise serializers.ValidationError(f'Error while parsing  brand id \'{data}\' as integer.')
+        try:
             brand_obj = queryset.get(id=data)
         except Brand.DoesNotExist:
             raise serializers.ValidationError(
-                f'Brand name \'{data}\' does not exist or you do not have access.')
+                f'Brand id \'{data}\' does not exist or you do not have access.')
         else:
             return brand_obj
 
