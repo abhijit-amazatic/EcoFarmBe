@@ -84,15 +84,15 @@ class LicenseProfileBrandAssociationField(serializers.RelatedField):
     queryset=Brand.objects.all()
 
     def to_representation(self, obj):
-        return obj.brand_name
+        return obj.id
 
     def to_internal_value(self, data):
         queryset = self.get_queryset()
         try:
-            brand_obj = queryset.get(brand_name=data)
+            brand_obj = queryset.get(id=data)
         except Brand.DoesNotExist:
             raise serializers.ValidationError(
-                f'Brand name \'{data} does\' not exist or you do not have access.')
+                f'Brand name \'{data}\' does not exist or you do not have access.')
         else:
             return brand_obj
 
