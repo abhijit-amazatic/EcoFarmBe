@@ -635,6 +635,14 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
 #             response = Response("false", status=400)
 #        return response
 
+class InvitesDataFilter(FilterSet):
+    status__in = CharInFilter(field_name='status', lookup_expr='in')
+    class Meta:
+        model = OrganizationUserInvite
+        fields = {
+            'status__in':['icontains', 'exact'],
+        }
+
 
 class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
                                 mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -644,6 +652,9 @@ class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
     queryset=OrganizationUserInvite.objects.all()
     permission_classes = (IsAuthenticatedBrandPermission, )
     serializer_class = InviteUserSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status',]
+    filterset_class = InvitesDataFilter
 
     def perform_create(self, serializer):
         instance = serializer.save()
