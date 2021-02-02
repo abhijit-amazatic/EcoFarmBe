@@ -1,6 +1,7 @@
 {% extends 'admin/submit_line.html' %}
+{% load i18n admin_urls %}
 
 {% block submit-row %}
-    <input type="submit" value="Approve" name="_approve" style="background: #21ba21;">
+{% if show_approve %}<input type="submit" value="{% trans 'Approve' %}" name="_approve" style="background: #21ba21;">{% endif %}
     {{ block.super }}
 {% endblock %}
