@@ -250,9 +250,19 @@ def send_onboarding_data_fetch_verification_mail(instance, user_id):
         'license': f"{instance.license_number} | {instance.legal_business_name}",
         'otp': instance.generate_otp_str(),
     }
-    mail_send(
-        "license_owner_datapoputalaion_otp.html",
-        context,
-        "Thrive Society License Data Population verification.",
-        settings.ONBOARDING_LICENSE_DATA_FETCH_OWNER_EMAIL_OVERIDE or instance.owner_email,
-    )
+    email_overide = getattr(settings, 'ONBOARDING_DATA_FETCH_EMAIL_OVERRIDE', [])
+    if email_overide:
+        for email in email_overide:
+            mail_send(
+                "license_owner_datapoputalaion_otp.html",
+                context,
+                "Thrive Society License Data Population verification.",
+                email.strip(),
+            )
+    else:
+        mail_send(
+            "license_owner_datapoputalaion_otp.html",
+            context,
+            "Thrive Society License Data Population verification.",
+            instance.owner_email,
+        )
