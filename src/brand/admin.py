@@ -216,12 +216,11 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
 
     def name(self, obj):
         return obj.license_profile.name
-    
+
     def approved_by(self, obj):
         if obj.license_profile.approved_by:
             return obj.license_profile.approved_by.get('email',"N/A")
         return "N/A"
-        
 
     def get_search_results(self, request, queryset, search_term):
         """
@@ -230,14 +229,14 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         queryset, use_distinct = super(MyLicenseAdmin, self).get_search_results(request, queryset, search_term)
         queryset |= self.model.objects.select_related('license_profile').filter(license_profile__name__contains={'name':search_term})
         return queryset, use_distinct
-    
+
     inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin,]
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('name','brand','legal_business_name','status','profile_category','approved_on','approved_by','created_on','updated_on',)
-    list_select_related = ['brand__organization__created_by']
-    search_fields = ('brand__brand_name','brand__organization__created_by__email','status')
+    list_display = ('name', 'organization', 'brand','legal_business_name','status','profile_category','approved_on','approved_by','created_on','updated_on',)
+    list_select_related = ['brand__organization__created_by', 'organization__created_by']
+    search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status')
     readonly_fields = ('created_on','updated_on',)
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
@@ -321,7 +320,7 @@ class OrganizationAdmin(nested_admin.NestedModelAdmin):
     """
     model = Organization
     list_display = ('name', 'created_by', 'created_on', 'updated_on',)
-    search_fields = ('name', 'created_by',)
+    search_fields = ('name', 'created_by__email',)
     list_filter = (
         ('created_on', DateRangeFilter),
         ('updated_on', DateRangeFilter),
