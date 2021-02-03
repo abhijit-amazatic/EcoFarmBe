@@ -314,7 +314,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     """
     This defines LicenseProfileSerializer
     """
-    brand_association = LicenseProfileBrandAssociationField()
+    brand_association = LicenseProfileBrandAssociationField(allow_null=True)
 
     def update(self, instance, validated_data):
         """
