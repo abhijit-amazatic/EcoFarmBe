@@ -53,7 +53,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
                              InTransitOrderViewSet, DocumentPreSignedView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
-                             InventoryCountyView)
+                             InventoryNutrientsView,InventoryCountyView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (
@@ -212,6 +212,7 @@ urlpatterns = [
     path(r'crm/labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     path(r'inventory/county/', InventoryCountyView.as_view(), name='get-county'),
+    path(r'inventory/nutrients/', InventoryNutrientsView.as_view(), name='get-nutrients'),
     path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
     path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),
     path(r'update-program-selection/', ProgramSelectionSyncView.as_view(), name="update-program"),

@@ -49,6 +49,7 @@ class DataFilter(FilterSet):
     cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
     cf_quantity_estimate__in = CharInFilter(field_name='cf_quantity_estimate', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
+    nutrients = django_filters.CharFilter(method='get_nutrients')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
     labtest__d_8_THC__in = CharInFilter(field_name='labtest__d_8_THC', lookup_expr='in')
@@ -74,6 +75,10 @@ class DataFilter(FilterSet):
             cf_strain_name__icontains=value).filter(cf_cfi_published=True)
         return items
 
+    def get_nutrients(self, queryset, name, value):
+        items = queryset.filter(cf_cfi_published=True,nutrients__overlap=[value])
+        return items
+    
     def filter_cf_pesticide_summary__in(self, queryset, name, values):
         values = ['ND' if val == 'Non-Detect' else val for val in values ]
         queryset.select_related('labtest')
@@ -566,3 +571,19 @@ class InventoryCountyView(APIView):
         return Response({
             'status_code': 200,
             'response': [i['county_grown'] for i in categories if i['county_grown'] != None]})
+
+class InventoryNutrientsView(APIView):
+    """
+    Return Inventory nutrients.
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory nutrients.
+        """
+        nutrients = Inventory.objects.filter(cf_cfi_published=True).values_list('nutrients',flat=True).distinct()
+        clean_nutrients = list(filter(None,list(nutrients)))
+        return Response({
+            'status_code': 200,
+            'response':[item for sublist in clean_nutrients for item in sublist]})
