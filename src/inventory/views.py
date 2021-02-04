@@ -50,6 +50,7 @@ class DataFilter(FilterSet):
     cf_quantity_estimate__in = CharInFilter(field_name='cf_quantity_estimate', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
     nutrients = django_filters.CharFilter(method='get_nutrients')
+    ethics_and_certification = django_filters.CharFilter(method='get_ethics_and_certification')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
     labtest__d_8_THC__in = CharInFilter(field_name='labtest__d_8_THC', lookup_expr='in')
@@ -78,6 +79,10 @@ class DataFilter(FilterSet):
     def get_nutrients(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,nutrients__overlap=[value])
         return items
+
+    def get_ethics_and_certification(self, queryset, name, value):
+        items = queryset.filter(cf_cfi_published=True,ethics_and_certification__overlap=[value])
+        return items    
     
     def filter_cf_pesticide_summary__in(self, queryset, name, values):
         values = ['ND' if val == 'Non-Detect' else val for val in values ]
@@ -586,4 +591,22 @@ class InventoryNutrientsView(APIView):
         clean_nutrients = list(filter(None,list(nutrients)))
         return Response({
             'status_code': 200,
-            'response':[item for sublist in clean_nutrients for item in sublist]})
+            'response':list(set([item for sublist in clean_nutrients for item in sublist]))})
+    
+class InventoryEthicsView(APIView):
+    """
+    Return Inventory ethics & certifications
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory ethics & certifications
+        """
+        ethics = Inventory.objects.filter(cf_cfi_published=True).values_list('ethics_and_certification',flat=True).distinct()
+        clean_ethics = list(filter(None,list(ethics)))
+        return Response({
+            'status_code': 200,
+            'response':list(set([item for sublist in clean_ethics for item in sublist]))})
+
+    
