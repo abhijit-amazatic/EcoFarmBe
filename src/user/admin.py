@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import models
 from datetime import datetime
 from .models import (User, MemberCategory,TermsAndCondition, TermsAndConditionAcceptance, HelpDocumentation)
-from core.utility import send_async_user_approval_mail
+from core.utility import (send_async_user_approval_mail, send_verification_link_user_instance,)
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 from django.db import transaction
@@ -91,7 +91,7 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     list_per_page = 25
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
-    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','email'] #'phone'
+    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified'] #'phone'
     actions = [approve_user, ] 
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link',)}),
@@ -99,6 +99,11 @@ class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
     
     @transaction.atomic
     def save_model(self, request, obj, form, change):
+        # if change and 'email' in form.changed_data:
+        #     if not form.initial['email'].lower() == obj.email.lower():
+        #         obj.is_verified = False
+        #         send_verification_link_user_instance(obj)
+
         if 'is_approved' in form.changed_data and obj.is_approved:
             mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': obj.full_name},"Account Approved.", obj.email)
             obj.approved_on  = timezone.now()

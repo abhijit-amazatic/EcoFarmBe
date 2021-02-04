@@ -26,7 +26,7 @@ def pre_save_user(sender, instance, **kwargs):
 
     if not instance.phone == old_instance.phone:
         instance.is_phone_verified = False
-    if not instance.email == old_instance.email:
+    if not instance.email.lower() == old_instance.email.lower():
         instance.is_verified = False
         send_verification_link_user_instance(instance)
 
