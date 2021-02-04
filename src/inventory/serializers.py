@@ -3,8 +3,16 @@ Serializer for inventory
 """
 import json
 from rest_framework import serializers
-from .models import (Inventory, ItemFeedback, InTransitOrder,
-                     Documents)
+from brand.permissions import filterQuerySet
+from brand.models import LicenseProfile
+from cultivar.models import Cultivar
+from .models import (
+    Inventory,
+    CustomInventory,
+    ItemFeedback,
+    InTransitOrder,
+    Documents,
+)
 
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -74,3 +82,41 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
         model = InTransitOrder
         fields = ('profile_id', 'order_data', 'created_on', 'updated_on')
         read_only_fields = ('created_on', 'updated_on')
+
+
+class CustomInventoryCultivarNameField(serializers.RelatedField):
+    queryset = Cultivar.objects.all()
+
+    def to_representation(self, obj):
+        return obj.cultivar_name
+
+    def to_internal_value(self, data):
+        queryset = self.get_queryset()
+        obj = queryset.filter(cultivar_name=data).first()
+        if not obj:
+            raise serializers.ValidationError(f'Cultivar name \'{data}\' does not exist or not approved.')
+        else:
+            return obj
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset =queryset.filter(status='approved')
+        return queryset
+
+
+class CustomInventorySerializer(serializers.ModelSerializer):
+    cultivar_name = CustomInventoryCultivarNameField(source='cultivar')
+    """
+    Inventory Serializer
+    """
+
+    def validate_vendor_name(self, val):
+        queryset = filterQuerySet.for_user(LicenseProfile.objects.all(), self.context['request'].user)
+        if not queryset.filter(name=val).exists():
+            raise serializers.ValidationError(
+                f'Vendor name \'{val}\' does not exist or you do not have access to vendor profile.')
+        return val
+
+    class Meta:
+        model = CustomInventory
+        exclude = ('cultivar',)

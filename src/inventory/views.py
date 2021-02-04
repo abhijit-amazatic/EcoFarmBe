@@ -19,8 +19,9 @@ from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from core.pagination import PageNumberPagination
 from .serializers import (InventorySerializer, LogoutInventorySerializer,
-                          ItemFeedbackSerializer, InTransitOrderSerializer)
-from .models import (Inventory, ItemFeedback, InTransitOrder, Documents)
+                          ItemFeedbackSerializer, InTransitOrderSerializer,
+                          CustomInventorySerializer,)
+from .models import (Inventory, ItemFeedback, InTransitOrder, Documents, CustomInventory)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
                                    get_inventory_name)
@@ -610,3 +611,20 @@ class InventoryEthicsView(APIView):
             'response':list(set([item for sublist in clean_ethics for item in sublist]))})
 
     
+
+class CustomInventoryViewSet(viewsets.ModelViewSet):
+    """
+    Inventory View
+    """
+    permission_classes = (AllowAny, )
+    filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
+    ordering_fields = '__all__'
+    pagination_class = BasicPagination
+    ordering = ('created_on',)
+    serializer_class = CustomInventorySerializer
+
+    def get_queryset(self):
+        """
+         Return QuerySet.
+        """
+        return CustomInventory.objects.all()

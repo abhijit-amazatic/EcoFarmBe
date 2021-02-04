@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='custominventory',
             name='best_contact_Day_of_week',
-            field=models.CharField(blank=True, choices=[('monday', 'Monday'), ('tuesday', 'Tuesday'), ('wednesday', 'Wednesday'), ('thursday', 'Thursday'), ('friday', 'Friday'), ('saturday', 'Saturday'), ('sunday', 'Sunday')], max_length=50, null=True, verbose_name='best_contact_Day_of_week'),
+            field=models.CharField(blank=True, choices=[('monday', 'Monday'), ('tuesday', 'Tuesday'), ('wednesday', 'Wednesday'), ('thursday', 'Thursday'), ('friday', 'Friday'), ('saturday', 'Saturday'), ('sunday', 'Sunday')], max_length=50, null=True, verbose_name='Best Contact Day Of Week'),
         ),
         migrations.AddField(
             model_name='custominventory',
@@ -111,5 +111,11 @@ class Migration(migrations.Migration):
             model_name='custominventory',
             name='pricing_position',
             field=models.CharField(blank=True, choices=[('Negotiable', 'Negotiable'), ('Firm', 'Firm'), ('Min Quantity', 'Min Quantity'), ('Offers Open', 'Offers Open')], max_length=255, null=True, verbose_name='Pricing Position'),
+        ),
+        migrations.AddField(
+            model_name='custominventory',
+            name='vendor_name',
+            field=models.CharField(default='', max_length=255, verbose_name='Vendor Name'),
+            preserve_default=False,
         ),
     ]

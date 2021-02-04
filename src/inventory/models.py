@@ -200,11 +200,12 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     minimum_order_quantity = models.DecimalField(_('Minimum Order Quantity(lbs)'), blank=True, null=True, max_digits=4, decimal_places=2)
 
     transportation = models.CharField(_("Transportation / Sample Pickup"), max_length=255, blank=True, null=True)
-    best_contact_Day_of_week = models.CharField(_("best_contact_Day_of_week"), max_length=50, choices=DAY_OF_WEEK, blank=True, null=True,)
+    best_contact_Day_of_week = models.CharField(_("Best Contact Day Of Week"), max_length=50, choices=DAY_OF_WEEK, blank=True, null=True,)
     best_contact_time_from = models.TimeField(_('Best Contact Time From'), auto_now=False, blank=True, null=True, default=None)
     best_contact_time_to = models.TimeField(_('Best Contact Time To'), auto_now=False, blank=True, null=True, default=None)
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    vendor_name = models.CharField(_('Vendor Name'), max_length=255)
 
 
 class ItemFeedback(TimeStampFlagModelMixin, models.Model):

@@ -15,7 +15,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     """
     change_form_template = "inventory/custom_inventory_change_form.html"
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
-    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name',)
+    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'vendor_name',)
     # actions = ['test_action', ]
     fieldsets = (
         ('BATCH & QUALITY INFORMATION', {
@@ -51,6 +51,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         ('Extra Info', {
             'fields': (
                 'status',
+                'vendor_name',
                 'created_on',
                 'updated_on',
             ),

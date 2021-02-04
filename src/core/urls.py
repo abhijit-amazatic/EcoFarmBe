@@ -53,7 +53,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
                              InTransitOrderViewSet, DocumentPreSignedView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
-                             InventoryNutrientsView,InventoryCountyView,InventoryEthicsView)
+                             InventoryNutrientsView,InventoryCountyView,
+                             InventoryEthicsView, CustomInventoryViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from brand.views import (
@@ -90,6 +91,7 @@ router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
+router.register(r'custom-inventory', CustomInventoryViewSet, base_name="inventory")
 router.register(r'item-feedback', ItemFeedbackViewSet, base_name="feedback")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
