@@ -83,6 +83,7 @@ from .serializers import (
     InviteUserVerificationSerializer,
     OTPSerializer,
     OnboardingDataFetchSerializer,
+    MyOrganizationRoleSerializer,
 )
 from .views_mixin import (
     NestedViewSetMixin,
@@ -527,7 +528,7 @@ class PermissionListView(APIView):
     """
     All KPI view set
     """
-    permission_classes = (IsAuthenticatedBrandPermission, IsAuthenticatedBrandPermission, )
+    permission_classes = (IsAuthenticatedBrandPermission, )
 
     def get(self, request, *args, **kwargs):
         """
@@ -552,8 +553,7 @@ class OrganizationRoleViewSet(PermissionQuerysetFilterMixin,
     serializer_class = OrganizationRoleSerializer
     search_fields = ['name', ]
 
-class OrganizationUserViewSet(PermissionQuerysetFilterMixin,
-                                NestedViewSetMixin, viewsets.ModelViewSet):
+class OrganizationUserViewSet(NestedViewSetMixin, viewsets.ModelViewSet):
     """
     All Brand related endpoint's view is defined here.
     """
@@ -583,6 +583,44 @@ class OrganizationUserRoleViewSet(PermissionQuerysetFilterMixin,
             organization_user__organization=self.context_parent['organization'])
         return  qs
 
+
+class MyOrganizationRoleView(APIView):
+    """
+    All KPI view set
+    """
+    permission_classes = (IsAuthenticatedBrandPermission, )
+
+    def get(self, request, *args, **kwargs):
+        """
+        Return QuerySet.
+        """
+        parents_query_dict = self.get_parents_query_dict()
+        qs = OrganizationUserRole.objects.filter(
+            organization_user__organization=parents_query_dict.get('organization'))
+        qs = qs.filter(organization_user__user=request.user)
+        serializers = MyOrganizationRoleSerializer(
+            qs,
+            context={
+                'view': self,
+                'request': request,
+                'format': self.kwargs,
+            },
+            many=True,
+        )
+        return Response(serializers.data)
+
+    def get_parents_query_dict(self, **kwargs):
+        result = {}
+        for kwarg_name, kwarg_value in self.kwargs.items():
+            if kwarg_name.startswith('parent_'):
+                query_lookup = kwarg_name.replace(
+                    'parent_',
+                    '',
+                    1
+                )
+                query_value = kwarg_value
+                result[query_lookup] = query_value
+        return result
 
 class ProfileReportViewSet(viewsets.ModelViewSet):
     """

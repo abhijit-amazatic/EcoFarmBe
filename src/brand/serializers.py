@@ -605,7 +605,21 @@ class OrganizationUserRoleNestedSerializer(NestedModelSerializer, serializers.Mo
             # 'organization',
         )
 
-
+class MyOrganizationRoleSerializer(OrganizationUserRoleNestedSerializer):
+    role_info = OrganizationRoleSerializer(source='role', read_only=True)
+    class Meta:
+        model = OrganizationUserRole
+        fields = (
+            'id',
+            # 'organization_user',
+            # 'organization_user_info',
+            'role',
+            'role_info',
+            'licenses',
+            # 'created_on',
+            # 'updated_on',
+            # 'organization',
+        )
 
 # class OrganizationUserRoleSerializer(serializers.ModelSerializer):
 #     """

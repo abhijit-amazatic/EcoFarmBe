@@ -74,6 +74,7 @@ from brand.views import (
     UserInvitationVerificationView,
     ProgramSelectionSyncView,
     OnboardingDataFetchViewSet,
+    MyOrganizationRoleView,
 )
 from two_factor.views import (
     TwoFactorLoginEnableView,
@@ -202,6 +203,7 @@ urlpatterns = [
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
     path(r'platform-kpi/', KpiViewSet.as_view(), name='kpi'),
     path('organization/<int:parent_organization>/platform-kpi/', KpiViewSet.as_view(), name='organization-kpi'),
+    path('organization/<int:parent_organization>/my-permissions/', MyOrganizationRoleView.as_view(), name='my-permissions'),
     path(r'file-upload/', FileUploadView.as_view(), name='file-upload'),
     path(r'document-url/<str:id>/', DocumentPreSignedView.as_view(), name='documents-url'),
     path(r'document-url/', DocumentPreSignedView.as_view(), name='documents-url'),
