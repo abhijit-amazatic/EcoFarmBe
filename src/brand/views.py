@@ -683,7 +683,7 @@ class UserInvitationVerificationView(GenericAPIView):
             except Auth_User.DoesNotExist:
                 pass
             else:
-                response['new_user'] = False
+                response_data['new_user'] = False
                 organization_user, _ = OrganizationUser.objects.get_or_create(
                     organization=instance.organization,
                     user=user,
