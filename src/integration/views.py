@@ -916,7 +916,7 @@ class GetAutoComplete(APIView):
     """
     Autocomplete address using google api.
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AllowAny, )
 
     def get(self, request):
         """
