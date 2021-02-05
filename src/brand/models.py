@@ -170,6 +170,7 @@ class OrganizationUser(TimeStampFlagModelMixin, models.Model):
         related_name='organization_user',
         on_delete=models.CASCADE
     )
+    is_disabled = models.BooleanField(_('Is Disabled'), default=False)
 
     class Meta:
         unique_together = (('organization', 'user'), )
