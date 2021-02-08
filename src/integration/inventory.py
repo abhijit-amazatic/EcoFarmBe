@@ -64,6 +64,20 @@ def get_inventory_obj(inventory_name):
         )
     return inventory
 
+def create_inventory_item(inventory_name, record, params={}):
+    """
+    Create an inventory item in zoho inventory.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    return inventory.get_inventory(record, params=params)
+
+def update_inventory_item(inventory_name, record_id, record, params={}):
+    """
+    Update an inventory item in zoho inventory.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    return inventory.get_inventory(record_id, record, params=params)
+
 def get_inventory_items(inventory_name, params={}):
     """
     Return Inventory list.
