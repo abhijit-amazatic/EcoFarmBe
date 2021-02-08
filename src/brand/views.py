@@ -682,8 +682,12 @@ class InvitesDataFilter(FilterSet):
         }
 
 
-class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
-                                mixins.ListModelMixin, viewsets.GenericViewSet):
+class InviteUserViewSet(NestedViewSetMixin,
+                        mixins.CreateModelMixin,
+                        mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
     """
     Invite User view
     """
@@ -697,6 +701,22 @@ class InviteUserViewSet(NestedViewSetMixin, mixins.CreateModelMixin,
     def perform_create(self, serializer):
         instance = serializer.save()
         send_async_invitation.delay(instance.id)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        name='Resend Invitation',
+        url_name='resend-invitation',
+        url_path='resend',
+        serializer_class=serializers.Serializer,
+    )
+    def resend_invitation(self, request, pk, *args, **kwargs):
+        """
+        Resend Invitation
+        """
+        instance = self.get_object()
+        send_async_invitation.delay(instance.id)
+        return Response(status=200)
 
 class UserInvitationVerificationView(GenericAPIView):
     """
