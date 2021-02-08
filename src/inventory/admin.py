@@ -4,8 +4,10 @@ from django.db import models
 from django import forms
 from django.contrib.admin.utils import (unquote,)
 
-from .models import CustomInventory
-
+from .models import (
+    Inventory,
+    CustomInventory
+)
 
 
 # Register your models here.
@@ -82,8 +84,28 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def approve(self, request, obj):
-        obj.status = 'approved'
-        obj.save()
+        if obj.status == 'pending_for_approval':
+            inventory_obj = Inventory(
+                vendor_name=obj.vendor_name,
+                category_name=obj.category_name,
+                category_id=obj.category_id,
+                cf_quantity_estimate=obj.quantity_available,
+                cf_harvest_date=obj.harvest_date,  # not in inventory
+                cf_date_available=obj.batch_availability_date,
+                cf_cannabis_grade_and_category=obj.grade_estimate,
+                cf_vendor_name=obj.vendor_name,
+                cf_farm_price=obj.farm_ask_price,
+                price=obj.farm_ask_price, # Calculate price = Cost price + IFP Tier membership Fee
+                cf_minimum_quantity=obj.minimum_order_quantity,
+                cf_sample_in_house='Pending',
+                product_type='goods',
+                unit='lb',
+                cf_status='In-Testing',
+                cf_cfi_published=False,
+                cf_cultivar_type=True,
+            )
+            obj.status = 'approved'
+            obj.save()
 
     def cultivar_name(self, obj):
             return obj.cultivar.cultivar_name
