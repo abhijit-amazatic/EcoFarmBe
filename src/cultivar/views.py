@@ -9,7 +9,7 @@ from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from .models import (Cultivar, )
 from .serializers import (CultivarSerializer, )
-from integration.crm import (sync_cultivars, )
+from integration.crm import (sync_cultivars, create_records, update_records)
 
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -26,9 +26,9 @@ class DataFilter(FilterSet):
     class Meta:
         model = Cultivar
         fields = {
-        'cultivar_name':['icontains', 'exact'],
         'cultivar_type':['icontains', 'exact'],
         'thc_range':['gte', 'lte', 'gt', 'lt'],
+        'cultivar_name':['icontains', 'exact'],
         'cbd_range':['gte', 'lte', 'gt', 'lt'],
         'cbg_range':['gte', 'lte', 'gt', 'lt'],
         'thcv_range':['gte', 'lte', 'gt', 'lt'],
@@ -54,6 +54,33 @@ class CultivarViewSet(viewsets.ModelViewSet):
         Return QuerySet.
         """
         return Cultivar.objects.all()
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        result = create_records('Cultivars', instance.__dict__)
+        if result.get('status_code') == 201:
+            try:
+                data = instance.get('response', {}).get('data')
+                if data and isinstance(data, list):
+                    crm_id = data[0].get('details', {}).get('id')
+            except Exception as exc:
+                print('Error while creating Cultivar in Zoho CRM')
+                print(exc)
+            else:
+                if crm_id:
+                    instance.cultivar_crm_id = crm_id
+        else:
+            print('Error while creating Cultivar in Zoho CRM')
+            print(result)
+
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        result = update_records('Cultivars', instance.__dict__)
+        if not result.get('status_code') == 200:
+            print('Error while creating Cultivar in Zoho CRM')
+            print(result)
+
 
 class CultivarSyncView(APIView):
     """
