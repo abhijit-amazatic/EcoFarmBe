@@ -10,7 +10,6 @@ role_map = {
 
 DEFAULT_ROLE_PERM = {
     'License Owner': [
-        "Invite_licence_user",
     ],
     'Farm Manager': [
         "view_cultivation_overview",
@@ -31,12 +30,15 @@ DEFAULT_ROLE_PERM = {
         "add_profile_contact",
         "edit_profile_contact",
         "delete_profile_contact",
+        "view_billing_information",
+        "edit_billing_information",
         "view_billing_address",
         "edit_billing_address",
         "view_shipping_address",
         "edit_shipping_address",
         "view_mailing_address",
         "edit_mailing_address",
+        "view_program_overview",
     ],
     'Logistics': [
         "view_license",
@@ -97,7 +99,6 @@ SALES_REP_PERM = [
     'edit_license_profile',
     # 'edit_profile_contact',
     # 'edit_program_overview',
-    # 'Invite_licence_user',
     'view_crop_overview',
     'view_cultivation_overview',
     'view_financial_overview',
