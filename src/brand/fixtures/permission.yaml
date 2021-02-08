@@ -1,0 +1,417 @@
+# ###################### ORG and  Brand ###################
+# Organization
+-   model: brand.permission
+    pk: view_organization
+    fields:
+        name: View Organization
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: add_organization
+    fields:
+        name: Add Organization
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: edit_organization
+    fields:
+        name: Edit Organization
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: delete_organization
+    fields:
+        name: Delete Organization
+        description: ''
+        group: 1
+
+
+
+# Brand
+-   model: brand.permission
+    pk: view_brand
+    fields:
+        name: View Brand
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: add_brand
+    fields:
+        name: Add Brand
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: edit_brand
+    fields:
+        name: Edit Brand
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: delete_brand
+    fields:
+        name: Delete Brand
+        description: ''
+        group: 1
+
+
+
+#############################   ORG user & roles #################
+# Organization Role
+-   model: brand.permission
+    pk: view_organization_role
+    fields:
+        name: View Organization Role
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: add_organization_role
+    fields:
+        name: Add Organization Role
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: edit_organization_role
+    fields:
+        name: Edit Organization Role
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: delete_organization_role
+    fields:
+        name: Delete Organization Role
+        description: ''
+        group: 1
+
+
+
+# Organization User
+-   model: brand.permission
+    pk: view_organization_user
+    fields:
+        name: View Organization User
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: add_organization_user
+    fields:
+        name: Add Organization User
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: edit_organization_user
+    fields:
+        name: Edit Organization User
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: delete_organization_user
+    fields:
+        name: Delete Organization User
+        description: ''
+        group: 1
+
+
+
+# Organization User Role
+-   model: brand.permission
+    pk: view_organization_user_role
+    fields:
+        name: View Organization User Role
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: add_organization_user_role
+    fields:
+        name: Add Organization User Role
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: edit_organization_user_role
+    fields:
+        name: Edit Organization User Role
+        description: ''
+        group: 1
+-   model: brand.permission
+    pk: delete_organization_user_role
+    fields:
+        name: Delete Organization User Role
+        description: ''
+        group: 1
+
+
+# Invite User To Organization
+-   model: brand.permission
+    pk: invite_user_to_organization
+    fields:
+        name: Invite User To Organization
+        description: ''
+        group: 1
+
+
+
+# ########################### License & profile #########################
+# License
+-   model: brand.permission
+    pk: view_license
+    fields:
+        name: View License
+        description: ''
+        group: 2
+-   model: brand.permission
+    pk: add_license
+    fields:
+        name: Add License
+        description: ''
+        group: 2
+-   model: brand.permission
+    pk: edit_license
+    fields:
+        name: Edit License
+        description: ''
+        group: 2
+-   model: brand.permission
+    pk: delete_license
+    fields:
+        name: Delete License
+        description: ''
+        group: 2
+
+
+
+# License Profile
+-   model: brand.permission
+    pk: view_license_profile
+    fields:
+        name: View License Profile
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: edit_license_profile
+    fields:
+        name: Edit License Profile
+        description: ''
+        group: 3
+
+
+
+# Profile Contact
+-   model: brand.permission
+    pk: view_profile_contact
+    fields:
+        name: View Profile Contact
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: add_profile_contact
+    fields:
+        name: Add Profile Contact
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: edit_profile_contact
+    fields:
+        name: Edit Profile Contact
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: delete_profile_contact
+    fields:
+        name: Delete Profile Contact
+        description: ''
+        group: 4
+
+
+
+# Cultivation Overview
+-   model: brand.permission
+    pk: view_cultivation_overview
+    fields:
+        name: View Cultivation Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: add_cultivation_overview
+    fields:
+        name: Add Cultivation Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: edit_cultivation_overview
+    fields:
+        name: Edit Cultivation Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: delete_cultivation_overview
+    fields:
+        name: Delete Cultivation Overview
+        description: ''
+        group: 3
+
+
+
+# Financial Overview
+-   model: brand.permission
+    pk: view_financial_overview
+    fields:
+        name: View Financial Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: add_financial_overview
+    fields:
+        name: Add Financial Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: edit_financial_overview
+    fields:
+        name: Edit Financial Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: delete_financial_overview
+    fields:
+        name: Delete Financial Overview
+        description: ''
+        group: 3
+
+
+
+# Crop Overview
+-   model: brand.permission
+    pk: view_crop_overview
+    fields:
+        name: View Crop Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: add_crop_overview
+    fields:
+        name: Add Crop Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: edit_crop_overview
+    fields:
+        name: Edit Crop Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: delete_crop_overview
+    fields:
+        name: Delete Crop Overview
+        description: ''
+        group: 3
+
+
+
+# Program Overview
+-   model: brand.permission
+    pk: view_program_overview
+    fields:
+        name: View Program Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: add_program_overview
+    fields:
+        name: Add Program Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: delete_program_overview
+    fields:
+        name: Delete Program Overview
+        description: ''
+        group: 3
+-   model: brand.permission
+    pk: edit_program_overview
+    fields:
+        name: Edit Program Overview
+        description: ''
+        group: 3
+
+
+
+# Billing Information
+-   model: brand.permission
+    pk: view_billing_information
+    fields:
+        name: View Billing Information
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: edit_billing_information
+    fields:
+        name: Edit Billing Information
+        description: ''
+        group: 4
+
+
+
+# Billing Address
+-   model: brand.permission
+    pk: view_billing_address
+    fields:
+        name: View Billing Address
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: edit_billing_address
+    fields:
+        name: Edit Billing Address
+        description: ''
+        group: 4
+
+
+
+# Shipping Address
+-   model: brand.permission
+    pk: view_shipping_address
+    fields:
+        name: View Shipping Address
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: edit_shipping_address
+    fields:
+        name: Edit Shipping Address
+        description: ''
+        group: 4
+
+
+
+# Mailing Address
+-   model: brand.permission
+    pk: view_mailing_address
+    fields:
+        name: View Mailing Address
+        description: ''
+        group: 4
+-   model: brand.permission
+    pk: edit_mailing_address
+    fields:
+        name: Edit Mailing Address
+        description: ''
+        group: 4
+
+
+
+# Sales
+-   model: brand.permission
+    pk: view_sales
+    fields:
+        name: View Sales
+        description: ''
+        group: 5
+
+
+
+# Inventory
+-   model: brand.permission
+    pk: view_inventory
+    fields:
+        name: View Inventory
+        description: ''
+        group: 5
