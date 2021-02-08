@@ -55,31 +55,18 @@ class CultivarViewSet(viewsets.ModelViewSet):
         """
         return Cultivar.objects.all()
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        result = create_records('Cultivars', instance.__dict__)
-        if result.get('status_code') == 201:
+    def perform_update(self, serializer):
+        obj = serializer.save()
+        if obj.status == 'approved':
             try:
-                data = instance.get('response', {}).get('data')
-                if data and isinstance(data, list):
-                    crm_id = data[0].get('details', {}).get('id')
+                result = update_records('Cultivars', obj.__dict__)
             except Exception as exc:
-                print('Error while creating Cultivar in Zoho CRM')
+                print('Error while updating Cultivar in Zoho CRM')
                 print(exc)
             else:
-                if crm_id:
-                    instance.cultivar_crm_id = crm_id
-        else:
-            print('Error while creating Cultivar in Zoho CRM')
-            print(result)
-
-
-    def perform_update(self, serializer):
-        instance = serializer.save()
-        result = update_records('Cultivars', instance.__dict__)
-        if not result.get('status_code') == 200:
-            print('Error while creating Cultivar in Zoho CRM')
-            print(result)
+                if not result.get('status_code') == 200:
+                    print('Error while updating Cultivar in Zoho CRM')
+                    print(result)
 
 
 class CultivarSyncView(APIView):
