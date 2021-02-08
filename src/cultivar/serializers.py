@@ -10,4 +10,4 @@ class CultivarSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Cultivar
-        fields = ('__all__')
+        exclude = ('status',)
