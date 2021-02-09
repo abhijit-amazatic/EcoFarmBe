@@ -678,7 +678,7 @@ class InvitesDataFilter(FilterSet):
     class Meta:
         model = OrganizationUserInvite
         fields = {
-            'status__in':['icontains', 'exact'],
+            'status':['icontains', 'exact'],
         }
 
 
