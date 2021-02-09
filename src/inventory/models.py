@@ -181,7 +181,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('saturday', _('Saturday')),
         ('sunday', _('Sunday')),
     )
-    cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'),related_name='custom_inventory', on_delete=models.PROTECT)
+    cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
     category_name = models.CharField(_('Item Category Name'), blank=True, null=True, max_length=225)
@@ -205,7 +205,9 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     best_contact_time_to = models.TimeField(_('Best Contact Time To'), auto_now=False, blank=True, null=True, default=None)
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
     vendor_name = models.CharField(_('Vendor Name'), max_length=255)
+    zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
 
 
 class ItemFeedback(TimeStampFlagModelMixin, models.Model):
