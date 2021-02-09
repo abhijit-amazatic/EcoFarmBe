@@ -274,7 +274,7 @@ CRM_FORMAT  = {
         "License_Phone": "license_phone",
         "Title": "title",
         #Cultivation Overview
-        # "Types_of_Nutrients": "co.type_of_nutrients",
+        "Types_of_Nutrients": "type_of_nutrients_parse",
         "Canopy_Square_Feet_Mixed_Light": "co.0.canopy_sqf_parse",
         "Annual_Harvests_Mixed_Light": "co.0.no_of_harvest_parse",
         "Plants_per_Cycle_Mixed_Light": "co.0.plants_per_cycle_parse",
@@ -531,7 +531,7 @@ CRM_FORMAT  = {
         "Sellers_Permit_Expiration_Date": "Sellers_Permit_Expiration_Date",
         "cultivars_of_interest": "Cultivars_parse",
         "lighting_type": "Indoor_Mixed_Lighting_Type",
-        "type_of_nutrients": "Types_of_Nutrients_Used",
+        "type_of_nutrients": "Types_of_Nutrients_Used_parse",
         "interested_in_growing_genetics": "Would_you_grow_genetics_suggested_by_Thrive",
         "which_third_party_lab_do_you_use": "Which_third_party_lab_do_you_use",
         "lab_test_issues": "Issues_with_Failed_Lab_Tests",

@@ -116,9 +116,13 @@ def get_places(address):
     """
     try:
         if address:
+            result = list()
             gmaps = googlemaps.Client(key=GOOGLEPLACES_API_KEY)
-            response = gmaps.places_autocomplete(address)
-            return response
+            responses = gmaps.places_autocomplete(address)
+            for response in responses:
+                data = gmaps.places(response.get('description')).get('results')[0]
+                result.append(data)
+            return result
         return []
     except googlemaps.exceptions.ApiError as exc:
         return {'code':1, 'Error': exc}

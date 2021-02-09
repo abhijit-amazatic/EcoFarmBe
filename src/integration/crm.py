@@ -677,7 +677,7 @@ def update_license(dba, license=None, license_id=None):
         except Exception as exc:
             print('Error in update license', exc)
             pass
-    documents = create_folder(new_folder, 'documents')
+    # documents = create_folder(new_folder, 'documents')
     if not license.get('uploaded_sellers_permit_to') or license_id:
         try:
             seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
@@ -688,7 +688,7 @@ def update_license(dba, license=None, license_id=None):
                 file_id = box_file
             else:
                 file_id = box_file.id
-            moved_file = move_file(file_id, documents)
+            moved_file = move_file(file_id, license_folder)
             license_url = get_shared_link(file_id)
             license['uploaded_sellers_permit_to'] = license_url  + "?id=" + moved_file.id
         except Exception as exc:

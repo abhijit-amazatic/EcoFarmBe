@@ -18,7 +18,7 @@ from .models import (Integration, )
 from labtest.models import (LabTest, )
 from inventory.models import PriceChange, Inventory as InventoryModel, Documents
 from cultivar.models import (Cultivar, )
-from integration.crm import (get_labtest, search_query,)
+from integration.crm import (get_labtest, search_query, get_record, )
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
                              get_thumbnail_url, get_inventory_folder_id,
@@ -257,7 +257,7 @@ def get_parent_category(category_name):
     """
     category_dict = {
         'Wholesale - Flower': [
-            'Tops', 'Tops - THC', 'Smalls','In the Field',
+            'Tops', 'Tops - THC', 'Smalls', 'In the Field',
             'Flower - Tops',
             'Flower - Bucked Untrimmed',
             'Flower - Bucked Untrimmed - Seeded',
@@ -296,16 +296,28 @@ def get_parent_category(category_name):
         return category_name
     return None
 
+def get_from_licenses(response, field):
+    """
+    Get data from license module.
+    """
+    vendor = response.get('response')[0].get('Vendor_Name')
+    data = search_query('Vendors_X_Licenses', vendor, 'Licenses_Module', True)
+    if data.get('status_code') == 200:
+        license_id = data.get('response')[0].get('Licenses').get('id')
+        result = get_record('Licenses', license_id)
+        if result.get('status_code') == 200:
+            return result.get('response')[license_id].get(field)
+
 def get_record_data(vendor_name):
     """
-    Get  record data for inventory item from crm.
+    Get record data for inventory item from crm.
     """
     try:
         data = dict()
         response = search_query('Vendors', vendor_name, 'Vendor_Name', True)
         if response.get('status_code') == 200:
             data['county_grown'] = response.get('response')[0].get('County')
-            data['nutrients'] = response.get('response')[0].get('Types_of_Nutrients_Used')
+            data['nutrients'] = get_from_licenses(response, 'Types_of_Nutrients')
             data['ethics_and_certification'] = response.get('response')[0].get('Special_Certifications')
             return data
         return None
