@@ -181,20 +181,68 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('saturday', _('Saturday')),
         ('sunday', _('Sunday')),
     )
+    GRADE_ESTIMATE_CHOICES = (
+        ('Smalls A', _('Smalls A')),
+        ('Smalls B', _('Smalls B')),
+        ('Smalls C', _('Smalls C')),
+        ('Tops A', _('Tops A')),
+        ('Tops AA', _('Tops AA')),
+        ('Tops AAA', _('Tops AAA')),
+        ('Tops B', _('Tops B')),
+        ('Tops C', _('Tops C')),
+        ('Trim', _('Trim')),
+    )
+
+    CATEGORY_NAME_CHOICES = (
+        ('Wholesale - Flower', _('Wholesale - Flower')),
+        ('In the Field', _('In the Field')),
+        ('Flower - Tops', _('Flower - Tops')),
+        ('Flower - Bucked Untrimmed', _('Flower - Bucked Untrimmed')),
+        ('Flower - Bucked Untrimmed - Seeded', _('Flower - Bucked Untrimmed - Seeded')),
+        ('Flower - Bucked Untrimmed - Contaminated', _('Flower - Bucked Untrimmed - Contaminated')),
+        ('Flower - Small', _('Flower - Small')),
+        ('Trim', _('Trim')),
+        ('Packaged Goods', _('Packaged Goods')),
+        ('Isolates', _('Isolates')),
+        ('Isolates - CBD', _('Isolates - CBD')),
+        ('Isolates - THC', _('Isolates - THC')),
+        ('Isolates - CBG', _('Isolates - CBG')),
+        ('Isolates - CBN', _('Isolates - CBN')),
+        ('Wholesale - Concentrates', _('Wholesale - Concentrates')),
+        ('Crude Oil', _('Crude Oil')),
+        ('Crude Oil - THC', _('Crude Oil - THC')),
+        ('Crude Oil - CBD', _('Crude Oil - CBD')),
+        ('Distillate Oil', _('Distillate Oil')),
+        ('Distillate Oil - THC', _('Distillate Oil - THC')),
+        ('Distillate Oil - CBD', _('Distillate Oil - CBD')),
+        ('Shatter', _('Shatter')),
+        ('Sauce', _('Sauce')),
+        ('Crumble', _('Crumble')),
+        ('Kief', _('Kief')),
+        ('Lab Testing', _('Lab Testing')),
+        ('Terpenes', _('Terpenes')),
+        ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
+        ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
+        ('Services', _('Services')),
+        ('QC', _('QC')),
+        ('Transport', _('Transport')),
+        ('Secure Cash Handling', _('Secure Cash Handling')),
+    )
+
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
-    category_name = models.CharField(_('Item Category Name'), blank=True, null=True, max_length=225)
+    category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, blank=True, null=True, max_length=225)
     category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
-    grade_estimate = models.CharField(_('Grade Estimate'), max_length=255, blank=True, null=True)
+    grade_estimate = models.CharField(_('Grade Estimate'), choices=GRADE_ESTIMATE_CHOICES, max_length=255, blank=True, null=True)
     product_quality_notes = models.TextField(_('Product Quality Notes'), blank=True, null=True)
     extra_documents = GenericRelation(Documents)
 
-    farm_ask_price = models.CharField(_('Farm Ask Price'), blank=True, null=True, max_length=100)
+    farm_ask_price = models.FloatField(_('Farm Ask Price'), blank=True, null=True,)
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
     have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
     minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)

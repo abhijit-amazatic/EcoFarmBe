@@ -92,11 +92,11 @@ class CustomInventoryCultivarNameField(serializers.RelatedField):
 
     def to_internal_value(self, data):
         queryset = self.get_queryset()
-        obj = queryset.filter(cultivar_name=data).first()
-        if not obj:
+        queryset = queryset.filter(cultivar_name=data)
+        if not queryset.exists():
             raise serializers.ValidationError(f'Cultivar name \'{data}\' does not exist or not approved.')
         else:
-            return obj
+            return queryset.latest('create_time')
 
     def get_queryset(self):
         queryset = super().get_queryset()
