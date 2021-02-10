@@ -105,10 +105,44 @@ class CustomInventoryCultivarNameField(serializers.RelatedField):
 
 
 class CustomInventorySerializer(serializers.ModelSerializer):
-    cultivar_name = CustomInventoryCultivarNameField(source='cultivar')
     """
     Inventory Serializer
     """
+    cultivar_name = CustomInventoryCultivarNameField(source='cultivar')
+    item_image_url = serializers.SerializerMethodField()
+    labtest_url = serializers.SerializerMethodField()
+
+    def get_item_image_url(self, obj):
+        """
+        Return s3 item image.
+        """
+        try:
+            document = Documents.objects.filter(object_id=obj.id, doc_type='item_image').latest('created_on')
+            if document.box_url:
+                return document.box_url
+            else:
+                path = document.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
+        except Exception:
+            return None
+
+    def get_labtest_url(self, obj):
+        """
+        Return s3 labtest url.
+        """
+        try:
+            document = Documents.objects.filter(object_id=obj.id, doc_type='labtest').latest('created_on')
+            if license.box_url:
+                return license.box_url
+            else:
+                path = license.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
+        except Exception:
+            return None
 
     def validate_vendor_name(self, val):
         queryset = filterQuerySet.for_user(LicenseProfile.objects.all(), self.context['request'].user)
