@@ -186,7 +186,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
     category_name = models.CharField(_('Item Category Name'), blank=True, null=True, max_length=225)
     category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
-    quantity_available = models.DecimalField(_('Quantity Available'), blank=True, null=True, max_digits=4, decimal_places=2)
+    quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
@@ -197,7 +197,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     farm_ask_price = models.CharField(_('Farm Ask Price'), blank=True, null=True, max_length=100)
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
     have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
-    minimum_order_quantity = models.DecimalField(_('Minimum Order Quantity(lbs)'), blank=True, null=True, max_digits=4, decimal_places=2)
+    minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
 
     transportation = models.CharField(_("Transportation / Sample Pickup"), max_length=255, blank=True, null=True)
     best_contact_Day_of_week = models.CharField(_("Best Contact Day Of Week"), max_length=50, choices=DAY_OF_WEEK, blank=True, null=True,)
