@@ -187,6 +187,7 @@ DEFAULT_FILE_STORAGE = 'brand.storage.CKEditorMediaStorage' #storages.backends.s
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_RESTRICT_BY_USER = False
 
-
+#you can also set it to 'SOMEORIGIN'
+X_FRAME_OPTIONS = 'DENY'
 
 
