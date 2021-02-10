@@ -387,6 +387,7 @@ class DocumentPreSignedView(APIView):
         user_id = request.data.get('user_id')
         brand_id = request.data.get('brand_id')
         doc_type = request.data.get('doc_type')
+        custom_inventory_id = request.data.get('custom_inventory_id')
         expiry = request.data.get('expiration', 3600)
         if sku:
             try:
@@ -405,6 +406,12 @@ class DocumentPreSignedView(APIView):
                 obj = Brand.objects.get(id=brand_id)
             except Inventory.DoesNotExist:
                 return Response({'error': 'Brand not in database'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        elif custom_inventory_id:
+            try:
+                obj = CustomInventory.objects.get(id=custom_inventory_id)
+            except CustomInventory.DoesNotExist:
+                return Response({'error': 'Custom inventory not in database'},
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
