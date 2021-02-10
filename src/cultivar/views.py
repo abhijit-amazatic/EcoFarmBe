@@ -10,7 +10,7 @@ from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from .models import (Cultivar, )
 from .serializers import (CultivarSerializer, )
 from integration.crm import (sync_cultivars, create_records, update_records)
-
+from .tasks import (notify_slack_cultivar_added, notify_slack_cultivar_Approved)
 
 class CharInFilter(BaseInFilter,CharFilter):
     pass
@@ -54,6 +54,14 @@ class CultivarViewSet(viewsets.ModelViewSet):
         Return QuerySet.
         """
         return Cultivar.objects.all()
+
+    def perform_create(self, serializer):
+        obj = serializer.save()
+        notify_slack_cultivar_added.delay(
+            serializer.context['request'].user.email,
+            obj.cultivar_name,
+            obj.cultivar_type,
+        )
 
     def perform_update(self, serializer):
         obj = serializer.save()

@@ -9,6 +9,7 @@ from django.conf import settings
 from celery.task import periodic_task
 from celery.schedules import crontab
 from django.utils import  timezone
+from slacker import Slacker
 
 from integration.apps.twilio import (send_sms,)
 from integration.crm import (get_records_from_crm, search_query)
@@ -33,6 +34,7 @@ from .task_helpers import (
     send_onboarding_data_fetch_verification_mail,
 )
 
+slack = Slacker(settings.SLACK_TOKEN)
 
 @periodic_task(run_every=(crontab(hour=[1], minute=0)), options={'queue': 'general'})
 def update_expired_licence_status():

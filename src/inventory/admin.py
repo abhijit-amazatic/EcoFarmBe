@@ -96,7 +96,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 'cf_cultivar_name': obj.cultivar.cultivar_name,
                 'cf_cultivar_type': obj.cultivar.cultivar_type,
                 'sku': sku,
-                # 'category_id': obj.category_id,
+                'category_id': obj.category_id,
                 'category_name': obj.category_name,
                 'cf_quantity_estimate': obj.quantity_available,
                 'cf_harvest_date': self.date_str(obj.harvest_date),  # not in inventory
@@ -123,7 +123,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 result = create_inventory_item(inventory_name='inventory_efd', record=data, params={})
             except Exception as exc:
                 self.message_user(request, "Error while creating item in Zoho Inventory", level='error')
-                print('Error while creating Cultivar in Zoho CRM')
+                print('Error while creating item in Zoho Inventory')
                 print(exc)
             else:
                 if result.get('code') == 0:
@@ -135,7 +135,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                             self.message_user(request, "This item is approved")
                 else:
                     self.message_user(request, "Error while creating item in Zoho Inventory", level='error')
-                    print('Error while creating Cultivar in Zoho CRM')
+                    print('Error while creating item in Zoho Inventory')
                     print(result)
 
 
