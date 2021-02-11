@@ -32,7 +32,7 @@ from integration.books import  get_buyer_summary
 from integration.apps.aws import (create_presigned_url, )
 from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,)
 from core.mailer import (mail, mail_send,)
-from integration.crm import (get_licenses, update_program_selection)
+from integration.crm import (get_licenses, update_program_selection, create_records)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
 from .tasks import (
@@ -152,6 +152,32 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return super().destroy(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        obj = serializer.save()
+        try:
+            result = create_records('Orgs', obj.__dict__, True)
+        except Exception as exc:
+                print('Error while creating Organization in Zoho CRM')
+                print(exc)
+        else:
+            if result.get('status_code') in [201, 200]:
+                crm_id = None
+                try:
+                    crm_id = result['response'][0]['id']
+                except KeyError:
+                    try:
+                        crm_id = result['response']['response']['data'][0]['details']['id']
+                    except KeyError:
+                        data = result.get('response', {}).get('data')
+                        if data and isinstance(data, list):
+                            crm_id = data[0].get('details', {}).get('id')
+                if crm_id:
+                    obj.cultivar_crm_id = crm_id
+                    obj.save()
+            else:
+                print('Error while creating Organization in Zoho CRM')
+                print(result)
 
 
 class BrandViewSet(PermissionQuerysetFilterMixin,
