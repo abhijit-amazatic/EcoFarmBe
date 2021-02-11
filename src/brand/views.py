@@ -156,25 +156,22 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
     def perform_create(self, serializer):
         obj = serializer.save()
         try:
-            result = create_records('Orgs', obj.__dict__, True)
+            result = create_records('Orgs', obj.__dict__)
         except Exception as exc:
                 print('Error while creating Organization in Zoho CRM')
                 print(exc)
         else:
             if result.get('status_code') in [201, 200]:
+                data = result.get('response', {}).get('data')
                 crm_id = None
-                try:
-                    crm_id = result['response'][0]['id']
-                except KeyError:
-                    try:
-                        crm_id = result['response']['response']['data'][0]['details']['id']
-                    except KeyError:
-                        data = result.get('response', {}).get('data')
-                        if data and isinstance(data, list):
-                            crm_id = data[0].get('details', {}).get('id')
+                if data and isinstance(data, list):
+                    crm_id = data[0].get('details', {}).get('id')
                 if crm_id:
-                    obj.cultivar_crm_id = crm_id
+                    obj.zoho_crm_id = crm_id
                     obj.save()
+                else:
+                    print('Error while Extrating zoho_crm_id for created Organization in Zoho CRM')
+                    print(result)
             else:
                 print('Error while creating Organization in Zoho CRM')
                 print(result)
