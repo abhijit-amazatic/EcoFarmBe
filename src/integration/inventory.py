@@ -48,7 +48,8 @@ def get_inventory_obj(inventory_name):
         redirect_uri=INVENTORY_REDIRECT_URI,
         organization_id=INVENTORY_ORGANIZATION_ID,
         access_token=access_token,
-        access_expiry=access_expiry
+        access_expiry=access_expiry,
+        inventory_name=inventory_name
     )
     if inventory.refreshed:
         Integration.objects.update_or_create(
@@ -64,11 +65,22 @@ def get_inventory_obj(inventory_name):
         )
     return inventory
 
+def get_vendor_id(inventory, record):
+    """
+    Get vendor id from zoho.
+    """
+    vendor_name = inventory.get_contact(params={'contact_name': record.get('cf_vendor_name')})
+    if vendor_name.get('code') == 0:
+        for vendor in vendor_name.get('contacts'):
+            if vendor.get('vendor_name') == record.get('cf_vendor_name'):
+                return vendor.get('contact_id')
+
 def create_inventory_item(inventory_name, record, params={}):
     """
     Create an inventory item in zoho inventory.
     """
     inventory = get_inventory_obj(inventory_name)
+    record['cf_vendor_name'] = get_vendor_id(inventory, record)
     return inventory.create_item(record, params=params)
 
 def update_inventory_item(inventory_name, record_id, record, params={}):
@@ -76,6 +88,7 @@ def update_inventory_item(inventory_name, record_id, record, params={}):
     Update an inventory item in zoho inventory.
     """
     inventory = get_inventory_obj(inventory_name)
+    record['cf_vendor_name'] = get_vendor_id(inventory, record)
     return inventory.update_item(record_id, record, params=params)
 
 def get_inventory_items(inventory_name, params={}):
