@@ -10,7 +10,7 @@ from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
 from .crm import (insert_users, insert_vendors,
-                  fetch_labtests, update_in_crm)
+                  fetch_labtests, update_in_crm, update_license)
 from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses)
@@ -72,5 +72,5 @@ def update_in_crm_task(module, record_id):
     update_in_crm(module, record_id)
 
 @app.task(queue="general")
-def update_license_task(dba, license=None, license_id=None):
-    update_license_task(dba=dba, license=license, license_id=license_id)
+def update_license_task(dba, license_id):
+    update_license(dba=dba, license=None, license_id=license_id)
