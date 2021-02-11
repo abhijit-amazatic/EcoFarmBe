@@ -1,3 +1,4 @@
+from os import urandom
 from django.contrib import admin
 from django.shortcuts import HttpResponseRedirect
 from django.db import models
@@ -6,7 +7,7 @@ from django.contrib.admin.utils import (unquote,)
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django_otp.util import random_hex
-from integration.inventory import (create_inventory_item, update_inventory_item,)
+from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id)
 from .models import (
     Inventory,
     CustomInventory,
@@ -19,7 +20,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
-    change_form_template = "inventory/custom_inventory_change_form.html"
+    change_form_template = 'inventory/custom_inventory_change_form.html'
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
     # readonly_fields = ( 'status', 'created_on', 'updated_on', 'cultivar_name', 'vendor_name', 'zoho_item_id',)
     readonly_fields = ('created_on', 'updated_on', 'cultivar_name',)
@@ -67,10 +68,10 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     )
 
     def response_change(self, request, obj):
-        if "_approve" in request.POST:
+        if '_approve' in request.POST:
             if obj.status == 'pending_for_approval':
                 self.approve(request, obj)
-            return HttpResponseRedirect(".")
+            return HttpResponseRedirect('.')
         return super().response_change(request, obj)
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -87,42 +88,57 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     def date_str(self, date_obj):
         return str(date_obj.strftime('%m.%d.%Y'))
 
+    def generate_sku(self, request, obj):
+        sku = 'test_sku'
+        sku += '_' + obj.cultivar.cultivar_name
+        sku += '_' + force_str(urandom(10).hex())
+        return sku
+
     def approve(self, request, obj):
-        sku = 'sku_tmp_'+force_str(random_hex(length=10))
         if obj.status == 'pending_for_approval':
-            data = {
-                # 'cultivar': obj.cultivar,
-                'name': obj.cultivar.cultivar_name,
-                'cf_cultivar_name': obj.cultivar.cultivar_name,
-                'cf_cultivar_type': obj.cultivar.cultivar_type,
-                'sku': sku,
-                'category_id': obj.category_id,
-                'category_name': obj.category_name,
-                'cf_quantity_estimate': obj.quantity_available,
-                'cf_harvest_date': self.date_str(obj.harvest_date),  # not in inventory
-                'cf_available_date': self.date_str(obj.batch_availability_date),
-                'cf_cannabis_grade_and_category': obj.grade_estimate,
-                'cf_batch_notes': obj.product_quality_notes,
-                'cf_farm_price': str(obj.farm_ask_price),
-                'cf_seller_position': str(obj.pricing_position),
-                'cf_minimum_quantity': str(obj.minimum_order_quantity if obj.have_minimum_order_quantity else 0.0),
-                'price': str(obj.farm_ask_price + 1.0), # Calculate price = Cost price + IFP Tier membership Fee
-                'cf_sample_in_house': 'Pending',
-                'product_type': 'goods',
-                'unit': 'lb',
-                'cf_status': 'In-Testing',
-                'cf_cfi_published': False,
-                'vendor_name': obj.vendor_name,
-                'cf_vendor_name': obj.vendor_name,
-                'purchase_rate': "0.0",
-                'account': '',
-                'inventory_account': '',
-                'item_tax_preferences': '',
-            }
+            data = {}
+            data['item_type'] = 'inventory'
+            data['name'] = obj.cultivar.cultivar_name
+            data['sku'] = self.generate_sku(request, obj)
+            data['unit'] = 'lb'
+            data['category_id'] = obj.category_id
+            data['category_name'] = obj.category_name
+
+            # data['cf_client_code'] = ''
+
+            if obj.cultivar.cultivar_type:
+                data['cf_cultivar_type'] = obj.cultivar.cultivar_type
+            data['cf_cultivar_name'] = obj.cultivar.cultivar_name
+            data['cf_strain_name'] = obj.cultivar.cultivar_name
+            data['cf_quantity_estimate'] = int(obj.quantity_available)
+            data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
+            data['cf_date_available'] = str(obj.batch_availability_date)
+            data['cf_cannabis_grade_and_category'] = obj.grade_estimate
+            data['cf_batch_notes'] = obj.product_quality_notes
+            data['cf_farm_price'] = str(int(obj.farm_ask_price))
+            data['cf_seller_position'] = obj.pricing_position
+            if obj.have_minimum_order_quantity:
+                data['cf_minimum_quantity'] = int(obj.minimum_order_quantity)
+            data['cf_sample_in_house'] = 'Pending'
+            data['cf_status'] = 'In-Testing'
+            data['cf_cfi_published'] = False
+            data['cf_vendor_name'] = obj.vendor_name
+
+            data['product_type'] = 'goods'
+            data['price'] = obj.farm_ask_price + 2.0 # Calculate price = Cost price + IFP Tier membership Fee
+            data['rate'] = obj.farm_ask_price + 1.0 # Calculate price = Cost price + IFP Tier membership Fee
+            data['vendor_name'] = obj.vendor_name
+            data['purchase_rate'] = obj.farm_ask_price
+            data['purchase_account_id'] = 2155380000000565567
+            # data['purchase_account_name'] = 'Product Costs - Flower'
+            data['inventory_account_id'] = 2155380000000448361
+            # data['inventory_account_name'] = 'Inventory - In the Field'
+            data['is_taxable'] = True
+
             try:
                 result = create_inventory_item(inventory_name='inventory_efd', record=data, params={})
             except Exception as exc:
-                self.message_user(request, "Error while creating item in Zoho Inventory", level='error')
+                self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                 print('Error while creating item in Zoho Inventory')
                 print(exc)
             else:
@@ -132,9 +148,9 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                             obj.zoho_item_id = item_id
                             obj.status = 'approved'
                             obj.save()
-                            self.message_user(request, "This item is approved")
+                            self.message_user(request, 'This item is approved')
                 else:
-                    self.message_user(request, "Error while creating item in Zoho Inventory", level='error')
+                    self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                     print('Error while creating item in Zoho Inventory')
                     print(result)
 
