@@ -458,7 +458,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                         record_obj.save()
                     except KeyError as exc:
                         print(exc)
-                        continue
+                        pass
             if is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
                 result = update_records('Vendors', d, True)
@@ -476,7 +476,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
-                    continue
+                    pass
                 if (result['response']['orignal_data'][0].get('Licenses_List')):
                     data = dict()
                     data['Licenses_Module'] = record_response[0]['details']['id']
@@ -583,19 +583,24 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         brand_id = result['response']['response']['data'][0]['details']['id']
             final_dict['org'] = organization_id
             final_dict['brand'] = brand_id
-            if brand_id and organization_id:
+            if brand_id:
                 try:
                     record_obj = Brand.objects.get(id=id)
                     record_obj.zoho_crm_id = brand_id
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
+                except KeyError as exc:
+                    print(exc)
+                    pass
+            if organization_id:
+                try:
                     record_obj = Organization.objects.get(id=record.organization_id)
                     record_obj.zoho_crm_id = organization_id
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
-                    continue
+                    pass
             record_response = insert_record(record=record, is_update=is_update, is_single_user=is_single_user)
             final_dict.update(record_response)
             for k,response in record_response.items():
@@ -912,6 +917,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 record_obj.save()
             except KeyError as exc:
                 print(exc)
+                pass
         if is_update:
             d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
             result = update_records('Accounts', d, is_return_orginal_data=True)
@@ -929,7 +935,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 record_obj.save()
             except KeyError as exc:
                 print(exc)
-                continue
+                pass
             if (result['response']['orignal_data'][0].get('Licenses_List')):
                 data = dict()
                 data['Licenses_Module'] = record_response[0]['details']['id']
@@ -1028,19 +1034,24 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                             brand_id = result['response']['response']['data'][0]['details']['id']
                 final_dict['org'] = organization_id
                 final_dict['brand'] = brand_id
-                if brand_id and organization_id:
+                if brand_id:
                     try:
                         record_obj = Brand.objects.get(id=id)
                         record_obj.zoho_crm_id = brand_id
                         record_obj.is_updated_in_crm = True
                         record_obj.save()
+                    except KeyError as exc:
+                        print(exc)
+                        pass
+                if organization_id:
+                    try:
                         record_obj = Organization.objects.get(id=record.organization_id)
                         record_obj.zoho_crm_id = organization_id
                         record_obj.is_updated_in_crm = True
                         record_obj.save()
                     except KeyError as exc:
                         print(exc)
-                        continue
+                        pass
                 record_response = insert_account_record(record=record, is_update=is_update, is_single_user=is_single_user)
                 final_dict.update(record_response)
                 for k, response in record_response.items():
