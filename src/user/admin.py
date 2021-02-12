@@ -47,7 +47,8 @@ class MyUserChangeForm(UserChangeForm):
         # if self.cleaned_data.get('is_approved'):
         #     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
         #     return self.cleaned_data
-            
+
+    
 def get_user_data(request):
     """
     return user info dict.
@@ -72,7 +73,8 @@ def approve_user(modeladmin, request, queryset):
     messages.success(request,'Users Approved!')    
 approve_user.short_description = 'Approve Selected Users'      
 
-class MyUserAdmin(nested_admin.NestedModelAdmin,):#(UserAdmin):
+    
+class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     
     def approved_by_member(self, obj):
         if hasattr(obj,'approved_by') and obj.approved_by is not None :

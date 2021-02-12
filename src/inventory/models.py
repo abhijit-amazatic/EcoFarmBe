@@ -257,6 +257,10 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     vendor_name = models.CharField(_('Vendor Name'), max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
 
+    class Meta:
+        verbose_name = _('Custom Inventory')
+        verbose_name_plural = _('Custom Inventory Items')
+
 
 class ItemFeedback(TimeStampFlagModelMixin, models.Model):
     """
