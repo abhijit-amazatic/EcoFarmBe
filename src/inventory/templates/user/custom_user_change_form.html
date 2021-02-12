@@ -1,0 +1,5 @@
+{% extends 'admin/change_form.html' %}
+{% block submit_buttons_bottom %}
+<div class="submit-row"> <input type="submit" value="Resend Verification Email" name="_resend-mail"> </div>
+{{ block.super }}
+{% endblock %}

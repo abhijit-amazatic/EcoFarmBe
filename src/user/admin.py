@@ -18,6 +18,7 @@ from django.utils import timezone
 import nested_admin
 from ckeditor.fields import RichTextField       
 from core.widgets import CKEditorWidget
+from django.http import HttpResponseRedirect
 
 class MyUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
@@ -88,6 +89,7 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     
     #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
+    change_form_template = 'user/custom_user_change_form.html'
     list_display = ('email', 'is_approved', 'phone', 'approved_on','last_login','approved_by_member','date_joined',)
     list_filter = ('is_approved', 'is_verified',)
     list_per_page = 25
@@ -98,6 +100,13 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link',)}),
     )     
+
+    def response_change(self, request, obj):
+        if "_resend-mail" in request.POST:
+            send_verification_link_user_instance(obj)
+            self.message_user(request, "Verification Link sent!")
+            return HttpResponseRedirect(".")
+        return super().response_change(request, obj)
     
     @transaction.atomic
     def save_model(self, request, obj, form, change):
