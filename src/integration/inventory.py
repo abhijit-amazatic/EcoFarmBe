@@ -80,7 +80,12 @@ def create_inventory_item(inventory_name, record, params={}):
     Create an inventory item in zoho inventory.
     """
     inventory = get_inventory_obj(inventory_name)
-    record['cf_vendor_name'] = get_vendor_id(inventory, record)
+    if 'cf_vendor_name' in record:
+        vendor_id = get_vendor_id(inventory, record)
+        if vendor_id:
+            record['cf_vendor_name'] = vendor_id
+        else:
+            record.pop('cf_vendor_name')
     return inventory.create_item(record, params=params)
 
 def update_inventory_item(inventory_name, record_id, record, params={}):
@@ -88,7 +93,12 @@ def update_inventory_item(inventory_name, record_id, record, params={}):
     Update an inventory item in zoho inventory.
     """
     inventory = get_inventory_obj(inventory_name)
-    record['cf_vendor_name'] = get_vendor_id(inventory, record)
+    if 'cf_vendor_name' in record:
+        vendor_id = get_vendor_id(inventory, record)
+        if vendor_id:
+            record['cf_vendor_name'] = vendor_id
+        else:
+            record.pop('cf_vendor_name')
     return inventory.update_item(record_id, record, params=params)
 
 def get_inventory_items(inventory_name, params={}):

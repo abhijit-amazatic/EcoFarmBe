@@ -233,7 +233,6 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
     category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, blank=True, null=True, max_length=225)
-    category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
@@ -253,7 +252,6 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     best_contact_time_to = models.TimeField(_('Best Contact Time To'), auto_now=False, blank=True, null=True, default=None)
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
-    category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
     vendor_name = models.CharField(_('Vendor Name'), max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
 
