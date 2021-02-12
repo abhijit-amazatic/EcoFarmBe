@@ -27,10 +27,7 @@ def extract_map_role(data):
         "Logistics Manager":"Logistics",
         "Billing / Accounting":"Billing",
     }
-    if data:
-        return [role_map.get(i) for i in data]
-    else:
-        return []
+    return [role_map.get(i) for i in data if i in role_map] or ['Employee']
 
 def get_employee(data_l_p):
     """
