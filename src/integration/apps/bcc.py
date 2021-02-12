@@ -25,7 +25,7 @@ def get_license_dict():
 	"License_Type": "licenseType_parse",
 	"Issue_Date": "issuedDate_parse",
 	"Premises_City": "premiseCity",
-	"Premises_State": "premiseState",
+	"Premises_State": "premiseState_parse",
 	"Premises_Zipcode": "premiseZip",
 	"Premises_County": "premiseCounty",
 	"License_Status": "licenseStatus",
@@ -68,6 +68,11 @@ def parse_field(license, key, value):
         if license_types.get(v):
             return license_types.get(v)
         return v
+    if value.startswith('premiseState'):
+        premise_state = {
+            "CA":"California",
+        }
+        return premise_state.get(v, v)
     if value.startswith('layout'):
         try:
             license_layout = json.loads(LICENSE_LAYOUT)
