@@ -112,8 +112,13 @@ SLACK_CHANNEL_NAME = os.environ.get("SLACK_CHANNEL_NAME")
 SLACK_SALES_CHANNEL = os.environ.get("SLACK_SALES_CHANNEL")
 #PROFILE
 SLACK_PROFILE_CHANNEL = os.environ.get("SLACK_PROFILE_CHANNEL")
+#Inventory
+SLACK_INVENTORY_CHANNEL = os.environ.get("SLACK_INVENTORY_CHANNEL")
+
 # Admin Email
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
+#Inventory Notification Email
+INVENTORY_NOTIFICATION_EMAIL = os.environ.get("INVENTORY_NOTIFICATION_EMAIL")
 
 # layouts
 VENDOR_LAYOUT = os.environ.get("VENDOR_LAYOUT")

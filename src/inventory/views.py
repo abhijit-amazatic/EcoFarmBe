@@ -32,7 +32,7 @@ from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
 from integration.inventory import (get_inventory_summary,)
-
+from .tasks import (notify_inventory_item_added, )
 class CharInFilter(BaseInFilter,CharFilter):
     pass
 
@@ -635,3 +635,10 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
          Return QuerySet.
         """
         return CustomInventory.objects.all()
+
+    def perform_create(self, serializer):
+        obj = serializer.save()
+        notify_inventory_item_added.delay(
+            serializer.context['request'].user.email,
+            obj.id,
+        )

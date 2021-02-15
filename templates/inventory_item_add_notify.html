@@ -1,0 +1,23 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi {{ owner_full_name }},</p>
+<div style="padding-left:15px;">
+    <div >
+        <p style='font-size:16px !important;color: #013c48;'>
+            New Inventory item is Submitted by user associated with the EmailID <strong>{{user_email}}</strong>. Please review and approve the item!\n"
+        </p>
+        <br><stron>Cultivar Name: <stron>           {{cultivar_name}}"
+        <br><stron>Cultivar Type: <stron>           {{cultivar_type}}"
+        <br><stron>Quantity: <stron>                {{quantity_available}}"
+        <br><stron>Price: <stron>                   {{farm_ask_price}}"
+        <br><stron>Pricing Position: <stron>        {{pricing_position}}\n"
+        <br><stron>Min Qty Purchase: <stron>        {{minimum_order_quantity}}\n"
+        <br><stron>Harvest Date: <stron>            {{arvest_date}}\n"
+        <br><stron>Lab Test Yes/No: <stron>         {% if need_lab_testing_service %}Yes{% else %}No{% endif %}\n"
+        <br><stron>Batch Availability Date: <stron> {{batch_availability_date}}\n"
+        <br><stron>Grade Estimate: <stron>          {{grade_estimate}}\n"
+        <br><stron>Batch Quality Notes: <stron>     {{product_quality_notes}}\n"
+    </div>
+</div>
+{% endblock %}
