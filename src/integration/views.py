@@ -21,8 +21,11 @@ from integration.inventory import (
 from integration.crm import (
     search_query, get_picklist,
     list_crm_contacts, create_lead,
-    get_records_from_crm,get_accounts_from_crm,
-    get_record, update_vendor_tier)
+    get_records_from_crm,
+    get_accounts_from_crm,
+    get_vendors_from_crm,
+    get_record, update_vendor_tier,
+)
 from integration.books import (
     create_contact, create_estimate,
     get_estimate, list_estimates,
@@ -620,6 +623,22 @@ class VendorCreditView(APIView):
                 params=request.query_params.dict()))
         return Response(list_vendor_credits(params=request.query_params.dict()))
 
+class VendorCreditView(APIView):
+    """
+    View class for Zoho books vendor credit.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get vendor credit.
+        """
+        if request.query_params.get('credit_id', None):
+            return Response(get_vendor_credit(
+                request.query_params.get('credit_id'),
+                params=request.query_params.dict()))
+        return Response(list_vendor_credits(params=request.query_params.dict()))
+
 class AccountSummaryView(APIView):
     """
     View class for Zoho books summary.
@@ -779,6 +798,21 @@ class ClientCodeView(APIView):
         if request.query_params.get('legal_business_name'):
             account_data = get_accounts_from_crm(request.query_params.get('legal_business_name'))
             return Response({"client_code":account_data.get('client_code')})
+        return Response({'error': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
+
+class VendorClientCodeView(APIView):
+    """
+    Vendors's client code view
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        Get vendor client code.
+        """
+        if request.query_params.get('legal_business_name'):
+            vendor_data = get_vendors_from_crm(request.query_params.get('legal_business_name'))
+            return Response({"client_code":vendor_data.get('Client_Code')})
         return Response({'error': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetDocumentStatus(APIView):

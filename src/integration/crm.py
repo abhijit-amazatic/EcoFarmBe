@@ -1127,6 +1127,54 @@ def get_accounts_from_crm(legal_business_name):
             return response
     return {}
 
+
+def get_vendors_from_crm(legal_business_name):
+    """
+    Fetch existing vendors from Zoho CRM.
+    """
+    licenses = search_query('Licenses', legal_business_name, 'Legal_Business_Name')
+    if licenses['status_code'] == 200 and len(licenses['response']) > 0:
+        license_number = licenses['response'][0]['Name']
+        vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+        if vendor['status_code'] != 200:
+            vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', licenses)
+        else:
+            vendor = vendor['response'][0]['Licenses_Module']
+            vendor_id = vendor['id']
+        if not vendor_id:
+            return {'error': 'No association found for legal business name'}
+        crm_obj = get_crm_obj()
+        vendor_record = crm_obj.get_record('Vendors', vendor_id)
+        if vendor_record['status_code'] == 200:
+            vendor = vendor_record['response'][vendor_id]
+            licenses = [licenses['response'][0]]
+            if vendor.get('Licenses'):
+                license_list = vendor.get('Licenses').split(',')
+                license_list.remove(license_number)
+                for l in license_list:
+                    license = search_query('Licenses', l.strip(), 'Name')
+                    if license['status_code'] == 200:
+                        licenses.append(license['response'][0])
+            crm_dict = get_format_dict('Licenses_To_DB')
+            li = list()
+            for license in licenses:
+                r = dict()
+                for k, v in crm_dict.items():
+                    r[k] = license.get(v)
+                li.append(r)
+            crm_dict = get_format_dict('Vendors_To_DB')
+            response = dict()
+            response['licenses'] = li
+            for k,v in crm_dict.items():
+                if v.endswith('_parse'):
+                    value = v.split('_parse')[0]
+                    value = parse_fields('Vendors', k, value, vendor, crm_obj, vendor_id=vendor_id)
+                    response[k] = value
+                else:
+                    response[k] = vendor.get(v)
+            return response
+    return {}
+
 def post_leads_to_slack_and_email(record,response):
     """
     Post New leads on slack.
