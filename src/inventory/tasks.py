@@ -57,6 +57,8 @@ def notify_inventory_item_added(email, custom_inventory_id):
     if qs.exists():
         obj = qs.first()
         data = copy.deepcopy(obj.__dict__)
+        data['cultivar_name'] = obj.cultivar.cultivar_name
+        data['cultivar_type'] = obj.cultivar.cultivar_type
         data['user_email'] = email
         notify_slack_inventory_item_added(data)
         notify_email_inventory_item_added(data)
