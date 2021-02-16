@@ -825,7 +825,8 @@ class VendorClientCodeView(APIView):
                                 client_code = vendor.get('Client_Code')
                                 return Response({"client_code": client_code})
                     return Response({'error': 'Vendor not found in Zoho CRM!'}, status=status.HTTP_400_BAD_REQUEST)
-
+                elif result.get('status_code') == 204:
+                    return Response({'error': 'Vendor not found in Zoho CRM!'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.query_params.get('legal_business_name'):
             vendor_data = get_vendors_from_crm(request.query_params.get('legal_business_name'))
