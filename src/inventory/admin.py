@@ -130,12 +130,12 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         return str(date_obj.strftime('%m.%d.%Y'))
 
     def generate_sku(self, obj, client_code):
-        sku = 'test_sku'
-        sku += '_' + client_code
-        sku += '_' + obj.cultivar.cultivar_name
+        sku = 'test-sku'
+        sku += '-' + client_code
+        sku += '-' + obj.cultivar.cultivar_name
         if obj.harvest_date:
-            sku += '_' + obj.harvest_date.strftime('%m-%d-%y')
-        sku += '_' + force_str(urandom(3).hex())
+            sku += '-' + obj.harvest_date.strftime('%m-%d-%y')
+        sku += '-' + force_str(urandom(3).hex())
         return sku
 
     def get_client_code(self, request, obj):
@@ -169,36 +169,52 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             if client_code:
                 data = {}
                 data['item_type'] = 'inventory'
-                data['name'] = obj.cultivar.cultivar_name
                 data['cf_client_code'] = client_code
                 data['sku'] = self.generate_sku(obj, client_code)
                 data['unit'] = 'lb'
+
+                data['name'] = obj.cultivar.cultivar_name
+                data['cf_cultivar_name'] = obj.cultivar.cultivar_name
+                data['cf_strain_name'] = obj.cultivar.cultivar_name
+
+                if obj.cultivar.cultivar_type:
+                    data['cf_cultivar_type'] = obj.cultivar.cultivar_type
+
                 if obj.category_name:
                     data['category_name'] = obj.category_name
                     data['category_id'] = get_category_id(obj.category_name)
 
-                if obj.cultivar.cultivar_type:
-                    data['cf_cultivar_type'] = obj.cultivar.cultivar_type
-                data['cf_cultivar_name'] = obj.cultivar.cultivar_name
-                data['cf_strain_name'] = obj.cultivar.cultivar_name
-                data['cf_quantity_estimate'] = int(obj.quantity_available)
-                data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
-                data['cf_date_available'] = str(obj.batch_availability_date)
-                data['cf_cannabis_grade_and_category'] = obj.grade_estimate
+                if obj.harvest_date:
+                    data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
+
+                if obj.batch_availability_date:
+                    data['cf_date_available'] = str(obj.batch_availability_date)
+
+                if obj.grade_estimate:
+                    data['Grade - Seller'] = obj.grade_estimate
+
                 data['cf_batch_notes'] = obj.product_quality_notes
-                data['cf_farm_price'] = str(int(obj.farm_ask_price))
-                data['cf_seller_position'] = obj.pricing_position
+
+                if obj.farm_ask_price:
+                    data['cf_farm_price'] = str(int(obj.farm_ask_price))
+                    data['purchase_rate'] = obj.farm_ask_price
+                    data['rate'] = obj.farm_ask_price + 154.40 # = Cost price + IFP Tier membership Fee
+
+                if obj.pricing_position:
+                    data['cf_seller_position'] = obj.pricing_position
+
                 if obj.have_minimum_order_quantity:
                     data['cf_minimum_quantity'] = int(obj.minimum_order_quantity)
+
+                if obj.vendor_name:
+                    data['cf_vendor_name'] = obj.vendor_name
+                    # data['vendor_name'] = obj.vendor_name
+
+                data['initial_stock'] = int(obj.quantity_available)
+                data['product_type'] = 'goods'
                 data['cf_sample_in_house'] = 'Pending'
                 data['cf_status'] = 'In-Testing'
                 data['cf_cfi_published'] = False
-                data['cf_vendor_name'] = obj.vendor_name
-
-                data['product_type'] = 'goods'
-                data['rate'] = obj.farm_ask_price + 154.40 # = Cost price + IFP Tier membership Fee
-                data['vendor_name'] = obj.vendor_name
-                data['purchase_rate'] = obj.farm_ask_price
                 data['purchase_account_id'] = 2155380000000565567
                 # data['purchase_account_name'] = 'Product Costs - Flower'
                 data['inventory_account_id'] = 2155380000000448361
