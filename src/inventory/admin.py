@@ -242,7 +242,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     data['cf_date_available'] = str(obj.batch_availability_date)
 
                 if obj.grade_estimate:
-                    data['Grade - Seller'] = obj.grade_estimate
+                    data['cf_grade_seller'] = obj.grade_estimate
 
                 if obj.product_quality_notes:
                     data['cf_batch_notes'] = obj.product_quality_notes
