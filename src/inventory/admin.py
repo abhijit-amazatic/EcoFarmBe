@@ -199,7 +199,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 if obj.grade_estimate:
                     data['Grade - Seller'] = obj.grade_estimate
 
-                data['cf_batch_notes'] = obj.product_quality_notes
+                if obj.product_quality_notes:
+                    data['cf_batch_notes'] = obj.product_quality_notes
 
                 if obj.farm_ask_price:
                     data['cf_farm_price'] = str(int(obj.farm_ask_price))

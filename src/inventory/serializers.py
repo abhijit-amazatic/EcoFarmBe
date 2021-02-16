@@ -3,9 +3,11 @@ Serializer for inventory
 """
 import json
 from rest_framework import serializers
+from integration.apps.aws import (create_presigned_url, )
 from brand.permissions import filterQuerySet
 from brand.models import LicenseProfile
 from cultivar.models import Cultivar
+from core.settings import (AWS_BUCKET, )
 from .models import (
     Inventory,
     CustomInventory,
@@ -117,7 +119,7 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         Return s3 item image.
         """
         try:
-            document = Documents.objects.filter(object_id=obj.id, doc_type='item_image').latest('created_on')
+            document = obj.extra_documents.filter(doc_type='item_image').latest('created_on')
             if document.box_url:
                 return document.box_url
             else:
@@ -133,11 +135,11 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         Return s3 labtest url.
         """
         try:
-            document = Documents.objects.filter(object_id=obj.id, doc_type='labtest').latest('created_on')
-            if license.box_url:
-                return license.box_url
+            document = obj.extra_documents.filter(doc_type='labtest').latest('created_on')
+            if document.box_url:
+                return document.box_url
             else:
-                path = license.path
+                path = document.path
                 url = create_presigned_url(AWS_BUCKET, path)
                 if url.get('response'):
                     return url.get('response')
