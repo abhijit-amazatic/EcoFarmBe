@@ -462,7 +462,7 @@ def sync_inventory(inventory_name, response):
         if record['cf_vendor_name']:
             record.update(get_record_data(record['cf_vendor_name']))
         if record['category_name']:
-            record['parent_category_record'] = get_parent_category(record['category_name'])
+            record['parent_category_name'] = get_parent_category(record['category_name'])
         record['inventory_name'] = get_inventory_name_from_db(inventory_name)
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
