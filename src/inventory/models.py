@@ -190,7 +190,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Tops AAA', _('Tops AAA')),
         ('Tops B', _('Tops B')),
         ('Tops C', _('Tops C')),
-        ('Trim', _('Trim')),
+        # ('Trim', _('Trim')),
     )
 
     CATEGORY_NAME_CHOICES = (
@@ -254,6 +254,10 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
     vendor_name = models.CharField(_('Vendor Name'), max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
+    sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
+    created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = _('Custom Inventory')

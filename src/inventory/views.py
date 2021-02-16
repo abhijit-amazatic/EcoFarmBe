@@ -624,13 +624,14 @@ class CustomInventoryFilterSet(FilterSet):
         model = CustomInventory
         fields = {
             'status':['icontains', 'exact'],
+            'vendor_name':['icontains', 'exact'],
         }
 
 class CustomInventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
     """
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticated, )
     filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
     filterset_class = CustomInventoryFilterSet
     ordering_fields = '__all__'
@@ -646,7 +647,11 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         obj = serializer.save()
-        notify_inventory_item_added.delay(
-            serializer.context['request'].user.email,
-            obj.id,
-        )
+        user = serializer.context['request'].user
+        obj.created_by = {
+            'email': user.email,
+            'phone': user.phone.as_e164,
+            'name':  user.get_full_name(),
+        }
+        obj.save()
+        notify_inventory_item_added.delay(user.email, obj.id)

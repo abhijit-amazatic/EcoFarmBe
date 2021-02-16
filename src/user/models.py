@@ -108,6 +108,16 @@ class User(StatusFlagMixin,AbstractUser):
     def __str__(self):
         return self.email if self.email else self.username
 
+    def get_full_name(self):
+        full_name = ''
+        if self.full_name:
+            full_name = self.full_name
+        elif self.first_name:
+            full_name += self.first_name
+            if self.last_name:
+                full_name += ' ' + self.last_name
+        return full_name.strip()
+
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')

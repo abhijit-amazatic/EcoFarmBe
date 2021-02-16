@@ -64,8 +64,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     """
     change_form_template = 'inventory/custom_inventory_change_form.html'
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
-    # readonly_fields = ( 'status', 'created_on', 'updated_on', 'cultivar_name', 'vendor_name', 'zoho_item_id',)
-    readonly_fields = ('created_on', 'updated_on', 'cultivar_name',)
+    # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
+    readonly_fields = ('created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
     # actions = ['test_action', ]
     fieldsets = (
         ('BATCH & QUALITY INFORMATION', {
@@ -102,6 +102,10 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 'status',
                 'vendor_name',
                 'zoho_item_id',
+                'sku',
+                'approved_by',
+                'approved_on',
+                'created_by',
                 'created_on',
                 'updated_on',
             ),
@@ -167,10 +171,12 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         if obj.status == 'pending_for_approval':
             client_code = self.get_client_code(request, obj)
             if client_code:
+                sku = self.generate_sku(obj, client_code)
+
                 data = {}
                 data['item_type'] = 'inventory'
                 data['cf_client_code'] = client_code
-                data['sku'] = self.generate_sku(obj, client_code)
+                data['sku'] = sku
                 data['unit'] = 'lb'
 
                 data['name'] = obj.cultivar.cultivar_name
@@ -232,8 +238,15 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     if result.get('code') == 0:
                             item_id = result.get('item', {}).get('item_id')
                             if item_id:
-                                obj.zoho_item_id = item_id
                                 obj.status = 'approved'
+                                obj.zoho_item_id = item_id
+                                obj.sku = sku
+                                obj.approved_on = timezone.now()
+                                obj.approved_by = {
+                                    'email': request.user.email,
+                                    'phone': request.user.phone.as_e164,
+                                    'name': request.user.get_full_name(),
+                                }
                                 obj.save()
                                 self.message_user(request, 'This item is approved')
                     else:
