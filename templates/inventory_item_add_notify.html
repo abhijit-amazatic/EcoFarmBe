@@ -11,11 +11,11 @@
                 <strong>Cultivar Name: </strong>           {{cultivar_name}}
             <br><strong>Cultivar Type: </strong>           {{cultivar_type}}
             <br><strong>Quantity: </strong>                {{quantity_available}}
-            <br><strong>Price: </strong>                   {{farm_ask_price}}"
-            <br><strong>Pricing Position: </strong>        {{pricing_position}}"
+            <br><strong>Price: </strong>                   {{farm_ask_price}}
+            <br><strong>Pricing Position: </strong>        {{pricing_position}}
             <br><strong>Min Qty Purchase: </strong>        {{minimum_order_quantity}}
-            <br><strong>Harvest Date: </strong>            {{arvest_date}}
-            <br><strong>Lab Test Yes/No: </strong>         {% if need_lab_testing_service %}Yes{% else %}No{% endif %}
+            <br><strong>Harvest Date: </strong>            {{harvest_date}}
+            <br><strong>Need Lab Test Yes/No: </strong>    {% if need_lab_testing_service %}Yes{% else %}No{% endif %}
             <br><strong>Batch Availability Date: </strong> {{batch_availability_date}}
             <br><strong>Grade Estimate: </strong>          {{grade_estimate}}
             <br><strong>Batch Quality Notes: </strong>     {{product_quality_notes}}

@@ -29,7 +29,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Pricing Position:* {data.get('pricing_position')}\n"
         f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
         f"- *Harvest Date:* {data.get('harvest_date')}\n"
-        f"- *Lab Test Yes / No:* {data.get('need_lab_testing_service')}\n"
+        f"- *Need Lab Test Yes / No:* { 'Yes' if data.get('need_lab_testing_service') else 'No'}\n"
         f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
         f"- *Grade Estimate:* {data.get('grade_estimate')}\n"
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
