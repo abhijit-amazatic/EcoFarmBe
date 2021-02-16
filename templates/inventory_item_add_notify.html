@@ -5,19 +5,21 @@
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            New Inventory item is Submitted by user associated with the EmailID <strong>{{user_email}}</strong>. Please review and approve the item!\n"
+            New Inventory item is Submitted by user associated with the EmailID <strong>{{user_email}}</strong>. Please review and approve the item!"
         </p>
-        <br><stron>Cultivar Name: <stron>           {{cultivar_name}}"
-        <br><stron>Cultivar Type: <stron>           {{cultivar_type}}"
-        <br><stron>Quantity: <stron>                {{quantity_available}}"
-        <br><stron>Price: <stron>                   {{farm_ask_price}}"
-        <br><stron>Pricing Position: <stron>        {{pricing_position}}\n"
-        <br><stron>Min Qty Purchase: <stron>        {{minimum_order_quantity}}\n"
-        <br><stron>Harvest Date: <stron>            {{arvest_date}}\n"
-        <br><stron>Lab Test Yes/No: <stron>         {% if need_lab_testing_service %}Yes{% else %}No{% endif %}\n"
-        <br><stron>Batch Availability Date: <stron> {{batch_availability_date}}\n"
-        <br><stron>Grade Estimate: <stron>          {{grade_estimate}}\n"
-        <br><stron>Batch Quality Notes: <stron>     {{product_quality_notes}}\n"
+        <p style='font-size:16px !important;color: #013c48;'>
+                <strong>Cultivar Name: </strong>           {{cultivar_name}}
+            <br><strong>Cultivar Type: </strong>           {{cultivar_type}}
+            <br><strong>Quantity: </strong>                {{quantity_available}}
+            <br><strong>Price: </strong>                   {{farm_ask_price}}"
+            <br><strong>Pricing Position: </strong>        {{pricing_position}}"
+            <br><strong>Min Qty Purchase: </strong>        {{minimum_order_quantity}}
+            <br><strong>Harvest Date: </strong>            {{arvest_date}}
+            <br><strong>Lab Test Yes/No: </strong>         {% if need_lab_testing_service %}Yes{% else %}No{% endif %}
+            <br><strong>Batch Availability Date: </strong> {{batch_availability_date}}
+            <br><strong>Grade Estimate: </strong>          {{grade_estimate}}
+            <br><strong>Batch Quality Notes: </strong>     {{product_quality_notes}}
+        </>
     </div>
 </div>
 {% endblock %}
