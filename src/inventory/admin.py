@@ -1,17 +1,24 @@
 from os import urandom
 from django.contrib import admin
-from django.shortcuts import HttpResponseRedirect
+from django.contrib.contenttypes.admin import GenericStackedInline
+from django.contrib.admin.utils import (unquote,)
 from django.db import models
 from django import forms
-from django.contrib.admin.utils import (unquote,)
 from django.utils import timezone
+from django.shortcuts import HttpResponseRedirect
 from django.utils.encoding import force_str
-from django_otp.util import random_hex
+
+from integration.apps.aws import (create_presigned_url, )
+
+from core.settings import (AWS_BUCKET, )
+
+import nested_admin
 from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id)
 from integration.crm import search_query
 from .models import (
     Inventory,
     CustomInventory,
+    Documents,
 )
 
 
@@ -57,6 +64,43 @@ def get_category_id(category_name):
 
 
 
+
+
+class InlineDocumentsAdmin(GenericStackedInline):
+    """
+    Configuring field admin view for ProfileContact model.
+    """
+    extra = 0
+    readonly_fields = ('doc_type', 'url',)
+    fields = ('doc_type', 'url',)
+    model = Documents
+    can_delete = False
+
+
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def url(self, obj):
+        """
+        Return s3 item image.
+        """
+        if obj.box_url:
+            return obj.box_url
+        try:
+            url = create_presigned_url(AWS_BUCKET, obj.path)
+            return url.get('response')
+        except Exception:
+            return None
+
+
+
 # Register your models here.
 class CustomInventoryAdmin(admin.ModelAdmin):
     """
@@ -65,7 +109,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     change_form_template = 'inventory/custom_inventory_change_form.html'
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
     # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
-    readonly_fields = ('created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
+    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
+    inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
     fieldsets = (
         ('BATCH & QUALITY INFORMATION', {
