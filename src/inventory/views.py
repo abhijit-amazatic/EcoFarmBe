@@ -617,7 +617,14 @@ class InventoryEthicsView(APIView):
             'status_code': 200,
             'response':list(set([item for sublist in clean_ethics for item in sublist]))})
 
-    
+
+class CustomInventoryFilterSet(FilterSet):
+    status__in = CharInFilter(field_name='status', lookup_expr='in')
+    class Meta:
+        model = CustomInventory
+        fields = {
+            'status':['icontains', 'exact'],
+        }
 
 class CustomInventoryViewSet(viewsets.ModelViewSet):
     """
@@ -625,6 +632,7 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
     """
     permission_classes = (AllowAny, )
     filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
+    filterset_class = CustomInventoryFilterSet
     ordering_fields = '__all__'
     pagination_class = BasicPagination
     ordering = ('created_on',)
