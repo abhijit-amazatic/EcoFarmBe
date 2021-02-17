@@ -215,6 +215,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             client_code = self.get_client_code(request, obj)
+            # client_code = 'code'
             if client_code:
                 sku = self.generate_sku(obj, client_code)
 
@@ -249,7 +250,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
                 if obj.farm_ask_price:
                     data['cf_farm_price'] = str(int(obj.farm_ask_price))
-                    data['purchase_rate'] = obj.farm_ask_price
+                    # data['purchase_rate'] = obj.farm_ask_price
                     data['rate'] = obj.farm_ask_price + 154.40 # = Cost price + IFP Tier membership Fee
 
                 if obj.pricing_position:
@@ -267,6 +268,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 data['cf_sample_in_house'] = 'Pending'
                 data['cf_status'] = 'In-Testing'
                 data['cf_cfi_published'] = False
+                data['account_id'] = 2155380000000448337
+                # data['account_name'] = '3rd Party Flower Sales'
                 data['purchase_account_id'] = 2155380000000565567
                 # data['purchase_account_name'] = 'Product Costs - Flower'
                 data['inventory_account_id'] = 2155380000000448361
