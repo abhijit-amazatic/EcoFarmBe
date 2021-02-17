@@ -277,6 +277,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 if obj.payment_method:
                     data['cf_payment_method'] = obj.payment_method
 
+                data['cf_procurement_rep'] = request.user.email
+
                 data['initial_stock'] = int(obj.quantity_available)
                 data['product_type'] = 'goods'
                 data['cf_sample_in_house'] = 'Pending'

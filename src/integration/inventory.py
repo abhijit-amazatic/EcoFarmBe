@@ -75,6 +75,17 @@ def get_vendor_id(inventory, record):
             if vendor.get('vendor_name') == record.get('cf_vendor_name'):
                 return vendor.get('contact_id')
 
+def get_user_id(inventory, email):
+    """
+    Get vendor id from zoho.
+    """
+    result = inventory.get_user(params={'email': email})
+    if result.get('code') == 0:
+        for user in result.get('users'):
+            if user.get('email') == email:
+                return user.get('user_id')
+
+
 def create_inventory_item(inventory_name, record, params={}):
     """
     Create an inventory item in zoho inventory.
@@ -86,6 +97,14 @@ def create_inventory_item(inventory_name, record, params={}):
             record['cf_vendor_name'] = vendor_id
         else:
             record.pop('cf_vendor_name')
+
+    if 'cf_procurement_rep' in record:
+        user_id = get_user_id(inventory, record['cf_procurement_rep'])
+        if user_id:
+            record['cf_procurement_rep'] = user_id
+        else:
+            record.pop('cf_procurement_rep')
+
     return inventory.create_item(record, params=params)
 
 def update_inventory_item(inventory_name, record_id, record, params={}):
