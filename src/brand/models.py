@@ -647,8 +647,8 @@ class CultivationOverview(models.Model):
     """
     license = models.OneToOneField(License, verbose_name=_('License'),
                                    related_name='cultivation_overview', on_delete=models.CASCADE)
-    autoflower = models.BooleanField(_('Is Agreement Signed'), default=False)
-    full_season = models.BooleanField(_('Is Agreement Signed'), default=False)
+    autoflower = models.BooleanField(_('Autoflower'), default=False)
+    full_season = models.BooleanField(_('Full Season'), default=False)
     lighting_type = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     type_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     overview = ArrayField(HStoreField(blank=True, null=True), blank=True, null=True,default=list)
