@@ -1,6 +1,7 @@
 """
 Inventory Model
 """
+from django import forms
 from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRelation)
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -157,6 +158,16 @@ class Inventory(models.Model):
         return self.name
 
 
+class ChoiceArrayField(ArrayField):
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': forms.MultipleChoiceField,
+            'choices': self.base_field.choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
+
+
 class CustomInventory(TimeStampFlagModelMixin, models.Model):
     """
     Custom Inventory Model Class
@@ -229,6 +240,19 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Secure Cash Handling', _('Secure Cash Handling')),
     )
 
+    PAYMENT_TERMS_CHOICES = (
+        ('14-30 Days', _('14-30 Days')),
+        ('21 Days', _('21 Days')),
+        ('7-14 Days', _('7-14 Days')),
+        ('COD', _('COD')),
+    )
+    PAYMENT_METHOD_CHOICES = (
+        ('Cash', _('Cash')),
+        ('ACH', _('ACH')),
+        ('Check', _('Check')),
+        ('Bank Wire', _('Bank Wire')),
+    )
+
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
@@ -250,6 +274,9 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     best_contact_Day_of_week = models.CharField(_("Best Contact Day Of Week"), max_length=50, choices=DAY_OF_WEEK, blank=True, null=True,)
     best_contact_time_from = models.TimeField(_('Best Contact Time From'), auto_now=False, blank=True, null=True, default=None)
     best_contact_time_to = models.TimeField(_('Best Contact Time To'), auto_now=False, blank=True, null=True, default=None)
+
+    payment_terms = models.CharField(_('Payment Terms'), choices=PAYMENT_TERMS_CHOICES, blank=True, null=True, max_length=50)
+    payment_method = ChoiceArrayField(models.CharField(_('Payment Method'), max_length=100, choices=PAYMENT_METHOD_CHOICES), default=list)
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
     vendor_name = models.CharField(_('Vendor Name'), max_length=255)

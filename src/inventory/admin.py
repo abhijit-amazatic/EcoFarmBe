@@ -1,11 +1,13 @@
 from os import urandom
-from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericStackedInline
-from django.contrib.admin.utils import (unquote,)
-from django.db import models
 from django import forms
-from django.utils import timezone
+from django.contrib.admin import widgets
+from django.contrib import admin
+from django.contrib.admin.utils import (unquote,)
+from django.contrib.contenttypes.admin import GenericStackedInline
+from django.contrib.postgres.fields import (ArrayField, JSONField,)
+from django.db import models
 from django.shortcuts import HttpResponseRedirect
+from django.utils import timezone
 from django.utils.encoding import force_str
 
 from integration.apps.aws import (create_presigned_url, )
@@ -142,6 +144,12 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 'best_contact_time_to',
             ),
         }),
+        ('PAYMENT', {
+            'fields': (
+                'payment_terms',
+                'payment_method',
+            ),
+        }),
         ('Extra Info', {
             'fields': (
                 'status',
@@ -262,6 +270,12 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 if obj.vendor_name:
                     data['cf_vendor_name'] = obj.vendor_name
                     # data['vendor_name'] = obj.vendor_name
+
+                if obj.payment_terms:
+                    data['cf_payment_terms'] = obj.payment_terms
+
+                if obj.payment_method:
+                    data['cf_payment_method'] = obj.payment_method
 
                 data['initial_stock'] = int(obj.quantity_available)
                 data['product_type'] = 'goods'
