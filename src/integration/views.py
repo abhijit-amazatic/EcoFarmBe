@@ -55,10 +55,12 @@ from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
+from slacker import Slacker
 from core.mailer import (mail, mail_send,)
 from integration.apps.scrapper import (Scrapper, )
 from labtest.models import (LabTest,)
 
+slack = Slacker(settings.SLACK_TOKEN)
 
 class GetBoxTokensView(APIView):
     """
@@ -996,4 +998,23 @@ class OrderVariableView(APIView):
         """
         queryset = OrderVariable.objects.values()
         return Response(queryset)
+
+class NotificationView(APIView):
+    """
+    View class for posting to slack via webhook.
+    """
+    permission_classes = (IsAuthenticated,)    
+    
+    def post(self, request):
+        """
+        add slack notificatiion.
+        """
+        if request.data.get('channel', None) and request.data.get('message', None):
+            try:
+                return Response(slack.chat.post_message(request.data.get('channel'), "<!channel> %s" %request.data.get('message'), as_user=True),status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({
+                    "status_code": 400,
+                    "error": e}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Please specify channel/message correctly!'}, status=status.HTTP_400_BAD_REQUEST)
     

@@ -48,7 +48,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
-                               GetRecordView, LabTestView, GetAutoComplete, OrderVariableView,)
+                               GetRecordView, LabTestView, GetAutoComplete, OrderVariableView,NotificationView,)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -141,6 +141,7 @@ urlpatterns = [
     path(r'search/', SearchQueryView.as_view(), name='search'),
     path(r'box/link/', GetBoxSharedLink.as_view(), name='get_shared_link'),
     path(r'integration/box/', GetBoxTokensView.as_view(), name='box'),
+    path(r'notify/', NotificationView.as_view(), name='notification'),
     path(r'integration/box-aws/',
          GetBoxTokenAuthenticationView.as_view(), name='box-token-authentication'),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
