@@ -601,6 +601,11 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     """
     It is farm profile/Account profile in UI.Stores Farm data.Vendors are essentially replica of license.
     """
+    HAVE_TRANSPORTATION_CHOICES = (
+        ('Yes', _('Yes')),
+        ('No', _('No')),
+    )
+
     license = models.OneToOneField(License, verbose_name=_('LicenseProfile'),
                                 related_name='license_profile', on_delete=models.CASCADE)
     brand_association = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
@@ -615,7 +620,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     about = models.TextField(blank=True, null=True)
     other_distributors = models.CharField(blank=True, null=True, max_length=255)
     transportation = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
-    have_transportation = models.BooleanField(_('Have Transportation'),  blank=True, null=True,)
+    have_transportation = models.CharField(_('Have Transportation'), choices=HAVE_TRANSPORTATION_CHOICES, blank=True, null=True, max_length=255)
     issues_with_failed_labtest = models.CharField(blank=True, null=True, max_length=255)
     approved_on = models.DateTimeField(_('Approved on'), blank=True, null=True)
     # preferred_payment = models.CharField(_('Preferred Payment'), blank=True, null=True, max_length=255)
