@@ -386,7 +386,7 @@ class PermissionAdmin(admin.ModelAdmin):
 
 # admin.site.register(LicenseRole,LicenseRoleAdmin)
 admin.site.register(Organization,OrganizationAdmin)
-admin.site.register(OrganizationRole,OrganizationRoleAdmin)
+# admin.site.register(OrganizationRole,OrganizationRoleAdmin)
 admin.site.register(PermissionGroup,admin.ModelAdmin)
 admin.site.register(Permission,PermissionAdmin)
 admin.site.register(Brand,MyBrandAdmin)

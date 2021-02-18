@@ -10,6 +10,10 @@ role_map = {
 
 DEFAULT_ROLE_PERM = {
     'License Owner': [
+        "view_license",
+        "edit_license",
+        "view_license_profile"
+        "edit_license_profile"
     ],
     'Farm Manager': [
         "view_cultivation_overview",
@@ -24,6 +28,8 @@ DEFAULT_ROLE_PERM = {
     'Sales/Inventory': [
         "view_sales",
         "view_inventory",
+        "add_inventory",
+        "edit_inventory",
     ],
     'Billing': [
         "view_profile_contact",
@@ -65,7 +71,6 @@ SALES_REP_PERM = [
     'add_brand',
     # 'add_organization',
     # 'add_organization_role',
-    # 'add_organization_user',
     # 'add_organization_user_role',
     # 'delete_brand',
     # 'delete_organization',

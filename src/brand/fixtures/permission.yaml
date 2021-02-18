@@ -91,12 +91,12 @@
         name: View Organization User
         description: ''
         group: 1
--   model: brand.permission
-    pk: add_organization_user
-    fields:
-        name: Add Organization User
-        description: ''
-        group: 1
+# -   model: brand.permission
+#     pk: add_organization_user
+#     fields:
+#         name: Add Organization User
+#         description: ''
+#         group: 1
 -   model: brand.permission
     pk: edit_organization_user
     fields:
@@ -413,5 +413,17 @@
     pk: view_inventory
     fields:
         name: View Inventory
+        description: ''
+        group: 5
+-   model: brand.permission
+    pk: add_inventory
+    fields:
+        name: Add Inventory
+        description: ''
+        group: 5
+-   model: brand.permission
+    pk: edit_inventory
+    fields:
+        name: Edit Inventory
         description: ''
         group: 5
