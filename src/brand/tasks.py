@@ -142,7 +142,7 @@ def invite_profile_contacts(profile_contact_id):
                     # notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
                     # notify_profile_user(obj.email,license_obj[0].license_profile.name)
 
-@app.task(queue="general")
+@app.task(queue="urgent")
 def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
     """
     async task for existing user.Insert/create license based on license number.
@@ -199,7 +199,7 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
             instance.save()
 
 
-@app.task(queue="general")
+@app.task(queue="urgent")
 def resend_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
     """
     async task for existing user.Insert/create license based on license number.
