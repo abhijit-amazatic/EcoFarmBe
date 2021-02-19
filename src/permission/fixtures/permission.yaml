@@ -1,0 +1,488 @@
+# ###################### ORG and  Brand ###################
+# Organization
+-   model: permission.permission
+    pk: view_organization
+    fields:
+        name: View Organization
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: add_organization
+    fields:
+        name: Add Organization
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: edit_organization
+    fields:
+        name: Edit Organization
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: delete_organization
+    fields:
+        name: Delete Organization
+        type: 'organizational'
+        description: ''
+        group: 1
+
+
+
+# Brand
+-   model: permission.permission
+    pk: view_brand
+    fields:
+        name: View Brand
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: add_brand
+    fields:
+        name: Add Brand
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: edit_brand
+    fields:
+        name: Edit Brand
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: delete_brand
+    fields:
+        name: Delete Brand
+        type: 'organizational'
+        description: ''
+        group: 1
+
+
+
+#############################   ORG user & roles #################
+# Organization Role
+-   model: permission.permission
+    pk: view_organization_role
+    fields:
+        name: View Organization Role
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: add_organization_role
+    fields:
+        name: Add Organization Role
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: edit_organization_role
+    fields:
+        name: Edit Organization Role
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: delete_organization_role
+    fields:
+        name: Delete Organization Role
+        type: 'organizational'
+        description: ''
+        group: 1
+
+
+
+# Organization User
+-   model: permission.permission
+    pk: view_organization_user
+    fields:
+        name: View Organization User
+        type: 'organizational'
+        description: ''
+        group: 1
+# -   model: permission.permission
+#     pk: add_organization_user
+#     fields:
+#         name: Add Organization User
+#         type: 'organizational'
+        description: ''
+#         group: 1
+-   model: permission.permission
+    pk: edit_organization_user
+    fields:
+        name: Edit Organization User
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: delete_organization_user
+    fields:
+        name: Delete Organization User
+        type: 'organizational'
+        description: ''
+        group: 1
+
+
+
+# Organization User Role
+-   model: permission.permission
+    pk: view_organization_user_role
+    fields:
+        name: View Organization User Role
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: add_organization_user_role
+    fields:
+        name: Add Organization User Role
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: edit_organization_user_role
+    fields:
+        name: Edit Organization User Role
+        type: 'organizational'
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: delete_organization_user_role
+    fields:
+        name: Delete Organization User Role
+        type: 'organizational'
+        description: ''
+        group: 1
+
+
+# Invite User To Organization
+-   model: permission.permission
+    pk: invite_user_to_organization
+    fields:
+        name: Invite User To Organization
+        type: 'organizational'
+        description: ''
+        group: 1
+
+
+
+# ########################### License & profile #########################
+# License
+-   model: permission.permission
+    pk: view_license
+    fields:
+        name: View License
+        type: 'organizational'
+        description: ''
+        group: 2
+-   model: permission.permission
+    pk: add_license
+    fields:
+        name: Add License
+        type: 'organizational'
+        description: ''
+        group: 2
+-   model: permission.permission
+    pk: edit_license
+    fields:
+        name: Edit License
+        type: 'organizational'
+        description: ''
+        group: 2
+-   model: permission.permission
+    pk: delete_license
+    fields:
+        name: Delete License
+        type: 'organizational'
+        description: ''
+        group: 2
+
+
+
+# License Profile
+-   model: permission.permission
+    pk: view_license_profile
+    fields:
+        name: View License Profile
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_profile
+    fields:
+        name: Edit License Profile
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# Profile Contact
+-   model: permission.permission
+    pk: view_profile_contact
+    fields:
+        name: View Profile Contact
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: add_profile_contact
+    fields:
+        name: Add Profile Contact
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: edit_profile_contact
+    fields:
+        name: Edit Profile Contact
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: delete_profile_contact
+    fields:
+        name: Delete Profile Contact
+        type: 'organizational'
+        description: ''
+        group: 4
+
+
+
+# Cultivation Overview
+-   model: permission.permission
+    pk: view_cultivation_overview
+    fields:
+        name: View Cultivation Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: add_cultivation_overview
+    fields:
+        name: Add Cultivation Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_cultivation_overview
+    fields:
+        name: Edit Cultivation Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: delete_cultivation_overview
+    fields:
+        name: Delete Cultivation Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# Financial Overview
+-   model: permission.permission
+    pk: view_financial_overview
+    fields:
+        name: View Financial Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: add_financial_overview
+    fields:
+        name: Add Financial Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_financial_overview
+    fields:
+        name: Edit Financial Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: delete_financial_overview
+    fields:
+        name: Delete Financial Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# Crop Overview
+-   model: permission.permission
+    pk: view_crop_overview
+    fields:
+        name: View Crop Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: add_crop_overview
+    fields:
+        name: Add Crop Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_crop_overview
+    fields:
+        name: Edit Crop Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: delete_crop_overview
+    fields:
+        name: Delete Crop Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# Program Overview
+-   model: permission.permission
+    pk: view_program_overview
+    fields:
+        name: View Program Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: add_program_overview
+    fields:
+        name: Add Program Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: delete_program_overview
+    fields:
+        name: Delete Program Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_program_overview
+    fields:
+        name: Edit Program Overview
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# Billing Information
+-   model: permission.permission
+    pk: view_billing_information
+    fields:
+        name: View Billing Information
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: edit_billing_information
+    fields:
+        name: Edit Billing Information
+        type: 'organizational'
+        description: ''
+        group: 4
+
+
+
+# Billing Address
+-   model: permission.permission
+    pk: view_billing_address
+    fields:
+        name: View Billing Address
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: edit_billing_address
+    fields:
+        name: Edit Billing Address
+        type: 'organizational'
+        description: ''
+        group: 4
+
+
+
+# Shipping Address
+-   model: permission.permission
+    pk: view_shipping_address
+    fields:
+        name: View Shipping Address
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: edit_shipping_address
+    fields:
+        name: Edit Shipping Address
+        type: 'organizational'
+        description: ''
+        group: 4
+
+
+
+# Mailing Address
+-   model: permission.permission
+    pk: view_mailing_address
+    fields:
+        name: View Mailing Address
+        type: 'organizational'
+        description: ''
+        group: 4
+-   model: permission.permission
+    pk: edit_mailing_address
+    fields:
+        name: Edit Mailing Address
+        type: 'organizational'
+        description: ''
+        group: 4
+
+
+
+# Sales
+-   model: permission.permission
+    pk: view_sales
+    fields:
+        name: View Sales
+        type: 'organizational'
+        description: ''
+        group: 5
+
+
+
+# Inventory
+-   model: permission.permission
+    pk: view_inventory
+    fields:
+        name: View Inventory
+        type: 'organizational'
+        description: ''
+        group: 5
+-   model: permission.permission
+    pk: add_inventory
+    fields:
+        name: Add Inventory
+        type: 'organizational'
+        description: ''
+        group: 5
+-   model: permission.permission
+    pk: edit_inventory
+    fields:
+        name: Edit Inventory
+        type: 'organizational'
+        description: ''
+        group: 5

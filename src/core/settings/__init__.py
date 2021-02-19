@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django_filters',
     'ckeditor_uploader',
     'ckeditor',
+    'permission',
     'user',
     'two_factor',
     'knox',

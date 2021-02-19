@@ -25,7 +25,6 @@ from core.utility import (send_async_approval_mail, get_profile_type,)
 from .models import (Organization, Brand,License,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
 from .models import (OrganizationRole, Permission, OrganizationUser, OrganizationUserRole, PermissionGroup)
 from .tasks import (invite_profile_contacts,)
-from .widgets import PermissionSelectMultipleWidget
 
 class LicenseUpdatedForm(forms.ModelForm):
 
@@ -355,15 +354,6 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
     #search_fields = ('',)
 
 
-# class LicenseRoleAdmin(admin.ModelAdmin):
-#     """
-#     ProfileCategoryAdmin
-#     """
-#     formfield_overrides = {
-#         models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
-#     }
-
-
 class OrganizationRoleAdmin(admin.ModelAdmin):
     """
     OrganizationRoleAdmin
@@ -376,19 +366,8 @@ class OrganizationRoleAdmin(admin.ModelAdmin):
     }
 
 
-class PermissionAdmin(admin.ModelAdmin):
-    """
-    OrganizationRoleAdmin
-    """
-    readonly_fields = ()
-
-
-
-# admin.site.register(LicenseRole,LicenseRoleAdmin)
 admin.site.register(Organization,OrganizationAdmin)
 # admin.site.register(OrganizationRole,OrganizationRoleAdmin)
-admin.site.register(PermissionGroup,admin.ModelAdmin)
-admin.site.register(Permission,PermissionAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)
 admin.site.register(ProfileCategory, ProfileCategoryAdmin)
