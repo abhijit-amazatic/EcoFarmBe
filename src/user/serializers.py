@@ -86,6 +86,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile_photo_sharable_link = serializers.ReadOnlyField()
     platform_kpi = serializers.SerializerMethodField(read_only=True)
     document_url = serializers.SerializerMethodField()
+    internal_permission = serializers.SerializerMethodField()
 
     def get_document_url(self, obj):
         """
@@ -102,7 +103,17 @@ class UserSerializer(serializers.ModelSerializer):
                     return url.get('response')
         except Exception:
             return None
-        
+
+    def get_internal_permission(self, obj):
+        """
+        Return perm list.
+        """
+        perm = set()
+        for role in obj.internal_roles.all():
+            for x in role.permissions.all():
+                perm.add(x.id)
+        return list(perm)
+
     def get_member_categories(self, obj):
         """
         Adds ,member categories to response
@@ -130,7 +141,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations', 'internal_permission')
 
 
     def validate_password(self, password):
