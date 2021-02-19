@@ -35,6 +35,7 @@ from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses, update_program_selection, create_records)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
+from permission.filterqueryset import (filterQuerySet, )
 from .tasks import (
     send_async_invitation,
     send_onboarding_data_fetch_verification,
@@ -56,7 +57,7 @@ from .models import (
     OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
-    Permission,
+    # Permission,
     OrganizationUserInvite,
     OnboardingDataFetch,
 )
@@ -78,7 +79,7 @@ from .serializers import (
     OrganizationRoleSerializer,
     OrganizationUserNestedViewSerializer,
     OrganizationUserRoleNestedSerializer,
-    PermissionSerializer,
+    # PermissionSerializer,
     OrganizationDetailSerializer,
     InviteUserVerificationSerializer,
     OTPSerializer,
@@ -89,14 +90,13 @@ from .views_mixin import (
     NestedViewSetMixin,
     PermissionQuerysetFilterMixin,
 )
-from .permissions import (
+from .views_permissions import (
     LicenseViewSetPermission,
     OrganizationViewSetPermission,
     BrandViewSetPermission,
     OrganizationRoleViewSetPermission,
     OrganizationUserViewSetPermission,
     OrganizationUserRoleViewSetPermission,
-    filterQuerySet,
 )
 
 Auth_User = get_user_model()
@@ -545,24 +545,6 @@ class KpiViewSet(NestedViewSetMixin, APIView):
             group_by_value[value] = license_profile_kpis
 
         return Response({"kpis": group_by_value})
-
-
-class PermissionListView(APIView):
-    """
-    All KPI view set
-    """
-    permission_classes = (IsAuthenticatedBrandPermission, )
-
-    def get(self, request, *args, **kwargs):
-        """
-        Return QuerySet.
-        """
-        qs = Permission.objects.all()
-        value_list = qs.values_list('group__id', 'group__name').distinct()
-        group_by_value = {}
-        for value in value_list:
-            group_by_value[value[1]] = PermissionSerializer(qs.filter(group=value[0]), many=True).data
-        return Response({"permission": group_by_value})
 
 
 class OrganizationRoleViewSet(PermissionQuerysetFilterMixin,

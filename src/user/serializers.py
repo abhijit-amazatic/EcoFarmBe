@@ -22,7 +22,7 @@ from integration.apps.aws import (create_presigned_url, )
 
 from two_factor.serializers import TwoFactorDevicesSerializer
 from brand.serializers import OrganizationSerializer
-from brand.permissions import filterQuerySet
+from permission.filterqueryset import filterQuerySet
 
 BS = 16
 key = hashlib.md5(str('asdsadsadsds').encode('utf-8')).hexdigest()[:BS]

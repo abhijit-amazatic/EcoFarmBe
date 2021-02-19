@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .permissions import (filterQuerySet,)
+from permission.filterqueryset import (filterQuerySet,)
 from .exceptions import (InvalidInviteToken, ExpiredInviteToken)
 from .models import (
     License,

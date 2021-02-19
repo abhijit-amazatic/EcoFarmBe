@@ -98,7 +98,7 @@ class PermissionSelectMultipleWidget(forms.CheckboxSelectMultiple):
             # last_group = group
             # last_model = model_class
 
-        table =  [dict(model=model_verbose_name, model_class=model_class, group=group, permissions=table_dict[model_class][group][model_verbose_name])
+        table = [dict(model=model_verbose_name, model_class=model_class, group=group, permissions=table_dict[model_class][group][model_verbose_name])
             for model_class in table_dict
             for group in table_dict[model_class]
             for model_verbose_name in table_dict[model_class][group]

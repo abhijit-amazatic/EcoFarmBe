@@ -22,9 +22,21 @@ from multiselectfield import MultiSelectField
 
 from integration.box import (delete_file,)
 from core.utility import (send_async_approval_mail, get_profile_type,)
-from .models import (Organization, Brand,License,ProfileContact,LicenseProfile,CultivationOverview,ProgramOverview,FinancialOverview,CropOverview, ProfileCategory)
-from .models import (OrganizationRole, Permission, OrganizationUser, OrganizationUserRole, PermissionGroup)
 from .tasks import (invite_profile_contacts,)
+from .models import (
+    Organization,
+    Brand,License,
+    ProfileContact,
+    LicenseProfile,
+    CultivationOverview,
+    ProgramOverview,
+    FinancialOverview,
+    CropOverview,
+    ProfileCategory,
+    OrganizationRole,
+    OrganizationUser,
+    OrganizationUserRole,
+)
 
 class LicenseUpdatedForm(forms.ModelForm):
 
@@ -354,19 +366,19 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
     #search_fields = ('',)
 
 
-class OrganizationRoleAdmin(admin.ModelAdmin):
-    """
-    OrganizationRoleAdmin
-    """
-    readonly_fields = ('created_on','updated_on',)
+# class OrganizationRoleAdmin(admin.ModelAdmin):
+#     """
+#     OrganizationRoleAdmin
+#     """
+#     readonly_fields = ('created_on','updated_on',)
 
-    formfield_overrides = {
-        # models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
-        models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
-    }
+#     formfield_overrides = {
+#         # models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
+#         models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+#     }
 
 
-admin.site.register(Organization,OrganizationAdmin)
+admin.site.register(Organization, OrganizationAdmin)
 # admin.site.register(OrganizationRole,OrganizationRoleAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)

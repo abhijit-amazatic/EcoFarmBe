@@ -25,6 +25,7 @@ from cryptography.fernet import (Fernet, InvalidToken)
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
 from user.models import User
+from permission.models import (Permission)
 from two_factor.utils import (random_hex, random_hex_32, key_validator,)
 from inventory.models import (Documents, )
 from .exceptions import (InvalidInviteToken, ExpiredInviteToken,)
@@ -62,64 +63,6 @@ class Organization(TimeStampFlagModelMixin,models.Model):
 
     def __str__(self):
         return self.name
-
-
-class PermissionGroup(models.Model):
-    """
-    The permission Group.
-    """
-    name = models.CharField(
-        _('Name'),
-        max_length=100,
-        unique=True,
-    )
-
-    class Meta:
-        verbose_name = _('Permission Group')
-        verbose_name_plural = _('Permission Groups')
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
-
-
-class Permission(models.Model):
-    """
-    The permissions.
-    """
-    id = models.CharField(
-        _('Id'),
-        max_length=100,
-        unique=True,
-        primary_key=True,
-    )
-    name = models.CharField(
-        _('Name'),
-        max_length=100,
-    )
-
-    description = models.TextField(_('description'), null=True, blank=True)
-    group = models.ForeignKey(
-        PermissionGroup,
-        verbose_name=_('Group'),
-        related_name='permissions',
-        on_delete=models.PROTECT
-    )
-
-    # def save(self, *args, **kwargs):
-    #     self.group = PERMISSION_GROUP_MAP[self.codename]
-    #     return super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = _('permission')
-        verbose_name_plural = _('permissions')
-        ordering = ('group__name', 'id')
-
-    def __str__(self):
-        return f"{self.group} | {self.name}"
-
-    def natural_key(self):
-        return (self.name,)
 
 
 class OrganizationRole(TimeStampFlagModelMixin, models.Model):
@@ -495,95 +438,6 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
             raise InvalidInviteToken
         else:
             return obj
-
-
-
-# class LicenseRole(TimeStampFlagModelMixin, models.Model):
-#     """
-#     Stores License Profile User's User's Roles.
-#     """
-#     ROLE_OWNER = 'owner'
-#     ROLE_LICENSE_OWNER = 'license_owner'
-#     ROLE_FARM_MANAGER = 'farm_manager'
-#     ROLE_LOGISTICS = 'logistics'
-#     ROLE_SALES_OR_INVENTORY = 'sales_or_inventory'
-#     ROLE_BILLING = 'billing'
-#     ROLE_CHOICES = (
-#         (ROLE_OWNER, _('Owner')),
-#         (ROLE_LICENSE_OWNER, _('License Owner')),
-#         (ROLE_FARM_MANAGER, _('Farm Manager')),
-#         (ROLE_LOGISTICS, _('Logistics')),
-#         (ROLE_SALES_OR_INVENTORY, _('Sales or Inventory')),
-#         (ROLE_BILLING, _('Billing')),
-#     )
-#     ROLE_CHOICES_DICT = dict(ROLE_CHOICES)
-#     name = models.CharField(
-#         verbose_name=_('Name'),
-#         max_length=60,
-#         choices=ROLE_CHOICES,
-#         unique=True,
-#     )
-#     default_permissions = models.ManyToManyField(
-#         DjPermission,
-#         verbose_name=_('Default Permissions'),
-#         blank=True,
-#         limit_choices_to=Q(content_type__app_label='brand'),
-#     )
-
-
-#     def __str__(self):
-#         return str(self.ROLE_CHOICES_DICT.get(self.name, ''))
-
-#     def natural_key(self):
-#         return (self.name,)
-
-#     class Meta:
-#         verbose_name = _('License Role')
-#         verbose_name_plural = _('License Roles')
-
-
-# class LicenseUser(TimeStampFlagModelMixin,models.Model):
-#     """
-#     Stores License Profile User's details #combined roles for all accounts & vendors.
-#     Only farm manager is extra in vendors/sellers.
-#     """
-#     license = models.ForeignKey(License, verbose_name=_('License'),
-#                              related_name='profile_roles', on_delete=models.CASCADE)
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
-#                              related_name='license_roles', on_delete=models.CASCADE)
-#     role = models.ManyToManyField(LicenseRole, verbose_name=_('Role'), related_name='license_users')
-
-#     def __str__(self):
-#         return f'{self.license} | {self.user}'
-
-#     class Meta:
-#         unique_together = (('license', 'user'), )
-#         verbose_name = _('License Profile User')
-#         verbose_name_plural = _('License Profile Users')
-
-
-# class LicenseRolePermissions(TimeStampFlagModelMixin,models.Model):
-#     """
-#     Stores License Profile Role's Permissions.
-#     """
-#     license = models.ForeignKey(License, verbose_name=_('License'),
-#                              related_name='license_role_permissions', on_delete=models.CASCADE)
-#     role = models.ForeignKey(LicenseRole, verbose_name=_('Role'),
-#                              related_name='license_role_permissions', on_delete=models.CASCADE)
-#     permissions = models.ManyToManyField(
-#         DjPermission,
-#         verbose_name=_('License Role Permissions'),
-#         blank=True,
-#         limit_choices_to=Q(content_type__app_label='brand'),
-#     )
-
-#     def __str__(self):
-#         return self.name
-
-#     class Meta:
-#         unique_together = (('license', 'role'), )
-#         verbose_name = _('License Role Permissions')
-#         verbose_name_plural = _('License Roles Permissions')
 
 
 

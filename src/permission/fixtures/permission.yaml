@@ -104,13 +104,13 @@
         type: 'organizational'
         description: ''
         group: 1
-# -   model: permission.permission
-#     pk: add_organization_user
-#     fields:
-#         name: Add Organization User
-#         type: 'organizational'
+-   model: permission.permission
+    pk: add_organization_user
+    fields:
+        name: Add Organization User
+        type: 'organizational'
         description: ''
-#         group: 1
+        group: 1
 -   model: permission.permission
     pk: edit_organization_user
     fields:

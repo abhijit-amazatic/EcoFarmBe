@@ -45,7 +45,7 @@ from .models import (
     OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
-    Permission,
+    # Permission,
     OrganizationUserInvite,
     OnboardingDataFetch,
 )
@@ -446,18 +446,6 @@ class CurrentPasswordSerializer(serializers.Serializer): # pylint: disable=W0223
             if user.check_password(value):
                 return value
         raise serializers.ValidationError("wrong current password.")
-
-
-class PermissionSerializer(serializers.ModelSerializer):
-    """
-    This defines organization role serializer.
-    """
-    # display_name = serializers.CharField(
-    #     source='get_codename_display'
-    # )
-    class Meta:
-        model = Permission
-        fields = ('id', 'name',)
 
 
 class OrganizationUserInfoSerializer(serializers.ModelSerializer):

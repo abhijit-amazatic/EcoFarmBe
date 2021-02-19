@@ -1,16 +1,14 @@
 from django.db import models
 from rest_framework.utils import model_meta
-from .models import (
-    License,
-    Organization,
-    Permission,
-)
-from .permission_defaults import (
+from brand.permission_defaults import (
     SALES_REP_GROUP_NAME,
     SALES_REP_PERM,
 )
+from .models import (
+    Permission,
+)
 
-class LicensePermissionBackend:
+class CustomPermissionBackend:
 
     def has_perm(self, user_obj, perm, obj=None):
         if not user_obj.is_active or user_obj.is_anonymous or obj is None:
@@ -36,9 +34,9 @@ class LicensePermissionBackend:
             new_ls = []
             for o in obj_ls:
                 if isinstance(o, models.Model):
-                    if o.__class__ == License:
+                    if o.__class__.__name__ == 'License':
                         return self.get_license_role_perm(user_obj, o)
-                    if o.__class__ == Organization:
+                    if o.__class__.__name__ == 'Organization':
                         return self.get_organization_user_perm(user_obj, o)
                     opts = o.__class__._meta.concrete_model._meta
                     fk_ref = model_meta._get_forward_relationships(opts)

@@ -1,7 +1,7 @@
 import os
-
 from django.core.management.base import BaseCommand, CommandError
-from utils.helper import  add_default_organization_role
+
+from brand.utils import  add_default_organization_role
 #from pylama.main import check_path, parse_options
 
 

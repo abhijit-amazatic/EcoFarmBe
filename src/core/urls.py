@@ -58,6 +58,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryEthicsView, CustomInventoryViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
+from permission.views import (PermissionListView,)
 from brand.views import (
     OrganizationViewSet,
     ProfileCategoryView,
@@ -70,7 +71,6 @@ from brand.views import (
     OrganizationRoleViewSet,
     OrganizationUserViewSet,
     OrganizationUserRoleViewSet,
-    PermissionListView,
     InviteUserViewSet,
     UserInvitationVerificationView,
     ProgramSelectionSyncView,

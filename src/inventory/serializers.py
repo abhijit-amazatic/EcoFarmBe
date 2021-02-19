@@ -4,7 +4,7 @@ Serializer for inventory
 import json
 from rest_framework import serializers
 from integration.apps.aws import (create_presigned_url, )
-from brand.permissions import filterQuerySet
+from permission.filterqueryset import (filterQuerySet, )
 from brand.models import LicenseProfile
 from cultivar.models import Cultivar
 from core.settings import (AWS_BUCKET, )

@@ -2,8 +2,8 @@ from django.db.models import Q
 from django.http import Http404
 from rest_framework.exceptions import (NotFound, PermissionDenied,)
 
+from permission.filterqueryset import filterQuerySet
 
-from .permissions import filterQuerySet
 from . import models
 
 class NestedViewSetMixin:
