@@ -15,7 +15,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 
-
+from permission.models import InternalRole
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin)
 from integration.apps.twilio import (send_sms, verification_call)
@@ -96,6 +96,14 @@ class User(StatusFlagMixin,AbstractUser):
     updated_on = models.DateTimeField(auto_now=True)
     documents = GenericRelation('inventory.Documents')
     crm_link = models.CharField(_('CRM link'), max_length=255, blank=True, null=True)
+
+    internal_roles = models.ManyToManyField(
+        InternalRole,
+        verbose_name=_('Internal Roles'),
+        related_name="users",
+        blank=True,
+    )
+
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'

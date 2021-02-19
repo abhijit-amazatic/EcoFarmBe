@@ -10,7 +10,6 @@ from django.conf import settings
 from django.utils import timezone
 
 
-
 class PermissionGroup(models.Model):
     """
     The permission Group.
@@ -93,6 +92,7 @@ class InternalRole(models.Model):
         verbose_name=_('Permissions'),
         blank=True,
     )
+
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
