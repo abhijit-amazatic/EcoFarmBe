@@ -583,7 +583,7 @@ def create_purchase_order(record, params=None):
             "error": exc
         }
 
-def update_purchase_order(purchase_id, record, params=None):
+def update_purchase_order(po_id, record, params=None):
     """
     Update purchase order to Zoho books.
     """
@@ -596,7 +596,7 @@ def update_purchase_order(purchase_id, record, params=None):
         result = get_item(obj, result['data'])
         if result['code'] != 0 and result['code'] != 1004:
            return result
-        return po_obj.update_purchase_order(purchase_id, result['data'], parameters=params)
+        return po_obj.update_purchase_order(po_id, result['data'], parameters=params)
     except Exception as exc:
         return {
             "status_code": 400,
