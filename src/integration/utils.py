@@ -119,6 +119,7 @@ def get_places(address):
             result = list()
             gmaps = googlemaps.Client(key=GOOGLEPLACES_API_KEY)
             responses = gmaps.places_autocomplete(address)
+            result.extend(gmaps.places(address).get('results'))
             for response in responses:
                 data = gmaps.places(response.get('description')).get('results')
                 result.extend(data)
