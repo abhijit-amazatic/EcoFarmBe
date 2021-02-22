@@ -284,17 +284,20 @@ class EstimateView(APIView):
         """
         Get estimates.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('estimate_id', None):
             return Response(get_estimate(
+                organization_name,
                 request.query_params.get('estimate_id'),
                 params=request.query_params.dict()))
-        return Response(list_estimates(params=request.query_params.dict()))
+        return Response(list_estimates(organization_name, params=request.query_params.dict()))
 
     def post(self, request):
         """
         Create and estimate in Zoho Books.
         """
-        response = create_estimate(data=request.data, params=request.query_params.dict())
+        organization_name = request.query_params.get('organization_name')
+        response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response)
@@ -303,15 +306,16 @@ class EstimateView(APIView):
         """
         Update an estimate in Zoho Books.
         """
+        organization_name = request.query_params.get('organization_name')
         is_draft = request.query_params.get('is_draft')
         estimate_id = request.data['estimate_id']
         if is_draft == 'true' or is_draft == 'True':
-            response = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            response = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response)
         else:
-            estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            estimate = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if estimate.get('code') and estimate['code'] != 0:
                 return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
             update_available_for_sale(request.data)
@@ -322,9 +326,10 @@ class EstimateView(APIView):
         """
         Delete an estimate from Zoho books.
         """
+        organization_name = request.query_params.get('organization_name')
         estimate_id = request.data['estimate_id']
         if estimate_id:
-            return Response(delete_estimate(estimate_id=estimate_id, params=request.query_params.dict()))
+            return Response(delete_estimate(organization_name, estimate_id=estimate_id, params=request.query_params.dict()))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -340,8 +345,9 @@ class EstimateAddressView(APIView):
         """
         estimate_id = request.data.get('estimate_id', None)
         address_type = request.data.get('address_type', None)
+        organization_name = request.query_params.get('organization_name')
         if estimate_id and address_type:
-            response = update_estimate_address(estimate_id, address_type, request.data)
+            response = update_estimate_address(organization_name, estimate_id, address_type, request.data)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
@@ -360,8 +366,9 @@ class EstimateSignView(APIView):
         """
         estimate_id = request.query_params.get('estimate_id', None)
         customer_name = request.query_params.get('customer_name', None)
+        organization_name = request.query_params.get('organization_name')
         if estimate_id and customer_name:
-            response = send_estimate_to_sign(estimate_id, customer_name)
+            response = send_estimate_to_sign(organization_name, estimate_id, customer_name)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             Estimate.objects.get(estimate_id=estimate_id).update(request_id=response.get('request_id'))
@@ -468,10 +475,11 @@ class EstimateTaxView(APIView):
         """
         Get estimates tax.
         """
+        organization_name = request.query_params.get('organization_name')
         product_category = request.query_params.get('product_category', None)
         quantity = request.query_params.get('quantity', None)
         if product_category and quantity:
-            return Response(calculate_tax(product_category, quantity))
+            return Response(calculate_tax(organization_name, product_category, quantity))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class EstimateStatusView(APIView):
@@ -486,8 +494,9 @@ class EstimateStatusView(APIView):
         """
         estimate_id = request.query_params.get('estimate_id', None)
         status = request.query_params.get('status', None)
+        organization_name = request.query_params.get('organization_name')
         if estimate_id and status:
-            return Response(mark_estimate(estimate_id, status))
+            return Response(mark_estimate(organization_name, estimate_id, status))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class EstimateSignCompleteView(APIView):
@@ -500,6 +509,7 @@ class EstimateSignCompleteView(APIView):
         """
         Post data from zoho sign on sign.
         """
+        organization_name = request.query_params.get('organization_name')
         request_id = request.data.get('request_id')
         estimate_id = request.data.get('estimate_id')
         business_dba = request.data.get('business_dba')
@@ -515,8 +525,8 @@ class EstimateSignCompleteView(APIView):
             if is_agreement:
                 new_folder = create_folder(folder_id, 'agreements')
             else:
-                a = mark_estimate(estimate_id, 'sent')
-                a = mark_estimate(estimate_id, 'accepted')
+                a = mark_estimate(organization_name, estimate_id, 'sent')
+                a = mark_estimate(organization_name, estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
             upload_pdf_box.delay(request_id, new_folder, filename, is_agreement)
         if order_number:
@@ -577,11 +587,13 @@ class PurchaseOrderView(APIView):
         """
         Get PO.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('po_id', None):
             return Response(get_purchase_order(
+                organization_name,
                 request.query_params.get('po_id'),
                 params=request.query_params.dict()))
-        return Response(list_purchase_orders(params=request.query_params.dict()))
+        return Response(list_purchase_orders(organization_name, params=request.query_params.dict()))
 
 class VendorPaymentView(APIView):
     """
@@ -593,11 +605,13 @@ class VendorPaymentView(APIView):
         """
         Get payment made.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('payment_id', None):
             return Response(get_vendor_payment(
+                organization_name,
                 request.query_params.get('payment_id'),
                 params=request.query_params.dict()))
-        return Response(list_vendor_payments(params=request.query_params.dict()))
+        return Response(list_vendor_payments(organization_name, params=request.query_params.dict()))
 
 class CustomerPaymentView(APIView):
     """
@@ -609,11 +623,13 @@ class CustomerPaymentView(APIView):
         """
         Get Payment received.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('payment_id', None):
             return Response(get_customer_payment(
+                organization_name,
                 request.query_params.get('payment_id'),
                 params=request.query_params.dict()))
-        return Response(list_customer_payments(params=request.query_params.dict()))
+        return Response(list_customer_payments(organization_name, params=request.query_params.dict()))
 
 class InvoiceView(APIView):
     """
@@ -625,11 +641,13 @@ class InvoiceView(APIView):
         """
         Get an invoice.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('invoice_id', None):
             return Response(get_invoice(
+                organization_name,
                 request.query_params.get('invoice_id'),
                 params=request.query_params.dict()))
-        return Response(list_invoices(params=request.query_params.dict()))
+        return Response(list_invoices(organization_name, params=request.query_params.dict()))
 
 class BillView(APIView):
     """
@@ -641,14 +659,16 @@ class BillView(APIView):
         """
         Get/List bills.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('bill_id', None):
             response = get_bill(
+                organization_name,
                 request.query_params.get('bill_id'),
                 params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
-        response = list_bills(params=request.query_params.dict())
+        response = list_bills(organization_name, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
@@ -663,14 +683,16 @@ class SalesOrderView(APIView):
         """
         Get/List sales orders.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('so_id', None):
             response = get_salesorder(
+                organization_name,
                 request.query_params.get('so_id'),
                 params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
-        response = list_salesorders(params=request.query_params.dict())
+        response = list_salesorders(organization_name, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
@@ -685,27 +707,13 @@ class VendorCreditView(APIView):
         """
         Get vendor credit.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('credit_id', None):
             return Response(get_vendor_credit(
+                organization_name,
                 request.query_params.get('credit_id'),
                 params=request.query_params.dict()))
-        return Response(list_vendor_credits(params=request.query_params.dict()))
-
-class VendorCreditView(APIView):
-    """
-    View class for Zoho books vendor credit.
-    """
-    permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get vendor credit.
-        """
-        if request.query_params.get('credit_id', None):
-            return Response(get_vendor_credit(
-                request.query_params.get('credit_id'),
-                params=request.query_params.dict()))
-        return Response(list_vendor_credits(params=request.query_params.dict()))
+        return Response(list_vendor_credits(organization_name, params=request.query_params.dict()))
 
 class AccountSummaryView(APIView):
     """
@@ -717,10 +725,11 @@ class AccountSummaryView(APIView):
         """
         Get account summary.
         """
+        organization_name = request.query_params.get('organization_name')
         vendor = request.query_params.get('vendor_name')
-        total_unpaid_bills = get_unpaid_bills(vendor)
-        total_credits = get_available_credit(vendor)
-        total_unpaid_invoices = get_unpaid_invoices(vendor)
+        total_unpaid_bills = get_unpaid_bills(organization_name, vendor)
+        total_credits = get_available_credit(organization_name, vendor)
+        total_unpaid_invoices = get_unpaid_invoices(organization_name, vendor)
         return Response({
             "Available_Credits": total_credits,
             "Overdue_Bills": total_unpaid_bills,
@@ -737,15 +746,17 @@ class ContactView(APIView):
         """
         Get contact.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('contact_id', None):
-            return Response(get_contact(request.query_params.get('contact_id')))
-        return Response(list_contacts(params=request.query_params.dict()))
+            return Response(get_contact(organization_name, request.query_params.get('contact_id')))
+        return Response(list_contacts(organization_name, params=request.query_params.dict()))
 
     def post(self, request):
         """
         Create contact in Zoho Books.
         """
-        return Response(create_contact(data=request.data, params=request.query_params.dict()))
+        organization_name = request.query_params.get('organization_name')
+        return Response(create_contact(organization_name, data=request.data, params=request.query_params.dict()))
 
 class ContactAddressView(APIView):
     """
@@ -757,27 +768,30 @@ class ContactAddressView(APIView):
         """
         Get contact addresses.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.query_params.get('contact_name', None):
-            return Response(get_contact_addresses(request.query_params.get('contact_name')))
+            return Response(get_contact_addresses(organization_name, request.query_params.get('contact_name')))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request):
         """
         add contact addresses.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.data.get('contact_name', None):
             contact_name = request.data.get('contact_name', None)
-            return Response(add_contact_address(contact_name, request.data))
+            return Response(add_contact_address(organization_name, contact_name, request.data))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request):
         """
         edit contact addresses.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.data.get('contact_name', None) and request.data.get('address_id', None):
             contact_name = request.data.get('contact_name', None)
             address_id = request.data.get('address_id', None)
-            return Response(edit_contact_address(contact_name, address_id, request.data))
+            return Response(edit_contact_address(organization_name, contact_name, address_id, request.data))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -793,9 +807,10 @@ class ContactPersonView(APIView):
         """
         contact_id = request.query_params.get('contact_id', None)
         contact_persons_id = request.query_params.get('contact_persons_id', None)
+        organization_name = request.query_params.get('organization_name')
         if contact_id:
-            return Response(get_contact_person(contact_id, contact_persons_id, request.query_params))
-        response = list_contact_persons(request.query_params)
+            return Response(get_contact_person(organization_name, contact_id, contact_persons_id, request.query_params))
+        response = list_contact_persons(organization_name, request.query_params)
         return Response(response, status=status.HTTP_200_OK)
     
     def post(self, request):
@@ -803,17 +818,19 @@ class ContactPersonView(APIView):
         add contact persons.
         """
         contact_id = request.data.get('contact_id', None)
+        organization_name = request.query_params.get('organization_name')
         if contact_id:
-            return Response(create_contact_person(request.data))
+            return Response(create_contact_person(organization_name, request.data))
         return Response({'error': 'Conact id not specified'}, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request):
         """
         edit contact persons.
         """
+        organization_name = request.query_params.get('organization_name')
         if request.data.get('contact_person_id', None):
             contact_person_id = request.data.get('contact_person_id', None)
-            return Response(update_contact_person(contact_person_id, request.data))
+            return Response(update_contact_person(organization_name, contact_person_id, request.data))
         return Response({'error': 'Conact person id not specified'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -851,7 +868,8 @@ class GetTaxView(APIView):
         """
         Get tax.
         """
-        return Response(get_tax_rates())
+        organization_name = request.query_params.get('organization_name')
+        return Response(get_tax_rates(organization_name))
         
 class ClientCodeView(APIView):
     """
@@ -969,6 +987,7 @@ class GetDistanceView(APIView):
         """
         account_name = request.data.get('account_name')
         is_ship_changed = request.data.get('is_ship_changed')
+        organization_name = request.query_params.get('organization_name')
         mileage = None
         if not is_ship_changed:
             response = search_query('Accounts', account_name, 'Account_Name')
@@ -985,7 +1004,7 @@ class GetDistanceView(APIView):
                 if response.get('code'):
                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
                 mileage = float(response.get('distance').get('text').strip(' km'))
-        fees = get_transportation_fees()
+        fees = get_transportation_fees(organization_name)
         if fees.get('response'):
             res = dict()
             data = fees['response'][0]

@@ -56,11 +56,11 @@ def fetch_inventory_on_interval():
                 'error': exc}
 
 @app.task(queue="general")
-def send_estimate(estimate_id, contact_id):
+def send_estimate(organization_name, estimate_id, contact_id):
     """
     Send estimate for sign.
     """
-    return send_estimate_to_sign(estimate_id, contact_id)
+    return send_estimate_to_sign(organization_name, estimate_id, contact_id)
 
 @periodic_task(run_every=(crontab(day_of_week='sun', hour=[8], minute=0)), options={'queue': 'general'})
 def fetch_bcc_licenses():
