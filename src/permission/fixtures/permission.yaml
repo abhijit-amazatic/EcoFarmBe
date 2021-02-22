@@ -486,3 +486,233 @@
         type: 'organizational'
         description: ''
         group: 5
+
+
+
+
+###################################### field perm #######################################
+# License Profile
+# License Profile Logo
+-   model: permission.permission
+    pk: view_license_profile_logo
+    fields:
+        name: View License Profile Logo
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: change_license_profile_logo
+    fields:
+        name: Change License Profile Logo
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# License Profile About
+-   model: permission.permission
+    pk: view_license_profile_about
+    fields:
+        name: View License Profile About
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_profile_about
+    fields:
+        name: edit License Profile About
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+# License Profile Region
+-   model: permission.permission
+    pk: view_license_profile_region
+    fields:
+        name: View License Profile Region
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_profile_region
+    fields:
+        name: edit License Profile Region
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+# License Profile Appellation
+-   model: permission.permission
+    pk: view_license_profile_appellation
+
+    fields:
+        name: View License Profile Appellation
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_profile_appellation
+
+    fields:
+        name: edit License Profile Appellation
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# License Profile Ethics & Certifications
+-   model: permission.permission
+    pk: view_license_ethics_Certifications
+
+    fields:
+        name: View License Ethics & Certifications
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_ethics_Certifications
+    fields:
+        name: edit License Ethics & Certifications
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# License Profile Lighting Type
+-   model: permission.permission
+    pk: view_license_profile_lighting_type
+    fields:
+        name: View License Profile Lighting Type
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_profile_lighting_type
+
+    fields:
+        name: edit License Profile Lighting Type
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# License Type of Nutrients
+-   model: permission.permission
+    pk: view_license_type_of_nutrients
+    fields:
+        name: View License Type of Nutrients
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_type_of_nutrients
+    fields:
+        name: edit License Type of Nutrients
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# License Profile Brand Association
+-   model: permission.permission
+    pk: view_license_profile_brand_association
+    fields:
+        name: View License Profile Brand Association
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_license_profile_brand_association
+
+    fields:
+        name: edit License Profile Brand Association
+        type: 'organizational'
+        description: ''
+        group: 3
+
+
+
+# Profile Contact
+# Profile Contact Personal Phone
+-   model: permission.permission
+    pk: view_profile_contact_personal_phone
+    fields:
+        name: View Profile contact Personal Phone
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_profile_contact_personal_phone
+
+    fields:
+        name: edit Profile contact Personal Phone
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# Profile Contact Business Email
+-   model: permission.permission
+    pk: view_profile_contact_business_email
+    fields:
+        name: View Profile contact Business Email
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_profile_contact_business_email
+
+    fields:
+        name: edit Profile contact Business Email
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# Profile Contact Website
+-   model: permission.permission
+    pk: view_profile_contact_website
+    fields:
+        name: View Profile contact Website
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_profile_contact_website
+
+    fields:
+        name: edit Profile contact Website
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# Profile Contact Instagram
+-   model: permission.permission
+    pk: view_profile_contact_instagram
+    fields:
+        name: View Profile contact Instagram
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_profile_contact_instagram
+
+    fields:
+        name: edit Profile contact Instagram
+        type: 'organizational'
+        description: ''
+        group: 3
+
+# Profile Contact LinkedIn
+-   model: permission.permission
+    pk: view_profile_contact_linkedin
+    fields:
+        name: View Profile contact LinkedIn
+        type: 'organizational'
+        description: ''
+        group: 3
+-   model: permission.permission
+    pk: edit_profile_contact_linkedin
+
+    fields:
+        name: edit Profile contact LinkedIn
+        type: 'organizational'
+        description: ''
+        group: 3
