@@ -209,6 +209,8 @@ class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser:
+            return True
         if isinstance(obj, TermsAndConditionAcceptance):
             if request.path.startswith(reverse("admin:user_termsandconditionacceptance_changelist")):
                 return False
