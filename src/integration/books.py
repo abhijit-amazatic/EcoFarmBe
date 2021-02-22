@@ -405,6 +405,30 @@ def get_customer(obj, data):
     data['customer_id'] = customer['contact_id']
     return {"code": 0, "data": data}
 
+def get_vendor(obj, data):
+    """
+    Return vendor from Zoho books using Zoho Inventory name.
+    """
+    contact_obj = obj.Contacts()
+    try:
+        vendor = contact_obj.list_contacts(parameters={'contact_name': data['vendor_name']})
+        vendor = vendor['response']
+    except KeyError:
+        return {"code": 1003, "error": "vendor name not provided"}
+    if len(vendor) == 1:
+        vendor = vendor[0]
+    elif len(vendor) > 1:
+        for i in vendor:
+            if i['contact_name'] == data['vendor_name'] and i['contact_type'] == 'vendor':
+                vendor = i
+                break
+    else:
+        return {"code": 1003, "message": "Contact not in zoho books."}
+    if vendor.get('email') == '':
+        return {"code": 1003, "message": "Contact don't have email associated with it."}
+    data['vendor_id'] = vendor['contact_id']
+    return {"code": 0, "data": data}
+
 def create_estimate(data, params=None):
     """
     Create estimate in Zoho Books.
@@ -538,6 +562,54 @@ def get_purchase_order(po_id, params=None):
     obj = get_books_obj()
     po_obj = obj.PurchaseOrders()
     return po_obj.get_purchase_order(po_id=po_id, parameters=params)
+
+def create_purchase_order(record, params=None):
+    """
+    Create purchase order to Zoho books.
+    """
+    try:
+        obj = get_books_obj()
+        po_obj = obj.PurchaseOrders()
+        result = get_vendor(obj, record)
+        if result['code'] != 0:
+            return result
+        result = get_item(obj, result['data'])
+        if result['code'] != 0:
+           return result
+        return po_obj.create_purchase_order(result['data'], parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
+
+def update_purchase_order(purchase_id, record, params=None):
+    """
+    Update purchase order to Zoho books.
+    """
+    try:
+        obj = get_books_obj()
+        po_obj = obj.PurchaseOrders()
+        result = get_vendor(obj, record)
+        if result['code'] != 0:
+            return result
+        result = get_item(obj, result['data'])
+        if result['code'] != 0 and result['code'] != 1004:
+           return result
+        return po_obj.update_purchase_order(purchase_id, result['data'], parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
+
+def submit_purchase_order(po_id, params=None):
+    """
+    Submit specific purchase order.
+    """
+    obj = get_books_obj()
+    po_obj = obj.PurchaseOrders()
+    return po_obj.submit_purchase_order(po_id=po_id, parameters=params)
 
 def list_purchase_orders(params=None):
     """
