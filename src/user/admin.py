@@ -99,7 +99,7 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     actions = [approve_user, ] 
     filter_horizontal = ('groups', 'user_permissions', 'internal_roles')
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link',)}),
+            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions',)}),
             (('Internal Permission'), {'fields': ('internal_roles',)}),
     )
 

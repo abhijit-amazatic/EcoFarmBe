@@ -443,6 +443,12 @@ class TermsAndConditionAcceptanceView(APIView):
         """
         profile_type = request.GET.get('profile_type')
         if profile_type:
+            bypass_qs = User.objects.filter(
+                id=self.request.user.id,
+                bypass_terms_and_conditions=True
+            )
+            if bypass_qs.exists():
+                return Response({'is_accepted': 'False'}, status=200)
             qs = TermsAndConditionAcceptance.objects.filter(
                 user=self.request.user,
                 terms_and_condition__profile_type=profile_type,
