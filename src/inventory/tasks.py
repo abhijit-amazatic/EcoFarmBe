@@ -2,6 +2,7 @@
 """
 All tasks related to inventory. 
 """
+import re
 import traceback
 import copy
 from django.conf import settings
@@ -12,6 +13,8 @@ from slacker import Slacker
 
 from core.celery import app
 from core.mailer import mail, mail_send
+
+from integration.books import (create_purchase_order, submit_purchase_order)
 
 from .models import (CustomInventory, )
 
@@ -62,3 +65,61 @@ def notify_inventory_item_added(email, custom_inventory_id):
         data['user_email'] = email
         notify_slack_inventory_item_added(data)
         notify_email_inventory_item_added(data)
+
+@app.task(queue="general")
+def create_approved_item_po(custom_inventory_id,):
+    item = CustomInventory.objects.get(id=custom_inventory_id)
+    if item.status == 'approved':
+        data = {
+            # "vendor_id": "460000000026049",
+            # "purchaseorder_number": "PO-00001",
+            'vendor_name': item.vendor_name,
+            # "gst_treatment": "business_gst",
+            # "tax_treatment": "vat_registered",
+            # "gst_no": "22AAAAA0000A1Z5",
+            # "source_of_supply": "AP",
+            # "destination_of_supply": "TN",
+            # "place_of_supply": "DU",
+            # # "pricebook_id": 460000000026089,
+            # "reference_number": "ER/0034",
+            # "billing_address_id": "460000000017491",
+            # "template_id": "460000000011003",
+            # "date": "2014-02-10",
+            # "delivery_date": "2014-02-10",
+            # "exchange_rate": 1,
+            # # "discount": "10",
+            # # "discount_account_id": "460000000011105",
+            # # "is_discount_before_tax": true,
+            # # "is_inclusive_tax": False,
+            # "notes": "Please deliver as soon as possible.",
+            # "terms": "Thanks for your business.",
+            # "salesorder_id": "460000124728314",
+            "line_items": [
+                {
+                    "item_id": item.zoho_item_id,
+                    # "account_id": "2155380000000448337",
+                    # "name": item.cultivar.cultivar_name,
+                    "sku": item.sku,
+                    # "rate": 112,
+                    "quantity": int(item.quantity_available),
+                    # "item_order": 0,
+                    # "tax_treatment_code": "uae_others",
+                    # "tags": [
+                    #     {}
+                    # ],
+                    # "project_id": 90300000087378
+                }
+            ],
+            # "custom_fields": [
+            #     {
+            #         "customfield_id": "46000000012845",
+            #         "value": "Normal"
+            #     }
+            # ],
+        }
+        result = create_purchase_order(data, params={})
+        if result.get('code') == 0:
+            item.books_po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
+            item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
+            item.save()
+            submit_purchase_order(item.books_po_id)

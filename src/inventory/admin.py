@@ -17,6 +17,7 @@ from core.settings import (AWS_BUCKET, )
 import nested_admin
 from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id)
 from integration.crm import search_query
+from .tasks import (create_approved_item_po, )
 from .models import (
     Inventory,
     CustomInventory,
@@ -111,7 +112,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     change_form_template = 'inventory/custom_inventory_change_form.html'
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
     # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
-    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
+    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on', 'books_po_id', 'po_number',)
     inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
     fieldsets = (
@@ -156,6 +157,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 'vendor_name',
                 'zoho_item_id',
                 'sku',
+                'books_po_id',
+                'po_number',
                 'approved_by',
                 'approved_on',
                 'created_by',
@@ -314,6 +317,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                                 }
                                 obj.save()
                                 self.message_user(request, 'This item is approved')
+                                create_approved_item_po.apply_async((obj.id,), countdown=5)
                     else:
                         self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                         print('Error while creating item in Zoho Inventory')

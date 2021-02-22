@@ -81,6 +81,7 @@ src/*/local_settings.py
 # direnv
 .envrc
 .env
+.direnv
 
 # celery
 celerybeat.pid
