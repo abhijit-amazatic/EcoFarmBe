@@ -12,8 +12,8 @@ DEFAULT_ROLE_PERM = {
     'License Owner': [
         "view_license",
         "edit_license",
-        "view_license_profile"
-        "edit_license_profile"
+        "view_license_profile",
+        "edit_license_profile",
     ],
     'Farm Manager': [
         "view_cultivation_overview",

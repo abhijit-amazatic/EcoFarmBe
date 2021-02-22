@@ -67,7 +67,7 @@ def notify_inventory_item_added(email, custom_inventory_id):
         notify_email_inventory_item_added(data)
 
 @app.task(queue="general")
-def create_approved_item_po(custom_inventory_id,):
+def create_approved_item_po(custom_inventory_id, retry=3):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
         data = {
@@ -123,3 +123,5 @@ def create_approved_item_po(custom_inventory_id,):
             item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
             item.save()
             submit_purchase_order(item.books_po_id)
+        elif retry:
+            create_approved_item_po.apply_async((item.id, retry-1), countdown=5)
