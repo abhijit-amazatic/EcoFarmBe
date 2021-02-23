@@ -7,6 +7,8 @@ from rest_framework import (status,)
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import (permissions, viewsets, filters, mixins)
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import (TokenAuthentication,)
 from django.conf import settings
@@ -52,6 +54,7 @@ from integration.sign import (upload_pdf_box, get_document,
                               send_template)
 from integration.tasks import (send_estimate, )
 from integration.utils import (get_distance, get_places)
+from .serializers import OrderVariableSerializer
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
@@ -985,19 +988,17 @@ class GetAutoComplete(APIView):
         return Response({'code':1, 'error': 'address missing.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OrderVariableView(APIView):
+class OrderVariableView(viewsets.ReadOnlyModelViewSet):
 
     """
     Get Order Variables information.
     """
     permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        """
-        Display variables.    
-        """
-        queryset = OrderVariable.objects.values()
-        return Response(queryset)
+    queryset = OrderVariable.objects.all()
+    serializer_class = OrderVariableSerializer
+    filter_backends = [filters.OrderingFilter,DjangoFilterBackend]
+    filterset_fields = ['program_type', 'tier']
+    
 
 class NotificationView(APIView):
     """

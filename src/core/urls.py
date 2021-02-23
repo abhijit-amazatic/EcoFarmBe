@@ -116,6 +116,7 @@ router.register(r'two-factor/device', TwoFactorDeviceViewSet, base_name="two-fac
 router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestViewSet, base_name="add-authy-user")
 router.register(r'two-factor/add-device/phone', AddPhoneDeviceViewSet, base_name="add-phone-device")
 router.register(r'two-factor/add-device/authenticator', AddAuthenticatorRequestViewSet, base_name="add-authenticator-device")
+router.register(r'order-variables', OrderVariableView, base_name="order-variables")
 
 
 
@@ -200,7 +201,7 @@ urlpatterns = [
     path(r'sign/template-status/',
          GetTemplateStatus.as_view(), name='template_status'),
     path(r'integration/distance/', GetDistanceView.as_view(), name='get_distance'),
-    path(r'order-variables/', OrderVariableView.as_view(), name='order-variables'),
+    #path(r'order-variables/', OrderVariableView.as_view(), name='order-variables'),
     path(r'crm/sales-person/', GetSalesPersonView.as_view(),
          name='get_sales_person'),
     path(r'profile-category/', ProfileCategoryView.as_view(), name='category'),
