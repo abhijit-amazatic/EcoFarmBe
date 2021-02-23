@@ -50,15 +50,17 @@ class filterQuerySet:
         return self.queryset.filter(q).distinct()
 
     def brand_brand(self):
-        if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
-            return self.queryset
+        for role in self.user.internal_roles.all():
+            if role.permissions.filter(id='view_brand').exists():
+                return self.queryset
         q = Q()
         q |= Q(organization__created_by=self.user)
         return self.queryset.filter(q).distinct()
 
     def brand_license(self):
-        if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
-            return self.queryset
+        for role in self.user.internal_roles.all():
+            if role.permissions.filter(id='view_license').exists():
+                return self.queryset
         q = Q()
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':

@@ -11,6 +11,9 @@ from .models import (
 class CustomPermissionBackend:
 
     def has_perm(self, user_obj, perm, obj=None):
+        for role in user_obj.internal_roles.all():
+            if role.permissions.filter(id=perm).exists():
+                return True
         if not user_obj.is_active or user_obj.is_anonymous or obj is None:
             return False
         if obj:
@@ -19,16 +22,12 @@ class CustomPermissionBackend:
 
     def get_all_permissions(self, user_obj, obj=None):
         perm_set = set()
-        if user_obj.groups.filter(name=SALES_REP_GROUP_NAME).exists():
-            perm_set.update(set(SALES_REP_PERM))
         perm_set.update(self._get_all_permissions(user_obj, obj))
         return perm_set
 
     def _get_all_permissions(self, user_obj, obj=None):
         if not user_obj.is_active or user_obj.is_anonymous or obj is None:
             return set()
-        if user_obj.groups.filter(name=SALES_REP_GROUP_NAME).exists():
-            return set(SALES_REP_PERM)
         obj_ls = [obj]
         while obj_ls:
             new_ls = []
