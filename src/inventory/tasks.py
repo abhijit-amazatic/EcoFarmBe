@@ -148,3 +148,8 @@ def create_approved_item_po(custom_inventory_id, client_code, retry=3):
             submit_purchase_order(item.books_po_id)
         elif retry:
             create_approved_item_po.apply_async((item.id, client_code, retry-1), countdown=5)
+
+
+@app.task(queue="general")
+def create_duplicate_crm_vendor_from_account_(vendor_name,):
+    pass

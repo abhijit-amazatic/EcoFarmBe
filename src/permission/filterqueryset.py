@@ -41,8 +41,9 @@ class filterQuerySet:
 
 
     def brand_organization(self):
-        if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
-            return self.queryset
+        for role in self.user.internal_roles.all():
+            if role.permissions.filter(id='view_organization').exists():
+                return self.queryset
         q = Q()
         q |= Q(created_by=self.user)
         q |= Q(organization_user__user=self.user)
