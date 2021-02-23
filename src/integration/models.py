@@ -27,13 +27,25 @@ class OrderVariable(models.Model):
     """
     Class implementing  order variables
     """
-    PROGRAM_TYPE_GOLD = 'gold'
-    PROGRAM_TYPE_SILVER = 'silver'
-    PROGRAM_TYPE_CHOICES = (
-        (PROGRAM_TYPE_GOLD, _('Gold')),
-        (PROGRAM_TYPE_SILVER, _('Silver')),
+    PROGRAM_TIER_GOLD = 'gold'
+    PROGRAM_TIER_SILVER = 'silver'
+    PROGRAM_TIER_BRONZE = 'bronze'
+    PROGRAM_TIER_CHOICES = (
+        (PROGRAM_TIER_GOLD, _('Gold')),
+        (PROGRAM_TIER_SILVER, _('Silver')),
+        (PROGRAM_TIER_BRONZE, _('Bronze')),
+        
     )
-    program_type = models.CharField(verbose_name=_("Program"), max_length=255, choices=PROGRAM_TYPE_CHOICES)
+
+    PROGRAM_TYPE_IFP = 'ifp'
+    PROGRAM_TYPE_SELLER = 'seller'
+    PROGRAM_TYPE_CHOICES = (
+        (PROGRAM_TYPE_IFP, _('IFP Program')),
+        (PROGRAM_TYPE_SELLER, _('Seller Program')),
+    )
+    
+    program_type = models.CharField(verbose_name=_("Program Type"), max_length=255, choices=PROGRAM_TYPE_CHOICES)
+    tier = models.CharField(verbose_name=_("Tier"), max_length=255, choices=PROGRAM_TIER_CHOICES)
     mcsp_fee = models.CharField(verbose_name=_("MCSP Fee(%)"), max_length=255,blank=True, null=True)
     net_7_14 = models.CharField(verbose_name=_("Net 7-14(%)"), max_length=255,blank=True, null=True)
     net_14_30 = models.CharField(verbose_name=_("Net 14-30(%)"), max_length=255,blank=True, null=True)
@@ -44,7 +56,7 @@ class OrderVariable(models.Model):
         return self.program_type
 
     class Meta:
-        verbose_name = _('Order Variable')
+        verbose_name = _('Fees & Variables')
       
 
         
