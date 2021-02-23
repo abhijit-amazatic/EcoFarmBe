@@ -241,10 +241,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     )
 
     PAYMENT_TERMS_CHOICES = (
-        ('14-30 Days', _('14-30 Days')),
+        ('60 Days', _('60 Days')),
         ('21 Days', _('21 Days')),
-        ('7-14 Days', _('7-14 Days')),
-        ('COD', _('COD')),
     )
     PAYMENT_METHOD_CHOICES = (
         ('Cash', _('Cash')),
