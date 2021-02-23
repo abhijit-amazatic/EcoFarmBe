@@ -57,6 +57,6 @@ class OrderVariable(models.Model):
 
     class Meta:
         verbose_name = _('Fees & Variables')
-      
+        verbose_name_plural = _('Fees & Variables')      
 
         
