@@ -15,7 +15,7 @@ from integration.apps.aws import (create_presigned_url, )
 from core.settings import (AWS_BUCKET, )
 
 import nested_admin
-from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id)
+from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id, get_inventory_obj)
 from integration.crm import search_query
 from .tasks import (create_approved_item_po, )
 from .models import (
@@ -102,6 +102,20 @@ class InlineDocumentsAdmin(GenericStackedInline):
         except Exception:
             return None
 
+class CustomInventoryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        inventory = get_inventory_obj(inventory_name='inventory_efd')
+        result = inventory.get_user()
+        if result.get('code') == 0:
+            procurement_rep = [(o.get('email'), o.get('name')) for o in result.get('users', []) if o.get('status') in ['active', 'invited']]
+            procurement_rep.insert(0, ('', '-------'))
+            self.fields['procurement_rep'] = forms.ChoiceField(choices=procurement_rep, required=False)
+
+    class Meta:
+        model = CustomInventory
+        fields = '__all__'
+
 
 
 # Register your models here.
@@ -115,6 +129,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on', 'books_po_id', 'po_number',)
     inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
+    form = CustomInventoryForm
     fieldsets = (
         ('BATCH & QUALITY INFORMATION', {
             'fields': (
@@ -155,6 +170,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             'fields': (
                 'status',
                 'vendor_name',
+                'procurement_rep',
                 'zoho_item_id',
                 'sku',
                 'books_po_id',
@@ -280,7 +296,10 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 if obj.payment_method:
                     data['cf_payment_method'] = obj.payment_method
 
-                data['cf_procurement_rep'] = request.user.email
+                if obj.procurement_rep:
+                    data['cf_procurement_rep'] = obj.procurement_rep
+                else:
+                    data['cf_procurement_rep'] = request.user.email
 
                 data['initial_stock'] = int(obj.quantity_available)
                 data['product_type'] = 'goods'
@@ -317,7 +336,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                                 }
                                 obj.save()
                                 self.message_user(request, 'This item is approved')
-                                create_approved_item_po.apply_async((obj.id,), countdown=5)
+                                create_approved_item_po.apply_async((obj.id, client_code,), countdown=5)
                     else:
                         self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                         print('Error while creating item in Zoho Inventory')

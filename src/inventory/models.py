@@ -284,6 +284,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
     books_po_id = models.CharField(_('Zoho Books Purchase Order id'), blank=True, null=True, max_length=255)
     po_number = models.CharField(_('Purchase Order Number'), blank=True, null=True, max_length=255)
+    procurement_rep = models.CharField(_('Procurement Rep'), blank=True, null=True, max_length=255)
     created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)

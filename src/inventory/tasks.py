@@ -15,7 +15,7 @@ from core.celery import app
 from core.mailer import mail, mail_send
 
 from integration.books import (create_purchase_order, submit_purchase_order)
-
+from brand.models import (LicenseProfile, )
 from .models import (CustomInventory, )
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -67,9 +67,15 @@ def notify_inventory_item_added(email, custom_inventory_id):
         notify_email_inventory_item_added(data)
 
 @app.task(queue="general")
-def create_approved_item_po(custom_inventory_id, retry=3):
+def create_approved_item_po(custom_inventory_id, client_code, retry=3):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
+        try:
+            lp_obj = LicenseProfile.objects.get(name=item.vendor_name)
+        except Exception:
+            license_number = ''
+        else:
+            license_number = lp_obj.license.license_number
         data = {
             # "vendor_id": "460000000026049",
             # "purchaseorder_number": "PO-00001",
@@ -110,13 +116,30 @@ def create_approved_item_po(custom_inventory_id, retry=3):
                     # "project_id": 90300000087378
                 }
             ],
-            # "custom_fields": [
-            #     {
-            #         "customfield_id": "46000000012845",
-            #         "value": "Normal"
-            #     }
-            # ],
+            "custom_fields": [
+                {
+                    "api_name": "cf_client_code",
+                    "value": client_code,
+                },
+                {
+                    "api_name": "cf_billing_published",
+                    "value": True,
+                },
+            ],
         }
+
+        if license_number:
+            data['custom_fields'].append({
+                "api_name": "cf_client_license",
+                "value": license_number,
+            })
+
+        # if procurement_rep_id:
+        #     data['custom_fields'].append({)                # {
+        #         "api_name": "cf_procurement_rep",
+        #         "value": "",
+        #     })
+
         result = create_purchase_order(data, params={})
         if result.get('code') == 0:
             item.books_po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
@@ -124,4 +147,4 @@ def create_approved_item_po(custom_inventory_id, retry=3):
             item.save()
             submit_purchase_order(item.books_po_id)
         elif retry:
-            create_approved_item_po.apply_async((item.id, retry-1), countdown=5)
+            create_approved_item_po.apply_async((item.id, client_code, retry-1), countdown=5)
