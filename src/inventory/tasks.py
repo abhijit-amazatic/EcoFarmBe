@@ -15,7 +15,10 @@ from core.celery import app
 from core.mailer import mail, mail_send
 
 from integration.books import (create_purchase_order, submit_purchase_order)
+from integration.crm import (search_query, create_records, update_records)
+from integration.crm import (get_crm_obj)
 from brand.models import (LicenseProfile, )
+from .task_helpers import accounts_to_vendors_dict
 from .models import (CustomInventory, )
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -151,5 +154,34 @@ def create_approved_item_po(custom_inventory_id, client_code, retry=3):
 
 
 @app.task(queue="general")
-def create_duplicate_crm_vendor_from_account_(vendor_name,):
-    pass
+def create_duplicate_crm_vendor_from_crm_account(vendor_name,):
+    f_create = False
+    result = search_query('Vendors', vendor_name, 'Vendor_Name')
+    if result.get('status_code') == 200:
+            data_ls = result.get('response')
+            if data_ls and isinstance(data_ls, list):
+                vendor_name_ls = [x.get('Vendor_Name') for x in data_ls]
+                if vendor_name_ls and vendor_name not in vendor_name_ls:
+                    f_create = True
+    if result.get('status_code') == 204 or f_create:
+        result = search_query('Accounts', vendor_name, 'Account_Name')
+        if result.get('status_code') == 200:
+            data_ls = result.get('response')
+            if data_ls and isinstance(data_ls, list):
+                for account in data_ls:
+                    if account.get('Account_Name') == vendor_name:
+                        print(f'Creating Vendor profile \'{vendor_name}\' from Account in Zoho CRM')
+                        crm_obj = get_crm_obj()
+                        request = list()
+                        account_id = account.get('id')
+                        account_record = crm_obj.get_full_record('Accounts', account_id ,)
+                        if account_record['status_code'] == 200:
+                            account = account_record['response']
+                        data = dict()
+                        for k,v in accounts_to_vendors_dict.items():
+                            if account.get(k):
+                                data[v] = account.get(k)
+                        request.append(data)
+                        return crm_obj.insert_records('Vendors', request,)
+        else:
+            return result
