@@ -402,7 +402,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
     if id and is_single_user:
         licenses = [License.objects.select_related().get(id=id).__dict__]
     else:
-        licenses = record.license_set.values()
+        licenses = [record.__dict__]
     final_list = dict()
     for i in licenses:
         try:
@@ -467,7 +467,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 if result.get('status_code') != 200:
                     result = create_records('Vendors', d, True)
             final_dict['vendor'] = result
-            if response['status_code'] == 200 and result['status_code'] == 201:
+            if response['status_code'] == 200 and result['status_code'] in [200, 201]:
                 record_response = result['response']['response']['data']
                 try:
                     record_obj = LicenseProfile.objects.get(id=vendor_id)
@@ -482,7 +482,12 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     data['Licenses_Module'] = record_response[0]['details']['id']
                     for license in result['response']['orignal_data'][0]['Licenses_List']:
                         data['Licenses'] = license
-                        r = create_records('Vendors_X_Licenses', [data])
+                        if is_update:
+                            r = update_records('Vendors_X_Licenses', [data])
+                            if r.get('status_code') == 202:
+                                r = create_records('Vendors_X_Licenses', [data])
+                        else:
+                            r = create_records('Vendors_X_Licenses', [data])
                 if result['response']['orignal_data'][0].get('Cultivars_List'):
                     data = dict()
                     l = list()
@@ -520,6 +525,8 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                                 request.append(data)
                 if is_update:
                     contact_response = update_records('Vendors_X_Contacts', request)
+                    if r.get('status_code') == 202:
+                        contact_response = create_records('Vendors_X_Contacts', request)
                 else:
                     contact_response = create_records('Vendors_X_Contacts', request)
         except Exception as exc:
@@ -538,18 +545,19 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
     else:
         final_list = dict()
         if id:
-            records = Brand.objects.filter(id=id).select_related()
+            records = License.objects.filter(id=id).select_related()
         else:
-            records = Brand.objects.filter(is_updated_in_crm=False).select_related()
+            records = License.objects.filter(is_updated_in_crm=False).select_related()
         for record in records:
             final_dict = dict()
             if is_update:
                 result = search_query('Orgs', record.organization.name, 'Name')
                 if result.get('status_code') == 200:
+                    organization_id = result.get('response')[0].get('id')
                     result = update_records('Orgs', record.organization.__dict__, True)
                 else:
                     result = create_records('Orgs', record.organization.__dict__, True)
-                if result.get('status_code') == 200:
+                if result.get('status_code') in [200, 201]:
                     try:
                         organization_id = result['response'][0]['id']
                     except KeyError:
@@ -562,25 +570,30 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                     result = create_records('Orgs', record.organization.__dict__, True)
                     if result.get('status_code') == 201:
                         organization_id = result['response']['response']['data'][0]['details']['id']
-            if is_update:
-                result = search_query('Brands', record.brand_name, 'Name')
-                if result.get('status_code') == 200:
-                    result = update_records('Brands', record.__dict__, True)
+            try:
+                if is_update:
+                    result = search_query('Brands', record.brand_name, 'Name')
+                    if result.get('status_code') == 200:
+                        result = update_records('Brands', record.__dict__, True)
+                    else:
+                        result = create_records('Brands', record.__dict__, True)
+                    if result.get('status_code') in [200, 201]:
+                        try:
+                            brand_id = result['response'][0]['id']
+                        except KeyError:
+                            brand_id = result['response']['response']['data'][0]['details']['id']
                 else:
-                    result = create_records('Brands', record.__dict__, True)
-                if result.get('status_code') == 200:
-                    try:
+                    result = search_query('Brands', record.brand_name, 'Name')
+                    if result.get('status_code') == 200:
                         brand_id = result['response'][0]['id']
-                    except KeyError:
-                        brand_id = result['response']['response']['data'][0]['details']['id']
-            else:
-                result = search_query('Brands', record.brand_name, 'Name')
-                if result.get('status_code') == 200:
-                    brand_id = result['response'][0]['id']
-                else:
-                    result = create_records('Brands', record.__dict__, True)
-                    if result.get('status_code') == 201:
-                        brand_id = result['response']['response']['data'][0]['details']['id']
+                    else:
+                        result = create_records('Brands', record.__dict__, True)
+                        if result.get('status_code') == 201:
+                            brand_id = result['response']['response']['data'][0]['details']['id']
+            except Exception as exc:
+                print(exc)
+                brand_id = None
+                pass
             final_dict['org'] = organization_id
             final_dict['brand'] = brand_id
             if brand_id:
@@ -604,20 +617,30 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
             record_response = insert_record(record=record, is_update=is_update, is_single_user=is_single_user)
             final_dict.update(record_response)
             for k,response in record_response.items():
-                if (brand_id and \
+                if (brand_id or \
                     response['license']['status_code'] == 200 and \
-                    response['vendor']['status_code'] == 201 and \
+                    response['vendor']['status_code'] in [200, 201] and \
                     organization_id):
                     data = dict()
                     resp_brand = brand_id
-                    resp_vendor = response['vendor']['response']['response']['data']
+                    try:
+                        resp_vendor = response['vendor']['response']['response']['data']
+                        data['Vendor'] = resp_vendor[0]['details']['id']
+                    except TypeError:
+                        resp_vendor = response['vendor']['response'][0]
+                        data['Vendor'] = resp_vendor['id']
                     data['Org'] = organization_id
-                    data['Vendor'] = resp_vendor[0]['details']['id']
                     data['Brand'] = brand_id
                     if is_update:
                         r = update_records('Orgs_X_Vendors', [data])
+                        if r.get('status_code') == 202:
+                            r = create_records('Orgs_X_Vendors', [data])
                         r = update_records('Orgs_X_Brands', [data])
+                        if r.get('status_code') == 202:
+                            r = create_records('Orgs_X_Brands', [data])
                         r = update_records('Brands_X_Vendors', [data])
+                        if r.get('status_code') == 202:
+                            r = create_records('Brands_X_Vendors', [data])
                     else:
                         r = create_records('Orgs_X_Vendors', [data])
                         r = create_records('Orgs_X_Brands', [data])
@@ -866,7 +889,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
     if id and is_single_user:
         licenses = [License.objects.select_related().get(id=id).__dict__]
     else:
-        licenses = record.license_set.values()
+        licenses = [record.__dict__]
     final_list = dict()
     for i in licenses:
         final_dict = dict()
@@ -926,7 +949,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             if result.get('status_code') != 200:
                 result = create_records('Accounts', d, is_return_orginal_data=True)
         final_dict['account'] = result
-        if response['status_code'] == 200 and result['status_code'] == 201:
+        if response['status_code'] == 200 and result['status_code'] in [200, 201]:
             record_response = result['response']['response']['data']
             try:
                 record_obj = LicenseProfile.objects.get(id=vendor_id)
@@ -943,6 +966,9 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                     data['Licenses'] = license
                     if is_update:
                         r = update_records('Accounts_X_Licenses', [data])
+                        if r.get('status_code') == 202:
+                            r = create_records('Accounts_X_Licenses', [data])
+                        print(r)
                     else:
                         r = create_records('Accounts_X_Licenses', [data])
                 request = list()
@@ -973,6 +999,8 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                                 request.append(data)
                 if is_update:
                     contact_response = update_records('Accounts_X_Contacts', request)
+                    if r.get('status_code') == 202:
+                        contact_response = create_records('Accounts_X_Contacts', request)
                 else:
                     contact_response = create_records('Accounts_X_Contacts', request)
         final_list[license_db_id] = final_dict
@@ -988,19 +1016,20 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
     else:
         final_list = dict()
         if id:
-            records = Brand.objects.filter(id=id).select_related()
+            records = License.objects.filter(id=id).select_related()
         else:
-            records = Brand.objects.filter(is_updated_in_crm=False).select_related()
+            records = License.objects.filter(is_updated_in_crm=False).select_related()
         for record in records:
             final_dict = dict()
             try:
                 if is_update:
                     result = search_query('Orgs', record.organization.name, 'Name')
                     if result.get('status_code') == 200:
+                        organization_id = result.get('response')[0].get('id')
                         result = update_records('Orgs', record.organization.__dict__, True)
                     else:
                         result = create_records('Orgs', record.organization.__dict__, True)
-                    if result.get('status_code') == 200:
+                    if result.get('status_code') in [200, 201]:
                         try:
                             organization_id = result['response'][0]['id']
                         except KeyError:
@@ -1013,25 +1042,30 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                         result = create_records('Orgs', record.organization.__dict__, True)
                         if result.get('status_code') == 201:
                             organization_id = result['response']['response']['data'][0]['details']['id']
-                if is_update:
-                    result = search_query('Brands', record.brand_name, 'Name')
-                    if result.get('status_code') == 200:
-                        result = update_records('Brands', record.__dict__, True)
+                try:
+                    if is_update:
+                        result = search_query('Brands', record.brand.brand_name, 'Name')
+                        if result.get('status_code') == 200:
+                            result = update_records('Brands', record.brand.__dict__, True)
+                        else:
+                            result = create_records('Brands', record.brand.__dict__, True)
+                        if result.get('status_code') in [200, 201]:
+                            try:
+                                brand_id = result['response'][0]['id']
+                            except KeyError:
+                                brand_id = result['response']['response']['data'][0]['details']['id']
                     else:
-                        result = create_records('Brands', record.__dict__, True)
-                    if result.get('status_code') == 200:
-                        try:
+                        result = create_records('Brands', record.brand.__dict__, True)
+                        if result.get('status_code') == 200:
                             brand_id = result['response'][0]['id']
-                        except KeyError:
-                            brand_id = result['response']['response']['data'][0]['details']['id']
-                else:
-                    result = create_records('Brands', record.__dict__, True)
-                    if result.get('status_code') == 200:
-                        brand_id = result['response'][0]['id']
-                    else:
-                        result = create_records('Brands', record.__dict__, True)
-                        if result.get('status_code') == 201:
-                            brand_id = result['response']['response']['data'][0]['details']['id']
+                        else:
+                            result = create_records('Brands', record.brand.__dict__, True)
+                            if result.get('status_code') == 201:
+                                brand_id = result['response']['response']['data'][0]['details']['id']
+                except Exception as exc:
+                    print(exc)
+                    brand_id = None
+                    pass
                 final_dict['org'] = organization_id
                 final_dict['brand'] = brand_id
                 if brand_id:
@@ -1055,19 +1089,29 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 record_response = insert_account_record(record=record, is_update=is_update, is_single_user=is_single_user)
                 final_dict.update(record_response)
                 for k, response in record_response.items():
-                    if (brand_id and \
+                    if (brand_id or \
                         response['license']['status_code'] == 200 and \
-                        response['account']['status_code'] == 201 and organization_id):
+                        response['account']['status_code'] in [200, 201] and organization_id):
                         data = dict()
                         resp_brand = brand_id
-                        resp_account = response['account']['response']['response']['data']
+                        try:
+                            resp_account = response['account']['response']['response']['data']
+                            data['Account'] = resp_account[0]['details']['id']
+                        except TypeError:
+                            resp_account = response['account']['response'][0]
+                            data['Account'] = resp_account['id']
                         data['Org'] = organization_id
-                        data['Account'] = resp_account[0]['details']['id']
                         data['Brand'] = brand_id
                         if is_update:
                             r = update_records('Orgs_X_Accounts', [data])
+                            if r.get('status_code') == 202:
+                                r = create_records('Orgs_X_Accounts', [data])
                             r = update_records('Orgs_X_Brands', [data])
+                            if r.get('status_code') == 202:
+                                r = create_records('Orgs_X_Brands', [data])
                             r = update_records('Brands_X_Accounts', [data])
+                            if r.get('status_code') == 202:
+                                r = create_records('Brands_X_Accounts', [data])
                         else:
                             r = create_records('Orgs_X_Accounts', [data])
                             r = create_records('Orgs_X_Brands', [data])

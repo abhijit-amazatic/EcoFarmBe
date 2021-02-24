@@ -396,7 +396,7 @@ CRM_FORMAT  = {
         "Can_Provide_Transport": "",
         "Tag": "",
         "Box_Folder_ID": "",
-        "About_Company": "",
+        "About_Company": "about",
         "Created_Time": "",
         "Transportation_Method": "transportation_parse",
         "Modified_Time": "",
