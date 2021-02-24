@@ -489,8 +489,12 @@
 
 
 
-
+#########################################################################################
 ###################################### field perm #######################################
+#########################################################################################
+
+
+################################## Licence and profile ##################################
 # License Profile
 # License Profile Logo
 -   model: permission.permission
@@ -716,3 +720,35 @@
         type: 'organizational'
         description: ''
         group: 3
+
+
+
+
+########################################### Inventory #########################################
+# Profile Contact LinkedIn
+-   model: permission.permission
+    pk: view_inventory_farm_price
+    fields:
+        name: View Inventory Farm Price
+        type: 'internal'
+        description: ''
+        group: 5
+
+-   model: permission.permission
+    pk: view_inventory_seller_position
+    fields:
+        name: View Inventory Seller Position
+        type: 'internal'
+        description: ''
+        group: 5
+
+-   model: permission.permission
+    pk: view_inventory_procurement_rep
+    fields:
+        name: View Inventory Procurement Rep
+        type: 'internal'
+        description: ''
+        group: 5
+
+
+

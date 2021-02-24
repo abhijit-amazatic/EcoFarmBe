@@ -12,7 +12,7 @@ from .models import (
 # Create your views here.
 class PermissionListView(APIView):
     """
-    All KPI view set
+    organizational permissions list view
     """
     permission_classes = (IsAuthenticated,)
 
@@ -21,6 +21,7 @@ class PermissionListView(APIView):
         Return QuerySet.
         """
         qs = Permission.objects.all()
+        qs = qs.filter(type='organizational')
         value_list = qs.values_list('group__id', 'group__name').distinct()
         group_by_value = {}
         for value in value_list:

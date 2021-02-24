@@ -8,20 +8,37 @@ from .models import (
     InternalRole,
 )
 
-# Register your models here.
 
-class ProfileCategoryAdmin(admin.ModelAdmin):
+class PermissionGroupAdmin(admin.ModelAdmin):
     """
-    ProfileCategoryAdmin
-    """
-    #search_fields = ('',)
-
-class PermissionAdmin(admin.ModelAdmin):
-    """
-    OrganizationRoleAdmin
+    Permission Group Admin
     """
     readonly_fields = ()
 
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class PermissionAdmin(admin.ModelAdmin):
+    """
+    Permission Admin
+    """
+    readonly_fields = ()
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class InternalRoleAdmin(admin.ModelAdmin):
@@ -38,6 +55,6 @@ class InternalRoleAdmin(admin.ModelAdmin):
 
 
 
-admin.site.register(Permission,PermissionAdmin)
-admin.site.register(PermissionGroup,admin.ModelAdmin)
-admin.site.register(InternalRole,InternalRoleAdmin)
+admin.site.register(Permission, PermissionAdmin)
+admin.site.register(PermissionGroup, PermissionGroupAdmin)
+admin.site.register(InternalRole, InternalRoleAdmin)
