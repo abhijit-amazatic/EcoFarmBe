@@ -241,8 +241,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            client_code = self.get_client_code(request, obj)
-            # client_code = 'code'
+            # client_code = self.get_client_code(request, obj)
+            client_code = 'code'
             if client_code:
                 sku = self.generate_sku(obj, client_code)
 
@@ -273,7 +273,10 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     data['cf_grade_seller'] = obj.grade_estimate
 
                 if obj.product_quality_notes:
-                    data['cf_batch_notes'] = obj.product_quality_notes
+                    data['cf_batch_quality_notes'] = obj.product_quality_notes
+
+                if obj.need_lab_testing_service is not None:
+                    data['cf_lab_testing_services'] = 'Yes' if obj.need_lab_testing_service else 'No'
 
                 if obj.farm_ask_price:
                     data['cf_farm_price'] = str(int(obj.farm_ask_price))
@@ -298,10 +301,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
                 if obj.procurement_rep:
                     data['cf_procurement_rep'] = obj.procurement_rep
-                else:
-                    data['cf_procurement_rep'] = request.user.email
 
-                data['initial_stock'] = int(obj.quantity_available)
+                # data['initial_stock'] = int(obj.quantity_available)
                 data['product_type'] = 'goods'
                 data['cf_sample_in_house'] = 'Pending'
                 data['cf_status'] = 'In-Testing'
