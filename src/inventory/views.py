@@ -32,7 +32,7 @@ from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
 from integration.inventory import (get_inventory_summary,)
-from .tasks import (notify_inventory_item_added, )
+from .tasks import (notify_inventory_item_added, create_duplicate_crm_vendor_from_crm_account_task, )
 class CharInFilter(BaseInFilter,CharFilter):
     pass
 
@@ -655,3 +655,4 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
         }
         obj.save()
         notify_inventory_item_added.delay(user.email, obj.id)
+        create_duplicate_crm_vendor_from_crm_account_task(obj.vendor_name)
