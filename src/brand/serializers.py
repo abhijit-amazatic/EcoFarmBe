@@ -57,28 +57,14 @@ def insert_or_update_vendor_accounts(profile, instance):
     """
     if profile.license.organization.created_by.existing_member:
         if profile.license.profile_category == 'cultivation':
-            if instance.brand:
-                insert_vendors.delay(id=instance.brand.id,is_update=True)
-            else:
-                insert_vendors.delay(id=instance.id, is_single_user=True, is_update=True)
+            insert_vendors.delay(id=instance.id, is_update=True)
         else:
-            if instance.brand:
-                insert_accounts.delay(id=instance.brand.id,is_update=True)
-            else:
-                insert_accounts.delay(id=instance.id, is_single_user=True,is_update=True)
+            insert_accounts.delay(id=instance.id,is_update=True)
     elif not profile.license.organization.created_by.existing_member:
         if profile.license.profile_category == 'cultivation':
-            if instance.brand:
-                insert_vendors.delay(id=instance.brand.id)
-            else:
-                insert_vendors.delay(id=instance.id, is_single_user=True)
+            insert_vendors.delay(id=instance.id)
         else:
-            if instance.brand:
-                insert_accounts.delay(id=instance.brand.id)
-            else:
-                insert_accounts.delay(
-                    id=instance.id, is_single_user=True)
-
+            insert_accounts.delay(id=instance.id)
 
 class OrganizationSerializer(serializers.ModelSerializer):
     """
