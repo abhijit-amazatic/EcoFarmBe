@@ -576,15 +576,28 @@ class OrganizationUserRoleNestedSerializer(NestedModelSerializer, serializers.Mo
             # 'organization',
         )
 
+############################### my-perm ################################
+class myOrganizationRoleSerializer(NestedModelSerializer, serializers.ModelSerializer):
+    """
+    This defines organization role serializer.
+    """
+
+    class Meta:
+        model = OrganizationRole
+        fields = (
+            "name",
+            "permissions",
+        )
+
 class MyOrganizationRoleSerializer(OrganizationUserRoleNestedSerializer):
-    role_info = OrganizationRoleSerializer(source='role', read_only=True)
+    role_info = myOrganizationRoleSerializer(source='role', read_only=True)
     class Meta:
         model = OrganizationUserRole
         fields = (
-            'id',
+            # 'id',
             # 'organization_user',
             # 'organization_user_info',
-            'role',
+            # 'role',
             'role_info',
             'licenses',
             # 'created_on',

@@ -9,6 +9,7 @@ import traceback
 import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission as DjangoPermission
 from django.db import transaction
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -41,6 +42,7 @@ from .tasks import (
     send_onboarding_data_fetch_verification,
     resend_onboarding_data_fetch_verification,
 )
+from permission.models import Permission
 from .models import (
     Organization,
     Brand, License,
@@ -600,19 +602,36 @@ class MyOrganizationRoleView(APIView):
         Return QuerySet.
         """
         parents_query_dict = self.get_parents_query_dict()
-        qs = OrganizationUserRole.objects.filter(
-            organization_user__organization=parents_query_dict.get('organization'))
-        qs = qs.filter(organization_user__user=request.user)
-        serializers = MyOrganizationRoleSerializer(
-            qs,
-            context={
-                'view': self,
-                'request': request,
-                'format': self.kwargs,
-            },
-            many=True,
-        )
-        return Response(serializers.data)
+        org_id = parents_query_dict.get('organization')
+        try:
+            org = Organization.objects.get(id=org_id)
+        except Organization.DoesNotExist:
+            return Response([])
+        else:
+            data = {}
+            if org.created_by_id == request.user.id:
+                data["role_info"] = {
+                        "name": "Org Admin",
+                        "permissions": Permission.objects.filter(type='organizational').values_list('id', flat=True).distinct(),
+                    }
+                data["licenses"] = License.objects.filter(organization=org).values_list('id', flat=True).distinct()
+
+            qs = OrganizationUserRole.objects.filter(
+                organization_user__organization_id=org)
+            qs = qs.filter(organization_user__user=request.user)
+            serializers = MyOrganizationRoleSerializer(
+                qs,
+                context={
+                    'view': self,
+                    'request': request,
+                    'format': self.kwargs,
+                },
+                many=True,
+            )
+            resp_data = serializers.data
+            if data:
+                resp_data.append(data)
+            return Response(resp_data)
 
     def get_parents_query_dict(self, **kwargs):
         result = {}
@@ -623,8 +642,7 @@ class MyOrganizationRoleView(APIView):
                     '',
                     1
                 )
-                query_value = kwarg_value
-                result[query_lookup] = query_value
+                result[query_lookup] = kwarg_value
         return result
 
 class ProfileReportViewSet(viewsets.ModelViewSet):
