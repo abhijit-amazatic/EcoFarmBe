@@ -816,13 +816,16 @@ def get_records_from_crm(license_number):
             else:
                 brand = dict()
             if brand.get('status_code') == 200:
-                brand_list = list()
-                for b in brand.get('response'):
-                    r = dict()
-                    r['name'] = b['Brand']['name']
-                    r['id'] = b['Brand']['id']
-                    brand_list.append(r)
-                final_response['Brand'] = brand_list
+                try:
+                    brand_list = list()
+                    for b in brand.get('response'):
+                        r = dict()
+                        r['name'] = b['Brand']['name']
+                        r['id'] = b['Brand']['id']
+                        brand_list.append(r)
+                    final_response['Brand'] = brand_list
+                except TypeError:
+                    pass
             else:
                 final_response['Brand'] = brand
             crm_obj = get_crm_obj()
