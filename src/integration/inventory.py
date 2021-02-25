@@ -489,6 +489,8 @@ def sync_inventory(inventory_name, response):
         # update_price_change(price_data, record)
         return obj.item_id
     except Exception as exc:
+        import traceback
+        traceback.print_exc()
         print(exc)
         return {}
 
