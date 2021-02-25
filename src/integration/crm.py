@@ -495,7 +495,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 if result.get('status_code') != 200:
                     result = create_records('Vendors', d, True)
             final_dict['vendor'] = result
-            if response['status_code'] == 200 and result['status_code'] in [200, 201]:
+            if response['status_code'] == 200 and result['status_code'] in [201]:
                 record_response = result['response']['response']['data']
                 try:
                     record_obj = LicenseProfile.objects.get(id=vendor_id)
@@ -600,7 +600,7 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         organization_id = result['response']['response']['data'][0]['details']['id']
             try:
                 if is_update:
-                    result = search_query('Brands', record.brand_name, 'Name')
+                    result = search_query('Brands', record.brand.brand_name, 'Name')
                     if result.get('status_code') == 200:
                         result = update_records('Brands', record.__dict__, True)
                     else:
@@ -611,11 +611,11 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         except KeyError:
                             brand_id = result['response']['response']['data'][0]['details']['id']
                 else:
-                    result = search_query('Brands', record.brand_name, 'Name')
+                    result = search_query('Brands', record.brand.brand_name, 'Name')
                     if result.get('status_code') == 200:
                         brand_id = result['response'][0]['id']
                     else:
-                        result = create_records('Brands', record.__dict__, True)
+                        result = create_records('Brands', record.brand.__dict__, True)
                         if result.get('status_code') == 201:
                             brand_id = result['response']['response']['data'][0]['details']['id']
             except Exception as exc:
@@ -626,7 +626,7 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
             final_dict['brand'] = brand_id
             if brand_id:
                 try:
-                    record_obj = Brand.objects.get(id=id)
+                    record_obj = Brand.objects.get(id=record.brand_id)
                     record_obj.zoho_crm_id = brand_id
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
@@ -980,7 +980,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             if result.get('status_code') != 200:
                 result = create_records('Accounts', d, is_return_orginal_data=True)
         final_dict['account'] = result
-        if response['status_code'] == 200 and result['status_code'] in [200, 201]:
+        if response['status_code'] == 200 and result['status_code'] in [201]:
             record_response = result['response']['response']['data']
             try:
                 record_obj = LicenseProfile.objects.get(id=vendor_id)
@@ -1086,7 +1086,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                             except KeyError:
                                 brand_id = result['response']['response']['data'][0]['details']['id']
                     else:
-                        result = create_records('Brands', record.brand.__dict__, True)
+                        result = search_query('Brands', record.brand.brand_name, 'Name')
                         if result.get('status_code') == 200:
                             brand_id = result['response'][0]['id']
                         else:
@@ -1101,7 +1101,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 final_dict['brand'] = brand_id
                 if brand_id:
                     try:
-                        record_obj = Brand.objects.get(id=id)
+                        record_obj = Brand.objects.get(id=record.brand_id)
                         record_obj.zoho_crm_id = brand_id
                         record_obj.is_updated_in_crm = True
                         record_obj.save()
