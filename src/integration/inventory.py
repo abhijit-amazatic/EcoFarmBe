@@ -362,9 +362,10 @@ def get_record_data(vendor_name):
             data['nutrients'] = get_from_licenses(response, 'Types_of_Nutrients')
             data['ethics_and_certification'] = response.get('response')[0].get('Special_Certifications')
             return data
-        return None
-    except Exception:
-        return None
+        return {}
+    except Exception as exc:
+        print(exc)
+        return {}
 
 def get_inventory_name_from_db(inventory_name):
     """
