@@ -241,8 +241,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            # client_code = self.get_client_code(request, obj)
-            client_code = 'code'
+            client_code = self.get_client_code(request, obj)
+            # client_code = 'code'
             if client_code:
                 sku = self.generate_sku(obj, client_code)
 

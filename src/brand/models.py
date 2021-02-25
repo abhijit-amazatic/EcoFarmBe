@@ -365,7 +365,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
     """
     STATUS_CHOICES = (
         ('pending', _('Pending')),
-        ('accepted', _('Accepted')),
+        ('user_joining_platform', _('User Joining Platform')),
         ('completed', _('Completed')),
     )
     organization = models.ForeignKey(
@@ -383,6 +383,7 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
         related_name='invites',
         on_delete=models.CASCADE,
     )
+    is_invite_accepted = models.BooleanField(_('Is Invite Accepted'), default=False)
     licenses = models.ManyToManyField(
         License,
         verbose_name=_('Licenses'),

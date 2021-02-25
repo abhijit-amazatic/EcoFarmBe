@@ -733,7 +733,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = OrganizationUserInvite
-        read_only_fields = ('id', 'status')
+        read_only_fields = ('id', 'status', 'is_invite_accepted',)
         fields = (
             'id',
             'full_name',
@@ -741,6 +741,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
             'phone',
             'role',
             'licenses',
+            'is_invite_accepted',
             'status',
             'created_on',
             'updated_on',

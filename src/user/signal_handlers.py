@@ -39,26 +39,24 @@ def post_save_user(sender, instance, created, **kwargs):
         PrimaryPhoneTOTPDevice.objects.create(user=instance)
 
     if created:
-        ################### add default org ###################
-        Organization.objects.get_or_create(
-            name=get_unique_org_name(Organization),
-            created_by=instance,
-        )
-
         ###################### user invite #####################
         invites = OrganizationUserInvite.objects.filter(
             email=instance.email,
-            status='accepted',
+            status__in=['pending', 'user_joining_platform']
         )
         for invite in invites:
-            organization_user = OrganizationUser.objects.get_or_create(
-                organization=invite.organization,
-                user=instance,
-            )
-            organization_user_role = OrganizationUserRole.objects.get(
-                organization_user=organization_user,
-                role=invite.role,
-            )
-            organization_user_role.licenses.add(*invite.licenses.all())
-            invite.status = 'completed'
-            invite.save()
+            if invite.is_invite_accepted:
+                organization_user = OrganizationUser.objects.get_or_create(
+                    organization=invite.organization,
+                    user=instance,
+                )
+                organization_user_role = OrganizationUserRole.objects.get(
+                    organization_user=organization_user,
+                    role=invite.role,
+                )
+                organization_user_role.licenses.add(*invite.licenses.all())
+                invite.status = 'completed'
+                invite.save()
+            elif invite.status == 'user_joining_platform':
+                invite.status = 'pending'
+                invite.save()

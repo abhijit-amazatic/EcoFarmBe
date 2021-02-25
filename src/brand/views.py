@@ -734,8 +734,8 @@ class UserInvitationVerificationView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.validated_data['token']
-        if instance.status == 'pending':
-            instance.status = 'accepted'
+        if instance.status in ['pending', 'user_joining_platform']:
+            instance.is_invite_accepted = True
             response_data = {
                 'new_user': True,
                 'email': instance.email,
@@ -744,7 +744,7 @@ class UserInvitationVerificationView(GenericAPIView):
             try:
                 user = Auth_User.objects.get(email=instance.email)
             except Auth_User.DoesNotExist:
-                pass
+                instance.status = 'user_joining_platform'
             else:
                 response_data['new_user'] = False
                 organization_user, _ = OrganizationUser.objects.get_or_create(
@@ -762,11 +762,6 @@ class UserInvitationVerificationView(GenericAPIView):
         elif instance.status == 'completed':
             response = Response(
                 {'detail': 'Already accepted'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        elif instance.status == 'completed':
-            response = Response(
-                {'detail': 'Already completed'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         else:
