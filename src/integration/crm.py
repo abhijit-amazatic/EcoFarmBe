@@ -395,6 +395,34 @@ def get_licenses(license_field):
     if licenses['status_code'] == 200:
         return licenses['response']
 
+def is_user_existing(license_number):
+    """
+    Check if user is existing or not.
+    """
+    licenses = search_query('Licenses', license_number, 'Name')
+    if licenses['status_code'] == 200 and len(licenses['response']) > 0:
+        for license_dict in licenses.get('response'):
+            vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+            if vendor['status_code'] != 200:
+                vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+            else:
+                vendor = vendor['response'][0]['Licenses_Module']
+                vendor_id = vendor['id']
+            if not vendor_id:
+                account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
+                if account['status_code'] != 200:
+                    account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
+                else:
+                    account = account['response'][0]['Licenses_Module']
+                    account_id = account['id']
+                if not account_id:
+                    return False, None
+                else:
+                    return True, 'Buyer'
+            else:
+                return True, 'Seller'
+    return None
+
 def insert_record(record=None, is_update=False, id=None, is_single_user=False):
     """
     Insert record to Zoho CRM.
