@@ -3,6 +3,7 @@ Serializer for inventory
 """
 import json
 from rest_framework import serializers
+from django.utils import timezone
 from integration.apps.aws import (create_presigned_url, )
 from permission.filterqueryset import (filterQuerySet, )
 from brand.models import LicenseProfile
@@ -71,9 +72,12 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
                 user=validated_data['user'],
                 profile_id=validated_data['profile_id']
             )
+            if not instance.order_data:
+                instance.created_on = timezone.now()
             return super().update(instance, validated_data)
         except InTransitOrder.DoesNotExist:
             return super().create(validated_data)
+
 
     def validate_order_data(self, value):
         if value is None:
