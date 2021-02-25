@@ -68,15 +68,15 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
         records = [License.objects.select_related().get(id=id).__dict__]
     else:
         if id:
-            records = Brand.objects.filter(id=id)
+            records = License.objects.filter(id=id)
         else:
-            records = Brand.objects.filter(is_updated_in_crm=False)
+            records = License.objects.filter(is_updated_in_crm=False)
     for record in records:
         request = dict()
         record_id = record.id
         if not is_single_user:
             request.update(record.__dict__)
-            licenses = record.license_set.values()
+            licenses = [record.__dict__]
         else:
             licenses = records
         for license in licenses:
@@ -106,23 +106,25 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
                 else:
                     v = request.get(v)
                     record_dict[k] = v
+            zoho_books_ids = dict()
             for customer_type in ['vendor', 'customer']:
                 record_dict['contact_type'] = customer_type
                 if is_update:
                     response = update_contact(record_dict, params=params)
                 else:
                     response = create_contact(record_dict, params=params)
-                if response.get('contact_id'):
-                    try:
-                        if is_single_user:
-                            record_obj = License.objects.get(id=record_id)
-                        else:
-                            record_obj = Brand.objects.get(id=record_id)
-                        record_obj.zoho_books_id = response.get('contact_id')
-                        record_obj.save()
-                    except KeyError as exc:
-                        print(exc)
-                response_list.append(response)
+                zoho_books_ids[customer_type] = response.get('contact_id')
+            if all(zoho_books_ids.values()):
+                try:
+                    if is_single_user:
+                        record_obj = License.objects.get(id=record_id)
+                    else:
+                        record_obj = License.objects.get(id=record_id)
+                    record_obj.zoho_books_id = zoho_books_ids
+                    record_obj.save()
+                except KeyError as exc:
+                    print(exc)
+            response_list.append(response)
     return response_list
 
 def parse_books_fields(k, v, request):
