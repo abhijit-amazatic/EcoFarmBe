@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('brand', '0063_auto_20210218_1031'),
+        ('permission', '0003_remove_internalrole_users')
     ]
 
     operations = [
