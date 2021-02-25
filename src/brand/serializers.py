@@ -14,7 +14,7 @@ from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (notify_admins_on_profile_registration,)
 from inventory.models import (Documents, )
-from integration.crm import (insert_vendors, insert_accounts,)
+from integration.crm import (insert_vendors, insert_accounts,is_user_existing,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
@@ -55,12 +55,14 @@ def insert_or_update_vendor_accounts(profile, instance):
     """
     Insert/update vendors/accounts based on existing user or not. 
     """
-    if profile.license.organization.created_by.existing_member:
+    is_existing_user = is_user_existing(license_number=instance.license_number)
+    
+    if is_existing_user and is_existing_user[0]:
         if profile.license.profile_category == 'cultivation':
             insert_vendors.delay(id=instance.id, is_update=True)
         else:
             insert_accounts.delay(id=instance.id,is_update=True)
-    elif not profile.license.organization.created_by.existing_member:
+    else:
         if profile.license.profile_category == 'cultivation':
             insert_vendors.delay(id=instance.id)
         else:
@@ -243,13 +245,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                 notify_admins_on_profile_registration(
                     profile.license.organization.created_by.email, profile.name, instance)
                 #Create zoho books customer
-                if profile.license.organization.created_by.membership_type == "personal":
-                    create_customer_in_books(profile.license.id, is_update=False, is_single_user=True, params={})
-                elif profile.license.organization.created_by.membership_type == "business":
-                    if profile.license.brand:
-                        create_customer_in_books(profile.license.brand.id, is_update=False, is_single_user=False, params={})
-                    else:
-                        create_customer_in_books(id=None,is_update=False, is_single_user=False, params={})
+                create_customer_in_books(id=profile.license.id,is_update=False, params={})
                 #insert or update vendors/accounts
                 insert_or_update_vendor_accounts(profile,instance)
             except Exception as e:
