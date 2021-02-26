@@ -92,6 +92,11 @@ class InternalRole(models.Model):
         verbose_name=_('Permissions'),
         blank=True,
     )
+    profile_categories = models.ManyToManyField(
+        'brand.ProfileCategory',
+        verbose_name=_('Profile Categories'),
+        blank=True,
+    )
 
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.db import models
+from django import forms
 from django.contrib.admin import widgets
 from .widgets import PermissionSelectMultipleWidget
 from .models import (
@@ -41,18 +42,27 @@ class PermissionAdmin(admin.ModelAdmin):
         return False
 
 
+class InternalRoleAdminForm(forms.ModelForm):
+  class Meta:
+    model = InternalRole
+    widgets = {
+      'permissions': PermissionSelectMultipleWidget(),
+    }
+    fields = '__all__'
+
+
 class InternalRoleAdmin(admin.ModelAdmin):
     """
     InternalRoleAdmin
     """
+    form=InternalRoleAdminForm
     readonly_fields = ('created_on','updated_on',)
+    filter_horizontal = ('profile_categories',)
 
-    formfield_overrides = {
-        models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
-        # models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
-    }
-
-
+    # formfield_overrides = {
+    #     models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
+    #     # models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
+    # }
 
 
 admin.site.register(Permission, PermissionAdmin)

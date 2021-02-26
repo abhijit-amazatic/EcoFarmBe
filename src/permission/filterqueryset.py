@@ -1,3 +1,4 @@
+from django.db.models import query
 from rest_framework.permissions import BasePermission
 from rest_framework.viewsets import ViewSetMixin
 from django.utils.translation import ugettext_lazy as _
@@ -58,10 +59,13 @@ class filterQuerySet:
         return self.queryset.filter(q).distinct()
 
     def brand_license(self):
+        q = Q()
+        profile_categories_ids = set()
         for role in self.user.internal_roles.all():
             if role.permissions.filter(id='view_license').exists():
-                return self.queryset
-        q = Q()
+                profile_categories_ids.add(role.profile_categories.all().values_list('name', flat=True))
+        if profile_categories_ids:
+            q |= Q(profile_category__in=profile_categories_ids)
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':
             q |= Q(organizationuserrole__organization_user__user=self.user)&Q(organizationuserrole__role__permissions='view_license')
