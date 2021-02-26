@@ -55,7 +55,8 @@ class InternalRoleAdmin(admin.ModelAdmin):
     """
     InternalRoleAdmin
     """
-    form=InternalRoleAdminForm
+    change_form_template = 'permission/internal_role_change_form.html'
+    form = InternalRoleAdminForm
     readonly_fields = ('created_on','updated_on',)
     filter_horizontal = ('profile_categories',)
 

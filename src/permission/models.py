@@ -33,7 +33,7 @@ class Permission(models.Model):
     """
     The permissions.
     """
-    PERMISSION_TYPE_CHOICES= (
+    PERMISSION_TYPE_CHOICES = (
         ('organizational', _('Organizational')),
         ('internal', _('Internal')),
     )

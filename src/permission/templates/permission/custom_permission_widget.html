@@ -55,4 +55,18 @@
             {% endifchanged %}
         {% endfor %}
     </tbody>
+    <thead>
+            <tr>
+                <th>
+                </th>
+                {% for permission_type in default_permission_types %}
+                <th>
+                </th>
+                {% endfor %}
+                <th>
+                    <a  id="select-all" href="#">Selecct All</a> | <a id="select-none" href="#">Select None</a>
+                </th>
+            </tr>
+    <thead>
+
 </table>
