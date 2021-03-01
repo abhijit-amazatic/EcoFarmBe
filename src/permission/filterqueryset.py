@@ -60,12 +60,15 @@ class filterQuerySet:
 
     def brand_license(self):
         q = Q()
-        profile_categories_ids = set()
         for role in self.user.internal_roles.all():
             if role.permissions.filter(id='view_license').exists():
-                profile_categories_ids.add(role.profile_categories.all().values_list('name', flat=True))
-        if profile_categories_ids:
-            q |= Q(profile_category__in=profile_categories_ids)
+                if not role.created_profiles_only:
+                    q |= Q(profile_category__in=role.profile_categories.all().values_list('name', flat=True))
+                else:
+                    q |= Q(
+                        profile_category__in=role.profile_categories.all().values_list('name', flat=True),
+                        created_by=self.user,
+                    )
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':
             q |= Q(organizationuserrole__organization_user__user=self.user)&Q(organizationuserrole__role__permissions='view_license')
@@ -74,8 +77,6 @@ class filterQuerySet:
         return self.queryset.filter(q).distinct()
 
     def brand_organizationuser(self):
-        # if self.user.groups.filter(name=SALES_REP_GROUP_NAME).exists():
-        #     return self.queryset
         q = Q()
         q |= Q(organization__created_by=self.user)
         q |= Q(organization_user_role__role__permissions='view_organization_user')

@@ -260,6 +260,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
 
     def create(self, validated_data):
         data_fetch_token = validated_data.pop('data_fetch_token')
+        validated_data['created_by'] = self.context['request'].user
         fetch_instance = OnboardingDataFetch.objects.filter(data_fetch_token=data_fetch_token).first()
         instance = super().create(validated_data)
         if fetch_instance.owner_verification_status == 'verified':

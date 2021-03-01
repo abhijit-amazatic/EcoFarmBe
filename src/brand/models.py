@@ -9,6 +9,7 @@ from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
 from django.db import models
 from django.db.models import Q
+from django.db.models.deletion import SET_NULL
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Permission as DjPermission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
@@ -167,7 +168,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
-    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), on_delete=models.CASCADE,)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), null=True, on_delete=SET_NULL,)
     organization = models.ForeignKey(
         Organization,
         verbose_name=_('Organization'),
