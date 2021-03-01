@@ -105,12 +105,12 @@ class InlineDocumentsAdmin(GenericStackedInline):
 class CustomInventoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        inventory = get_inventory_obj(inventory_name='inventory_efd')
-        result = inventory.get_user()
-        if result.get('code') == 0:
-            procurement_rep = [(o.get('email'), o.get('name')) for o in result.get('users', []) if o.get('status') in ['active', 'invited']]
-            procurement_rep.insert(0, ('', '-------'))
-            self.fields['procurement_rep'] = forms.ChoiceField(choices=procurement_rep, required=False)
+        # inventory = get_inventory_obj(inventory_name='inventory_efd')
+        # result = inventory.get_user()
+        # if result.get('code') == 0:
+        #     procurement_rep = [(o.get('email'), o.get('name')) for o in result.get('users', []) if o.get('status') in ['active', 'invited']]
+        #     procurement_rep.insert(0, ('', '-------'))
+        #     self.fields['procurement_rep'] = forms.ChoiceField(choices=procurement_rep, required=False)
 
     class Meta:
         model = CustomInventory
@@ -126,7 +126,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     change_form_template = 'inventory/custom_inventory_change_form.html'
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
     # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
-    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on', 'books_po_id', 'po_number',)
+    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on', 'books_po_id', 'po_number', 'procurement_rep',)
     inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
     form = CustomInventoryForm
@@ -170,6 +170,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             'fields': (
                 'status',
                 'vendor_name',
+                'client_code',
                 'procurement_rep',
                 'zoho_item_id',
                 'sku',
@@ -205,9 +206,9 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     def date_str(self, date_obj):
         return str(date_obj.strftime('%m.%d.%Y'))
 
-    def generate_sku(self, obj, client_code):
+    def generate_sku(self, obj):
         sku = 'test-sku'
-        sku += '-' + client_code
+        sku += '-' + obj.client_code
         sku += '-' + obj.cultivar.cultivar_name
         if obj.harvest_date:
             sku += '-' + obj.harvest_date.strftime('%m-%d-%y')
@@ -215,6 +216,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         return sku
 
     def get_client_code(self, request, obj):
+        found_code = False
         if obj.vendor_name:
             try:
                 result = search_query('Vendors', obj.vendor_name, 'Vendor_Name')
@@ -226,14 +228,40 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     if data_ls and isinstance(data_ls, list):
                         for vendor in data_ls:
                             if vendor.get('Vendor_Name') == obj.vendor_name:
+                                if not obj.procurement_rep:
+                                    p_rep = vendor.get('Owner', {}).get('email')
+                                    if p_rep:
+                                        obj.procurement_rep = p_rep
                                 client_code = vendor.get('Client_Code')
                                 if client_code:
+                                    found_code = True
+                                    obj.client_code = client_code
                                     return client_code
-                                else:
-                                    self.message_user(request, f'client code not found for vendor \'{obj.vendor_name}\' in Zoho CRM', level='error')
-                    self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
-                elif result.get('status_code') == 204:
-                    self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
+
+                if result.get('status_code') == 204 or not found_code:
+                    try:
+                        result = search_query('Accounts', obj.vendor_name, 'Account_Name')
+                    except Exception :
+                        self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
+                    else:
+                        if result.get('status_code') == 200:
+                            data_ls = result.get('response')
+                            if data_ls and isinstance(data_ls, list):
+                                for vendor in data_ls:
+                                    if vendor.get('Account_Name') == obj.vendor_name:
+                                        if not obj.procurement_rep:
+                                            p_rep = vendor.get('Owner', {}).get('email')
+                                            if p_rep:
+                                                obj.procurement_rep = p_rep
+                                        client_code = vendor.get('Client_Code')
+                                        if client_code:
+                                            obj.client_code = client_code
+                                            return client_code
+                                        else:
+                                            self.message_user(request, f'client code not found for vendor \'{obj.vendor_name}\' in Zoho CRM', level='error')
+                                self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
+                        elif result.get('status_code') == 204 or not found_code:
+                            self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
                 else:
                     self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
 
@@ -241,14 +269,15 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            client_code = self.get_client_code(request, obj)
+            if not obj.client_code:
+                self.get_client_code(request, obj)
             # client_code = 'code'
-            if client_code:
-                sku = self.generate_sku(obj, client_code)
+            if obj.client_code:
+                sku = self.generate_sku(obj)
 
                 data = {}
                 data['item_type'] = 'inventory'
-                data['cf_client_code'] = client_code
+                data['cf_client_code'] = obj.client_code
                 data['sku'] = sku
                 data['unit'] = 'lb'
 
@@ -337,7 +366,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                                 }
                                 obj.save()
                                 self.message_user(request, 'This item is approved')
-                                create_approved_item_po.apply_async((obj.id, client_code,), countdown=5)
+                                create_approved_item_po.apply_async((obj.id,), countdown=5)
                     else:
                         self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                         print('Error while creating item in Zoho Inventory')

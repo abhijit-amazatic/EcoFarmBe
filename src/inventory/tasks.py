@@ -17,7 +17,11 @@ from core.mailer import (mail, mail_send)
 from integration.books import (create_purchase_order, submit_purchase_order)
 from brand.models import (LicenseProfile, )
 
-from .task_helpers import (create_duplicate_crm_vendor_from_crm_account, )
+from .task_helpers import (
+    create_duplicate_crm_vendor_from_crm_account,
+    get_custom_inventory_data_from_crm_vendor,
+    get_custom_inventory_data_from_crm_account,
+)
 from .models import (CustomInventory, )
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -69,7 +73,7 @@ def notify_inventory_item_added(email, custom_inventory_id):
         notify_email_inventory_item_added(data)
 
 @app.task(queue="general")
-def create_approved_item_po(custom_inventory_id, client_code, retry=3):
+def create_approved_item_po(custom_inventory_id, retry=3):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
         try:
@@ -121,7 +125,7 @@ def create_approved_item_po(custom_inventory_id, client_code, retry=3):
             "custom_fields": [
                 {
                     "api_name": "cf_client_code",
-                    "value": client_code,
+                    "value": item.client_code,
                 },
                 {
                     "api_name": "cf_billing_published",
@@ -149,9 +153,18 @@ def create_approved_item_po(custom_inventory_id, client_code, retry=3):
             item.save()
             submit_purchase_order(item.books_po_id)
         elif retry:
-            create_approved_item_po.apply_async((item.id, client_code, retry-1), countdown=5)
+            create_approved_item_po.apply_async((item.id, retry-1), countdown=5)
 
 
 @app.task(queue="general")
 def create_duplicate_crm_vendor_from_crm_account_task(vendor_name):
     create_duplicate_crm_vendor_from_crm_account(vendor_name)
+
+@app.task(queue="general")
+def get_custom_inventory_data_from_crm(custom_inventory_id):
+    item = CustomInventory.objects.get(id=custom_inventory_id)
+    if not item.client_code:
+        get_custom_inventory_data_from_crm_vendor(item)
+    if not item.client_code:
+        get_custom_inventory_data_from_crm_account(item)
+    item.save()
