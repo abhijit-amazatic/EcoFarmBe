@@ -758,16 +758,19 @@ def get_buyer_summary(customer):
         for item in resp['line_items']:
             total_quantity += item['quantity']
             try:
-                inventory = Inventory.objects.get(sku=item['sku'], name=item['name'])
+                inventory = Inventory.objects.filter(sku=item['sku']).latest('last_modified_time')
             except Inventory.DoesNotExist:
                 continue
-            total_items += 1
-            if 'Flower' in inventory.category_name:
-                category_count['flower'] += 1
-            elif 'Trim' in inventory.category_name:
-                category_count['trim'] += 1
-            elif 'Smalls' in inventory.category_name:
-                category_count['smalls'] += 1
+            try:
+                total_items += 1
+                if 'Flower' in inventory.category_name:
+                    category_count['flower'] += 1
+                elif 'Trim' in inventory.category_name:
+                    category_count['trim'] += 1
+                elif 'Smalls' in inventory.category_name:
+                    category_count['smalls'] += 1
+            except AttributeError as exc:
+                continue
     if total_items:
         for k, v in category_count.items():
             category_count[k] = (v/total_items) * 100
