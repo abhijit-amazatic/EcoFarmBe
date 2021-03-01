@@ -48,7 +48,8 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
-                               GetRecordView, LabTestView, GetAutoComplete, OrderVariableView,NotificationView,)
+                               GetRecordView, LabTestView, GetAutoComplete, OrderVariableView,NotificationView,
+                               DownloadSignDocumentView, )
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -226,6 +227,7 @@ urlpatterns = [
     path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),
     path(r'update-program-selection/', ProgramSelectionSyncView.as_view(), name="update-program"),
     path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
+    path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
 
 ] + router.urls
 

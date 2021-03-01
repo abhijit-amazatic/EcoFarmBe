@@ -24,13 +24,14 @@ from .serializers import (InventorySerializer, LogoutInventorySerializer,
 from .models import (Inventory, ItemFeedback, InTransitOrder, Documents, CustomInventory)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
-                                   get_inventory_name)
+                                   get_inventory_name, update_inventory_item)
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
 from .permissions import (DocumentPermission, )
 from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
+from cultivar.models import (Cultivar, )
 from integration.inventory import (get_inventory_summary,)
 from .tasks import (notify_inventory_item_added, create_duplicate_crm_vendor_from_crm_account_task, )
 class CharInFilter(BaseInFilter,CharFilter):
@@ -246,6 +247,26 @@ class InventoryViewSet(viewsets.ModelViewSet):
         data['summary'] = summary
         data['results'] = serializer.data
         return Response(data)
+
+    def put(self, request):
+        """
+        Update inventory item.
+        """
+        is_update_zoho = request.query_params.get('is_update_zoho', False)
+        item = request.data
+        inventory_name = 'inventory_efd' if item.get('inventory_name') == 'EFD' else 'inventory_efl'
+        item.pop('inventory_name')
+        if item.get('labtest'):
+            obj = LabTest.objects.update_or_create(id=item.get('labtest').get('id'), defaults=item.get('labtest'))
+            item.pop('labtest')
+        if item.get('cultivar'):
+            obj = Cultivar.objects.update_or_create(id=item.get('cultivar').get('id'), defaults=item.get('cultivar'))
+            item.pop('cultivar')
+        obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
+        if is_update_zoho:
+            response = update_inventory_item(inventory_name, item.get('item_id'), item)
+            return Response(response)
+        return Response(item)
 
 
 class ItemFeedbackViewSet(viewsets.ModelViewSet):

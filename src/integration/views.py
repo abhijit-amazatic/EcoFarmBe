@@ -2,6 +2,7 @@
 Integration views
 """
 from datetime import (datetime, timedelta)
+import base64
 from django.http import (QueryDict,)
 from rest_framework import (status,)
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
@@ -403,6 +404,21 @@ class TemplateSignView(APIView):
                                           license_owner_email
                                           ))
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class DownloadSignDocumentView(APIView):
+    """
+    View class to download sign document.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        Get document binary.
+        """
+        request_id = request.query_params.get('request_id')
+        response = download_pdf(request_id)
+        response = base64.b64encode(response)
+        return Response(response, content_type='application/pdf')
 
 class EstimateTaxView(APIView):
     """

@@ -118,6 +118,12 @@ def update_inventory_item(inventory_name, record_id, record, params={}):
             record['cf_vendor_name'] = vendor_id
         else:
             record.pop('cf_vendor_name')
+    if 'cf_procurement_rep' in record:
+        user_id = get_user_id(inventory, record['cf_procurement_rep'])
+        if user_id:
+            record['cf_procurement_rep'] = user_id
+        else:
+            record.pop('cf_procurement_rep')
     return inventory.update_item(record_id, record, params=params)
 
 def get_inventory_items(inventory_name, params={}):
