@@ -148,8 +148,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             'fields': (
                 'farm_ask_price',
                 'pricing_position',
-                'have_minimum_order_quantity',
-                'minimum_order_quantity',
+                # 'have_minimum_order_quantity',
+                # 'minimum_order_quantity',
             ),
         }),
         ('SAMPLE LOGISTICS (PICKUP OR DROP OFF)', {

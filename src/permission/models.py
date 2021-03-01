@@ -33,9 +33,11 @@ class Permission(models.Model):
     """
     The permissions.
     """
+    PERMISSION_TYPE_ORGANIZATIONAL = 'organizational'
+    PERMISSION_TYPE_INTERNAL = 'internal'
     PERMISSION_TYPE_CHOICES = (
-        ('organizational', _('Organizational')),
-        ('internal', _('Internal')),
+        (PERMISSION_TYPE_ORGANIZATIONAL, _('Organizational')),
+        (PERMISSION_TYPE_INTERNAL, _('Internal')),
     )
 
     id = models.CharField(

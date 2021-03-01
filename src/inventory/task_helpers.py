@@ -39,7 +39,7 @@ accounts_to_vendors_dict = {
     # 'Reference_1_Link': '',
     # 'Reference_2_Link': '',
     # 'Credit_Reference_3_Link': '',
-    'Cultivars_of_Interest': 'Cultivars',
+    # 'Cultivars_of_Interest': 'Cultivars',
     # 'Curator': '',
     'Currency': 'Currency',
     'Dama_Approved': 'Dama_Approved',
@@ -88,70 +88,48 @@ accounts_to_vendors_dict = {
     'Website': 'Website',
 }
 
-
-def get_account_or_vendor_associations(account_id=None, vendor_id=None):
-    final_response = dict()
+def get_vendor_associations(vendor_id=None):
+    final_response = {
+        'Orgs': [],
+        'Brands': [],
+        'Licenses': [],
+        'Contacts': [],
+        'Cultivars': [],
+    }
 
     if vendor_id:
         org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
-    elif account_id:
-        org = search_query('Orgs_X_Accounts', account_id, 'Account')
-    else:
-        org = dict()
-    final_response['organization'] = []
-    if org.get('status_code') == 200:
-        for o in org.get('response'):
-            r = dict()
-            r['name'] = o['Org']['name']
-            r['id'] = o['Org']['id']
-            final_response['organization'].append(r)
+        if org.get('status_code') == 200:
+            for o in org.get('response'):
+                r = dict()
+                r['name'] = o['Org']['name']
+                r['id'] = o['Org']['id']
+                final_response['Orgs'].append(r)
 
-    if vendor_id:
         brand = search_query('Brands_X_Vendors', vendor_id, 'Vendor')
-    elif account_id:
-        brand = search_query('Brands_X_Accounts', account_id, 'Account')
-    else:
-        brand = dict()
-    final_response['brand'] = []
-    if brand.get('status_code') == 200:
-        for b in brand.get('response'):
-            r = dict()
-            r['name'] = b['Brand']['name']
-            r['id'] = b['Brand']['id']
-            final_response['brand'].append(r)
+        if brand.get('status_code') == 200:
+            for b in brand.get('response'):
+                r = dict()
+                r['name'] = b['Brand']['name']
+                r['id'] = b['Brand']['id']
+                final_response['Brands'].append(r)
 
-    if vendor_id:
         license = search_query('Vendors_X_Licenses', vendor_id, 'Licenses_Module')
-    elif account_id:
-        license = search_query('Accounts_X_Licenses', account_id, 'Licenses_Module')
-    else:
-        license = dict()
-    final_response['license'] = []
-    if license.get('status_code') == 200:
-        for l in license.get('response'):
-            r = dict()
-            r['name'] = l['Licenses']['name']
-            r['id'] = l['Licenses']['id']
-            final_response['license'].append(r)
+        if license.get('status_code') == 200:
+            for l in license.get('response'):
+                r = dict()
+                r['name'] = l['Licenses']['name']
+                r['id'] = l['Licenses']['id']
+                final_response['Licenses'].append(r)
 
-    final_response['contact'] = []
-    if vendor_id:
         contact = search_query('Vendors_X_Contacts', vendor_id, 'Vendor')
         if contact.get('status_code') == 200:
             for ct in contact.get('response'):
                 r = dict()
                 r['name'] = ct['Contact']['name']
                 r['id'] = ct['Contact']['id']
-                final_response['contact'].append(r)
-    elif account_id:
-        contact = search_query('Accounts_X_Contacts', account_id, 'Accounts')
-        if contact.get('status_code') == 200:
-            for ct in contact.get('response'):
-                r = dict()
-                r['name'] = ct['Contacts']['name']
-                r['id'] = ct['Contacts']['id']
-                final_response['contact'].append(r)
-    if vendor_id:
+                final_response['Contacts'].append(r)
+
         cultivar = search_query('Vendors_X_Cultivars', vendor_id, 'Cultivar_Associations')
         final_response['cultivar'] = []
         if cultivar.get('status_code') == 200:
@@ -159,7 +137,51 @@ def get_account_or_vendor_associations(account_id=None, vendor_id=None):
                 r = dict()
                 r['name'] = cl['Cultivars']['name']
                 r['id'] = cl['Cultivars']['id']
-                final_response['cultivar'].append(r)
+                final_response['Cultivars'].append(r)
+    return final_response
+
+
+
+def get_account_associations(account_id=None):
+    final_response = {
+        'Orgs': [],
+        'Brands': [],
+        'Licenses': [],
+        'Contacts': [],
+    }
+    if account_id:
+        org = search_query('Orgs_X_Accounts', account_id, 'Account')
+        if org.get('status_code') == 200:
+            for o in org.get('response'):
+                r = dict()
+                r['name'] = o['Org']['name']
+                r['id'] = o['Org']['id']
+                final_response['Orgs'].append(r)
+
+        brand = search_query('Brands_X_Accounts', account_id, 'Account')
+        if brand.get('status_code') == 200:
+            for b in brand.get('response'):
+                r = dict()
+                r['name'] = b['Brand']['name']
+                r['id'] = b['Brand']['id']
+                final_response['Brands'].append(r)
+
+        license = search_query('Accounts_X_Licenses', account_id, 'Licenses_Module')
+        if license.get('status_code') == 200:
+            for l in license.get('response'):
+                r = dict()
+                r['name'] = l['Licenses']['name']
+                r['id'] = l['Licenses']['id']
+                final_response['Licenses'].append(r)
+
+        contact = search_query('Accounts_X_Contacts', account_id, 'Accounts')
+        if contact.get('status_code') == 200:
+            for ct in contact.get('response'):
+                r = dict()
+                r['name'] = ct['Contacts']['name']
+                r['id'] = ct['Contacts']['id']
+                final_response['Contacts'].append(r)
+
     return final_response
 
 
@@ -167,11 +189,11 @@ def create_duplicate_crm_vendor_from_crm_account(vendor_name,):
     f_create = False
     result = search_query('Vendors', vendor_name, 'Vendor_Name')
     if result.get('status_code') == 200:
-            data_ls = result.get('response')
-            if data_ls and isinstance(data_ls, list):
-                vendor_name_ls = [x.get('Vendor_Name') for x in data_ls]
-                if vendor_name_ls and vendor_name not in vendor_name_ls:
-                    f_create = True
+        data_ls = result.get('response')
+        if data_ls and isinstance(data_ls, list):
+            vendor_name_ls = [x.get('Vendor_Name') for x in data_ls]
+            if vendor_name_ls and vendor_name not in vendor_name_ls:
+                f_create = True
     if result.get('status_code') == 204 or f_create:
         result = search_query('Accounts', vendor_name, 'Account_Name')
         if result.get('status_code') == 200:
@@ -197,25 +219,25 @@ def create_duplicate_crm_vendor_from_crm_account(vendor_name,):
                                 vendor_id = resp_vendor['response']['data'][0]['details']['id']
                             except TypeError:
                                 vendor_id = resp_vendor['response'][0]['id']
-                            association_data = get_account_or_vendor_associations(account_id=account_id)
-                            if association_data['organization']:
-                                association_data['organization'] = [{'Vendor': vendor_id, 'Org': x['id']} for x in association_data['organization']]
-                                r = create_records('Orgs_X_Vendors', association_data['organization'])
+                            association_data = get_account_associations(account_id=account_id)
+                            if association_data['Orgs']:
+                                association_data['Orgs'] = [{'Vendor': vendor_id, 'Org': x['id']} for x in association_data['Orgs']]
+                                r = create_records('Orgs_X_Vendors', association_data['Orgs'])
                                 if r.get('status_code') != 201:
                                     print(r)
-                            if association_data['brand']:
-                                association_data['brand'] = [{'Vendor': vendor_id, 'Brand': x['id']} for x in association_data['brand']]
-                                r = create_records('Brands_X_Vendors', association_data['brand'])
+                            if association_data['Brands']:
+                                association_data['Brands'] = [{'Vendor': vendor_id, 'Brand': x['id']} for x in association_data['Brands']]
+                                r = create_records('Brands_X_Vendors', association_data['Brands'])
                                 if r.get('status_code') != 201:
                                     print(r)
-                            if association_data['license']:
-                                association_data['license'] = [{'Licenses_Module': vendor_id, 'Licenses': x['id']} for x in association_data['license']]
-                                r = create_records('Vendors_X_Licenses', association_data['license'])
+                            if association_data['Licenses']:
+                                association_data['Licenses'] = [{'Licenses_Module': vendor_id, 'Licenses': x['id']} for x in association_data['Licenses']]
+                                r = create_records('Vendors_X_Licenses', association_data['Licenses'])
                                 if r.get('status_code') != 201:
                                     print(r)
-                            if association_data['contact']:
-                                association_data['contact'] = [{'Vendor': vendor_id, 'Contact': x['id']} for x in association_data['contact']]
-                                r = create_records('Vendors_X_Contacts', association_data['contact'])
+                            if association_data['Contacts']:
+                                association_data['Contacts'] = [{'Vendor': vendor_id, 'Contact': x['id']} for x in association_data['Contacts']]
+                                r = create_records('Vendors_X_Contacts', association_data['Contacts'])
                                 if r.get('status_code') != 201:
                                     print(r)
                         return resp_vendor

@@ -83,6 +83,9 @@ class OrganizationRole(TimeStampFlagModelMixin, models.Model):
         Permission,
         verbose_name=_('Permissions'),
         blank=True,
+        limit_choices_to={
+            'type': Permission.PERMISSION_TYPE_ORGANIZATIONAL,
+        },
     )
 
     def __str__(self):
