@@ -359,16 +359,17 @@ class TermsAndConditionAcceptanceSerializer(serializers.Serializer):  # pylint: 
     Serializer for terms and condition acceptance,
     """
     # user_id = serializers.IntegerField(read_only=True)
-    profile_type = serializers.ChoiceField( choices=TermsAndCondition.PROFILE_TYPE_CHOICES)
+    #profile_type = serializers.ChoiceField( choices=TermsAndCondition.PROFILE_TYPE_CHOICES)
     is_accepted = serializers.BooleanField()
     ip_address = serializers.IPAddressField(read_only=True)
     user_agent = serializers.CharField(read_only=True)
     hostname = serializers.CharField(read_only=True)
     created_on = serializers.CharField(read_only=True)
 
-    def validate_profile_type(self, value):
+        
+    def validate(self, value):
         qs = TermsAndCondition.objects.filter(
-            profile_type=value,
+            profile_type='other',
             publish_from__lte=timezone.now().date(),
         )
         if qs.exists():

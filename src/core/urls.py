@@ -29,7 +29,7 @@ from user.views import (UserViewSet, MeView, LogInView,
                         GetPhoneNumberVerificationCodeCallView,
                         PhoneNumberVerificationView,
                         HelpDocumentationView,
-                        TermsAndConditionAcceptanceView,TermsView,)
+                        TermsAndConditionAcceptanceView,)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView, SearchCultivars,
@@ -125,7 +125,6 @@ router.register(r'order-variables', OrderVariableView, base_name="order-variable
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'user/me/', MeView.as_view(), name='user-me'),
-    path(r'user/terms/', TermsView.as_view(), name='user-terms'),
     # path(r'user/login/', LogInView.as_view(), name='login'),
     path(r'user/logout/', LogoutView.as_view(), name='logout'),
     path(r'user/change-password/',

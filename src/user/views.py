@@ -166,52 +166,7 @@ class MeView(APIView):
         """
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=200)
-
-class TermsView(APIView):
-
-    """
-    Get Terms & condition related response for user..
-    """
-
-    def get(self, request):
-        """
-        Logged in user's info.
-        """
-        license_onboarded = License.objects.filter(organization__created_by=self.request.user)
-        terms_list = []
-        bypass_qs = User.objects.filter(
-            id=self.request.user.id,
-            bypass_terms_and_conditions=True
-        )
-        profile_type = {'cultivation':'seller', 'retail':'buyer','other':'other'}
-        
-        for licese_instance in license_onboarded:
-            profile_type = []
-            if not bypass_qs.exists() and licese_instance and 'not accepted':
-                pass
-            
-        
-        profile_type = request.GET.get('profile_type')
-        if profile_type:
-            
-            if bypass_qs.exists():
-                return Response({'is_accepted': 'False'}, status=200)
-            qs = TermsAndConditionAcceptance.objects.filter(
-                user=self.request.user,
-                terms_and_condition__profile_type=profile_type,
-            )
-            if qs.exists():
-                instance = qs.latest('created_on')
-                return Response({'is_accepted': instance.is_accepted}, status=200)
-            qs = TermsAndCondition.objects.filter(
-                profile_type=profile_type,
-                publish_from__lte=timezone.now().date(),
-            )
-            if qs.exists():
-                instance = qs.latest('publish_from')
-                return Response({'terms_and_condition': instance.terms_and_condition}, status=200)
-            return Response({'detail': f"Terms And Condition not found for profile type '{profile_type}'"}, status=400)
-        return Response({'detail': 'Quey parameter "profile_type" not found'}, status=400)
+                    
     
 class CategoryView(APIView):
 
@@ -488,30 +443,26 @@ class TermsAndConditionAcceptanceView(APIView):
         """
         Get method list terms and condition acceptances
         """
-        profile_type = request.GET.get('profile_type')
-        if profile_type:
-            bypass_qs = User.objects.filter(
-                id=self.request.user.id,
-                bypass_terms_and_conditions=True
-            )
-            if bypass_qs.exists():
-                return Response({'is_accepted': 'False'}, status=200)
-            qs = TermsAndConditionAcceptance.objects.filter(
-                user=self.request.user,
-                terms_and_condition__profile_type=profile_type,
-            )
-            if qs.exists():
-                instance = qs.latest('created_on')
-                return Response({'is_accepted': instance.is_accepted}, status=200)
-            qs = TermsAndCondition.objects.filter(
-                profile_type=profile_type,
+        bypass_qs = User.objects.filter(id=self.request.user.id,bypass_terms_and_conditions=True)
+        if bypass_qs.exists():
+            return Response({'is_accepted': True}, status=200)
+        
+        qs = TermsAndConditionAcceptance.objects.filter(
+            user=self.request.user,
+            terms_and_condition__profile_type='other',
+        )
+        if qs.exists():
+            instance = qs.latest('created_on')
+            return Response({'is_accepted': instance.is_accepted}, status=200)
+        
+        qs = TermsAndCondition.objects.filter(
+                profile_type='other',
                 publish_from__lte=timezone.now().date(),
-            )
-            if qs.exists():
-                instance = qs.latest('publish_from')
-                return Response({'terms_and_condition': instance.terms_and_condition}, status=200)
-            return Response({'detail': f"Terms And Condition not found for profile type '{profile_type}'"}, status=400)
-        return Response({'detail': 'Quey parameter "profile_type" not found'}, status=400)
+        )
+        if qs.exists():
+            instance = qs.latest('publish_from')
+            return Response({'terms_and_condition': instance.terms_and_condition}, status=200)
+        
 
 class HelpDocumentationView(ReadOnlyModelViewSet):
     """

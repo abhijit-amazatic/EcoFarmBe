@@ -197,7 +197,7 @@ class TermsAndConditionAcceptanceAdmin(admin.ModelAdmin):
     list_display = ('user', 'is_accepted', 'terms_and_condition', 'ip_address', 'created_on',)
     list_filter = ('is_accepted',)
     list_per_page = 25
-    search_fields = ('user',)
+    search_fields = ('user__email',)
     ordering = ('-created_on',)
     readonly_fields = ('terms_and_condition_id', 'ip_address', 'user_agent', 'hostname', 'created_on','updated_on',)
     fields = ('user', 'terms_and_condition_id', 'terms_and_condition', 'is_accepted', 'ip_address', 'user_agent', 'hostname', 'created_on','updated_on',)
