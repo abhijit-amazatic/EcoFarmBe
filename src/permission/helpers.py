@@ -31,6 +31,8 @@ def get_user_owned_profiles_crm_id(email):
                         crm_user_id = user.get('id')
                         if crm_user_id:
                             return get_user_owned_accounts_crm_id(crm_user_id) + get_user_owned_vendors_crm_id(crm_user_id)
+            else:
+                print(result)
         except Exception as exc:
             print(exc)
     return []
