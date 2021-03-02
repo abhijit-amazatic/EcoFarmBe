@@ -18,7 +18,7 @@ from core.permissions import UserPermissions
 from .models import (Integration,OrderVariable)
 from integration.box import(
     get_box_tokens, get_shared_link,
-    get_client_folder_id, create_folder,)
+    get_client_folder_id, create_folder, get_download_url)
 from integration.inventory import (
     get_inventory_item, get_inventory_items,)
 from integration.crm import (
@@ -347,7 +347,7 @@ class EstimateAddressView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class EstimateSignView(APIView):
     """
@@ -415,10 +415,20 @@ class DownloadSignDocumentView(APIView):
         """
         Get document binary.
         """
+        response = list()
         request_id = request.query_params.get('request_id')
-        response = download_pdf(request_id)
-        response = base64.b64encode(response)
-        return Response(response, content_type='application/pdf')
+        business_dba = request.query_params.get('business_dba')
+        document_number = request.query_params.get('document_number')
+        if request_id and business_dba and document_number:
+            dir_name = f'{business_dba}_{document_number}'
+            data = get_document(request_id)['requests']
+            folder_id = get_client_folder_id(dir_name)
+            new_folder = create_folder(folder_id, 'agreements')
+            for document in data.get('document_ids'):
+                filename = 'unsigned-' + document.get('document_name')
+                file_id = upload_pdf_box(request_id, new_folder, filename, True)
+                response.append(get_download_url(file_id))
+        return Response(response)
 
 class EstimateTaxView(APIView):
     """
