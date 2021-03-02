@@ -13,6 +13,8 @@ from rest_framework import serializers
 from Crypto.Cipher import AES
 from Crypto import Random
 from phonenumber_field.serializerfields import PhoneNumberField
+
+from permission.models import InternalRole
 from .models import User, TermsAndCondition, HelpDocumentation
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
@@ -58,8 +60,8 @@ def get_decrypted_data(enc):
         #cipher = AES.new(key, AES.MODE_CBC, iv)
         cipher = AES.new(bytes(key,'utf-8'),AES.MODE_CBC,iv)
         return unpad(cipher.decrypt(enc[BS:]))       
-       
-    
+
+
 class UserSerializer(serializers.ModelSerializer):
     """
     User Serializer.
@@ -86,6 +88,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile_photo_sharable_link = serializers.ReadOnlyField()
     platform_kpi = serializers.SerializerMethodField(read_only=True)
     document_url = serializers.SerializerMethodField()
+    internal_roles = serializers.SerializerMethodField()
     internal_permission = serializers.SerializerMethodField()
 
     def get_document_url(self, obj):
@@ -103,6 +106,12 @@ class UserSerializer(serializers.ModelSerializer):
                     return url.get('response')
         except Exception:
             return None
+
+    def get_internal_roles(self, obj):
+        """
+        Return perm list.
+        """
+        return [x.name for x in obj.internal_roles.all()]
 
     def get_internal_permission(self, obj):
         """
@@ -141,7 +150,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations', 'internal_permission')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations', 'internal_roles', 'internal_permission')
 
 
     def validate_password(self, password):
