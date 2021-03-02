@@ -118,11 +118,20 @@ def get_places(address):
         if address:
             result = list()
             gmaps = googlemaps.Client(key=GOOGLEPLACES_API_KEY)
-            responses = gmaps.places_autocomplete(address)
-            result.extend(gmaps.places(address).get('results'))
+            responses = gmaps.places_autocomplete(address, types='(regions)')
+            places = gmaps.places(address).get('results')
+            if places:
+                result.extend(places)
             for response in responses:
                 data = gmaps.places(response.get('description')).get('results')
-                result.extend(data)
+                for i in data:
+                    try:
+                        f_a = i['formatted_address']
+                        f_a = f_a.split(',')
+                        if address in f_a[-2]:
+                            result.append(i)
+                    except IndexError:
+                        continue
             return result
         return []
     except googlemaps.exceptions.ApiError as exc:
