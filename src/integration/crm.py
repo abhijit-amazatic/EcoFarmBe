@@ -92,6 +92,26 @@ def get_dict(cd, i):
         if user['status_code'] in (201, 202):
             return user['response']['data'][0]['details']['id']
 
+def get_users(user_type='ActiveUsers', email=None):
+    """
+    Get users from zoho CRM.
+    """
+    crm_obj = get_crm_obj()
+    response = crm_obj.get_users(user_type)
+    if email:
+        for i in response.get('response'):
+            if i['email'] == email:
+                return i
+        return []
+    return response
+
+def get_user(user_id):
+    """
+    Get user from zoho CRM.
+    """
+    crm_obj = get_crm_obj()
+    return crm_obj.get_user(user_id)
+
 def create_employees(key, value, obj, crm_obj):
     """
     Create contacts in Zoho CRM.
