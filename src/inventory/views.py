@@ -339,6 +339,30 @@ class CultivarCategoryView(APIView):
                 'label': i['cf_strain_name'],
                 'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None]})
 
+class InventoryClientCodeView(APIView):
+    """
+    Return distinct client code
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Return QuerySet.
+        """
+        if request.query_params.get('cf_client_code'):
+            items = Inventory.objects.filter(
+                cf_cfi_published=True,
+                cf_client_code__icontains=request.query_params.get('cf_client_code')
+                ).values('cf_client_code').distinct()
+        else:
+            items = Inventory.objects.filter(
+                cf_cfi_published=True,
+                ).values('cf_client_code').distinct()
+        return Response({
+            'status_code': 200,
+            'response': [{
+                'label': i['cf_client_code'],
+                'value': i['cf_client_code']} for i in items if i['cf_client_code'] != None]})    
 
 class InventoryStatusTypeView(APIView):
     """

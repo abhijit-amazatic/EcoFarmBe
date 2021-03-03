@@ -56,7 +56,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InTransitOrderViewSet, DocumentPreSignedView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
                              InventoryNutrientsView,InventoryCountyView,
-                             InventoryEthicsView, CustomInventoryViewSet)
+                             InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -192,6 +192,8 @@ urlpatterns = [
     path(r'inventory/sync', InventorySyncView.as_view(), name='sync_inventory'),
     path(r'inventory/cultivar', CultivarCategoryView.as_view(),
          name='cultivar_category'),
+    path(r'inventory/client-code', InventoryClientCodeView.as_view(),
+         name='inventory_client_code'),
     path(r'inventory/status/', InventoryStatusTypeView.as_view(),
          name='get_status_types'),
     path(r'inventory/last-modified-time/',
