@@ -843,10 +843,11 @@ class VendorClientCodeView(APIView):
         """
         if request.query_params.get('vendor_name'):
             vendor_name = request.query_params.get('vendor_name')
+            client_code = ''
             try:
                 result = search_query('Vendors', vendor_name, 'Vendor_Name')
             except Exception:
-                Response({'error': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
+                result = {}
             else:
                 if result.get('status_code') == 200:
                     data_ls = result.get('response')
@@ -854,10 +855,25 @@ class VendorClientCodeView(APIView):
                         for vendor in data_ls:
                             if vendor.get('Vendor_Name') == vendor_name:
                                 client_code = vendor.get('Client_Code')
-                                return Response({"client_code": client_code})
-                    return Response({'error': 'Vendor not found in Zoho CRM!'}, status=status.HTTP_400_BAD_REQUEST)
-                elif result.get('status_code') == 204:
-                    return Response({'error': 'Vendor not found in Zoho CRM!'}, status=status.HTTP_400_BAD_REQUEST)
+                                if client_code:
+                                    return Response({"client_code": client_code})
+
+            if result.get('status_code') == 204 or not client_code:
+                try:
+                    result = search_query('Accounts', vendor_name, 'Account_Name')
+                except Exception:
+                    Response({'error': 'Something went wrong!'}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    if result.get('status_code') == 200:
+                        data_ls = result.get('response')
+                        if data_ls and isinstance(data_ls, list):
+                            for account in data_ls:
+                                if account.get('Account_Name') == vendor_name:
+                                    client_code = account.get('Client_Code')
+                                    return Response({"client_code": client_code})
+                        return Response({'error': 'Vendor or Account not found in Zoho CRM!'}, status=status.HTTP_400_BAD_REQUEST)
+                    elif result.get('status_code') == 204:
+                        return Response({'error': 'Vendor or Account not found in Zoho CRM!'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.query_params.get('legal_business_name'):
             vendor_data = get_vendors_from_crm(request.query_params.get('legal_business_name'))
