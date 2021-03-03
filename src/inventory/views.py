@@ -50,6 +50,7 @@ class DataFilter(FilterSet):
     vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     county_grown__in = CharInFilter(field_name='county_grown', lookup_expr='in')
+    cf_client_code__in = CharInFilter(field_name='cf_client_code', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     # cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
@@ -121,7 +122,8 @@ class DataFilter(FilterSet):
         'cf_vendor_name': ['icontains', 'exact'],
         'parent_category_name':['icontains', 'exact'],
         'cf_cultivar_type':['icontains', 'exact'],
-        'county_grown':['icontains', 'exact'],   
+        'county_grown':['icontains', 'exact'],
+        'cf_client_code':['icontains', 'exact'],   
         'cf_strain_name':['icontains', 'exact'],
         'price':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
