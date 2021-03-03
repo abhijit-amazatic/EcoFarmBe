@@ -26,7 +26,7 @@ from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
                                    get_inventory_name, update_inventory_item)
 from integration.apps.aws import (create_presigned_url, create_presigned_post)
-from .permissions import (DocumentPermission, )
+from .permissions import (DocumentPermission, InventoryPermission, )
 from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
@@ -210,7 +210,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     """
     Inventory View
     """
-    permission_classes = (AllowAny, )
+    permission_classes = (InventoryPermission, )
     filter_backends = (CustomOrderFilter,filters.DjangoFilterBackend,)
     filterset_class = DataFilter
     ordering_fields = '__all__'
@@ -270,6 +270,25 @@ class InventoryViewSet(viewsets.ModelViewSet):
         if item.get('cultivar'):
             obj = Cultivar.objects.update_or_create(id=item.get('cultivar').get('id'), defaults=item.get('cultivar'))
             item.pop('cultivar')
+        obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
+        if is_update_zoho:
+            response = update_inventory_item(inventory_name, item.get('item_id'), item)
+            return Response(response)
+        return Response(item)
+
+class InventoryWebHook(APIView):
+    """
+    Inventory web hook for zoho crm.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def put(self, request):
+        """
+        Update inventory item.
+        """
+        is_update_zoho = request.query_params.get('is_update_zoho', False)
+        item = request.data
+        inventory_name = 'inventory_efd' if item.get('inventory_name') == 'EFD' else 'inventory_efl'
         obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
         if is_update_zoho:
             response = update_inventory_item(inventory_name, item.get('item_id'), item)

@@ -12,3 +12,15 @@ class DocumentPermission(permissions.BasePermission):
         elif request.method in ['PUT', 'DELETE'] and request.user.is_authenticated:
             return True
         return False
+
+class InventoryPermission(permissions.BasePermission):
+
+    def __init__(self):
+        super().__init__()
+
+    def has_permission(self, request, view):
+        if request.method == 'GET':
+            return True
+        elif request.method in ['PUT', 'DELETE'] and request.user.is_authenticated:
+            return True
+        return False

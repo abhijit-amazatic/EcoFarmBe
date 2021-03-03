@@ -56,7 +56,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InTransitOrderViewSet, DocumentPreSignedView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
                              InventoryNutrientsView,InventoryCountyView,
-                             InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView)
+                             InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
+                             InventoryWebHook)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -231,6 +232,7 @@ urlpatterns = [
     path(r'update-program-selection/', ProgramSelectionSyncView.as_view(), name="update-program"),
     path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
+    path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
 
 ] + router.urls
 
