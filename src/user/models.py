@@ -96,6 +96,7 @@ class User(StatusFlagMixin,AbstractUser):
     updated_on = models.DateTimeField(auto_now=True)
     documents = GenericRelation('inventory.Documents')
     crm_link = models.CharField(_('CRM link'), max_length=255, blank=True, null=True)
+    zoho_crm_id = models.CharField(_('zoho CRM Id'), max_length=255, blank=True, null=True)
     bypass_terms_and_conditions = models.BooleanField(_('Bypass Terms & Conditions Until this Flag is ON'), default=False)
 
     internal_roles = models.ManyToManyField(
