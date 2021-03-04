@@ -14,3 +14,25 @@ class OrderVariableSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderVariable
         fields = ('__all__')
+
+
+class CustomInventoryVariableSerializer(serializers.ModelSerializer):
+    """
+    This defines CustomInventoryVariableVariableSerializer
+    """
+    class Meta:
+        model = CustomInventoryVariable
+        fields = ('__all__')
+
+
+class TaxVariableVariableSerializer(serializers.ModelSerializer):
+    """
+    This defines TaxVariableVariableSerializer
+    """
+    class Meta:
+        model = TaxVariable
+        fields = ('__all__')        
+
+
+        
+        

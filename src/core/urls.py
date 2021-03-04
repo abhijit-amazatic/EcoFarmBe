@@ -50,7 +50,11 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
                                GetRecordView, LabTestView, GetAutoComplete,NotificationView,
                                DownloadSignDocumentView, )
-from fee_variable.views import (OrderVariableView,)
+
+from fee_variable.views import (OrderVariableView,
+                                CustomInventoryVariableView,
+                                TaxVariableVariableView, )
+
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
@@ -121,6 +125,8 @@ router.register(r'two-factor/add-device/authy-one-touch', AuthyAddUserRequestVie
 router.register(r'two-factor/add-device/phone', AddPhoneDeviceViewSet, base_name="add-phone-device")
 router.register(r'two-factor/add-device/authenticator', AddAuthenticatorRequestViewSet, base_name="add-authenticator-device")
 router.register(r'order-variables', OrderVariableView, base_name="order-variables")
+router.register(r'inventory-variables', CustomInventoryVariableView, base_name="inventory-variables")
+router.register(r'tax-variables', TaxVariableVariableView, base_name="tax-variables")
 
 
 

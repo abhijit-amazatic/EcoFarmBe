@@ -25,3 +25,28 @@ class OrderVariableView(ReadOnlyModelViewSet):
     serializer_class = OrderVariableSerializer
     filter_backends = [filters.OrderingFilter,DjangoFilterBackend]
     filterset_fields = ['tier']
+
+    
+class CustomInventoryVariableView(ReadOnlyModelViewSet):
+
+    """
+    Get CustomInventory Variable information.
+    """
+    permission_classes = (IsAuthenticated,)
+    queryset = CustomInventoryVariable.objects.all()
+    serializer_class = CustomInventoryVariableSerializer
+    filter_backends = [filters.OrderingFilter,DjangoFilterBackend]
+    filterset_fields = ['tier','program_type']
+
+    
+class TaxVariableVariableView(ReadOnlyModelViewSet):
+    
+    """
+    Get Tax Variable information.
+    """
+    permission_classes = (IsAuthenticated,)
+    queryset = TaxVariable.objects.all()
+    serializer_class =  TaxVariableVariableSerializer
+    #filter_backends = [filters.OrderingFilter,DjangoFilterBackend]
+    
+    

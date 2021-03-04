@@ -34,6 +34,51 @@ class OrderVariable(TimeStampFlagModelMixin,models.Model):
     class Meta:
         verbose_name = _('Order Variable')
         verbose_name_plural = _('Order Variables')      
-
         
+class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing  CustomInventory variables
+    """
+    PROGRAM_TIER_GOLD = 'gold'
+    PROGRAM_TIER_SILVER = 'silver'
+    PROGRAM_TIER_BRONZE = 'bronze'
+    PROGRAM_TIER_CHOICES = (
+        (PROGRAM_TIER_GOLD, _('Gold')),
+        (PROGRAM_TIER_SILVER, _('Silver')),
+        (PROGRAM_TIER_BRONZE, _('Bronze')),
+        
+    )
+    PROGRAM_TYPE_IFP = 'ifp'
+    PROGRAM_TYPE_SELLER = 'ibp'
+    PROGRAM_TYPE_CHOICES = (
+        (PROGRAM_TYPE_IFP, _('IFP Program')),
+        (PROGRAM_TYPE_SELLER, _('IBP Program')),
+    )
 
+    
+    tier = models.CharField(verbose_name=_("Tier"), max_length=255, choices=PROGRAM_TIER_CHOICES)
+    program_type = models.CharField(verbose_name=_("Program Type"), max_length=255, choices=PROGRAM_TYPE_CHOICES)
+    mcsp_fee = models.CharField(verbose_name=_("MCSP Fee"), max_length=255,blank=True, null=True)
+    
+    def __str__(self):
+        return self.program_type
+
+    class Meta:
+        verbose_name = _('Custom Inventory Variable')
+        verbose_name_plural = _('Custom Inventory Variables')      
+       
+
+class TaxVariable(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing  Tax variables
+    """
+    cultivar_tax = models.CharField(verbose_name=_("Cultivar Tax"), max_length=255,blank=True, null=True)
+    trim_tax = models.CharField(verbose_name=_("Trim Tax"), max_length=255,blank=True, null=True)
+    
+    def __str__(self):
+        return f'{self.cultivar_tax} | {self.trim_tax}'
+
+    class Meta:
+        verbose_name = _('Tax Variable')
+        verbose_name_plural = _('Tax Variables')      
+        
