@@ -49,15 +49,15 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         
     )
     PROGRAM_TYPE_IFP = 'ifp'
-    PROGRAM_TYPE_SELLER = 'ibp'
+    PROGRAM_TYPE_IBP = 'ibp'
     PROGRAM_TYPE_CHOICES = (
         (PROGRAM_TYPE_IFP, _('IFP Program')),
-        (PROGRAM_TYPE_SELLER, _('IBP Program')),
+        (PROGRAM_TYPE_IBP, _('IBP Program')),
     )
 
     
-    tier = models.CharField(verbose_name=_("Tier"), max_length=255, choices=PROGRAM_TIER_CHOICES)
     program_type = models.CharField(verbose_name=_("Program Type"), max_length=255, choices=PROGRAM_TYPE_CHOICES)
+    tier = models.CharField(verbose_name=_("Tier"), max_length=255, choices=PROGRAM_TIER_CHOICES)
     mcsp_fee = models.CharField(verbose_name=_("MCSP Fee"), max_length=255,blank=True, null=True)
     
     def __str__(self):
