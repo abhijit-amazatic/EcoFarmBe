@@ -15,7 +15,7 @@ from rest_framework.authentication import (TokenAuthentication,)
 from django.conf import settings
 
 from core.permissions import UserPermissions
-from .models import (Integration,OrderVariable)
+from .models import (Integration)
 from integration.box import(
     get_box_tokens, get_shared_link,
     get_client_folder_id, create_folder, get_download_url)
@@ -55,7 +55,6 @@ from integration.sign import (upload_pdf_box, get_document,
                               send_template)
 from integration.tasks import (send_estimate, )
 from integration.utils import (get_distance, get_places)
-from .serializers import OrderVariableSerializer
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET,
     )
@@ -1028,20 +1027,7 @@ class GetAutoComplete(APIView):
                Response(response, status=status.HTTP_400_BAD_REQUEST) 
             return Response(response)
         return Response({'code':1, 'error': 'address missing.'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class OrderVariableView(viewsets.ReadOnlyModelViewSet):
-
-    """
-    Get Order Variables information.
-    """
-    permission_classes = (IsAuthenticated,)
-    queryset = OrderVariable.objects.all()
-    serializer_class = OrderVariableSerializer
-    filter_backends = [filters.OrderingFilter,DjangoFilterBackend]
-    filterset_fields = ['program_type', 'tier']
     
-
 class NotificationView(APIView):
     """
     View class for posting to slack via webhook.

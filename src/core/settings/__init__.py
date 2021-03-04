@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'inventory',
     'cultivar',
     'labtest',
-    'multiselectfield'
+    'multiselectfield',
+    'fee_variable'
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',
@@ -152,7 +153,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'knox.auth.TokenAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',

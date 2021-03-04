@@ -48,8 +48,9 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                CustomerPaymentView, GetBoxTokenAuthenticationView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
-                               GetRecordView, LabTestView, GetAutoComplete, OrderVariableView,NotificationView,
+                               GetRecordView, LabTestView, GetAutoComplete,NotificationView,
                                DownloadSignDocumentView, )
+from fee_variable.views import (OrderVariableView,)
 from inventory.views import (InventoryViewSet, InventorySyncView,
                              CultivarCategoryView, InventoryStatusTypeView,
                              ItemFeedbackViewSet, InventoryUpdateDateView,
