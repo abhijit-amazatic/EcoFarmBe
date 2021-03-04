@@ -159,7 +159,7 @@ def get_inventory_name(item_id):
     Get inventory name.
     """
     item = InventoryModel.objects.get(item_id=item_id)
-    return 'inventory_efl' if item.name == 'EFL' else 'inventory_efd'
+    return 'inventory_efl' if item.inventory_name == 'EFL' else 'inventory_efd'
 
 def get_cultivar_from_db(cultivar_name):
     """
@@ -389,22 +389,37 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
     for record in inventory_list:
         record = get_inventory_item(inventory_name=inventory_name, item_id=record)
         try:
-            record['pre_tax_price'] = get_pre_tax_price(record)
-            cultivar = get_cultivar_from_db(record['cf_strain_name'])
-            if cultivar:
-                record['cultivar'] = cultivar
-            labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
-            if labtest:
-                record['labtest'] = labtest
+            try:
+                record['pre_tax_price'] = get_pre_tax_price(record)
+            except KeyError:
+                    pass
+            try:
+                cultivar = get_cultivar_from_db(record['cf_strain_name'])
+                if cultivar:
+                    record['cultivar'] = cultivar
+            except KeyError:
+                    pass
+            try:
+                labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
+                if labtest:
+                    record['labtest'] = labtest
+            except KeyError:
+                    pass
             documents, thumbnail_url = check_documents(inventory_name, record)
             if documents and len(documents) > 0:
                 record['documents'] = documents
             if thumbnail_url:
                 record['thumbnail_url'] = thumbnail_url
-            if record['cf_vendor_name']:
-                record.update(get_record_data(record['cf_vendor_name']))
-            if record['category_name']:
-                record['parent_category_name'] = get_parent_category(record['category_name'])
+            try:
+                if record['cf_vendor_name']:
+                    record.update(get_record_data(record['cf_vendor_name']))
+            except KeyError:
+                    pass
+            try:
+                if record['category_name']:
+                    record['parent_category_name'] = get_parent_category(record['category_name'])
+            except KeyError:
+                    pass
             record['inventory_name'] = get_inventory_name_from_db(inventory_name)
             obj = InventoryModel.objects.update_or_create(
                 item_id=record['item_id'],
@@ -431,22 +446,37 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
         page = records['page_context']['page'] + 1
         for record in records['items']:
             try:
-                record['pre_tax_price'] = get_pre_tax_price(record)
-                cultivar = get_cultivar_from_db(record['cf_strain_name'])
-                if cultivar:
-                    record['cultivar'] = cultivar
-                labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
-                if labtest:
-                    record['labtest'] = labtest
+                try:
+                    record['pre_tax_price'] = get_pre_tax_price(record)
+                except KeyError:
+                    pass
+                try:
+                    cultivar = get_cultivar_from_db(record['cf_strain_name'])
+                    if cultivar:
+                        record['cultivar'] = cultivar
+                except KeyError:
+                    pass
+                try:
+                    labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
+                    if labtest:
+                        record['labtest'] = labtest
+                except KeyError:
+                    pass
                 documents, thumbnail_url = check_documents(inventory_name, record)
                 if documents and len(documents) > 0:
                     record['documents'] = documents
                 if thumbnail_url:
                     record['thumbnail_url'] = thumbnail_url
-                if record['cf_vendor_name']:
-                    record.update(get_record_data(record['cf_vendor_name']))
-                if record['category_name']:
-                    record['parent_category_name'] = get_parent_category(record['category_name'])
+                try:
+                    if record['cf_vendor_name']:
+                        record.update(get_record_data(record['cf_vendor_name']))
+                except KeyError:
+                    pass
+                try:
+                    if record['category_name']:
+                        record['parent_category_name'] = get_parent_category(record['category_name'])
+                except KeyError:
+                    pass
                 record['inventory_name'] = get_inventory_name_from_db(inventory_name)
                 obj = InventoryModel.objects.update_or_create(
                     item_id=record['item_id'],
@@ -468,27 +498,42 @@ def sync_inventory(inventory_name, response):
     record = json.loads(unquote(response))['item']
     record = inventory.parse_item(response=record, is_detail=True)
     try:
-        record['pre_tax_price'] = get_pre_tax_price(record)
+        try:
+            record['pre_tax_price'] = get_pre_tax_price(record)
+        except KeyError:
+                    pass
         # try:
         #     item = InventoryModel.objects.get(item_id=record['item_id'])
         #     price_data[record['item_id']] = item.price
         # except InventoryModel.DoesNotExist:
         #     price_data[record['item_id']] = 0
-        cultivar = get_cultivar_from_db(record['cf_strain_name'])
-        if cultivar:
-            record['cultivar'] = cultivar
-        labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
-        if labtest:
-            record['labtest'] = labtest
+        try:
+            cultivar = get_cultivar_from_db(record['cf_strain_name'])
+            if cultivar:
+                record['cultivar'] = cultivar
+        except KeyError:
+                    pass
+        try:
+            labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
+            if labtest:
+                record['labtest'] = labtest
+        except KeyError:
+                    pass
         documents, thumbnail_url = check_documents(inventory_name, record)
         if documents and len(documents) > 0:
             record['documents'] = documents
         if thumbnail_url:
             record['thumbnail_url'] = thumbnail_url
-        if record['cf_vendor_name']:
-            record.update(get_record_data(record['cf_vendor_name']))
-        if record['category_name']:
-            record['parent_category_name'] = get_parent_category(record['category_name'])
+        try:
+            if record['cf_vendor_name']:
+                record.update(get_record_data(record['cf_vendor_name']))
+        except KeyError:
+                    pass
+        try:
+            if record['category_name']:
+                record['parent_category_name'] = get_parent_category(record['category_name'])
+        except KeyError:
+                    pass
         record['inventory_name'] = get_inventory_name_from_db(inventory_name)
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
