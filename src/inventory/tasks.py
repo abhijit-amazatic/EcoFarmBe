@@ -73,7 +73,7 @@ def notify_inventory_item_added(email, custom_inventory_id):
         notify_email_inventory_item_added(data)
 
 @app.task(queue="general")
-def create_approved_item_po(custom_inventory_id, retry=3):
+def create_approved_item_po(custom_inventory_id, retry=6):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
         try:
@@ -83,43 +83,11 @@ def create_approved_item_po(custom_inventory_id, retry=3):
         else:
             license_number = lp_obj.license.license_number
         data = {
-            # "vendor_id": "460000000026049",
-            # "purchaseorder_number": "PO-00001",
             'vendor_name': item.vendor_name,
-            # "gst_treatment": "business_gst",
-            # "tax_treatment": "vat_registered",
-            # "gst_no": "22AAAAA0000A1Z5",
-            # "source_of_supply": "AP",
-            # "destination_of_supply": "TN",
-            # "place_of_supply": "DU",
-            # # "pricebook_id": 460000000026089,
-            # "reference_number": "ER/0034",
-            # "billing_address_id": "460000000017491",
-            # "template_id": "460000000011003",
-            # "date": "2014-02-10",
-            # "delivery_date": "2014-02-10",
-            # "exchange_rate": 1,
-            # # "discount": "10",
-            # # "discount_account_id": "460000000011105",
-            # # "is_discount_before_tax": true,
-            # # "is_inclusive_tax": False,
-            # "notes": "Please deliver as soon as possible.",
-            # "terms": "Thanks for your business.",
-            # "salesorder_id": "460000124728314",
             "line_items": [
                 {
-                    "item_id": item.zoho_item_id,
-                    # "account_id": "2155380000000448337",
-                    # "name": item.cultivar.cultivar_name,
                     "sku": item.sku,
-                    # "rate": 112,
                     "quantity": int(item.quantity_available),
-                    # "item_order": 0,
-                    # "tax_treatment_code": "uae_others",
-                    # "tags": [
-                    #     {}
-                    # ],
-                    # "project_id": 90300000087378
                 }
             ],
             "custom_fields": [
@@ -141,7 +109,7 @@ def create_approved_item_po(custom_inventory_id, retry=3):
             })
 
         # if procurement_rep_id:
-        #     data['custom_fields'].append({)                # {
+        #     data['custom_fields'].append({
         #         "api_name": "cf_procurement_rep",
         #         "value": "",
         #     })
@@ -153,7 +121,7 @@ def create_approved_item_po(custom_inventory_id, retry=3):
             item.save()
             submit_purchase_order(item.books_po_id)
         elif retry:
-            create_approved_item_po.apply_async((item.id, retry-1), countdown=5)
+            create_approved_item_po.apply_async((item.id, retry-1), countdown=15)
 
 
 @app.task(queue="general")
