@@ -6,6 +6,7 @@ import re
 import traceback
 import copy
 from django.conf import settings
+from django.shortcuts import reverse
 
 from celery.task import periodic_task
 from celery.schedules import crontab
@@ -42,6 +43,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
         f"- *Grade Estimate:* {data.get('grade_estimate')}\n"
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
+        f"- *Admin Link:* {data.get('admin_link')}\n"
     )
     slack.chat.post_message(settings.SLACK_SALES_CHANNEL, msg, as_user=True)
 
@@ -59,6 +61,11 @@ def notify_email_inventory_item_added(data):
     except Exception as e:
         traceback.print_tb(e.__traceback__)
 
+def reverse_admin_change_path(obj):
+    return reverse(
+        f"admin:{obj._meta.app_label}_{obj._meta.model_name}_change",
+        args=(obj.id,),
+    )
 
 @app.task(queue="general")
 def notify_inventory_item_added(email, custom_inventory_id):
@@ -69,6 +76,7 @@ def notify_inventory_item_added(email, custom_inventory_id):
         data['cultivar_name'] = obj.cultivar.cultivar_name
         data['cultivar_type'] = obj.cultivar.cultivar_type
         data['user_email'] = email
+        data['admin_link'] = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}"
         notify_slack_inventory_item_added(data)
         notify_email_inventory_item_added(data)
 
