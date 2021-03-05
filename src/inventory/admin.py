@@ -9,6 +9,7 @@ from django.db import models
 from django.shortcuts import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.encoding import force_str
+from django.utils.html import mark_safe
 
 from integration.apps.aws import (create_presigned_url, )
 
@@ -97,8 +98,8 @@ class InlineDocumentsAdmin(GenericStackedInline):
     Configuring field admin view for ProfileContact model.
     """
     extra = 0
-    readonly_fields = ('doc_type', 'url',)
-    fields = ('doc_type', 'url',)
+    readonly_fields = ('doc_type', 'file',)
+    fields = ('doc_type', 'file',)
     model = Documents
     can_delete = False
 
@@ -111,6 +112,19 @@ class InlineDocumentsAdmin(GenericStackedInline):
     def has_change_permission(self, request, obj=None):
         return False
 
+    def file(self, obj):
+        url = self.url(obj)
+        if url and obj.doc_type == 'item_image':
+            return mark_safe(
+                '<div style="max-width: 500px;">'
+                f'<a href="{url}" target="_blank">'
+                f'<img src="{url}" style="width: 100%;height: auto;" alt="Image"/>'
+                '</a></div>'
+            )
+        return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
+    file.short_description = 'Uploaded File'
+    file.allow_tags = True
+
     def url(self, obj):
         """
         Return s3 item image.
@@ -122,6 +136,7 @@ class InlineDocumentsAdmin(GenericStackedInline):
             return url.get('response')
         except Exception:
             return None
+
 
 class CustomInventoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
