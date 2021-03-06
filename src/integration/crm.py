@@ -92,12 +92,12 @@ def get_dict(cd, i):
         if user['status_code'] in (201, 202):
             return user['response']['data'][0]['details']['id']
 
-def get_users(user_type='ActiveUsers', email=None):
+def get_users(user_type='ActiveUsers', email=None, page=1, per_page=200):
     """
     Get users from zoho CRM.
     """
     crm_obj = get_crm_obj()
-    response = crm_obj.get_users(user_type)
+    response = crm_obj.get_users(user_type, page=page, per_page=per_page)
     if email:
         for i in response.get('response'):
             if i['email'] == email:
