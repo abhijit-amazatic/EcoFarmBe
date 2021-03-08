@@ -423,9 +423,10 @@ class DownloadSignDocumentView(APIView):
             data = get_document(request_id)['requests']
             folder_id = get_client_folder_id(dir_name)
             new_folder = create_folder(folder_id, 'agreements')
+            offline_folder = create_folder(new_folder, 'offline')
             for document in data.get('document_ids'):
                 filename = document.get('document_name')
-                file_id = upload_pdf_box(request_id, new_folder, filename, True)
+                file_id = upload_pdf_box(request_id, offline_folder, filename, True)
                 response.append(get_download_url(file_id))
         return Response(response)
 
