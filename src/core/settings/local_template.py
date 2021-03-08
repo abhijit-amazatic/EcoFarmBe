@@ -5,6 +5,7 @@ from mongoengine import connect
 SECRET_KEY = ''
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+PRODUCTION = False
 DATABASES = {
     'default': {
         'ENGINE': '',

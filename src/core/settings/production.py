@@ -7,6 +7,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'true').lower() == "true"
+PRODUCTION = os.environ.get('PRODUCTION', 'false').lower() == "true"
 DEFAULT_CONNECTION = dj_database_url.parse(os.environ.get("DATABASE_URL"))
 DEFAULT_CONNECTION.update({"CONN_MAX_AGE": 600})
 DATABASES = {"default": DEFAULT_CONNECTION}

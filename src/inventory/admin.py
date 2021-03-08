@@ -10,6 +10,7 @@ from django.shortcuts import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.html import mark_safe
+from core import settings
 
 from integration.apps.aws import (create_presigned_url, )
 
@@ -240,13 +241,20 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def generate_sku(self, obj):
-        sku = 'test-sku'
-        sku += '-' + obj.client_code
-        sku += '-' + obj.cultivar.cultivar_name
+        sku = []
+        if not settings.PRODUCTION:
+            sku.append('test')
+        sku.append('sku')
+        sku.append(obj.client_code)
+        sku.append(obj.cultivar.cultivar_name)
+
         if obj.harvest_date:
-            sku += '-' + obj.harvest_date.strftime('%m-%d-%y')
-        sku += '-' + force_str(urandom(3).hex())
-        return sku
+            sku.append(obj.harvest_date.strftime('%m-%d-%y'))
+
+        if not settings.PRODUCTION:
+            sku.append(force_str(urandom(3).hex()))
+
+        return '-'.join(sku)
 
     def get_client_code(self, request, obj):
         found_code = False
