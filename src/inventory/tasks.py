@@ -35,14 +35,16 @@ def notify_slack_inventory_item_added(data):
         f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
         f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
         f"- *Quantity:* {data.get('quantity_available')}\n"
-        f"- *Price:* {data.get('farm_ask_price')}\n"
+        f"- *Farm Price:* {data.get('farm_ask_price')}\n"
         f"- *Pricing Position:* {data.get('pricing_position')}\n"
-        f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
+        # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
         f"- *Harvest Date:* {data.get('harvest_date')}\n"
         f"- *Need Lab Test Yes / No:* { 'Yes' if data.get('need_lab_testing_service') else 'No'}\n"
         f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
         f"- *Grade Estimate:* {data.get('grade_estimate')}\n"
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
+        f"- *Client Code:* {data.get('client_code')}\n"
+        f"- *Vendor Name:* {data.get('vendor_name')}\n"
         f"- *Admin Link:* {data.get('admin_link')}\n"
     )
     slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=True)
