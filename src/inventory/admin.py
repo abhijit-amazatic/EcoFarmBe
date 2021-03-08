@@ -21,7 +21,7 @@ from integration.inventory import (create_inventory_item, update_inventory_item,
 from integration.crm import search_query
 from brand.models import (License, LicenseProfile,)
 from fee_variable.models import (CustomInventoryVariable, TaxVariable)
-from .tasks import (create_approved_item_po, )
+from .tasks import (create_approved_item_po, notify_inventory_item_approved)
 from .models import (
     Inventory,
     CustomInventory,
@@ -420,7 +420,6 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     #         # "warehouse_actual_committed_stock": 0.0,
                     #         # "warehouse_available_for_sale_stock": 0.0,
                     #         # "warehouse_actual_available_for_sale_stock": 0.0,
-
                     #     },
                     # ]
 
@@ -449,6 +448,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                                     obj.save()
                                     self.message_user(request, 'This item is approved')
                                     create_approved_item_po.apply_async((obj.id,), countdown=5)
+                                    notify_inventory_item_approved.delay(obj.id)
                         else:
                             self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                             print('Error while creating item in Zoho Inventory')

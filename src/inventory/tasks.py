@@ -89,7 +89,7 @@ def notify_slack_inventory_item_approved(data):
     """
     as new Inventory item approved, inform admin on slack.
     """
-    msg = (f"<!channel>Inventory item is approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`). "
+    msg = (f"<!channel>Inventory item is approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`).\n"
         f"- *SKU:* {data.get('sku')}\n"
         f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
         f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
@@ -116,7 +116,7 @@ def notify_email_inventory_item_approved(data):
     """
     try:
         mail_send(
-            "inventory_item_add_notify.html",
+            "notification_inventory_item_approves.html",
             data,
             "Inventory Item Approved",
             settings.INVENTORY_NOTIFICATION_EMAIL,
