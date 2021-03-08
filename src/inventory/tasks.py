@@ -45,7 +45,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
         f"- *Admin Link:* {data.get('admin_link')}\n"
     )
-    slack.chat.post_message(settings.SLACK_SALES_CHANNEL, msg, as_user=True)
+    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=True)
 
 def notify_email_inventory_item_added(data):
     """
