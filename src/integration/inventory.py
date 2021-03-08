@@ -23,6 +23,7 @@ from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
                              get_thumbnail_url, get_inventory_folder_id,
                              get_file_from_link, get_thumbnail_url)
+from fee_variable.models import *
 
 
 def get_inventory_obj(inventory_name):
@@ -201,14 +202,11 @@ def get_pre_tax_price(record):
     """
     Get pre tax price.
     """
-    if not isinstance(INVENTORY_TAXES, dict):
-        taxes = json.loads(INVENTORY_TAXES)
-    else:
-        taxes = INVENTORY_TAXES
+    taxes = TaxVariable.objects.values('cultivar_tax','trim_tax')[0]
     if 'Flower' in record['category_name']:
-        return record['price'] - taxes['Flower']
+        return record['price'] - float(taxes['cultivar_tax'])
     elif 'Trim' in record['category_name']:
-        return record['price'] - taxes['Trim']
+        return record['price'] - float(taxes['trim_tax'])
 
     # Issue:- It will call Books API multiple times.
     # taxes = get_tax_rates()

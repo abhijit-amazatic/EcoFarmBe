@@ -74,6 +74,8 @@ class TaxVariable(TimeStampFlagModelMixin,models.Model):
     """
     cultivar_tax = models.CharField(verbose_name=_("Cultivar Tax"), max_length=255,blank=True, null=True)
     trim_tax = models.CharField(verbose_name=_("Trim Tax"), max_length=255,blank=True, null=True)
+    cultivar_tax_item = models.CharField(verbose_name=_("Cultivar Tax Item"), max_length=255, blank=True, null=True)
+    trim_tax_item = models.CharField(verbose_name=_("Trim Tax Item"), max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f'{self.cultivar_tax} | {self.trim_tax}'

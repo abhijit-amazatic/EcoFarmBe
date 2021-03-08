@@ -8,7 +8,6 @@ from core.settings import (
     BOOKS_ORGANIZATION_ID,
     BOOKS_REDIRECT_URI,
     BOOKS_REFRESH_TOKEN,
-    ESTIMATE_TAXES,
     TRANSPORTATION_FEES,
 )
 from brand.models import (Brand, License, LicenseProfile, )
@@ -18,7 +17,7 @@ from .crm_format import (CRM_FORMAT, )
 from .inventory import (get_inventory_items, )
 from .sign import (submit_estimate, )
 from inventory.models import Inventory
-
+from fee_variable.models import *
 
 def get_books_obj():
     """
@@ -293,10 +292,7 @@ def get_tax_rates():
     """
     Get all tax rates.
     """
-    try:
-        taxes = json.loads(ESTIMATE_TAXES)
-    except Exception:
-        taxes = ESTIMATE_TAXES
+    taxes = TaxVariable.objects.values('cultivar_tax_item','trim_tax_item')[0]
     books_obj = get_books_obj()
     response = dict()
     for k,v in taxes.items():
@@ -317,20 +313,17 @@ def calculate_tax(product_category, quantity):
     """
     Calculate tax from product category for estimate page.
     """
-    try:
-        taxes = json.loads(ESTIMATE_TAXES)
-    except Exception:
-        taxes = ESTIMATE_TAXES
+    taxes = TaxVariable.objects.values('cultivar_tax_item','trim_tax_item')[0]
     books_obj = get_books_obj()
     if product_category == 'Flower':
-        item = get_tax(books_obj, taxes['Flower'])['response'][0]
+        item = get_tax(books_obj, taxes['cultivar_tax_item'])['response'][0]
         item_id = item['item_id']
         item_sku = item['sku']
         item_name = item['name']
         tax = item['rate']
         total_tax = float(quantity) * float(tax)
     elif product_category == 'Trim':
-        item = get_tax(books_obj, taxes['Trim'])['response'][0]
+        item = get_tax(books_obj, taxes['trim_tax_item'])['response'][0]
         item_name = item['name']
         item_id = item['item_id']
         item_sku = item['sku']
@@ -355,10 +348,6 @@ def get_item(obj, data):
     """
     Return item from Zoho books with applied tax.
     """
-    try:
-        taxes = json.loads(ESTIMATE_TAXES)
-    except Exception:
-        taxes = ESTIMATE_TAXES
     line_items = list()
     if not data.get('line_items'):
         return {"code": 1004, "data": data}
