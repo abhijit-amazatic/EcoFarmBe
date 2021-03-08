@@ -123,9 +123,9 @@ SLACK_CHANNEL_NAME = 'tech_dev_slack_testing' #PROD: 'tech_new_website_users'
 #sales channel
 SLACK_SALES_CHANNEL = 'tech_dev_slack_testing' #PROD:'sales_leads'
 #profile channel
-SLACK_PROFILE_CHANNEL = 'tech_dev_slack_testing' #PROD: '﻿tech_new_website_onboarding_profiles'
+SLACK_PROFILE_CHANNEL = 'tech_dev_slack_testing' #PROD: 'tech_new_website_onboarding_profiles'
 #inventory channel
-SLACK_INVENTORY_CHANNEL = 'tech_dev_slack_testing' #PROD: 'tech_new_website_inventory_items'
+SLACK_INVENTORY_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_new_inventory_items_web_app'
 
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'

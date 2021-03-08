@@ -398,7 +398,24 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     data['purchase_account_id'] = 2155380000000565567
                     # data['purchase_account_name'] = 'Product Costs - Flower'
                     data['inventory_account_id'] = 2155380000000448361
-                    # data['inventory_account_name'] = 'Inventory - In the Field'
+                    # data['warehouses'] = [
+                    #     {
+                    #         "warehouse_id": "2155380000000782007",
+                    #         # "warehouse_name": "In the Field Inventory ",
+                    #         # "is_primary": True,
+                    #         # "warehouse_stock_on_hand": 0.0,
+                    #         "initial_stock": 1,
+                    #         "initial_stock_rate": 1,
+                    #         # "warehouse_available_stock": 0.0,
+                    #         # "warehouse_actual_available_stock": 0.0,
+                    #         # "warehouse_committed_stock": 0.0,
+                    #         # "warehouse_actual_committed_stock": 0.0,
+                    #         # "warehouse_available_for_sale_stock": 0.0,
+                    #         # "warehouse_actual_available_for_sale_stock": 0.0,
+
+                    #     },
+                    # ]
+
                     data['is_taxable'] = True
 
                     try:

@@ -27,6 +27,7 @@ from .models import (CustomInventory, )
 
 slack = Slacker(settings.SLACK_TOKEN)
 
+
 def notify_slack_inventory_item_added(data):
     """
     as new Inventory item added, inform admin on slack.
@@ -39,7 +40,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Pricing Position:* {data.get('pricing_position')}\n"
         # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
         f"- *Harvest Date:* {data.get('harvest_date')}\n"
-        f"- *Need Lab Test Yes / No:* { 'Yes' if data.get('need_lab_testing_service') else 'No'}\n"
+        f"- *Need Lab Test:* { 'Yes' if data.get('need_lab_testing_service') else 'No'}\n"
         f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
         f"- *Grade Estimate:* {data.get('grade_estimate')}\n"
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
@@ -55,7 +56,7 @@ def notify_email_inventory_item_added(data):
     """
     try:
         mail_send(
-            "inventory_item_add_notify.html",
+            "notification_inventory_item_added.html",
             data,
             "New Inventory Item.",
             settings.INVENTORY_NOTIFICATION_EMAIL,
@@ -82,6 +83,66 @@ def notify_inventory_item_added(email, custom_inventory_id):
         notify_slack_inventory_item_added(data)
         notify_email_inventory_item_added(data)
 
+
+
+def notify_slack_inventory_item_approved(data):
+    """
+    as new Inventory item approved, inform admin on slack.
+    """
+    msg = (f"<!channel>Inventory item is approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`). "
+        f"- *SKU:* {data.get('sku')}\n"
+        f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
+        f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
+        f"- *Quantity:* {data.get('quantity_available')}\n"
+        f"- *Farm Price:* {data.get('farm_ask_price')}\n"
+        f"- *Pricing Position:* {data.get('pricing_position')}\n"
+        # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
+        f"- *Harvest Date:* {data.get('harvest_date')}\n"
+        f"- *Need Lab Test Yes / No:* { 'Yes' if data.get('need_lab_testing_service') else 'No'}\n"
+        f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
+        f"- *Grade Estimate:* {data.get('grade_estimate')}\n"
+        f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
+        f"- *Client Code:* {data.get('client_code')}\n"
+        f"- *Vendor Name:* {data.get('vendor_name')}\n"
+        f"- *Procurement Rep:* {data.get('procurement_rep')}\n"
+        f"- *Admin Link:* {data.get('admin_link')}\n"
+        f"- *Zoho Inventory Item Link:* {data.get('zoho_item_link')}\n"
+    )
+    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=True)
+
+def notify_email_inventory_item_approved(data):
+    """
+    as new Inventory item approved, send notification mail.
+    """
+    try:
+        mail_send(
+            "inventory_item_add_notify.html",
+            data,
+            "Inventory Item Approved",
+            settings.INVENTORY_NOTIFICATION_EMAIL,
+        )
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+
+
+@app.task(queue="general")
+def notify_inventory_item_approved(custom_inventory_id):
+    qs = CustomInventory.objects.filter(id=custom_inventory_id)
+    if qs.exists():
+        obj = qs.first()
+        if obj.status == 'approved':
+            data = copy.deepcopy(obj.__dict__)
+            data['cultivar_name'] = obj.cultivar.cultivar_name
+            data['cultivar_type'] = obj.cultivar.cultivar_type
+            data['admin_link'] = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}"
+            data['approved_by_email'] = obj.approved_by.get('email')
+            data['approved_by_name'] = obj.approved_by.get('name')
+            data['zoho_item_link'] = f"https://inventory.zoho.com/app#/inventory/items/{obj.zoho_item_id}"
+            notify_slack_inventory_item_approved(data)
+            notify_email_inventory_item_approved(data)
+
+
+
 @app.task(queue="general")
 def create_approved_item_po(custom_inventory_id, retry=6):
     item = CustomInventory.objects.get(id=custom_inventory_id)
@@ -98,7 +159,8 @@ def create_approved_item_po(custom_inventory_id, retry=6):
                 {
                     "sku": item.sku,
                     "quantity": int(item.quantity_available),
-                    "rate": 0.0
+                    "rate": 0.0,
+                    # "warehouse_name": "In the Field Inventory ",
                 }
             ],
             "custom_fields": [
