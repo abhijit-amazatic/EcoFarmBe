@@ -1,11 +1,11 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
 
-<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi,</p>
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi {{created_by_name}},</p>
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            Inventory item is approved by <strong>{{approved_by_name}}</strong> (User ID: <strong>{{approved_by_email}}</strong>).
+            Your Inventory Item is approved by <strong>{{approved_by_name}}</strong>.
         </p>
         <p style='font-size:16px !important;color: #013c48;'>
                 <strong>SKU: </strong>                      {{sku}}
@@ -23,8 +23,8 @@
             <br><strong>Client Code: </strong>              {{client_code}}
             <br><strong>Vendor Name: </strong>              {{vendor_name}}
             <br><strong>Procurement Rep: </strong>          {{procurement_rep}}
-            <br><strong>Admin Link: </strong>               {{admin_link}}
-            <br><strong>Zoho Inventory Item Link: </strong> {{zoho_item_link}}
+            {% comment %} <br><strong>Admin Link: </strong>               {{admin_link}} {% endcomment %}
+            {% comment %} <br><strong>Zoho Inventory Item Link: </strong> {{zoho_item_link}} {% endcomment %}
         </p>
     </div>
 </div>

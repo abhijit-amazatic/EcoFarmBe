@@ -163,7 +163,23 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     change_form_template = 'inventory/custom_inventory_change_form.html'
     list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
     # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
-    readonly_fields = ('status', 'created_on', 'updated_on', 'cultivar_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on', 'books_po_id', 'po_number', 'procurement_rep',)
+    readonly_fields = (
+        'cultivar_name',
+        'status',
+        # 'vendor_name',
+        'crm_vendor_id',
+        # 'client_code',
+        'procurement_rep',
+        'zoho_item_id',
+        'sku',
+        'books_po_id',
+        'po_number',
+        'approved_by',
+        'approved_on',
+        'created_by',
+        'created_on',
+        'updated_on',
+    )
     inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
     form = CustomInventoryForm
@@ -207,6 +223,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             'fields': (
                 'status',
                 'vendor_name',
+                'crm_vendor_id',
                 'client_code',
                 'procurement_rep',
                 'zoho_item_id',
@@ -256,7 +273,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
         return '-'.join(sku)
 
-    def get_client_code(self, request, obj):
+    def get_crm_data(self, request, obj):
         found_code = False
         if obj.vendor_name:
             try:
@@ -269,6 +286,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     if data_ls and isinstance(data_ls, list):
                         for vendor in data_ls:
                             if vendor.get('Vendor_Name') == obj.vendor_name:
+                                if not obj.crm_vendor_id:
+                                    obj.crm_vendor_id = vendor.get('id', '')
                                 if not obj.procurement_rep:
                                     p_rep = vendor.get('Owner', {}).get('email')
                                     if p_rep:
@@ -335,8 +354,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         if obj.status == 'pending_for_approval':
             tax_and_mcsp_fee = self.tax_and_mcsp_fee(request, obj)
             if tax_and_mcsp_fee:
-                if not obj.client_code:
-                    self.get_client_code(request, obj)
+                if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
+                    self.get_crm_data(request, obj)
                 if obj.client_code:
                     sku = self.generate_sku(obj)
 

@@ -127,11 +127,15 @@ SLACK_SALES_CHANNEL = 'tech_dev_slack_testing' #PROD:'sales_leads'
 SLACK_PROFILE_CHANNEL = 'tech_dev_slack_testing' #PROD: 'tech_new_website_onboarding_profiles'
 #inventory channel
 SLACK_INVENTORY_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_new_inventory_items_web_app'
+#Logistics Transport channel
+SLACK_LOGISTICS_TRANSPORT_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_logistics_transport_requests_web_app'
 
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'
 #Inventory Notification Email
-INVENTORY_NOTIFICATION_EMAIL = 'procurement@thrive-society.com'
+NOTIFICATION_EMAIL_INVENTORY = 'tech@ecofarm.ag'
+#Logistics Transport Notification Email
+NOTIFICATION_EMAIL_LOGISTICS_TRANSPORT = 'tech@ecofarm.ag' #PROD: logistics@thrive-society.com 
 
 #layouts
 VENDOR_LAYOUT = "4230236000001156761"

@@ -279,6 +279,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
     vendor_name = models.CharField(_('Vendor Name'), max_length=255)
+    crm_vendor_id = models.CharField(_('CRM Vendor ID'), blank=True, null=True, max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
     sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
     books_po_id = models.CharField(_('Zoho Books Purchase Order id'), blank=True, null=True, max_length=255)

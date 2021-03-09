@@ -243,6 +243,8 @@ def create_duplicate_crm_vendor_from_crm_account(vendor_name,):
                         return resp_vendor
         else:
             return result
+    else:
+        return result
 
 
 def get_custom_inventory_data_from_crm_vendor(obj):
@@ -257,6 +259,8 @@ def get_custom_inventory_data_from_crm_vendor(obj):
                 if data_ls and isinstance(data_ls, list):
                     for vendor in data_ls:
                         if vendor.get('Vendor_Name') == obj.vendor_name:
+                            if not obj.crm_vendor_id:
+                                obj.crm_vendor_id = vendor.get('id')
                             if not obj.procurement_rep:
                                 p_rep = vendor.get('Owner', {}).get('email')
                                 if p_rep:
