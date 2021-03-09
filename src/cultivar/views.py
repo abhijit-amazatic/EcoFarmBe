@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import ProtectedError
 from rest_framework.views import APIView
 from rest_framework import (viewsets, status,)
 from rest_framework.response import (Response, )
@@ -89,3 +90,23 @@ class CultivarSyncView(APIView):
         """
         record = sync_cultivars(request.data)
         return Response(record)
+
+    def delete(self, request):
+        """
+        Delete cultivar from database.
+        """
+        cultivar_crm_id = request.query_params.get('cultivar_crm_id', None)
+        if cultivar_crm_id:
+            try:
+                Cultivar.objects.get(cultivar_crm_id=cultivar_crm_id).delete()
+                return Response(
+                    {'status': 'success'},
+                    status=status.HTTP_200_OK
+                )
+            except Cultivar.DoesNotExist:
+                pass
+            except ProtectedError:
+                return Response({
+                    'error': 'Cannot delete cultivar due to association with an item.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)

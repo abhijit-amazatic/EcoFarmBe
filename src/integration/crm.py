@@ -98,6 +98,8 @@ def get_users(user_type='ActiveUsers', email=None, page=1, per_page=200):
     """
     crm_obj = get_crm_obj()
     response = crm_obj.get_users(user_type, page=page, per_page=per_page)
+    if response.get('status_code') != 200:
+        return response
     if email:
         for i in response.get('response'):
             if i['email'] == email:
