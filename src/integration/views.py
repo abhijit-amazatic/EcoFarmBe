@@ -50,7 +50,7 @@ from integration.books import (
     add_contact_address, edit_contact_address,
     get_contact_person, list_contact_persons,
     create_contact_person, update_contact_person,
-    get_unpaid_invoices)
+    get_unpaid_invoices, update_available_for_sale)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
@@ -307,6 +307,7 @@ class EstimateView(APIView):
             #     contact_id = estimate['customer_id']
             #     mark_estimate(estimate_id, 'sent')
             #     mark_estimate(estimate_id, 'accepted')
+            update_available_for_sale(request.data)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 

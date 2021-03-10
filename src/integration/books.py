@@ -16,7 +16,7 @@ from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
 from .models import (Integration, )
 from .crm_format import (CRM_FORMAT, )
-from .inventory import (get_inventory_items, )
+from .inventory import (get_inventory_items, update_inventory_item, get_inventory_name)
 from .sign import (submit_estimate, )
 from inventory.models import Inventory
 from fee_variable.models import *
@@ -176,6 +176,29 @@ def is_duplicate_contact(email, contact_persons):
         if email == contact.get('email'):
             return True
     return False
+
+def update_available_for_sale(estimate):
+    """
+    Update inventory on basis of following contidions-
+    - If estimate item is at ask price then decrease quantity from total item
+      quantity available in marketplace (Not Zoho) and update Status in Zoho to "Pending Sale"
+    - If estimate order item is converted to sales order  decrease item available quantity
+      in marketplace (Not Zoho) and update Status in Zoho to "Pending Sale"
+    """
+    for item in estimate.get('line_items'):
+        ask_price = item.get('ask_price')
+        item_id = item.get('item_id')
+        inventory = Inventory.objects.get(item_id=item_id)
+        price = inventory.price
+        if ask_price and price and (ask_price >= price):
+            inventory.actual_available_stock -= int(item.get('quantity'))
+            inventory.save()
+            inventory_name = get_inventory_name(item_id)
+            request = dict()
+            request['item_id'] = item_id
+            request['cf_status'] = 'Pending Sale'
+            response = update_inventory_item(inventory_name, item_id, request)
+    return
 
 def create_contact(data, params=None):
     """
