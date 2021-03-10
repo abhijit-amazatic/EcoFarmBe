@@ -28,6 +28,7 @@ def get_price_data():
     return response
     
 # @periodic_task(run_every=(crontab(hour=[9], minute=0)), options={'queue': 'general'})
+@app.task(queue="general")
 def fetch_inventory_on_interval():
     """
     Update inventory on every interval from Zoho Inventory.
@@ -41,7 +42,8 @@ def fetch_inventory_on_interval():
         licenses = fetch_licenses()
         labtests = LabTest.objects.all().count()
         fetch_inventory('inventory_efd', days=days, price_data=price_data)
-        fetch_inventory('inventory_efl', days=days, price_data=price_data)
+        # Commenting below only for staging. We do not have test book organization for staging.
+        # fetch_inventory('inventory_efl', days=days, price_data=price_data)
         inventory_after = Inventory.objects.all().count()
         return {'status_code': 200,
                 'labtest': labtests,
