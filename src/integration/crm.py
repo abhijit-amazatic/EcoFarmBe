@@ -1517,11 +1517,16 @@ def fetch_record_owners(license_number=None, update_all=False):
     Fetch vendor/account owner for license_number or
     Fetch owner for all records which don't have owner in db.
     """
+    vendor_id = None
+    account_id = None
+    final_response = dict()
     if license_number:
         records = License.objects.filter(license_number=license_number)
     elif update_all:
-        records = License.objects.filter(record_owner_crm__isnull=True)
+        records = License.objects.filter(license_profile__crm_owner_id__isnull=True)
     for record in records:
+        full_record = dict()
+        license_number = record.license_number
         licenses = search_query('Licenses', license_number, 'Name')
         if licenses['status_code'] == 200 and len(licenses['response']) > 0:
             for license_dict in licenses.get('response'):
@@ -1547,14 +1552,15 @@ def fetch_record_owners(license_number=None, update_all=False):
         elif account_id:
             full_record = crm_obj.get_full_record('Accounts', account_id)
         else:
-            full_record = dict()
-        owner = full_record.get('response').get('Owner')
-        try:
-            license_profile = LicenseProfile.objects.get(id=record.license_profile.id)
-        except LicenseProfile.DoesNotExist:
-            return {'error': 'License does not exist in database.'}
-        license_profile.crm_owner_id = owner.get('id')
-        license_profile.crm_owner_email = owner.get('email')
-        license_profile.save()
-        return Response(license_profile)
-    return {}
+            continue
+        if full_record.get('status_code') == 200:
+            owner = full_record.get('response').get('Owner')
+            try:
+                license_profile = LicenseProfile.objects.get(id=record.license_profile.id)
+            except LicenseProfile.DoesNotExist:
+                return {'error': 'License does not exist in database.'}
+            license_profile.crm_owner_id = owner.get('id')
+            license_profile.crm_owner_email = owner.get('email')
+            license_profile.save()
+            final_response[license_number] = license_profile
+    return final_response
