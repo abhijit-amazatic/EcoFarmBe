@@ -8,20 +8,20 @@
             Your Inventory Item is approved by <strong>{{approved_by_name}}</strong>.
         </p>
         <p style='font-size:16px !important;color: #013c48;'>
-                <strong>SKU: </strong>                      {{sku}}
+                <strong>Vendor Name: </strong>              {{vendor_name}}
+            <br><strong>Client Code: </strong>              {{client_code}}
             <br><strong>Cultivar Name: </strong>            {{cultivar_name}}
             <br><strong>Cultivar Type: </strong>            {{cultivar_type}}
+            <br><strong>SKU: </strong>                      {{sku}}
             <br><strong>Quantity: </strong>                 {{quantity_available}}
             <br><strong>Farm Price: </strong>               {{farm_ask_price}}
             <br><strong>Pricing Position: </strong>         {{pricing_position}}
             {% comment %} <br><strong>Min Qty Purchase: </strong>         {{minimum_order_quantity}} {% endcomment %}
-            <br><strong>Harvest Date: </strong>             {{harvest_date}}
-            <br><strong>Need Lab Test Yes/No: </strong>     {% if need_lab_testing_service %}Yes{% else %}No{% endif %}
-            <br><strong>Batch Availability Date: </strong>  {{batch_availability_date}}
             <br><strong>Grade Estimate: </strong>           {{grade_estimate}}
+            <br><strong>Need Testing: </strong>     {% if need_lab_testing_service %}Yes{% else %}No{% endif %}
+            <br><strong>Batch Availability Date: </strong>  {{batch_availability_date}}
+            <br><strong>Harvest Date: </strong>             {{harvest_date}}
             <br><strong>Batch Quality Notes: </strong>      {{product_quality_notes}}
-            <br><strong>Client Code: </strong>              {{client_code}}
-            <br><strong>Vendor Name: </strong>              {{vendor_name}}
             <br><strong>Procurement Rep: </strong>          {{procurement_rep}}
             {% comment %} <br><strong>Admin Link: </strong>               {{admin_link}} {% endcomment %}
             {% comment %} <br><strong>Zoho Inventory Item Link: </strong> {{zoho_item_link}} {% endcomment %}
