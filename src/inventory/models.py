@@ -286,6 +286,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     po_number = models.CharField(_('Purchase Order Number'), blank=True, null=True, max_length=255)
     client_code = models.CharField(_('Client Code'), blank=True, null=True, max_length=255)
     procurement_rep = models.CharField(_('Procurement Rep'), blank=True, null=True, max_length=255)
+    procurement_rep_name = models.CharField(_('Procurement Rep name'), blank=True, null=True, max_length=255)
     created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)

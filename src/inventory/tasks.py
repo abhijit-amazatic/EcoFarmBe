@@ -104,7 +104,7 @@ def notify_slack_inventory_item_approved(data):
         f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
         f"- *Harvest Date:* {data.get('harvest_date')}\n"
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
-        f"- *Procurement Rep:* {data.get('procurement_rep')}\n"
+        f"- *Procurement Rep:* {data.get('procurement_rep_name')}\n"
         f"- *Admin Link:* {data.get('admin_link')}\n"
         f"- *Zoho Inventory Item Link:* {data.get('zoho_item_link')}\n"
     )

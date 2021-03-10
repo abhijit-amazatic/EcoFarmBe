@@ -292,6 +292,9 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                                     p_rep = vendor.get('Owner', {}).get('email')
                                     if p_rep:
                                         obj.procurement_rep = p_rep
+                                    p_rep_name = vendor.get('Owner', {}).get('name')
+                                    if p_rep_name:
+                                        obj.procurement_rep_name = p_rep_name
                                 client_code = vendor.get('Client_Code')
                                 if client_code:
                                     found_code = True
@@ -313,6 +316,9 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                                             p_rep = vendor.get('Owner', {}).get('email')
                                             if p_rep:
                                                 obj.procurement_rep = p_rep
+                                            p_rep_name = vendor.get('Owner', {}).get('name')
+                                            if p_rep_name:
+                                                obj.procurement_rep_name = p_rep_name
                                         client_code = vendor.get('Client_Code')
                                         if client_code:
                                             obj.client_code = client_code
