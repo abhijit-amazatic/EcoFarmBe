@@ -64,8 +64,8 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         return self.program_type
 
     class Meta:
-        verbose_name = _('Custom Inventory Variable')
-        verbose_name_plural = _('Custom Inventory Variables')      
+        verbose_name = _('Vendor Inventory Variable')
+        verbose_name_plural = _('Vendor Inventory Variables')      
        
 
 class TaxVariable(TimeStampFlagModelMixin,models.Model):
