@@ -39,7 +39,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
         f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
         f"- *Quantity:* {data.get('quantity_available')}\n"
-        f"- *Farm Price:* {data.get('farm_ask_price')}\n"
+        f"- *Farm Price:* {data.get('farm_price_formated')}\n"
         f"- *Pricing Position:* {data.get('pricing_position')}\n"
         # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
         f"- *Seller Grade Estimate:* {data.get('grade_estimate')}\n"
@@ -90,7 +90,11 @@ def notify_inventory_item_added(email, custom_inventory_id):
         data['cultivar_name'] = obj.cultivar.cultivar_name
         data['cultivar_type'] = obj.cultivar.cultivar_type
         data['user_email'] = email
+        data['created_by_email'] = obj.created_by.get('email')
+        data['created_by_name'] = obj.created_by.get('name')
         data['admin_link'] = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}"
+        if obj.farm_ask_price:
+            data['farm_price_formated'] = "${:,.2f}".format(obj.farm_ask_price)
         notify_slack_inventory_item_added(data)
         notify_email_inventory_item_added(data)
 
@@ -107,7 +111,7 @@ def notify_slack_inventory_item_approved(data):
         f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
         f"- *SKU:* {data.get('sku')}\n"
         f"- *Quantity:* {data.get('quantity_available')}\n"
-        f"- *Farm Price:* {data.get('farm_ask_price')}\n"
+        f"- *Farm Price:* {data.get('farm_price_formated')}\n"
         f"- *Pricing Position:* {data.get('pricing_position')}\n"
         # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
         f"- *Seller Grade Estimate:* {data.get('grade_estimate')}\n"
@@ -186,6 +190,8 @@ def notify_inventory_item_approved(custom_inventory_id):
             data['created_by_name'] = obj.created_by.get('name')
             data['zoho_item_link'] = f"https://inventory.zoho.com/app#/inventory/items/{obj.zoho_item_id}"
             data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME}/inventory/{obj.zoho_item_id}/item/"
+            if obj.farm_ask_price:
+                data['farm_price_formated'] = "${:,.2f}".format(obj.farm_ask_price)
             if obj.best_contact_Day_of_week:
                 data['best_day'] = obj.best_contact_Day_of_week.title()
             if obj.best_contact_time_from:
