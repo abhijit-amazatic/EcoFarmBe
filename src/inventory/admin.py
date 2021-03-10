@@ -378,7 +378,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     if obj.cultivar.cultivar_type:
                         data['cf_cultivar_type'] = obj.cultivar.cultivar_type
 
-                    if obj.category_name:
+                    if obj.category_name and settings.PRODUCTION:
                         data['category_name'] = obj.category_name
                         data['category_id'] = get_category_id(obj.category_name)
 

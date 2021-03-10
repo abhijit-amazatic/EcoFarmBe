@@ -55,16 +55,25 @@ def notify_email_inventory_item_added(data):
     """
     as new Inventory item added, send notification mail.
     """
-    emails = set()
-    try:
-        mail_send(
-            "notification_inventory_item_added.html",
-            data,
-            "New Inventory Item.",
-            settings.NOTIFICATION_EMAIL_INVENTORY,
-        )
-    except Exception as e:
-        traceback.print_tb(e.__traceback__)
+    qs = User.objects.all()
+    qs = qs.filter(
+        organization_user__organization_user_role__licenses__license_profile__name=data.get('vendor_name'),
+        organization_user__organization_user_role__role__name='Sales/Inventory',
+    )
+    emails = set(qs.values_list('email', flat=True))
+    emails.add(settings.NOTIFICATION_EMAIL_INVENTORY)
+    if data.get('created_by_email'):
+        emails.add(data.get('created_by_email'))
+    for email in emails:
+        try:
+            mail_send(
+                "notification_inventory_item_added.html",
+                data,
+                "New Inventory Item.",
+                email,
+            )
+        except Exception as e:
+            traceback.print_tb(e.__traceback__)
 
 def reverse_admin_change_path(obj):
     return reverse(
