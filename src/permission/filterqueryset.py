@@ -10,9 +10,9 @@ from brand.permission_defaults import (
     SALES_REP_GROUP_NAME,
 )
 
-from .helpers import (
-    get_user_owned_profiles_crm_id,
-)
+# from .helpers import (
+#     get_user_owned_profiles_crm_id,
+# )
 
 
 class filterQuerySet:
@@ -68,10 +68,9 @@ class filterQuerySet:
                 if not role.created_profiles_only:
                     q |= Q(profile_category__in=role.profile_categories.all().values_list('name', flat=True))
                 else:
-                    lp_crm_ids = get_user_owned_profiles_crm_id(self.user.id)
                     q |= Q(
                         profile_category__in=role.profile_categories.all().values_list('name', flat=True),
-                        license_profile__zoho_crm_id__in=lp_crm_ids,
+                        license_profile__crm_owner_email=self.user.email,
                     )
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':
