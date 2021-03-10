@@ -807,7 +807,7 @@ class LicenseSyncView(APIView):
                 return Response(status=status.HTTP_202_ACCEPTED)
             except License.DoesNotExist:
                 pass
-        elif account_id and owner_id and owner_email:
+        elif record_id and owner_id and owner_email:
             record = LicenseProfile.objects.get(zoho_crm_id=record_id)
             record.crm_owner_id = owner_id
             record.crm_owner_email = owner_email
