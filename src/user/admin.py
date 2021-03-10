@@ -233,7 +233,11 @@ admin.site.register(User, MyUserAdmin)
 admin.site.register(MemberCategory, MemberCategoryAdmin)
 admin.site.register(TermsAndCondition, TermsAndConditionAdmin)
 admin.site.register(TermsAndConditionAcceptance, TermsAndConditionAcceptanceAdmin)
-admin.site.register(HelpDocumentation, HelpDocumentationAdmin)    
+admin.site.register(HelpDocumentation, HelpDocumentationAdmin)
+
+# admin.site.site_header = "Thrive Society - Eco Farm Administration"
+# admin.site.site_title = "Thrive Society - Eco Farm App Administration"
+# admin.site.index_title = "Welcome to Thrive Society - Eco Farm App"
         
 # class UserForm(forms.ModelForm):
 #     manual_activation = forms.BooleanField()  # a flag which determines if the user should be manually activated

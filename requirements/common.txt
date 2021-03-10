@@ -37,4 +37,5 @@ django-ckeditor==6.0.0
 django-storages==1.10.1
 django-multiselectfield==0.1.12
 PyYAML==5.4.1
+django-admin-interface
 -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho
