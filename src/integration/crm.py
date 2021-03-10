@@ -1511,3 +1511,50 @@ def update_program_selection(record_id, tier_selection):
         error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
         print(error)
         return error
+
+def fetch_record_owners(license_number=None, update_all=False):
+    """
+    Fetch vendor/account owner for license_number or
+    Fetch owner for all records which don't have owner in db.
+    """
+    if license_number:
+        records = License.objects.filter(license_number=license_number)
+    elif update_all:
+        records = License.objects.filter(record_owner_crm__isnull=True)
+    for record in records:
+        licenses = search_query('Licenses', license_number, 'Name')
+        if licenses['status_code'] == 200 and len(licenses['response']) > 0:
+            for license_dict in licenses.get('response'):
+                vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+                if vendor['status_code'] != 200:
+                    vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+                else:
+                    vendor = vendor['response'][0]['Licenses_Module']
+                    vendor_id = vendor['id']
+                if not vendor_id:
+                    account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
+                    if account['status_code'] != 200:
+                        account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
+                    else:
+                        account = account['response'][0]['Licenses_Module']
+                        account_id = account['id']
+                    if not account_id:
+                        final_response[license_number] = {'error': 'No association found for legal business name'}
+                        continue
+        crm_obj = get_crm_obj()
+        if vendor_id:
+            full_record = crm_obj.get_full_record('Vendors', vendor_id)
+        elif account_id:
+            full_record = crm_obj.get_full_record('Accounts', account_id)
+        else:
+            full_record = dict()
+        owner = full_record.get('response').get('Owner')
+        try:
+            license_profile = LicenseProfile.objects.get(id=record.license_profile.id)
+        except LicenseProfile.DoesNotExist:
+            return {'error': 'License does not exist in database.'}
+        license_profile.crm_owner_id = owner.get('id')
+        license_profile.crm_owner_email = owner.get('email')
+        license_profile.save()
+        return Response(license_profile)
+    return {}

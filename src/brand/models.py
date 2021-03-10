@@ -504,6 +504,8 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
     bank_state  = models.CharField(_('Bank State'), null=True, blank=True, max_length=255)
     bank_country  = models.CharField(_('Bank Country'), null=True, blank=True, max_length=255)
+    crm_owner_id = models.CharField(_('CRM Owner ID'), null=True, blank=True, max_length=255)
+    crm_owner_email = models.CharField(_('CRM Owner EMAIL'), null=True, blank=True, max_length=255)
 
 
 class CultivationOverview(models.Model):

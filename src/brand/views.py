@@ -786,6 +786,9 @@ class LicenseSyncView(APIView):
         license_number = request.data.get('license_number')
         issue = request.data.get('issue')
         expiry = request.data.get('expiry')
+        record_id = request.data.get('account_id')
+        owner_id = request.data.get('owner_id')
+        owner_email = request.data.get('owner_email')
         if license_number and expiry:
             try:
                 license_obj = License.objects.get(license_number=license_number)
@@ -804,6 +807,12 @@ class LicenseSyncView(APIView):
                 return Response(status=status.HTTP_202_ACCEPTED)
             except License.DoesNotExist:
                 pass
+        elif account_id and owner_id and owner_email:
+            record = LicenseProfile.objects.get(zoho_crm_id=record_id)
+            record.crm_owner_id = owner_id
+            record.crm_owner_email = owner_email
+            record.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProgramSelectionSyncView(APIView):
