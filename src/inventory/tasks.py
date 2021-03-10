@@ -7,6 +7,7 @@ import traceback
 import copy
 from django.conf import settings
 from django.shortcuts import reverse
+from django.contrib.auth import get_user_model
 
 from celery.task import periodic_task
 from celery.schedules import crontab
@@ -26,7 +27,7 @@ from .task_helpers import (
 from .models import (CustomInventory, )
 
 slack = Slacker(settings.SLACK_TOKEN)
-
+User = get_user_model()
 
 def notify_slack_inventory_item_added(data):
     """
@@ -54,6 +55,7 @@ def notify_email_inventory_item_added(data):
     """
     as new Inventory item added, send notification mail.
     """
+    emails = set()
     try:
         mail_send(
             "notification_inventory_item_added.html",

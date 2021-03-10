@@ -426,11 +426,13 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                     data['cf_sample_in_house'] = 'Pending'
                     data['cf_status'] = 'In-Testing'
                     data['cf_cfi_published'] = False
-                    data['account_id'] = 2155380000000448337
+                    data['account_id'] = 2155380000000448337 if settings.PRODUCTION else 2185756000001423419
                     # data['account_name'] = '3rd Party Flower Sales'
-                    data['purchase_account_id'] = 2155380000000565567
+                    data['purchase_account_id'] = 2155380000000565567 if settings.PRODUCTION else 2185756000001031365
                     # data['purchase_account_name'] = 'Product Costs - Flower'
-                    data['inventory_account_id'] = 2155380000000448361
+                    data['inventory_account_id'] = 2155380000000448361 if settings.PRODUCTION else 2185756000001423111
+                    # data['inventory_account_name'] = 'Inventory - In the Field'
+
                     # data['warehouses'] = [
                     #     {
                     #         "warehouse_id": "2155380000000782007",
