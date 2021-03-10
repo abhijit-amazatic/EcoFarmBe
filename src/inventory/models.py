@@ -291,8 +291,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
 
     class Meta:
-        verbose_name = _('Custom Inventory')
-        verbose_name_plural = _('Custom Inventory Items')
+        verbose_name = _('Vendor Inventory')
+        verbose_name_plural = _('Vendor Inventory Items')
 
 
 class ItemFeedback(TimeStampFlagModelMixin, models.Model):
