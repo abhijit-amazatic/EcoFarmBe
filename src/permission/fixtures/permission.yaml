@@ -4,28 +4,28 @@
     pk: view_organization
     fields:
         name: View Organization
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: add_organization
     fields:
         name: Add Organization
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: edit_organization
     fields:
         name: Edit Organization
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: delete_organization
     fields:
         name: Delete Organization
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 
@@ -36,28 +36,28 @@
     pk: view_brand
     fields:
         name: View Brand
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: add_brand
     fields:
         name: Add Brand
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: edit_brand
     fields:
         name: Edit Brand
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: delete_brand
     fields:
         name: Delete Brand
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 
@@ -69,28 +69,28 @@
     pk: view_organization_role
     fields:
         name: View Organization Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: add_organization_role
     fields:
         name: Add Organization Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: edit_organization_role
     fields:
         name: Edit Organization Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: delete_organization_role
     fields:
         name: Delete Organization Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 
@@ -101,28 +101,28 @@
     pk: view_organization_user
     fields:
         name: View Organization User
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: add_organization_user
     fields:
         name: Add Organization User
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: edit_organization_user
     fields:
         name: Edit Organization User
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: delete_organization_user
     fields:
         name: Delete Organization User
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 
@@ -133,28 +133,28 @@
     pk: view_organization_user_role
     fields:
         name: View Organization User Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: add_organization_user_role
     fields:
         name: Add Organization User Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: edit_organization_user_role
     fields:
         name: Edit Organization User Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 -   model: permission.permission
     pk: delete_organization_user_role
     fields:
         name: Delete Organization User Role
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 
@@ -164,7 +164,7 @@
     pk: invite_user_to_organization
     fields:
         name: Invite User To Organization
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 1
 
@@ -176,28 +176,28 @@
     pk: view_license
     fields:
         name: View License
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 2
 -   model: permission.permission
     pk: add_license
     fields:
         name: Add License
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 2
 -   model: permission.permission
     pk: edit_license
     fields:
         name: Edit License
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 2
 -   model: permission.permission
     pk: delete_license
     fields:
         name: Delete License
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 2
 
@@ -208,14 +208,14 @@
     pk: view_license_profile
     fields:
         name: View License Profile
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_license_profile
     fields:
         name: Edit License Profile
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -226,28 +226,28 @@
     pk: view_profile_contact
     fields:
         name: View Profile Contact
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: add_profile_contact
     fields:
         name: Add Profile Contact
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: edit_profile_contact
     fields:
         name: Edit Profile Contact
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: delete_profile_contact
     fields:
         name: Delete Profile Contact
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 
@@ -258,28 +258,28 @@
     pk: view_cultivation_overview
     fields:
         name: View Cultivation Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: add_cultivation_overview
     fields:
         name: Add Cultivation Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_cultivation_overview
     fields:
         name: Edit Cultivation Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: delete_cultivation_overview
     fields:
         name: Delete Cultivation Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -290,28 +290,28 @@
     pk: view_financial_overview
     fields:
         name: View Financial Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: add_financial_overview
     fields:
         name: Add Financial Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_financial_overview
     fields:
         name: Edit Financial Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: delete_financial_overview
     fields:
         name: Delete Financial Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -322,28 +322,28 @@
     pk: view_crop_overview
     fields:
         name: View Crop Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: add_crop_overview
     fields:
         name: Add Crop Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_crop_overview
     fields:
         name: Edit Crop Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: delete_crop_overview
     fields:
         name: Delete Crop Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -354,28 +354,28 @@
     pk: view_program_overview
     fields:
         name: View Program Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: add_program_overview
     fields:
         name: Add Program Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: delete_program_overview
     fields:
         name: Delete Program Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_program_overview
     fields:
         name: Edit Program Overview
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -386,14 +386,14 @@
     pk: view_billing_information
     fields:
         name: View Billing Information
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: edit_billing_information
     fields:
         name: Edit Billing Information
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 
@@ -404,14 +404,14 @@
     pk: view_billing_address
     fields:
         name: View Billing Address
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: edit_billing_address
     fields:
         name: Edit Billing Address
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 
@@ -422,14 +422,14 @@
     pk: view_shipping_address
     fields:
         name: View Shipping Address
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: edit_shipping_address
     fields:
         name: Edit Shipping Address
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 
@@ -440,14 +440,14 @@
     pk: view_mailing_address
     fields:
         name: View Mailing Address
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 -   model: permission.permission
     pk: edit_mailing_address
     fields:
         name: Edit Mailing Address
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 4
 
@@ -460,7 +460,7 @@
     pk: view_billing_overview
     fields:
         name: View Billing Overview
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -471,7 +471,7 @@
     pk: view_orders_estimates
     fields:
         name: View Orders Estimates
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -482,7 +482,7 @@
     pk: view_sales_orders
     fields:
         name: View Sales Orders
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -493,7 +493,7 @@
     pk: view_purchase_orders
     fields:
         name: View Purchase Orders
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -504,7 +504,7 @@
     pk: view_bills
     fields:
         name: View Bills
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -515,7 +515,7 @@
     pk: view_invoices
     fields:
         name: View Invoices
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -526,7 +526,7 @@
     pk: view_payments_made
     fields:
         name: View Payments Made
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -537,7 +537,7 @@
     pk: view_payments_received
     fields:
         name: View Payments Received
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -552,7 +552,7 @@
     pk: view_sales
     fields:
         name: View Sales
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 5
 
@@ -563,21 +563,21 @@
     pk: view_inventory
     fields:
         name: View Inventory
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 5
 -   model: permission.permission
     pk: add_inventory
     fields:
         name: Add Inventory
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 5
 -   model: permission.permission
     pk: edit_inventory
     fields:
         name: Edit Inventory
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 5
 
@@ -600,14 +600,14 @@
     pk: view_license_profile_logo
     fields:
         name: View License Profile Logo
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: change_license_profile_logo
     fields:
         name: Change License Profile Logo
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -616,14 +616,14 @@
     pk: view_license_profile_about
     fields:
         name: View License Profile About
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_license_profile_about
     fields:
         name: edit License Profile About
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -633,14 +633,14 @@
     pk: view_license_profile_region
     fields:
         name: View License Profile Region
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_license_profile_region
     fields:
         name: edit License Profile Region
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -651,7 +651,7 @@
 
     fields:
         name: View License Profile Appellation
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -659,7 +659,7 @@
 
     fields:
         name: edit License Profile Appellation
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -669,14 +669,14 @@
 
     fields:
         name: View License Ethics & Certifications
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_license_ethics_Certifications
     fields:
         name: edit License Ethics & Certifications
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -685,7 +685,7 @@
     pk: view_license_profile_lighting_type
     fields:
         name: View License Profile Lighting Type
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -693,7 +693,7 @@
 
     fields:
         name: edit License Profile Lighting Type
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -702,14 +702,14 @@
     pk: view_license_type_of_nutrients
     fields:
         name: View License Type of Nutrients
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
     pk: edit_license_type_of_nutrients
     fields:
         name: edit License Type of Nutrients
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -720,7 +720,7 @@
     pk: view_license_profile_brand_association
     fields:
         name: View License Profile Brand Association
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -728,7 +728,7 @@
 
     fields:
         name: edit License Profile Brand Association
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -740,7 +740,7 @@
     pk: view_profile_contact_personal_phone
     fields:
         name: View Profile contact Personal Phone
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -748,7 +748,7 @@
 
     fields:
         name: edit Profile contact Personal Phone
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -757,7 +757,7 @@
     pk: view_profile_contact_business_email
     fields:
         name: View Profile contact Business Email
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -765,7 +765,7 @@
 
     fields:
         name: edit Profile contact Business Email
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -774,7 +774,7 @@
     pk: view_profile_contact_website
     fields:
         name: View Profile contact Website
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -782,7 +782,7 @@
 
     fields:
         name: edit Profile contact Website
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -791,7 +791,7 @@
     pk: view_profile_contact_instagram
     fields:
         name: View Profile contact Instagram
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -799,7 +799,7 @@
 
     fields:
         name: edit Profile contact Instagram
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -808,7 +808,7 @@
     pk: view_profile_contact_linkedin
     fields:
         name: View Profile contact LinkedIn
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 -   model: permission.permission
@@ -816,7 +816,7 @@
 
     fields:
         name: edit Profile contact LinkedIn
-        type: 'organizational'
+        type: organizational
         description: ''
         group: 3
 
@@ -832,7 +832,7 @@
     pk: view_billing_overview_bank_information
     fields:
         name: View Billing Overview Bank Information
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -840,7 +840,7 @@
     pk: edit_billing_overview_bank_information
     fields:
         name: Edit Billing Overview Bank Information
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -851,7 +851,7 @@
     pk: view_billing_overview_bank_address
     fields:
         name: View Billing Overview Bank Address
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -859,7 +859,7 @@
     pk: edit_billing_overview_bank_address
     fields:
         name: Edit Billing Overview Bank Address
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -870,7 +870,7 @@
     pk: view_billing_overview_preferred_payment
     fields:
         name: View Billing Overview Preferred Payment
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -878,7 +878,7 @@
     pk: edit_billing_overview_preferred_payment
     fields:
         name: Edit Billing Overview Preferred Payment
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -889,7 +889,7 @@
     pk: view_billing_overview_license_premises_address
     fields:
         name: View Billing Overview License Premises Address
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
@@ -897,7 +897,7 @@
     pk: edit_billing_overview_license_premises_address
     fields:
         name: Edit Billing Overview License Premises Address
-        type: internal
+        type: organizational
         description: ''
         group: 4
 
