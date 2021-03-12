@@ -224,6 +224,7 @@ def create_approved_item_po(custom_inventory_id, retry=6):
                     "sku": item.sku,
                     "quantity": int(item.quantity_available),
                     "rate": 0.0,
+                    # "warehouse_id": "2185756000003640003"
                     # "warehouse_name": "In the Field Inventory ",
                 }
             ],

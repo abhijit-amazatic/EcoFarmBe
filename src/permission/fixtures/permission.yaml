@@ -453,6 +453,100 @@
 
 
 
+# ########################### Billing & Accounting #########################
+
+# Billing Overview
+-   model: permission.permission
+    pk: view_billing_overview
+    fields:
+        name: View Billing Overview
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Orders Estimates
+-   model: permission.permission
+    pk: view_orders_estimates
+    fields:
+        name: View Orders Estimates
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Sales Orders
+-   model: permission.permission
+    pk: view_sales_orders
+    fields:
+        name: View Sales Orders
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Purchase Orders
+-   model: permission.permission
+    pk: view_purchase_orders
+    fields:
+        name: View Purchase Orders
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Bills
+-   model: permission.permission
+    pk: view_bills
+    fields:
+        name: View Bills
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Invoices
+-   model: permission.permission
+    pk: view_invoices
+    fields:
+        name: View Invoices
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Payments Made
+-   model: permission.permission
+    pk: view_payments_made
+    fields:
+        name: View Payments Made
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Payments Received
+-   model: permission.permission
+    pk: view_payments_received
+    fields:
+        name: View Payments Received
+        type: internal
+        description: ''
+        group: 4
+
+
+
+
+
+# ########################### Marketplace #########################0
+
 # Sales
 -   model: permission.permission
     pk: view_sales
@@ -486,6 +580,11 @@
         type: 'organizational'
         description: ''
         group: 5
+
+
+
+
+
 
 
 
@@ -720,6 +819,89 @@
         type: 'organizational'
         description: ''
         group: 3
+
+
+
+
+########################################### Billing & Accounting #########################################
+
+
+
+# Billing Overview Bank Information
+-   model: permission.permission
+    pk: view_billing_overview_bank_information
+    fields:
+        name: View Billing Overview Bank Information
+        type: internal
+        description: ''
+        group: 4
+
+-   model: permission.permission
+    pk: edit_billing_overview_bank_information
+    fields:
+        name: Edit Billing Overview Bank Information
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Billing Overview Bank Address
+-   model: permission.permission
+    pk: view_billing_overview_bank_address
+    fields:
+        name: View Billing Overview Bank Address
+        type: internal
+        description: ''
+        group: 4
+
+-   model: permission.permission
+    pk: edit_billing_overview_bank_address
+    fields:
+        name: Edit Billing Overview Bank Address
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Billing Overview Preferred Payment
+-   model: permission.permission
+    pk: view_billing_overview_preferred_payment
+    fields:
+        name: View Billing Overview Preferred Payment
+        type: internal
+        description: ''
+        group: 4
+
+-   model: permission.permission
+    pk: edit_billing_overview_preferred_payment
+    fields:
+        name: Edit Billing Overview Preferred Payment
+        type: internal
+        description: ''
+        group: 4
+
+
+
+# Billing Overview License Premises Address
+-   model: permission.permission
+    pk: view_billing_overview_license_premises_address
+    fields:
+        name: View Billing Overview License Premises Address
+        type: internal
+        description: ''
+        group: 4
+
+-   model: permission.permission
+    pk: edit_billing_overview_license_premises_address
+    fields:
+        name: Edit Billing Overview License Premises Address
+        type: internal
+        description: ''
+        group: 4
+
+
 
 
 

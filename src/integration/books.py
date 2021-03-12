@@ -271,7 +271,7 @@ def get_item_dict(book, inventory):
     """
     Return Zoho Book item.
     """
-    return {
+    data  = {
         'item_id': book.get('item_id'),
         'sku': book.get('sku'),
         'name': book.get('name'),
@@ -280,6 +280,9 @@ def get_item_dict(book, inventory):
         'category_name': inventory.get('category_name'),
         'item_custom_fields': inventory.get('item_custom_fields'),
     }
+    if inventory.get('warehouse_id'):
+        data['warehouse_id'] = inventory.get('warehouse_id')
+    return data
 
 def get_tax(obj, tax):
     """
