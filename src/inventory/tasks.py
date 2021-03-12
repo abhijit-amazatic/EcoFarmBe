@@ -307,7 +307,7 @@ def save_daily_summary():
     """
     Save daily inventory summary
     """
-    queryset = Inventory.objects.filter(cf_cfi_published=True)
+    queryset = Inventory.objects.filter(cf_cfi_published=True, cf_status__in=['Available','Under Contract'])
     summary = get_inventory_summary(queryset)
     fields_data = {
         'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
