@@ -17,6 +17,7 @@ from core.celery import (app,)
 from core.mailer import (mail, mail_send)
 
 from integration.books import (create_purchase_order, submit_purchase_order)
+from integration.inventory import (get_inventory_obj)
 from brand.models import (LicenseProfile, )
 
 from .task_helpers import (
@@ -217,17 +218,32 @@ def create_approved_item_po(custom_inventory_id, retry=6):
             license_number = ''
         else:
             license_number = lp_obj.license.license_number
+
+        warehouse_id = None
+        inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
+        result = inv_obj.list_warehouses()
+        if result.get('code') == 0:
+            warehouses = result.get("warehouses", [])
+            warehouses = [
+                warehouse
+                for warehouse in warehouses 
+                if warehouse.get('warehouse_name', '').strip() == getattr(settings, 'CUSTOM_INVENTORY_WAREHOUSE_NAME', '').strip()
+            ]
+            if warehouses:
+                warehouse_id = warehouses[0].get('warehouse_id')
+
+        item_data = {
+            "sku": item.sku,
+            "quantity": int(item.quantity_available),
+            "rate": 0.0,
+        }
+
+        if warehouse_id:
+            item_data['warehouse_id'] = warehouse_id
+
         data = {
             'vendor_name': item.vendor_name,
-            "line_items": [
-                {
-                    "sku": item.sku,
-                    "quantity": int(item.quantity_available),
-                    "rate": 0.0,
-                    # "warehouse_id": "2185756000003640003"
-                    # "warehouse_name": "In the Field Inventory ",
-                }
-            ],
+            "line_items": [item_data],
             "custom_fields": [
                 {
                     "api_name": "cf_client_code",
