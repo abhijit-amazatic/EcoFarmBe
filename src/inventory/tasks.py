@@ -5,6 +5,8 @@ All tasks related to inventory.
 import re
 import traceback
 import copy
+import datetime
+import pytz
 from django.conf import settings
 from django.shortcuts import reverse
 from django.contrib.auth import get_user_model
@@ -17,7 +19,7 @@ from core.celery import (app,)
 from core.mailer import (mail, mail_send)
 
 from integration.books import (create_purchase_order, submit_purchase_order)
-from integration.inventory import (get_inventory_obj)
+from integration.inventory import (get_inventory_obj,get_inventory_summary,)
 from brand.models import (LicenseProfile, )
 
 from .task_helpers import (
@@ -25,7 +27,7 @@ from .task_helpers import (
     get_custom_inventory_data_from_crm_vendor,
     get_custom_inventory_data_from_crm_account,
 )
-from .models import (CustomInventory, )
+from .models import (CustomInventory, DailyInventorySummary,Inventory, )
 
 slack = Slacker(settings.SLACK_TOKEN)
 User = get_user_model()
@@ -298,3 +300,29 @@ def get_custom_inventory_data_from_crm(custom_inventory_id):
     if not item.client_code:
         get_custom_inventory_data_from_crm_account(item)
     item.save()
+
+
+@periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})
+def save_daily_summary():
+    """
+    Save daily inventory summary
+    """
+    queryset = Inventory.objects.filter(cf_cfi_published=True)
+    summary = get_inventory_summary(queryset)
+    fields_data = {
+        'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
+        'total_thc_max':summary['total_thc_max'],
+        'total_thc_min':summary['total_thc_min'],
+        'batch_varities':summary['batch_varities'],
+        'average':summary['average'],
+        'total_value':summary['total_value'],
+        'smalls_quantity':summary['smalls_quantity'],
+        'tops_quantity':summary['tops_quantity'],
+        'total_quantity':summary['total_quantity'],
+        'trim_quantity':summary['trim_quantity']
+    }
+    if summary:
+        DailyInventorySummary.objects.update_or_create(**fields_data)
+        
+    
+    

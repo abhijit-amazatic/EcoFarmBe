@@ -26,6 +26,7 @@ from .models import (
     Inventory,
     CustomInventory,
     Documents,
+    DailyInventorySummary,
 )
 
 
@@ -488,5 +489,16 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     # def test_action(self, request, queryset):
     #     pass
 
+class DailyInventorySummaryAdmin(admin.ModelAdmin):
+    """
+    Summary Admin.
+    """
+    model = DailyInventorySummary
+    search_fields = ('date',)
+    ordering = ('-date',)
+    readonly_fields = ('date','total_thc_max','total_thc_min','batch_varities','average','total_value','smalls_quantity','tops_quantity','total_quantity','trim_quantity',)
+    
+    
 admin.site.register(CustomInventory, CustomInventoryAdmin)
+admin.site.register(DailyInventorySummary, DailyInventorySummaryAdmin)
 
