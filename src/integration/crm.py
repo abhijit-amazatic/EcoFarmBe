@@ -1558,7 +1558,8 @@ def fetch_record_owners(license_number=None, update_all=False):
             try:
                 license_profile = LicenseProfile.objects.get(id=record.license_profile.id)
             except LicenseProfile.DoesNotExist:
-                return {'error': 'License does not exist in database.'}
+                final_response[license_number] = {'error': 'License does not exist in database.'}
+                continue
             license_profile.crm_owner_id = owner.get('id')
             license_profile.crm_owner_email = owner.get('email')
             license_profile.save()
