@@ -475,6 +475,30 @@
         description: ''
         group: 4
 
+-   model: permission.permission
+    pk: add_orders_estimates
+    fields:
+        name: Add Orders Estimates
+        type: organizational
+        description: ''
+        group: 4
+
+-   model: permission.permission
+    pk: edit_orders_estimates
+    fields:
+        name: Edit Orders Estimates
+        type: organizational
+        description: ''
+        group: 4
+
+-   model: permission.permission
+    pk: delete_orders_estimates
+    fields:
+        name: Delete Orders Estimates
+        type: organizational
+        description: ''
+        group: 4
+
 
 
 # Sales Orders

@@ -62,6 +62,15 @@ from slacker import Slacker
 from core.mailer import (mail, mail_send,)
 from integration.apps.scrapper import (Scrapper, )
 from labtest.models import (LabTest,)
+from .views_permissions import (
+    EstimateViewPermission,
+    PurchaseOrderViewPermission,
+    VendorPaymentViewPermission,
+    CustomerPaymentViewPermission,
+    InvoiceViewPermission,
+    BillViewPermission,
+    SalesOrderViewPermission,
+)
 
 slack = Slacker(settings.SLACK_TOKEN)
 

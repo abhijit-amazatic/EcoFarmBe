@@ -6,9 +6,6 @@ from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.views.generic import View
 from user.models import (User, )
-from brand.permission_defaults import (
-    SALES_REP_GROUP_NAME,
-)
 
 # from .helpers import (
 #     get_user_owned_profiles_crm_id,

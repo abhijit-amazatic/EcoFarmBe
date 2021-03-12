@@ -1,9 +1,5 @@
 from django.db import models
 from rest_framework.utils import model_meta
-from brand.permission_defaults import (
-    SALES_REP_GROUP_NAME,
-    SALES_REP_PERM,
-)
 from .models import (
     Permission,
 )
