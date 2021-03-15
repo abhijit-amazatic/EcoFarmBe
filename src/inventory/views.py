@@ -238,7 +238,11 @@ class InventoryViewSet(viewsets.ModelViewSet):
         page_size = request.query_params.get('page_size', 50)
         summary = self.filter_queryset(self.get_queryset())
         summary = get_inventory_summary(summary)
-        category_count = get_category_count()
+        params = dict()
+        for k, v in request.query_params.items():
+            if k not in ['cf_status__in', 'order-by', 'page', 'page_size'] and v:
+                params[k] = v
+        category_count = get_category_count(params)
         queryset = Paginator(self.filter_queryset(self.get_queryset()), page_size)
         page = int(request.query_params.get('page', 1))
         if page > queryset.num_pages:
