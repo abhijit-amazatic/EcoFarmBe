@@ -601,11 +601,11 @@ def get_category_count():
     response = dict()
     categories = {
         'Available': ('Available',),
-        'Pending Sale': ('Pending Sale',),
-        'In-Testing': ('In-Testing',),
+        'Pending_Sale': ('Pending Sale',),
+        'In_Testing': ('In-Testing',),
         'Processing': ('Processing',),
-        'Future Exchange': ('Vegging', 'Flowering', 'Under Contract',),
-        'Market Intelligence': ('Sold',)
+        'Future_Exchange': ('Vegging', 'Flowering', 'Under Contract',),
+        'Market_Intelligence': ('Sold',)
     }
     for name, category in categories.items():
         response[name] = InventoryModel.objects.filter(cf_cfi_published=True, cf_status__in=category).count()
