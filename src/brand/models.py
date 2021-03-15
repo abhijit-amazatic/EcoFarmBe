@@ -590,3 +590,16 @@ class ProfileReport(models.Model):
     report_name = models.CharField( _('Report Name'), blank=True, null=True, max_length=255)
     profile_type = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
     profile_reports = JSONField(null=False, blank=False, default=dict)
+
+class Sign(TimeStampFlagModelMixin,models.Model):
+    """
+    Store sign request ids.
+    """
+    license = models.ForeignKey(
+        License,
+        verbose_name=_('License'),
+        related_name='Licenses',
+        on_delete=models.CASCADE,
+    )
+    request_id = models.CharField( _('Request ID'), blank=True, null=True, max_length=255)
+    action_id = models.CharField( _('Action ID'), blank=True, null=True, max_length=255)

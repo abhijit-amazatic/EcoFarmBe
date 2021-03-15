@@ -71,6 +71,7 @@ from .views_permissions import (
     BillViewPermission,
     SalesOrderViewPermission,
 )
+from brand.models import (License, Sign, )
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -401,16 +402,30 @@ class TemplateSignView(APIView):
         premise_zip = request.data.get('premise_zip', None)
         license_owner_email = request.data.get('license_owner_email', None)
 
+        try:
+            license = License.objects.get(license_number=licenses[0])
+            obj = Sign.objects.get(license=license)
+            if obj:
+                return Response(get_embedded_url_from_sign(obj.request_id, obj.action_id))
+        except (License.DoesNotExist, Sign.DoesNotExist):
+            pass
+
         if template_id and recipient:
-            return Response(send_template(template_id,
-                                          recipient,
-                                          licenses,
-                                          legal_business_names,
-                                          EIN, SSN, business_structure,
-                                          license_owner_name, premise_address,
-                                          premise_state, premise_city, premise_zip,
-                                          license_owner_email
-                                          ))
+            response = send_template(template_id,
+                                     recipient,licenses,
+                                     legal_business_names,
+                                     EIN, SSN, business_structure,
+                                     license_owner_name, premise_address,
+                                     premise_state, premise_city, premise_zip,
+                                     license_owner_email)
+            try:
+                license = License.objects.get(license_number=licenses[0])
+                obj = Sign.objects.create(license=license,
+                                    request_id=response['request_id'],
+                                    action_id=response['action_id'])
+            except (License.DoesNotExist, Sign.DoesNotExist):
+                pass
+            return Response(response)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class DownloadSignDocumentView(APIView):

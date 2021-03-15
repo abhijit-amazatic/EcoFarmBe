@@ -9,6 +9,7 @@ from core.settings import (
     INVENTORY_REDIRECT_URI,
     INVENTORY_EFL_ORGANIZATION_ID,
     INVENTORY_EFD_ORGANIZATION_ID,
+    INVENTORY_EFN_ORGANIZATION_ID,
     INVENTORY_BOX_ID,
     INVENTORY_TAXES,
 )
@@ -42,6 +43,8 @@ def get_inventory_obj(inventory_name):
         INVENTORY_ORGANIZATION_ID = INVENTORY_EFD_ORGANIZATION_ID
     elif inventory_name == 'inventory_efl':
         INVENTORY_ORGANIZATION_ID = INVENTORY_EFL_ORGANIZATION_ID
+    elif inventory_name == 'inventory_efn':
+        INVENTORY_ORGANIZATION_ID = INVENTORY_EFN_ORGANIZATION_ID
     inventory = Inventory(
         client_id=INVENTORY_CLIENT_ID,
         client_secret=INVENTORY_CLIENT_SECRET,
@@ -160,7 +163,12 @@ def get_inventory_name(item_id):
     Get inventory name.
     """
     item = InventoryModel.objects.get(item_id=item_id)
-    return 'inventory_efl' if item.inventory_name == 'EFL' else 'inventory_efd'
+    inventory_names = {
+        'EFL': 'inventory_efl',
+        'EFD': 'inventory_efd',
+        'EFN': 'inventory_efn',
+    }
+    return inventory_names[item.inventory_name]
 
 def get_cultivar_from_db(cultivar_name):
     """
@@ -377,7 +385,10 @@ def get_inventory_name_from_db(inventory_name):
     """
     if 'efl' in inventory_name:
         return 'EFL'
-    return 'EFD'
+    elif 'efd' in inventory_name:
+        return 'EFD'
+    elif 'efn' in inventory_name:
+        return 'EFN'
 
 def fetch_inventory_from_list(inventory_name, inventory_list):
     """
