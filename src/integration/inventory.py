@@ -582,3 +582,20 @@ def get_inventory_summary(inventory):
         return response
     except Exception as exc:
         return {'error': f'{exc}'}
+
+def get_category_count():
+    """
+    Return category count.
+    """
+    response = dict()
+    categories = {
+        'Available': ('Available',),
+        'Pending Sale': ('Pending Sale',),
+        'In-Testing': ('In-Testing',),
+        'Processing': ('Processing',),
+        'Future Exchange': ('Vegging', 'Flowering', 'Under Contract',),
+        'Market Intelligence': ('Sold',)
+    }
+    for name, category in categories.items():
+        response[name] = InventoryModel.objects.filter(cf_cfi_published=True, cf_status__in=category).count()
+    return response

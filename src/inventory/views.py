@@ -32,7 +32,7 @@ from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
 from cultivar.models import (Cultivar, )
-from integration.inventory import (get_inventory_summary,)
+from integration.inventory import (get_inventory_summary, get_category_count)
 from .tasks import (
     notify_inventory_item_added,
     create_duplicate_crm_vendor_from_crm_account_task,
@@ -238,6 +238,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         page_size = request.query_params.get('page_size', 50)
         summary = self.filter_queryset(self.get_queryset())
         summary = get_inventory_summary(summary)
+        category_count = get_category_count()
         queryset = Paginator(self.filter_queryset(self.get_queryset()), page_size)
         page = int(request.query_params.get('page', 1))
         if page > queryset.num_pages:
@@ -253,6 +254,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             "page_size": page_size
         }
         data['summary'] = summary
+        data['categories_count'] = category_count
         data['results'] = serializer.data
         return Response(data)
 
