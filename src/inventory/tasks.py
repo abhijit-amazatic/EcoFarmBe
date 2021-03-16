@@ -7,9 +7,13 @@ import traceback
 import copy
 import datetime
 import pytz
+import io
+import csv
+
 from django.conf import settings
 from django.shortcuts import reverse
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from celery.task import periodic_task
 from celery.schedules import crontab
@@ -18,6 +22,7 @@ from slacker import Slacker
 from core.celery import (app,)
 from core.mailer import (mail, mail_send)
 
+from integration.box import (upload_file, upload_file_stream, )
 from integration.books import (create_purchase_order, submit_purchase_order)
 from integration.inventory import (get_inventory_obj,get_inventory_summary,)
 from brand.models import (LicenseProfile, )
@@ -27,7 +32,11 @@ from .task_helpers import (
     get_custom_inventory_data_from_crm_vendor,
     get_custom_inventory_data_from_crm_account,
 )
-from .models import (CustomInventory, DailyInventorySummary,Inventory, )
+from .models import (
+    Inventory,
+    CustomInventory,
+    DailyInventorySummary,
+)
 
 slack = Slacker(settings.SLACK_TOKEN)
 User = get_user_model()
@@ -325,4 +334,15 @@ def save_daily_summary():
         DailyInventorySummary.objects.update_or_create(**fields_data)
         
     
-    
+@periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})
+def export_inventory_csv():
+    with io.StringIO() as f:
+        writer = csv.writer(f)
+        qs = Inventory.objects.all()
+        file_name = 'Inventory_'+timezone.now().strftime("%Y-%m-%d_%H:%M:%S_%Z")+'.csv'
+        if qs.count()>0:
+            fields = qs[:1].values()[0].keys()
+            writer.writerow(fields)
+            writer.writerows(qs.values_list(*fields))
+            f.seek(0)
+            upload_file_stream(settings.INVENTORY_CSV_UPLOAD_FOLDER_ID, f, file_name)
