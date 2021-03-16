@@ -22,7 +22,12 @@ class ViewPermission(BasePermission):
         elif isinstance(view, View):
             perm = self.method_perm_map.get(request.method.lower(), '')
         if perm:
-            return request.user.has_perm(perm, obj)
+            if isinstance(perm, str):
+                return request.user.has_perm(perm, obj)
+            elif isinstance(perm, bool):
+                return perm
+            else:
+                return False
         elif request.method.lower() == 'options':
             return True
         return False

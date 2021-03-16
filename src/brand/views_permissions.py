@@ -63,7 +63,7 @@ class LicenseViewSetPermission(ViewPermission):
 class OrganizationViewSetPermission(ViewPermission):
     action_perm_map = {
         'retrieve': {
-            'get': 'view_organization',
+            'get': True,
         },
         'create': {
             'post': 'add_organization',
