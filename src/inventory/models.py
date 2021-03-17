@@ -328,7 +328,7 @@ class PriceChange(TimeStampFlagModelMixin, models.Model):
     price_array = ArrayField(JSONField(default=dict), blank=True, null=True)
 
 
-class DailyInventorySummary(models.Model):
+class DailyInventoryAggrigatedSummary(models.Model):
     """
     Stores Inventory daily data.
     """
@@ -347,9 +347,51 @@ class DailyInventorySummary(models.Model):
         return "%s" % (self.date.strftime("%B %d,%Y"))
 
     class Meta:
-        verbose_name = _('Daily Inventory Summary')
-        verbose_name_plural = _('Daily Inventory Summary')
+        verbose_name = _('Daily Inventory Aggrigated Summary')
+        verbose_name_plural = _('Daily Inventory  Aggrigated Summary')
 
+class County(models.Model):
+    """
+    Stores inventory county grown.
+    """
+    name = models.CharField(_('County Grown'), blank=True, null=True, max_length=50)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Inventory County')
+        verbose_name_plural = _('County Wise Summary')
+
+class CountyDailySummary(models.Model):
+    """
+    Stores Inventory countiwise  daily data.
+    """
+    county = models.ForeignKey(County, verbose_name=_('County'),on_delete=models.CASCADE)
+    date = models.DateField()
+    total_thc_max = models.FloatField(_('Total THC(Max)'), blank=True, null=True, max_length=255)
+    total_thc_min = models.FloatField(_('Total THC(Min)'), blank=True, null=True, max_length=255)
+    batch_varities = models.IntegerField(_('Batches'), blank=True, null=True)
+    average = models.FloatField(_('Average $/lb'), blank=True, null=True, max_length=255)
+    total_value = models.FloatField(_('Total Value $'), blank=True, null=True, max_length=255)
+    smalls_quantity = models.FloatField(_('Smalls(lbs)'), blank=True, null=True, max_length=255)
+    tops_quantity = models.FloatField(_('Tops(lbs)'), blank=True, null=True, max_length=255)
+    total_quantity = models.FloatField(_('Total(lbs)'), blank=True, null=True, max_length=255)
+    trim_quantity =  models.FloatField(_('Trim quantity'), blank=True, null=True, max_length=255)
+    
+    def __str__(self):
+        return "%s" % (self.date.strftime("%B %d,%Y"))
+
+    class Meta:
+        unique_together = (('date', 'county'), )
+        verbose_name = _('Daily County Summary')
+        verbose_name_plural = _('Daily County Summary')
+       
+    
+
+        
+
+        
         
 
 

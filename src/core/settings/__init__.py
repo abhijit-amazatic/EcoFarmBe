@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'inventory',
     'cultivar',
     'labtest',
+    'import_export',
     'multiselectfield',
     'fee_variable'
     # 'django_extensions',

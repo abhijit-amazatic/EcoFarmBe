@@ -26,8 +26,12 @@ from .models import (
     Inventory,
     CustomInventory,
     Documents,
-    DailyInventorySummary,
+    DailyInventoryAggrigatedSummary,
+    County,
+    CountyDailySummary,
 )
+from import_export import resources
+from import_export.admin import (ImportExportModelAdmin,ExportActionMixin)
 
 
 def get_category_id(category_name):
@@ -489,16 +493,59 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     # def test_action(self, request, queryset):
     #     pass
 
-class DailyInventorySummaryAdmin(admin.ModelAdmin):
+
+class DailyInventoryAggrigatedSummaryResource(resources.ModelResource):
+
+    class Meta:
+        model = DailyInventoryAggrigatedSummary
+        fields = ('date','total_thc_max','total_thc_min','batch_varities','average','total_value','smalls_quantity','tops_quantity','total_quantity','trim_quantity',)
+        #exclude = ('imported', )
+        #export_order = ('id', 'price', 'author', 'name')
+        
+class DailyInventoryAggrigatedSummaryAdmin(ExportActionMixin,admin.ModelAdmin):
     """
     Summary Admin.
     """
-    model = DailyInventorySummary
+    model = DailyInventoryAggrigatedSummary
     search_fields = ('date',)
+    list_display = ('date',)
     ordering = ('-date',)
     readonly_fields = ('date','total_thc_max','total_thc_min','batch_varities','average','total_value','smalls_quantity','tops_quantity','total_quantity','trim_quantity',)
+    resource_class = DailyInventoryAggrigatedSummaryResource
+
+
+class InlineCountyDailySummaryAdminResource(resources.ModelResource):
+
+    class Meta:
+        model = CountyDailySummary
+        fields = ('date','county__name','total_thc_max','total_thc_min','batch_varities','average','total_value','smalls_quantity','tops_quantity','total_quantity','trim_quantity',)
+        
+        
+class InlineCountyDailySummaryAdmin(admin.TabularInline):
+    extra = 0
+    model = CountyDailySummary
+    list_display = ('date', 'county__name',)
+    readonly_fields = ('date','county','total_thc_max','total_thc_min','batch_varities','average','total_value','smalls_quantity','tops_quantity','total_quantity','trim_quantity',)
+    search_fields = ('date', 'county__name',)
+    can_delete = False
     
     
+
+
+class CountyAdmin(ImportExportModelAdmin,admin.ModelAdmin):
+    """
+    Admin
+    """
+    inlines = (InlineCountyDailySummaryAdmin,)
+    model = County
+    search_fields = ('name',)
+    ordering = ('-name',)
+    readonly_fields = ('name',)
+    resource_class = InlineCountyDailySummaryAdminResource
+    
+
+admin.site.register(County, CountyAdmin)
+admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)
 admin.site.register(CustomInventory, CustomInventoryAdmin)
-admin.site.register(DailyInventorySummary, DailyInventorySummaryAdmin)
+
 
