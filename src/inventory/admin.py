@@ -166,7 +166,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     OrganizationRoleAdmin
     """
     change_form_template = 'inventory/custom_inventory_change_form.html'
-    list_display = ('cultivar_name', 'category_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
+    list_display = ('cultivar_name', 'category_name', 'vendor_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
     # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
     readonly_fields = (
         'cultivar_name',
@@ -264,17 +264,17 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
     def generate_sku(self, obj):
         sku = []
-        if not settings.PRODUCTION:
-            sku.append('test')
-        sku.append('sku')
+        # if not settings.PRODUCTION:
+        #     sku.append('test')
+        #     sku.append('sku')
         sku.append(obj.client_code)
-        sku.append(obj.cultivar.cultivar_name)
+        sku.append(obj.cultivar.cultivar_name.replace(' ', '-'))
 
         if obj.harvest_date:
             sku.append(obj.harvest_date.strftime('%m-%d-%y'))
 
-        if not settings.PRODUCTION:
-            sku.append(force_str(urandom(3).hex()))
+        # if not settings.PRODUCTION:
+        #     sku.append(force_str(urandom(3).hex()))
 
         return '-'.join(sku)
 
