@@ -407,3 +407,21 @@ def export_inventory_aggrigated_csv():
             f.seek(0)
             upload_file_stream(settings.INVENTORY_CSV_UPLOAD_FOLDER_ID, f, file_name)
             
+@periodic_task(run_every=(crontab(hour=[9], minute=0)), options={'queue': 'general'})
+def export_inventory_aggrigated_county_csv():
+    counties= County.objects.filter().values('name','id')
+    for county in counties:
+        with io.StringIO() as f:
+            writer = csv.writer(f)
+            qs = CountyDailySummary.objects.filter(date=datetime.datetime.now(pytz.timezone('US/Pacific')).date(),county_id=county['id'])
+            file_name = county['name']+'_Aggrigated_Inventory_'+timezone.now().strftime("%Y-%m-%d_%H:%M:%S_%Z")+'.csv'
+            if qs.count()>0:
+                fields = qs[:1].values()[0].keys()
+                writer.writerow(fields)
+                writer.writerows(qs.values_list(*fields))
+                f.seek(0)
+                upload_file_stream(settings.INVENTORY_CSV_UPLOAD_FOLDER_ID, f, file_name)
+        
+        
+        
+    
