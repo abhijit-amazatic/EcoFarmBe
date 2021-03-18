@@ -42,10 +42,12 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
     PROGRAM_TIER_GOLD = 'gold'
     PROGRAM_TIER_SILVER = 'silver'
     PROGRAM_TIER_BRONZE = 'bronze'
+    PROGRAM_TIER_NO_TIER = 'no_tier'
     PROGRAM_TIER_CHOICES = (
         (PROGRAM_TIER_GOLD, _('Gold')),
         (PROGRAM_TIER_SILVER, _('Silver')),
         (PROGRAM_TIER_BRONZE, _('Bronze')),
+        (PROGRAM_TIER_NO_TIER, _('No Tier')),
         
     )
     PROGRAM_TYPE_IFP = 'ifp'

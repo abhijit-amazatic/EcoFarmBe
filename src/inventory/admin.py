@@ -95,6 +95,14 @@ custom_inventory_variable_program_map = {
         'program_type': CustomInventoryVariable.PROGRAM_TYPE_IBP,
         'tier': CustomInventoryVariable.PROGRAM_TIER_GOLD,
     },
+    'IFP No Tier': {
+        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
+        'tier': CustomInventoryVariable.PROGRAM_TIER_NO_TIER,
+    },
+    'IBP No Tier': {
+        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IBP,
+        'tier': CustomInventoryVariable.PROGRAM_TIER_NO_TIER,
+    },
 }
 
 
@@ -262,7 +270,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             context['show_approve'] = True
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
-    def generate_sku(self, obj):
+    def generate_sku(self, obj, postfix):
         sku = []
         # if not settings.PRODUCTION:
         #     sku.append('test')
@@ -272,6 +280,9 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
         if obj.harvest_date:
             sku.append(obj.harvest_date.strftime('%m-%d-%y'))
+
+        if postfix:
+            sku.append(str(postfix))
 
         # if not settings.PRODUCTION:
         #     sku.append(force_str(urandom(3).hex()))
@@ -309,7 +320,7 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 if result.get('status_code') == 204 or not found_code:
                     try:
                         result = search_query('Accounts', obj.vendor_name, 'Account_Name')
-                    except Exception :
+                    except Exception:
                         self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
                     else:
                         if result.get('status_code') == 200:
@@ -341,25 +352,43 @@ class CustomInventoryAdmin(admin.ModelAdmin):
     def tax_and_mcsp_fee(self, request, obj):
         lp = LicenseProfile.objects.filter(name=obj.vendor_name).first()
         if lp:
-            try:
-                program_overview = lp.license.program_overview
-            except License.program_overview.RelatedObjectDoesNotExist:
-                self.message_user(request, 'program overview not exist', level='error')
-            else:
-                ifp_tier_name = program_overview.program_details.get('program_name', '')
-                tier = custom_inventory_variable_program_map.get(ifp_tier_name, {})
-                if tier:
-                    InventoryVariable = CustomInventoryVariable.objects.filter(**tier).first()
-                    if InventoryVariable and InventoryVariable.mcsp_fee:
-                        tax_var = TaxVariable.objects.latest('updated_on')
-                        if tax_var and tax_var.cultivar_tax:
-                            return float(InventoryVariable.mcsp_fee)+float(tax_var.cultivar_tax)
-                        else:
-                            self.message_user(request, 'No Cultivar Tax found.', level='error')
+            if lp.license.status == 'approved':
+                program_name = None
+                try:
+                    program_overview = lp.license.program_overview
+                    program_name = program_overview.program_details.get('program_name')
+                except License.program_overview.RelatedObjectDoesNotExist:
+                    pass
+                    # self.message_user(request, 'program overview not exist', level='error')
+                if not program_name:
+                    if lp.license.is_buyer:
+                        program_name = 'IBP No Tier'
                     else:
-                        self.message_user(request, 'No MCSP fee found for profile.', level='error')
+                        program_name = 'IFP No Tier'
+                    self.message_user(request, f'No program tier found for profile, using {program_name} MCSP fee.', level='warning')
+
+                tier = custom_inventory_variable_program_map.get(program_name, {})
+                InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
+                if InventoryVariable and getattr(InventoryVariable, 'mcsp_fee'):
+                    tax_var = TaxVariable.objects.latest('-created_on')
+                    if tax_var and tax_var.cultivar_tax:
+                        return float(InventoryVariable.mcsp_fee)+float(tax_var.cultivar_tax)
+                    else:
+                        self.message_user(request, 'No Cultivar Tax found.', level='error')
                 else:
-                    self.message_user(request, 'No program tier found for profile.', level='error')
+                    program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
+                    program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
+                    self.message_user(
+                        request,
+                        (
+                            'MCSP fee not found in Vendor Inventory Variables for '
+                            f"Program Type: '{program_type_choices_dict.get(tier.get('program_type'))}' "
+                            f"and Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
+                        ),
+                        level='error')
+
+            else:
+                self.message_user(request, 'Profile is not approved.', level='error')
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
@@ -368,12 +397,10 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                     self.get_crm_data(request, obj)
                 if obj.client_code:
-                    sku = self.generate_sku(obj)
 
                     data = {}
                     data['item_type'] = 'inventory'
                     data['cf_client_code'] = obj.client_code
-                    data['sku'] = sku
                     data['unit'] = 'lb'
 
                     data['name'] = obj.cultivar.cultivar_name
@@ -457,35 +484,42 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
                     data['is_taxable'] = True
 
-                    try:
-                        result = create_inventory_item(inventory_name='inventory_efd', record=data, params={})
-                    except Exception as exc:
-                        self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
-                        print('Error while creating item in Zoho Inventory')
-                        print(exc)
-                        print(data)
-                    else:
-                        if result.get('code') == 0:
-                                item_id = result.get('item', {}).get('item_id')
-                                if item_id:
-                                    obj.status = 'approved'
-                                    obj.zoho_item_id = item_id
-                                    obj.sku = sku
-                                    obj.approved_on = timezone.now()
-                                    obj.approved_by = {
-                                        'email': request.user.email,
-                                        'phone': request.user.phone.as_e164,
-                                        'name': request.user.get_full_name(),
-                                    }
-                                    obj.save()
-                                    self.message_user(request, 'This item is approved')
-                                    create_approved_item_po.apply_async((obj.id,), countdown=5)
-                                    notify_inventory_item_approved.delay(obj.id)
-                        else:
-                            self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
-                            print('Error while creating item in Zoho Inventory')
-                            print(result)
-                            print(data)
+                    self._approve(request, obj, data,)
+
+    def _approve(self, request, obj, data, sku_postfix=0):
+        sku = self.generate_sku(obj, sku_postfix)
+        data['sku'] = sku
+        try:
+            result = create_inventory_item(inventory_name='inventory_efd', record=data, params={})
+        except Exception as exc:
+            self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
+            print('Error while creating item in Zoho Inventory')
+            print(exc)
+            print(data)
+        else:
+            if result.get('code') == 0:
+                    item_id = result.get('item', {}).get('item_id')
+                    if item_id:
+                        obj.status = 'approved'
+                        obj.zoho_item_id = item_id
+                        obj.sku = sku
+                        obj.approved_on = timezone.now()
+                        obj.approved_by = {
+                            'email': request.user.email,
+                            'phone': request.user.phone.as_e164,
+                            'name': request.user.get_full_name(),
+                        }
+                        obj.save()
+                        self.message_user(request, 'This item is approved', level='success')
+                        create_approved_item_po.apply_async((obj.id,), countdown=5)
+                        notify_inventory_item_approved.delay(obj.id)
+            elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
+                self._approve(request, obj, data, sku_postfix=sku_postfix+1)
+            else:
+                self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
+                print('Error while creating item in Zoho Inventory')
+                print(result)
+                print(data)
 
     def cultivar_name(self, obj):
             return obj.cultivar.cultivar_name
