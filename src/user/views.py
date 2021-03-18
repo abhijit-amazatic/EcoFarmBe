@@ -85,6 +85,10 @@ class SearchQueryView(APIView):
             result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA', True)
         elif request.query_params.get('license_number', None):
             license_number = request.query_params['license_number']
+            is_allow_all = request.query_params.get('is_allow_all', False)
+            if is_allow_all in [True, 'true']:
+                result = search_query('Licenses', license_number, 'Name', is_license=True)
+                return Response(result)
             try:
                 is_license_in_db = License.objects.filter(license_number=license_number).exists()
             except License.DoesNotExist:

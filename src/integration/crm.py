@@ -494,7 +494,8 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             d.update({'licenses': l})
             if id and is_single_user and is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
-            farm_name = license_db.license_profile.__dict__['name']
+            # farm_name = license_db.license_profile.__dict__['name']
+            farm_name = i['legal_business_name']
             if d['is_buyer'] == True:
                 continue
             response = update_license(dba=farm_name, license=d)
@@ -979,7 +980,8 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
         d.update({'licenses': l})    
         if id and is_single_user and is_update:
             d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
-        farm_name = license_db.license_profile.__dict__['name']
+        # farm_name = license_db.license_profile.__dict__['name']
+        farm_name = i['legal_business_name']
         if d['is_seller'] == True:
                 continue
         response = update_license(dba=farm_name, license=d)
