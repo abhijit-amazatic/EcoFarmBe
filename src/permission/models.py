@@ -100,7 +100,7 @@ class InternalRole(models.Model):
         blank=True,
     )
 
-    created_profiles_only = models.BooleanField(_('Created Profiles Only'), default=True,)
+    owned_profiles_only = models.BooleanField(_('Owned Profiles Only'), default=True,)
 
     created_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)

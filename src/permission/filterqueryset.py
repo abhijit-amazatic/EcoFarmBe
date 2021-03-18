@@ -62,7 +62,7 @@ class filterQuerySet:
         q = Q()
         for role in self.user.internal_roles.all():
             if role.permissions.filter(id='view_license').exists():
-                if not role.created_profiles_only:
+                if not role.owned_profiles_only:
                     q |= Q(profile_category__in=role.profile_categories.all().values_list('name', flat=True))
                 else:
                     q |= Q(
