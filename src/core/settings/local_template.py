@@ -133,6 +133,7 @@ SLACK_LOGISTICS_TRANSPORT_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_logi
 
 #eco farm bot
 BOT_NAME= 'Thrive-Society-Bot'
+BOT_ICON_URL= 'https://www.thrive-society.com/static/media/logo.f8a96e86.png'
 
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'

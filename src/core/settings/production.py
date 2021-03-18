@@ -121,6 +121,7 @@ SLACK_LOGISTICS_TRANSPORT_CHANNEL = os.environ.get("SLACK_LOGISTICS_TRANSPORT_CH
 
 #eco farm bot
 BOT_NAME = os.environ.get("BOT_NAME") 
+BOT_ICON_URL= os.environ.get("BOT_ICON_URL")
 
 
 # Admin Email

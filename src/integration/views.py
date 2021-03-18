@@ -1065,7 +1065,7 @@ class NotificationView(APIView):
         """
         if request.data.get('channel', None) and request.data.get('message', None):
             try:
-                return Response(slack.chat.post_message(request.data.get('channel'), "<!channel> %s" %request.data.get('message'), as_user=False, username=settings.BOT_NAME),status=status.HTTP_200_OK)
+                return Response(slack.chat.post_message(request.data.get('channel'), "<!channel> %s" %request.data.get('message'), as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL),status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({
                     "status_code": 400,

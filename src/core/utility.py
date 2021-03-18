@@ -78,7 +78,7 @@ def notify_admins_on_profile_user_registration(email,profile):
     Notify admins on slack & email about new user registration under profile.
     """
     msg = "<!channel>User with the EmailID `%s` is registered with us for the profile-%s" % (email, farm)
-    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=False, username=settings.BOT_NAME)
+    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
     #mail_send("notify.html",{'link': email},"New Profile User registration.", recipient_list=settings.ADMIN_EMAIL)
 
 
@@ -94,7 +94,7 @@ def notify_admins_on_slack(email,license_instance):
     as license onboarded, inform admin on slack.
     """
     msg = "<!channel>New License is registered with us (step 1) under the organization  - *%s*, associated with the EmailID `%s`.Please review/check whether they need any assistance!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n" % (license_instance.organization.name, email, license_instance.legal_business_name,license_instance.profile_category,license_instance.license_number,license_instance.premises_county)
-    slack.chat.post_message(settings.SLACK_PROFILE_CHANNEL,msg, as_user=False, username=settings.BOT_NAME)
+    slack.chat.post_message(settings.SLACK_PROFILE_CHANNEL,msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
         
 def notify_profile_user(recipient_email,farm):
     """
