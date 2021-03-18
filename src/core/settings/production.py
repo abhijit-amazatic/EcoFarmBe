@@ -119,6 +119,10 @@ SLACK_INVENTORY_CHANNEL = os.environ.get("SLACK_INVENTORY_CHANNEL")
 #Logistics Transport channel
 SLACK_LOGISTICS_TRANSPORT_CHANNEL = os.environ.get("SLACK_LOGISTICS_TRANSPORT_CHANNEL")
 
+#eco farm bot
+BOT_NAME = os.environ.get("BOT_NAME") 
+
+
 # Admin Email
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 #Inventory Notification Email
@@ -173,3 +177,5 @@ BACKEND_DOMAIN_NAME = os.environ.get("BACKEND_DOMAIN_NAME")
 CUSTOM_INVENTORY_WAREHOUSE_NAME = os.environ.get("CUSTOM_INVENTORY_WAREHOUSE_NAME")
 
 INVENTORY_CSV_UPLOAD_FOLDER_ID = os.environ.get('INVENTORY_CSV_UPLOAD_FOLDER_ID')
+
+

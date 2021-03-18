@@ -131,6 +131,9 @@ SLACK_INVENTORY_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_new_inventory_
 #Logistics Transport channel
 SLACK_LOGISTICS_TRANSPORT_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_logistics_transport_requests_web_app'
 
+#eco farm bot
+BOT_NAME= 'Thrive-Society-Bot'
+
 #Admin email
 ADMIN_EMAIL = 'tech@ecofarm.ag'
 #Inventory Notification Email

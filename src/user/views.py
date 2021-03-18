@@ -58,7 +58,7 @@ def notify_admins(email,crm_link):
     Notify admins on slack & email about new user registration.
     """
     msg = "<!channel>*User with the EmailID `%s`  is registered with us!*\n* Contact CRM Link is:* <%s>" % (email,crm_link)
-    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=True)
+    slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=False, username=settings.BOT_NAME)
     #mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
 
     

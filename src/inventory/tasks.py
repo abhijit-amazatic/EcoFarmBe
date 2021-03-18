@@ -63,7 +63,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
         f"- *Admin Link:* {data.get('admin_link')}\n"
     )
-    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=True)
+    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=False, username=settings.BOT_NAME)
 
 def notify_email_inventory_item_added(data):
     """
@@ -137,7 +137,7 @@ def notify_slack_inventory_item_approved(data):
         f"- *Admin Link:* {data.get('admin_link')}\n"
         f"- *Zoho Inventory Item Link:* {data.get('zoho_item_link')}\n"
     )
-    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=True)
+    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=False, username=settings.BOT_NAME)
 
 def notify_email_inventory_item_approved(data):
     """
@@ -170,7 +170,7 @@ def notify_logistics_slack_inventory_item_approved(data):
         f"- *Admin Link:* {data.get('admin_link')}\n"
         f"- *CRM Vendor Link:* {data.get('crm_vendor_link')}\n"
     )
-    slack.chat.post_message(settings.SLACK_LOGISTICS_TRANSPORT_CHANNEL, msg, as_user=True)
+    slack.chat.post_message(settings.SLACK_LOGISTICS_TRANSPORT_CHANNEL, msg, as_user=False, username=settings.BOT_NAME)
 
 def notify_logistics_email_inventory_item_approved(data):
     """
