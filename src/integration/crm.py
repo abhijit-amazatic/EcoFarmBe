@@ -1331,7 +1331,7 @@ def get_field(record, key, field):
     if field in ('Created_By', 'Modified_By'):
         return record.get(key)
     if field in ('parent_1', 'parent_2'):
-        return [record.get(key).get('id')]
+        return [record.get(key).get('name')]
     if field in ('Created_Time', 'Date_Harvested', 'Modified_Time'):
         return datetime.strptime(record.get(key), '%Y-%m-%dT%H:%M:%S%z').date()
     if field in date_fields:
