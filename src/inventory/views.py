@@ -756,3 +756,29 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
         get_custom_inventory_data_from_crm(obj.id)
         notify_inventory_item_added.delay(user.email, obj.id)
         create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
+
+
+class InventoryExportViewSet(viewsets.ModelViewSet):
+    """
+    Inventory  Ecport View
+    """
+    permission_classes = (InventoryPermission, )
+    filter_backends = (CustomOrderFilter,filters.DjangoFilterBackend,)
+    filterset_class = DataFilter
+    ordering_fields = '__all__'
+    ordering = ('-Created_Time',)
+    pagination_class = None
+
+    def get_serializer_class(self):
+        """
+        Return serializer.
+        """
+        if not self.request.user.is_authenticated:
+            return LogoutInventorySerializer
+        return InventorySerializer
+
+    def get_queryset(self):
+        """
+         Return QuerySet.
+        """
+        return Inventory.objects.filter(cf_cfi_published=True)        

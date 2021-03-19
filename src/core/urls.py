@@ -62,7 +62,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
                              InventoryNutrientsView,InventoryCountyView,
                              InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
-                             InventoryWebHook)
+                             InventoryWebHook,InventoryExportViewSet)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -106,6 +106,8 @@ router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")
 router.register(r'organization', OrganizationViewSet, base_name="organization")
 router.register(r'license', LicenseViewSet, 'license-all')
+router.register(r'export-inventory', InventoryExportViewSet, base_name="inventory-export")
+
 router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/brand', BrandViewSet, 'brand'),
     ('organization/(?P<parent_organization>[^/.]+)/license', LicenseViewSet, 'license'),
@@ -240,6 +242,7 @@ urlpatterns = [
     path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
+    
 
 ] + router.urls
 
