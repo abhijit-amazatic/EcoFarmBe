@@ -9,7 +9,6 @@ from django.contrib.contenttypes.fields import (GenericRelation, )
 from django.conf import settings
 from django.utils import timezone
 
-
 class PermissionGroup(models.Model):
     """
     The permission Group.
@@ -98,6 +97,19 @@ class InternalRole(models.Model):
         'brand.ProfileCategory',
         verbose_name=_('Profile Categories'),
         blank=True,
+    )
+
+    profile_categories = models.ManyToManyField(
+        'brand.ProfileCategory',
+        verbose_name=_('Profile Categories'),
+        blank=True,
+    )
+
+    role_users = models.ManyToManyField(
+        'user.User',
+        verbose_name=_('Role Users'),
+        blank=True,
+        through='user.User_internal_roles',
     )
 
     owned_profiles_only = models.BooleanField(_('Owned Profiles Only'), default=True,)
