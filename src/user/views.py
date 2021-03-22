@@ -84,7 +84,7 @@ class SearchQueryView(APIView):
         elif request.query_params.get('business_dba', None):
             result = search_query('Licenses', request.query_params['business_dba'], 'Business_DBA', True)
         elif request.query_params.get('license_number', None):
-            license_number = request.query_params['license_number']
+            license_number = request.query_params['license_number'].strip()
             is_allow_all = request.query_params.get('is_allow_all', False)
             if is_allow_all in [True, 'true']:
                 result = search_query('Licenses', license_number, 'Name', is_license=True)
