@@ -6,6 +6,7 @@ from django.contrib.admin.utils import (unquote,)
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from django.db import models
+from django.db.models.query import QuerySet
 from django.shortcuts import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -566,7 +567,7 @@ class InlineCountyDailySummaryAdmin(admin.TabularInline):
     
 
 
-class CountyAdmin(ImportExportModelAdmin,admin.ModelAdmin):
+class CountyAdmin(ExportActionMixin, admin.ModelAdmin):
     """
     Admin
     """
@@ -576,7 +577,14 @@ class CountyAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     ordering = ('-name',)
     readonly_fields = ('name',)
     resource_class = InlineCountyDailySummaryAdminResource
-    
+
+    def get_export_data(self, file_format, queryset, *args, **kwargs):
+        """
+        Returns file_format representation for given queryset.
+        """
+        res_qs = CountyDailySummary.objects.filter(county__in=queryset).order_by('-county__name')
+        return super().get_export_data(file_format, res_qs, *args, **kwargs)
+
 
 admin.site.register(County, CountyAdmin)
 admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)
