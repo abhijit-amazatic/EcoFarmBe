@@ -236,8 +236,9 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Return inventory list queryset with summary.
         """
         page_size = request.query_params.get('page_size', 50)
+        statuses = request.query_params.get('cf_status__in').split(',')
         summary = self.filter_queryset(self.get_queryset())
-        summary = get_inventory_summary(summary)
+        summary = get_inventory_summary(summary, statuses)
         params = dict()
         for k, v in request.query_params.items():
             if k not in ['cf_status__in', 'order-by', 'page', 'page_size'] and v:
