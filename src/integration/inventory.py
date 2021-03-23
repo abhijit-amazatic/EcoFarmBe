@@ -579,7 +579,7 @@ def get_inventory_summary(inventory, statuses):
         response = dict()
         categories = ['In-Testing',
                       'Processing',
-                      'Vegging,Flowering,Sold',]
+                      'Vegging,Flowering,Under Contract', 'Sold']
         labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
         response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
         response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
