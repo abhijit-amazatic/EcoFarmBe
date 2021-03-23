@@ -236,7 +236,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Return inventory list queryset with summary.
         """
         page_size = request.query_params.get('page_size', 50)
-        statuses = request.query_params.get('cf_status__in').split(',')
+        statuses = request.query_params.get('cf_status__in')
         summary = self.filter_queryset(self.get_queryset())
         summary = get_inventory_summary(summary, statuses)
         params = dict()

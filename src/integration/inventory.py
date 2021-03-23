@@ -579,11 +579,11 @@ def get_inventory_summary(inventory, statuses):
         response = dict()
         categories = ['In-Testing',
                       'Processing',
-                      'Vegging', 'Flowering', 'Sold',]
+                      'Vegging,Flowering,Sold',]
         labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
         response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
         response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
-        if isinstance(statuses, list) and len(statuses) == 1 and statuses[0] in categories:
+        if statuses in categories:
             response['total_quantity'] = inventory.filter(inventory_name='EFD').aggregate(Sum('cf_quantity_estimate'))['cf_quantity_estimate__sum']
             for category in ['Tops', 'Smalls', 'Trim']:
                 response[category.lower() + '_quantity'] = inventory.filter(
