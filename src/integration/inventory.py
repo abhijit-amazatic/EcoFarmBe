@@ -401,34 +401,32 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
             try:
                 record['pre_tax_price'] = get_pre_tax_price(record)
             except KeyError:
-                    pass
+                pass
             try:
                 cultivar = get_cultivar_from_db(record['cf_strain_name'])
                 if cultivar:
                     record['cultivar'] = cultivar
             except KeyError:
-                    pass
+                pass
             try:
                 labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
                 if labtest:
                     record['labtest'] = labtest
             except KeyError:
-                    pass
+                pass
             documents, thumbnail_url = check_documents(inventory_name, record)
-            if documents and len(documents) > 0:
-                record['documents'] = documents
-            if thumbnail_url:
-                record['thumbnail_url'] = thumbnail_url
+            record['documents'] = documents
+            record['thumbnail_url'] = thumbnail_url
             try:
                 if record['cf_vendor_name']:
                     record.update(get_record_data(record['cf_vendor_name']))
             except KeyError:
-                    pass
+                pass
             try:
                 if record['category_name']:
                     record['parent_category_name'] = get_parent_category(record['category_name'])
             except KeyError:
-                    pass
+                pass
             record['inventory_name'] = get_inventory_name_from_db(inventory_name)
             obj = InventoryModel.objects.update_or_create(
                 item_id=record['item_id'],
@@ -472,10 +470,8 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                 except KeyError:
                     pass
                 documents, thumbnail_url = check_documents(inventory_name, record)
-                if documents and len(documents) > 0:
-                    record['documents'] = documents
-                if thumbnail_url:
-                    record['thumbnail_url'] = thumbnail_url
+                record['documents'] = documents
+                record['thumbnail_url'] = thumbnail_url
                 try:
                     if record['cf_vendor_name']:
                         record.update(get_record_data(record['cf_vendor_name']))
@@ -492,8 +488,6 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                     defaults=record)
                 # update_price_change(price_data, record)
             except Exception as exc:
-                import traceback
-                traceback.print_exc()
                 print({
                     'item_id': record['item_id'],
                     'error': exc
@@ -512,7 +506,7 @@ def sync_inventory(inventory_name, response):
         try:
             record['pre_tax_price'] = get_pre_tax_price(record)
         except KeyError:
-                    pass
+            pass
         # try:
         #     item = InventoryModel.objects.get(item_id=record['item_id'])
         #     price_data[record['item_id']] = item.price
@@ -523,28 +517,26 @@ def sync_inventory(inventory_name, response):
             if cultivar:
                 record['cultivar'] = cultivar
         except KeyError:
-                    pass
+            pass
         try:
             labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
             if labtest:
                 record['labtest'] = labtest
         except KeyError:
-                    pass
+            pass
         documents, thumbnail_url = check_documents(inventory_name, record)
-        if documents and len(documents) > 0:
-            record['documents'] = documents
-        if thumbnail_url:
-            record['thumbnail_url'] = thumbnail_url
+        record['documents'] = documents
+        record['thumbnail_url'] = thumbnail_url
         try:
             if record['cf_vendor_name']:
                 record.update(get_record_data(record['cf_vendor_name']))
         except KeyError:
-                    pass
+            pass
         try:
             if record['category_name']:
                 record['parent_category_name'] = get_parent_category(record['category_name'])
         except KeyError:
-                    pass
+            pass
         record['inventory_name'] = get_inventory_name_from_db(inventory_name)
         obj, created = InventoryModel.objects.update_or_create(
             item_id=record['item_id'],
