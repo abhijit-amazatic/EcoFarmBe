@@ -252,8 +252,8 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                 print(e)
         user = super().update(instance, validated_data)
         try:
-            update_license_task.delay(dba=instance.license_profile.name, license_id=instance.id)
-        except License.license_profile.RelatedObjectDoesNotExist:
+            update_license_task.delay(dba=instance.legal_business_name, license_id=instance.id)
+        except License.DoesNotExist:
             print('License Profile does not exist.')
             pass
         return user
