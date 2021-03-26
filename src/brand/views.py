@@ -499,6 +499,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                     'is_updated_in_crm': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.is_updated_in_crm,
                     'zoho_crm_id': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.zoho_crm_id,
                     'is_draft': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.is_draft,
+                    'program_name': '' if not hasattr(license, 'program_overview') else license.program_overview.program_details.get('program_name', ''),
                     'brand': "N/A" if not hasattr(license, 'brand') else {
                         'id': "N/A" if not hasattr(license.brand, 'id')else license.brand.id,
                         'brand_name': "N/A" if not hasattr(license.brand, 'brand_name') else license.brand.brand_name,
