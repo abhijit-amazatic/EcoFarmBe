@@ -7,6 +7,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
+
+from simple_history.models import HistoricalRecords
+
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
@@ -45,6 +48,13 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     is_primary = models.BooleanField(_('Is Primary Image'), default=False)
     doc_type = models.CharField(_('Doc Type'), blank=True, null=True, max_length=50)
     order = models.IntegerField(_('Order'), blank=True, null=True)
+
+
+class HistoricalBaseModel(models.Model):
+    ip_address = models.GenericIPAddressField(_('IP address'), blank=True, null=True)
+
+    class Meta:
+        abstract = True
 
 
 class Inventory(models.Model):
@@ -155,6 +165,11 @@ class Inventory(models.Model):
     nutrients = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     ethics_and_certification = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
 
+    history = HistoricalRecords(
+        history_change_reason_field=models.TextField(null=True),
+        bases=[HistoricalBaseModel,],
+    )
+
     def __str__(self):
         return self.name
 
@@ -167,6 +182,78 @@ class ChoiceArrayField(ArrayField):
         }
         defaults.update(kwargs)
         return super(ArrayField, self).formfield(**defaults)
+
+class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
+    """
+    Custom Inventory Model Class
+    """
+    STATUS_CHOICES = (
+        ('pending_for_approval', _('Pending For Approval')),
+        ('approved', _('Approved')),
+    )
+
+    PRICING_POSITION_CHOICES = (
+        ('Negotiable', _('Negotiable')),
+        ('Firm', _('Firm')),
+        ('Min Quantity', _('Min Quantity')),
+        ('Offers Open', _('Offers Open')),
+    )
+
+    PAYMENT_TERMS_CHOICES = (
+        ('60 Days', _('60 Days')),
+        ('21 Days', _('21 Days')),
+    )
+    PAYMENT_METHOD_CHOICES = (
+        ('Cash', _('Cash')),
+        ('ACH', _('ACH')),
+        ('Check', _('Check')),
+        ('Bank Wire', _('Bank Wire')),
+    )
+
+    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='change_request', on_delete=models.CASCADE)
+    quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
+    batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
+
+    farm_price = models.FloatField(_('Farm Price'), blank=True, null=True,)
+    pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
+    have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
+    minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
+
+    payment_terms = models.CharField(_('Payment Terms'), choices=PAYMENT_TERMS_CHOICES, blank=True, null=True, max_length=50)
+    payment_method = ChoiceArrayField(models.CharField(_('Payment Method'), max_length=100, choices=PAYMENT_METHOD_CHOICES), default=list)
+
+    extra_documents = GenericRelation(Documents)
+
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
+
+    def get_item_update_data(self):
+        data = {
+            'item_id': self.item.item_id,
+            'inventory_name': self.item.inventory_name,
+            'available_stock': self.quantity_available,
+            'cf_date_available': self.batch_availability_date,
+            'cf_farm_price': str(self.farm_price),
+            'cf_farm_price_2': self.farm_price,
+            'cf_seller_position': self.pricing_position,
+            'cf_payment_terms': self.payment_terms,
+            'cf_payment_method': self.payment_method,
+        }
+        if self.have_minimum_order_quantity:
+            data['cf_minimum_quantity'] = int(self.minimum_order_quantity)
+        else:
+            data['cf_minimum_quantity'] = None
+        return data
+
+    def __str__(self):
+        return "%s" % (self.item)
+
+    class Meta:
+        verbose_name = _('Inventory Items Change Request')
+        verbose_name_plural = _('Inventory Items Change Requests')
+
 
 
 class CustomInventory(TimeStampFlagModelMixin, models.Model):

@@ -15,6 +15,7 @@ from .models import (
     ItemFeedback,
     InTransitOrder,
     Documents,
+    InventoryItemsChangeRequest,
 )
 
 
@@ -161,3 +162,14 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         model = CustomInventory
         exclude = ('cultivar', 'zoho_item_id')
         read_only_fields = ('status', 'sku', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
+
+
+class  InventoryItemsChangeRequestSerializer(serializers.ModelSerializer):
+    """
+    Inventory Serializer
+    """
+
+    class Meta:
+        model = InventoryItemsChangeRequest
+        exclude = ()
+        read_only_fields = ('status', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)

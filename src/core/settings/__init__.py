@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'labtest',
     'import_export',
     'multiselectfield',
-    'fee_variable'
+    'fee_variable',
+    'simple_history',
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',
@@ -77,6 +78,7 @@ MIDDLEWARE += [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',
 ]
 
@@ -195,4 +197,4 @@ CKEDITOR_RESTRICT_BY_USER = False
 #you can also set it to 'SOMEORIGIN'
 X_FRAME_OPTIONS = 'DENY'
 
-
+SIMPLE_HISTORY_REVERT_DISABLED = True

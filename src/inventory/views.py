@@ -18,10 +18,15 @@ from django.shortcuts import get_object_or_404
 
 from django.core.paginator import Paginator
 from core.pagination import PageNumberPagination
-from .serializers import (InventorySerializer, LogoutInventorySerializer,
-                          ItemFeedbackSerializer, InTransitOrderSerializer,
-                          CustomInventorySerializer,)
-from .models import (Inventory, ItemFeedback, InTransitOrder, Documents, CustomInventory)
+from .serializers import (
+    InventorySerializer,
+    LogoutInventorySerializer,
+    ItemFeedbackSerializer,
+    InTransitOrderSerializer,
+    CustomInventorySerializer,
+    InventoryItemsChangeRequestSerializer,
+)
+from .models import (Inventory, ItemFeedback, InTransitOrder, Documents, CustomInventory, InventoryItemsChangeRequest)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
                                    get_inventory_name, update_inventory_item)
@@ -263,25 +268,25 @@ class InventoryViewSet(viewsets.ModelViewSet):
         data['results'] = serializer.data
         return Response(data)
 
-    def put(self, request):
-        """
-        Update inventory item.
-        """
-        is_update_zoho = request.query_params.get('is_update_zoho', False)
-        item = request.data
-        inventory_name = 'inventory_efd' if item.get('inventory_name') == 'EFD' else 'inventory_efl'
-        item.pop('inventory_name')
-        if item.get('labtest'):
-            obj = LabTest.objects.update_or_create(id=item.get('labtest').get('id'), defaults=item.get('labtest'))
-            item.pop('labtest')
-        if item.get('cultivar'):
-            obj = Cultivar.objects.update_or_create(id=item.get('cultivar').get('id'), defaults=item.get('cultivar'))
-            item.pop('cultivar')
-        obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
-        if is_update_zoho:
-            response = update_inventory_item(inventory_name, item.get('item_id'), item)
-            return Response(response)
-        return Response(item)
+    # def put(self, request):
+    #     """
+    #     Update inventory item.
+    #     """
+    #     is_update_zoho = request.query_params.get('is_update_zoho', False)
+    #     item = request.data
+    #     inventory_name = 'inventory_efd' if item.get('inventory_name') == 'EFD' else 'inventory_efl'
+    #     item.pop('inventory_name')
+    #     if item.get('labtest'):
+    #         obj = LabTest.objects.update_or_create(id=item.get('labtest').get('id'), defaults=item.get('labtest'))
+    #         item.pop('labtest')
+    #     if item.get('cultivar'):
+    #         obj = Cultivar.objects.update_or_create(id=item.get('cultivar').get('id'), defaults=item.get('cultivar'))
+    #         item.pop('cultivar')
+    #     obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
+    #     if is_update_zoho:
+    #         response = update_inventory_item(inventory_name, item.get('item_id'), item)
+    #         return Response(response)
+    #     return Response(item)
 
 class InventoryWebHook(APIView):
     """
@@ -783,3 +788,53 @@ class InventoryExportViewSet(viewsets.ModelViewSet):
          Return QuerySet.
         """
         return Inventory.objects.filter(cf_cfi_published=True)        
+
+
+class InventoryItemsChangeRequestFilterSet(FilterSet):
+    status__in = CharInFilter(field_name='status', lookup_expr='in')
+    class Meta:
+        model = CustomInventory
+        fields = {
+            'status':['icontains', 'exact'],
+        }
+
+
+class InventoryItemsChangeRequestViewSet(viewsets.ModelViewSet):
+    """
+    Inventory View
+    """
+    permission_classes = (IsAuthenticated, )
+    filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
+    filterset_class = InventoryItemsChangeRequestFilterSet
+    ordering_fields = '__all__'
+    pagination_class = BasicPagination
+    ordering = ('created_on',)
+    serializer_class = InventoryItemsChangeRequestSerializer
+    queryset = InventoryItemsChangeRequest.objects.all()
+
+
+    def perform_create(self, serializer):
+        obj = serializer.save()
+        user = serializer.context['request'].user
+        obj.created_by = {
+            'email': user.email,
+            'phone': user.phone.as_e164,
+            'name':  user.get_full_name(),
+        }
+        obj.save()
+        get_custom_inventory_data_from_crm(obj.id)
+        create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
+
+
+    def put(self, request):
+        """
+        Update inventory item.
+        """
+        is_update_zoho = request.query_params.get('is_update_zoho', False)
+        item = request.data
+        inventory_name = 'inventory_efd' if item.get('inventory_name') == 'EFD' else 'inventory_efl'
+        item.pop('inventory_name')
+        if is_update_zoho:
+            response = update_inventory_item(inventory_name, item.get('item_id'), item)
+            return Response(response)
+        return Response(item)
