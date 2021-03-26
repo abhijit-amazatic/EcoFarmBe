@@ -241,6 +241,8 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         queryset |= self.model.objects.select_related('license_profile').filter(license_profile__name__contains={'name':search_term})
         return queryset, use_distinct
 
+    
+    name.admin_order_field = 'license_profile__name'
     inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin,]
     form = LicenseUpdatedForm
     extra = 0
@@ -250,11 +252,12 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status')
     readonly_fields = ('created_on','updated_on',)
     list_filter = (
-        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status',
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
     actions = [approve_license_profile, delete_model, ] 
     list_per_page = 50
+
 
     @transaction.atomic
     def save_model(self, request, obj, form, change):
