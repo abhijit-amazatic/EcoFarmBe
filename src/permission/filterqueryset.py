@@ -62,11 +62,14 @@ class filterQuerySet:
         q = Q()
         for role in self.user.internal_roles.all():
             if role.permissions.filter(id='view_license').exists():
+                p_cats = list(role.profile_categories.all().values_list('name', flat=True))
+                if 'retail' in p_cats:
+                    p_cats = p_cats + ['storefront', 'delivery']
                 if not role.owned_profiles_only:
-                    q |= Q(profile_category__in=role.profile_categories.all().values_list('name', flat=True))
+                    q |= Q(profile_category__in=p_cats)
                 else:
                     q |= Q(
-                        profile_category__in=role.profile_categories.all().values_list('name', flat=True),
+                        profile_category__in=p_cats,
                         license_profile__crm_owner_email=self.user.email,
                     )
         q |= Q(organization__created_by=self.user)
