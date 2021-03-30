@@ -8,7 +8,7 @@ from import_export import resources
 
 from core import settings
 from core.settings import (AWS_BUCKET, )
-from import_export.admin import (ImportExportModelAdmin,ExportActionMixin)
+from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
 
 from ..tasks import (create_approved_item_po, notify_inventory_item_approved)
 from ..models import (
@@ -135,6 +135,7 @@ class InventoryAdmin(SimpleHistoryAdmin):
     model = Inventory
     list_display = (
         'name',
+        'cf_vendor_name',
         'sku',
         'actual_available_stock',
         'price',
@@ -148,8 +149,8 @@ class InventoryAdmin(SimpleHistoryAdmin):
     def has_change_permission(self, request, obj=None):
         if isinstance(obj, Inventory):
             info = obj.__class__._meta.app_label, obj.__class__._meta.model_name
-            if request.path == reverse("admin:{}_{}_change".format(*info), args=(obj.pk,)):
-                return False
+            if request.path.startswith(reverse("admin:{}_{}_history".format(*info), args=(obj.pk,))):
+                return True
         return True
 
     def has_add_permission(self, request, obj=None):

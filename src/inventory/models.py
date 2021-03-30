@@ -220,7 +220,7 @@ class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
     minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
 
     payment_terms = models.CharField(_('Payment Terms'), choices=PAYMENT_TERMS_CHOICES, blank=True, null=True, max_length=50)
-    payment_method = ChoiceArrayField(models.CharField(_('Payment Method'), max_length=100, choices=PAYMENT_METHOD_CHOICES), default=list)
+    payment_method = ChoiceArrayField(models.CharField(_('Payment Method'), max_length=100, choices=PAYMENT_METHOD_CHOICES), blank=True, default=list)
 
     extra_documents = GenericRelation(Documents)
 

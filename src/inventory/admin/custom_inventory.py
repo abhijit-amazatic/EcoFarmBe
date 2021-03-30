@@ -352,7 +352,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                         data['cf_farm_price'] = str(int(obj.farm_ask_price))
                         data['cf_farm_price_2'] = obj.farm_ask_price
                         # data['purchase_rate'] = obj.farm_ask_price
-                        data['rate'] = obj.farm_ask_price + tax_and_mcsp_fee
+                        data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
 
                     if obj.pricing_position:
                         data['cf_seller_position'] = obj.pricing_position

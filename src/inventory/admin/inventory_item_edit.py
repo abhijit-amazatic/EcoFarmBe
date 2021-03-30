@@ -55,7 +55,7 @@ class InventoryItemsChangeRequestAdmin(AdminApproveMixin, admin.ModelAdmin):
         'updated_on',
     )
     readonly_fields = (
-        'status',
+        # 'status',
         'approved_by',
         'approved_on',
         'created_by',
@@ -96,7 +96,8 @@ class InventoryItemsChangeRequestAdmin(AdminApproveMixin, admin.ModelAdmin):
             if tax_and_mcsp_fee:
                 data = obj.get_item_update_data()
                 if obj.farm_price:
-                    data['price'] = obj.farm_price + tax_and_mcsp_fee
+                    data['price'] = obj.farm_price + sum(tax_and_mcsp_fee)
+                    data['rate'] = obj.farm_price + sum(tax_and_mcsp_fee)
                 inventory_name = 'inventory_efd' if data.get('inventory_name') == 'EFD' else 'inventory_efl'
                 data.pop('inventory_name')
                 try:
