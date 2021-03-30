@@ -21,14 +21,14 @@ from integration.apps.aws import (create_presigned_url, )
 from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id, get_inventory_obj)
 from integration.crm import search_query
 from brand.models import (License, LicenseProfile,)
-from fee_variable.models import (CustomInventoryVariable, TaxVariable)
+from fee_variable.utils import (get_tax_and_mcsp_fee,)
+from .mixin import AdminApproveMixin
 from ..models import (
     Inventory,
     CustomInventory,
     Documents,
 )
 from ..tasks import (create_approved_item_po, notify_inventory_item_approved)
-
 
 
 
@@ -71,38 +71,6 @@ def get_category_id(category_name):
         'Secure Cash Handling':                     '2155380000004337548',
     }
     return name_id_map.get(category_name, '')
-
-custom_inventory_variable_program_map = {
-    'spot market farm': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_BRONZE,
-    },
-    'integrated farm partner silver': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_SILVER,
-    },
-    'integrated farm partner gold': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_GOLD,
-    },
-    'Silver - Member': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IBP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_SILVER,
-    },
-    'Gold - VIP': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IBP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_GOLD,
-    },
-    'IFP No Tier': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_NO_TIER,
-    },
-    'IBP No Tier': {
-        'program_type': CustomInventoryVariable.PROGRAM_TYPE_IBP,
-        'tier': CustomInventoryVariable.PROGRAM_TIER_NO_TIER,
-    },
-}
-
 
 
 class InlineDocumentsAdmin(GenericStackedInline):
@@ -165,14 +133,22 @@ class CustomInventoryForm(forms.ModelForm):
         fields = '__all__'
 
 
-
-class CustomInventoryAdmin(admin.ModelAdmin):
+class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
-    change_form_template = 'inventory/custom_inventory_change_form.html'
-    list_display = ('cultivar_name', 'category_name', 'vendor_name', 'grade_estimate', 'quantity_available', 'farm_ask_price', 'status', 'created_on', 'updated_on',)
-    # readonly_fields = ( 'status', 'cultivar_name', 'created_on', 'updated_on', 'vendor_name', 'zoho_item_id', 'sku', 'created_by', 'approved_by', 'approved_on',)
+    form = CustomInventoryForm
+    list_display = (
+        'cultivar_name',
+        'category_name',
+        'vendor_name',
+        'grade_estimate',
+        'quantity_available',
+        'farm_ask_price',
+        'status',
+        'created_on',
+        'updated_on',
+    )
     readonly_fields = (
         'cultivar_name',
         'status',
@@ -190,9 +166,6 @@ class CustomInventoryAdmin(admin.ModelAdmin):
         'created_on',
         'updated_on',
     )
-    inlines = [InlineDocumentsAdmin,]
-    # actions = ['test_action', ]
-    form = CustomInventoryForm
     fieldsets = (
         ('BATCH & QUALITY INFORMATION', {
             'fields': (
@@ -248,13 +221,8 @@ class CustomInventoryAdmin(admin.ModelAdmin):
             ),
         }),
     )
-
-    def response_change(self, request, obj):
-        if '_approve' in request.POST:
-            if obj.status == 'pending_for_approval':
-                self.approve(request, obj)
-            return HttpResponseRedirect('.')
-        return super().response_change(request, obj)
+    inlines = [InlineDocumentsAdmin,]
+    # actions = ['test_action', ]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -262,10 +230,6 @@ class CustomInventoryAdmin(admin.ModelAdmin):
                 field.queryset = field.queryset.filter(status='approved')
         return field
 
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        if obj and obj.status == 'pending_for_approval' and change:
-            context['show_approve'] = True
-        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def generate_sku(self, obj, postfix):
         sku = []
@@ -346,50 +310,9 @@ class CustomInventoryAdmin(admin.ModelAdmin):
 
         return None
 
-    def tax_and_mcsp_fee(self, request, obj):
-        lp = LicenseProfile.objects.filter(name=obj.vendor_name).first()
-        if lp:
-            if lp.license.status == 'approved':
-                program_name = None
-                try:
-                    program_overview = lp.license.program_overview
-                    program_name = program_overview.program_details.get('program_name')
-                except License.program_overview.RelatedObjectDoesNotExist:
-                    pass
-                    # self.message_user(request, 'program overview not exist', level='error')
-                if not program_name:
-                    if lp.license.is_buyer:
-                        program_name = 'IBP No Tier'
-                    else:
-                        program_name = 'IFP No Tier'
-                    self.message_user(request, f'No program tier found for profile, using {program_name} MCSP fee.', level='warning')
-
-                tier = custom_inventory_variable_program_map.get(program_name, {})
-                InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
-                if InventoryVariable and getattr(InventoryVariable, 'mcsp_fee'):
-                    tax_var = TaxVariable.objects.latest('-created_on')
-                    if tax_var and tax_var.cultivar_tax:
-                        return float(InventoryVariable.mcsp_fee)+float(tax_var.cultivar_tax)
-                    else:
-                        self.message_user(request, 'No Cultivar Tax found.', level='error')
-                else:
-                    program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
-                    program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
-                    self.message_user(
-                        request,
-                        (
-                            'MCSP fee not found in Vendor Inventory Variables for '
-                            f"Program Type: '{program_type_choices_dict.get(tier.get('program_type'))}' "
-                            f"and Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
-                        ),
-                        level='error')
-
-            else:
-                self.message_user(request, 'Profile is not approved.', level='error')
-
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            tax_and_mcsp_fee = self.tax_and_mcsp_fee(request, obj)
+            tax_and_mcsp_fee = get_tax_and_mcsp_fee(obj.vendor_name, request,)
             if tax_and_mcsp_fee:
                 if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                     self.get_crm_data(request, obj)

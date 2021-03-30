@@ -1,29 +1,15 @@
-from os import urandom
-from django import forms
-from django.contrib.admin import widgets
 from django.contrib import admin
-from django.contrib.admin.utils import (unquote,)
-from django.contrib.contenttypes.admin import GenericStackedInline
-from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from django.db import models
-from django.db.models.query import QuerySet
-from django.shortcuts import (HttpResponseRedirect, reverse)
-from django.utils import timezone
-from django.utils.encoding import force_str
-from django.utils.html import mark_safe
+from django.shortcuts import (reverse, )
 
 from simple_history.admin import SimpleHistoryAdmin
-import nested_admin
+from import_export import resources
 
 
 from core import settings
 from core.settings import (AWS_BUCKET, )
+from import_export.admin import (ImportExportModelAdmin,ExportActionMixin)
 
-from integration.apps.aws import (create_presigned_url, )
-from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id, get_inventory_obj)
-from integration.crm import search_query
-from brand.models import (License, LicenseProfile,)
-from fee_variable.models import (CustomInventoryVariable, TaxVariable)
 from ..tasks import (create_approved_item_po, notify_inventory_item_approved)
 from ..models import (
     Inventory,
@@ -36,8 +22,6 @@ from ..models import (
 )
 from .custom_inventory import CustomInventoryAdmin
 from .inventory_item_edit import InventoryItemsChangeRequestAdmin
-from import_export import resources
-from import_export.admin import (ImportExportModelAdmin,ExportActionMixin)
 
 
 
@@ -59,7 +43,8 @@ class DailyInventoryAggrigatedSummaryResource(resources.ModelResource):
         )
         #exclude = ('imported', )
         #export_order = ('id', 'price', 'author', 'name')
-        
+
+
 class DailyInventoryAggrigatedSummaryAdmin(ExportActionMixin,admin.ModelAdmin):
     """
     Summary Admin.
@@ -100,8 +85,8 @@ class InlineCountyDailySummaryAdminResource(resources.ModelResource):
             'total_quantity',
             'trim_quantity',
         )
-        
-        
+
+
 class InlineCountyDailySummaryAdmin(admin.TabularInline):
     extra = 0
     model = CountyDailySummary
@@ -121,8 +106,7 @@ class InlineCountyDailySummaryAdmin(admin.TabularInline):
     )
     search_fields = ('date', 'county__name',)
     can_delete = False
-    
-    
+
 
 
 class CountyAdmin(ExportActionMixin, admin.ModelAdmin):
@@ -157,7 +141,6 @@ class InventoryAdmin(SimpleHistoryAdmin):
         'cf_farm_price_2',
         'created_time'
     )
-
     search_fields = ('sku', 'name',)
     history_list_display = ["ip_address"]
     ordering = ('-created_time',)
