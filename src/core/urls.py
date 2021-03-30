@@ -49,7 +49,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
                                GetRecordView, LabTestView, GetAutoComplete,NotificationView,
-                               DownloadSignDocumentView, )
+                               DownloadSignDocumentView, CampaignView)
 
 from fee_variable.views import (OrderVariableView,
                                 CustomInventoryVariableView,
@@ -242,6 +242,7 @@ urlpatterns = [
     path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
+    path(r'campaign/', CampaignView.as_view(), name="campaign"),
     
 
 ] + router.urls

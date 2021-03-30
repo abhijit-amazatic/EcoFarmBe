@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from core.mixins.models import (TimeStampFlagModelMixin)
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.postgres.fields import (ArrayField,)
 
 
 class OrderVariable(TimeStampFlagModelMixin,models.Model):
@@ -86,3 +87,13 @@ class TaxVariable(TimeStampFlagModelMixin,models.Model):
         verbose_name = _('Tax Variable')
         verbose_name_plural = _('Tax Variables')      
         
+class CampaignVariable(TimeStampFlagModelMixin,models.Model):
+    """
+    Zoho campaign variables.
+    """
+    from_email = models.EmailField(verbose_name=_("From Email"), max_length=255, blank=True, null=True)
+    mailing_list_id = ArrayField(models.CharField(max_length=255), blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('Campaign Variable')
+        verbose_name_plural = _('Campaign Variables')

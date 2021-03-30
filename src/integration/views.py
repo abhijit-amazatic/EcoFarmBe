@@ -3,6 +3,8 @@ Integration views
 """
 from datetime import (datetime, timedelta)
 import base64
+import ast
+from io import (BytesIO, )
 from django.http import (QueryDict,)
 from rest_framework import (status,)
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
@@ -56,7 +58,7 @@ from integration.sign import (upload_pdf_box, get_document,
 from integration.tasks import (send_estimate, )
 from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
-                           BOX_CLIENT_SECRET,
+                           BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET
     )
 from slacker import Slacker
 from core.mailer import (mail, mail_send,)
@@ -72,6 +74,9 @@ from .views_permissions import (
     SalesOrderViewPermission,
 )
 from brand.models import (License, Sign, )
+from integration.campaign import (create_campaign, )
+from fee_variable.models import (CampaignVariable, )
+from integration.apps.aws import (get_boto_client, create_presigned_url)
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -1072,3 +1077,34 @@ class NotificationView(APIView):
                     "error": e}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Please specify channel/message correctly!'}, status=status.HTTP_400_BAD_REQUEST)
     
+class CampaignView(APIView):
+    """
+    View class for Zoho Campaign.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Create zoho campaign.
+        """
+        campaign_name = request.data.get('campaign_name')
+        campaign_subject = request.data.get('campaign_subject')
+        content_data = request.data.get('content_data')
+
+        file_name = f'{campaign_subject}.html'
+        file_obj = BytesIO(bytes(content_data.encode('utf-8')))
+
+        client = get_boto_client('s3')
+        response = client.upload_fileobj(file_obj, CAMPAIGN_HTML_BUCKET, file_name)
+        response = create_presigned_url(CAMPAIGN_HTML_BUCKET, file_name)
+        if response['status_code'] == 0:
+            content_url = response['response']
+        else:
+            return Response({'error': 'error occured while upload file to s3.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        vars = CampaignVariable.objects.values('from_email', 'mailing_list_id')[0]
+        list_details = dict()
+        mailing_list_ids = ast.literal_eval(vars['mailing_list_id'][0])
+        for mailing_list in mailing_list_ids:
+            list_details[mailing_list] = []
+        return Response(create_campaign(campaign_name, vars['from_email'], campaign_subject, list_details, content_url))

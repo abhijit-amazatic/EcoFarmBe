@@ -24,6 +24,12 @@ class TaxVariableAdmin(admin.ModelAdmin):
     """
     Tax Variables
     """
+
+class CampaignVariableAdmin(admin.ModelAdmin):
+    """
+    Zoho campaign Variables
+    """
 admin.site.register(OrderVariable, OrderVariableAdmin)
 admin.site.register(CustomInventoryVariable, CustomInventoryVariableAdmin)
 admin.site.register(TaxVariable, TaxVariableAdmin)
+admin.site.register(CampaignVariable, CampaignVariableAdmin)
