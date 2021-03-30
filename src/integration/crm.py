@@ -752,7 +752,7 @@ def update_license(dba, license=None, license_id=None):
             moved_file = move_file(file_id, license_folder)
             license_url = get_shared_link(file_id)
             if license_url:
-                license['uploaded_license_to'] = license_url  + "?id=" + moved_file.id
+                license['uploaded_license_to'] = license_url + "?id=" + moved_file.id
                 license_to.box_url = license_url
                 license_to.box_id = moved_file.id
                 license_to.save()
@@ -773,7 +773,7 @@ def update_license(dba, license=None, license_id=None):
             moved_file = move_file(file_id, license_folder)
             seller_permit_url = get_shared_link(file_id)
             if seller_permit_url:
-                license['uploaded_sellers_permit_to'] = seller_permit_url  + "?id=" + moved_file.id
+                license['uploaded_sellers_permit_to'] = seller_permit_url + "?id=" + moved_file.id
                 license_to.box_url = seller_permit_url
                 license_to.box_id = moved_file.id
                 license_to.save()

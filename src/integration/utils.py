@@ -1,6 +1,9 @@
 import requests
 from datetime import (datetime, )
 
+from brand.models import (License,)
+from inventory.models import (Documents, )
+
 import googlemaps
 from pdfminer.layout import LAParams, LTTextBox
 from pdfminer.pdfpage import PDFPage
@@ -172,3 +175,22 @@ def get_overview_field(key, value, obj, crm_obj):
         else:
             return dictionary[index].get(field)
     return None
+
+def update_documents():
+    """
+    Update documents model with latest license and seller permit links.
+    """
+    updated_list = list()
+    licenses = License.objects.all()
+    for license in licenses:
+        if license.uploaded_license_to:
+            documents = Documents.objects.get(object_id=license.id, doc_type='license')
+            documents.box_url = license.uploaded_license_to
+            documents.save()
+            updated_list.append(license.id)
+        if  license.uploaded_sellers_permit_to:
+            documents = Documents.objects.get(object_id=license.id, doc_type='seller_permit')
+            documents.box_url = license.uploaded_sellers_permit_to
+            documents.save()
+            updated_list.append(license.id)
+    return updated_list

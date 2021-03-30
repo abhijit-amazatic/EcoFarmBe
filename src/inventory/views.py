@@ -787,7 +787,21 @@ class InventoryExportViewSet(viewsets.ModelViewSet):
         """
          Return QuerySet.
         """
-        return Inventory.objects.filter(cf_cfi_published=True)        
+        return Inventory.objects.filter(cf_cfi_published=True)
+
+    def list(self, request):
+        """
+        Return inventory list queryset with summary for export.
+        """
+        data = dict()
+        summary = self.filter_queryset(self.get_queryset())
+        statuses = request.query_params.get('cf_status__in')
+        summary = get_inventory_summary(summary, statuses)
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        data['summary'] = summary
+        data['results'] = serializer.data
+        return Response(data)
 
 
 class InventoryItemsChangeRequestFilterSet(FilterSet):
