@@ -753,6 +753,9 @@ def update_license(dba, license=None, license_id=None):
             license_url = get_shared_link(file_id)
             if license_url:
                 license['uploaded_license_to'] = license_url  + "?id=" + moved_file.id
+                license_to.box_url = license_url
+                license_to.box_id = moved_file.id
+                license_to.save()
         except Exception as exc:
             print('Error in update license', exc)
             pass
@@ -768,8 +771,12 @@ def update_license(dba, license=None, license_id=None):
             else:
                 file_id = box_file.id
             moved_file = move_file(file_id, license_folder)
-            license_url = get_shared_link(file_id)
-            license['uploaded_sellers_permit_to'] = license_url  + "?id=" + moved_file.id
+            seller_permit_url = get_shared_link(file_id)
+            if seller_permit_url:
+                license['uploaded_sellers_permit_to'] = seller_permit_url  + "?id=" + moved_file.id
+                license_to.box_url = seller_permit_url
+                license_to.box_id = moved_file.id
+                license_to.save()
         except Exception as exc:
             print('Error in update license', exc)
             pass
