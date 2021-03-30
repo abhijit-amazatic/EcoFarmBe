@@ -797,7 +797,7 @@ class InventoryExportViewSet(viewsets.ModelViewSet):
         summary = self.filter_queryset(self.get_queryset())
         statuses = request.query_params.get('cf_status__in')
         summary = get_inventory_summary(summary, statuses)
-        queryset = self.get_queryset()
+        queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         data['summary'] = summary
         data['results'] = serializer.data
