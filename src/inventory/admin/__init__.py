@@ -40,6 +40,7 @@ class DailyInventoryAggrigatedSummaryResource(resources.ModelResource):
             'tops_quantity',
             'total_quantity',
             'trim_quantity',
+            'average_thc',
         )
         #exclude = ('imported', )
         #export_order = ('id', 'price', 'author', 'name')
@@ -64,6 +65,7 @@ class DailyInventoryAggrigatedSummaryAdmin(ExportActionMixin,admin.ModelAdmin):
         'tops_quantity',
         'total_quantity',
         'trim_quantity',
+        'average_thc',
     )
     resource_class = DailyInventoryAggrigatedSummaryResource
 
@@ -84,6 +86,7 @@ class InlineCountyDailySummaryAdminResource(resources.ModelResource):
             'tops_quantity',
             'total_quantity',
             'trim_quantity',
+            'average_thc',
         )
 
 
@@ -103,6 +106,7 @@ class InlineCountyDailySummaryAdmin(admin.TabularInline):
         'tops_quantity',
         'total_quantity',
         'trim_quantity',
+        'average_thc',
     )
     search_fields = ('date', 'county__name',)
     can_delete = False
