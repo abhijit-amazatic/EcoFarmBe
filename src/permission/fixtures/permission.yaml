@@ -607,6 +607,13 @@
 
 
 
+-   model: permission.permission
+    pk: create_email_campaign
+    fields:
+        name: Create Email Campaign
+        type: internal
+        description: ''
+        group: 5
 
 
 
