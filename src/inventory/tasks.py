@@ -344,7 +344,8 @@ def save_daily_aggrigated_summary():
         'smalls_quantity':summary['smalls_quantity'],
         'tops_quantity':summary['tops_quantity'],
         'total_quantity':summary['total_quantity'],
-        'trim_quantity':summary['trim_quantity']
+        'trim_quantity':summary['trim_quantity'],
+        'average_thc':summary['average_thc']
     }
         
     if summary:
@@ -372,7 +373,8 @@ def save_daily_aggrigated_county_summary():
             'smalls_quantity':summary['smalls_quantity'],
             'tops_quantity':summary['tops_quantity'],
             'total_quantity':summary['total_quantity'],
-            'trim_quantity':summary['trim_quantity']
+            'trim_quantity':summary['trim_quantity'],
+            'average_thc':summary['average_thc']
         }
         
         if summary:

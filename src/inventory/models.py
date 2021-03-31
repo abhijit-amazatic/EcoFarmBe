@@ -429,6 +429,7 @@ class DailyInventoryAggrigatedSummary(models.Model):
     tops_quantity = models.FloatField(_('Tops(lbs)'), blank=True, null=True, max_length=255)
     total_quantity = models.FloatField(_('Total(lbs)'), blank=True, null=True, max_length=255)
     trim_quantity =  models.FloatField(_('Trim quantity'), blank=True, null=True, max_length=255)
+    average_thc = models.FloatField(_('Avg THC'), blank=True, null=True, max_length=255)
     
     def __str__(self):
         return "%s" % (self.date.strftime("%B %d,%Y"))
@@ -465,6 +466,7 @@ class CountyDailySummary(models.Model):
     tops_quantity = models.FloatField(_('Tops(lbs)'), blank=True, null=True, max_length=255)
     total_quantity = models.FloatField(_('Total(lbs)'), blank=True, null=True, max_length=255)
     trim_quantity =  models.FloatField(_('Trim quantity'), blank=True, null=True, max_length=255)
+    average_thc = models.FloatField(_('Avg THC'), blank=True, null=True, max_length=255)
     
     def __str__(self):
         return "%s" % (self.date.strftime("%B %d,%Y"))
