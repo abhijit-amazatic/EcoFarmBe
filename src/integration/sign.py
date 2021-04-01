@@ -12,6 +12,7 @@ from core.settings import (
 )
 from integration.box import (create_folder, upload_file_stream,)
 from .utils import (parse_pdf, )
+from core.celery import app
 
 def get_sign_obj():
     """
@@ -91,7 +92,7 @@ def download_pdf(request_id):
     sign_obj = get_sign_obj()
     return sign_obj.download_pdf(request_id)
 
-@app.task(queue="general")
+@app.task(queue="urgent")
 def upload_pdf_box(request_id, folder_id, file_name, is_agreement=False):
     """
     Upload document to box.
