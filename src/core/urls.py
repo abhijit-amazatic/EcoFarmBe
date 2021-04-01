@@ -62,7 +62,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              DocumentView, DocumentStatusView, InventoryDeleteView,
                              InventoryNutrientsView,InventoryCountyView,
                              InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
-                             InventoryWebHook,InventoryExportViewSet)
+                             InventoryWebHook,InventoryExportViewSet,
+                             InventoryItemsChangeRequestViewSet,)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -101,6 +102,7 @@ router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
 router.register(r'inventory', InventoryViewSet, base_name="inventory")
 router.register(r'custom-inventory', CustomInventoryViewSet, base_name="inventory")
+router.register(r'inventory-change', InventoryItemsChangeRequestViewSet, base_name="inventory-change")
 router.register(r'item-feedback', ItemFeedbackViewSet, base_name="feedback")
 router.register(r'cultivar', CultivarViewSet, base_name="cultivar")
 router.register(r'labtest', LabTestViewSet, base_name="labtest")

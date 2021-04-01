@@ -809,7 +809,7 @@ class InventoryExportViewSet(viewsets.ModelViewSet):
 class InventoryItemsChangeRequestFilterSet(FilterSet):
     status__in = CharInFilter(field_name='status', lookup_expr='in')
     class Meta:
-        model = CustomInventory
+        model = InventoryItemsChangeRequest
         fields = {
             'status':['icontains', 'exact'],
         }
