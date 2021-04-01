@@ -743,10 +743,8 @@ def get_buyer_summary(customer):
     invoices = invoices.get('response', [])
     invoices_count = len(invoices)
     invoices_total = sum([i['total'] for i in invoices])
-    invoices_detail = list()
     for invoice in invoices:
         resp = get_invoice(invoice.get('invoice_id'), params={})
-        invoices_detail.append(resp)
         for item in resp['line_items']:
             total_quantity += item['quantity']
             try:

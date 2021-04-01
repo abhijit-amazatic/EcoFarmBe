@@ -519,10 +519,10 @@ class EstimateSignCompleteView(APIView):
                 a = mark_estimate(estimate_id, 'sent')
                 a = mark_estimate(estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
-            response.append(upload_pdf_box(request_id, new_folder, filename, is_agreement))
+            upload_pdf_box.delay(request_id, new_folder, filename, is_agreement)
         if order_number:    
             mail("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number},"Your Thrive Society Order %s." %order_number, request.user.email,file_data=download_pdf(request_id))   
-        return Response(response)
+        return Response({'message': 'Success'})
 
 class GetTemplateStatus(APIView):
     """
