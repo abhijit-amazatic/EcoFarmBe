@@ -31,6 +31,7 @@ from .task_helpers import (
     create_duplicate_crm_vendor_from_crm_account,
     get_custom_inventory_data_from_crm_vendor,
     get_custom_inventory_data_from_crm_account,
+    inventory_item_change,
 )
 from .models import (
     Inventory,
@@ -38,6 +39,7 @@ from .models import (
     DailyInventoryAggrigatedSummary,
     County,
     CountyDailySummary,
+    InventoryItemsChangeRequest,
 )
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -249,6 +251,7 @@ def create_approved_item_po(custom_inventory_id, retry=6):
             "sku": item.sku,
             "quantity": int(item.quantity_available),
             "rate": 0.0,
+            "reference_number": "To feed the CFI",
         }
 
         if warehouse_id:
@@ -425,5 +428,17 @@ def export_inventory_aggrigated_county_csv():
                 upload_file_stream(settings.INVENTORY_CSV_UPLOAD_FOLDER_ID, f, file_name)
         
         
-        
-    
+@app.task(queue="general")
+def inventory_item_change_task(inventory_items_change_request_id):
+    obj = InventoryItemsChangeRequest.objects.get(id=inventory_items_change_request_id)
+    history_qs = obj.item.history.filter(cf_farm_price_2__gt=0)
+    if history_qs:
+        h_obj = history_qs.earliest('history_date')
+        if abs(h_obj.cf_farm_price_2 - obj.farm_price) <= 50:
+            inventory_item_change(obj)
+
+    elif obj.item.cf_farm_price_2:
+        if abs(obj.item.cf_farm_price_2 - obj.farm_price) <= 50: 
+            inventory_item_change(obj)
+    else:
+        inventory_item_change(obj)

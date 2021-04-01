@@ -14,7 +14,7 @@ from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
 from user.models import (User, )
-
+from .fields import (ChoiceArrayField,)
 
 class Documents(TimeStampFlagModelMixin, models.Model):
     """
@@ -173,15 +173,6 @@ class Inventory(models.Model):
     def __str__(self):
         return self.name
 
-
-class ChoiceArrayField(ArrayField):
-    def formfield(self, **kwargs):
-        defaults = {
-            'form_class': forms.MultipleChoiceField,
-            'choices': self.base_field.choices,
-        }
-        defaults.update(kwargs)
-        return super(ArrayField, self).formfield(**defaults)
 
 class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
     """

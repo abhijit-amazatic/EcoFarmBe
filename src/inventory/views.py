@@ -7,6 +7,7 @@ import django_filters
 from django.shortcuts import (render, )
 from django.db.models import (Sum, F, Min, Max, Avg, Q)
 from rest_framework.views import APIView
+from rest_framework.viewsets import (GenericViewSet, mixins)
 from rest_framework.response import (Response, )
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework import (viewsets, status,)
@@ -42,6 +43,7 @@ from .tasks import (
     notify_inventory_item_added,
     create_duplicate_crm_vendor_from_crm_account_task,
     get_custom_inventory_data_from_crm,
+    inventory_item_change_task,
 )
 
 
@@ -813,9 +815,14 @@ class InventoryItemsChangeRequestFilterSet(FilterSet):
         }
 
 
-class InventoryItemsChangeRequestViewSet(viewsets.ModelViewSet):
+class InventoryItemsChangeRequestViewSet(mixins.CreateModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                        #  mixins.UpdateModelMixin,
+                                         mixins.DestroyModelMixin,
+                                         mixins.ListModelMixin,
+                                         GenericViewSet):
     """
-    Inventory View
+    ViewSet
     """
     permission_classes = (IsAuthenticated, )
     filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
@@ -836,19 +843,4 @@ class InventoryItemsChangeRequestViewSet(viewsets.ModelViewSet):
             'name':  user.get_full_name(),
         }
         obj.save()
-        get_custom_inventory_data_from_crm(obj.id)
-        create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
-
-
-    def put(self, request):
-        """
-        Update inventory item.
-        """
-        is_update_zoho = request.query_params.get('is_update_zoho', False)
-        item = request.data
-        inventory_name = 'inventory_efd' if item.get('inventory_name') == 'EFD' else 'inventory_efl'
-        item.pop('inventory_name')
-        if is_update_zoho:
-            response = update_inventory_item(inventory_name, item.get('item_id'), item)
-            return Response(response)
-        return Response(item)
+        inventory_item_change_task.delay(obj.id)

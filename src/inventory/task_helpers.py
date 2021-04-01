@@ -1,4 +1,13 @@
+import re
+from django.utils import timezone
+from django.contrib import messages
+
+from fee_variable.utils import (get_tax_and_mcsp_fee,)
 from integration.crm import (get_crm_obj, search_query, create_records, update_records)
+from integration.inventory import (update_inventory_item,)
+from integration.crm import search_query
+from integration.books import (get_books_obj,)
+
 
 
 accounts_to_vendors_dict = {
@@ -294,3 +303,85 @@ def get_custom_inventory_data_from_crm_account(obj):
                             client_code = vendor.get('Client_Code')
                             if client_code:
                                 obj.client_code = client_code
+
+
+def update_po_item_quantity(obj, request=None):
+    books_obj = get_books_obj()
+    po_obj = books_obj.PurchaseOrders()
+    try:
+        result = po_obj.list_purchase_orders(parameters={'item_id': obj.item.item_id}, parse=False)
+    except Exception as exc:
+        if request:
+            messages.error(request, 'Error while geting item Purchase Order from Zoho Books',)
+        print('Error while geting item Purchase Order from Zoho Books')
+        print(exc)
+    else:
+        if result.get('code') == 0:
+            po_ls = result.get('purchaseorders')
+            if po_ls:
+                for _po in po_ls:
+                    po_ref = _po.get('reference_number', '')
+                    po_ref_condensed = re.sub(r"[\W\s]", '', po_ref)
+                    if po_ref_condensed.lower() == 'tofeedthecfi':
+                        po_id = _po.get('purchaseorder_id')
+                        po = po_obj.get_purchase_order(po_id=po_id, parameters={})
+                        line_items = po.get('line_items')
+                        for item in line_items:
+                            if item.get('item_id') == obj.item.item_id:
+                                if po.get('billed_status') == 'billed':
+                                    item['quantity_billed'] = obj.quantity_available
+                                item['quantity'] = obj.quantity_available
+                                update_result =  po_obj.update_purchase_order(po_id, {'line_items': line_items}, parameters={})
+                                if update_result.get('code') == 0:
+                                    return True
+                                else:
+                                    if request:
+                                        messages.error(request, update_result.get('message'))
+                                    print(update_result)
+            else:
+                if request:
+                    messages.error(request, 'Purchase Order not found for this item.')
+                print('Purchase Order not found for the item.')
+    return False
+
+
+def inventory_item_change(obj, request=None):
+    if obj.status == 'pending_for_approval':
+        tax_and_mcsp_fee = get_tax_and_mcsp_fee(obj.item.cf_vendor_name, request)
+        if tax_and_mcsp_fee:
+            data = obj.get_item_update_data()
+            if obj.farm_price:
+                data['price'] = obj.farm_price + sum(tax_and_mcsp_fee)
+                data['rate'] = obj.farm_price + sum(tax_and_mcsp_fee)
+            inventory_name = 'inventory_efd' if data.get('inventory_name') == 'EFD' else 'inventory_efl'
+            data.pop('inventory_name')
+            try:
+                result = update_inventory_item(inventory_name, data.get('item_id'), data)
+            except Exception as exc:
+                if request:
+                    messages.error(request, 'Error while updating item in Zoho Inventory',)
+                print('Error while updating item in Zoho Inventory')
+                print(exc)
+                print(data)
+            else:
+                if result.get('code') == 0:
+                    update_po_item_quantity(obj, request)
+                    obj.status = 'approved'
+                    obj.approved_on = timezone.now()
+                    obj.approved_by = {
+                        'email': request.user.email,
+                        'phone': request.user.phone.as_e164,
+                        'name': request.user.get_full_name(),
+                    }
+                    obj.save()
+                    if request:
+                        messages.success(request, 'This change is approved and updated in Zoho Inventory')
+                    # create_approved_item_po.apply_async((obj.id,), countdown=5)
+                    # notify_inventory_item_approved.delay(obj.id)
+                else:
+                    if request:
+                        messages.error(request, 'Error while updating item in Zoho Inventory')
+                    print('Error while updating item in Zoho Inventory')
+                    print(result)
+                    print(data)
+
