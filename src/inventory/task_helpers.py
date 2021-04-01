@@ -406,11 +406,18 @@ def inventory_item_change(obj, request=None):
                     if result.get('code') == 0:
                         obj.status = 'approved'
                         obj.approved_on = timezone.now()
-                        obj.approved_by = {
-                            'email': request.user.email,
-                            'phone': request.user.phone.as_e164,
-                            'name': request.user.get_full_name(),
-                        }
+                        if request:
+                            obj.approved_by = {
+                                'email': request.user.email,
+                                'phone': request.user.phone.as_e164,
+                                'name': request.user.get_full_name(),
+                            }
+                        else:
+                            obj.approved_by = {
+                                'email': 'connect@thrive-society.com',
+                                'phone': '',
+                                'name': 'Automated Bot',
+                            }
                         obj.save()
                         if request:
                             messages.success(request, 'This change is approved and updated in Zoho Inventory')

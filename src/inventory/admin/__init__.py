@@ -155,7 +155,7 @@ class InventoryAdmin(SimpleHistoryAdmin):
             info = obj.__class__._meta.app_label, obj.__class__._meta.model_name
             if request.path.startswith(reverse("admin:{}_{}_history".format(*info), args=(obj.pk,))):
                 return True
-        return True
+        return False
 
     def has_add_permission(self, request, obj=None):
         return False
