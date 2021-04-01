@@ -91,7 +91,7 @@ def download_pdf(request_id):
     sign_obj = get_sign_obj()
     return sign_obj.download_pdf(request_id)
 
-@app.task(queue="urgent")
+@app.task(queue="general")
 def upload_pdf_box(request_id, folder_id, file_name, is_agreement=False):
     """
     Upload document to box.
