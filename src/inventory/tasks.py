@@ -333,7 +333,7 @@ def save_daily_aggrigated_summary():
     Save daily inventory  aggrigated summary(without county).
     """
     queryset = Inventory.objects.filter(cf_cfi_published=True)
-    summary = get_inventory_summary(queryset)
+    summary = get_inventory_summary(queryset, statuses=None)
     fields_data = {
         'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
         'total_thc_max':summary['total_thc_max'],
@@ -361,7 +361,7 @@ def save_daily_aggrigated_county_summary():
                 
     for county in counties:
         queryset = Inventory.objects.filter(cf_cfi_published=True, county_grown__in=[county['name']])
-        summary = get_inventory_summary(queryset)
+        summary = get_inventory_summary(queryset, statuses=None)
         fields_data = {
             'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
             'county_id': county['id'],

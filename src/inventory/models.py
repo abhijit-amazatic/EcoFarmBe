@@ -435,8 +435,8 @@ class DailyInventoryAggrigatedSummary(models.Model):
         return "%s" % (self.date.strftime("%B %d,%Y"))
 
     class Meta:
-        verbose_name = _('Daily Inventory Aggrigated Summary')
-        verbose_name_plural = _('Daily Inventory  Aggrigated Summary')
+        verbose_name = _('Daily Inventory Aggregated Summary')
+        verbose_name_plural = _('Daily Inventory  Aggregated Summary')
 
 class County(models.Model):
     """
