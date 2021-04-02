@@ -332,14 +332,14 @@ def get_po_for_item_quantity_change(obj, request=None, po_obj=None):
                         if po_result.get('code') == 0:
                             po = po_result.get('purchaseorder', {})
                             if po:
-                                if po.get('bills'):
-                                    for bill in po.get('bills'):
-                                        bill_res = bill_obj.delete_bill(bill_id=bill.get('bill_id'))
-                                        if bill_res.get('code') != 0:
-                                            if request:
-                                                messages.error(request, 'Purchase Order not found for this item.')
-                                            print('Error while deleting PO bill.')
-                                            print(bill_res)
+                                # if po.get('bills'):
+                                #     for bill in po.get('bills'):
+                                #         bill_res = bill_obj.delete_bill(bill_id=bill.get('bill_id'))
+                                #         if bill_res.get('code') != 0:
+                                #             if request:
+                                #                 messages.error(request, 'Purchase Order not found for this item.')
+                                #             print('Error while deleting PO bill.')
+                                #             print(bill_res)
                                 return po
             if request:
                 messages.error(request, 'Purchase Order not found for this item.')

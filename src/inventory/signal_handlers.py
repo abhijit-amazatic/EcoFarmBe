@@ -34,9 +34,26 @@ def pre_save_inventory(sender, instance, **kwargs):
             diff = {
                 k: (repr(od[k]), repr(v)) if isinstance(od[k], str) else (od[k], v)
                 for k, v in instance.__dict__.items()
-                if not k.startswith('_') and (od[k] or v) and getattr(old_instance, k, 'a') != getattr(old_instance, k, 'a')
+                if not k.startswith('_') and (od[k] or v) and getattr(old_instance, k, 'a') != getattr(instance, k, 'a')
             }
             diff_msg = ''
             for k, v in diff.items():
-                diff_msg += f"{k}: {v[0]} to {v[1]}\n"
+                if k in ('created_time', 'last_modified_time'):
+                    diff_msg += f"{k}: {getattr(old_instance, k)} to {getattr(instance, k)}  |  "
+                else:
+                    diff_msg += f"{k}: {v[0]} to {v[1]}  | "
             instance._change_reason = diff_msg
+            if diff_msg:
+                if hasattr(instance, 'skip_history_when_saving'):
+                    del instance.skip_history_when_saving
+            else:
+                instance.skip_history_when_saving = True
+
+@receiver(signals.post_save, sender=Inventory)
+def post_save_inventory(sender, instance, **kwargs):
+    """
+    Deletes old file.
+    """
+    if hasattr(instance, 'skip_history_when_saving'):
+        del instance.skip_history_when_saving
+
