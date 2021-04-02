@@ -1,5 +1,6 @@
 import json
 import base64
+import redis
 from io import (BytesIO, )
 from datetime import (datetime, timedelta, )
 from core.settings import (
@@ -9,6 +10,7 @@ from core.settings import (
     BOOKS_REDIRECT_URI,
     BOOKS_REFRESH_TOKEN,
     TRANSPORTATION_FEES,
+    CELERY_BROKER_URL,
 )
 from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
@@ -726,6 +728,18 @@ def get_unpaid_invoices(customer, status='unpaid'):
     unpaid = sum([i['balance'] for i in response])
     return unpaid
 
+def get_invoice_from_redis(invoice_id):
+    """
+    Get invoices data from redis.
+    """
+    r = redis.from_url(CELERY_BROKER_URL)
+    if r.get(invoice_id):
+        return json.loads(r.get(invoice_id))
+    else:
+        resp = get_invoice(invoice_id, params={})
+        r.set(invoice_id, json.dumps(resp))
+        return resp
+
 def get_buyer_summary(customer):
     """
     Get buyer summary for books.
@@ -744,7 +758,7 @@ def get_buyer_summary(customer):
     invoices_count = len(invoices)
     invoices_total = sum([i['total'] for i in invoices])
     for invoice in invoices:
-        resp = get_invoice(invoice.get('invoice_id'), params={})
+        resp = get_invoice_from_redis(invoice.get('invoice_id'))
         for item in resp['line_items']:
             total_quantity += item['quantity']
             try:
