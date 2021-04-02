@@ -10,7 +10,7 @@ from core.settings import (
     BOOKS_REDIRECT_URI,
     BOOKS_REFRESH_TOKEN,
     TRANSPORTATION_FEES,
-    CELERY_BROKER_URL,
+    REDIS_URL,
 )
 from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
@@ -732,7 +732,7 @@ def get_invoice_from_redis(invoice_id):
     """
     Get invoices data from redis.
     """
-    r = redis.from_url(CELERY_BROKER_URL)
+    r = redis.from_url(REDIS_URL)
     if r.get(invoice_id):
         return json.loads(r.get(invoice_id))
     else:
