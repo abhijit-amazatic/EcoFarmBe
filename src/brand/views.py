@@ -33,7 +33,7 @@ from integration.books import  get_buyer_summary
 from integration.apps.aws import (create_presigned_url, )
 from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,)
 from core.mailer import (mail, mail_send,)
-from integration.crm import (get_licenses, update_program_selection, create_records)
+from integration.crm import (get_licenses, update_program_selection, create_records, search_query, update_records)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
 from permission.filterqueryset import (filterQuerySet, )
