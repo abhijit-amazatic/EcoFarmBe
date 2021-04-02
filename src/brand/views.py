@@ -171,7 +171,7 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
                 try:
                     organization_id = result['response'][0]['id']
                 except KeyError:
-                    organization_id = result['response']['response']['data'][0]['details']['id']
+                    organization_id = result['response']['data'][0]['details']['id']
                 if organization_id:
                     obj.zoho_crm_id = organization_id
                     obj.save()
