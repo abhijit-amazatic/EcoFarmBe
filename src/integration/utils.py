@@ -176,12 +176,18 @@ def get_overview_field(key, value, obj, crm_obj):
             return dictionary[index].get(field)
     return None
 
-def update_documents():
+def update_documents(license_id=None):
     """
     Update documents model with latest license and seller permit links.
     """
     updated_list = list()
-    licenses = License.objects.all()
+    if license_id:
+        try:
+            licenses = [License.objects.get(id=license_id)]
+        except License.DoesNotExist:
+            licenses = list()
+    else:
+        licenses = License.objects.all()
     for license in licenses:
         if license.uploaded_license_to:
             documents = Documents.objects.get(object_id=license.id, doc_type='license')
