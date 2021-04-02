@@ -30,10 +30,11 @@ def pre_save_inventory(sender, instance, **kwargs):
         except sender.DoesNotExist:
             return
         else:
+            od = old_instance.__dict__
             diff = {
-                k: (repr(old_instance.__dict__[k]), repr(v)) if isinstance(v, str) else (old_instance.__dict__[k], v)
+                k: (repr(od[k]), repr(v)) if isinstance(od[k], str) else (od[k], v)
                 for k, v in instance.__dict__.items()
-                if not k.startswith('_') and (old_instance.__dict__[k] or v) and old_instance.__dict__[k] != v
+                if not k.startswith('_') and (od[k] or v) and getattr(old_instance, k, 'a') != getattr(old_instance, k, 'a')
             }
             diff_msg = ''
             for k, v in diff.items():
