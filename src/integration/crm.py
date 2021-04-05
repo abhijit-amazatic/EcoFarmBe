@@ -591,6 +591,7 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
     """
     Insert Vendors into Zoho CRM.
     """
+    brand_id = None
     if is_single_user:
         return insert_record(id=id, is_update=is_update, is_single_user=is_single_user)
     else:
@@ -1073,6 +1074,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
     """
     Insert new accounts in Zoho CRM.
     """
+    brand_id = None
     if is_single_user:
         return insert_account_record(id=id, is_single_user=is_single_user)
     else:
