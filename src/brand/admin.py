@@ -126,7 +126,7 @@ def update_records(modeladmin, request, queryset):
             is_buyer=record.is_buyer,
             is_seller=record.is_seller,
             is_update=True)
-sync_records.short_description = "Update Records To CRM"
+update_records.short_description = "Update Records To CRM"
 
 class ProfileContactForm(forms.ModelForm):
     class Meta:
