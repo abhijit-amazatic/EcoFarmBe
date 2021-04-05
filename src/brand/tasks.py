@@ -12,7 +12,7 @@ from django.utils import  timezone
 from slacker import Slacker
 
 from integration.apps.twilio import (send_sms,)
-from integration.crm import (get_records_from_crm, search_query)
+from integration.crm import (get_records_from_crm, search_query, insert_vendors, insert_accounts)
 from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
@@ -258,3 +258,14 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
                     else:
                         instance.data_fetch_status = 'complete'
                         instance.save()
+
+@app.task(queue="urgent")
+def insert_record_to_crm(record):
+    """
+    Insert record according to buyer/seller to crm.
+    """
+    if record.is_seller:
+        response = insert_vendors(record.id)
+    elif record.is_buyer:
+        response = insert_accounts(record.id)
+    return response

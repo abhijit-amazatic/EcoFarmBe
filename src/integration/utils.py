@@ -190,12 +190,18 @@ def update_documents(license_id=None):
         licenses = License.objects.all()
     for license in licenses:
         if license.uploaded_license_to:
-            documents = Documents.objects.get(object_id=license.id, doc_type='license')
+            try:
+                documents = Documents.objects.get(object_id=license.id, doc_type='license')
+            except Documents.DoesNotExist:
+                continue
             documents.box_url = license.uploaded_license_to
             documents.save()
             updated_list.append(license.id)
         if  license.uploaded_sellers_permit_to:
-            documents = Documents.objects.get(object_id=license.id, doc_type='seller_permit')
+            try:
+                documents = Documents.objects.get(object_id=license.id, doc_type='seller_permit')
+            except Documents.DoesNotExist:
+                continue
             documents.box_url = license.uploaded_sellers_permit_to
             documents.save()
             updated_list.append(license.id)

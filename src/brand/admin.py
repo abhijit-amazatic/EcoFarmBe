@@ -22,7 +22,7 @@ from multiselectfield import MultiSelectField
 
 from integration.box import (delete_file,)
 from core.utility import (send_async_approval_mail, get_profile_type,)
-from .tasks import (invite_profile_contacts,)
+from .tasks import (invite_profile_contacts, insert_record_to_crm)
 from .models import (
     Organization,
     Brand,License,
@@ -110,6 +110,10 @@ def delete_model(modeladmin, request, queryset):
         obj.delete()
 delete_model.short_description = "Delete selected License Profile and it's box files"
 
+def sync_records(modeladmin, request, queryset):
+    for record in queryset:
+        insert_record_to_crm.delay(record)
+sync_records.short_description = "Sync Records To CRM"
 
 class ProfileContactForm(forms.ModelForm):
     class Meta:
@@ -240,7 +244,6 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         queryset, use_distinct = super(MyLicenseAdmin, self).get_search_results(request, queryset, search_term)
         queryset |= self.model.objects.select_related('license_profile').filter(license_profile__name__contains={'name':search_term})
         return queryset, use_distinct
-
     
     name.admin_order_field = 'license_profile__name'
     inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin,]
@@ -255,7 +258,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
-    actions = [approve_license_profile, delete_model, ] 
+    actions = [approve_license_profile, delete_model, sync_records]
     list_per_page = 50
 
 
