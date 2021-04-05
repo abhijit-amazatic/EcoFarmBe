@@ -265,7 +265,7 @@ def insert_record_to_crm(record_id, is_buyer, is_seller):
     Insert record according to buyer/seller to crm.
     """
     if is_seller:
-        response = insert_vendors(id=record_id)
+        response = insert_vendors(id=record_id, is_update=True)
     elif is_buyer:
-        response = insert_accounts(id=record_id)
+        response = insert_accounts(id=record_id, is_update=True)
     return response
