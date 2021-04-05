@@ -115,8 +115,18 @@ def sync_records(modeladmin, request, queryset):
         insert_record_to_crm.delay(
             record_id=record.id,
             is_buyer=record.is_buyer,
-            is_seller=record.is_seller)
-sync_records.short_description = "Sync Records To CRM"
+            is_seller=record.is_seller,
+            is_update=False)
+sync_records.short_description = "Insert Records To CRM"
+
+def update_records(modeladmin, request, queryset):
+    for record in queryset:
+        insert_record_to_crm.delay(
+            record_id=record.id,
+            is_buyer=record.is_buyer,
+            is_seller=record.is_seller,
+            is_update=True)
+sync_records.short_description = "Update Records To CRM"
 
 class ProfileContactForm(forms.ModelForm):
     class Meta:
@@ -261,7 +271,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
-    actions = [approve_license_profile, delete_model, sync_records]
+    actions = [approve_license_profile, delete_model, sync_records, update_records]
     list_per_page = 50
 
 
