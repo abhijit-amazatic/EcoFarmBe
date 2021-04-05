@@ -112,7 +112,10 @@ delete_model.short_description = "Delete selected License Profile and it's box f
 
 def sync_records(modeladmin, request, queryset):
     for record in queryset:
-        insert_record_to_crm.delay(record.id)
+        insert_record_to_crm.delay(
+            record_id=record.id,
+            is_buyer=record.is_buyer,
+            is_seller=record.is_seller)
 sync_records.short_description = "Sync Records To CRM"
 
 class ProfileContactForm(forms.ModelForm):
