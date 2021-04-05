@@ -32,6 +32,8 @@ from .task_helpers import (
     get_custom_inventory_data_from_crm_vendor,
     get_custom_inventory_data_from_crm_account,
     inventory_item_change,
+    add_item_quantity,
+    create_po,
 )
 from .models import (
     Inventory,
@@ -39,7 +41,8 @@ from .models import (
     DailyInventoryAggrigatedSummary,
     County,
     CountyDailySummary,
-    InventoryItemsChangeRequest,
+    InventoryItemEdit,
+    InventoryItemQuantityAddition,
 )
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -227,64 +230,12 @@ def notify_inventory_item_approved(custom_inventory_id):
 def create_approved_item_po(custom_inventory_id, retry=6):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
-        try:
-            lp_obj = LicenseProfile.objects.get(name=item.vendor_name)
-        except Exception:
-            license_number = ''
-        else:
-            license_number = lp_obj.license.license_number
-
-        warehouse_id = None
-        inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
-        result = inv_obj.list_warehouses()
-        if result.get('code') == 0:
-            warehouses = result.get("warehouses", [])
-            warehouses = [
-                warehouse
-                for warehouse in warehouses 
-                if warehouse.get('warehouse_name', '').strip() == getattr(settings, 'CUSTOM_INVENTORY_WAREHOUSE_NAME', '').strip()
-            ]
-            if warehouses:
-                warehouse_id = warehouses[0].get('warehouse_id')
-
-        item_data = {
-            "sku": item.sku,
-            "quantity": int(item.quantity_available),
-            "rate": 0.0,
-            "reference_number": "To feed the CFI",
-        }
-
-        if warehouse_id:
-            item_data['warehouse_id'] = warehouse_id
-
-        data = {
-            'vendor_name': item.vendor_name,
-            "line_items": [item_data],
-            "custom_fields": [
-                {
-                    "api_name": "cf_client_code",
-                    "value": item.client_code,
-                },
-                {
-                    "api_name": "cf_billing_published",
-                    "value": True,
-                },
-            ],
-        }
-
-        if license_number:
-            data['custom_fields'].append({
-                "api_name": "cf_client_license",
-                "value": license_number,
-            })
-
-        # if procurement_rep_id:
-        #     data['custom_fields'].append({
-        #         "api_name": "cf_procurement_rep",
-        #         "value": "",
-        #     })
-
-        result = create_purchase_order(data, params={})
+        result = create_po(
+            sku=item.sku,
+            quantity=item.quantity_available,
+            vendor_name=item.vendor_name,
+            client_code=item.client_code
+        )
         if result.get('code') == 0:
             item.books_po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
             item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
@@ -430,7 +381,7 @@ def export_inventory_aggrigated_county_csv():
         
 @app.task(queue="general")
 def inventory_item_change_task(inventory_items_change_request_id):
-    obj = InventoryItemsChangeRequest.objects.get(id=inventory_items_change_request_id)
+    obj = InventoryItemEdit.objects.get(id=inventory_items_change_request_id)
     history_qs = obj.item.history.filter(cf_farm_price_2__gt=0)
     if history_qs:
         h_obj = history_qs.earliest('history_date')
@@ -442,3 +393,8 @@ def inventory_item_change_task(inventory_items_change_request_id):
             inventory_item_change(obj)
     else:
         inventory_item_change(obj)
+
+@app.task(queue="general")
+def inventory_item_quantity_addition_task(item_quantity_addition_id):
+    obj = InventoryItemQuantityAddition.objects.get(id=item_quantity_addition_id)
+    add_item_quantity(obj)

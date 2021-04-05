@@ -174,7 +174,7 @@ class Inventory(models.Model):
         return self.name
 
 
-class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
+class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     """
     Custom Inventory Model Class
     """
@@ -201,7 +201,7 @@ class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
         ('Bank Wire', _('Bank Wire')),
     )
 
-    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='change_request', on_delete=models.CASCADE)
+    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='edits', on_delete=models.CASCADE)
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
 
@@ -224,7 +224,6 @@ class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
         data = {
             'item_id': self.item.item_id,
             'inventory_name': self.item.inventory_name,
-            'available_stock': self.quantity_available,
             'cf_date_available': self.batch_availability_date,
             'cf_farm_price': str(self.farm_price),
             'cf_farm_price_2': self.farm_price,
@@ -242,8 +241,36 @@ class InventoryItemsChangeRequest(TimeStampFlagModelMixin, models.Model):
         return "%s" % (self.item)
 
     class Meta:
-        verbose_name = _('Inventory Items Change Request')
-        verbose_name_plural = _('Inventory Items Change Requests')
+        verbose_name = _('Item Edit Request')
+        verbose_name_plural = _('Item Edit Requests')
+
+
+
+class InventoryItemQuantityAddition(TimeStampFlagModelMixin, models.Model):
+    """
+    Custom Inventory Model Class
+    """
+    STATUS_CHOICES = (
+        ('pending_for_approval', _('Pending For Approval')),
+        ('approved', _('Approved')),
+    )
+
+    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='quantity_additions', on_delete=models.CASCADE)
+    quantity = models.FloatField(_('Quantity'), blank=True, null=True,)
+
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    po_id = models.CharField(_('Purchase Order id'), blank=True, null=True, max_length=255)
+    po_number = models.CharField(_('Purchase Order Number'), blank=True, null=True, max_length=255)
+    created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "%s" % (self.item)
+
+    class Meta:
+        verbose_name = _('Quantity Addition')
+        verbose_name_plural = _('Quantity Additions')
 
 
 

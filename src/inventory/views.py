@@ -25,9 +25,18 @@ from .serializers import (
     ItemFeedbackSerializer,
     InTransitOrderSerializer,
     CustomInventorySerializer,
-    InventoryItemsChangeRequestSerializer,
+    InventoryItemEditSerializer,
+    InventoryItemQuantityAdditionSerializer,
 )
-from .models import (Inventory, ItemFeedback, InTransitOrder, Documents, CustomInventory, InventoryItemsChangeRequest)
+from .models import (
+    Inventory,
+    ItemFeedback,
+    InTransitOrder,
+    Documents,
+    CustomInventory,
+    InventoryItemEdit,
+    InventoryItemQuantityAddition,
+)
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
                                    get_inventory_name, update_inventory_item)
@@ -44,6 +53,7 @@ from .tasks import (
     create_duplicate_crm_vendor_from_crm_account_task,
     get_custom_inventory_data_from_crm,
     inventory_item_change_task,
+    inventory_item_quantity_addition_task,
 )
 
 
@@ -806,16 +816,16 @@ class InventoryExportViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 
-class InventoryItemsChangeRequestFilterSet(FilterSet):
+class InventoryItemEditFilterSet(FilterSet):
     status__in = CharInFilter(field_name='status', lookup_expr='in')
     class Meta:
-        model = InventoryItemsChangeRequest
+        model = InventoryItemEdit
         fields = {
             'status':['icontains', 'exact'],
         }
 
 
-class InventoryItemsChangeRequestViewSet(mixins.CreateModelMixin,
+class InventoryItemEditViewSet(mixins.CreateModelMixin,
                                          mixins.RetrieveModelMixin,
                                         #  mixins.UpdateModelMixin,
                                          mixins.DestroyModelMixin,
@@ -826,12 +836,12 @@ class InventoryItemsChangeRequestViewSet(mixins.CreateModelMixin,
     """
     permission_classes = (IsAuthenticated, )
     filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
-    filterset_class = InventoryItemsChangeRequestFilterSet
+    filterset_class = InventoryItemEditFilterSet
     ordering_fields = '__all__'
     pagination_class = BasicPagination
     ordering = ('created_on',)
-    serializer_class = InventoryItemsChangeRequestSerializer
-    queryset = InventoryItemsChangeRequest.objects.all()
+    serializer_class = InventoryItemEditSerializer
+    queryset = InventoryItemEdit.objects.all()
 
 
     def perform_create(self, serializer):
@@ -844,3 +854,43 @@ class InventoryItemsChangeRequestViewSet(mixins.CreateModelMixin,
         }
         obj.save()
         inventory_item_change_task.delay(obj.id)
+
+
+class InventoryItemQuantityAdditionFilterSet(FilterSet):
+    status__in = CharInFilter(field_name='status', lookup_expr='in')
+    class Meta:
+        model = InventoryItemEdit
+        fields = {
+            'status':['icontains', 'exact'],
+        }
+
+
+class InventoryItemQuantityAdditionViewSet(mixins.CreateModelMixin,
+                                         mixins.RetrieveModelMixin,
+                                        #  mixins.UpdateModelMixin,
+                                         mixins.DestroyModelMixin,
+                                         mixins.ListModelMixin,
+                                         GenericViewSet):
+    """
+    ViewSet
+    """
+    permission_classes = (IsAuthenticated, )
+    filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
+    filterset_class = InventoryItemQuantityAdditionFilterSet
+    ordering_fields = '__all__'
+    pagination_class = BasicPagination
+    ordering = ('created_on',)
+    serializer_class = InventoryItemQuantityAdditionSerializer
+    queryset = InventoryItemQuantityAddition.objects.all()
+
+
+    def perform_create(self, serializer):
+        obj = serializer.save()
+        user = serializer.context['request'].user
+        obj.created_by = {
+            'email': user.email,
+            'phone': user.phone.as_e164,
+            'name':  user.get_full_name(),
+        }
+        obj.save()
+        inventory_item_quantity_addition_task.delay(obj.id)

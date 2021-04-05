@@ -18,10 +18,14 @@ from ..models import (
     DailyInventoryAggrigatedSummary,
     County,
     CountyDailySummary,
-    InventoryItemsChangeRequest,
+    InventoryItemEdit,
+    InventoryItemQuantityAddition,
 )
 from .custom_inventory import CustomInventoryAdmin
-from .inventory_item_edit import InventoryItemsChangeRequestAdmin
+from .inventory_item_edit import (
+    InventoryItemEditAdmin,
+    InventoryItemQuantityAdditionAdmin,
+)
 
 
 
@@ -166,8 +170,9 @@ class InventoryAdmin(SimpleHistoryAdmin):
 
 
 
-admin.site.register(InventoryItemsChangeRequest, InventoryItemsChangeRequestAdmin)
 admin.site.register(Inventory, InventoryAdmin)
+admin.site.register(InventoryItemEdit, InventoryItemEditAdmin)
+admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
 admin.site.register(County, CountyAdmin)
 admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)
 admin.site.register(CustomInventory, CustomInventoryAdmin)

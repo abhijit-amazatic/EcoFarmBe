@@ -15,7 +15,8 @@ from .models import (
     ItemFeedback,
     InTransitOrder,
     Documents,
-    InventoryItemsChangeRequest,
+    InventoryItemEdit,
+    InventoryItemQuantityAddition,
 )
 
 
@@ -164,12 +165,22 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         read_only_fields = ('status', 'sku', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
 
 
-class  InventoryItemsChangeRequestSerializer(serializers.ModelSerializer):
+class  InventoryItemEditSerializer(serializers.ModelSerializer):
     """
     Inventory Serializer
     """
 
     class Meta:
-        model = InventoryItemsChangeRequest
+        model = InventoryItemEdit
+        exclude = ()
+        read_only_fields = ('status', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
+
+class  InventoryItemQuantityAdditionSerializer(serializers.ModelSerializer):
+    """
+    Inventory Serializer
+    """
+
+    class Meta:
+        model = InventoryItemQuantityAddition
         exclude = ()
         read_only_fields = ('status', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
