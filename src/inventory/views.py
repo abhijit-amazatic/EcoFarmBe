@@ -49,9 +49,9 @@ from labtest.models import (LabTest, )
 from cultivar.models import (Cultivar, )
 from integration.inventory import (get_inventory_summary, get_category_count)
 from .tasks import (
-    notify_inventory_item_added,
+    notify_inventory_item_added_task,
     create_duplicate_crm_vendor_from_crm_account_task,
-    get_custom_inventory_data_from_crm,
+    get_custom_inventory_data_from_crm_task,
     inventory_item_change_task,
     inventory_item_quantity_addition_task,
 )
@@ -771,8 +771,8 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
             'name':  user.get_full_name(),
         }
         obj.save()
-        get_custom_inventory_data_from_crm(obj.id)
-        notify_inventory_item_added.delay(user.email, obj.id)
+        get_custom_inventory_data_from_crm_task(obj.id)
+        notify_inventory_item_added_task.delay(user.email, obj.id)
         create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
 
 

@@ -1,11 +1,7 @@
 from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericStackedInline
-from django.utils import timezone
-
-from core import settings
 
 from .mixin import AdminApproveMixin
-from ..task_helpers import (
+from ..tasks.helpers import (
     inventory_item_change,
     add_item_quantity,
 )
@@ -63,7 +59,7 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
         inventory_item_change(obj, request)
 
     def cultivar_name(self, obj):
-            return obj.item.cultivar.cultivar_name
+        return obj.item.cultivar.cultivar_name
 
 
 class InventoryItemQuantityAdditionAdmin(AdminApproveMixin, admin.ModelAdmin):
@@ -115,4 +111,4 @@ class InventoryItemQuantityAdditionAdmin(AdminApproveMixin, admin.ModelAdmin):
         add_item_quantity(obj, request)
 
     def cultivar_name(self, obj):
-            return obj.item.cultivar.cultivar_name
+        return obj.item.cultivar.cultivar_name

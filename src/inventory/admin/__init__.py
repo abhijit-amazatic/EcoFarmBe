@@ -10,7 +10,7 @@ from core import settings
 from core.settings import (AWS_BUCKET, )
 from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
 
-from ..tasks import (create_approved_item_po, notify_inventory_item_approved)
+from ..tasks import (create_approved_item_po, notify_inventory_item_approved_task)
 from ..models import (
     Inventory,
     CustomInventory,

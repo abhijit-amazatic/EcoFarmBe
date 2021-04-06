@@ -28,7 +28,7 @@ from ..models import (
     CustomInventory,
     Documents,
 )
-from ..tasks import (create_approved_item_po, notify_inventory_item_approved)
+from ..tasks import (create_approved_item_po, notify_inventory_item_approved_task)
 
 
 
@@ -413,7 +413,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     obj.save()
                     self.message_user(request, 'This item is approved', level='success')
                     create_approved_item_po.apply_async((obj.id,), countdown=5)
-                    notify_inventory_item_approved.delay(obj.id)
+                    notify_inventory_item_approved_task.delay(obj.id)
             elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
                 self._approve(request, obj, data, sku_postfix=sku_postfix+1)
             else:
