@@ -15,7 +15,12 @@ import nested_admin
 
 
 from core import settings
-from core.settings import (AWS_BUCKET, )
+from core.settings import (
+    AWS_BUCKET,
+    INVENTORY_EFD_ORGANIZATION_ID,
+    INVENTORY_EFL_ORGANIZATION_ID,
+    INVENTORY_EFN_ORGANIZATION_ID,
+)
 
 from integration.apps.aws import (create_presigned_url, )
 from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id, get_inventory_obj)
@@ -29,48 +34,11 @@ from ..models import (
     Documents,
 )
 from ..tasks import (create_approved_item_po, notify_inventory_item_approved_task)
+from ..data import(INVENTORY_ITEM_CATEGORY_NAME_ID_MAP, )
 
 
-
-def get_category_id(category_name):
-    name_id_map = {
-        'ROOT': '-1',
-        'Wholesale - Flower':                       '2155380000000446107',
-        'In the Field':                             '2155380000000446105',
-        'Flower - Tops':                            '2155380000001179966',
-        'Flower - Bucked Untrimmed':                '2155380000001179970',
-        'Flower - Bucked Untrimmed - Seeded':       '2155380000001179986',
-        'Flower - Bucked Untrimmed - Contaminated': '2155380000001179990',
-        'Flower - Small':                           '2155380000009002152',
-        'Trim':                                     '2155380000001138013',
-        'Packaged Goods':                           '2155380000001138015',
-        'Isolates':                                 '2155380000001138017',
-        'Isolates - CBD':                           '2155380000001179992',
-        'Isolates - THC':                           '2155380000001187003',
-        'Isolates - CBG':                           '2155380000001339007',
-        'Isolates - CBN':                           '2155380000001339009',
-        'Wholesale - Concentrates':                 '2155380000001138019',
-        'Crude Oil':                                '2155380000001178426',
-        'Crude Oil - THC':                          '2155380000001178430',
-        'Crude Oil - CBD':                          '2155380000001178432',
-        'Distillate Oil':                           '2155380000001178428',
-        'Distillate Oil - THC':                     '2155380000001178434',
-        'Distillate Oil - CBD':                     '2155380000001178436',
-        'Shatter':                                  '2155380000001339001',
-        'Sauce':                                    '2155380000001339003',
-        'Crumble':                                  '2155380000001339005',
-        'Kief':                                     '2155380000001501335',
-        'Hash':                                     '2155380000009512784',
-        'Lab Testing':                              '2155380000001213350',
-        'Terpenes':                                 '2155380000001295002',
-        'Terpenes - Cultivar Specific':             '2155380000001295004',
-        'Terpenes - Cultivar Blended':              '2155380000001295006',
-        'Services':                                 '2155380000001889003',
-        'QC':                                       '2155380000001889005',
-        'Transport':                                '2155380000004337546',
-        'Secure Cash Handling':                     '2155380000004337548',
-    }
-    return name_id_map.get(category_name, '')
+def get_category_id(org_id, category_name):
+    return INVENTORY_ITEM_CATEGORY_NAME_ID_MAP.get(org_id, {}).get(category_name, '')
 
 
 class InlineDocumentsAdmin(GenericStackedInline):
@@ -328,10 +296,11 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
 
                     if obj.cultivar.cultivar_type:
                         data['cf_cultivar_type'] = obj.cultivar.cultivar_type
-
-                    if obj.category_name and settings.PRODUCTION:
-                        data['category_name'] = obj.category_name
-                        data['category_id'] = get_category_id(obj.category_name)
+                    if obj.category_name:
+                        category_id = get_category_id(INVENTORY_EFD_ORGANIZATION_ID, obj.category_name)
+                        if category_id:
+                            data['category_name'] = obj.category_name
+                            data['category_id'] = category_id
 
                     if obj.harvest_date:
                         data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
