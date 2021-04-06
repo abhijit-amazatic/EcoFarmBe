@@ -25,7 +25,6 @@ from core.mailer import (mail, mail_send)
 from integration.box import (upload_file, upload_file_stream, )
 from integration.books import (create_purchase_order, submit_purchase_order)
 from integration.inventory import (get_inventory_obj,get_inventory_summary,)
-from brand.models import (LicenseProfile, )
 
 from .task_helpers import (
     create_duplicate_crm_vendor_from_crm_account,

@@ -1,14 +1,13 @@
 import re
 from django.utils import timezone
 from django.contrib import messages
+from django.conf import settings
 
 from fee_variable.utils import (get_tax_and_mcsp_fee,)
-from integration.crm import (get_crm_obj, search_query, create_records, update_records)
+from integration.crm import (get_crm_obj, search_query, create_records)
 from integration.inventory import (get_inventory_obj, update_inventory_item,)
-from integration.books import (get_books_obj, create_purchase_order, submit_purchase_order)
-
-from integration.crm import search_query
-
+from integration.books import (create_purchase_order, submit_purchase_order)
+from brand.models import (LicenseProfile, )
 
 
 accounts_to_vendors_dict = {
@@ -306,57 +305,57 @@ def get_custom_inventory_data_from_crm_account(obj):
                                 obj.client_code = client_code
 
 def create_po(sku, quantity, vendor_name, client_code):
-        try:
-            lp_obj = LicenseProfile.objects.get(name=vendor_name)
-        except Exception:
-            license_number = ''
-        else:
-            license_number = lp_obj.license.license_number
-        warehouse_id = None
-        inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
-        result = inv_obj.list_warehouses()
-        if result.get('code') == 0:
-            warehouses = result.get("warehouses", [])
-            warehouses = [
-                warehouse
-                for warehouse in warehouses
-                if warehouse.get('warehouse_name', '').strip() == getattr(settings, 'CUSTOM_INVENTORY_WAREHOUSE_NAME', '').strip()
-            ]
-            if warehouses:
-                warehouse_id = warehouses[0].get('warehouse_id')
-        item_data = {
-            "sku": sku,
-            "quantity": int(quantity),
-            "rate": 0.0,
-            "reference_number": "To feed the CFI",
-        }
-        if warehouse_id:
-            item_data['warehouse_id'] = warehouse_id
-        data = {
-            'vendor_name': vendor_name,
-            "line_items": [item_data],
-            "custom_fields": [
-                {
-                    "api_name": "cf_client_code",
-                    "value": client_code,
-                },
-                {
-                    "api_name": "cf_billing_published",
-                    "value": True,
-                },
-            ],
-        }
-        if license_number:
-            data['custom_fields'].append({
-                "api_name": "cf_client_license",
-                "value": license_number,
-            })
-        # if procurement_rep_id:
-        #     data['custom_fields'].append({
-        #         "api_name": "cf_procurement_rep",
-        #         "value": "",
-        #     })
-        return create_purchase_order(data, params={})
+    try:
+        lp_obj = LicenseProfile.objects.get(name=vendor_name)
+    except Exception:
+        license_number = ''
+    else:
+        license_number = lp_obj.license.license_number
+    warehouse_id = None
+    inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
+    result = inv_obj.list_warehouses()
+    if result.get('code') == 0:
+        warehouses = result.get("warehouses", [])
+        warehouses = [
+            warehouse
+            for warehouse in warehouses
+            if warehouse.get('warehouse_name', '').strip() == getattr(settings, 'CUSTOM_INVENTORY_WAREHOUSE_NAME', '').strip()
+        ]
+        if warehouses:
+            warehouse_id = warehouses[0].get('warehouse_id')
+    item_data = {
+        "sku": sku,
+        "quantity": int(quantity),
+        "rate": 0.0,
+        "reference_number": "To feed the CFI",
+    }
+    if warehouse_id:
+        item_data['warehouse_id'] = warehouse_id
+    data = {
+        'vendor_name': vendor_name,
+        "line_items": [item_data],
+        "custom_fields": [
+            {
+                "api_name": "cf_client_code",
+                "value": client_code,
+            },
+            {
+                "api_name": "cf_billing_published",
+                "value": True,
+            },
+        ],
+    }
+    if license_number:
+        data['custom_fields'].append({
+            "api_name": "cf_client_license",
+            "value": license_number,
+        })
+    # if procurement_rep_id:
+    #     data['custom_fields'].append({
+    #         "api_name": "cf_procurement_rep",
+    #         "value": "",
+    #     })
+    return create_purchase_order(data, params={})
 
 
 
