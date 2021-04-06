@@ -173,7 +173,7 @@ def add_item_quantity(obj, request=None):
         line_items = [ x for x in po.get('line_items') if x.get('item_id') != item_id]
         for item in po.get('line_items'):
             if item.get('item_id') == item_id:
-                item['quantity'] += int(obj.quantity)
+                item['quantity'] += obj.quantity
                 line_items.append(item)
                 update_result = po_obj.update_purchase_order(po_id, {'line_items': line_items}, parameters={})
                 if update_result.get('code') == 0:

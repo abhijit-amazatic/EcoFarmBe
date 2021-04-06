@@ -224,7 +224,7 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         data = {
             'item_id': self.item.item_id,
             'inventory_name': self.item.inventory_name,
-            'cf_date_available': self.batch_availability_date,
+            'cf_date_available': self.batch_availability_date.strftime("%Y-%m-%d"),
             'cf_farm_price': str(self.farm_price),
             'cf_farm_price_2': self.farm_price,
             'cf_seller_position': self.pricing_position,
