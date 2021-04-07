@@ -191,6 +191,7 @@ def update_available_for_sale(estimate):
         try:
             inventory = Inventory.objects.get(item_id=item_id)
         except Inventory.DoesNotExist:
+            print(f'Item {item_id} not in zoho to update available quantity.')
             continue
         price = inventory.price
         if ask_price and price and (ask_price >= price):
@@ -307,6 +308,7 @@ def get_item_dict(book, inventory):
         'quantity': inventory.get('quantity'),
         'category_name': inventory.get('category_name'),
         'item_custom_fields': inventory.get('item_custom_fields'),
+        'ask_price': inventory.get('ask_price')
     }
     if inventory.get('warehouse_id'):
         data['warehouse_id'] = inventory.get('warehouse_id')
