@@ -7,8 +7,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import HttpResponseRedirect
 from django.utils import timezone
 
-
-
+from ..tasks.notify_item_change_submitted import notify_inventory_item_change_submitted_task
 from brand.models import (License, LicenseProfile,)
 
 

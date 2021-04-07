@@ -5,6 +5,9 @@ from ..tasks.helpers import (
     inventory_item_change,
     add_item_quantity,
 )
+from ..tasks import (
+    notify_inventory_item_change_approved_task,
+)
 
 
 
@@ -36,6 +39,7 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
                 'pricing_position',
                 'have_minimum_order_quantity',
                 'minimum_order_quantity',
+                'batch_availability_date',
                 'payment_terms',
                 'payment_method',
             ),
@@ -56,7 +60,11 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
 
 
     def approve(self, request, obj):
-        inventory_item_change(obj, request)
+        if obj.status == 'pending_for_approval':
+            inventory_item_change(obj, request)
+            if obj.status == 'approved':
+                notify_inventory_item_change_approved_task(obj.id)
+
 
     def cultivar_name(self, obj):
         return obj.item.cultivar.cultivar_name

@@ -55,7 +55,7 @@ def notify_email_inventory_item_added(data):
     for email in emails:
         try:
             mail_send(
-                "notification_inventory_item_added.html",
+                "email/notification_inventory_item_added.html",
                 data,
                 "New Inventory Item.",
                 email,

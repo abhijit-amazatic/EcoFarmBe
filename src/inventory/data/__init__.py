@@ -1,1 +1,1 @@
-from .inventory_categories import *
+from .item_categories import *

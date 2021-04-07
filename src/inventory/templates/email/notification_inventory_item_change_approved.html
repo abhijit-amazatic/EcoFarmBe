@@ -1,0 +1,42 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi,</p>
+<div style="padding-left:15px;">
+    <div >
+        <p style='font-size:16px !important;color: #013c48;'>
+            Changes for inventory item <strong>{{item_name}}</strong> (sku: {{item_sku}}) is
+            approved by <strong>{{created_by_name}}</strong> (User ID: {{created_by_email}}).
+            <br><strong>Vendor Name: </strong> {{vendor_name}}
+        </p>
+        <p style='font-size:16px !important;color: #013c48;'>
+            <br>Changes are as follows!
+        </p>
+        <table style='font-size:16px !important;color: #013c48;' border='0'>
+            {% for v in diff_display %}
+                <tr>
+                    <td style="padding: 5px 10px;">
+                        <strong>{{v.0}}:</strong>
+                    </td>
+                    <td style="padding: 5px 10px;">
+                        {{v.1}}
+                    </td>
+                    <td style="padding: 5px 10px;">
+                        =>
+                    </td>
+                    <td style="padding: 5px 10px;">
+                        {{v.2}}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p style='font-size:16px !important;color: #013c48;'>
+            <br><strong>Admin Link: </strong>               {{admin_link}}
+            <br><strong>Zoho Inventory Item Link: </strong> {{zoho_item_link}}
+            <br><strong>Webapp Item Link: </strong>         {{webapp_item_link}}
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -50,7 +50,7 @@ def notify_email_inventory_item_approved(data):
     if data.get('created_by_email'):
         try:
             mail_send(
-                "notification_inventory_item_approved.html",
+                "email/notification_inventory_item_approved.html",
                 data,
                 "Inventory Item Approved",
                 data.get('created_by_email'),
@@ -83,7 +83,7 @@ def notify_logistics_email_inventory_item_approved(data):
     if data.get('created_by_email'):
         try:
             mail_send(
-                "notification_inventory_item_approved_logistics.html",
+                "email/notification_inventory_item_approved_logistics.html",
                 data,
                 "New Inventory Item",
                 settings.NOTIFICATION_EMAIL_LOGISTICS_TRANSPORT,
@@ -107,7 +107,7 @@ def notify_inventory_item_approved_task(custom_inventory_id):
             data['created_by_email'] = obj.created_by.get('email')
             data['created_by_name'] = obj.created_by.get('name')
             data['zoho_item_link'] = f"https://inventory.zoho.com/app#/inventory/items/{obj.zoho_item_id}"
-            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME}/inventory/{obj.zoho_item_id}/item/"
+            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME}/marketplace/{obj.zoho_item_id}/item/"
             if obj.farm_ask_price:
                 data['farm_price_formated'] = "${:,.2f}".format(obj.farm_ask_price)
             if obj.best_contact_Day_of_week:
