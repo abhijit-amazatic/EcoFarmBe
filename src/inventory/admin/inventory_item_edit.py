@@ -5,9 +5,6 @@ from ..tasks.helpers import (
     inventory_item_change,
     add_item_quantity,
 )
-from ..tasks import (
-    notify_inventory_item_change_approved_task,
-)
 
 
 
@@ -62,8 +59,6 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             inventory_item_change(obj, request)
-            if obj.status == 'approved':
-                notify_inventory_item_change_approved_task(obj.id)
 
 
     def cultivar_name(self, obj):

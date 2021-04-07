@@ -844,21 +844,16 @@ class InventoryItemEditViewSet(mixins.CreateModelMixin,
     queryset = InventoryItemEdit.objects.all()
 
 
-    def create(self, request, *args, **kwargs):
-        request.data['created_by'] = {
-            'email': request.user.email,
-            'phone': request.user.phone.as_e164,
-            'name':  request.user.get_full_name(),
-        }
-        return super().create(request, *args, **kwargs)
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         obj = serializer.save()
+        user = serializer.context['request'].user
+        obj.created_by = {
+            'email': user.email,
+            'phone': user.phone.as_e164,
+            'name':  user.get_full_name(),
+        }
+        obj.save()
         notify_inventory_item_change_submitted_task.delay(obj.id)
 
 

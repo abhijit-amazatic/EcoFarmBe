@@ -7,6 +7,22 @@ from fee_variable.utils import (get_tax_and_mcsp_fee,)
 from integration.inventory import (get_inventory_obj, update_inventory_item,)
 from integration.books import (create_purchase_order, submit_purchase_order)
 from brand.models import (LicenseProfile, )
+from .notify_item_change_approved import (notify_inventory_item_change_approved_task, )
+
+
+def get_approved_by(request=None):
+    approved_by = {
+        'email': 'connect@thrive-society.com',
+        'phone': '',
+        'name': 'Automated Bot',
+    }
+    if request:
+        approved_by = {
+            'email': request.user.email,
+            'phone': request.user.phone.as_e164,
+            'name': request.user.get_full_name(),
+        }
+    return approved_by
 
 
 def create_po(sku, quantity, vendor_name, client_code):
@@ -86,23 +102,11 @@ def inventory_item_change(obj, request=None):
                 if result.get('code') == 0:
                     obj.status = 'approved'
                     obj.approved_on = timezone.now()
-                    if request:
-                        obj.approved_by = {
-                            'email': request.user.email,
-                            'phone': request.user.phone.as_e164,
-                            'name': request.user.get_full_name(),
-                        }
-                    else:
-                        obj.approved_by = {
-                            'email': 'connect@thrive-society.com',
-                            'phone': '',
-                            'name': 'Automated Bot',
-                        }
+                    obj.approved_by = get_approved_by(request=request)
                     obj.save()
                     if request:
                         messages.success(request, 'This change is approved and updated in Zoho Inventory')
-                    # create_approved_item_po.apply_async((obj.id,), countdown=5)
-                    # notify_inventory_item_approved_task.delay(obj.id)
+                    notify_inventory_item_change_approved_task.delay(obj.id)
                 else:
                     if request:
                         messages.error(request, 'Error while updating item in Zoho Inventory')
@@ -150,19 +154,6 @@ def get_po_for_item_quantity_change(obj, request=None, po_obj=None):
 
 
 def add_item_quantity(obj, request=None):
-    if request:
-        approved_by = {
-            'email': request.user.email,
-            'phone': request.user.phone.as_e164,
-            'name': request.user.get_full_name(),
-        }
-    else:
-        approved_by = {
-            'email': 'connect@thrive-society.com',
-            'phone': '',
-            'name': 'Automated Bot',
-        }
-
     item_id = obj.item.item_id
     inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
     po_obj = inv_obj.PurchaseOrders()
@@ -187,7 +178,7 @@ def add_item_quantity(obj, request=None):
                     # pr_res = pr_obj.create_purchase_receive(pr_data, parameters={'purchaseorder_id': po_id})
                     # print(pr_res)
                     obj.status = 'approved'
-                    obj.approved_by = approved_by
+                    obj.approved_by = get_approved_by(request=request)
                     obj.approved_on = timezone.now()
                     obj.save()
                     if request:

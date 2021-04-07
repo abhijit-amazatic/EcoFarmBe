@@ -65,7 +65,7 @@ def notify_inventory_item_change_approved_task(custom_inventory_id):
     qs = InventoryItemEdit.objects.filter(id=custom_inventory_id)
     if qs.exists():
         obj = qs.first()
-        if obj.status == 'pending_for_approval':
+        if obj.status == 'approved':
             item = obj.item
             data = {}
             data['item_name'] = str(item)

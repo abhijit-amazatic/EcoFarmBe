@@ -84,6 +84,6 @@ def notify_inventory_item_change_submitted_task(custom_inventory_id):
             data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME}/marketplace/{obj.item.item_id}/item/"
             # if obj.crm_vendor_id:
             #     data['crm_vendor_link'] = f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Vendors/{obj.crm_vendor_id}"
-            # notify_slack_inventory_item_change_submitted(data)
+            notify_slack_inventory_item_change_submitted(data)
             notify_email_inventory_item_change_submitted(data)            # notify_email_inventory_item_approved(data)
 
