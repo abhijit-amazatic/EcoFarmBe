@@ -23,11 +23,11 @@ def notify_slack_inventory_item_change_approved(data):
     """
     diff = "".join([ f"- *{v[0]}:* {v[1]} => {v[2]}\n" for v in data.get('diff_display', [])])
     msg = (f"<!channel>Changes for inventory item *{data.get('item_name')}* (sku: `{data.get('item_sku')}`) is"
-        f" approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`). Please review and approve the changes!\n"
-        f"- *Vendor Name:* {data.get('vendor_name')}\n"
+        f" approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`).\n"
+        f"- *Vendor Name:* {data.get('vendor_name')}\n\n"
         f"changes are as follows!\n"
         f"{diff}"
-        f"\n"
+        f"\n\n"
         f"- *Admin Link:* {data.get('admin_link')}\n"
         f"- *Zoho Inventory Item Link:* {data.get('zoho_item_link')}\n"
         f"- *Webapp Item Link:* {data.get('webapp_item_link')}\n"
@@ -53,7 +53,7 @@ def notify_email_inventory_item_change_approved(data):
             mail_send(
                 "email/notification_inventory_item_change_approved.html",
                 data,
-                "New Inventory Item.",
+                "Inventory Item Edit Approved.",
                 email,
             )
         except Exception as e:
@@ -78,7 +78,7 @@ def notify_inventory_item_change_approved_task(custom_inventory_id):
             data['created_by_name'] = obj.created_by.get('name')
             data['admin_link'] = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}"
             data['zoho_item_link'] = f"https://inventory.zoho.com/app#/inventory/items/{obj.item.item_id}"
-            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME}/marketplace/{obj.item.item_id}/item/"
+            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME.rstrip('/')}/marketplace/{obj.item.item_id}/item/"
             # if obj.crm_vendor_id:
             #     data['crm_vendor_link'] = f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Vendors/{obj.crm_vendor_id}"
             notify_slack_inventory_item_change_approved(data)

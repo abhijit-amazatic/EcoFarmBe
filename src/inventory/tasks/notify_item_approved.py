@@ -107,7 +107,7 @@ def notify_inventory_item_approved_task(custom_inventory_id):
             data['created_by_email'] = obj.created_by.get('email')
             data['created_by_name'] = obj.created_by.get('name')
             data['zoho_item_link'] = f"https://inventory.zoho.com/app#/inventory/items/{obj.zoho_item_id}"
-            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME}/marketplace/{obj.zoho_item_id}/item/"
+            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME.rstrip('/')}/marketplace/{obj.zoho_item_id}/item/"
             if obj.farm_ask_price:
                 data['farm_price_formated'] = "${:,.2f}".format(obj.farm_ask_price)
             if obj.best_contact_Day_of_week:

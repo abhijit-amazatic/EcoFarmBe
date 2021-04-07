@@ -232,21 +232,21 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
             'cf_payment_terms': self.payment_terms,
             'cf_payment_method': self.payment_method,
         }
-        if self.have_minimum_order_quantity:
-            data['cf_minimum_quantity'] = int(self.minimum_order_quantity)
-        else:
-            data['cf_minimum_quantity'] = None
+        # if self.have_minimum_order_quantity:
+        #     data['cf_minimum_quantity'] = int(self.minimum_order_quantity)
+        # else:
+        #     data['cf_minimum_quantity'] = None
         return data
 
     def get_display_diff_data(self):
         data = {}
         data['farm_price'] = ('Farm Price', "${:,.2f}".format(self.item.cf_farm_price_2), "${:,.2f}".format(self.farm_price))
         data['pricing_position'] = ('Pricing Position', self.item.cf_seller_position, self.pricing_position)
-        data['minimum_order_quantity'] = (
-            'Minimum Order Quantity',
-            int(self.item.cf_minimum_quantity) if self.item.cf_minimum_quantity else None,
-            int(self.minimum_order_quantity)  if self.have_minimum_order_quantity else None,
-        )
+        # data['minimum_order_quantity'] = (
+        #     'Minimum Order Quantity',
+        #     int(self.item.cf_minimum_quantity) if self.item.cf_minimum_quantity else None,
+        #     int(self.minimum_order_quantity)  if self.have_minimum_order_quantity else None,
+        # )
         data['payment_terms'] = ('Payment Terms', self.item.cf_payment_terms, self.payment_terms)
         data['payment_method'] = (
             'Payment Method',
