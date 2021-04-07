@@ -565,6 +565,22 @@ def update_inventory_thumbnail():
         inv.save()
     return documents
 
+
+def get_average_thc(inventory):
+    """
+    Ref:
+    (qty*THC)+(qty*THC)+.. +/Sum(qty)
+    """
+    try:
+        item_qs = inventory.select_related()
+        summation = item_qs.aggregate(total=Sum(F('actual_available_stock') * F('labtest__THC')))['total']
+        quantity_sum = item_qs.aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
+        avg_thc = (summation)/(quantity_sum)
+        return avg_thc
+    except Exception as e:
+        print('exception while calculating avg thc', e)
+        return 0
+    
 def get_inventory_summary(inventory, statuses):
     """
     Return inventory summary
@@ -577,7 +593,7 @@ def get_inventory_summary(inventory, statuses):
         labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
         response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
         response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
-        response['average_thc'] = labtest.aggregate(Avg('Total_THC'))['Total_THC__avg']
+        response['average_thc'] = get_average_thc(inventory)
         if statuses in categories:
             response['total_quantity'] = inventory.filter(inventory_name='EFD').aggregate(Sum('cf_quantity_estimate'))['cf_quantity_estimate__sum']
             for category in ['Tops', 'Smalls', 'Trim']:
