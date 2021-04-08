@@ -28,7 +28,7 @@ def generate_unique_user_id():
     """
     Generate customised uuid.
     """
-    return "{env}".format(env='dev-' if settings.IS_SANDBOX else 'prod-')+str(uuid4())
+    return "{env}".format(env=settings.ENV_PREFIX)+str(uuid4())
 
     
 class User(StatusFlagMixin,AbstractUser):
