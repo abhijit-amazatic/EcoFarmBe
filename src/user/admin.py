@@ -95,11 +95,11 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     list_per_page = 25
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
-    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified'] #'phone'
+    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','unique_user_id',] #'phone'
     actions = [approve_user, ] 
     filter_horizontal = ('groups', 'user_permissions', 'internal_roles')
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions',)}),
+            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id',)}),
             (('Internal Permission'), {'fields': ('internal_roles',)}),
     )
 

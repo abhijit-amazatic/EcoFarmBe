@@ -76,6 +76,9 @@ class UserSerializer(serializers.ModelSerializer):
     )
     is_staff = serializers.ReadOnlyField()
     is_superuser = serializers.ReadOnlyField()
+    unique_user_id = serializers.ReadOnlyField()
+    is_phone_verified = serializers.ReadOnlyField()
+    crm_link = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
     member_categories = serializers.SerializerMethodField(read_only=True)
     two_factor_devices = serializers.SerializerMethodField(read_only=True)
@@ -150,7 +153,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations', 'internal_roles', 'internal_permission')
+        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations', 'internal_roles', 'internal_permission', 'unique_user_id')
 
 
     def validate_password(self, password):

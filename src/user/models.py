@@ -1,6 +1,7 @@
 """
 User model defined here.
 """
+from uuid import uuid4
 from django.conf import settings
 from django.contrib.auth.models import (AbstractUser,)
 from django.contrib.postgres.fields import (JSONField,)
@@ -23,6 +24,13 @@ from two_factor.abstract_models import AbstractPhoneDevice
 from two_factor.utils import get_two_factor_devices
 # from inventory.models import (Documents, )
 
+def generate_unique_user_id():
+    """
+    Generate customised uuid.
+    """
+    return "{env}".format(env='dev-' if settings.IS_SANDBOX else 'prod-')+str(uuid4())
+
+    
 class User(StatusFlagMixin,AbstractUser):
     """
     Class implementing a custom user model.
@@ -98,6 +106,7 @@ class User(StatusFlagMixin,AbstractUser):
     crm_link = models.CharField(_('CRM link'), max_length=255, blank=True, null=True)
     zoho_crm_id = models.CharField(_('zoho CRM Id'), max_length=255, blank=True, null=True)
     bypass_terms_and_conditions = models.BooleanField(_('Bypass Terms & Conditions Until this Flag is ON'), default=False)
+    unique_user_id = models.CharField(_('Unique User Id'),default=generate_unique_user_id,max_length=255,unique=True)
 
     internal_roles = models.ManyToManyField(
         InternalRole,
@@ -117,7 +126,7 @@ class User(StatusFlagMixin,AbstractUser):
 
     def __str__(self):
         return self.email if self.email else self.username
-
+    
     def get_full_name(self):
         full_name = ''
         if self.full_name:
