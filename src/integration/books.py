@@ -197,11 +197,11 @@ def update_available_for_sale(estimate):
         if ask_price and price and (ask_price >= price):
             inventory.actual_available_stock -= int(item.get('quantity'))
             inventory.save()
-            inventory_name = get_inventory_name(item_id)
-            request = dict()
-            request['item_id'] = item_id
-            request['cf_status'] = 'Pending Sale'
-            response = update_inventory_item(inventory_name, item_id, request)
+            # inventory_name = get_inventory_name(item_id)
+            # request = dict()
+            # request['item_id'] = item_id
+            # request['cf_status'] = 'Pending Sale'
+            # response = update_inventory_item(inventory_name, item_id, request)
     return
 
 def create_contact(data, params=None):
