@@ -66,7 +66,7 @@ class OrganizationViewSetPermission(ViewPermission):
             'get': True,
         },
         'create': {
-            'post': 'add_organization',
+            'post': True,
         },
         'update': {
             'put': 'edit_organization',

@@ -31,17 +31,15 @@ def pre_save_inventory(sender, instance, **kwargs):
             return
         else:
             od = old_instance.__dict__
+            cd = instance.__dict__
             diff = {
                 k: (repr(od[k]), repr(v)) if isinstance(od[k], str) else (od[k], v)
-                for k, v in instance.__dict__.items()
-                if not k.startswith('_') and (od[k] or v) and getattr(old_instance, k, 'a') != getattr(instance, k, 'a')
+                for k, v in cd.items()
+                if not k.startswith('_') and k not in ('created_time', 'last_modified_time') and (od[k] or v) and getattr(old_instance, k, '') != getattr(instance, k, '')
             }
             diff_msg = ''
             for k, v in diff.items():
-                if k in ('created_time', 'last_modified_time'):
-                    diff_msg += f"{k}: {getattr(old_instance, k)} to {getattr(instance, k)}  |  "
-                else:
-                    diff_msg += f"{k}: {v[0]} to {v[1]}  | "
+                diff_msg += f"{k}: {v[0]} to {v[1]}  | "
             instance._change_reason = diff_msg
             if diff_msg:
                 if hasattr(instance, 'skip_history_when_saving'):

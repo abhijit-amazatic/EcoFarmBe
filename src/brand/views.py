@@ -132,7 +132,7 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
     serializer_class = OrganizationDetailSerializer
     pagination_class = None
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['name', 'created_by']
+    search_fields = ['name', ]
     ordering = ('name',)
 
     def get_queryset(self):
