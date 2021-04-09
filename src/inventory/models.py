@@ -306,6 +306,14 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('approved', _('Approved')),
     )
 
+    MARKETPLACE_STATUS_CHOICES = (
+        ('Available', _('Available')),
+        ('In-Testing', _('In-Testing')),
+        ('Processing', _('Processing')),
+        ('Flowering', _('Flowering')),
+        ('Vegging', _('Vegging')),
+    )
+
     PRICING_POSITION_CHOICES = (
         ('Negotiable', _('Negotiable')),
         ('Firm', _('Firm')),
@@ -384,6 +392,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
     category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, blank=True, null=True, max_length=225)
+    marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)

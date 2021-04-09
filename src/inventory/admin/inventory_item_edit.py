@@ -21,7 +21,7 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
         'updated_on',
     )
     readonly_fields = (
-        # 'status',
+        'status',
         'approved_by',
         'approved_on',
         'created_by',

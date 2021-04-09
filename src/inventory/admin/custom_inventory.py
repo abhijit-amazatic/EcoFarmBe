@@ -113,6 +113,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
         'grade_estimate',
         'quantity_available',
         'farm_ask_price',
+        'marketplace_status',
         'status',
         'created_on',
         'updated_on',
@@ -139,6 +140,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
             'fields': (
                 'cultivar',
                 'cultivar_name',
+                'marketplace_status',
                 'category_name',
                 'quantity_available',
                 'harvest_date',
@@ -302,14 +304,26 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                             data['category_name'] = obj.category_name
                             data['category_id'] = category_id
 
-                    if obj.harvest_date:
-                        data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
 
                     if obj.batch_availability_date:
                         data['cf_date_available'] = str(obj.batch_availability_date)
 
-                    if obj.grade_estimate:
-                        data['cf_grade_seller'] = obj.grade_estimate
+
+                    if obj.category_name in ('Flower - Small',):
+                        data['cf_flower_smalls'] = True
+
+
+                    if obj.marketplace_status in ('Vegging', 'Flowering'):
+                        if obj.quantity_available:
+                            data['cf_quantity_estimate'] = int(obj.quantity_available)
+                    else:
+                        if obj.grade_estimate:
+                            data['cf_grade_seller'] = obj.grade_estimate
+                        if obj.grade_estimate in ('Smalls A', 'Smalls B', 'Smalls C'):
+                            data['cf_flower_smalls'] = True
+
+                    if obj.harvest_date:
+                        data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
 
                     if obj.product_quality_notes:
                         data['cf_batch_quality_notes'] = obj.product_quality_notes
@@ -341,10 +355,11 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     if obj.procurement_rep:
                         data['cf_procurement_rep'] = obj.procurement_rep
 
+                    data['cf_status'] = obj.marketplace_status
+
                     # data['initial_stock'] = int(obj.quantity_available)
                     data['product_type'] = 'goods'
                     data['cf_sample_in_house'] = 'Pending'
-                    data['cf_status'] = 'In-Testing'
                     data['cf_cfi_published'] = True
                     data['account_id'] = 2155380000000448337 if settings.PRODUCTION else 2185756000001423419
                     # data['account_name'] = '3rd Party Flower Sales'
@@ -381,8 +396,12 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     }
                     obj.save()
                     self.message_user(request, 'This item is approved', level='success')
-                    create_approved_item_po.apply_async((obj.id,), countdown=5)
-                    notify_inventory_item_approved_task.delay(obj.id)
+                    if obj.marketplace_status in ('Vegging', 'Flowering'):
+                        notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
+                    else:
+                        create_approved_item_po.apply_async((obj.id,), countdown=5)
+                        notify_inventory_item_approved_task.delay(obj.id)
+
             elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
                 self._approve(request, obj, data, sku_postfix=sku_postfix+1)
             else:

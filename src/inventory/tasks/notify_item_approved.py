@@ -93,7 +93,7 @@ def notify_logistics_email_inventory_item_approved(data):
 
 
 @app.task(queue="general")
-def notify_inventory_item_approved_task(custom_inventory_id):
+def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=True):
     qs = CustomInventory.objects.filter(id=custom_inventory_id)
     if qs.exists():
         obj = qs.first()
@@ -119,7 +119,8 @@ def notify_inventory_item_approved_task(custom_inventory_id):
             if obj.crm_vendor_id:
                 data['crm_vendor_link'] = f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Vendors/{obj.crm_vendor_id}"
             notify_slack_inventory_item_approved(data)
-            notify_logistics_slack_inventory_item_approved(data)
             notify_email_inventory_item_approved(data)
-            notify_logistics_email_inventory_item_approved(data)
+            if notify_logistics:
+                notify_logistics_slack_inventory_item_approved(data)
+                notify_logistics_email_inventory_item_approved(data)
 
