@@ -23,7 +23,7 @@ from core.settings import (
 )
 
 from integration.apps.aws import (create_presigned_url, )
-from integration.inventory import (create_inventory_item, update_inventory_item, get_vendor_id, get_inventory_obj)
+from integration.inventory import (get_inventory_obj, get_user_id, create_inventory_item, update_inventory_item, )
 from integration.crm import search_query
 from brand.models import (License, LicenseProfile,)
 from fee_variable.utils import (get_tax_and_mcsp_fee,)
@@ -119,8 +119,8 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
         'updated_on',
     )
     readonly_fields = (
-        'cultivar_name',
         'status',
+        'cultivar_name',
         # 'vendor_name',
         'crm_vendor_id',
         # 'client_code',
@@ -280,6 +280,16 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
 
         return None
 
+    def get_vendor_id(self, inventory, vendor_name):
+        """
+        Get vendor id from zoho.
+        """
+        response = inventory.get_contact(params={'contact_name': vendor_name})
+        if response.get('code') == 0:
+            for vendor in response.get('contacts'):
+                if vendor.get('vendor_name') == vendor_name and vendor.get('contact_type') == 'vendor':
+                    return vendor.get('contact_id')
+
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             tax_and_mcsp_fee = get_tax_and_mcsp_fee(obj.vendor_name, request,)
@@ -287,95 +297,101 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                 if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                     self.get_crm_data(request, obj)
                 if obj.client_code:
-                    data = {}
-                    data['item_type'] = 'inventory'
-                    data['cf_client_code'] = obj.client_code
-                    data['unit'] = 'lb'
-
-                    data['name'] = obj.cultivar.cultivar_name
-                    data['cf_cultivar_name'] = obj.cultivar.cultivar_name
-                    data['cf_strain_name'] = obj.cultivar.cultivar_name
-
-                    if obj.cultivar.cultivar_type:
-                        data['cf_cultivar_type'] = obj.cultivar.cultivar_type
-                    if obj.category_name:
-                        category_id = get_category_id(INVENTORY_EFD_ORGANIZATION_ID, obj.category_name)
-                        if category_id:
-                            data['category_name'] = obj.category_name
-                            data['category_id'] = category_id
-
-
-                    if obj.batch_availability_date:
-                        data['cf_date_available'] = str(obj.batch_availability_date)
-
-
-                    if obj.category_name in ('Flower - Small',):
-                        data['cf_flower_smalls'] = True
-
-
-                    if obj.marketplace_status in ('Vegging', 'Flowering'):
-                        if obj.quantity_available:
-                            data['cf_quantity_estimate'] = int(obj.quantity_available)
+                    vendor_id = ''
+                    inv_obj = get_inventory_obj(inventory_name='inventory_efd')
+                    if obj.vendor_name:
+                        vendor_id = self.get_vendor_id(inv_obj, obj.vendor_name)
                     else:
-                        if obj.grade_estimate:
-                            data['cf_grade_seller'] = obj.grade_estimate
-                        if obj.grade_estimate in ('Smalls A', 'Smalls B', 'Smalls C'):
+                        self.message_user(request, 'Vendor Name is not set', level='error')
+                    if vendor_id:
+                        data = {}
+                        data['cf_vendor_name'] = vendor_id
+                        if obj.procurement_rep:
+                            pro_rep_id = get_user_id(inv_obj, obj.procurement_rep)
+                            if pro_rep_id:
+                                data['cf_procurement_rep'] = pro_rep_id
+                        data['item_type'] = 'inventory'
+                        data['cf_client_code'] = obj.client_code
+                        data['unit'] = 'lb'
+
+                        data['name'] = obj.cultivar.cultivar_name
+                        data['cf_cultivar_name'] = obj.cultivar.cultivar_name
+                        data['cf_strain_name'] = obj.cultivar.cultivar_name
+
+                        if obj.cultivar.cultivar_type:
+                            data['cf_cultivar_type'] = obj.cultivar.cultivar_type
+                        if obj.category_name:
+                            category_id = get_category_id(INVENTORY_EFD_ORGANIZATION_ID, obj.category_name)
+                            if category_id:
+                                data['category_name'] = obj.category_name
+                                data['category_id'] = category_id
+
+
+                        if obj.batch_availability_date:
+                            data['cf_date_available'] = str(obj.batch_availability_date)
+
+
+                        if obj.category_name in ('Flower - Small',):
                             data['cf_flower_smalls'] = True
 
-                    if obj.harvest_date:
-                        data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
 
-                    if obj.product_quality_notes:
-                        data['cf_batch_quality_notes'] = obj.product_quality_notes
+                        if obj.marketplace_status in ('Vegging', 'Flowering'):
+                            if obj.quantity_available:
+                                data['cf_quantity_estimate'] = int(obj.quantity_available)
+                        else:
+                            if obj.grade_estimate:
+                                data['cf_grade_seller'] = obj.grade_estimate
 
-                    if obj.need_lab_testing_service is not None:
-                        data['cf_lab_testing_services'] = 'Yes' if obj.need_lab_testing_service else 'No'
+                        if obj.harvest_date:
+                            data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
 
-                    if obj.farm_ask_price:
-                        data['cf_farm_price'] = str(int(obj.farm_ask_price))
-                        data['cf_farm_price_2'] = obj.farm_ask_price
-                        # data['purchase_rate'] = obj.farm_ask_price
-                        data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
+                        if obj.product_quality_notes:
+                            data['cf_batch_quality_notes'] = obj.product_quality_notes
 
-                    if obj.pricing_position:
-                        data['cf_seller_position'] = obj.pricing_position
-                    if obj.have_minimum_order_quantity:
-                        data['cf_minimum_quantity'] = int(obj.minimum_order_quantity)
+                        if obj.need_lab_testing_service is not None:
+                            data['cf_lab_testing_services'] = 'Yes' if obj.need_lab_testing_service else 'No'
 
-                    if obj.vendor_name:
-                        data['cf_vendor_name'] = obj.vendor_name
-                        # data['vendor_name'] = obj.vendor_name
+                        if obj.farm_ask_price:
+                            data['cf_farm_price'] = str(int(obj.farm_ask_price))
+                            data['cf_farm_price_2'] = obj.farm_ask_price
+                            # data['purchase_rate'] = obj.farm_ask_price
+                            data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
 
-                    if obj.payment_terms:
-                        data['cf_payment_terms'] = obj.payment_terms
+                        if obj.pricing_position:
+                            data['cf_seller_position'] = obj.pricing_position
+                        if obj.have_minimum_order_quantity:
+                            data['cf_minimum_quantity'] = int(obj.minimum_order_quantity)
 
-                    if obj.payment_method:
-                        data['cf_payment_method'] = obj.payment_method
+                        if obj.payment_terms:
+                            data['cf_payment_terms'] = obj.payment_terms
 
-                    if obj.procurement_rep:
-                        data['cf_procurement_rep'] = obj.procurement_rep
+                        if obj.payment_method:
+                            data['cf_payment_method'] = obj.payment_method
 
-                    data['cf_status'] = obj.marketplace_status
+                        data['cf_status'] = obj.marketplace_status
 
-                    # data['initial_stock'] = int(obj.quantity_available)
-                    data['product_type'] = 'goods'
-                    data['cf_sample_in_house'] = 'Pending'
-                    data['cf_cfi_published'] = True
-                    data['account_id'] = 2155380000000448337 if settings.PRODUCTION else 2185756000001423419
-                    # data['account_name'] = '3rd Party Flower Sales'
-                    data['purchase_account_id'] = 2155380000000565567 if settings.PRODUCTION else 2185756000001031365
-                    # data['purchase_account_name'] = 'Product Costs - Flower'
-                    data['inventory_account_id'] = 2155380000000448361 if settings.PRODUCTION else 2185756000001423111
-                    # data['inventory_account_name'] = 'Inventory - In the Field'
-                    data['is_taxable'] = True
+                        # data['initial_stock'] = int(obj.quantity_available)
+                        data['product_type'] = 'goods'
+                        data['cf_sample_in_house'] = 'Pending'
+                        data['cf_cfi_published'] = True
+                        data['account_id'] = 2155380000000448337 if settings.PRODUCTION else 2185756000001423419
+                        # data['account_name'] = '3rd Party Flower Sales'
+                        data['purchase_account_id'] = 2155380000000565567 if settings.PRODUCTION else 2185756000001031365
+                        # data['purchase_account_name'] = 'Product Costs - Flower'
+                        data['inventory_account_id'] = 2155380000000448361 if settings.PRODUCTION else 2185756000001423111
+                        # data['inventory_account_name'] = 'Inventory - In the Field'
+                        data['is_taxable'] = True
 
-                    self._approve(request, obj, data,)
+                        self._approve(request, obj, inv_obj, data,)
+                    else:
+                        self.message_user(request, 'Vendor not found on zoho', level='error')
 
-    def _approve(self, request, obj, data, sku_postfix=0):
+
+    def _approve(self, request, obj, inv_obj, data, sku_postfix=0):
         sku = self.generate_sku(obj, sku_postfix)
         data['sku'] = sku
         try:
-            result = create_inventory_item(inventory_name='inventory_efd', record=data, params={})
+            result = inv_obj.create_item(data, params={})
         except Exception as exc:
             self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
             print('Error while creating item in Zoho Inventory')

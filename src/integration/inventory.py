@@ -76,7 +76,7 @@ def get_vendor_id(inventory, record):
     vendor_name = inventory.get_contact(params={'contact_name': record.get('cf_vendor_name')})
     if vendor_name.get('code') == 0:
         for vendor in vendor_name.get('contacts'):
-            if vendor.get('vendor_name') == record.get('cf_vendor_name'):
+            if vendor.get('vendor_name') == record.get('cf_vendor_name') and vendor.get('contact_type') == 'vendor':
                 return vendor.get('contact_id')
 
 def get_user_id(inventory, email):
