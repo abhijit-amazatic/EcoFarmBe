@@ -294,6 +294,7 @@ class EstimateView(APIView):
         """
         is_draft = request.query_params.get('is_draft')
         if is_draft == 'true' or is_draft == 'True':
+            print('true')
             response = create_estimate(data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -307,6 +308,7 @@ class EstimateView(APIView):
             #     contact_id = estimate['customer_id']
             #     mark_estimate(estimate_id, 'sent')
             #     mark_estimate(estimate_id, 'accepted')
+            print('false')
             update_available_for_sale(request.data)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
