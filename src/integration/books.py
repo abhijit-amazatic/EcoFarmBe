@@ -195,7 +195,9 @@ def update_available_for_sale(estimate):
             continue
         price = inventory.price
         if ask_price and price and (ask_price >= price):
+            print(ask_price, price)
             inventory.actual_available_stock -= int(item.get('quantity'))
+            print(inventory.actual_available_stock)
             inventory.save()
             # inventory_name = get_inventory_name(item_id)
             # request = dict()
