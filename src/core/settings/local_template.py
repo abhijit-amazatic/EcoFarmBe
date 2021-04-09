@@ -205,4 +205,7 @@ CAMPAIGN_REDIRECT_URI=''
 CAMPAIGN_HTML_BUCKET=''
 
 IS_SANDBOX = True
-ENV_PREFIX ='' #'dev-' for stag & 'prod-' for prod 
+ENV_PREFIX ='' #'dev-' for stag & 'prod-' for prod
+
+#pendo config
+TRACK_EVENT_SECRET_KEY = ''
