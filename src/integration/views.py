@@ -317,13 +317,11 @@ class EstimateView(APIView):
         is_draft = request.query_params.get('is_draft')
         estimate_id = request.data['estimate_id']
         if is_draft == 'true' or is_draft == 'True':
-            print('true')
             response = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response)
         else:
-            print('false')
             estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if estimate.get('code') and estimate['code'] != 0:
                 return Response(estimate, status=status.HTTP_400_BAD_REQUEST)

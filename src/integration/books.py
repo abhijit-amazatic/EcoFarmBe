@@ -192,11 +192,10 @@ def update_available_for_sale(estimate):
         try:
             inventory = Inventory.objects.get(item_id=item_id)
         except Inventory.DoesNotExist:
-            print('exc')
             continue
         price = inventory.price
         print(ask_price, price)
-        if ask_price and price and (ask_price >= price):
+        if ask_price and price and (float(ask_price) >= float(price)):
             inventory.actual_available_stock -= int(item.get('quantity'))
             print(inventory.actual_available_stock)
             inventory.save()
