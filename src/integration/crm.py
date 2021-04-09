@@ -1375,6 +1375,7 @@ def sync_cultivars(record):
     crm_obj = get_crm_obj()
     record = json.loads(record.dict()['response'])
     record = parse_crm_record('Cultivars', [record])[0]
+    record['status'] = 'approved'
     try:
         obj, created = Cultivar.objects.update_or_create(
             cultivar_crm_id=record['cultivar_crm_id'],

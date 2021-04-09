@@ -15,7 +15,7 @@ class CultivarAdmin(admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
-    list_display = ('cultivar_name', 'cultivar_type', 'status', 'modified_by', 'modify_time', 'created_by', 'create_time',)
+    list_display = ('cultivar_name', 'cultivar_type', 'cultivar_crm_id', 'status', 'modified_by', 'modify_time', 'created_by', 'create_time',)
     readonly_fields = ('status',)
     change_form_template = "inventory/custom_inventory_change_form.html"
     actions = ['approve_selected_cultivars', ]
@@ -66,7 +66,7 @@ class CultivarAdmin(admin.ModelAdmin):
     def approve_selected_cultivars(self, request, queryset):
         qs = queryset.filter(status='pending_for_approval')
         qs.filter(~Q(cultivar_crm_id=None), ~Q(cultivar_crm_id='')).update(status='approved')
-        for obj in qs.filter(Q(cultivar_crm_id=None)|~Q(cultivar_crm_id='')).distinct():
+        for obj in qs.filter(Q(cultivar_crm_id=None)|Q(cultivar_crm_id='')).distinct():
             self.approve(request, obj)
 
     def save_model(self, request, obj, form, change):
