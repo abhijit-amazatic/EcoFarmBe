@@ -345,7 +345,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     data['product_type'] = 'goods'
                     data['cf_sample_in_house'] = 'Pending'
                     data['cf_status'] = 'In-Testing'
-                    data['cf_cfi_published'] = False
+                    data['cf_cfi_published'] = True
                     data['account_id'] = 2155380000000448337 if settings.PRODUCTION else 2185756000001423419
                     # data['account_name'] = '3rd Party Flower Sales'
                     data['purchase_account_id'] = 2155380000000565567 if settings.PRODUCTION else 2185756000001031365
