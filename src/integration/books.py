@@ -188,18 +188,13 @@ def update_available_for_sale(estimate):
     for item in estimate.get('line_items'):
         ask_price = item.get('ask_price')
         item_id = item.get('item_id')
-        print(item_id)
         try:
             inventory = Inventory.objects.get(item_id=item_id)
         except Inventory.DoesNotExist:
-            print(f'Item {item_id} not in zoho to update available quantity.')
             continue
         price = inventory.price
-        print(price)
         if ask_price and price and (ask_price >= price):
-            print(ask_price, price)
             inventory.actual_available_stock -= int(item.get('quantity'))
-            print(inventory.actual_available_stock)
             inventory.save()
             # inventory_name = get_inventory_name(item_id)
             # request = dict()
