@@ -307,7 +307,7 @@ def get_item_dict(book, inventory):
         'quantity': inventory.get('quantity'),
         'category_name': inventory.get('category_name'),
         'item_custom_fields': inventory.get('item_custom_fields'),
-        'ask_price': inventory.get('ask_price')
+        'ask_price': inventory.get('ask_price'),
         'description': inventory.get('description')
     }
     if inventory.get('warehouse_id'):
