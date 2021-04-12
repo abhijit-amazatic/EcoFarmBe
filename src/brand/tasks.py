@@ -160,7 +160,7 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
                     data = data[0]
                 instance.crm_license_data = data
                 instance.owner_email = data.get("License_Email")
-                owner_name = data.get("Owner_First_Name")+' '+data.get("Owner_Last_Name")
+                owner_name = data.get("Owner_First_Name","")+' '+data.get("Owner_Last_Name","")
                 instance.owner_name = owner_name.strip()
                 instance.legal_business_name = data.get("Legal_Business_Name")
                 if instance.owner_email:
