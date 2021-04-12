@@ -71,7 +71,6 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
         validated_data['user'] = self.context['request'].user
         try:
             instance = InTransitOrder.objects.get(
-                user=validated_data['user'],
                 profile_id=validated_data['profile_id']
             )
             if not instance.order_data:

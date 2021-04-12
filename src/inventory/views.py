@@ -453,7 +453,7 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(user=self.request.user)
+        return queryset #.filter(user=self.request.user)
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
@@ -469,7 +469,7 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
         print(filter_kwargs)
 
-        obj, created = queryset.model.objects.get_or_create(user=self.request.user, **filter_kwargs)
+        obj, created = queryset.model.objects.get_or_create(**filter_kwargs)
 
         # May raise a permission denied
         self.check_object_permissions(self.request, obj)
