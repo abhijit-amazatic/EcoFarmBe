@@ -521,8 +521,16 @@ class EstimateSignCompleteView(APIView):
                 a = mark_estimate(estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
             upload_pdf_box.delay(request_id, new_folder, filename, is_agreement)
-        if order_number:    
-            mail("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number},"Your Thrive Society Order %s." %order_number, request.user.email,file_data=download_pdf(request_id))   
+        if order_number:
+            try:
+                order_data = get_estimate(estimate_id,params={})
+                if order_data.get('estimate_id'):
+                    item_total = sum(i['item_total'] for i in order_data.get('line_items',[]))
+                    quantity = sum(i['quantity'] for i in order_data.get('line_items',[]))
+                    category = order_data.get('contact_category','')
+                    mail("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'dashboard/billing/estimates/%s/item' % estimate_id,'full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number, 'estimate_id':estimate_id, 'order_amount':item_total,'quantity':quantity,'product_category':category},"Your Thrive Society Order %s." %order_number, request.user.email,file_data=download_pdf(request_id))
+            except Exception as e:
+                print('Issue while preparing order email', e)
         return Response({'message': 'Success'})
 
 class GetTemplateStatus(APIView):

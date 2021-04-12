@@ -5,6 +5,7 @@ Generic functions needed.
 import hashlib
 import base64
 import re
+import json
 from django.conf import settings
 from Crypto.Cipher import AES
 from Crypto import Random
@@ -16,6 +17,7 @@ from user.models import *
 from core.celery import app
 from integration.crm import (get_records_from_crm,)
 from brand.models import *
+from utils import (reverse_admin_change_path,)
 
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -82,20 +84,36 @@ def notify_admins_on_profile_user_registration(email,profile):
     #mail_send("notify.html",{'link': email},"New Profile User registration.", recipient_list=settings.ADMIN_EMAIL)
 
 
-def notify_admins_on_profile_registration(email,farm,license_instance):
+def email_admins_on_profile_registration_completed(email,farm,instance,admin_link):
     """
-    Notify admins on email about new farm registration under farm.
+    Notify admins on email about new farm registration under farm.when status is 'Completed'
     """
+    mail_send("farm-register.html",{'farm_name': farm,'mail':email,'admin_link': admin_link,'license_type':instance.license_type,'legal_business_name':instance.legal_business_name,'license_number':instance.license_number },"License Profile [%s] registration completed." % instance.license_number, recipient_list=settings.ONBOARDING_ADMIN_EMAIL)
+
+def email_admins_on_profile_progress(user,instance,admin_link):
+    """
+    Notify admins on email about new profile in progress.
+    """
+    mail_send("farm-progress.html",{'admin_link': admin_link,'mail':user.email,'license_type':instance.license_type,'legal_business_name':instance.legal_business_name,'license_number':instance.license_number},"License Profile [%s] is created & in progress." % instance.license_number, recipient_list=settings.ONBOARDING_ADMIN_EMAIL)    
     
-    mail_send("farm-register.html",{'link': farm,'mail':email},"Profile registration.", recipient_list=settings.ADMIN_EMAIL)
-    
-def notify_admins_on_slack(email,license_instance):
+def notify_admins_on_slack(email,license_instance,admin_link):
     """
     as license onboarded, inform admin on slack.
     """
-    msg = "<!channel>New License is registered with us (step 1) under the organization  - *%s*, associated with the EmailID `%s`.Please review/check whether they need any assistance!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n" % (license_instance.organization.name, email, license_instance.legal_business_name,license_instance.profile_category,license_instance.license_number,license_instance.premises_county)
-    slack.chat.post_message(settings.SLACK_PROFILE_CHANNEL,msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
-        
+    msg = "<!channel>New License is registered with us (step 1) under the organization  - *%s*, associated with the EmailID `%s`.Please review/check whether they need any assistance!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n- *Admin Link:* %s\n" % (license_instance.organization.name, email, license_instance.legal_business_name,license_instance.profile_category,license_instance.license_number,license_instance.premises_county,admin_link)
+    slack.chat.post_message(settings.SLACK_ONBOARDING_PROGRESS,msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
+
+def notify_admins_on_slack_complete(email,instance,admin_link):
+    """
+    as license onboarded 'completed', inform admin on slack.
+    """
+    msg = "<!channel>New License profile was 'Completed' under the organization - *%s*, associated with the EmailID `%s`.Please mark it's status as 'Approved' from the admin panel after license & profile have been verified for compliance and accuracy!\n- *Legal Business name:* %s\n- *Profile Category:* %s\n- *License Number:* %s\n - *County:* %s\n- *Admin Link:* %s\n" % (instance.organization.name, email, instance.legal_business_name,instance.profile_category,instance.license_number,instance.premises_county,admin_link)
+    try:
+        channel_dict = json.loads(settings.SLACK_ONBOARDING_COMPLETED)
+    except Exception as e:
+        channel_dict = settings.SLACK_ONBOARDING_COMPLETED   
+    slack.chat.post_message(channel_dict.get(instance.profile_category,'tech_dev_slack_testing'),msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)    
+    
 def notify_profile_user(recipient_email,farm):
     """
      Notify farm/profile user.
@@ -174,13 +192,24 @@ def get_profile_type(obj):
 @app.task(queue="general")
 def send_async_approval_mail(profile_id):
     """
-    Async email send for after profile approval.
+    Async email send for after profile approval.'profile_id'is actually license obj id
     """
     license_obj = License.objects.filter(id=profile_id)
     if license_obj:
         ac_manager = license_obj[0].organization.created_by.email
         profile_type = get_profile_type(license_obj[0])
         mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login','profile_type': profile_type,'legal_business_name': license_obj[0].legal_business_name},"Your %s profile has been approved."% profile_type, ac_manager)
+
+@app.task(queue="general")
+def send_async_approval_mail_admin(obj_id,req_user_id):
+    """
+    Async email send to admin after profile approval.
+    """
+    license_obj = License.objects.filter(id=obj_id)
+    user = User.objects.get(id=req_user_id)
+    if license_obj:
+        admin_link = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(license_obj[0])}"
+        mail_send("farm-approved-admin.html",{'admin_link': admin_link,'mail':user.email,'license_type':license_obj[0].license_type,'legal_business_name':license_obj[0].legal_business_name,'license_number':license_obj[0].license_number},"License Profile [%s] approved" % license_obj[0].license_number, recipient_list=settings.ONBOARDING_ADMIN_EMAIL)
 
         
 @app.task(queue="general")        

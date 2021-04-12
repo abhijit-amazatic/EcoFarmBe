@@ -31,7 +31,7 @@ from core.permissions import IsAuthenticatedBrandPermission
 from inventory.models import (Documents, )
 from integration.books import  get_buyer_summary
 from integration.apps.aws import (create_presigned_url, )
-from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,)
+from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,email_admins_on_profile_progress, )
 from core.mailer import (mail, mail_send,)
 from integration.crm import (get_licenses, update_program_selection, create_records, search_query, update_records)
 from user.serializers import (get_encrypted_data,)
@@ -100,6 +100,8 @@ from .views_permissions import (
     OrganizationUserViewSetPermission,
     OrganizationUserRoleViewSetPermission,
 )
+
+from utils import (reverse_admin_change_path,)
 
 Auth_User = get_user_model()
 
@@ -292,16 +294,10 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         """
         instance = serializer.save()
         try:
-            user = instance.organization.created_by
-            notify_admins_on_slack(user.email,instance)
-            # if user.existing_member:
-            #     existing_user_license_nos = get_license_numbers(user.legal_business_name)
-            #     if instance.license_number in existing_user_license_nos:
-            #         get_license_from_crm_insert_to_db(user.id,instance.license_number,instance.id)
-            #     elif instance.license_number not in existing_user_license_nos:
-            #         instance.is_data_fetching_complete = True
-            #         instance.save()
-            #     pass
+            user = instance.created_by
+            admin_link = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(instance)}"
+            email_admins_on_profile_progress(user,instance,admin_link)
+            notify_admins_on_slack(user.email,instance,admin_link)
         except Exception as e:
             print('Exception while creating & pulling existing user license',e)
             traceback.print_tb(e.__traceback__)

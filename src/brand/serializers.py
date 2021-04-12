@@ -12,7 +12,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from core.settings import (AWS_BUCKET, )
 from user.models import User
 from inventory.models import (Documents, )
-from core.utility import (notify_admins_on_profile_registration,)
+from core.utility import (email_admins_on_profile_registration_completed,notify_admins_on_slack_complete,)
 from inventory.models import (Documents, )
 from integration.crm import (insert_vendors, insert_accounts,is_user_existing,)
 from integration.box import upload_file
@@ -49,6 +49,8 @@ from .models import (
     OrganizationUserInvite,
     OnboardingDataFetch,
 )
+
+from utils import (reverse_admin_change_path,)
 
 
 def insert_or_update_vendor_accounts(profile, instance):
@@ -242,8 +244,10 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         if validated_data.get('status') == 'completed':
             try:
                 profile = LicenseProfile.objects.get(license=instance.id)
-                notify_admins_on_profile_registration(
-                    profile.license.organization.created_by.email, profile.name, instance)
+                admin_link = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(instance)}"
+                #email &slack admins
+                email_admins_on_profile_registration_completed(instance.created_by.email,profile.name,instance,admin_link)
+                notify_admins_on_slack_complete(instance.created_by.email,instance,admin_link)
                 #Create zoho books customer
                 create_customer_in_books(id=profile.license.id,is_update=False, params={})
                 #insert or update vendors/accounts

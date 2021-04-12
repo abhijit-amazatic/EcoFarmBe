@@ -21,7 +21,7 @@ from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
 from integration.box import (delete_file,)
-from core.utility import (send_async_approval_mail, get_profile_type,)
+from core.utility import (send_async_approval_mail, get_profile_type,send_async_approval_mail_admin,)
 from .tasks import (invite_profile_contacts, insert_record_to_crm)
 from .models import (
     Organization,
@@ -37,6 +37,7 @@ from .models import (
     OrganizationUser,
     OrganizationUserRole,
 )
+from utils import (reverse_admin_change_path,)
 
 class LicenseUpdatedForm(forms.ModelForm):
 
@@ -44,14 +45,17 @@ class LicenseUpdatedForm(forms.ModelForm):
         model = License
         fields = '__all__'
 
-    def clean(self):
+    def clean(self):        
         if self.changed_data:
             if 'status' in self.changed_data and self.cleaned_data.get('status') == 'approved':
                 license_obj = License.objects.filter(id=self.instance.id)
                 if license_obj:
-                    ac_manager = license_obj[0].organization.created_by.email
+                    ac_manager = license_obj[0].created_by.email
                     profile_type = get_profile_type(license_obj[0])
+                    admin_link = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(license_obj[0])}"
                     mail_send("farm-approved.html",{'link': settings.FRONTEND_DOMAIN_NAME+'login', 'profile_type': profile_type,'legal_business_name': license_obj[0].legal_business_name},"Your %s profile has been approved."% profile_type, ac_manager)
+                    #admin mail send after approval
+                    mail_send("farm-approved-admin.html",{'admin_link': admin_link,'mail':self.request.user.email,'license_type':license_obj[0].license_type,'legal_business_name':license_obj[0].legal_business_name,'license_number':license_obj[0].license_number},"License Profile [%s] approved" % license_obj[0].license_number, recipient_list=settings.ONBOARDING_ADMIN_EMAIL)
                     
 
 def approve_license_profile(modeladmin, request, queryset):
@@ -68,6 +72,7 @@ def approve_license_profile(modeladmin, request, queryset):
                 license_profile[0].approved_by = get_user_data(request)
                 license_profile[0].save()
             send_async_approval_mail.delay(profile.id)
+            send_async_approval_mail_admin.delay(profile.id,request.user.id)
             if hasattr(profile, 'profile_contact'):
                 invite_profile_contacts.delay(profile.profile_contact.id)
                 pass#add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
@@ -278,7 +283,8 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     @transaction.atomic
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status == 'approved':
-            send_async_approval_mail(obj.id)
+            send_async_approval_mail.delay(obj.id)
+            send_async_approval_mail_admin.delay(obj.id,request.user.id)
             license_profile = LicenseProfile.objects.filter(license=obj)
             if license_profile:
                 license_profile[0].approved_on  = timezone.now()
@@ -289,6 +295,11 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
                 pass #add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
             
         super().save_model(request, obj, form, change)
+
+    def get_form(self, request, *args, **kwargs):
+        form = super(MyLicenseAdmin, self).get_form(request, *args, **kwargs)
+        form.request = request
+        return form    
 
 class OrganizationRoleNestedAdmin(nested_admin.NestedTabularInline):
     """

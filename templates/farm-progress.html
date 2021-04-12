@@ -1,0 +1,16 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi Onboarding Team,</p>
+<div style="padding-left:15px;">
+    <div ><p style='font-size:16px !important;color: #013c48;'><strong>{{ license_type }}</strong> License Profile <strong>{{ legal_business_name }}-{{ license_number }}</strong> is <strong>'In-Progress'</strong> by user {{ mail }}.<br><br>
+        Please kick off the Success Management process!<br><br>
+        <strong>Admin Panel-</strong> {{ admin_link }}
+    </p></div>
+    <div>
+        <ul style='font-size:16px !important;'>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}

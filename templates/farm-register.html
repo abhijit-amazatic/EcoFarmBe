@@ -1,9 +1,11 @@
 {% extends "email-skeleton.html" %}
 {% block body %}
 
-<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi {{ email }},</p>
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi Onboarding Team,</p>
 <div style="padding-left:15px;">
-    <div ><p style='font-size:16px !important;color: #013c48;'>Vendor/Account Profile named {{ link }} added under Email {{ mail }}.Please mark it's status as 'approved' from admin panel if Profile fits in our policy.<br>
+    <div ><p style='font-size:16px !important;color: #013c48;'><strong>{{ license_type }}</strong> License Profile <strong>{{ legal_business_name }}-{{ license_number }}</strong> was <strong>'Completed'</strong> by user {{ mail }}.Please mark it's status as <strong>'Approved'</strong> from the admin panel after the license and profile have been verified for compliance and accuracy.<br><br>
+
+        <strong>Admin Panel-</strong> {{ admin_link }}
     </p></div>
     <div>
         <ul style='font-size:16px !important;'>

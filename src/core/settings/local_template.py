@@ -209,3 +209,8 @@ ENV_PREFIX ='' #'dev-' for stag & 'prod-' for prod
 
 #pendo config
 TRACK_EVENT_SECRET_KEY = ''
+
+#Notifications
+ONBOARDING_ADMIN_EMAIL = '' #
+SLACK_ONBOARDING_PROGRESS = ''
+SLACK_ONBOARDING_COMPLETED = {}
