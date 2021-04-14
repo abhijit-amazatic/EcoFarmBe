@@ -142,6 +142,7 @@ def submit_estimate(
         return get_embedded_url_from_sign(
             response['requests']['request_id'],
             response['requests']['actions'][0]['action_id'])
+    return response
 
 def get_embedded_url_from_sign(request_id, action_id):
     """
