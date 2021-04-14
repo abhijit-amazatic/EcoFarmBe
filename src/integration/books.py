@@ -726,13 +726,15 @@ def list_vendor_credits(params=None):
     invoice_obj = obj.VendorCredits()
     return invoice_obj.list_vendor_credits(parameters=params)
 
-def get_unpaid_bills(vendor, status='unpaid'):
+def get_unpaid_bills(vendor, status='unpaid', start_date=None, end_date=None):
     """
     Return total unpaid bills.
     """
     response = list_bills({
         'vendor_name': vendor,
-        'status': status})['response']
+        'status': status,
+        'date_start': start_date,
+        'date_end': end_date})['response']
     unpaid = sum([i['balance'] for i in response])
     return unpaid
 
@@ -776,18 +778,24 @@ def get_buyer_summary(customer):
         return {}
     total_quantity = 0
     total_items = 0
-    category_count = {
+    category_percentage = category_count = {
         'flower': 0,
         'trim': 0,
         'smalls': 0
     }
-    invoices = list_invoices(params={'customer_name': customer})
+    start_date = datetime.now().date().replace(month=1, day=1)
+    end_date = datetime.now().date()
+    invoices = list_invoices(params={'customer_name': customer,
+        'date_start': start_date,
+        'date_end': end_date})
     invoices = invoices.get('response', [])
     invoices_count = len(invoices)
     invoices_total = sum([i['total'] for i in invoices])
     for invoice in invoices:
         resp = get_invoice_from_redis(invoice.get('invoice_id'))
         for item in resp['line_items']:
+            if 'Cultivation Tax' in item.get('name') or 'MCSP' in item.get('name'):
+                continue
             total_quantity += item['quantity']
             try:
                 inventory = Inventory.objects.filter(sku=item['sku']).latest('last_modified_time')
@@ -805,13 +813,14 @@ def get_buyer_summary(customer):
                 continue
     if total_items:
         for k, v in category_count.items():
-            category_count[k] = (v/total_items) * 100
+            category_percentage[k] = (v/total_items) * 100
     return {
         "total_invoice_price": invoices_total,
         "total_quantity": total_quantity,
         "average_invoice_price": invoices_total/invoices_count if invoices_count else 0,
-        "outstanding_bills": get_unpaid_bills(customer),
-        "category_percentage": category_count
+        "outstanding_bills": get_unpaid_bills(customer, status='unpaid', start_date=start_date, end_date=end_date),
+        "category_count": category_count,
+        "category_percentage": category_percentage
         }
 
 def get_contact_id(obj, contact_name):
