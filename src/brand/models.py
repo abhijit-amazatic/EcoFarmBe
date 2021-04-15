@@ -603,3 +603,4 @@ class Sign(TimeStampFlagModelMixin,models.Model):
     )
     request_id = models.CharField( _('Request ID'), blank=True, null=True, max_length=255)
     action_id = models.CharField( _('Action ID'), blank=True, null=True, max_length=255)
+    fields = JSONField(null=True, blank=True, default=dict)

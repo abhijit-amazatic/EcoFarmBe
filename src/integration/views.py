@@ -390,6 +390,16 @@ class TemplateSignView(APIView):
     """
     permission_classes = (IsAuthenticated,)
 
+    def compare_fields(self, fields):
+        """
+        Compare fields with request.data fields.
+        """
+        for field, value in fields.items():
+            print(field, self.request.data.get(field), value)
+            if self.request.data.get(field) != value:
+                return True
+        return False
+
     def post(self, request):
         """
         Get template signing url.
@@ -412,7 +422,9 @@ class TemplateSignView(APIView):
             license = License.objects.get(license_number=licenses[0])
             obj = Sign.objects.get(license=license)
             if obj:
-                return Response(get_embedded_url_from_sign(obj.request_id, obj.action_id))
+                is_agreement_changed = self.compare_fields(obj.fields)
+                if not is_agreement_changed:
+                    return Response(get_embedded_url_from_sign(obj.request_id, obj.action_id))
         except (License.DoesNotExist, Sign.DoesNotExist):
             pass
 
@@ -428,7 +440,8 @@ class TemplateSignView(APIView):
                 license = License.objects.get(license_number=licenses[0])
                 obj = Sign.objects.create(license=license,
                                     request_id=response['request_id'],
-                                    action_id=response['action_id'])
+                                    action_id=response['action_id'],
+                                    fields=request.data)
             except (License.DoesNotExist, Sign.DoesNotExist):
                 pass
             return Response(response)
