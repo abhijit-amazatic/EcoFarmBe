@@ -395,7 +395,6 @@ class TemplateSignView(APIView):
         Compare fields with request.data fields.
         """
         for field, value in fields.items():
-            print(field, self.request.data.get(field), value)
             if self.request.data.get(field) != value:
                 return True
         return False
@@ -438,10 +437,11 @@ class TemplateSignView(APIView):
                                      license_owner_email)
             try:
                 license = License.objects.get(license_number=licenses[0])
-                obj = Sign.objects.create(license=license,
-                                    request_id=response['request_id'],
-                                    action_id=response['action_id'],
-                                    fields=request.data)
+                data = {"request_id":response['request_id'],
+                        "action_id":response['action_id'],
+                        "fields":request.data}
+                obj = Sign.objects.update_or_create(license=license,
+                                    defaults=data)
             except (License.DoesNotExist, Sign.DoesNotExist):
                 pass
             return Response(response)
