@@ -419,7 +419,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                         notify_inventory_item_approved_task.delay(obj.id)
 
             elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
-                self._approve(request, obj, data, sku_postfix=sku_postfix+1)
+                self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix+1)
             else:
                 self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                 print('Error while creating item in Zoho Inventory')
