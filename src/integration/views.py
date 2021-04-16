@@ -18,6 +18,7 @@ from django.conf import settings
 
 from core.permissions import UserPermissions
 from .models import (Integration)
+from inventory.models import Inventory
 from integration.box import(
     get_box_tokens, get_shared_link,
     get_client_folder_id, create_folder, get_download_url)
@@ -538,9 +539,10 @@ class EstimateSignCompleteView(APIView):
             try:
                 order_data = get_estimate(estimate_id,params={})
                 if order_data.get('estimate_id'):
-                    item_total = sum(i['item_total'] for i in order_data.get('line_items',[]))
+                    item_total = '{:,.2f}'.format(sum(i['item_total'] for i in order_data.get('line_items',[])))
                     quantity = sum(i['quantity'] for i in order_data.get('line_items',[]))
-                    category = order_data.get('contact_category','')
+                    prod_category = Inventory.objects.filter(item_id__in=[i['item_id'] for i in  order_data.get('line_items')],parent_category_name__isnull=False).values_list('parent_category_name',flat=True).distinct()
+                    category = ",".join(list(prod_category))
                     mail("order.html",{'link': settings.FRONTEND_DOMAIN_NAME+'dashboard/billing/estimates/%s/item' % estimate_id,'full_name': request.user.full_name,'order_number':order_number,'business_name': business_dba, 'license_number': document_number, 'estimate_id':estimate_id, 'order_amount':item_total,'quantity':quantity,'product_category':category},"Your Thrive Society Order %s." %order_number, request.user.email,file_data=download_pdf(request_id))
             except Exception as e:
                 print('Issue while preparing order email', e)
