@@ -1012,7 +1012,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             if result.get('status_code') != 200:
                 result = create_records('Accounts', d, is_return_orginal_data=True)
         final_dict['account'] = result
-        if response['status_code'] == 200 and result['status_code'] in [201]:
+        if response['status_code'] == 200 and result['status_code'] in [200, 201]:
             record_response = result['response']['response']['data']
             try:
                 record_obj = LicenseProfile.objects.get(id=vendor_id)
@@ -1031,7 +1031,6 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                         r = update_records('Accounts_X_Licenses', [data])
                         if r.get('status_code') == 202:
                             r = create_records('Accounts_X_Licenses', [data])
-                        print(r)
                     else:
                         r = create_records('Accounts_X_Licenses', [data])
                 request = list()
