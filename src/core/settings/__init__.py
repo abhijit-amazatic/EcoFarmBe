@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'multiselectfield',
     'fee_variable',
     'simple_history',
+    'bill'
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',

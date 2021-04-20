@@ -525,12 +525,3 @@ class CountyDailySummary(models.Model):
         unique_together = (('date', 'county'), )
         verbose_name = _('Daily County Summary')
         verbose_name_plural = _('Daily County Summary')
-       
-    
-
-        
-
-        
-        
-
-

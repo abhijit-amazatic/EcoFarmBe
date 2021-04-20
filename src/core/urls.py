@@ -97,6 +97,8 @@ from two_factor.views import (
     AddAuthenticatorRequestViewSet,
 )
 # from brand.views import (InviteUserView,)
+from bill.views import (EstimateWebappView, )
+
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
@@ -173,6 +175,8 @@ urlpatterns = [
          name='get_account_client_code'),
     path(r'crm/vendor-client-code/', VendorClientCodeView.as_view(),name='get_vendor_client_code'),
     path(r'cultivar/sync/', CultivarSyncView.as_view(), name='sync_cultivar'),
+    path(r'books/estimate/sales-rep/', EstimateWebappView.as_view(), name="estimate-sales-rep-view"),
+    path(r'books/estimate/sales-rep/<str:id>/', EstimateWebappView.as_view(), name="estimate-sales-rep-view"),
     path(r'books/estimate/', EstimateView.as_view(), name='estimate'),
     path(r'books/estimate-address/', EstimateAddressView.as_view(), name='estimate_address'),
     path(r'books/contact/', ContactView.as_view(), name='contact'),
@@ -245,7 +249,6 @@ urlpatterns = [
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
     path(r'campaign/', CampaignView.as_view(), name="campaign"),
-    
 
 ] + router.urls
 

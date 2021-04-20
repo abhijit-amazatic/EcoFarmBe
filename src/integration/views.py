@@ -75,6 +75,7 @@ from .views_permissions import (
     SalesOrderViewPermission,
 )
 from brand.models import (License, Sign, )
+from bill.models import (Estimate, LineItem)
 from integration.campaign import (create_campaign, )
 from fee_variable.models import (CampaignVariable, )
 from integration.apps.aws import (get_boto_client, create_presigned_url)
@@ -293,24 +294,11 @@ class EstimateView(APIView):
         """
         Create and estimate in Zoho Books.
         """
-        is_draft = request.query_params.get('is_draft')
-        if is_draft == 'true' or is_draft == 'True':
-            response = create_estimate(data=request.data, params=request.query_params.dict())
-            if response.get('code') and response['code'] != 0:
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            return Response(response)
-        else:
-            estimate = create_estimate(data=request.data, params=request.query_params.dict())
-            if estimate.get('code') and estimate['code'] != 0:
-                return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
-            # if estimate.get('estimate_id'):
-            #     estimate_id = estimate['estimate_id']
-            #     contact_id = estimate['customer_id']
-            #     mark_estimate(estimate_id, 'sent')
-            #     mark_estimate(estimate_id, 'accepted')
-            return Response(estimate)
-        return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
+        response = create_estimate(data=request.data, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response)
+        
     def put(self, request):
         """
         Update an estimate in Zoho Books.
@@ -326,11 +314,6 @@ class EstimateView(APIView):
             estimate = update_estimate(estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if estimate.get('code') and estimate['code'] != 0:
                 return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
-            # if estimate.get('estimate_id'):
-            #     estimate_id = estimate['estimate_id']
-            #     contact_id = estimate['customer_id']
-            #     mark_estimate(estimate_id, 'sent')
-            #     mark_estimate(estimate_id, 'accepted')
             update_available_for_sale(request.data)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
@@ -381,6 +364,7 @@ class EstimateSignView(APIView):
             response = send_estimate_to_sign(estimate_id, customer_name)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            Estimate.objects.get(estimate_id=estimate_id).update(request_id=response.get('request_id'))
             return Response(response, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
