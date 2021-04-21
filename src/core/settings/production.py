@@ -119,6 +119,9 @@ SLACK_INVENTORY_CHANNEL = os.environ.get("SLACK_INVENTORY_CHANNEL")
 #Logistics Transport channel
 SLACK_LOGISTICS_TRANSPORT_CHANNEL = os.environ.get("SLACK_LOGISTICS_TRANSPORT_CHANNEL")
 
+#New cultivars
+SLACK_NEW_CULTIVARS = os.environ.get("SLACK_NEW_CULTIVARS")
+
 #eco farm bot
 BOT_NAME = os.environ.get("BOT_NAME") 
 BOT_ICON_URL= os.environ.get("BOT_ICON_URL")

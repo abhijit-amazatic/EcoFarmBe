@@ -131,6 +131,8 @@ SLACK_INVENTORY_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_new_inventory_
 #Logistics Transport channel
 SLACK_LOGISTICS_TRANSPORT_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_logistics_transport_requests_web_app'
 
+#NEW CULTIVARS
+SLACK_NEW_CULTIVARS = 'tech_dev_slack_testing'
 #eco farm bot
 BOT_NAME= 'Thrive-Society-Bot'
 BOT_ICON_URL= 'https://www.thrive-society.com/static/media/logo.f8a96e86.png'
