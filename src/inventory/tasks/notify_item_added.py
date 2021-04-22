@@ -26,6 +26,7 @@ def notify_slack_inventory_item_added(data):
         f"- *Client Code:* {data.get('client_code')}\n"
         f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
         f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
+        f"- *Marketplace Status:* {data.get('marketplace_status')}\n"
         f"- *Quantity:* {data.get('quantity_available')}\n"
         f"- *Farm Price:* {data.get('farm_price_formated')}\n"
         f"- *Pricing Position:* {data.get('pricing_position')}\n"

@@ -29,6 +29,7 @@ def notify_slack_inventory_item_approved(data):
         f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
         f"- *SKU:* {data.get('sku')}\n"
         f"- *Quantity:* {data.get('quantity_available')}\n"
+        f"- *Marketplace Status:* {data.get('marketplace_status')}\n"
         f"- *Farm Price:* {data.get('farm_price_formated')}\n"
         f"- *Pricing Position:* {data.get('pricing_position')}\n"
         # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
