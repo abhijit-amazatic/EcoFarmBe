@@ -46,11 +46,11 @@ def post_save_user(sender, instance, created, **kwargs):
         )
         for invite in invites:
             if invite.is_invite_accepted:
-                organization_user = OrganizationUser.objects.get_or_create(
+                organization_user, _ = OrganizationUser.objects.get_or_create(
                     organization=invite.organization,
                     user=instance,
                 )
-                organization_user_role = OrganizationUserRole.objects.get_or_create(
+                organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
                     organization_user=organization_user,
                     role=invite.role,
                 )
