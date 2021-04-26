@@ -8,6 +8,7 @@ from bill.models import (Estimate, LineItem, )
 from bill.utils import (parse_fields, )
 from integration.books import (create_estimate, delete_estimate,)
 from bill.tasks import (notify_estimate)
+from integration.books import (send_estimate_to_sign, )
 
 class EstimateWebappView(APIView):
     """
@@ -71,6 +72,9 @@ class EstimateWebappView(APIView):
             # notify_estimate.delay(notification_methods)
             response = create_estimate(data=request.data, params=request.query_params.dict())
             response = parse_fields('estimate', response)
+            sign_obj = send_estimate_to_sign(response.get('estimate_id'), response.get('customer_name'))
+            response['request_id'] = sign_obj.get('request_id')
+            sign_url = sign_obj.get('sign_url')
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             estimate = response
