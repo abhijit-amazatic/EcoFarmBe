@@ -50,7 +50,7 @@ def post_save_user(sender, instance, created, **kwargs):
                     organization=invite.organization,
                     user=instance,
                 )
-                organization_user_role = OrganizationUserRole.objects.get(
+                organization_user_role = OrganizationUserRole.objects.get_or_create(
                     organization_user=organization_user,
                     role=invite.role,
                 )

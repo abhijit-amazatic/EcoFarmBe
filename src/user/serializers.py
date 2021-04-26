@@ -18,7 +18,7 @@ from permission.models import InternalRole
 from .models import User, TermsAndCondition, HelpDocumentation
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
-from brand.models import (License,)
+from brand.models import (License, Organization)
 from inventory.models import (Documents, )
 from integration.apps.aws import (create_presigned_url, )
 
@@ -82,7 +82,7 @@ class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.ReadOnlyField()
     member_categories = serializers.SerializerMethodField(read_only=True)
     two_factor_devices = serializers.SerializerMethodField(read_only=True)
-    organizations = OrganizationSerializer(many=True, read_only=True)
+    organizations = serializers.SerializerMethodField(read_only=True)
     is_verified = serializers.ReadOnlyField()
     is_2fa_enabled = serializers.ReadOnlyField()
     is_approved = serializers.ReadOnlyField()
@@ -93,6 +93,14 @@ class UserSerializer(serializers.ModelSerializer):
     document_url = serializers.SerializerMethodField()
     internal_roles = serializers.SerializerMethodField()
     internal_permission = serializers.SerializerMethodField()
+
+    def get_organizations(self, obj):
+        """
+        Return s3 document url.
+        """
+        qs = Organization.objects.all()
+        serializer = OrganizationSerializer(filterQuerySet.for_user(queryset=qs, user=obj), many=True, read_only=True)
+        return serializer.data
 
     def get_document_url(self, obj):
         """
