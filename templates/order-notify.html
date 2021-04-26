@@ -1,0 +1,13 @@
+{% extends "email-skeleton.html" %}
+{% block body %}
+<p style='font-size:16px !important;color: #013c48;padding-left:15px;'>Hi {{ full_name }},</p>
+<div style ="padding-left:15px;">
+    <div><p style='font-size:16px !important;color: #013c48;'>Your Thrive Society Marketplace(Pending Order) is ready for review and sign.Your Order's Signature link is<br>
+        {{ sign_url }}<br><br>
+    </p>
+    </div>
+    <div>
+    </div>
+
+</div>
+{% endblock %}

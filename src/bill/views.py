@@ -81,6 +81,7 @@ class EstimateWebappView(APIView):
                                              notify_addresses=notify_addresses)
             response['request_id'] = sign_obj.get('request_id')
             sign_url = sign_obj.get('sign_url')
+            notify_estimate(notification_methods,sign_url)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             estimate = response
