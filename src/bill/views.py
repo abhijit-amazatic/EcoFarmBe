@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bill.models import (Estimate, LineItem, )
-from bill.utils import (parse_fields, )
+from bill.utils import (parse_fields, get_notify_addresses,)
 from integration.books import (create_estimate, delete_estimate,)
 from bill.tasks import (notify_estimate)
 from integration.books import (send_estimate_to_sign, )
@@ -56,7 +56,7 @@ class EstimateWebappView(APIView):
         """
         id = kwargs.get('id', None)
         is_draft = request.query_params.get('is_draft')
-        notification_methods = request.query_params.get('notification_methods')
+        notification_methods = request.data.get('notification_methods')
         if is_draft == 'true' or is_draft == 'True':
             estimate = request.data
             line_items = request.data.get('line_items')
@@ -72,7 +72,13 @@ class EstimateWebappView(APIView):
             # notify_estimate.delay(notification_methods)
             response = create_estimate(data=request.data, params=request.query_params.dict())
             response = parse_fields('estimate', response)
-            sign_obj = send_estimate_to_sign(response.get('estimate_id'), response.get('customer_name'))
+            if notification_methods:
+                notify_addresses = get_notify_addresses(notification_methods)
+            else:
+                notify_addresses = list()
+            sign_obj = send_estimate_to_sign(response.get('estimate_id'),
+                                             response.get('customer_name'),
+                                             notify_addresses=notify_addresses)
             response['request_id'] = sign_obj.get('request_id')
             sign_url = sign_obj.get('sign_url')
             if response.get('code') and response.get('code') != 0:

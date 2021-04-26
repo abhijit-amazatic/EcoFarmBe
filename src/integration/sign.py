@@ -60,7 +60,8 @@ def create_estimate_document(
     recipients,
     notes=None,
     expiry=10,
-    reminder_period=5
+    reminder_period=5,
+    notify_addresses=None
     ):
     """
     create estimate in Zoho sign.
@@ -71,7 +72,8 @@ def create_estimate_document(
         recipients=recipients,
         notes=notes,
         expiry=expiry,
-        reminder_period=reminder_period)
+        reminder_period=reminder_period,
+        notify_addresses=notify_addresses)
 
 def submit_estimate_document(document_obj, x, y, page_number):
     """
@@ -124,7 +126,8 @@ def submit_estimate(
     recipients,
     notes=None,
     expiry=10,
-    reminder_period=5):
+    reminder_period=5,
+    notify_addresses=None):
     """
     Create document and submit for signature.
     """
@@ -133,15 +136,20 @@ def submit_estimate(
         recipients,
         notes,
         expiry,
-        reminder_period
+        reminder_period,
+        notify_addresses
     )
     x, y, page_number = parse_pdf(file_obj[0][1])
     x, y = x+42, y-5
     response = submit_estimate_document(document_obj, x, y, page_number)
     if response['code'] == 0:
+        for action in response['requests']['actions']:
+            if action.get('action_type') == 'SIGN':
+                action_id = action.get('action_id')
         return get_embedded_url_from_sign(
             response['requests']['request_id'],
-            response['requests']['actions'][0]['action_id'])
+            action_id
+            )
     return response
 
 def get_embedded_url_from_sign(request_id, action_id):

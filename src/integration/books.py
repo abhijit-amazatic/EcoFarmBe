@@ -531,7 +531,7 @@ def update_estimate_address(estimate_id, address_type, data, params=None):
     estimate_obj = obj.Estimates()
     return estimate_obj.update_estimate_address(estimate_id, address_type, data, parameters=params)
 
-def send_estimate_to_sign(estimate_id, customer_name):
+def send_estimate_to_sign(estimate_id, customer_name, notify_addresses=None):
     """
     sync estimate status from zoho books.
     """
@@ -554,7 +554,8 @@ def send_estimate_to_sign(estimate_id, customer_name):
             recipients=customer_dict,
             notes="",
             expiry=10,
-            reminder_period=15
+            reminder_period=15,
+            notify_addresses=notify_addresses
             )
     except KeyError as exc:
         print('Key not found', exc)
