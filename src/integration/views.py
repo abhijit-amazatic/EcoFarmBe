@@ -364,7 +364,6 @@ class EstimateSignView(APIView):
             response = send_estimate_to_sign(estimate_id, customer_name)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            Estimate.objects.get(estimate_id=estimate_id).update(request_id=response.get('request_id'))
             return Response(response, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
