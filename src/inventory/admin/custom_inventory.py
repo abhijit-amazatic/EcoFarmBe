@@ -200,6 +200,10 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                 field.queryset = field.queryset.filter(status='approved')
         return field
 
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.status == 'pending_for_approval':
+            return True
+        return False
 
     def generate_sku(self, obj, postfix):
         sku = []

@@ -32,6 +32,7 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
         (None, {
             'fields': (
                 'item',
+                'marketplace_status',
                 'farm_price',
                 'pricing_position',
                 'have_minimum_order_quantity',

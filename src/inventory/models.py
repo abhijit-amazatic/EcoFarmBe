@@ -190,7 +190,16 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         ('Min Quantity', _('Min Quantity')),
         ('Offers Open', _('Offers Open')),
     )
-
+    MARKETPLACE_STATUS_CHOICES = (
+        ('Under Contract', _('Under Contract')),
+        ('Sold', _('Sold')),
+        ('Pending Sale', _('Pending Sale')),
+        ('Available', _('Available')),
+        ('In-Testing', _('In-Testing')),
+        ('Processing', _('Processing')),
+        ('Flowering', _('Flowering')),
+        ('Vegging', _('Vegging')),
+    )
     PAYMENT_TERMS_CHOICES = (
         ('60 Days', _('60 Days')),
         ('21 Days', _('21 Days')),
@@ -214,6 +223,8 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     payment_terms = models.CharField(_('Payment Terms'), choices=PAYMENT_TERMS_CHOICES, blank=True, null=True, max_length=50)
     payment_method = ChoiceArrayField(models.CharField(_('Payment Method'), max_length=100, choices=PAYMENT_METHOD_CHOICES), blank=True, default=list)
 
+    marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, blank=True, null=True,)
+
     extra_documents = GenericRelation(Documents)
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
@@ -232,6 +243,8 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
             'cf_payment_terms': self.payment_terms,
             'cf_payment_method': self.payment_method,
         }
+        if self.marketplace_status:
+            data['cf_status'] = self.marketplace_status
         # if self.have_minimum_order_quantity:
         #     data['cf_minimum_quantity'] = int(self.minimum_order_quantity)
         # else:
@@ -258,6 +271,12 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
                 self.item.cf_date_available.strftime("%Y-%m-%d") if self.item.cf_date_available else None,
                 self.batch_availability_date.strftime("%Y-%m-%d") if self.batch_availability_date else None,
         )
+        if self.marketplace_status:
+            data['marketplace_status'] = (
+                'Marketplace Status',
+                self.item.cf_status,
+                self.marketplace_status,
+            )
         return data
 
     def __str__(self):
