@@ -17,9 +17,9 @@ class Estimate(TimeStampFlagModelMixin, models.Model):
         (EFN, 'efn'),
     )
     
-    DRAFT = 'draft'
-    SENT = 'sent'
-    SIGNED = 'signed'
+    DRAFT = 'draft' # Order is only in db.
+    SENT = 'sent' # Order is sent to user for sign after creating in zoho.
+    SIGNED = 'signed' # Order is signed by user.
     PROGRESS_CHOICES = (
         (DRAFT, 'draft'),
         (SENT, 'sent'),

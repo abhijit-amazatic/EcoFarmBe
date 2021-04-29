@@ -517,6 +517,12 @@ class EstimateSignCompleteView(APIView):
                 a = mark_estimate(estimate_id, 'sent')
                 a = mark_estimate(estimate_id, 'accepted')
                 new_folder = create_folder(folder_id, 'estimates')
+                try:
+                    estimate_obj = Estimate.objects.get(estimate_id=estimate_id)
+                    estimate_obj.db_status = 'signed'
+                    estimate_obj.save()
+                except Estimate.DoesNotExist:
+                    pass
             upload_pdf_box.delay(request_id, new_folder, filename, is_agreement)
         if order_number:
             try:

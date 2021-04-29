@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from bill.models import (Estimate, LineItem, )
 from bill.utils import (parse_fields, get_notify_addresses,)
-from integration.books import (create_estimate, delete_estimate,)
+from integration.books import (create_estimate, delete_estimate, update_estimate)
 from bill.tasks import (notify_estimate)
 from integration.books import (send_estimate_to_sign, )
 
@@ -38,9 +38,10 @@ class EstimateWebappView(APIView):
         Create and estimate in Zoho Books.
         """
         estimate = request.data
+        customer_name = request.data.get('customer_name')
         line_items = request.data.get('line_items')
         del estimate['line_items']
-        estimate_obj = Estimate.objects.create(**estimate)
+        estimate_obj, created = Estimate.objects.update_or_create(customer_name=customer_name, defaults=estimate)
         items = list()
         for item in line_items:
             item['estimate'] = estimate_obj
@@ -59,9 +60,10 @@ class EstimateWebappView(APIView):
         notification_methods = request.data.get('notification_methods')
         if is_draft == 'true' or is_draft == 'True':
             estimate = request.data
+            customer_name = request.data.get('customer_name')
             line_items = request.data.get('line_items')
             del estimate['line_items']
-            estimate_obj = Estimate.objects.filter(id=id).update(**estimate)
+            estimate_obj = Estimate.objects.filter(customer_name=customer_name).update(**estimate)
             items = list()
             for item in line_items:
                 item_obj = LineItem.objects.filter(estimate_id=id, item_id=item.get('item_id')).update(**item)
@@ -70,7 +72,10 @@ class EstimateWebappView(APIView):
             return Response({'message': 'Updated', 'id': id})
         else:
             # notify_estimate.delay(notification_methods)
-            response = create_estimate(data=request.data, params=request.query_params.dict())
+            estimate = Estimate.objects.get(customer_name=request.data.get('customer_name'))
+            response = update_estimate(estimate_id=estimate.estimate_id, data=request.data, params=request.query_params.dict())
+            if response.get('status_code') and response['status_code'] != 0:
+                response = create_estimate(data=request.data, params=request.query_params.dict())
             response = parse_fields('estimate', response)
             if notification_methods:
                 notify_addresses = get_notify_addresses(notification_methods)
@@ -85,11 +90,12 @@ class EstimateWebappView(APIView):
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             estimate = response
+            estimate['db_status'] = 'sent'
             line_items = request.data.get('line_items')
             line_items = parse_fields('item', line_items, many=True)
-            estimate_obj = Estimate.objects.filter(id=id).update(**estimate)
+            estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
             items = list()
             for item in line_items:
                 item_obj = LineItem.objects.filter(estimate_id=id, item_id=item.get('item_id')).update(**item)
-            return Response({'message': 'Updated', 'id': id})
+            return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
