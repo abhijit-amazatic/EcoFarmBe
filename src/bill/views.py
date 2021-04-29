@@ -30,7 +30,10 @@ class EstimateWebappView(APIView):
         elif db_id:
             data = Estimate.objects.filter(id=db_id)
         if data:
-            return Response(data.values())
+            result = dict()
+            result['estimate'] = data.values()
+            result['line_items'] = LineItem.objects.filter(estimate__customer_name=customer_name).values()
+            return Response(result)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
         
     def post(self, request):
@@ -44,10 +47,8 @@ class EstimateWebappView(APIView):
         estimate_obj, created = Estimate.objects.update_or_create(customer_name=customer_name, defaults=estimate)
         items = list()
         for item in line_items:
-            item['estimate'] = estimate_obj
-            items.append(LineItem(**item))
-        items_obj = LineItem.objects.bulk_create(items)
-        if not estimate_obj or not items_obj:
+            item_obj, created = LineItem.objects.update_or_create(estimate=estimate_obj, item_id=item.get('item_id'), defaults=item)
+        if not estimate_obj:
             return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'Success', 'id': estimate_obj.id})
 
