@@ -539,7 +539,7 @@ def update_estimate_address(books_name, estimate_id, address_type, data, params=
     estimate_obj = obj.Estimates()
     return estimate_obj.update_estimate_address(estimate_id, address_type, data, parameters=params)
 
-def send_estimate_to_sign(books_name, estimate_id, customer_name, notify_addresses):
+def send_estimate_to_sign(books_name, estimate_id, customer_name, notify_addresses=None):
     """
     sync estimate status from zoho books.
     """
