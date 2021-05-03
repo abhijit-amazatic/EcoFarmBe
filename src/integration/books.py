@@ -6,7 +6,9 @@ from datetime import (datetime, timedelta, )
 from core.settings import (
     BOOKS_CLIENT_ID,
     BOOKS_CLIENT_SECRET,
-    BOOKS_ORGANIZATION_ID,
+    BOOKS_ORGANIZATION_EFD_ID,
+    BOOKS_ORGANIZATION_EFL_ID,
+    BOOKS_ORGANIZATION_EFN_ID,
     BOOKS_REDIRECT_URI,
     BOOKS_REFRESH_TOKEN,
     TRANSPORTATION_FEES,
@@ -19,20 +21,26 @@ from .crm_format import (CRM_FORMAT, )
 from .inventory import (get_inventory_items, update_inventory_item, get_inventory_name)
 from .sign import (submit_estimate, )
 from inventory.models import Inventory
-from fee_variable.models import *
+from fee_variable.models import (TaxVariable, )
 
-def get_books_obj():
+def get_books_obj(books_name):
     """
     Get Pyzoho books object.
     """
     try:
-        token = Integration.objects.get(name='books')
+        token = Integration.objects.get(name=books_name)
         access_token = token.access_token
         access_expiry = token.access_expiry
         refresh_token = token.refresh_token
     except Integration.DoesNotExist:
         access_token = access_expiry = None
         refresh_token = BOOKS_REFRESH_TOKEN
+    if books_name == 'books_efd':
+        BOOKS_ORGANIZATION_ID = BOOKS_ORGANIZATION_EFD_ID
+    elif books_name == 'books_efl':
+        BOOKS_ORGANIZATION_ID = BOOKS_ORGANIZATION_EFL_ID
+    elif books_name == 'books_efn':
+        BOOKS_ORGANIZATION_ID = BOOKS_ORGANIZATION_EFN_ID
     books_obj = Books(
         client_id=BOOKS_CLIENT_ID,
         client_secret=BOOKS_CLIENT_SECRET,
@@ -43,9 +51,9 @@ def get_books_obj():
         access_token=access_token)
     if books_obj.refreshed:
         Integration.objects.update_or_create(
-            name='books',
+            name=books_name,
             defaults={
-                "name":'books',
+                "name": books_name,
                 "client_id":BOOKS_CLIENT_ID,
                 "client_secret":BOOKS_CLIENT_SECRET,
                 "refresh_token":books_obj.refresh_token,
@@ -60,7 +68,7 @@ def get_format_dict(module):
     """
     return CRM_FORMAT[module]
 
-def create_customer_in_books(id=None, is_update=False, is_single_user=False, params={}):
+def create_customer_in_books(books_name, id=None, is_update=False, is_single_user=False, params={}):
     """
     Create customer in the Zoho books.
     """
@@ -111,9 +119,9 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
             for customer_type in ['vendor', 'customer']:
                 record_dict['contact_type'] = customer_type
                 if is_update:
-                    response = update_contact(record_dict, params=params)
+                    response = update_contact(books_name, record_dict, params=params)
                 else:
-                    response = create_contact(record_dict, params=params)
+                    response = create_contact(books_name, record_dict, params=params)
                 zoho_books_ids[customer_type] = response.get('contact_id')
             if all(zoho_books_ids.values()):
                 try:
@@ -203,35 +211,35 @@ def update_available_for_sale(estimate):
             # response = update_inventory_item(inventory_name, item_id, request)
     return
 
-def create_contact(data, params=None):
+def create_contact(books_name, data, params=None):
     """
     Create contact in Zoho Books.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
     return contact_obj.create_contact(data, parameters=params)
 
-def update_contact(data, params=None):
+def update_contact(books_name, data, params=None):
     """
     Update contact in Zoho Books.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
     return contact_obj.update_contact(data.get('contact_id'), data, parameters=params)
 
-def get_contact(contact_id, params=None):
+def get_contact(books_name, contact_id, params=None):
     """
     Get contact.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
     return contact_obj.get_contact(contact_id, parameters=params)
 
-def get_contact_addresses(contact_name):
+def get_contact_addresses(books_name, contact_name):
     """
     Get contact address list.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact = get_contact_id(obj, contact_name)
     if contact.get('code'):
         return {'code': '1003', 'error': 'Contact not found in zoho books.'}
@@ -239,11 +247,11 @@ def get_contact_addresses(contact_name):
     contact_obj = obj.Contacts()
     return contact_obj.get_contact_addresses(contact_id)
 
-def add_contact_address(contact_name, data, params=None):
+def add_contact_address(books_name, contact_name, data, params=None):
     """
     Add contact address in Zoho Books.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
     contact = get_contact_id(obj, contact_name)
     if contact.get('code'):
@@ -251,11 +259,11 @@ def add_contact_address(contact_name, data, params=None):
     contact_id = contact['contact_id']
     return contact_obj.add_contact_address(contact_id, data, parameters=params)
 
-def edit_contact_address(contact_name, address_id, data, params=None):
+def edit_contact_address(books_name, contact_name, address_id, data, params=None):
     """
     Edit contact address in Zoho Books.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
     contact = get_contact_id(obj, contact_name)
     if contact.get('code'):
@@ -263,35 +271,35 @@ def edit_contact_address(contact_name, address_id, data, params=None):
     contact_id = contact['contact_id']
     return contact_obj.edit_contact_address(contact_id, address_id, data, parameters=params)
 
-def get_contact_person(contact_id, contact_person_id, params=None):
+def get_contact_person(books_name, contact_id, contact_person_id, params=None):
     """
     Get contact person.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.ContactPersons()
     return contact_obj.get_contact_person(contact_id, contact_person_id, parameters=params)
 
-def list_contact_persons(params=None):
+def list_contact_persons(books_name, params=None):
     """
     List contact person.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.ContactPersons()
     return contact_obj.list_contact_persons(parameters=params)
 
-def create_contact_person(data, params=None):
+def create_contact_person(books_name, data, params=None):
     """
     Create contact person.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.ContactPersons()
     return contact_obj.create_contact_person(data, parameters=params)
 
-def update_contact_person(contact_person_id, data, params=None):
+def update_contact_person(books_name, contact_person_id, data, params=None):
     """
     Update contact person.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.ContactPersons()
     return contact_obj.update_contact_person(contact_person_id, data, parameters=params)
 
@@ -321,33 +329,33 @@ def get_tax(obj, tax):
     tax_obj = obj.Items()
     return tax_obj.list_items(parameters={'name': tax})
 
-def get_tax_rates():
+def get_tax_rates(books_name):
     """
     Get all tax rates.
     """
     taxes = TaxVariable.objects.values('cultivar_tax_item','trim_tax_item')[0]
-    books_obj = get_books_obj()
+    books_obj = get_books_obj(books_name)
     response = dict()
     for k,v in taxes.items():
         item = get_tax(books_obj, v)['response'][0]
         response[item['name']] = item['rate']
     return response
 
-def get_transportation_fees(name=None):
+def get_transportation_fees(books_name, name=None):
     """
     Return transportation fees.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     if name:
         return get_tax(obj, name)
     return get_tax(obj, TRANSPORTATION_FEES)
 
-def calculate_tax(product_category, quantity):
+def calculate_tax(books_name, product_category, quantity):
     """
     Calculate tax from product category for estimate page.
     """
     taxes = TaxVariable.objects.values('cultivar_tax_item','trim_tax_item')[0]
-    books_obj = get_books_obj()
+    books_obj = get_books_obj(books_name)
     if product_category == 'Flower':
         item = get_tax(books_obj, taxes['cultivar_tax_item'])['response'][0]
         item_id = item['item_id']
@@ -453,12 +461,12 @@ def get_vendor(obj, data):
     data['vendor_id'] = vendor['contact_id']
     return {"code": 0, "data": data}
 
-def create_estimate(data, params=None):
+def create_estimate(books_name, data, params=None):
     """
     Create estimate in Zoho Books.
     """
     try:
-        obj = get_books_obj()
+        obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
         result = get_customer(obj, data)
         if result['code'] != 0:
@@ -473,12 +481,12 @@ def create_estimate(data, params=None):
             "error": exc
         }
 
-def delete_estimate(estimate_id, params=None):
+def delete_estimate(books_name, estimate_id, params=None):
     """
     Delete an estimate in Zoho Books.
     """
     try:
-        obj = get_books_obj()
+        obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
         return estimate_obj.delete_estimate(estimate_id=estimate_id, parameters=params)
     except Exception as exc:
@@ -487,12 +495,12 @@ def delete_estimate(estimate_id, params=None):
             "error": exc
         }
 
-def update_estimate(estimate_id, data, params=None):
+def update_estimate(books_name, estimate_id, data, params=None):
     """
     Update an estimate in Zoho Books.
     """
     try:
-        obj = get_books_obj()
+        obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
         result = get_customer(obj, data)
         if result['code'] != 0:
@@ -507,41 +515,41 @@ def update_estimate(estimate_id, data, params=None):
             'error': exc
         }
         
-def get_estimate(estimate_id, params=None):
+def get_estimate(books_name, estimate_id, params=None):
     """
     Get an estimate.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     estimate_obj = obj.Estimates()
     return estimate_obj.get_estimate(estimate_id, parameters=params)
 
-def list_estimates(params=None):
+def list_estimates(books_name, params=None):
     """
     List estimates.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     estimate_obj = obj.Estimates()
     return estimate_obj.list_estimates(parameters=params)
 
-def update_estimate_address(estimate_id, address_type, data, params=None):
+def update_estimate_address(books_name, estimate_id, address_type, data, params=None):
     """
     Update estimate address in zoho books.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     estimate_obj = obj.Estimates()
     return estimate_obj.update_estimate_address(estimate_id, address_type, data, parameters=params)
 
-def send_estimate_to_sign(estimate_id, customer_name, notify_addresses=None):
+def send_estimate_to_sign(books_name, estimate_id, customer_name, notify_addresses=None):
     """
     sync estimate status from zoho books.
     """
     try:
-        obj = get_books_obj()
+        obj = get_books_obj(books_name)
         contact = get_contact_id(obj, customer_name)
         if contact.get('code'):
             return {'code': '1003', 'error': 'Contact not found in zoho books.'}
         contact_id = contact['contact_id']
-        file_obj = get_estimate(estimate_id=estimate_id, params={'accept': 'pdf'})
+        file_obj = get_estimate(books_name, estimate_id=estimate_id, params={'accept': 'pdf'})
         file_name = (file_obj['Content-Disposition'].split(';')[1]).split('=')[1].strip('"')
         file_binary = BytesIO(base64.b64decode(file_obj['data']))
         file_type = 'application/pdf'
@@ -564,36 +572,36 @@ def send_estimate_to_sign(estimate_id, customer_name, notify_addresses=None):
     except Exception as exc:
         print('error in sync estimate status', exc)
 
-def mark_estimate(estimate_id, status, params=None):
+def mark_estimate(books_name, estimate_id, status, params=None):
     """
     Mark statement as sent, accepted, declined.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     estimate_obj = obj.Estimates()
     return estimate_obj.mark_as(estimate_id, status, parameters=params)
 
-def list_contacts(params=None):
+def list_contacts(books_name, params=None):
     """
     List contact.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
     return contact_obj.list_contacts(parameters=params)
 
-def get_purchase_order(po_id, params=None):
+def get_purchase_order(books_name, po_id, params=None):
     """
     Get specific purchase order.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     po_obj = obj.PurchaseOrders()
     return po_obj.get_purchase_order(po_id=po_id, parameters=params)
 
-def create_purchase_order(record, params=None):
+def create_purchase_order(books_name, record, params=None):
     """
     Create purchase order to Zoho books.
     """
     try:
-        obj = get_books_obj()
+        obj = get_books_obj(books_name)
         po_obj = obj.PurchaseOrders()
         result = get_vendor(obj, record)
         if result['code'] != 0:
@@ -608,12 +616,12 @@ def create_purchase_order(record, params=None):
             "error": exc
         }
 
-def update_purchase_order(po_id, record, params=None):
+def update_purchase_order(books_name, po_id, record, params=None):
     """
     Update purchase order to Zoho books.
     """
     try:
-        obj = get_books_obj()
+        obj = get_books_obj(books_name)
         po_obj = obj.PurchaseOrders()
         result = get_vendor(obj, record)
         if result['code'] != 0:
@@ -628,19 +636,19 @@ def update_purchase_order(po_id, record, params=None):
             "error": exc
         }
 
-def submit_purchase_order(po_id, params=None):
+def submit_purchase_order(books_name, po_id, params=None):
     """
     Submit specific purchase order.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     po_obj = obj.PurchaseOrders()
     return po_obj.submit_purchase_order(po_id=po_id, parameters=params)
 
-def list_purchase_orders(params=None):
+def list_purchase_orders(books_name, params=None):
     """
     List specific purchase order.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     po_obj = obj.PurchaseOrders()
     legal_business_name = params.get('vendor_name')
     contact_obj = obj.Contacts()
@@ -651,87 +659,87 @@ def list_purchase_orders(params=None):
             break
     return po_obj.list_purchase_orders(parameters=params)
 
-def get_vendor_payment(payment_id, params={}):
+def get_vendor_payment(books_name, payment_id, params={}):
     """
     Return vendor payments made.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     vp_obj = obj.VendorPayments()
     return vp_obj.get_payment(payment_id=payment_id, parameters=params)
 
-def list_vendor_payments(params=None):
+def list_vendor_payments(books_name, params=None):
     """
     List vendor payments.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     po_obj = obj.VendorPayments()
     payments = po_obj.list_payments(parameters=params)
     for payment in payments.get('response'):
-        data = get_vendor_payment(payment['payment_id'])
+        data = get_vendor_payment(books_name, payment['payment_id'])
         payment['balance'] = 0
         for record in data.get('bills'):
             payment['balance'] += record['balance']
     return payments
 
-def get_customer_payment(payment_id, params={}):
+def get_customer_payment(books_name, payment_id, params={}):
     """
     Return customer payments made.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     vp_obj = obj.CustomerPayments()
     return vp_obj.get_payment(payment_id=payment_id, parameters=params)
 
-def list_customer_payments(params=None):
+def list_customer_payments(books_name, params=None):
     """
     List customer payments.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     po_obj = obj.CustomerPayments()
     payments = po_obj.list_payments(parameters=params)
     for payment in payments.get('response'):
-        data = get_customer_payment(payment['payment_id'])
+        data = get_customer_payment(books_name, payment['payment_id'])
         payment['balance'] = 0
         for record in data.get('invoices'):
             payment['balance'] += record['balance']
     return payments
 
-def get_invoice(invoice_id, params=None):
+def get_invoice(books_name, invoice_id, params=None):
     """
     Get an invoice.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     invoice_obj = obj.Invoices()
     return invoice_obj.get_invoice(invoice_id=invoice_id, parameters=params)
 
-def list_invoices(params=None):
+def list_invoices(books_name, params=None):
     """
     List invoices.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     invoice_obj = obj.Invoices()
     return invoice_obj.list_invoices(parameters=params)
 
-def get_vendor_credit(credit_id, params=None):
+def get_vendor_credit(books_name, credit_id, params=None):
     """
     Get vendor credit.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     invoice_obj = obj.VendorCredits()
     return invoice_obj.get_vendor_credit(credit_id=credit_id, parameters=params)
 
-def list_vendor_credits(params=None):
+def list_vendor_credits(books_name, params=None):
     """
     List vendor credits.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     invoice_obj = obj.VendorCredits()
     return invoice_obj.list_vendor_credits(parameters=params)
 
-def get_unpaid_bills(vendor, status='unpaid', start_date=None, end_date=None):
+def get_unpaid_bills(books_name, vendor, status='unpaid', start_date=None, end_date=None):
     """
     Return total unpaid bills.
     """
-    response = list_bills({
+    response = list_bills(books_name, {
         'vendor_name': vendor,
         'status': status,
         'date_start': start_date,
@@ -739,27 +747,27 @@ def get_unpaid_bills(vendor, status='unpaid', start_date=None, end_date=None):
     unpaid = sum([i['balance'] for i in response])
     return unpaid
 
-def get_available_credit(vendor, status='open'):
+def get_available_credit(books_name, vendor, status='open'):
     """
     Get available vendor credits.
     """
-    response = list_vendor_credits({
+    response = list_vendor_credits(books_name, {
         'vendor_name': vendor,
         'status':status})['response']
     credits = sum([i['total'] for i in response])
     return credits
 
-def get_unpaid_invoices(customer, status='unpaid'):
+def get_unpaid_invoices(books_name, customer, status='unpaid'):
     """
     Return outstanding invoices.
     """
-    response = list_invoices({
+    response = list_invoices(books_name, {
         'customer_name': customer,
         'status': status})['response']
     unpaid = sum([i['balance'] for i in response])
     return unpaid
 
-def get_invoice_from_redis(invoice_id):
+def get_invoice_from_redis(books_name, invoice_id):
     """
     Get invoices data from redis.
     """
@@ -767,11 +775,11 @@ def get_invoice_from_redis(invoice_id):
     if r.get(invoice_id):
         return json.loads(r.get(invoice_id))
     else:
-        resp = get_invoice(invoice_id, params={})
+        resp = get_invoice(books_name, invoice_id, params={})
         r.set(invoice_id, json.dumps(resp))
         return resp
 
-def get_buyer_summary(customer):
+def get_buyer_summary(books_name, customer):
     """
     Get buyer summary for books.
     """
@@ -786,14 +794,14 @@ def get_buyer_summary(customer):
     }
     start_date = datetime.now().date().replace(month=1, day=1)
     end_date = datetime.now().date()
-    invoices = list_invoices(params={'customer_name': customer,
+    invoices = list_invoices(books_name, params={'customer_name': customer,
         'date_start': start_date,
         'date_end': end_date})
     invoices = invoices.get('response', [])
     invoices_count = len(invoices)
     invoices_total = sum([i['total'] for i in invoices])
     for invoice in invoices:
-        resp = get_invoice_from_redis(invoice.get('invoice_id'))
+        resp = get_invoice_from_redis(books_name, invoice.get('invoice_id'))
         for item in resp['line_items']:
             if 'Cultivation Tax' in item.get('name') or 'MCSP' in item.get('name'):
                 continue
@@ -819,7 +827,7 @@ def get_buyer_summary(customer):
         "total_invoice_price": invoices_total,
         "total_quantity": total_quantity,
         "average_invoice_price": invoices_total/invoices_count if invoices_count else 0,
-        "outstanding_bills": get_unpaid_bills(customer, status='unpaid', start_date=start_date, end_date=end_date),
+        "outstanding_bills": get_unpaid_bills(books_name, customer, status='unpaid', start_date=start_date, end_date=end_date),
         "category_count": category_count,
         "category_percentage": category_percentage
         }
@@ -845,11 +853,11 @@ def get_contact_id(obj, contact_name):
         return {"code": 1003, "message": "Contact not in zoho books."}
     return customer
 
-def get_contact_statement(contact_name):
+def get_contact_statement(books_name, contact_name):
     """
     Get contact address list.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     contact = get_contact_id(obj, contact_name)
     if contact.get('code'):
         return {'code': '1003', 'error': 'Contact not found in zoho books.'}
@@ -857,11 +865,11 @@ def get_contact_statement(contact_name):
     contact_obj = obj.Contacts()
     return contact_obj.get_statement(contact_id)
 
-# def create_purchase_order(data, params=None):
+# def create_purchase_order(books_name, data, params=None):
 #     """
 #     Create purchase order in Zoho Books.
 #     """
-#     obj = get_books_obj()
+#     obj = get_books_obj(books_name)
 #     po_obj = obj.PurchaseOrders()
 #     result = get_customer(obj, data)
 #     if result['code'] != 0:
@@ -871,19 +879,19 @@ def get_contact_statement(contact_name):
 #         return result
 #     return po_obj.create_purchase_order(result['data'], parameters=params)
 
-def get_bill(bill_id, params=None):
+def get_bill(books_name, bill_id, params=None):
     """
     Get a bill.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     bill_obj = obj.Bills()
     return bill_obj.get_bill(bill_id=bill_id, parameters=params)
 
-def list_bills(params=None):
+def list_bills(books_name, params=None):
     """
     List bills.
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     bill_obj = obj.Bills()
     contact_obj = obj.Contacts()
     legal_business_name = params.get('vendor_name')
@@ -894,18 +902,18 @@ def list_bills(params=None):
             break
     return bill_obj.list_bills(parameters=params)
 
-def get_salesorder(so_id, params=None):
+def get_salesorder(books_name, so_id, params=None):
     """
     Get sales order
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     bill_obj = obj.SalesOrders()
     return bill_obj.get_sales_order(so_id=so_id, parameters=params)
 
-def list_salesorders(params=None):
+def list_salesorders(books_name, params=None):
     """
     List sales orders
     """
-    obj = get_books_obj()
+    obj = get_books_obj(books_name)
     bill_obj = obj.SalesOrders()
     return bill_obj.list_sales_orders(parameters=params)
