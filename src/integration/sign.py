@@ -158,6 +158,7 @@ def get_embedded_url_from_sign(request_id, action_id):
     """
     sign_obj = get_sign_obj()
     response = sign_obj.get_embedded_url(request_id, action_id)
+    print(response)
     if response['code'] == 0:
         response['request_id'] = request_id
         response['action_id'] = action_id
