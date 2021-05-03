@@ -549,7 +549,7 @@ def send_estimate_to_sign(books_name, estimate_id, customer_name, notify_address
         if contact.get('code'):
             return {'code': '1003', 'error': 'Contact not found in zoho books.'}
         contact_id = contact['contact_id']
-        file_obj = get_estimate(estimate_id=estimate_id, params={'accept': 'pdf'})
+        file_obj = get_estimate(books_name, estimate_id=estimate_id, params={'accept': 'pdf'})
         file_name = (file_obj['Content-Disposition'].split(';')[1]).split('=')[1].strip('"')
         file_binary = BytesIO(base64.b64decode(file_obj['data']))
         file_type = 'application/pdf'
