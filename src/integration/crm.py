@@ -299,6 +299,11 @@ def update_records(module, records, is_return_orginal_data=False):
                 record_dict[k] = v
         request.append(record_dict)
     response = crm_obj.update_records(module, request, is_return_orginal_data)
+    if settings.DEBUG:
+        print('*** crm update_records ***')
+        print(f'module: {module}')
+        print(f'data: {request}')
+        print(f'crm response: {response}')
     return response
 
 def update_in_crm(module, record_id):

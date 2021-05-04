@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     # 'social_django',
 ]
 
-MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if DEBUG else []
+MIDDLEWARE = ['querycount.middleware.QueryCountMiddleware'] if not PRODUCTION and DEBUG else []
 MIDDLEWARE += [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
