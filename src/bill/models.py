@@ -59,8 +59,8 @@ class Estimate(TimeStampFlagModelMixin, models.Model):
     db_status = models.CharField(_('Progress'), choices=PROGRESS_CHOICES, default='draft', max_length=50)
 
     class Meta:
-        verbose_name = _("estimate")
-        verbose_name_plural = _("estimates")
+        verbose_name = _("Pending Orders")
+        verbose_name_plural = _("Pending Orders")
 
     def __str__(self):
         return str(self.customer_name)
