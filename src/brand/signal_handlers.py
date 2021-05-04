@@ -22,3 +22,10 @@ def post_save_user(sender, instance, created, **kwargs):
             )
             role.permissions.set(perms_ls)
             role.save()
+
+@receiver(signals.post_save, sender=apps.get_model('brand', 'License'))
+def post_save_license(sender, instance, created, **kwargs):
+    try:
+        instance.binderlicense.save()
+    except Exception:
+        pass

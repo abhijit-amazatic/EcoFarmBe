@@ -916,6 +916,7 @@ class InventoryItemDelistFilterSet(FilterSet):
         model = InventoryItemDelist
         fields = {
             'status':['icontains', 'exact'],
+            'item_id':['exact',],
         }
 
 

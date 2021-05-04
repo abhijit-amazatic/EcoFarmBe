@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'import_export',
     'multiselectfield',
     'fee_variable',
-    'bill'
+    'bill',
+    'compliance_binder',
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',

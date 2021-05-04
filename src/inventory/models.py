@@ -290,7 +290,7 @@ class InventoryItemDelist(TimeStampFlagModelMixin, models.Model):
         ('approved', _('Approved')),
     )
 
-    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='deletion_requests', null=True, on_delete=models.SET_NULL)
+    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='deletion_requests', on_delete=models.CASCADE)
     name = models.CharField(_('Name'), blank=True, null=True, max_length=255)
     item_data = JSONField(_('item_data'), null=True, blank=True, default=dict)
 
