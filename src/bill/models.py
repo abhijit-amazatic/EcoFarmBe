@@ -89,8 +89,8 @@ class LineItem(TimeStampFlagModelMixin, models.Model):
     item_custom_fields = ArrayField(JSONField(default=dict), blank=True, null=True)
 
     class Meta:
-        verbose_name = _("lineitem")
-        verbose_name_plural = _("lineitems")
+        verbose_name = _("Line Item/Inventory Item")
+        verbose_name_plural = _("Line Items/Inventory Items")
 
     def __str__(self):
         return self.name
