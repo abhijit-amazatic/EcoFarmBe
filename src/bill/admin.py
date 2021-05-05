@@ -1,10 +1,28 @@
 from django.contrib import admin
 from bill.models import (Estimate, LineItem, )
 
+class LineItemInline(admin.TabularInline):
+    """
+    Add inline options:Tabular or Stacked
+    """
+    def get_readonly_fields(self, request, obj=None):
+        # make all fields readonly
+        readonly_fields = list(
+            set([field.name for field in self.opts.local_fields]))
+        return readonly_fields
+    
+    model = LineItem
+    extra = 0
+    can_delete = False
+  
+  
+    
 class EstimateAdmin(admin.ModelAdmin):
     """
     Zoho Estimates
     """
+    inlines = [LineItemInline]
+
 
 class LineItemAdmin(admin.ModelAdmin):
     """
