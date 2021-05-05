@@ -23,7 +23,7 @@ from integration.crm import (get_labtest, search_query, get_record, )
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
                              get_thumbnail_url, get_inventory_folder_id,
-                             get_file_from_link, get_thumbnail_url)
+                             get_file_from_link, get_thumbnail_url, get_folder_items,)
 from fee_variable.models import *
 
 
@@ -636,3 +636,25 @@ def get_category_count(params):
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response
+
+def resize_box_images():
+    """
+    Resize box images.
+    """
+    import requests
+    from PIL import Image
+    from io import BytesIO
+
+    main_dir = get_folder_items(INVENTORY_BOX_ID)
+    resize_tuple = (640, 480)
+    for id, name in main_dir.items():
+        files = get_folder_items(id)
+        for file_id, file_name in files.items():
+            url = get_preview_url(file_id)
+            data = BytesIO(requests.get(url).content)
+            out = BytesIO()
+            img = Image.open(data)
+            img.resize(resize_tuple)
+            img.save(out, format='JPEG')
+            file_name = file_name.split('.')[0]
+            upload_file_stream(id, out, file_name + '-resized.jpg')
