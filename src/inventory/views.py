@@ -68,6 +68,7 @@ class DataFilter(FilterSet):
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     county_grown__in = CharInFilter(field_name='county_grown', lookup_expr='in')
     cf_client_code__in = CharInFilter(field_name='cf_client_code', lookup_expr='in')
+    cf_strain_name__in = CharInFilter(field_name='cf_strain_name', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     # cf_pesticide_summary__in = CharInFilter(field_name='cf_pesticide_summary', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
@@ -103,11 +104,11 @@ class DataFilter(FilterSet):
         return items
 
     def get_nutrients(self, queryset, name, value):
-        items = queryset.filter(cf_cfi_published=True,nutrients__overlap=[value])
+        items = queryset.filter(cf_cfi_published=True,nutrients__overlap=value.split(','))
         return items
 
     def get_ethics_and_certification(self, queryset, name, value):
-        items = queryset.filter(cf_cfi_published=True,ethics_and_certification__overlap=[value])
+        items = queryset.filter(cf_cfi_published=True,ethics_and_certification__overlap=value.split(','))
         return items    
     
     def filter_cf_pesticide_summary__in(self, queryset, name, values):
