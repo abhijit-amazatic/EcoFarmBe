@@ -299,11 +299,6 @@ def update_records(module, records, is_return_orginal_data=False):
                 record_dict[k] = v
         request.append(record_dict)
     response = crm_obj.update_records(module, request, is_return_orginal_data)
-    if settings.DEBUG:
-        print('*** crm update_records ***')
-        print(f'module: {module}')
-        print(f'data: {request}')
-        print(f'crm response: {response}')
     return response
 
 def update_in_crm(module, record_id):
@@ -692,16 +687,24 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         r = update_records('Orgs_X_Vendors', [data])
                         if r.get('status_code') == 202:
                             r = create_records('Orgs_X_Vendors', [data])
+                        final_dict['org_vendor'] = r
+
                         r = update_records('Orgs_X_Brands', [data])
                         if r.get('status_code') == 202:
                             r = create_records('Orgs_X_Brands', [data])
+                        final_dict['org_brand'] = r
+
                         r = update_records('Brands_X_Vendors', [data])
                         if r.get('status_code') == 202:
                             r = create_records('Brands_X_Vendors', [data])
+                        final_dict['brand_vendor'] = r
                     else:
                         r = create_records('Orgs_X_Vendors', [data])
+                        final_dict['org_vendor'] = r
                         r = create_records('Orgs_X_Brands', [data])
+                        final_dict['org_brand'] = r
                         r = create_records('Brands_X_Vendors', [data])
+                        final_dict['brand_vendor'] = r
             final_list[record.id] = final_dict
         return final_list
 
@@ -1174,16 +1177,24 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                             r = update_records('Orgs_X_Accounts', [data])
                             if r.get('status_code') == 202:
                                 r = create_records('Orgs_X_Accounts', [data])
+                            final_dict['org_account'] = r
+
                             r = update_records('Orgs_X_Brands', [data])
                             if r.get('status_code') == 202:
                                 r = create_records('Orgs_X_Brands', [data])
+                            final_dict['org_brand'] = r
+
                             r = update_records('Brands_X_Accounts', [data])
                             if r.get('status_code') == 202:
                                 r = create_records('Brands_X_Accounts', [data])
+                            final_dict['brand_account'] = r
                         else:
                             r = create_records('Orgs_X_Accounts', [data])
+                            final_dict['org_account'] = r
                             r = create_records('Orgs_X_Brands', [data])
+                            final_dict['org_brand'] = r
                             r = create_records('Brands_X_Accounts', [data])
+                            final_dict['brand_account'] = r
             except Exception as exc:
                 print(exc)
                 final_dict['exception'] = exc
