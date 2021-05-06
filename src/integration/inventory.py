@@ -618,6 +618,18 @@ def get_inventory_summary(inventory, statuses):
     except Exception as exc:
         return {'error': f'{exc}'}
 
+def get_updated_params(params):
+    """
+    Update params if Array fields are present.
+    """
+    db_array_fields = ['ethics_and_certification', 'nutrients']
+    for i in db_array_fields:
+        if i in params.keys():
+            val = params[i].split(',')
+            params[i+'__overlap'] = params.pop(i)
+            params[i+'__overlap'] = val
+    return params        
+    
 def get_category_count(params):
     """
     Return category count.
@@ -632,7 +644,8 @@ def get_category_count(params):
         'Market_Intelligence': ('Sold',)
     }
     params['cf_cfi_published'] = True
-    inventory = InventoryModel.objects.filter(**params)
+    updated_params = get_updated_params(params)
+    inventory = InventoryModel.objects.filter(**updated_params)
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response
