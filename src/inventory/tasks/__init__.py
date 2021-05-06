@@ -55,6 +55,7 @@ def create_approved_item_po(custom_inventory_id, retry=6):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
         result = create_po(
+            custom_inventory_zoho_org=item.zoho_organization,
             sku=item.sku,
             quantity=item.quantity_available,
             vendor_name=item.vendor_name,
@@ -64,7 +65,7 @@ def create_approved_item_po(custom_inventory_id, retry=6):
             item.books_po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
             item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
             item.save()
-            submit_purchase_order(item.books_po_id)
+            submit_purchase_order(books_name=f'books_{item.zoho_organization}', po_id=item.books_po_id)
         elif retry:
             create_approved_item_po.apply_async((item.id, retry-1), countdown=15)
 

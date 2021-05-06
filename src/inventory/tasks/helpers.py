@@ -25,7 +25,9 @@ def get_approved_by(request=None):
     return approved_by
 
 
-def create_po(sku, quantity, vendor_name, client_code):
+def create_po(custom_inventory_zoho_org, sku, quantity, vendor_name, client_code):
+    inventory_name = f'inventory_{custom_inventory_zoho_org}'
+    books_name = f'books_{custom_inventory_zoho_org}'
     try:
         lp_obj = LicenseProfile.objects.get(name=vendor_name)
     except Exception:
@@ -33,7 +35,7 @@ def create_po(sku, quantity, vendor_name, client_code):
     else:
         license_number = lp_obj.license.license_number
     warehouse_id = None
-    inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
+    inv_obj = get_inventory_obj(inventory_name=inventory_name,)
     result = inv_obj.list_warehouses()
     if result.get('code') == 0:
         warehouses = result.get("warehouses", [])
@@ -76,8 +78,7 @@ def create_po(sku, quantity, vendor_name, client_code):
     #         "api_name": "cf_procurement_rep",
     #         "value": "",
     #     })
-    return create_purchase_order(data, params={})
-
+    return create_purchase_order(books_name=books_name, record=data, params={})
 
 
 def inventory_item_change(obj, request=None):

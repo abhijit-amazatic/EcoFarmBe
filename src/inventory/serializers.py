@@ -160,7 +160,7 @@ class CustomInventorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomInventory
-        exclude = ('cultivar', 'zoho_item_id')
+        exclude = ('cultivar', 'zoho_item_id', 'zoho_organization')
         read_only_fields = ('status', 'sku', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
 
 

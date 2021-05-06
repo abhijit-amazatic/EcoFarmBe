@@ -16,6 +16,7 @@ from core.settings import (
 from django.db.models import (Sum, F, Min, Max, Avg, Q)
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
+from .inventory_data import(INVENTORY_ITEM_CATEGORY_NAME_ID_MAP, )
 from labtest.models import (LabTest, )
 from inventory.models import PriceChange, Inventory as InventoryModel, Documents
 from cultivar.models import (Cultivar, )
@@ -69,14 +70,14 @@ def get_inventory_obj(inventory_name):
         )
     return inventory
 
-def get_vendor_id(inventory, record):
+def get_vendor_id(inventory, vendor_name):
     """
     Get vendor id from zoho.
     """
-    vendor_name = inventory.get_contact(params={'contact_name': record.get('cf_vendor_name')})
-    if vendor_name.get('code') == 0:
-        for vendor in vendor_name.get('contacts'):
-            if vendor.get('vendor_name') == record.get('cf_vendor_name') and vendor.get('contact_type') == 'vendor':
+    resp = inventory.get_contact(params={'contact_name': vendor_name})
+    if resp.get('code') == 0:
+        for vendor in resp.get('contacts'):
+            if vendor.get('vendor_name') == vendor_name and vendor.get('contact_type') == 'vendor':
                 return vendor.get('contact_id')
 
 def get_user_id(inventory, email):
@@ -89,6 +90,8 @@ def get_user_id(inventory, email):
             if user.get('email') == email:
                 return user.get('user_id')
 
+def get_item_category_id(org_id, category_name):
+    return INVENTORY_ITEM_CATEGORY_NAME_ID_MAP.get(org_id, {}).get(category_name, '')
 
 def create_inventory_item(inventory_name, record, params={}):
     """
@@ -96,7 +99,7 @@ def create_inventory_item(inventory_name, record, params={}):
     """
     inventory = get_inventory_obj(inventory_name)
     if 'cf_vendor_name' in record:
-        vendor_id = get_vendor_id(inventory, record)
+        vendor_id = get_vendor_id(inventory, record.get('cf_vendor_name'))
         if vendor_id:
             record['cf_vendor_name'] = vendor_id
         else:
@@ -117,7 +120,7 @@ def update_inventory_item(inventory_name, record_id, record, params={}):
     """
     inventory = get_inventory_obj(inventory_name)
     if 'cf_vendor_name' in record:
-        vendor_id = get_vendor_id(inventory, record)
+        vendor_id = get_vendor_id(inventory, record.get('cf_vendor_name'))
         if vendor_id:
             record['cf_vendor_name'] = vendor_id
         else:

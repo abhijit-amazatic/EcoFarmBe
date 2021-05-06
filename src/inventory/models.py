@@ -395,6 +395,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('QC', _('QC')),
         ('Transport', _('Transport')),
         ('Secure Cash Handling', _('Secure Cash Handling')),
+        ('Clones', _('Clones')),
     )
 
     PAYMENT_TERMS_CHOICES = (
@@ -407,11 +408,16 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Check', _('Check')),
         ('Bank Wire', _('Bank Wire')),
     )
+    ZOHO_ORG_CHOICES = (
+        ('efd', _('Thrive Society (EFD LLC)')),
+        ('efl', _('Eco Farm Labs (EFL LLC)')),
+        ('efn', _('Eco Farm Nursery (EFN LLC)')),
+    )
 
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
-    category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, blank=True, null=True, max_length=225)
+    category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, null=True, max_length=225)
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
@@ -447,6 +453,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
+
+    zoho_organization = models.CharField(_('Zoho Organization'), choices=ZOHO_ORG_CHOICES, null=True, max_length=100)
 
     class Meta:
         verbose_name = _('Vendor Inventory')
