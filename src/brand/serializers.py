@@ -37,6 +37,7 @@ from .models import (
     ProfileContact,
     LicenseProfile,
     CultivationOverview,
+    NurseryOverview,
     ProgramOverview,
     FinancialOverview,
     CropOverview,
@@ -296,6 +297,13 @@ class CultivationOverviewSerializer(serializers.ModelSerializer):
         model = CultivationOverview
         fields = ('__all__')
 
+class NurseryOverviewSerializer(serializers.ModelSerializer):
+    """
+    This defines NurseryOverviewSerializer
+    """
+    class Meta:
+        model = NurseryOverview
+        fields = ('__all__')        
 
 class LicenseProfileSerializer(serializers.ModelSerializer):
     """

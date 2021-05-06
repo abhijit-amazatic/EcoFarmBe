@@ -50,6 +50,7 @@ from .models import (
     ProfileContact,
     LicenseProfile,
     CultivationOverview,
+    NurseryOverview,
     CropOverview,
     FinancialOverview,
     ProgramOverview,
@@ -69,6 +70,7 @@ from .serializers import (
     LicenseSerializer,
     ProfileContactSerializer,
     CultivationOverviewSerializer,
+    NurseryOverviewSerializer,
     LicenseProfileSerializer,
     FinancialOverviewSerializer,
     CropOverviewSerializer,
@@ -238,6 +240,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
     queryset = License.objects.get_queryset()
     profile_contact_path = 'profile-contact(/(?P<profile_contact_id>[0-9]*))?'
     cultivation_overview_path = 'cultivation-overview(/(?P<cultivation_overview_id>[0-9]*))?'
+    nursery_overview_path = 'nursery-overview(/(?P<nursery_overview_id>[0-9]*))?'
     license_profile_path = 'license-profile(/(?P<license_profile_id>[0-9]*))?'
     financial_overview_path = 'financial-overview(/(?P<financial_overview_id>[0-9]*))?'
     crop_overview_path = 'crop-overview(/(?P<crop_overview_id>[0-9]*))?'
@@ -276,6 +279,8 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
             return ProfileContactSerializer
         elif self.action == 'cultivation_overview':
             return CultivationOverviewSerializer
+        elif self.action == 'nursery_overview':
+            return NurseryOverviewSerializer
         elif self.action == 'license_profile':
             return LicenseProfileSerializer
         elif self.action == 'financial_overview':
@@ -383,6 +388,13 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         Detail route CRUD operations on cultivation_overview.
         """
         return self.extra_info(request, pk, CultivationOverview, CultivationOverviewSerializer, 'cultivation_overview')
+
+    @action(detail=True, url_path=nursery_overview_path, methods=['get', 'patch'], pagination_class=CustomPagination)
+    def nursery_overview(self, request, pk, nursery_overview_id=None, *args, **kwargs):
+        """
+        Detail route CRUD operations on nursery_overview.
+        """
+        return self.extra_info(request, pk, NurseryOverview, NurseryOverviewSerializer, 'nursery_overview')
 
     @action(detail=True, url_path=financial_overview_path, methods=['get', 'delete', 'patch'], pagination_class=CustomPagination)
     def financial_overview(self, request, pk, financial_overview_id=None, *args, **kwargs):

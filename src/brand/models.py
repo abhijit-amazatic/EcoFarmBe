@@ -520,7 +520,24 @@ class CultivationOverview(models.Model):
     type_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     overview = ArrayField(HStoreField(blank=True, null=True), blank=True, null=True,default=list)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
-
+    
+class NurseryOverview(models.Model):
+    """
+    This is nursery_overview in old DB schema.
+    """
+    license = models.OneToOneField(License, verbose_name=_('License'),
+                                   related_name='nursery_overview', on_delete=models.CASCADE)
+    nursery_sqf = models.IntegerField(_('Nursary Sqf'), blank=True, null=True)
+    weekly_productions = models.IntegerField(_('Weekly Productions'), blank=True, null=True)
+    clones_per_productions = models.IntegerField(_('clones Per Productions'), blank=True, null=True)
+    types_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    growing_medium = models.CharField(_('Growing Medium'), blank=True, null=True, max_length=255)
+    lighting_type =  ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    cultivars_in_production = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    minimun_order_qty = models.IntegerField(_('clones Per Productions'), blank=True, null=True)
+    order_hold_days =  models.IntegerField(_('clones Per Productions'), blank=True, null=True)
+    is_draft = models.BooleanField(_('Is Draft'), default=False)
+    
 class ProgramOverview(models.Model):
     """
     Stores program overview.

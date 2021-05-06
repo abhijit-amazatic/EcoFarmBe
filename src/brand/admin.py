@@ -29,6 +29,7 @@ from .models import (
     ProfileContact,
     LicenseProfile,
     CultivationOverview,
+    NurseryOverview,
     ProgramOverview,
     FinancialOverview,
     CropOverview,
@@ -171,6 +172,15 @@ class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
     can_delete = False
     form = CultivationForm
 
+class InlineNurseryOverviewAdmin(nested_admin.NestedStackedInline):
+    """
+    Configuring field admin view for NurseryOverview.
+    """
+    extra = 0
+    model = NurseryOverview
+    can_delete = False
+    #readonly_fields = ('is_draft','overview',)
+    
 class FinancialForm(forms.ModelForm):
     class Meta:
         model = FinancialOverview
@@ -264,7 +274,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         return queryset, use_distinct
     
     name.admin_order_field = 'license_profile__name'
-    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin,]
+    inlines = [InlineLicenseProfileAdmin,InlineLicenseProfileContactAdmin,InlineCultivationOverviewAdmin,InlineNurseryOverviewAdmin,InlineFinancialOverviewAdmin,InlineCropOverviewAdmin,InlineProgramOverviewAdmin,]
     form = LicenseUpdatedForm
     extra = 0
     model = License
