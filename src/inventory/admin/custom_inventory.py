@@ -214,9 +214,9 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
 
     def generate_sku(self, obj, postfix):
         sku = []
-        # if not settings.PRODUCTION:
-        #     sku.append('test')
-        #     sku.append('sku')
+        if not settings.PRODUCTION and obj.zoho_organization in ['efl', 'efn']:
+            sku.append('test')
+            sku.append('sku')
         sku.append(obj.client_code)
         sku.append(obj.cultivar.cultivar_name.replace(' ', '-'))
 
@@ -366,11 +366,10 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
 
                                     data['cf_status'] = obj.marketplace_status
 
-                                    # data['initial_stock'] = int(obj.quantity_available)
+                                    data['is_taxable'] = True
                                     data['product_type'] = 'goods'
                                     data['cf_sample_in_house'] = 'Pending'
                                     data['cf_cfi_published'] = True
-                                    data['is_taxable'] = True
 
                                     self._approve(request, obj, inv_obj, data,)
                                 else:

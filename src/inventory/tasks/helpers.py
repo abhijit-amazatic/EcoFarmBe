@@ -89,31 +89,38 @@ def inventory_item_change(obj, request=None):
             if obj.farm_price:
                 data['price'] = obj.farm_price + sum(tax_and_mcsp_fee)
                 data['rate'] = obj.farm_price + sum(tax_and_mcsp_fee)
-            inventory_name = 'inventory_efd' if data.get('inventory_name') == 'EFD' else 'inventory_efl'
-            data.pop('inventory_name')
-            try:
-                result = update_inventory_item(inventory_name, data.get('item_id'), data)
-            except Exception as exc:
-                if request:
-                    messages.error(request, 'Error while updating item in Zoho Inventory',)
-                print('Error while updating item in Zoho Inventory')
-                print(exc)
-                print(data)
-            else:
-                if result.get('code') == 0:
-                    obj.status = 'approved'
-                    obj.approved_on = timezone.now()
-                    obj.approved_by = get_approved_by(request=request)
-                    obj.save()
+            inventory_org = data.get('inventory_name', '').lower()
+            if inventory_org in ('efd', 'efn', 'efl'):
+                inventory_name = 'inventory_{inventory_org}'
+                data.pop('inventory_name')
+                try:
+                    result = update_inventory_item(inventory_name, data.get('item_id'), data)
+                except Exception as exc:
                     if request:
-                        messages.success(request, 'This change is approved and updated in Zoho Inventory')
-                    notify_inventory_item_change_approved_task.delay(obj.id)
-                else:
-                    if request:
-                        messages.error(request, 'Error while updating item in Zoho Inventory')
+                        messages.error(request, 'Error while updating item in Zoho Inventory',)
                     print('Error while updating item in Zoho Inventory')
-                    print(result)
+                    print(exc)
                     print(data)
+                else:
+                    if result.get('code') == 0:
+                        obj.status = 'approved'
+                        obj.approved_on = timezone.now()
+                        obj.approved_by = get_approved_by(request=request)
+                        obj.save()
+                        if request:
+                            messages.success(request, 'This change is approved and updated in Zoho Inventory')
+                        notify_inventory_item_change_approved_task.delay(obj.id)
+                    else:
+                        if request:
+                            messages.error(request, 'Error while updating item in Zoho Inventory')
+                        print('Error while updating item in Zoho Inventory')
+                        print(result)
+                        print(data)
+            else:
+                if request:
+                    messages.error(request, 'Item have invalid inventory name.')
+                print('Item have invalid inventory name.')
+
 
 
 def get_po_for_item_quantity_change(obj, request=None, po_obj=None):
@@ -138,16 +145,8 @@ def get_po_for_item_quantity_change(obj, request=None, po_obj=None):
                         po_id = _po.get('purchaseorder_id')
                         po_result = po_obj.get_purchase_order(po_id=po_id, parameters={}, parse=False)
                         if po_result.get('code') == 0:
-                            po = po_result.get('purchaseorder', {})
+                            po = po_result.get('purchaseorder')
                             if po:
-                                # if po.get('bills'):
-                                #     for bill in po.get('bills'):
-                                #         bill_res = bill_obj.delete_bill(bill_id=bill.get('bill_id'))
-                                #         if bill_res.get('code') != 0:
-                                #             if request:
-                                #                 messages.error(request, 'Purchase Order not found for this item.')
-                                #             print('Error while deleting PO bill.')
-                                #             print(bill_res)
                                 return po
             if request:
                 messages.error(request, 'Purchase Order not found for this item.')
@@ -202,7 +201,7 @@ def add_item_quantity(obj, request=None):
             obj.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
             obj.status = 'approved'
             obj.approved_on = timezone.now()
-            obj.approved_by = approved_by
+            obj.approved_by = get_approved_by(request=request)
             obj.save()
             submit_purchase_order(obj.po_id)
 
