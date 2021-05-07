@@ -78,6 +78,8 @@ class DataFilter(FilterSet):
     cultivar = django_filters.CharFilter(method='get_cultivars')
     nutrients = django_filters.CharFilter(method='get_nutrients')
     ethics_and_certification = django_filters.CharFilter(method='get_ethics_and_certification')
+    county_grown = django_filters.CharFilter(method='get_county_grown')
+    appellation = django_filters.CharFilter(method='get_appellation')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
     labtest__d_8_THC__in = CharInFilter(field_name='labtest__d_8_THC', lookup_expr='in')
@@ -109,6 +111,14 @@ class DataFilter(FilterSet):
 
     def get_ethics_and_certification(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,ethics_and_certification__overlap=value.split(','))
+        return items
+
+    def get_county_grown(self, queryset, name, value):
+        items = queryset.filter(cf_cfi_published=True,county_grown__overlap=value.split(','))
+        return items
+
+    def get_appellation(self, queryset, name, value):
+        items = queryset.filter(cf_cfi_published=True,appellation__overlap=value.split(','))
         return items    
     
     def filter_cf_pesticide_summary__in(self, queryset, name, values):

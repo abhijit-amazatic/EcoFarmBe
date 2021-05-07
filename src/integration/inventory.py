@@ -645,7 +645,7 @@ def get_updated_params(params):
     """
     Update params if Array fields are present.
     """
-    db_array_fields = ['ethics_and_certification', 'nutrients']
+    db_array_fields = ['ethics_and_certification', 'nutrients','county_grown','appellation']
     for i in db_array_fields:
         if i in params.keys():
             val = params[i].split(',')
