@@ -12,11 +12,11 @@ from simple_history.signals import (
 Inventory = apps.get_model('inventory', 'Inventory')
 HistoricalInventory = apps.get_model('inventory', 'HistoricalInventory')
 
-@receiver(pre_create_historical_record, sender=HistoricalInventory)
-def add_user_info(sender, **kwargs):
-    history_instance = kwargs['history_instance']
-    if hasattr(HistoricalRecords, 'thread'):
-        history_instance.ip_address = HistoricalRecords.thread.request.META['REMOTE_ADDR']
+# @receiver(pre_create_historical_record, sender=HistoricalInventory)
+# def add_user_info(sender, **kwargs):
+#     history_instance = kwargs['history_instance']
+#     if hasattr(HistoricalRecords, 'thread'):
+#         history_instance.ip_address = HistoricalRecords.thread.request.META['REMOTE_ADDR']
 
 
 @receiver(signals.pre_save, sender=Inventory)
