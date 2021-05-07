@@ -697,13 +697,12 @@ class InventoryCountyView(APIView):
         """
         Get inventory county.
         """
-        categories = Inventory.objects.filter(
-                cf_cfi_published=True
-                ).values('county_grown').distinct()
+        categories = Inventory.objects.filter(cf_cfi_published=True).values_list('county_grown',flat=True).distinct()
+        clean_counties = list(filter(None,list(categories)))
         return Response({
             'status_code': 200,
-            'response': [i['county_grown'] for i in categories if i['county_grown'] != None]})
-
+            'response': list(set([item for sublist in clean_counties for item in sublist]))})
+    
 class InventoryNutrientsView(APIView):
     """
     Return Inventory nutrients.
@@ -734,7 +733,7 @@ class InventoryEthicsView(APIView):
         clean_ethics = list(filter(None,list(ethics)))
         return Response({
             'status_code': 200,
-            'response':list(set([item for sublist in clean_ethics for item in sublist]))})
+            'response': list(set([item for sublist in clean_ethics for item in sublist]))})
 
 
 class CustomInventoryFilterSet(FilterSet):
