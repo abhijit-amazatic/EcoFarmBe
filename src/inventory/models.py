@@ -415,7 +415,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('efl', _('Eco Farm Labs (EFL LLC)')),
         ('efn', _('Eco Farm Nursery (EFN LLC)')),
     )
-
+    license_profile = models.ForeignKey('brand.LicenseProfile', verbose_name=_('License Profile'), related_name='custom_inventory', null=True, on_delete=models.SET_NULL)
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)

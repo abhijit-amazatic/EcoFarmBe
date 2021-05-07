@@ -23,7 +23,12 @@ from core.settings import (
 )
 
 from integration.apps.aws import (create_presigned_url, )
-from integration.inventory import (get_inventory_obj, get_user_id, get_item_category_id )
+from integration.inventory import (
+    get_inventory_obj,
+    get_user_id,
+    get_item_category_id,
+    get_vendor_id,
+)
 from integration.crm import search_query
 from brand.models import (License, LicenseProfile,)
 from fee_variable.utils import (get_tax_and_mcsp_fee,)
@@ -105,6 +110,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
         'cultivar_name',
         'category_name',
         'vendor_name',
+        'license_profile',
         'grade_estimate',
         'quantity_available',
         'farm_ask_price',
@@ -170,6 +176,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
         ('Extra Info', {
             'fields': (
                 'status',
+                'license_profile',
                 'vendor_name',
                 'crm_vendor_id',
                 'client_code',
@@ -284,16 +291,6 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
 
         return None
 
-    def get_vendor_id(self, inventory, vendor_name):
-        """
-        Get vendor id from zoho.
-        """
-        response = inventory.get_contact(params={'contact_name': vendor_name})
-        if response.get('code') == 0:
-            for vendor in response.get('contacts'):
-                if vendor.get('vendor_name') == vendor_name and vendor.get('contact_type') == 'vendor':
-                    return vendor.get('contact_id')
-
     def approve(self, request, obj):
         data = {}
         if obj.status == 'pending_for_approval':
@@ -310,7 +307,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                             # data['category_name'] = obj.category_name
                             data['category_id'] = category_id
                             if obj.vendor_name:
-                                vendor_id = self.get_vendor_id(inv_obj, obj.vendor_name)
+                                vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
                                 if vendor_id:
                                     data['cf_vendor_name'] = vendor_id
                                     if obj.procurement_rep:

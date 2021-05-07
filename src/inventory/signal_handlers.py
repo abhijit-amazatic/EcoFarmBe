@@ -16,7 +16,9 @@ HistoricalInventory = apps.get_model('inventory', 'HistoricalInventory')
 def add_user_info(sender, **kwargs):
     history_instance = kwargs['history_instance']
     if hasattr(HistoricalRecords, 'thread'):
-        history_instance.ip_address = HistoricalRecords.thread.request.META['REMOTE_ADDR']
+        ip = HistoricalRecords.thread.request.META.get('REMOTE_ADDR')
+        if ip:
+            history_instance.ip_address = ip
 
 
 @receiver(signals.pre_save, sender=Inventory)

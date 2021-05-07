@@ -507,6 +507,9 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     crm_owner_id = models.CharField(_('CRM Owner ID'), null=True, blank=True, max_length=255)
     crm_owner_email = models.CharField(_('CRM Owner EMAIL'), null=True, blank=True, max_length=255)
 
+    def __str__(self):
+        return f'{self.name} ({self.license.legal_business_name})'
+
 
 class CultivationOverview(models.Model):
     """
