@@ -5,15 +5,15 @@ from .models import (CustomInventoryVariable, TaxVariable)
 
 
 custom_inventory_variable_program_map = {
-    'spot market farm': {
+    'Spot Market': {
         'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
         'tier': CustomInventoryVariable.PROGRAM_TIER_BRONZE,
     },
-    'integrated farm partner silver': {
+    'IFP - Silver - Right of First Refusal': {
         'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
         'tier': CustomInventoryVariable.PROGRAM_TIER_SILVER,
     },
-    'integrated farm partner gold': {
+    'IFP - Gold - Exclusivity': {
         'program_type': CustomInventoryVariable.PROGRAM_TYPE_IFP,
         'tier': CustomInventoryVariable.PROGRAM_TIER_GOLD,
     },
