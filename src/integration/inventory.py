@@ -2,6 +2,7 @@ import json
 from datetime import (datetime, timedelta)
 from io import BytesIO
 from urllib.parse import (unquote, )
+from PIL import Image
 from core.settings import (
     INVENTORY_CLIENT_ID,
     INVENTORY_CLIENT_SECRET,
@@ -24,7 +25,8 @@ from integration.crm import (get_labtest, search_query, get_record, )
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
                              get_thumbnail_url, get_inventory_folder_id,
-                             get_file_from_link, get_thumbnail_url, get_folder_items,)
+                             get_file_from_link, get_thumbnail_url, get_folder_items,
+                             get_file_information, )
 from fee_variable.models import *
 
 
@@ -226,6 +228,21 @@ def get_pre_tax_price(record):
     # elif 'Trim' in record['category_name']:
     #     return record['price'] - taxes[ESTIMATE_TAXES['Trim']]
 
+def get_mobile_url(compressed_file, folder_id, file_name):
+    """
+    Get mobile url for image.
+    """
+    img = Image.open(compressed_file)
+    img.resize((1280, 720))
+    out = BytesIO()
+    img.save(out, format='JPEG')
+    file_name = file_name.split('.')
+    mobile_id = upload_file_stream(folder_id, out, file_name[0] + '-mobile.' + file_name[1])
+    try:
+        return get_preview_url(mobile_id.id)
+    except AttributeError:
+        return get_preview_url(mobile_id)
+
 def check_documents(inventory_name, record):
     """
     Check if record has any documents.
@@ -233,6 +250,7 @@ def check_documents(inventory_name, record):
     try:
         response = list()
         thumbnail_url = None
+        mobile_url = None
         if record.get('image_name'):
             record = get_inventory_item(inventory_name, record['item_id'])
         if record.get('documents') and len(record['documents']) > 0:
@@ -247,12 +265,14 @@ def check_documents(inventory_name, record):
                     try:
                         link = get_preview_url(new_file.id)
                         thumbnail_url = get_thumbnail_url(new_file.id, folder_id, file_name)
+                        mobile_url = get_mobile_url(file_obj, folder_id, file_name)
                     except Exception:
                         link = get_preview_url(new_file)
                         thumbnail_url = get_thumbnail_url(new_file, folder_id, file_name)
+                        mobile_url = get_mobile_url(file_obj, folder_id, file_name)
                     response.append(link)
-            return response, thumbnail_url
-        return response, thumbnail_url
+            return response, thumbnail_url, mobile_url
+        return response, thumbnail_url, mobile_url
     except Exception as exc:
         print(exc)
         return None, None
@@ -373,7 +393,8 @@ def get_record_data(vendor_name):
         data = dict()
         response = search_query('Vendors', vendor_name, 'Vendor_Name', True)
         if response.get('status_code') == 200:
-            data['county_grown'] = response.get('response')[0].get('County')
+            data['county_grown'] = response.get('response')[0].get('County2', [])
+            data['appellation'] = response.get('response')[0].get('Appellation', [])
             data['nutrients'] = get_from_licenses(response, 'Types_of_Nutrients')
             data['ethics_and_certification'] = response.get('response')[0].get('Special_Certifications')
             return data
@@ -417,9 +438,10 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
                     record['labtest'] = labtest
             except KeyError:
                 pass
-            documents, thumbnail_url = check_documents(inventory_name, record)
+            documents, thumbnail_url, mobile_url = check_documents(inventory_name, record)
             record['documents'] = documents
             record['thumbnail_url'] = thumbnail_url
+            record['mobile_url'] = mobile_url
             try:
                 if record['cf_vendor_name']:
                     record.update(get_record_data(record['cf_vendor_name']))
@@ -472,9 +494,10 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
                         record['labtest'] = labtest
                 except KeyError:
                     pass
-                documents, thumbnail_url = check_documents(inventory_name, record)
+                documents, thumbnail_url, mobile_url = check_documents(inventory_name, record)
                 record['documents'] = documents
                 record['thumbnail_url'] = thumbnail_url
+                record['mobile_url'] = mobile_url
                 try:
                     if record['cf_vendor_name']:
                         record.update(get_record_data(record['cf_vendor_name']))
@@ -527,9 +550,10 @@ def sync_inventory(inventory_name, response):
                 record['labtest'] = labtest
         except KeyError:
             pass
-        documents, thumbnail_url = check_documents(inventory_name, record)
+        documents, thumbnail_url, mobile_url = check_documents(inventory_name, record)
         record['documents'] = documents
         record['thumbnail_url'] = thumbnail_url
+        record['mobile_url'] = mobile_url
         try:
             if record['cf_vendor_name']:
                 record.update(get_record_data(record['cf_vendor_name']))
@@ -547,8 +571,6 @@ def sync_inventory(inventory_name, response):
         # update_price_change(price_data, record)
         return obj.item_id
     except Exception as exc:
-        import traceback
-        traceback.print_exc()
         print(exc)
         return {}
 
@@ -566,8 +588,6 @@ def update_inventory_thumbnail():
         inv.thumbnail_url = url
         item.save()
         inv.save()
-    return documents
-
 
 def get_average_thc(inventory):
     """
@@ -661,16 +681,32 @@ def resize_box_images():
     from PIL import Image
     from io import BytesIO
 
-    main_dir = get_folder_items(INVENTORY_BOX_ID)
-    resize_tuple = (640, 480)
-    for id, name in main_dir.items():
-        files = get_folder_items(id)
-        for file_id, file_name in files.items():
-            url = get_preview_url(file_id)
-            data = BytesIO(requests.get(url).content)
-            out = BytesIO()
-            img = Image.open(data)
-            img.resize(resize_tuple)
-            img.save(out, format='JPEG')
-            file_name = file_name.split('.')[0]
-            upload_file_stream(id, out, file_name + '-resized.jpg')
+    documents = Documents.objects.filter(
+        status='AVAILABLE',
+        doc_type__isnull=True,
+        file_type='image/jpeg'
+    )
+    resize_tuple = (1280, 720)
+    for document in documents:
+        url = get_preview_url(document.box_id)
+        data = BytesIO(requests.get(url).content)
+        out = BytesIO()
+        img = Image.open(data)
+        img.resize(resize_tuple)
+        img.save(out, format='JPEG')
+        file_name = document.name.split('.')
+        parent = get_file_information(document.box_id)['parent'].id
+        mobile_id = upload_file_stream(parent, out, file_name[0] + '-resized.' + file_name[1])
+        try:
+            mobile_url = get_preview_url(mobile_id.id)
+        except AttributeError:
+            mobile_url = get_preview_url(mobile_id)
+        document.mobile_url = mobile_url
+        document.save()
+        try:
+            item = InventoryModel.objects.get(item_id=document.object_id)
+            item.mobile_url = mobile_url
+            item.save()
+        except Inventory.DoesNotExist:
+            print('here')
+            pass
