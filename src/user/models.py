@@ -106,8 +106,8 @@ class User(StatusFlagMixin,AbstractUser):
     crm_link = models.CharField(_('CRM link'), max_length=255, blank=True, null=True)
     zoho_crm_id = models.CharField(_('zoho CRM Id'), max_length=255, blank=True, null=True)
     bypass_terms_and_conditions = models.BooleanField(_('Bypass Terms & Conditions Until this Flag is ON'), default=False)
-    unique_user_id = models.CharField(_('Unique User Id'),default=generate_unique_user_id,max_length=255,unique=True)
-
+    unique_user_id = models.CharField(_('Unique User Id'), default=generate_unique_user_id, max_length=255, unique=True)
+    default_org = models.ForeignKey("brand.Organization", verbose_name=_("Default Organization Id"), on_delete=models.SET_NULL, null=True, blank=True)
     internal_roles = models.ManyToManyField(
         InternalRole,
         verbose_name=_('Internal Roles'),

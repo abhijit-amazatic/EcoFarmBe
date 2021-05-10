@@ -4,6 +4,7 @@ Basically they are used for API representation & validation.
 """
 import hashlib
 import base64
+from logging import exception
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.password_validation import validate_password as default_validate_password
@@ -99,7 +100,22 @@ class UserSerializer(serializers.ModelSerializer):
         Return s3 document url.
         """
         qs = Organization.objects.all()
-        serializer = OrganizationSerializer(filterQuerySet.for_user(queryset=qs, user=obj), many=True, read_only=True)
+        qs = filterQuerySet.for_user(queryset=qs, user=obj)
+        org_id_ls = qs.values_list('id', flat=True)
+        if not obj.default_org in org_id_ls:
+            try:
+                def_org_id = int(settings.INTERNAL_USER_DEFAULT_ORG_ID)
+            except Exception:
+                obj.default_org = None
+            else:
+                if obj.internal_roles.all().exists() and def_org_id in org_id_ls:
+                    obj.default_org_id = def_org_id
+                else:
+                    obj.default_org = None
+
+            obj.save()
+
+        serializer = OrganizationSerializer(qs, many=True, read_only=True)
         return serializer.data
 
     def get_document_url(self, obj):
@@ -161,8 +177,59 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email','first_name','last_name','categories','member_categories','membership_type','full_name','country','state','date_of_birth','city','zip_code','phone','date_joined','legal_business_name','business_dba','existing_member','password', 'recovery_email', 'alternate_email', 'is_superuser', 'is_staff','is_verified', 'is_approved','is_phone_verified', 'is_2fa_enabled','status', 'step','profile_photo','profile_photo_sharable_link','title','department','website','instagram','linkedin','facebook','twitter','approved_on','approved_by','platform_kpi','about','two_factor_devices', 'document_url', 'crm_link', 'organizations', 'internal_roles', 'internal_permission', 'unique_user_id')
-
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'categories',
+            'member_categories',
+            'membership_type',
+            'full_name',
+            'country',
+            'state',
+            'date_of_birth',
+            'city',
+            'zip_code',
+            'phone',
+            'date_joined',
+            'legal_business_name',
+            'business_dba',
+            'existing_member',
+            'password',
+            'recovery_email',
+            'alternate_email',
+            'is_superuser',
+            'is_staff',
+            'is_verified',
+            'is_approved',
+            'is_phone_verified',
+            'is_2fa_enabled',
+            'status',
+            'step',
+            'profile_photo',
+            'profile_photo_sharable_link',
+            'title',
+            'department',
+            'website',
+            'instagram',
+            'linkedin',
+            'facebook',
+            'twitter',
+            'approved_on',
+            'approved_by',
+            'platform_kpi',
+            'about',
+            'two_factor_devices',
+            'document_url',
+            'crm_link',
+            'organizations',
+            'internal_roles',
+            'internal_permission',
+            'unique_user_id',
+            'default_org',
+        )
 
     def validate_password(self, password):
         if password:
