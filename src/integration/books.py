@@ -779,12 +779,19 @@ def get_invoice_from_redis(books_name, invoice_id):
         r.set(invoice_id, json.dumps(resp))
         return resp
 
-def get_buyer_summary(books_name, customer):
+def get_buyer_summary(books_name='books_efd',customer=None):
     """
     Get buyer summary for books.
     """
     if not customer:
-        return {}
+        return {
+            "total_invoice_price": 0,
+            "total_quantity": 0,
+            "average_invoice_price": 0,
+            "outstanding_bills": 0,
+            "category_count": 0,
+            "category_percentage": 0
+        }
     total_quantity = 0
     total_items = 0
     category_percentage = category_count = {
