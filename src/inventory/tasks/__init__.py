@@ -15,13 +15,17 @@ from core.celery import (app,)
 from core.mailer import (mail, mail_send)
 
 from integration.box import (upload_file, upload_file_stream, )
-from integration.books import (create_purchase_order, submit_purchase_order)
-from integration.inventory import (get_inventory_obj,get_inventory_summary,)
+from integration.inventory import (
+    get_inventory_obj,
+    update_inventory_item,
+    create_purchase_order,
+    submit_purchase_order
+)
 
 from .helpers import (
     inventory_item_change,
     add_item_quantity,
-    create_po,
+    create_custom_inventory_item_po,
 )
 from ..models import (
     Inventory,
@@ -51,11 +55,12 @@ from .custom_inventory_data_from_crm import (get_custom_inventory_data_from_crm_
 
 
 @app.task(queue="general")
-def create_approved_item_po(custom_inventory_id, retry=6):
+def create_approved_item_po(custom_inventory_id):
     item = CustomInventory.objects.get(id=custom_inventory_id)
     if item.status == 'approved':
-        result = create_po(
-            custom_inventory_zoho_org=item.zoho_organization,
+        inventory_name = f'inventory_{item.zoho_organization}'
+        result = create_custom_inventory_item_po(
+            inventory_name=inventory_name,
             sku=item.sku,
             quantity=item.quantity_available,
             vendor_name=item.vendor_name,
@@ -65,9 +70,7 @@ def create_approved_item_po(custom_inventory_id, retry=6):
             item.books_po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
             item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
             item.save()
-            submit_purchase_order(books_name=f'books_{item.zoho_organization}', po_id=item.books_po_id)
-        elif retry:
-            create_approved_item_po.apply_async((item.id, retry-1), countdown=15)
+            submit_purchase_order(inventory_name=inventory_name, po_id=item.books_po_id)
 
 
 # @app.task(queue="general")

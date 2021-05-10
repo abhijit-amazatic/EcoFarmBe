@@ -4,8 +4,12 @@ from django.contrib import messages
 from django.conf import settings
 
 from fee_variable.utils import (get_tax_and_mcsp_fee,)
-from integration.inventory import (get_inventory_obj, update_inventory_item,)
-from integration.books import (create_purchase_order, submit_purchase_order)
+from integration.inventory import (
+    get_inventory_obj,
+    update_inventory_item,
+    create_purchase_order,
+    submit_purchase_order
+)
 from brand.models import (LicenseProfile, )
 from .notify_item_change_approved import (notify_inventory_item_change_approved_task, )
 
@@ -25,9 +29,9 @@ def get_approved_by(request=None):
     return approved_by
 
 
-def create_po(custom_inventory_zoho_org, sku, quantity, vendor_name, client_code):
-    inventory_name = f'inventory_{custom_inventory_zoho_org}'
-    books_name = f'books_{custom_inventory_zoho_org}'
+def create_custom_inventory_item_po(inventory_name, sku, quantity, vendor_name, client_code):
+    # inventory_name = f'inventory_{custom_inventory_zoho_org}'
+    # books_name = f'books_{custom_inventory_zoho_org}'
     try:
         lp_obj = LicenseProfile.objects.get(name=vendor_name)
     except Exception:
@@ -50,12 +54,12 @@ def create_po(custom_inventory_zoho_org, sku, quantity, vendor_name, client_code
         "sku": sku,
         "quantity": int(quantity),
         "rate": 0.0,
-        "reference_number": "To feed the CFI",
     }
     if warehouse_id:
         item_data['warehouse_id'] = warehouse_id
     data = {
         'vendor_name': vendor_name,
+        "reference_number": "To feed the CFI",
         "line_items": [item_data],
         "custom_fields": [
             {
@@ -78,7 +82,7 @@ def create_po(custom_inventory_zoho_org, sku, quantity, vendor_name, client_code
     #         "api_name": "cf_procurement_rep",
     #         "value": "",
     #     })
-    return create_purchase_order(books_name=books_name, record=data, params={})
+    return create_purchase_order(inventory_name=inventory_name, record=data, params={})
 
 
 def inventory_item_change(obj, request=None):
@@ -190,7 +194,7 @@ def add_item_quantity(obj, request=None):
                     print(update_result)
                     return False
     else:
-        result = create_po(
+        result = create_custom_inventory_item_po(
             sku=obj.item.sku,
             quantity=obj.quantity,
             vendor_name=obj.item.cf_vendor_name,

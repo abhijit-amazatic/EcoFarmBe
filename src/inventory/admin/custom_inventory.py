@@ -408,7 +408,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     if obj.marketplace_status in ('Vegging', 'Flowering'):
                         notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
                     else:
-                        create_approved_item_po.apply_async((obj.id,), countdown=5)
+                        create_approved_item_po.delay(obj.id)
                         notify_inventory_item_approved_task.delay(obj.id)
 
             elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):

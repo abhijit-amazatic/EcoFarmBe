@@ -710,3 +710,76 @@ def resize_box_images():
         except Inventory.DoesNotExist:
             print('here')
             pass
+
+def get_line_item(obj, data):
+    """
+    Return item from Zoho inventory.
+    """
+    line_items = list()
+    if not data.get('line_items'):
+        return {"code": 1004, "error": "line items not provided"}
+    for line_item in data.get('line_items'):
+        resp = obj.get_inventory(params={'search_text': line_item['sku']}, parse=False)
+        if resp.get('code') == 0:
+            fetched_items = resp['items']
+            fetched_item = None
+            for i in fetched_items:
+                if i['sku'] == line_item['sku']:
+                    fetched_item = i
+                    break
+            if not fetched_item:
+                return {"code": 1003, "message": "Item not in zoho inventory."}
+            item = {
+                'item_id': fetched_item.get('item_id'),
+                'sku': fetched_item.get('sku'),
+                'name': fetched_item.get('name'),
+                'rate': line_item.get('rate', fetched_item.get('rate')),
+                'quantity': line_item.get('quantity'),
+                'category_name': line_item.get('category_name'),
+                'item_custom_fields': line_item.get('item_custom_fields'),
+                'ask_price': line_item.get('ask_price'),
+                'description': line_item.get('description')
+            }
+            if line_item.get('warehouse_id'):
+                item['warehouse_id'] = line_item.get('warehouse_id')
+
+            line_items.append(item)
+        else:
+            {"code": 1003, "message": "Item not found in zoho inventory."}
+    data['line_items'] = line_items
+    return {"code": 0, "data": data}
+
+
+def create_purchase_order(inventory_name, record, params=None):
+    """
+    Create purchase order to Zoho books.
+    """
+    try:
+        inv_obj = get_inventory_obj(inventory_name)
+        po_obj = inv_obj.PurchaseOrders()
+        if 'vendor_name' in record:
+            vendor_id = get_vendor_id(inv_obj, record.get('vendor_name'))
+            if vendor_id:
+                record['vendor_id'] = vendor_id
+            else:
+                return {"code": 1003, "message": "Contact not in zoho inventory."}
+        else:
+            {"code": 1003, "error": "vendor name not provided"}
+
+        result = get_line_item(inv_obj, record)
+        if result['code'] != 0:
+           return result
+        return po_obj.create_purchase_order(result['data'], parameters=params)
+    except Exception as exc:
+        return {
+            "code": 400,
+            "error": exc
+        }
+
+def submit_purchase_order(inventory_name, po_id, params={}):
+    """
+    Submit specific purchase order.
+    """
+    obj = get_inventory_obj(inventory_name)
+    po_obj = obj.PurchaseOrders()
+    return po_obj.submit_purchase_order(po_id=po_id, parameters=params)
