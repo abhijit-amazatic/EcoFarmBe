@@ -318,7 +318,7 @@ class EstimateView(APIView):
             estimate = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if estimate.get('code') and estimate['code'] != 0:
                 return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
-            update_available_for_sale(request.data)
+            # update_available_for_sale(request.data)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
