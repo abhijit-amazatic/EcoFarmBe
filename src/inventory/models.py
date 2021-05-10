@@ -447,7 +447,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     crm_vendor_id = models.CharField(_('CRM Vendor ID'), blank=True, null=True, max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
     sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
-    books_po_id = models.CharField(_('Zoho Books Purchase Order id'), blank=True, null=True, max_length=255)
+    po_id = models.CharField(_('Purchase Order id'), blank=True, null=True, max_length=255)
     po_number = models.CharField(_('Purchase Order Number'), blank=True, null=True, max_length=255)
     client_code = models.CharField(_('Client Code'), blank=True, null=True, max_length=255)
     procurement_rep = models.CharField(_('Procurement Rep'), blank=True, null=True, max_length=255)

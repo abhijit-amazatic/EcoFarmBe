@@ -67,10 +67,10 @@ def create_approved_item_po(custom_inventory_id):
             client_code=item.client_code
         )
         if result.get('code') == 0:
-            item.books_po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
+            item.po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
             item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
             item.save()
-            submit_purchase_order(inventory_name=inventory_name, po_id=item.books_po_id)
+            submit_purchase_order(inventory_name=inventory_name, po_id=item.po_id)
 
 
 # @app.task(queue="general")
