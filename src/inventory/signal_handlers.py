@@ -59,13 +59,14 @@ def post_save_inventory(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=apps.get_model('inventory', 'CustomInventory'))
 def post_save_custom_inventory(sender, instance, created, **kwargs):
     if created:
-        if instance.license_profile and instance.license_profile.license.profile_category == 'nursery':
-            if instance.category_name in ['Clones',]:
-                instance.zoho_organization = 'efn'
+        l_p = instance.license_profile
+        if l_p:
+            if  l_p.license.profile_category == 'nursery' and instance.category_name in ['Clones',]:
+                    instance.zoho_organization = 'efn'
+                    instance.save()
+            elif l_p.license.legal_business_name == 'EFL, LLC':
+                instance.zoho_organization = 'efl'
                 instance.save()
-        elif instance.license_profile.license.legal_business_name == 'EFL, LLC':
-            instance.zoho_organization = 'efl'
-            instance.save()
-        else:
-            instance.zoho_organization = 'efd'
-            instance.save()
+            else:
+                instance.zoho_organization = 'efd'
+                instance.save()
