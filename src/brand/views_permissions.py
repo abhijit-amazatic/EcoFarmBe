@@ -57,6 +57,10 @@ class LicenseViewSetPermission(ViewPermission):
             'get': 'view_license',
             'patch': 'edit_license',
         },
+        'nursery_overview': {
+            'get': True,
+            'patch': True,
+        },
     }
 
 
