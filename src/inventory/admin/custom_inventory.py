@@ -40,6 +40,7 @@ from ..models import (
 )
 from ..tasks import (create_approved_item_po, notify_inventory_item_approved_task)
 from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, )
+from .custom_inventory_helpers import (get_new_item_data, )
 
 class InlineDocumentsAdmin(GenericStackedInline):
     """
@@ -292,7 +293,6 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
         return None
 
     def approve(self, request, obj):
-        data = {}
         if obj.status == 'pending_for_approval':
             tax_and_mcsp_fee = get_tax_and_mcsp_fee(obj.vendor_name, request,)
             if tax_and_mcsp_fee:
@@ -302,75 +302,11 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     if obj.zoho_organization:
                         inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
                         category_id = get_item_category_id(inv_obj.ORGANIZATION_ID, obj.category_name)
-                        data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
                         if category_id:
-                            # data['category_name'] = obj.category_name
-                            data['category_id'] = category_id
                             if obj.vendor_name:
                                 vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
                                 if vendor_id:
-                                    data['cf_vendor_name'] = vendor_id
-                                    if obj.procurement_rep:
-                                        pro_rep_id = get_user_id(inv_obj, obj.procurement_rep)
-                                        if pro_rep_id:
-                                            data['cf_procurement_rep'] = pro_rep_id
-                                    data['item_type'] = 'inventory'
-                                    data['cf_client_code'] = obj.client_code
-                                    data['unit'] = 'lb'
-
-                                    data['name'] = obj.cultivar.cultivar_name
-                                    data['cf_cultivar_name'] = obj.cultivar.cultivar_name
-                                    data['cf_strain_name'] = obj.cultivar.cultivar_name
-
-                                    if obj.cultivar.cultivar_type:
-                                        data['cf_cultivar_type'] = obj.cultivar.cultivar_type
-
-                                    if obj.batch_availability_date:
-                                        data['cf_date_available'] = str(obj.batch_availability_date)
-
-                                    if obj.category_name in ('Flower - Small',):
-                                        data['cf_flower_smalls'] = True
-
-                                    if obj.marketplace_status in ('Vegging', 'Flowering'):
-                                        if obj.quantity_available:
-                                            data['cf_quantity_estimate'] = int(obj.quantity_available)
-                                    else:
-                                        if obj.grade_estimate:
-                                            data['cf_grade_seller'] = obj.grade_estimate
-
-                                    if obj.harvest_date:
-                                        data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
-
-                                    if obj.product_quality_notes:
-                                        data['cf_batch_quality_notes'] = obj.product_quality_notes
-
-                                    if obj.need_lab_testing_service is not None:
-                                        data['cf_lab_testing_services'] = 'Yes' if obj.need_lab_testing_service else 'No'
-
-                                    if obj.farm_ask_price:
-                                        data['cf_farm_price'] = str(int(obj.farm_ask_price))
-                                        data['cf_farm_price_2'] = obj.farm_ask_price
-                                        # data['purchase_rate'] = obj.farm_ask_price
-                                        data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
-
-                                    if obj.pricing_position:
-                                        data['cf_seller_position'] = obj.pricing_position
-                                    if obj.have_minimum_order_quantity:
-                                        data['cf_minimum_quantity'] = int(obj.minimum_order_quantity)
-
-                                    if obj.payment_terms:
-                                        data['cf_payment_terms'] = obj.payment_terms
-
-                                    if obj.payment_method:
-                                        data['cf_payment_method'] = obj.payment_method
-
-                                    data['cf_status'] = obj.marketplace_status
-
-                                    data['is_taxable'] = True
-                                    data['product_type'] = 'goods'
-                                    data['cf_sample_in_house'] = 'Pending'
-                                    data['cf_cfi_published'] = True
-
+                                    data = get_new_item_data(obj, inv_obj, category_id, vendor_id, tax_and_mcsp_fee)
                                     self._approve(request, obj, inv_obj, data,)
                                 else:
                                     self.message_user(request, 'Vendor not found on zoho', level='error')
@@ -405,16 +341,20 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     }
                     obj.save()
                     self.message_user(request, 'This item is approved', level='success')
-                    if obj.marketplace_status in ('Vegging', 'Flowering'):
-                        notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
-                    else:
+                    if obj.marketplace_status in ('In-Testing', 'Available'):
                         create_approved_item_po.delay(obj.id)
                         notify_inventory_item_approved_task.delay(obj.id)
+                    else:
+                        notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
 
             elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
                 self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix+1)
             else:
-                self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
+                msg = result.get('message')
+                if msg:
+                    self.message_user(request, f'Error while creating item in Zoho Inventory:  {msg}', level='error')
+                else:
+                    self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                 print('Error while creating item in Zoho Inventory')
                 print(result)
                 print(data)
