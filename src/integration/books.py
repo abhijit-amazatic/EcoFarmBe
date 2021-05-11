@@ -13,6 +13,7 @@ from core.settings import (
     BOOKS_REFRESH_TOKEN,
     TRANSPORTATION_FEES,
     REDIS_URL,
+    BOOKS_ORGANIZATION_LIST
 )
 from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
@@ -527,9 +528,19 @@ def list_estimates(books_name, params=None):
     """
     List estimates.
     """
-    obj = get_books_obj(books_name)
-    estimate_obj = obj.Estimates()
-    return estimate_obj.list_estimates(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        estimate_obj = obj.Estimates()
+        return estimate_obj.list_estimates(parameters=params)
+
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
+
 
 def update_estimate_address(books_name, estimate_id, address_type, data, params=None):
     """
@@ -584,9 +595,19 @@ def list_contacts(books_name, params=None):
     """
     List contact.
     """
-    obj = get_books_obj(books_name)
-    contact_obj = obj.Contacts()
-    return contact_obj.list_contacts(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        contact_obj = obj.Contacts()
+        return contact_obj.list_contacts(parameters=params)
+    
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
+
 
 def get_purchase_order(books_name, po_id, params=None):
     """
@@ -648,16 +669,25 @@ def list_purchase_orders(books_name, params=None):
     """
     List specific purchase order.
     """
-    obj = get_books_obj(books_name)
-    po_obj = obj.PurchaseOrders()
-    legal_business_name = params.get('vendor_name')
-    contact_obj = obj.Contacts()
-    contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
-    for contact in contacts['response']:
-        if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
-            params['vendor_name'] = contact['contact_name']
-            break
-    return po_obj.list_purchase_orders(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        po_obj = obj.PurchaseOrders()
+        legal_business_name = params.get('vendor_name')
+        contact_obj = obj.Contacts()
+        contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
+        for contact in contacts['response']:
+            if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
+                params['vendor_name'] = contact['contact_name']
+                break
+        return po_obj.list_purchase_orders(parameters=params)
+    
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
 
 def get_vendor_payment(books_name, payment_id, params={}):
     """
@@ -671,15 +701,24 @@ def list_vendor_payments(books_name, params=None):
     """
     List vendor payments.
     """
-    obj = get_books_obj(books_name)
-    po_obj = obj.VendorPayments()
-    payments = po_obj.list_payments(parameters=params)
-    for payment in payments.get('response'):
-        data = get_vendor_payment(books_name, payment['payment_id'])
-        payment['balance'] = 0
-        for record in data.get('bills'):
-            payment['balance'] += record['balance']
-    return payments
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        po_obj = obj.VendorPayments()
+        payments = po_obj.list_payments(parameters=params)
+        for payment in payments.get('response'):
+            data = get_vendor_payment(books_name, payment['payment_id'])
+            payment['balance'] = 0
+            for record in data.get('bills'):
+                payment['balance'] += record['balance']
+        return payments
+    
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
 
 def get_customer_payment(books_name, payment_id, params={}):
     """
@@ -693,15 +732,24 @@ def list_customer_payments(books_name, params=None):
     """
     List customer payments.
     """
-    obj = get_books_obj(books_name)
-    po_obj = obj.CustomerPayments()
-    payments = po_obj.list_payments(parameters=params)
-    for payment in payments.get('response'):
-        data = get_customer_payment(books_name, payment['payment_id'])
-        payment['balance'] = 0
-        for record in data.get('invoices'):
-            payment['balance'] += record['balance']
-    return payments
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        po_obj = obj.CustomerPayments()
+        payments = po_obj.list_payments(parameters=params)
+        for payment in payments.get('response'):
+            data = get_customer_payment(books_name, payment['payment_id'])
+            payment['balance'] = 0
+            for record in data.get('invoices'):
+                payment['balance'] += record['balance']
+        return payments
+
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
 
 def get_invoice(books_name, invoice_id, params=None):
     """
@@ -715,9 +763,18 @@ def list_invoices(books_name, params=None):
     """
     List invoices.
     """
-    obj = get_books_obj(books_name)
-    invoice_obj = obj.Invoices()
-    return invoice_obj.list_invoices(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        invoice_obj = obj.Invoices()
+        return invoice_obj.list_invoices(parameters=params)
+    
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
 
 def get_vendor_credit(books_name, credit_id, params=None):
     """
@@ -731,9 +788,18 @@ def list_vendor_credits(books_name, params=None):
     """
     List vendor credits.
     """
-    obj = get_books_obj(books_name)
-    invoice_obj = obj.VendorCredits()
-    return invoice_obj.list_vendor_credits(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        invoice_obj = obj.VendorCredits()
+        return invoice_obj.list_vendor_credits(parameters=params)
+    
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
 
 def get_unpaid_bills(books_name, vendor, status='unpaid', start_date=None, end_date=None):
     """
@@ -898,16 +964,25 @@ def list_bills(books_name, params=None):
     """
     List bills.
     """
-    obj = get_books_obj(books_name)
-    bill_obj = obj.Bills()
-    contact_obj = obj.Contacts()
-    legal_business_name = params.get('vendor_name')
-    contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
-    for contact in contacts['response']:
-        if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
-            params['vendor_name'] = contact['contact_name']
-            break
-    return bill_obj.list_bills(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        bill_obj = obj.Bills()
+        contact_obj = obj.Contacts()
+        legal_business_name = params.get('vendor_name')
+        contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
+        for contact in contacts['response']:
+            if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
+                params['vendor_name'] = contact['contact_name']
+                break
+        return bill_obj.list_bills(parameters=params)
+
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)
 
 def get_salesorder(books_name, so_id, params=None):
     """
@@ -921,6 +996,15 @@ def list_salesorders(books_name, params=None):
     """
     List sales orders
     """
-    obj = get_books_obj(books_name)
-    bill_obj = obj.SalesOrders()
-    return bill_obj.list_sales_orders(parameters=params)
+    def _list(books_name):
+        obj = get_books_obj(books_name)
+        bill_obj = obj.SalesOrders()
+        return bill_obj.list_sales_orders(parameters=params)
+    
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _list(org)
+        return result
+    else:
+        return _list(books_name)

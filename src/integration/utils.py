@@ -66,7 +66,7 @@ def get_layout(module, layout_name=None):
     if layout_name:
         layout = LEADS_LAYOUT
     if module == 'Vendors':
-        return VENDOR_LAYOUT
+        return VENDOR_LAYOUT[layout_name]
     if module == 'Leads':
         return layout[layout_name]
 

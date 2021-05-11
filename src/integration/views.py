@@ -1086,7 +1086,7 @@ class GetAutoComplete(APIView):
         if address:
             response = get_places(address)
             if isinstance(response, dict) and response.get('code') == 1:
-               Response(response, status=status.HTTP_400_BAD_REQUEST) 
+                Response(response, status=status.HTTP_400_BAD_REQUEST) 
             return Response(response)
         return Response({'code':1, 'error': 'address missing.'}, status=status.HTTP_400_BAD_REQUEST)
     

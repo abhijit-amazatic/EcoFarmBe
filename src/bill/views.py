@@ -59,35 +59,37 @@ class EstimateWebappView(APIView):
         id = kwargs.get('id', None)
         is_draft = request.query_params.get('is_draft')
         notification_methods = request.data.get('notification_methods')
+        organization_name = request.query_params.get('organization_name')
         if is_draft == 'true' or is_draft == 'True':
             estimate = request.data
             customer_name = request.data.get('customer_name')
             line_items = request.data.get('line_items')
             del estimate['line_items']
             estimate_obj = Estimate.objects.filter(customer_name=customer_name).update(**estimate)
-            items = list()
             for item in line_items:
-                item_obj = LineItem.objects.filter(estimate_id=id, item_id=item.get('item_id')).update(**item)
+                LineItem.objects.filter(estimate_id=id, item_id=item.get('item_id')).update(**item)
             if not estimate_obj:
                 return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': 'Updated', 'id': id})
         else:
             # notify_estimate.delay(notification_methods)
             estimate = Estimate.objects.get(customer_name=request.data.get('customer_name'))
-            response = update_estimate(estimate_id=estimate.estimate_id, data=request.data, params=request.query_params.dict())
+            response = update_estimate(organization_name,
+                                        estimate_id=estimate.estimate_id,
+                                        data=request.data, params=request.query_params.dict())
             if response.get('status_code') and response['status_code'] != 0:
-                response = create_estimate(data=request.data, params=request.query_params.dict())
+                response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
             response = parse_fields('estimate', response)
             if notification_methods:
                 notify_addresses = get_notify_addresses(notification_methods)
             else:
                 notify_addresses = list()
-            sign_obj = send_estimate_to_sign(response.get('estimate_id'),
+            sign_obj = send_estimate_to_sign(organization_name, response.get('estimate_id'),
                                              response.get('customer_name'),
                                              notify_addresses=notify_addresses)
             response['request_id'] = sign_obj.get('request_id')
             sign_url = sign_obj.get('sign_url')
-            notify_estimate(notification_methods,sign_url)
+            notify_estimate(notification_methods, sign_url)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             estimate = response

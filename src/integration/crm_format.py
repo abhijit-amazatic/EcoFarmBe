@@ -239,6 +239,17 @@ CRM_FORMAT  = {
         "Sprayers_Applicators": "Sprayers_Applicators",
         "Vendor_Service_s_Categories": "Vendor_Service_s_Categories",
         "Services_Provided": "Services_Provided",
+        "Default_License_for_Transactions_in_Books": "Default_License_for_Transactions_in_Books",
+        "Have_you_ever_had_issues_with_failed_Lab_tests": "Have_you_ever_had_issues_with_failed_Lab_tests",
+        "Digital_Score": "Digital_Score",
+        "Gate_Code": "Gate_Code",
+        "Indoor_Mixed_Lighting_Type": "Indoor_Mixed_Lighting_Type",
+        "Marketing_material": "Marketing_material",
+        "Packaged_Flower_Line": "Packaged_Flower_Line",
+        "Unhide_Back_End_Fields": "Unhide_Back_End_Fields",
+        "Vendor_Type": "Vendor_Type",
+        "Which_third_party_lab_do_you_use": "Which_third_party_lab_do_you_use",
+        "Do_you_work_with_other_Distributors": "Do_you_work_with_other_Distributors"
     },
     "Licenses":{
         "id": "id",
