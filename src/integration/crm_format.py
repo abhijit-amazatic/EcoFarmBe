@@ -106,6 +106,7 @@ CRM_FORMAT  = {
         "db_id": "db_id",
         "id": "id",
         "Layout": "layout_parse",
+        "Layout_Name": "Layout_Name",
         #Farm Profile
         "Vendor_Name": "name",
         "Legal_Entity_Names": "Legal_Entity_Names",

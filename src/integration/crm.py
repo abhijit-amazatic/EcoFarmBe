@@ -510,6 +510,10 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     except KeyError as exc:
                         print(exc)
                         pass
+            if i.profile_category == 'nursery':
+                d['Layout_Name'] = 'vendor_cannabis_nursery'
+            else:
+                d['Layout_Name'] = 'vendor_cannabis'
             if is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
                 result = update_records('Vendors', d, True)
