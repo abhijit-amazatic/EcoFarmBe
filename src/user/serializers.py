@@ -101,8 +101,8 @@ class UserSerializer(serializers.ModelSerializer):
         """
         qs = Organization.objects.all()
         qs = filterQuerySet.for_user(queryset=qs, user=obj)
-        org_id_ls = qs.values_list('id', flat=True)
-        if not obj.default_org in org_id_ls:
+        org_id_ls = list(qs.values_list('id', flat=True))
+        if not obj.default_org_id in org_id_ls:
             try:
                 def_org_id = int(settings.INTERNAL_USER_DEFAULT_ORG_ID)
             except Exception:
