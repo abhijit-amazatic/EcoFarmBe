@@ -26,6 +26,7 @@ from fee_variable.models import (TaxVariable, )
 
 if not isinstance(BOOKS_ORGANIZATION_LIST, list):
     BOOKS_ORGANIZATION_LIST = BOOKS_ORGANIZATION_LIST.split(',')
+    print(BOOKS_ORGANIZATION_LIST)
 
 def get_books_obj(books_name):
     """
