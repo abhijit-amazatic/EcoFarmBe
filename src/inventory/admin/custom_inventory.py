@@ -342,7 +342,8 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                     obj.save()
                     self.message_user(request, 'This item is approved', level='success')
                     if obj.marketplace_status in ('In-Testing', 'Available'):
-                        create_approved_item_po.delay(obj.id)
+                        if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
+                            create_approved_item_po.delay(obj.id)
                         notify_inventory_item_approved_task.delay(obj.id)
                     else:
                         notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
