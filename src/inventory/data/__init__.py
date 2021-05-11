@@ -17,9 +17,9 @@ CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS = {
         # 'inventory_account_id': '', # 'Inventory - In the Field'
     },
     '708301606': {   # Eco Farm Nursery (EFN LLC)
-        # 'account_id':           '', # '3rd Party Flower Sales'
-        'purchase_account_id':  '2158711000000198305', # 'Product Costs - Flower'
-        'inventory_account_id': '2158711000000979003', # 'Inventory - In the Field'
+        'account_id':           '2158711000001027029', # 'Product Sales - Clones'
+        'purchase_account_id':  '2158711000001027033', # 'Product Costs - Clones'
+        'inventory_account_id': '2158711000000198057', # 'Inventory - Clones'
     },
 }
 
