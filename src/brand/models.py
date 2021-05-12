@@ -534,7 +534,7 @@ class NurseryOverview(models.Model):
     weekly_productions = models.IntegerField(_('Weekly Productions'), blank=True, null=True)
     clones_per_productions = models.IntegerField(_('clones Per Productions'), blank=True, null=True)
     types_of_nutrients = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    growing_medium = models.CharField(_('Growing Medium'), blank=True, null=True, max_length=255)
+    growing_medium = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     lighting_type =  ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     cultivars_in_production = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     minimun_order_qty = models.IntegerField(_('clones Per Productions'), blank=True, null=True)
