@@ -164,7 +164,10 @@ class Inventory(models.Model):
     def __str__(self):
         return self.name
 
-
+    class Meta:
+        verbose_name = _('Inventory')
+        verbose_name_plural = _('Inventory')
+        
 class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     """
     Custom Inventory Model Class

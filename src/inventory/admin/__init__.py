@@ -8,7 +8,8 @@ from import_export import resources
 from core import settings
 from core.settings import (AWS_BUCKET, )
 from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
-
+from brand.models import LicenseProfile
+from django import forms
 from ..models import (
     Inventory,
     CustomInventory,
@@ -16,6 +17,7 @@ from ..models import (
     DailyInventoryAggrigatedSummary,
     County,
     CountyDailySummary,
+    InTransitOrder,
     InventoryItemEdit,
     InventoryItemQuantityAddition,
 )
@@ -24,6 +26,7 @@ from .inventory_item_edit import (
     InventoryItemEditAdmin,
     InventoryItemQuantityAdditionAdmin,
 )
+from django_json_widget.widgets import JSONEditorWidget
 
 
 
@@ -160,7 +163,28 @@ class InventoryAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+class InTransitForm(forms.ModelForm):
+    class Meta:
+        model = InTransitOrder
+        fields = '__all__'
+        widgets = {
+            'order_data': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+        }
+        
+class InTransitOrderAdmin(admin.ModelAdmin):
+    """
+    Admin for itransit/pending urder.
+    """
+    model = InTransitOrder
+    search_fields = ('user__email',)
+    list_display = ('user','profile','created_on',)
+    ordering = ('-created_on',)
+    readonly_fields = ('profile_id',)
+    form = InTransitForm
 
+    def profile(self, obj):
+        return LicenseProfile.objects.get(id=obj.profile_id)
+    
 
 
 admin.site.register(Inventory, InventoryAdmin)
@@ -168,6 +192,7 @@ admin.site.register(InventoryItemEdit, InventoryItemEditAdmin)
 admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
 admin.site.register(County, CountyAdmin)
 admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)
+admin.site.register(InTransitOrder, InTransitOrderAdmin)
 admin.site.register(CustomInventory, CustomInventoryAdmin)
 
 
