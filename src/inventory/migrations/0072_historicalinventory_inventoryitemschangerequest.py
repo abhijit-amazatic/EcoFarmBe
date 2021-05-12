@@ -4,9 +4,49 @@ from django.conf import settings
 import django.contrib.postgres.fields
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
+from django.forms.models import model_to_dict
 import django.db.models.deletion
 import inventory.models
-import simple_history.models
+
+class HistoricalChanges(object):
+    def diff_against(self, old_history, excluded_fields=None):
+        if not isinstance(old_history, type(self)):
+            raise TypeError(
+                ("unsupported type(s) for diffing: " "'{}' and '{}'").format(
+                    type(self), type(old_history)
+                )
+            )
+        if excluded_fields is None:
+            excluded_fields = []
+        changes = []
+        changed_fields = []
+        old_values = model_to_dict(old_history.instance)
+        current_values = model_to_dict(self.instance)
+        for field, new_value in current_values.items():
+            if field in excluded_fields:
+                continue
+            if field in old_values:
+                old_value = old_values[field]
+                if old_value != new_value:
+                    change = ModelChange(field, old_value, new_value)
+                    changes.append(change)
+                    changed_fields.append(field)
+
+        return ModelDelta(changes, changed_fields, old_history, self)
+
+class ModelChange(object):
+    def __init__(self, field_name, old_value, new_value):
+        self.field = field_name
+        self.old = old_value
+        self.new = new_value
+
+
+class ModelDelta(object):
+    def __init__(self, changes, changed_fields, old_record, new_record):
+        self.changes = changes
+        self.changed_fields = changed_fields
+        self.old_record = old_record
+        self.new_record = new_record
 
 
 class Migration(migrations.Migration):
@@ -159,6 +199,6 @@ class Migration(migrations.Migration):
                 'ordering': ('-history_date', '-history_id'),
                 'get_latest_by': 'history_date',
             },
-            bases=(simple_history.models.HistoricalChanges, models.Model),
+            bases=(HistoricalChanges, models.Model),
         ),
     ]

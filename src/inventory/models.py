@@ -8,8 +8,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 
-from simple_history.models import HistoricalRecords
-
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
@@ -50,12 +48,6 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     doc_type = models.CharField(_('Doc Type'), blank=True, null=True, max_length=50)
     order = models.IntegerField(_('Order'), blank=True, null=True)
 
-
-class HistoricalBaseModel(models.Model):
-    ip_address = models.GenericIPAddressField(_('IP address'), blank=True, null=True)
-
-    class Meta:
-        abstract = True
 
 
 class Inventory(models.Model):
@@ -168,11 +160,6 @@ class Inventory(models.Model):
     nutrients = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     ethics_and_certification = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     cf_payment_method = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
-
-    history = HistoricalRecords(
-        history_change_reason_field=models.TextField(null=True),
-        bases=[HistoricalBaseModel,],
-    )
 
     def __str__(self):
         return self.name

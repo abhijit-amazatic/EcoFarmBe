@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     'import_export',
     'multiselectfield',
     'fee_variable',
-    'simple_history',
     'bill'
     # 'django_extensions',
     # 'rest_social_auth',
@@ -79,7 +78,6 @@ MIDDLEWARE += [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',
 ]
 

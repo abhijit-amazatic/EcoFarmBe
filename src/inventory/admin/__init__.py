@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.db import models
 from django.shortcuts import (reverse, )
 
-from simple_history.admin import SimpleHistoryAdmin
 from import_export import resources
 
 
@@ -135,7 +134,7 @@ class CountyAdmin(ExportActionMixin, admin.ModelAdmin):
         return super().get_export_data(file_format, res_qs, *args, **kwargs)
 
 
-class InventoryAdmin(SimpleHistoryAdmin):
+class InventoryAdmin(admin.ModelAdmin):
     """
     Admin
     """
@@ -150,14 +149,9 @@ class InventoryAdmin(SimpleHistoryAdmin):
         'created_time'
     )
     search_fields = ('sku', 'name',)
-    history_list_display = ["ip_address"]
     ordering = ('-created_time',)
 
     def has_change_permission(self, request, obj=None):
-        if isinstance(obj, Inventory):
-            info = obj.__class__._meta.app_label, obj.__class__._meta.model_name
-            if request.path.startswith(reverse("admin:{}_{}_history".format(*info), args=(obj.pk,))):
-                return True
         return False
 
     def has_add_permission(self, request, obj=None):

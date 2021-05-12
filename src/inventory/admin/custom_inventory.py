@@ -10,7 +10,6 @@ from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.html import mark_safe
 
-from simple_history.admin import SimpleHistoryAdmin
 import nested_admin
 
 
