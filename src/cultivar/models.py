@@ -41,4 +41,7 @@ class Cultivar(models.Model):
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
 
     def __str__(self):
-        return self.cultivar_name
+        if self.cultivar_name:
+            return f'{self.cultivar_name} ({self.id})'
+        else:
+            return super().__str__()

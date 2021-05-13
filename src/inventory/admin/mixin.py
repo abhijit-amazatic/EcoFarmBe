@@ -30,6 +30,8 @@ class AdminApproveMixin:
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         if obj and self.show_aproval_button(request, obj) and change:
             context['show_approve'] = True
+        context['approve_button_label'] = getattr(self, 'approve_button_label', 'Approve')
+        context['approve_button_color'] = getattr(self, 'approve_button_color', '#21ba21')
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
 

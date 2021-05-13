@@ -2,6 +2,6 @@
 {% load i18n admin_urls %}
 
 {% block submit-row %}
-{% if show_approve %}<input type="submit" value="{% trans 'Approve' %}" name="_approve" style="background: #21ba21;">{% endif %}
+{% if show_approve %}<input type="submit" value="{% trans approve_button_label %}" name="_approve" style="background: {{ approve_button_color }};">{% endif %}
     {{ block.super }}
 {% endblock %}

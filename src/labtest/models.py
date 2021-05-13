@@ -208,6 +208,9 @@ class LabTest(models.Model):
     two_propanol = models.CharField(_('2-propanol'), blank=True, null=True, max_length=255)
     two_butanol = models.CharField(_('2-butanol'), blank=True, null=True, max_length=255)
     Associated_Vendor = models.CharField(_('Associated_Vendor'), blank=True, null=True, max_length=255)
-    
+
     def __str__(self):
-        return self.Name
+        if self.Name:
+            return f'{self.Name} ({self.id})'
+        else:
+            return super().__str__()

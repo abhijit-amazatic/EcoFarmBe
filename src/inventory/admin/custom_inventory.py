@@ -4,8 +4,8 @@ from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
-from django.shortcuts import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.html import mark_safe
@@ -87,14 +87,36 @@ class InlineDocumentsAdmin(GenericStackedInline):
 
 
 class CustomInventoryForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # inventory = get_inventory_obj(inventory_name='inventory_efd')
-        # result = inventory.get_user()
-        # if result.get('code') == 0:
-        #     procurement_rep = [(o.get('email'), o.get('name')) for o in result.get('users', []) if o.get('status') in ['active', 'invited']]
-        #     procurement_rep.insert(0, ('', '-------'))
-        #     self.fields['procurement_rep'] = forms.ChoiceField(choices=procurement_rep, required=False)
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     instance = kwargs.get('instance')
+    #     if instance and instance.zoho_organization:
+    #         if instance.zoho_organization == 'efd':
+    #             marketplace_status_choices = (
+    #                 ('Vegging', _('Vegging')),
+    #                 ('Flowering', _('Flowering')),
+    #                 ('Processing', _('Processing')),
+    #                 ('In-Testing', _('In-Testing')),
+    #                 ('Available', _('Available')),
+    #             )
+    #             self.fields['marketplace_status'] = forms.ChoiceField(choices=marketplace_status_choices, required=True)
+    #         elif instance.zoho_organization == 'efl':
+    #             marketplace_status_choices =(
+    #                 ('Vegging', _('Vegging')),
+    #                 ('Flowering', _('Flowering')),
+    #                 ('Processing', _('Processing')),
+    #                 ('In-Testing', _('In-Testing')),
+    #                 ('Available', _('Available')),
+    #             )
+    #             self.fields['marketplace_status'] = forms.ChoiceField(choices=marketplace_status_choices, required=True)
+    #             self.fields['harvest_date'].label='Manufacturing Date'
+    #         elif instance.zoho_organization  == 'efn':
+    #             marketplace_status_choices =(
+    #                 ('Rooting', _('Rooting')),
+    #                 ('Available', _('Available')),
+    #             )
+    #             self.fields['marketplace_status'] = forms.ChoiceField(choices=marketplace_status_choices, required=True)
+    #             self.fields['harvest_date'].label='Clone Date'
 
     class Meta:
         model = CustomInventory
@@ -137,6 +159,11 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
         'updated_on',
     )
     fieldsets = (
+        (None, {
+            'fields': (
+                'zoho_organization',
+            ),
+        }),
         ('BATCH & QUALITY INFORMATION', {
             'fields': (
                 'cultivar',
@@ -190,11 +217,6 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                 'created_by',
                 'created_on',
                 'updated_on',
-            ),
-        }),
-        ('zoho Organization', {
-            'fields': (
-                'zoho_organization',
             ),
         }),
     )

@@ -165,9 +165,10 @@ class Inventory(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = _('Inventory')
-        verbose_name_plural = _('Inventory')
-        
+        verbose_name = _('Item')
+        verbose_name_plural = _('Items')
+
+
 class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     """
     Custom Inventory Model Class
@@ -278,6 +279,36 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     class Meta:
         verbose_name = _('Item Edit Request')
         verbose_name_plural = _('Item Edit Requests')
+
+class InventoryItemDelete(TimeStampFlagModelMixin, models.Model):
+    """
+    Custom Inventory Model Class
+    """
+    STATUS_CHOICES = (
+        ('pending_for_approval', _('Pending For Approval')),
+        ('approved', _('Approved')),
+    )
+
+    item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='deletion_requests', null=True, on_delete=models.SET_NULL)
+    name = models.CharField(_('Name'), blank=True, null=True, max_length=255)
+    item_data = JSONField(_('item_data'), null=True, blank=True, default=dict)
+
+    sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
+    vendor = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
+    vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
+    zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
+
+    status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
+    created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
+    approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
+    approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "%s" % (self.item)
+
+    class Meta:
+        verbose_name = _('Item Delete Request')
+        verbose_name_plural = _('Item Delete Requests')
 
 
 
