@@ -443,7 +443,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         """
         license_obj = self.get_object()
         if license_obj.is_buyer:
-            return Response({'buyer_summary':get_buyer_summary(license_obj.legal_business_name)},status=200)
+            return Response({'buyer_summary':get_buyer_summary(request.query_params.get('books_name'),license_obj.legal_business_name)},status=200)
         else:
             return Response({'detail':"License is not asscoaited with buyer account or couldn't fetch summary!"}, status=400)
 

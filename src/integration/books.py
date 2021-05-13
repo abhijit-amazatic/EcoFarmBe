@@ -849,7 +849,7 @@ def get_invoice_from_redis(books_name, invoice_id):
         r.set(invoice_id, json.dumps(resp))
         return resp
 
-def get_buyer_summary(books_name='books_efd',customer=None):
+def get_buyer_summary(books_name,customer):
     """
     Get buyer summary for books.
     """

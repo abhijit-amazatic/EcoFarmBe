@@ -112,7 +112,8 @@ BOOKS_REDIRECT_URI=''
 BOOKS_REFRESH_TOKEN=''
 ESTIMATE_TAXES = {'Flower': 'Cultivation Tax - Flower (2020)', 'Trim': 'Cultivation Tax - Trim (2020)'}
 TRANSPORTATION_FEES = 'Transportation Fees'
-BOOKS_ORGANIZATION_LIST = ['books_efd', 'books_efl', 'books_efn']
+#BOOKS_ORGANIZATION_LIST = ['books_efd', 'books_efl', 'books_efn']
+BOOKS_ORGANIZATION_LIST = "books_efd,books_efl,books_efn"
 
 #Zoho Sign configuration
 SIGN_CLIENT_ID=''
