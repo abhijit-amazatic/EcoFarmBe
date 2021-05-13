@@ -42,6 +42,8 @@ def get_books_obj(books_name):
         BOOKS_ORGANIZATION_ID = BOOKS_ORGANIZATION_EFL_ID
     elif books_name == 'books_efn':
         BOOKS_ORGANIZATION_ID = BOOKS_ORGANIZATION_EFN_ID
+    else:
+        print(f'{books_name} organization not found.')
     books_obj = Books(
         client_id=BOOKS_CLIENT_ID,
         client_secret=BOOKS_CLIENT_SECRET,
