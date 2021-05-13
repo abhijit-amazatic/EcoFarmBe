@@ -849,61 +849,70 @@ def get_buyer_summary(books_name='books_efd',customer=None):
     """
     Get buyer summary for books.
     """
-    if not customer:
+    def _buyer_summary(books_name, customer):
+        if not customer:
+            return {
+                "total_invoice_price": 0,
+                "total_quantity": 0,
+                "average_invoice_price": 0,
+                "outstanding_bills": 0,
+                "category_count": 0,
+                "category_percentage": 0
+            }
+        total_quantity = 0
+        total_items = 0
+        category_percentage = category_count = {
+            'flower': 0,
+            'trim': 0,
+            'smalls': 0
+        }
+        start_date = datetime.now().date().replace(month=1, day=1)
+        end_date = datetime.now().date()
+        invoices = list_invoices(books_name, params={'customer_name': customer,
+            'date_start': start_date,
+            'date_end': end_date})
+        invoices = invoices.get('response', [])
+        invoices_count = len(invoices)
+        invoices_total = sum([i['total'] for i in invoices])
+        for invoice in invoices:
+            resp = get_invoice_from_redis(books_name, invoice.get('invoice_id'))
+            for item in resp['line_items']:
+                if 'Cultivation Tax' in item.get('name') or 'MCSP' in item.get('name'):
+                    continue
+                total_quantity += item['quantity']
+                try:
+                    inventory = Inventory.objects.filter(sku=item['sku']).latest('last_modified_time')
+                except Inventory.DoesNotExist:
+                    continue
+                try:
+                    total_items += 1
+                    if 'Flower' in inventory.category_name:
+                        category_count['flower'] += 1
+                    elif 'Trim' in inventory.category_name:
+                        category_count['trim'] += 1
+                    elif 'Smalls' in inventory.category_name:
+                        category_count['smalls'] += 1
+                except AttributeError as exc:
+                    continue
+        if total_items:
+            for k, v in category_count.items():
+                category_percentage[k] = (v/total_items) * 100
         return {
-            "total_invoice_price": 0,
-            "total_quantity": 0,
-            "average_invoice_price": 0,
-            "outstanding_bills": 0,
-            "category_count": 0,
-            "category_percentage": 0
-        }
-    total_quantity = 0
-    total_items = 0
-    category_percentage = category_count = {
-        'flower': 0,
-        'trim': 0,
-        'smalls': 0
-    }
-    start_date = datetime.now().date().replace(month=1, day=1)
-    end_date = datetime.now().date()
-    invoices = list_invoices(books_name, params={'customer_name': customer,
-        'date_start': start_date,
-        'date_end': end_date})
-    invoices = invoices.get('response', [])
-    invoices_count = len(invoices)
-    invoices_total = sum([i['total'] for i in invoices])
-    for invoice in invoices:
-        resp = get_invoice_from_redis(books_name, invoice.get('invoice_id'))
-        for item in resp['line_items']:
-            if 'Cultivation Tax' in item.get('name') or 'MCSP' in item.get('name'):
-                continue
-            total_quantity += item['quantity']
-            try:
-                inventory = Inventory.objects.filter(sku=item['sku']).latest('last_modified_time')
-            except Inventory.DoesNotExist:
-                continue
-            try:
-                total_items += 1
-                if 'Flower' in inventory.category_name:
-                    category_count['flower'] += 1
-                elif 'Trim' in inventory.category_name:
-                    category_count['trim'] += 1
-                elif 'Smalls' in inventory.category_name:
-                    category_count['smalls'] += 1
-            except AttributeError as exc:
-                continue
-    if total_items:
-        for k, v in category_count.items():
-            category_percentage[k] = (v/total_items) * 100
-    return {
-        "total_invoice_price": invoices_total,
-        "total_quantity": total_quantity,
-        "average_invoice_price": invoices_total/invoices_count if invoices_count else 0,
-        "outstanding_bills": get_unpaid_bills(books_name, customer, status='unpaid', start_date=start_date, end_date=end_date),
-        "category_count": category_count,
-        "category_percentage": category_percentage
-        }
+            "total_invoice_price": invoices_total,
+            "total_quantity": total_quantity,
+            "average_invoice_price": invoices_total/invoices_count if invoices_count else 0,
+            "outstanding_bills": get_unpaid_bills(books_name, customer, status='unpaid', start_date=start_date, end_date=end_date),
+            "category_count": category_count,
+            "category_percentage": category_percentage
+            }
+
+    if books_name == 'all':
+        result = dict()
+        for org in BOOKS_ORGANIZATION_LIST:
+            result[org] = _buyer_summary(org, customer)
+        return result
+    else:
+        return _buyer_summary(books_name, customer)
 
 def get_contact_id(obj, contact_name):
     """
