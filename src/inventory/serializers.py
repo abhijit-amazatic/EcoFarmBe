@@ -17,6 +17,7 @@ from .models import (
     Documents,
     InventoryItemEdit,
     InventoryItemQuantityAddition,
+    InventoryItemDelete,
 )
 
 
@@ -183,3 +184,26 @@ class  InventoryItemQuantityAdditionSerializer(serializers.ModelSerializer):
         model = InventoryItemQuantityAddition
         exclude = ()
         read_only_fields = ('status', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
+
+class  InventoryItemDeleteSerializer(serializers.ModelSerializer):
+    """
+    Inventory Serializer
+    """
+
+    class Meta:
+        model = InventoryItemDelete
+        exclude = ('item_data',)
+        read_only_fields = (
+            'name',
+            'status',
+            'sku',
+            'zoho_item_id',
+            'cultivar_name',
+            'vendor_name',
+            'approved_by',
+            'approved_on',
+            'created_by',
+            'created_on',
+            'updated_on',
+        )
+

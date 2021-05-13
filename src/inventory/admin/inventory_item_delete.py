@@ -12,6 +12,9 @@ from  ..models import (
     Inventory,
     InventoryItemDelete,
 )
+from ..tasks import (
+    notify_inventory_item_deletion_approved_task,
+)
 from ..tasks.helpers import (
     get_approved_by
 )
@@ -39,6 +42,7 @@ class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
         'status',
         'sku',
         'zoho_item_id',
+        'cultivar_name',
         'vendor_name',
         'approved_by',
         'approved_on',
@@ -56,6 +60,7 @@ class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
                 'name',
                 'zoho_item_id',
                 'sku',
+                'cultivar_name',
                 'vendor_name',
                 # 'item_data',
             ),
@@ -118,7 +123,7 @@ class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
                             obj.save()
                             obj.item.delete()
                             self.message_user(request, 'This deletion is approved and item is deleted', level='success')
-                            # notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
+                            notify_inventory_item_deletion_approved_task.delay(obj.id,)
 
                         else:
                             msg = result.get('message')
@@ -128,7 +133,6 @@ class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
                                 self.message_user(request, 'Error while deleting item from Zoho Inventory', level='error')
                             print('Error while deleting item from Zoho Inventory')
                             print(result)
-                            print(data)
                 else:
                     self.message_user(request, 'Invalid Inventory Organization Name', level='error')
             else:

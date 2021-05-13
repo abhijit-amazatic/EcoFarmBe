@@ -49,9 +49,10 @@ from .notify_item_added import (notify_inventory_item_added_task, )
 from .notify_item_approved import (notify_inventory_item_approved_task, )
 from .notify_item_change_submitted import (notify_inventory_item_change_submitted_task, )
 from .notify_item_change_approved import (notify_inventory_item_change_approved_task, )
+from .notify_item_deletion_submitted import (notify_inventory_item_deletion_submitted_task,)
+from .notify_item_deletion_approved import (notify_inventory_item_deletion_approved_task,)
 from .crm_vendor_from_crm_account import (create_duplicate_crm_vendor_from_crm_account_task, )
 from .custom_inventory_data_from_crm import (get_custom_inventory_data_from_crm_task )
-
 
 
 @app.task(queue="general")
