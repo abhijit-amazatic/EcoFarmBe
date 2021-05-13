@@ -294,7 +294,7 @@ class InventoryItemDelete(TimeStampFlagModelMixin, models.Model):
     item_data = JSONField(_('item_data'), null=True, blank=True, default=dict)
 
     sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
-    vendor = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
+    cultivar_name = models.CharField(_('Cultivar Name'), blank=True, null=True, max_length=255)
     vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
 

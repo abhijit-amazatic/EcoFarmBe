@@ -36,5 +36,6 @@ def pre_save_item_deletion_request(sender, instance, **kwargs):
             instance.name = item.name
             instance.item_data = data
             instance.vendor_name = item.cf_vendor_name
+            instance.cultivar_name = getattr(item.cultivar, 'cultivar_name') if item.cultivar else ''
             instance.sku = item.sku
             instance.zoho_item_id = item.item_id
