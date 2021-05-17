@@ -66,11 +66,11 @@ def notify_email_inventory_item_delist_approved(data):
 
 
 @app.task(queue="general")
-def notify_inventory_item_delist_approved_task(custom_delist_req_id):
-    qs = InventoryItemDelist.objects.filter(id=custom_delist_req_id)
+def notify_inventory_item_delist_approved_task(item_delist_req_id):
+    qs = InventoryItemDelist.objects.filter(id=item_delist_req_id)
     if qs.exists():
         obj = qs.first()
-        if obj.status == 'pending_for_approval':
+        if obj.status == 'approved':
             item = obj.item
             data = {}
             data['item_name'] = obj.item_data.get('name')
