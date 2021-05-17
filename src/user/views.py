@@ -132,11 +132,11 @@ class UserViewSet(ModelViewSet):
                     response = update_records('Contacts', request.data)
             else:
                 response = create_records('Contacts', request.data)
-            if response['status_code'] == 201:
-                instance.is_updated_in_crm = True
-                instance.zoho_contact_id = response['response']['data'][0]['details']['id']
-                instance.crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Contacts/"+response['response']['data'][0]['details']['id']+"/"
-                instance.save()
+                if response['status_code'] == 201:
+                    instance.is_updated_in_crm = True
+                    instance.zoho_contact_id = response['response']['data'][0]['details']['id']
+                    instance.crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Contacts/"+response['response']['data'][0]['details']['id']+"/"
+                    instance.save()
             try:
                 if not instance.existing_member:
                     pass
