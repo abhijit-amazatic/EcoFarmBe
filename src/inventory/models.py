@@ -160,6 +160,7 @@ class Inventory(models.Model):
     nutrients = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     ethics_and_certification = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     cf_payment_method = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
+    mapped_items = JSONField(blank=True, null=True, default=dict)
 
     def __str__(self):
         return self.name

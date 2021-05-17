@@ -79,6 +79,7 @@ from bill.models import (Estimate, LineItem)
 from integration.campaign import (create_campaign, )
 from fee_variable.models import (CampaignVariable, )
 from integration.apps.aws import (get_boto_client, create_presigned_url)
+from bill.utils import (save_estimate, )
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -294,9 +295,10 @@ class EstimateView(APIView):
 
     def post(self, request):
         """
-        Create and estimate in Zoho Books.
+        Create and estimate in Zoho Books. 
         """
         organization_name = request.query_params.get('organization_name')
+        estimate_obj = save_estimate(request)
         response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -310,6 +312,7 @@ class EstimateView(APIView):
         is_draft = request.query_params.get('is_draft')
         estimate_id = request.data['estimate_id']
         if is_draft == 'true' or is_draft == 'True':
+            estimate_obj = save_estimate(request)
             response = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)

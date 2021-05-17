@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from bill.models import (Estimate, LineItem, )
-from bill.utils import (parse_fields, get_notify_addresses,)
+from bill.utils import (parse_fields, get_notify_addresses, save_estimate, )
 from integration.books import (create_estimate, delete_estimate, update_estimate)
 from bill.tasks import (notify_estimate)
 from integration.books import (send_estimate_to_sign, )
@@ -40,14 +40,7 @@ class EstimateWebappView(APIView):
         """
         Create and estimate in Zoho Books.
         """
-        estimate = request.data
-        customer_name = request.data.get('customer_name')
-        line_items = request.data.get('line_items')
-        del estimate['line_items']
-        estimate_obj, created = Estimate.objects.update_or_create(customer_name=customer_name, defaults=estimate)
-        items = list()
-        for item in line_items:
-            item_obj, created = LineItem.objects.update_or_create(estimate=estimate_obj, item_id=item.get('item_id'), defaults=item)
+        estimate_obj = save_estimate(request)
         if not estimate_obj:
             return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'Success', 'id': estimate_obj.id})
@@ -61,13 +54,7 @@ class EstimateWebappView(APIView):
         notification_methods = request.data.get('notification_methods')
         organization_name = request.query_params.get('organization_name')
         if is_draft == 'true' or is_draft == 'True':
-            estimate = request.data
-            customer_name = request.data.get('customer_name')
-            line_items = request.data.get('line_items')
-            del estimate['line_items']
-            estimate_obj = Estimate.objects.filter(customer_name=customer_name).update(**estimate)
-            for item in line_items:
-                LineItem.objects.filter(estimate_id=id, item_id=item.get('item_id')).update(**item)
+            estimate_obj = save_estimate(request)
             if not estimate_obj:
                 return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': 'Updated', 'id': id})

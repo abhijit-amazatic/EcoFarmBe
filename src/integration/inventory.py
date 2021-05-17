@@ -149,6 +149,13 @@ def get_inventory_item(inventory_name, item_id):
     inventory = get_inventory_obj(inventory_name)
     return inventory.get_inventory(item_id=item_id)
 
+def get_composite_item(inventory_name, item_id=None, params={}):
+    """
+    Get composite inventory item.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    return inventory.get_composite_inventory(item_id=item_id)
+
 def get_inventory_document(inventory_name, item_id, document_id, params={}):
     """
     Return documents for inventory item.
@@ -420,7 +427,10 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
     """
     cultivar = None
     for record in inventory_list:
-        record = get_inventory_item(inventory_name=inventory_name, item_id=record)
+        if is_composite:
+            records = get_composite_item(inventory_name, item_id=record)
+        else:
+            record = get_inventory_item(inventory_name=inventory_name, item_id=record)
         try:
             try:
                 record['pre_tax_price'] = get_pre_tax_price(record)
@@ -463,7 +473,7 @@ def fetch_inventory_from_list(inventory_name, inventory_list):
                 })
             continue
 
-def fetch_inventory(inventory_name, days=1, price_data=None):
+def fetch_inventory(inventory_name, days=1, price_data=None, is_composite=False):
     """
     Fetch latest inventory from Zoho Inventory.
     """
@@ -473,11 +483,17 @@ def fetch_inventory(inventory_name, days=1, price_data=None):
     has_more = True
     page = 0
     while has_more:
-        records = get_inventory_items(inventory_name, params={'page': page, 'last_modified_time': date})
+        if is_composite:
+            records = get_composite_item(inventory_name)
+        else:
+            records = get_inventory_items(inventory_name, params={'page': page, 'last_modified_time': date})
         has_more = records['page_context']['has_more_page']
         page = records['page_context']['page'] + 1
         for record in records['items']:
             try:
+                if is_composite:
+                    record.update(get_composite_item(inventory_name, item_id=record['item_id']))
+                    print(record)
                 try:
                     record['pre_tax_price'] = get_pre_tax_price(record)
                 except KeyError:

@@ -24,7 +24,8 @@ from .sign import (submit_estimate, )
 from inventory.models import Inventory
 from fee_variable.models import (TaxVariable, )
 
-BOOKS_ORGANIZATION_LIST = BOOKS_ORGANIZATION_LIST.split(',')
+if not isinstance(BOOKS_ORGANIZATION_LIST, tuple):
+    BOOKS_ORGANIZATION_LIST = BOOKS_ORGANIZATION_LIST.split(',')
 
 def get_books_obj(books_name):
     """
