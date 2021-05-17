@@ -27,7 +27,7 @@ from .serializers import (
     CustomInventorySerializer,
     InventoryItemEditSerializer,
     InventoryItemQuantityAdditionSerializer,
-    InventoryItemDeleteSerializer,
+    InventoryItemDelistSerializer,
 )
 from .models import (
     Inventory,
@@ -37,7 +37,7 @@ from .models import (
     CustomInventory,
     InventoryItemEdit,
     InventoryItemQuantityAddition,
-    InventoryItemDelete,
+    InventoryItemDelist,
 )
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
@@ -56,7 +56,7 @@ from .tasks import (
     get_custom_inventory_data_from_crm_task,
     inventory_item_quantity_addition_task,
     notify_inventory_item_change_submitted_task,
-    notify_inventory_item_deletion_submitted_task,
+    notify_inventory_item_delist_submitted_task,
 )
 
 
@@ -910,16 +910,16 @@ class InventoryItemQuantityAdditionViewSet(mixins.CreateModelMixin,
         obj.save()
         inventory_item_quantity_addition_task.delay(obj.id)
 
-class InventoryItemDeleteFilterSet(FilterSet):
+class InventoryItemDelistFilterSet(FilterSet):
     status__in = CharInFilter(field_name='status', lookup_expr='in')
     class Meta:
-        model = InventoryItemDelete
+        model = InventoryItemDelist
         fields = {
             'status':['icontains', 'exact'],
         }
 
 
-class InventoryItemDeleteViewSet(mixins.CreateModelMixin,
+class InventoryItemDelistViewSet(mixins.CreateModelMixin,
                                          mixins.RetrieveModelMixin,
                                         #  mixins.UpdateModelMixin,
                                          mixins.DestroyModelMixin,
@@ -930,12 +930,12 @@ class InventoryItemDeleteViewSet(mixins.CreateModelMixin,
     """
     permission_classes = (IsAuthenticated, )
     filter_backends = (OrderingFilter, filters.DjangoFilterBackend,)
-    filterset_class = InventoryItemDeleteFilterSet
+    filterset_class = InventoryItemDelistFilterSet
     ordering_fields = '__all__'
     pagination_class = BasicPagination
     ordering = ('created_on',)
-    serializer_class = InventoryItemDeleteSerializer
-    queryset = InventoryItemDelete.objects.all()
+    serializer_class = InventoryItemDelistSerializer
+    queryset = InventoryItemDelist.objects.all()
 
     def perform_create(self, serializer):
         obj = serializer.save()
@@ -946,4 +946,4 @@ class InventoryItemDeleteViewSet(mixins.CreateModelMixin,
             'name':  user.get_full_name(),
         }
         obj.save()
-        notify_inventory_item_deletion_submitted_task.delay(obj.id)
+        notify_inventory_item_delist_submitted_task.delay(obj.id)

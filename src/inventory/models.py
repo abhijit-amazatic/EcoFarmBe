@@ -280,7 +280,7 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         verbose_name = _('Item Edit Request')
         verbose_name_plural = _('Item Edit Requests')
 
-class InventoryItemDelete(TimeStampFlagModelMixin, models.Model):
+class InventoryItemDelist(TimeStampFlagModelMixin, models.Model):
     """
     Custom Inventory Model Class
     """
@@ -307,8 +307,8 @@ class InventoryItemDelete(TimeStampFlagModelMixin, models.Model):
         return "%s" % (self.item)
 
     class Meta:
-        verbose_name = _('Item Delete Request')
-        verbose_name_plural = _('Item Delete Requests')
+        verbose_name = _('Item Delist Request')
+        verbose_name_plural = _('Item Delist Requests')
 
 
 

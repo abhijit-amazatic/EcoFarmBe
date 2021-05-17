@@ -10,19 +10,19 @@ from integration.inventory import (
 )
 from  ..models import (
     Inventory,
-    InventoryItemDelete,
+    InventoryItemDelist,
 )
 from ..tasks import (
-    notify_inventory_item_deletion_approved_task,
+    notify_inventory_item_delist_approved_task,
 )
 from ..tasks.helpers import (
     get_approved_by
 )
 from .mixin import AdminApproveMixin
+from ..data import(ITEM_CUSTOM_FIELD_ORG_MAP)
 
 
-
-class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
+class InventoryItemDelistAdmin(AdminApproveMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
@@ -76,9 +76,8 @@ class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
             ),
         }),
     )
-    # form = InventoryItemDeleteForm
-    approve_button_label = 'Approve Deletion'
-    approve_button_color = '#ba2121'
+    approve_button_label = 'Approve'
+    # approve_button_color = '#ba2121'
 
     # formfield_overrides = {
     #     JSONField: {'widget': JSONEditorWidget(options={'modes':['code', 'text'], 'search': True, }, attrs={'disabled': 'disabled'})},
@@ -108,33 +107,38 @@ class InventoryItemDeleteAdmin(AdminApproveMixin, admin.ModelAdmin):
         if obj.status == 'pending_for_approval':
             if obj.item:
                 if obj.item.inventory_name and obj.item.inventory_name.lower() in ['efd', 'efl', 'efn']:
-                    inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.item.inventory_name.lower()}')
+                    org = obj.item.inventory_name.lower()
+                    inv_obj = get_inventory_obj(inventory_name=f'inventory_{org}')
+                    data={'cf_cfi_published': False}
+                    if org in ITEM_CUSTOM_FIELD_ORG_MAP:
+                        org_cf_map = ITEM_CUSTOM_FIELD_ORG_MAP[org]
+                        data={ org_cf_map[k]: v for k, v in data.items() if k in org_cf_map }
                     try:
-                        result = inv_obj.delete_item(obj.item.item_id, params={})
+                        result = inv_obj.update_item(obj.item.item_id, data, params={})
                     except Exception as exc:
-                        self.message_user(request, f'Error while deleting item from Zoho Inventory:  {exc}', level='error')
-                        print('Error while creating item in Zoho Inventory')
+                        self.message_user(request, f'Error while delisting item from Zoho Inventory:  {exc}', level='error')
+                        print('Error while delisting item from Zoho Inventory')
                         print(exc)
                     else:
-                        if result.get('code') in (0, 2006):
+                        if result.get('code') == 0:
                             obj.status = 'approved'
                             obj.approved_on = timezone.now()
                             obj.approved_by = get_approved_by(request=request)
                             obj.save()
-                            obj.item.delete()
-                            self.message_user(request, 'This deletion is approved and item is deleted', level='success')
-                            notify_inventory_item_deletion_approved_task.delay(obj.id,)
+                            obj.item.cf_cfi_published = False
+                            obj.item.save
+                            self.message_user(request, 'This delisting is approved and item is delisted', level='success')
+                            notify_inventory_item_delist_approved_task.delay(obj.id,)
 
                         else:
                             msg = result.get('message')
                             if msg:
-                                self.message_user(request, f'Error while deleting item from Zoho Inventory:  {msg}', level='error')
+                                self.message_user(request, f'Error while delisting item from Zoho Inventory:  {msg}', level='error')
                             else:
-                                self.message_user(request, 'Error while deleting item from Zoho Inventory', level='error')
+                                self.message_user(request, 'Error while delisting item from Zoho Inventory', level='error')
                             print('Error while deleting item from Zoho Inventory')
                             print(result)
                 else:
                     self.message_user(request, 'Invalid Inventory Organization Name', level='error')
             else:
                 self.message_user(request, 'No is item selected For action', level='error')
-

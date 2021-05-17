@@ -20,14 +20,14 @@ from ..models import (
     InTransitOrder,
     InventoryItemEdit,
     InventoryItemQuantityAddition,
-    InventoryItemDelete,
+    InventoryItemDelist,
 )
 from .custom_inventory import CustomInventoryAdmin
 from .inventory_item_edit import (
     InventoryItemEditAdmin,
     InventoryItemQuantityAdditionAdmin,
 )
-from .inventory_item_delete import (InventoryItemDeleteAdmin, )
+from .inventory_item_delist import (InventoryItemDelistAdmin, )
 from django_json_widget.widgets import JSONEditorWidget
 
 
@@ -191,7 +191,7 @@ class InTransitOrderAdmin(admin.ModelAdmin):
 
 admin.site.register(Inventory, InventoryAdmin)
 admin.site.register(InventoryItemEdit, InventoryItemEditAdmin)
-admin.site.register(InventoryItemDelete, InventoryItemDeleteAdmin)
+admin.site.register(InventoryItemDelist, InventoryItemDelistAdmin)
 admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
 admin.site.register(County, CountyAdmin)
 admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)

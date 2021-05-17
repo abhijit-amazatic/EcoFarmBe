@@ -17,7 +17,7 @@ from .models import (
     Documents,
     InventoryItemEdit,
     InventoryItemQuantityAddition,
-    InventoryItemDelete,
+    InventoryItemDelist,
 )
 
 
@@ -185,13 +185,13 @@ class  InventoryItemQuantityAdditionSerializer(serializers.ModelSerializer):
         exclude = ()
         read_only_fields = ('status', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
 
-class  InventoryItemDeleteSerializer(serializers.ModelSerializer):
+class  InventoryItemDelistSerializer(serializers.ModelSerializer):
     """
     Inventory Serializer
     """
 
     class Meta:
-        model = InventoryItemDelete
+        model = InventoryItemDelist
         exclude = ('item_data',)
         read_only_fields = (
             'name',
