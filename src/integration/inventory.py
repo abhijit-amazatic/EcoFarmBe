@@ -493,7 +493,6 @@ def fetch_inventory(inventory_name, days=1, price_data=None, is_composite=False)
             try:
                 if is_composite:
                     record.update(get_composite_item(inventory_name, item_id=record['item_id']))
-                    print(record)
                 try:
                     record['pre_tax_price'] = get_pre_tax_price(record)
                 except KeyError:
