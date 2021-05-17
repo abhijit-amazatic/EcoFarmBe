@@ -134,6 +134,13 @@ def update_records(modeladmin, request, queryset):
             is_update=True)
 update_records.short_description = "Update Records To CRM"
 
+def update_status_to_in_progress(modeladmin, request, queryset):
+    for profile in queryset:
+        profile.status ='in_progress'
+        profile.save()
+    messages.success(request,'Status Updated to in_progress!')    
+update_status_to_in_progress.short_description = "Update Status To in_progress"
+
 class ProfileContactForm(forms.ModelForm):
     class Meta:
         model = ProfileContact
@@ -286,7 +293,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
-    actions = [approve_license_profile, delete_model, sync_records, update_records]
+    actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records]
     list_per_page = 50
 
 
