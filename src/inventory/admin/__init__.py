@@ -15,6 +15,7 @@ from ..models import (
     CustomInventory,
     Documents,
     DailyInventoryAggrigatedSummary,
+    SummaryByProductCategory,
     County,
     CountyDailySummary,
     InTransitOrder,
@@ -53,11 +54,31 @@ class DailyInventoryAggrigatedSummaryResource(resources.ModelResource):
         #export_order = ('id', 'price', 'author', 'name')
 
 
+class InlineSummaryByProductCategoryAdmin(admin.TabularInline):
+    extra = 0
+    model = SummaryByProductCategory
+    readonly_fields = (
+        'product_category',
+        'total_thc_max',
+        'total_thc_min',
+        'batch_varities',
+        'average',
+        'total_value',
+        'smalls_quantity',
+        'tops_quantity',
+        'total_quantity',
+        'trim_quantity',
+        'average_thc',
+    )
+    can_delete = False
+
+    
 class DailyInventoryAggrigatedSummaryAdmin(ExportActionMixin,admin.ModelAdmin):
     """
     Summary Admin.
     """
     model = DailyInventoryAggrigatedSummary
+    inlines = (InlineSummaryByProductCategoryAdmin,)
     search_fields = ('date',)
     list_display = ('date',)
     ordering = ('-date',)

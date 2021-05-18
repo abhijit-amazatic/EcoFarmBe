@@ -11,10 +11,12 @@ from celery.schedules import crontab
 
 from integration.box import (upload_file_stream, )
 from integration.inventory import (get_inventory_summary,)
+from core.celery import app
 
 from ..models import (
     Inventory,
     DailyInventoryAggrigatedSummary,
+    SummaryByProductCategory,
     County,
     CountyDailySummary,
 )
@@ -35,7 +37,35 @@ def county_update_create():
         obj, created = County.objects.update_or_create(name=county,defaults={'name':county})
         print(created, obj)
 
-
+@app.task(queue="general")
+def save_summary_by_product_category(daily_aggrigated_summary_id):
+    """
+    save by parent/product cateory
+    """
+    prod_category = ['Wholesale - Terpenes','Wholesale - Flower', 'Wholesale - Isolates', 'Services', 'Wholesale - Trim', 'Lab Testing', 'Wholesale - Concentrates']
+    queryset = Inventory.objects.filter(cf_cfi_published=True)
+    try:
+        for category in prod_category:
+            qs = queryset.filter(parent_category_name = category)
+            summary = get_inventory_summary(qs, statuses=None)
+            fields_data = {
+                'daily_aggrigated_summary_id':daily_aggrigated_summary_id,
+                'product_category': category,
+                'total_thc_max':summary['total_thc_max'],
+                'total_thc_min':summary['total_thc_min'],
+                'batch_varities':summary['batch_varities'],
+                'average':summary['average'],
+                'total_value':summary['total_value'],
+                'smalls_quantity':summary['smalls_quantity'],
+                'tops_quantity':summary['tops_quantity'],
+                'total_quantity':summary['total_quantity'],
+                'trim_quantity':summary['trim_quantity'],
+                'average_thc':summary['average_thc']
+            }
+            cat_obj,created =  SummaryByProductCategory.objects.update_or_create(**fields_data)
+    except Exception as e:
+        pint('exception while saving summary by product category',e)
+    
 @periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})
 def save_daily_aggrigated_summary():
     """
@@ -59,7 +89,9 @@ def save_daily_aggrigated_summary():
 
     if summary:
         print('saving aggregated summary data for date `%s`:' % (fields_data['date']))
-        DailyInventoryAggrigatedSummary.objects.update_or_create(**fields_data)
+        obj, created = DailyInventoryAggrigatedSummary.objects.update_or_create(**fields_data)
+        #Save summary according to product category Flower, Terpenes etc.
+        save_summary_by_product_category.delay(obj.id,)    
 
 
 @periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})

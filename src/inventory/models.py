@@ -541,6 +541,41 @@ class DailyInventoryAggrigatedSummary(models.Model):
         verbose_name = _('Daily Inventory Aggregated Summary')
         verbose_name_plural = _('Daily Inventory  Aggregated Summary')
 
+        
+class SummaryByProductCategory(models.Model):
+    """
+    Stores summary by parent_category_name.
+    """ 
+    PRODUCT_CATEGORY_CHOICES = (
+        ('Wholesale - Flower', _('Wholesale - Flower')),
+        ('Wholesale - Isolates', _('Wholesale - Isolates')),
+        ('Wholesale - Terpenes', _('Wholesale - Terpenes')),
+        ('Wholesale - Trim', _('Wholesale - Trim')),
+        ('Wholesale - Concentrates', _('Wholesale - Concentrates')),
+        ('Lab Testing', _('Lab Testing')),
+        ('Services', _('Services')),
+    )
+    daily_aggrigated_summary = models.ForeignKey(DailyInventoryAggrigatedSummary,on_delete=models.CASCADE)
+    product_category = models.CharField(_('PRODUCT/PARENT CATEGORY'), choices=PRODUCT_CATEGORY_CHOICES,max_length=255)    
+    total_thc_max = models.FloatField(_('Total THC(Max)'), blank=True, null=True, max_length=255)
+    total_thc_min = models.FloatField(_('Total THC(Min)'), blank=True, null=True, max_length=255)
+    batch_varities = models.IntegerField(_('Batches'), blank=True, null=True)
+    average = models.FloatField(_('Average $/lb'), blank=True, null=True, max_length=255)
+    total_value = models.FloatField(_('Total Value $'), blank=True, null=True, max_length=255)
+    smalls_quantity = models.FloatField(_('Smalls(lbs)'), blank=True, null=True, max_length=255)
+    tops_quantity = models.FloatField(_('Tops(lbs)'), blank=True, null=True, max_length=255)
+    total_quantity = models.FloatField(_('Total(lbs)'), blank=True, null=True, max_length=255)
+    trim_quantity =  models.FloatField(_('Trim quantity'), blank=True, null=True, max_length=255)
+    average_thc = models.FloatField(_('Avg THC'), blank=True, null=True, max_length=255)
+    
+    def __str__(self):
+        return "%s" % (self.product_category)
+
+    class Meta:
+        unique_together = (('daily_aggrigated_summary', 'product_category'), )
+        verbose_name = _('Summary by product category')
+
+        
 class County(models.Model):
     """
     Stores inventory county grown.
