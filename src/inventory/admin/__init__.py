@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.db import models
 from django.shortcuts import (reverse, )
+from django.contrib.contenttypes.admin import GenericStackedInline
 
 from import_export import resources
 
@@ -22,6 +23,9 @@ from ..models import (
     InventoryItemEdit,
     InventoryItemQuantityAddition,
     InventoryItemDelist,
+    Vendor,
+    VendorDailySummary,
+    Summary,
 )
 from .custom_inventory import CustomInventoryAdmin
 from .inventory_item_edit import (
@@ -160,6 +164,23 @@ class CountyAdmin(ExportActionMixin, admin.ModelAdmin):
         return super().get_export_data(file_format, res_qs, *args, **kwargs)
 
 
+class InlineVendorDailySummaryAdmin(GenericStackedInline):
+    extra = 0
+    model = Summary
+    ct_field = "content_type"
+    ct_fk_field = "object_id"
+    can_delete = False
+    
+class VendorAdmin(ExportActionMixin, admin.ModelAdmin):
+    """
+    Admin
+    """
+    inlines = (InlineVendorDailySummaryAdmin,)
+    model = Vendor
+    list_display  = ('cf_client_code','vendor_name')
+    search_fields = ('vendor_name','cf_client_code')
+   
+    
 class InventoryAdmin(admin.ModelAdmin):
     """
     Admin
@@ -215,6 +236,7 @@ admin.site.register(InventoryItemEdit, InventoryItemEditAdmin)
 admin.site.register(InventoryItemDelist, InventoryItemDelistAdmin)
 admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
 admin.site.register(County, CountyAdmin)
+admin.site.register(Vendor, VendorAdmin)
 admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)
 admin.site.register(InTransitOrder, InTransitOrderAdmin)
 admin.site.register(CustomInventory, CustomInventoryAdmin)

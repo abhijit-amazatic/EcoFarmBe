@@ -613,3 +613,55 @@ class CountyDailySummary(models.Model):
         unique_together = (('date', 'county'), )
         verbose_name = _('Daily County Summary')
         verbose_name_plural = _('Daily County Summary')
+
+
+class Summary(TimeStampFlagModelMixin, models.Model):
+    """
+    summary model.
+    """
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    object_id = models.CharField(max_length=255)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    date = models.DateField(blank=True, null=True)
+    total_thc_max = models.FloatField(_('Total THC(Max)'), blank=True, null=True, max_length=255)
+    total_thc_min = models.FloatField(_('Total THC(Min)'), blank=True, null=True, max_length=255)
+    batch_varities = models.IntegerField(_('Batches'), blank=True, null=True)
+    average = models.FloatField(_('Average $/lb'), blank=True, null=True, max_length=255)
+    total_value = models.FloatField(_('Total Value $'), blank=True, null=True, max_length=255)
+    smalls_quantity = models.FloatField(_('Smalls(lbs)'), blank=True, null=True, max_length=255)
+    tops_quantity = models.FloatField(_('Tops(lbs)'), blank=True, null=True, max_length=255)
+    total_quantity = models.FloatField(_('Total(lbs)'), blank=True, null=True, max_length=255)
+    trim_quantity =  models.FloatField(_('Trim quantity'), blank=True, null=True, max_length=255)
+    average_thc = models.FloatField(_('Avg THC'), blank=True, null=True, max_length=255)
+
+    class Meta:
+        verbose_name = _('Summary')
+        verbose_name_plural = _('Summary')
+
+        
+class Vendor(models.Model):
+    """
+    Separately stored vendor name & code  as in future we may need APIs independently.
+    """
+    vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True,max_length=255)
+    cf_client_code = models.CharField(_('Client Code'), blank=True, null=True, max_length=50)
+    
+    def __str__(self):
+        return self.cf_client_code
+
+    class Meta:
+        verbose_name = _('Vendor')
+        verbose_name_plural = _('Vendor Wise Summary')
+   
+class VendorDailySummary(models.Model):
+    """
+    Daily summary by vendor.
+    """
+    vendor = models.ForeignKey(Vendor,on_delete=models.CASCADE)
+    summary = GenericRelation(Summary)
+
+    class Meta:
+        verbose_name = _('Vendor Daily Summary')
+        verbose_name_plural = _('Vendor Daily Summary')
+    
+

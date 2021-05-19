@@ -2,6 +2,7 @@ import datetime
 import pytz
 import io
 import csv
+import json
 
 from django.conf import settings
 from django.utils import timezone
@@ -12,6 +13,7 @@ from celery.schedules import crontab
 from integration.box import (upload_file_stream, )
 from integration.inventory import (get_inventory_summary,)
 from core.celery import app
+from django.db import transaction
 
 from ..models import (
     Inventory,
@@ -19,9 +21,23 @@ from ..models import (
     SummaryByProductCategory,
     County,
     CountyDailySummary,
+    Vendor,
+    VendorDailySummary,
+    Summary,
 )
+from core.mixins.helpers import batch_create_update
 
 
+def dict_clean(items):
+    """
+    Replaces dict None values to default 0.
+    """
+    result = {}
+    for key, value in items:
+        if value is None:
+            value = 0
+        result[key] = value
+    return result
 
 @periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})
 def county_update_create():
@@ -37,6 +53,43 @@ def county_update_create():
         obj, created = County.objects.update_or_create(name=county,defaults={'name':county})
         print(created, obj)
 
+@periodic_task(run_every=(crontab(hour=[7], minute=0)), options={'queue': 'general'})
+def vendor_update_create():
+    """
+    Save vendor data sepaately.
+    """
+    vendors = list(Inventory.objects.filter().values('vendor_name','cf_client_code').exclude(vendor_name__isnull=True,cf_client_code__isnull=True).distinct())
+    with transaction.atomic():
+        batch_create_update(Vendor, ['vendor_name','cf_client_code'], ['vendor_name','cf_client_code'], vendors)
+
+@periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})
+def save_daily_aggrigated_vendor_summary():
+    """
+    Save daily inventory aggrigated summary(with vendor).
+    """
+    vendors= Vendor.objects.filter()
+    for vendor in vendors:
+        queryset = Inventory.objects.filter(cf_cfi_published=True,cf_client_code=vendor.cf_client_code,vendor_name=vendor.vendor_name)
+        summary = get_inventory_summary(queryset, statuses=None)
+        fields_data = {
+            'total_thc_max':summary['total_thc_max'],
+            'total_thc_min':summary['total_thc_min'],
+            'batch_varities':summary['batch_varities'],
+            'average':summary['average'],
+            'total_value':summary['total_value'],
+            'smalls_quantity':summary['smalls_quantity'],
+            'tops_quantity':summary['tops_quantity'],
+            'total_quantity':summary['total_quantity'],
+            'trim_quantity':summary['trim_quantity'],
+            'average_thc':summary['average_thc']
+        }
+        if summary:
+            obj,created = VendorDailySummary.objects.get_or_create(vendor=vendor)
+            clean_data = json.loads(json.dumps(fields_data), object_pairs_hook=dict_clean)
+            clean_data.update({'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date()})
+            obj.summary.update_or_create(**clean_data)
+            print('saving daily summary data for vendor_name `%s` and date `%s`:' % (vendor.vendor_name,clean_data['date']))
+            
 @app.task(queue="general")
 def save_summary_by_product_category(daily_aggrigated_summary_id):
     """
@@ -91,7 +144,7 @@ def save_daily_aggrigated_summary():
         print('saving aggregated summary data for date `%s`:' % (fields_data['date']))
         obj, created = DailyInventoryAggrigatedSummary.objects.update_or_create(**fields_data)
         #Save summary according to product category Flower, Terpenes etc.
-        save_summary_by_product_category.delay(obj.id,)    
+        save_summary_by_product_category.delay(obj.id)    
 
 
 @periodic_task(run_every=(crontab(hour=[8], minute=0)), options={'queue': 'general'})
