@@ -715,6 +715,22 @@ class InventoryCountyView(APIView):
         return Response({
             'status_code': 200,
             'response': list(set([item for sublist in clean_counties for item in sublist]))})
+
+class InventoryAppellationView(APIView):
+    """
+    Return Inventory Appellation.
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory appellation
+        """
+        categories = Inventory.objects.filter(cf_cfi_published=True).values_list('appellation',flat=True).distinct()
+        clean_appellation = list(filter(None,list(categories)))
+        return Response({
+            'status_code': 200,
+            'response': list(set([item for sublist in clean_appellation for item in sublist]))})
     
 class InventoryNutrientsView(APIView):
     """
