@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
+from integration.crm import(search_query,)
 from .models import (
     BinderLicense,
 )
@@ -133,7 +134,30 @@ class BinderLicenseAdmin(admin.ModelAdmin):
             return True
         return False
 
-
+    def save_model(self, request, obj, form, change):
+        if not change:
+            response = search_query('Licenses', obj.license_number, 'Name', is_license=True)
+            if response.get('status_code') == 200:
+                data = response.get('response', [])
+                if data and isinstance(data, list):
+                    data = [lic for lic in data if lic.get('Name') == obj.license_number]
+                    if data:
+                        lic=data[0]
+                        obj.zoho_crm_id                = lic.get('id')
+                        obj.license_type               = lic.get('License_Type')
+                        # obj.profile_category           = lic.get('')
+                        obj.premises_address           = lic.get('Premises_Address')
+                        obj.premises_county            = lic.get('Premises_County')
+                        obj.premises_city              = lic.get('Premises_City')
+                        obj.premises_apn               = lic.get('Premises_APN_Number')
+                        obj.premises_state             = lic.get('Premises_State')
+                        obj.zip_code                   = lic.get('Premises_Zipcode')
+                        obj.issue_date                 = lic.get('Issue_Date')
+                        obj.expiration_date            = lic.get('Expiration_Date')
+                        # obj.uploaded_license_to        = lic.get('')
+                        # obj.uploaded_sellers_permit_to = lic.get('')
+                        # obj.uploaded_w9_to             = lic.get('')
+        return super().save_model(request, obj, form, change)
 
 
 
