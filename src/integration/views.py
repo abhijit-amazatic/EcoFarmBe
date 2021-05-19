@@ -154,8 +154,9 @@ class GetRecordView(APIView):
         Get recrod.
         """
         module = request.query_params.get('module')
-        record_id = request.query_params.get('id')
-        legal_business_name = request.query_params.get('legal_business_name')
+        record_id = request.query_params.get('id', None)
+        legal_business_name = request.query_params.get('legal_business_name', None)
+        name = request.query_params.get('name', None)
         if module and record_id:
             record = get_record(module, record_id)
             if record['status_code'] == 200:
@@ -166,6 +167,16 @@ class GetRecordView(APIView):
             if record['status_code'] == 200:
                 return Response(record, status=status.HTTP_200_OK)
             return Response(record, status=status.HTTP_400_BAD_REQUEST)
+        elif module and name:
+            field_dict = {
+                'Accounts': 'Account_Name',
+                'Vendors': 'Vendor_Name',
+                'Contacts': 'Last_Name'
+            }
+            response = search_query(module, name, field_dict.get(module), True)
+            if response['status_code'] == 200:
+                return Response(response, status=status.HTTP_200_OK)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetPickListView(APIView):
