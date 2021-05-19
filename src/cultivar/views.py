@@ -23,6 +23,8 @@ class DataFilter(FilterSet):
     cbd_range__in = CharInFilter(field_name='cbd_range', lookup_expr='in')
     cbg_range__in = CharInFilter(field_name='cbg_range', lookup_expr='in')
     thcv_range__in = CharInFilter(field_name='thcv_range', lookup_expr='in')
+    status__in = CharInFilter(field_name='status__in', lookup_expr='in')
+
     
     class Meta:
         model = Cultivar
@@ -33,6 +35,7 @@ class DataFilter(FilterSet):
         'cbd_range':['gte', 'lte', 'gt', 'lt'],
         'cbg_range':['gte', 'lte', 'gt', 'lt'],
         'thcv_range':['gte', 'lte', 'gt', 'lt'],
+        'status':['icontains', 'exact'],
         }
 
 class CultivarViewSet(viewsets.ModelViewSet):

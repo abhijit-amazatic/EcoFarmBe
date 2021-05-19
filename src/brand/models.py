@@ -540,7 +540,16 @@ class NurseryOverview(models.Model):
     minimun_order_qty = models.IntegerField(_('clones Per Productions'), blank=True, null=True)
     order_hold_days =  models.IntegerField(_('clones Per Productions'), blank=True, null=True)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
-    
+
+    pending_cultivars = models.ManyToManyField(
+        'cultivar.Cultivar',
+        verbose_name=_('Pending cultivars'),
+        blank=True,
+        limit_choices_to=models.Q(status='pending_for_approval'),
+        related_name='nursery_overview',
+    )
+
+
 class ProgramOverview(models.Model):
     """
     Stores program overview.
