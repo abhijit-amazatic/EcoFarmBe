@@ -733,6 +733,20 @@ def get_customer_payment(books_name, payment_id, params={}):
     vp_obj = obj.CustomerPayments()
     return vp_obj.get_payment(payment_id=payment_id, parameters=params)
 
+def get_payment_from_redis(books_name, payment_id):
+    """
+    Get invoices data from redis.
+    """
+    r = redis.from_url(REDIS_URL)
+    if r.get(payment_id):
+        print('1', payment_id)
+        return json.loads(r.get(payment_id))
+    else:
+        print('2', payment_id)
+        resp = get_customer_payment(books_name, payment_id, params={})
+        r.set(payment_id, json.dumps(resp))
+        return resp
+
 def list_customer_payments(books_name, params=None):
     """
     List customer payments.
@@ -742,7 +756,7 @@ def list_customer_payments(books_name, params=None):
         po_obj = obj.CustomerPayments()
         payments = po_obj.list_payments(parameters=params)
         for payment in payments.get('response'):
-            data = get_customer_payment(books_name, payment['payment_id'])
+            data = get_payment_from_redis(books_name, payment['payment_id'])
             payment['balance'] = 0
             for record in data.get('invoices'):
                 payment['balance'] += record['balance']
