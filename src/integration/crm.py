@@ -23,7 +23,7 @@ from core.celery import app
 from .utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout, get_overview_field,)
 from core.mailer import mail, mail_send
-from brand.models import (Brand, License, LicenseProfile, Organization, ProgramOverview)
+from brand.models import (Brand, License, LicenseProfile, Organization, ProgramOverview, NurseryOverview)
 from integration.models import (Integration,)
 from integration.apps.aws import (get_boto_client, )
 from inventory.models import (Documents, )
@@ -485,6 +485,11 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             try:
                 for k, v in license_db.crop_overview.__dict__.items():
                     d.update({'cr.' + k:v})
+            except Exception:
+                pass
+            try:
+                for k, v in license_db.nursery_overview.__dict__.items():
+                    d.update({'no.' + k:v})
             except Exception:
                 pass
             try:
