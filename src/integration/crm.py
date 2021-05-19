@@ -171,6 +171,8 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         "fo.",
         "cr.",
     )
+    if value.startswith('county') or value.startswith('appellation'):
+        return obj.get(value).split(',')
     if value.startswith('ethics_and_certification'):
         if isinstance(obj.get(value), list) and len(obj.get(value)) > 0:
             return obj.get(value)
@@ -510,7 +512,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     except KeyError as exc:
                         print(exc)
                         pass
-            if i.profile_category == 'nursery':
+            if i['profile_category'] == 'nursery':
                 d['Layout_Name'] = 'vendor_cannabis_nursery'
             else:
                 d['Layout_Name'] = 'vendor_cannabis'
