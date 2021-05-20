@@ -7,6 +7,7 @@ from tempfile import TemporaryFile
 
 from django.conf import settings
 from rest_framework import serializers
+from rest_framework.fields import (empty, )
 from phonenumber_field.serializerfields import PhoneNumberField
 
 from core.settings import (AWS_BUCKET, )
@@ -20,6 +21,7 @@ from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 from integration.tasks import (update_in_crm_task, update_license_task)
 from user.models import (User,)
+from cultivar.models import (Cultivar,)
 from .tasks import (onboarding_fetched_data_insert_to_db,)
 from .serializers_mixin import (
     NestedModelSerializer,
@@ -301,9 +303,22 @@ class NurseryOverviewSerializer(serializers.ModelSerializer):
     """
     This defines NurseryOverviewSerializer
     """
+    def __init__(self, instance=None, data=empty, **kwargs):
+        if data is not empty:
+            pending_cultivars = []
+            for cultivar in data.get('pending_cultivars', []):
+                if isinstance(cultivar, str):
+                    cultivar_obj = Cultivar.objects.create(cultivar_name=cultivar)
+                    pending_cultivars.append(cultivar_obj.id)
+                else:
+                    pending_cultivars.append(cultivar)
+            data['pending_cultivars'] = pending_cultivars
+        super().__init__(instance=instance, data=data, **kwargs)
+
     class Meta:
         model = NurseryOverview
         fields = ('__all__')        
+
 
 class LicenseProfileSerializer(serializers.ModelSerializer):
     """
