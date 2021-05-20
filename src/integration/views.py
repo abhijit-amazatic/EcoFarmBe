@@ -173,7 +173,7 @@ class GetRecordView(APIView):
                 'Vendors': 'Vendor_Name',
                 'Contacts': 'Last_Name'
             }
-            response = search_query(module, name, field_dict.get(module), True)
+            response = search_query(module, name, field_dict.get(module), case_insensitive=True)
             if response['status_code'] == 200:
                 return Response(response, status=status.HTTP_200_OK)
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -691,7 +691,7 @@ class BillView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
-    
+
 class SalesOrderView(APIView):
     """
     View class for Zoho books sales order.

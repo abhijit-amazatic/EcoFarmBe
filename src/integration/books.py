@@ -739,10 +739,8 @@ def get_payment_from_redis(books_name, payment_id):
     """
     r = redis.from_url(REDIS_URL)
     if r.get(payment_id):
-        print('1', payment_id)
         return json.loads(r.get(payment_id))
     else:
-        print('2', payment_id)
         resp = get_customer_payment(books_name, payment_id, params={})
         r.set(payment_id, json.dumps(resp))
         return resp

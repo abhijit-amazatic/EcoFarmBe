@@ -49,7 +49,7 @@ from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
 from cultivar.models import (Cultivar, )
-from integration.inventory import (get_inventory_summary, get_category_count)
+from integration.inventory import (get_inventory_summary, get_category_count, get_packages, get_sales_returns)
 from .tasks import (
     notify_inventory_item_added_task,
     create_duplicate_crm_vendor_from_crm_account_task,
@@ -964,3 +964,51 @@ class InventoryItemDelistViewSet(mixins.CreateModelMixin,
         }
         obj.save()
         notify_inventory_item_delist_submitted_task.delay(obj.id)
+
+class PackageView(APIView):
+    """
+    View class for Zoho inventory packages.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get/List packages.
+        """
+        organization_name = request.query_params.get('organization_name')
+        if request.query_params.get('package_id', None):
+            response = get_packages(
+                organization_name,
+                request.query_params.get('package_id'),
+                params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+        response = get_packages(organization_name, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)
+
+class SalesReturnView(APIView):
+    """
+    View class for Zoho inventory sales return.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get/List sales return.
+        """
+        organization_name = request.query_params.get('organization_name')
+        if request.query_params.get('sales_return_id', None):
+            response = get_sales_returns(
+                organization_name,
+                request.query_params.get('sales_return_id'),
+                params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+        response = get_sales_returns(organization_name, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)

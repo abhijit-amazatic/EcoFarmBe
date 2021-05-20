@@ -63,7 +63,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryNutrientsView,InventoryCountyView,InventoryAppellationView,
                              InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
                              InventoryWebHook,InventoryExportViewSet,
-                             InventoryItemEditViewSet, InventoryItemDelistViewSet,)
+                             InventoryItemEditViewSet, InventoryItemDelistViewSet,
+                             SalesReturnView, PackageView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -256,6 +257,8 @@ urlpatterns = [
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
     path(r'campaign/', CampaignView.as_view(), name="campaign"),
+    path(r'inventory/package/', PackageView.as_view(), name="inventory-packages"),
+    path(r'inventory/sales-return/', SalesReturnView.as_view(), name="inventory-sales-returns"),
 
 ] + router.urls
 

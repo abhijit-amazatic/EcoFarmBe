@@ -170,6 +170,54 @@ def upload_inventory_document(inventory_name, item_id, files, params={}):
     inventory = get_inventory_obj(inventory_name)
     return inventory.upload_item_document(item_id, files, params=params)
 
+def get_packages(inventory_name, package_id=None, params={}):
+    """
+    Return packages.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.Package()
+    return obj.get_package(package_id=package_id, params=params)
+
+def create_package(inventory_name, record, params={}):
+    """
+    Create packages.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.Package()
+    return obj.create_package(record=record, params=params)
+
+def update_package(inventory_name, package_id, record, params={}):
+    """
+    Update packages.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.Package()
+    return obj.update_package(package_id=package_id, record=record, params=params)
+
+def get_sales_returns(inventory_name, sales_return_id=None, params={}):
+    """
+    Return packages.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.SalesReturn()
+    return obj.get_sales_return(sales_return_id=sales_return_id, params=params)
+
+def create_sales_return(inventory_name, record, params={}):
+    """
+    Create packages.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.SalesReturn()
+    return obj.create_sales_return(record=record, params=params)
+
+def update_sales_return(inventory_name, sales_return_id, record, params={}):
+    """
+    Update packages.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.SalesReturn()
+    return obj.update_sales_return(sales_return_id=sales_return_id, record=record, params=params)
+
 def get_inventory_name(item_id):
     """
     Get inventory name.
