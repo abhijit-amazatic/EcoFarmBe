@@ -305,19 +305,20 @@ class NurseryOverviewSerializer(serializers.ModelSerializer):
     """
     def __init__(self, instance=None, data=empty, **kwargs):
         if data is not empty:
-            pending_cultivars = []
-            for cultivar in data.get('pending_cultivars', []):
-                if isinstance(cultivar, str):
-                    cultivar_obj = Cultivar.objects.create(cultivar_name=cultivar)
-                    pending_cultivars.append(cultivar_obj.id)
-                else:
-                    pending_cultivars.append(cultivar)
-            data['pending_cultivars'] = pending_cultivars
+            if data.get('pending_cultivars'):
+                pending_cultivars = []
+                for cultivar in data.get('pending_cultivars', []):
+                    if isinstance(cultivar, str):
+                        cultivar_obj = Cultivar.objects.create(cultivar_name=cultivar)
+                        pending_cultivars.append(cultivar_obj.id)
+                    else:
+                        pending_cultivars.append(cultivar)
+                data['pending_cultivars'] = pending_cultivars
         super().__init__(instance=instance, data=data, **kwargs)
 
     class Meta:
         model = NurseryOverview
-        fields = ('__all__')        
+        fields = ('__all__')
 
 
 class LicenseProfileSerializer(serializers.ModelSerializer):

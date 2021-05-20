@@ -1,14 +1,57 @@
 from django.contrib import admin
-from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.shortcuts import HttpResponseRedirect
 from django.db import models
 from django.db.models import Q
 from django import forms
+from brand.tasks import (insert_record_to_crm,)
 from django.contrib.admin.utils import (unquote,)
 
 from integration.crm import (create_records, update_records)
+from brand.models import (NurseryOverview)
 from .models import Cultivar
 from .tasks import (notify_slack_cultivar_added, notify_slack_cultivar_Approved)
+
+
+class InlineNurseryOverviewAdmin(admin.TabularInline):
+    """
+    Configuring field admin view for ProfileContact model.
+    """
+    extra = 0
+    readonly_fields = ('name', 'license_number', 'organization')
+    fields = ('name', 'license_number', 'organization')
+    model = NurseryOverview.pending_cultivars.through
+
+    verbose_name = 'Nursery Profile'
+    verbose_name_plural = 'Nursery Profile'
+
+    can_add = False
+    can_delete = False
+
+    def _has_add_permission(self, request, obj):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def name(self, obj):
+        return obj.nurseryoverview.license.legal_business_name
+    name.short_description = 'Name'
+
+    def license_number(self, obj):
+        return obj.nurseryoverview.license.license_number
+    license_number.short_description = 'License Number'
+
+
+    def organization(self, obj):
+        return obj.nurseryoverview.license.organization.name
+    organization.short_description = 'Organization'
 
 # Register your models here.
 class CultivarAdmin(admin.ModelAdmin):
@@ -20,6 +63,12 @@ class CultivarAdmin(admin.ModelAdmin):
     change_form_template = "inventory/custom_inventory_change_form.html"
     actions = ['approve_selected_cultivars', ]
 
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = super().get_inline_instances(request, obj=obj)
+        if obj and obj.status == 'pending_for_approval':
+            inline_instances.append(InlineNurseryOverviewAdmin(self.model, self.admin_site))
+        return inline_instances
+
     def response_change(self, request, obj):
         if "_approve" in request.POST:
             if obj.status == 'pending_for_approval':
@@ -30,6 +79,8 @@ class CultivarAdmin(admin.ModelAdmin):
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         if obj and obj.status == 'pending_for_approval' and change:
             context['show_approve'] = True
+        context['approve_button_label'] = getattr(self, 'approve_button_label', 'Approve')
+        context['approve_button_color'] = getattr(self, 'approve_button_color', '#21ba21')
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def approve(self, request, obj):
@@ -54,6 +105,19 @@ class CultivarAdmin(admin.ModelAdmin):
                                     obj.cultivar_name,
                                     obj.cultivar_type,
                                 )
+                                for no_obj in obj.nursery_overview.all():
+                                    if obj.cultivar_name not in no_obj.cultivars_in_production:
+                                        no_obj.cultivars_in_production.append(obj.cultivar_name)
+                                        no_obj.save()
+                                    lic_obj = no_obj.license
+                                    insert_record_to_crm.delay(
+                                        record_id=lic_obj.id,
+                                        is_buyer=lic_obj.is_buyer,
+                                        is_seller=lic_obj.is_seller,
+                                        is_update=True,
+                                    )
+                                    obj.nursery_overview.remove(no_obj)
+
                         self.message_user(request, "This item is approved")
                 else:
                     self.message_user(request, "Error while creating Cultivar in Zoho CRM", level='error')
