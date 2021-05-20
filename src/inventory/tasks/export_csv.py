@@ -44,11 +44,9 @@ def county_update_create():
     """
     Save county names.
     """
-    categories = Inventory.objects.filter(
-        cf_cfi_published=True
-    ).values('county_grown').distinct()
-    counties = [i['county_grown'] for i in categories if i['county_grown']]
-
+    categories = Inventory.objects.filter(cf_cfi_published=True).values_list('county_grown',flat=True).distinct()
+    clean_counties = list(filter(None,list(categories)))
+    counties = list(set([item for sublist in clean_counties for item in sublist]))
     for county in counties:
         obj, created = County.objects.update_or_create(name=county,defaults={'name':county})
         print(created, obj)
@@ -155,7 +153,7 @@ def save_daily_aggrigated_county_summary():
     counties= County.objects.filter().values('name','id')
 
     for county in counties:
-        queryset = Inventory.objects.filter(cf_cfi_published=True, county_grown__in=[county['name']])
+        queryset = Inventory.objects.filter(cf_cfi_published=True, county_grown__overlap=[county['name']])
         summary = get_inventory_summary(queryset, statuses=None)
         fields_data = {
             'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
