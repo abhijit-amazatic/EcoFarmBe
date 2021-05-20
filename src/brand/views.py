@@ -846,7 +846,7 @@ class LicenseSyncView(APIView):
                             {k:v for k, v in license_data.items() if k in binder_license_obj.__dict__.keys() and k != 'id'}
                         )
                         binder_license_obj.save()
-                except License.DoesNotExist:
+                except BinderLicense.DoesNotExist:
                     pass
                 return Response(status=status.HTTP_202_ACCEPTED)
             except License.DoesNotExist:
@@ -865,7 +865,7 @@ class LicenseSyncView(APIView):
                             else:
                                 binder_license_obj.status = 'completed'
                                 binder_license_obj.save()
-                except License.DoesNotExist:
+                except BinderLicense.DoesNotExist:
                     pass
 
         elif record_id and owner_id and owner_email:
