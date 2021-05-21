@@ -76,6 +76,7 @@ class BinderLicenseSerializer(serializers.ModelSerializer):
     """
     This defines license serializer.
     """
+    status=serializers.ReadOnlyField()
     license_url = serializers.SerializerMethodField()
     seller_permit_url = serializers.SerializerMethodField()
     license_profile_url = serializers.SerializerMethodField()
@@ -133,6 +134,5 @@ class BinderLicenseSerializer(serializers.ModelSerializer):
         model = BinderLicense
         fields = ('__all__')
         list_serializer_class = ListGroupBySerializer
-        # read_only_fields = ['approved_on', 'approved_by',
-        #                     'uploaded_sellers_permit_to', 'uploaded_license_to']
+        # read_only_fields = ('status', 'created_on', 'updated_on')
         # exclude = ('profile_category', )

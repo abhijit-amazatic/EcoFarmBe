@@ -1,6 +1,7 @@
 """
 Brand related schemas defined here.
 """
+import re
 import traceback
 from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
@@ -19,10 +20,22 @@ from inventory.models import (Documents, )
 
 
 
-class BinderLicense(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
+class BinderLicense(TimeStampFlagModelMixin, models.Model):
     """
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
+    STATUS_CHOICES = (
+        ('Active', _('Active')),
+        ('Cancelled', _('Cancelled')),
+        ('About to Expire', _('About to Expire')),
+        ('Expired', _('Expired')),
+        ('Expired - Pending Renewal', _('Expired - Pending Renewal')),
+        ('Inactive', _('Inactive')),
+        ('Revoked', _('Revoked')),
+        ('Surrendered', _('Surrendered')),
+        ('Suspended', _('Suspended')),
+    )
+
     profile_license = models.OneToOneField('brand.License', verbose_name=_('Profile License'), blank=True, null=True, on_delete=SET_NULL,)
 
     license_number = models.CharField(_('License Number'), max_length=255)
@@ -40,13 +53,22 @@ class BinderLicense(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     uploaded_license_to = models.CharField(_('Uploaded To'), blank=True, null=True, max_length=255)
     uploaded_sellers_permit_to = models.CharField(_('Uploaded Sellers Permit To'), blank=True, null=True, max_length=255)
     uploaded_w9_to = models.CharField(_('Uploaded W9  To'), blank=True, null=True, max_length=255)
-    # is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)
-    # is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
-    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
-    zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
+    is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
+
+    license_status = models.CharField(choices=STATUS_CHOICES, blank=True, null=True, max_length=50,)
+
     documents = GenericRelation(Documents)
+
+    @property
+    def status(self):
+        if self.license_status:
+            return self.license_status
+        elif self.expiration_date >= timezone.now().date():
+            return 'Active'
+        else:
+            return 'Expired'
 
     def __str__(self):
         return self.legal_business_name

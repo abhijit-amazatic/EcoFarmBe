@@ -817,9 +817,12 @@ class LicenseSyncView(APIView):
         """
         Update license.
         """
+        response = None
         license_number = request.data.get('license_number')
         issue = request.data.get('issue')
         expiry = request.data.get('expiry')
+        license_status = request.data.get('license_status')
+        license_status_2 = request.data.get('license_status_2')
         record_id = request.data.get('account_id')
         owner_id = request.data.get('owner_id')
         owner_email = request.data.get('owner_email')
@@ -838,43 +841,34 @@ class LicenseSyncView(APIView):
                     else:
                         license_obj.status = 'completed'
                         license_obj.save()
-                try:
-                    binder_license_obj = BinderLicense.objects.get(license_number=license_number)
-                    if not binder_license_obj.profile_license:
-                        license_data = model_to_dict(license_obj)
-                        binder_license_obj.__dict__.update(
-                            {k:v for k, v in license_data.items() if k in binder_license_obj.__dict__.keys() and k != 'id'}
-                        )
-                        binder_license_obj.save()
-                except BinderLicense.DoesNotExist:
-                    pass
-                return Response(status=status.HTTP_202_ACCEPTED)
+                response = Response(status=status.HTTP_202_ACCEPTED)
             except License.DoesNotExist:
-                try:
-                    binder_license_obj = BinderLicense.objects.get(license_number=license_number)
-                    if not binder_license_obj.profile_license:
-                        date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
-                        binder_license_obj.expiration_date = date_time_obj.date()
-                        # binder_license_obj.is_updated_via_trigger = True
-                        binder_license_obj.issue_date = issue
-                        binder_license_obj.save()
-                        if binder_license_obj.expiration_date >= timezone.now().date():
-                            if binder_license_obj.status_before_expiry:
-                                binder_license_obj.status = binder_license_obj.status_before_expiry
-                                binder_license_obj.save()
-                            else:
-                                binder_license_obj.status = 'completed'
-                                binder_license_obj.save()
-                except BinderLicense.DoesNotExist:
-                    pass
+                pass
+
+            try:
+                binder_license_obj = BinderLicense.objects.get(license_number=license_number)
+                if not binder_license_obj.profile_license:
+                    date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
+                    binder_license_obj.expiration_date = date_time_obj.date()
+                    binder_license_obj.issue_date = issue
+                    binder_license_obj.is_updated_via_trigger = True
+                    if license_status or license_status_2:
+                        binder_license_obj.license_status = license_status or license_status_2
+                    binder_license_obj.save()
+            except BinderLicense.DoesNotExist:
+                pass
 
         elif record_id and owner_id and owner_email:
             record = LicenseProfile.objects.get(zoho_crm_id=record_id)
             record.crm_owner_id = owner_id
             record.crm_owner_email = owner_email
             record.save()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            response = Response(status=status.HTTP_202_ACCEPTED)
+
+        if response:
+            return response
+        else:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProgramSelectionSyncView(APIView):
     """

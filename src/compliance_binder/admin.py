@@ -41,6 +41,7 @@ class BinderLicenseAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = (
+        'status',
         'created_on',
         'updated_on',
     )
@@ -66,6 +67,7 @@ class BinderLicenseAdmin(admin.ModelAdmin):
                 'premises_apn',
                 'issue_date',
                 'expiration_date',
+                'license_status',
             ),
         }),
         ('Premises Address', {
@@ -87,10 +89,7 @@ class BinderLicenseAdmin(admin.ModelAdmin):
         ('Extra Info', {
             'fields': (
                 'status',
-                'is_updated_in_crm',
                 'zoho_crm_id',
-                'zoho_books_id',
-                'status_before_expiry',
                 'created_on',
                 'updated_on',
             ),
@@ -156,6 +155,7 @@ class BinderLicenseAdmin(admin.ModelAdmin):
                             obj.uploaded_license_to = lic.get('License_Box_Link')
                             obj.uploaded_sellers_permit_to = lic.get('Sellers_Permit_Box_Link')
                             obj.uploaded_w9_to = lic.get('W9_Box_Link')
+                            obj.license_status = lic.get('License_Status')
             else:
                 obj.profile_license = lic_obj
         else:
@@ -168,12 +168,13 @@ class BinderLicenseAdmin(admin.ModelAdmin):
                 if data and obj.__dict__.get('zoho_crm_id'):
                     data['id'] = obj.__dict__.get('zoho_crm_id')
                     response = update_records('Licenses', data)
-                    if response.get('Status_code') != 200:
+                    if response.get('status_code') != 200:
                         self.message_user(
                             request=request,
                             message='Error while updating changes to CRM.',
                             level='warning'
                         )
+                        print(response)
         return super().save_model(request, obj, form, change)
 
 
