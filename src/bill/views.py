@@ -59,7 +59,7 @@ class EstimateWebappView(APIView):
                 return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': 'Updated', 'id': id})
         else:
-            # notify_estimate.delay(notification_methods)
+            estimate_obj = save_estimate(request)
             estimate = Estimate.objects.get(customer_name=request.data.get('customer_name'))
             response = update_estimate(organization_name,
                                         estimate_id=estimate.estimate_id,
@@ -86,6 +86,6 @@ class EstimateWebappView(APIView):
             estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
             items = list()
             for item in line_items:
-                item_obj = LineItem.objects.filter(estimate_id=id, item_id=item.get('item_id')).update(**item)
+                item_obj = LineItem.objects.filter(estimate_id=response.get('estimate_id'), item_id=item.get('item_id')).update(**item)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
