@@ -35,7 +35,7 @@ class BinderLicenseAdmin(admin.ModelAdmin):
         'legal_business_name',
         'license_number',
         'profile_category',
-        'status',
+        # 'status',
         'created_on',
         'updated_on',
     )
@@ -116,7 +116,10 @@ class BinderLicenseAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.profile_license:
-            return tuple(field.name for field in BinderLicense._meta.fields if field.name not in ('id', 'profile_license'))
+            f = set(field.name for field in BinderLicense._meta.fields if field.name not in ('id', 'profile_license'))
+            if self.readonly_fields:
+                f.update(self.readonly_fields)
+            return tuple(f)
         return self.readonly_fields
 
 
@@ -176,7 +179,6 @@ class BinderLicenseAdmin(admin.ModelAdmin):
                         )
                         print(response)
         return super().save_model(request, obj, form, change)
-
 
 
 admin.site.register(BinderLicense, BinderLicenseAdmin)

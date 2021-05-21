@@ -85,49 +85,55 @@ class BinderLicenseSerializer(serializers.ModelSerializer):
         """
         Return s3 license url.
         """
-        try:
-            document = Documents.objects.filter(object_id=obj.id, doc_type='profile_image').latest('created_on')
-            if document.box_url:
-                return document.box_url
-            else:
-                path = document.path
-                url = create_presigned_url(AWS_BUCKET, path)
-                if url.get('response'):
-                    return url.get('response')
-        except Exception:
-            return None
+        if obj.profile_license:
+            try:
+                document = Documents.objects.filter(object_id=obj.profile_license.id, doc_type='profile_image').latest('created_on')
+                if document.box_url:
+                    return document.box_url
+                else:
+                    path = document.path
+                    url = create_presigned_url(AWS_BUCKET, path)
+                    if url.get('response'):
+                        return url.get('response')
+            except Exception:
+                pass
+        return None
     
     def get_license_url(self, obj):
         """
         Return s3 license url.
         """
-        try:
-            license = Documents.objects.filter(object_id=obj.id, doc_type='license').latest('created_on')
-            if license.box_url:
-                return license.box_url
-            else:
-                path = license.path
-                url = create_presigned_url(AWS_BUCKET, path)
-                if url.get('response'):
-                    return url.get('response')
-        except Exception:
-            return None
+        if obj.profile_license:
+            try:
+                license = Documents.objects.filter(object_id=obj.profile_license.id, doc_type='license').latest('created_on')
+                if license.box_url:
+                    return license.box_url
+                else:
+                    path = license.path
+                    url = create_presigned_url(AWS_BUCKET, path)
+                    if url.get('response'):
+                        return url.get('response')
+            except Exception:
+                pass
+        return None
 
     def get_seller_permit_url(self, obj):
         """
         Return s3 license url.
         """
-        try:
-            seller = Documents.objects.filter(object_id=obj.id, doc_type='seller_permit').latest('created_on')
-            if seller.box_url:
-                return seller.box_url
-            else:
-                path = seller.path
-                url = create_presigned_url(AWS_BUCKET, path)
-                if url.get('response'):
-                    return url.get('response')
-        except Exception:
-            return None
+        if obj.profile_license:
+            try:
+                seller = Documents.objects.filter(object_id=obj.profile_license.id, doc_type='seller_permit').latest('created_on')
+                if seller.box_url:
+                    return seller.box_url
+                else:
+                    path = seller.path
+                    url = create_presigned_url(AWS_BUCKET, path)
+                    if url.get('response'):
+                        return url.get('response')
+            except Exception:
+                pass
+        return None
 
 
     class Meta:
