@@ -60,6 +60,7 @@ class EstimateWebappView(APIView):
                 return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': 'Updated', 'id': id})
         else:
+            line_items = request.data.get('line_items')
             estimate_obj = save_estimate(request)
             estimate = Estimate.objects.get(customer_name=request.data.get('customer_name'))
             response = update_estimate(organization_name,
