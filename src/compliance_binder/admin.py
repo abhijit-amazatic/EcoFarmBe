@@ -1,35 +1,30 @@
 from django.contrib import admin
-
-# Register your models here.
-from integration.crm import(search_query,)
-from .models import (
-    BinderLicense,
-)
-
-class BinderLicenseAdmin(admin.ModelAdmin):
-    """
-    BinderLicenseAdmin
-    """
-    readonly_fields = ('created_on','updated_on',)
-
-#     formfield_overrides = {
-#         # models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
-#         models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
-#     }
-
-from django.contrib import admin
 from django import forms
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from django.utils import timezone
-
 from django_json_widget.widgets import JSONEditorWidget
+from django.utils.translation import ugettext_lazy as _
 
+from integration.crm import(search_query, update_records)
 from integration.inventory import (
     get_inventory_obj,
 )
+from brand.models import (ProfileCategory,)
 from  .models import (
     BinderLicense,
 )
+
+
+class BinderLicenseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        cat_ls = ProfileCategory.objects.values_list('name', flat=True)
+        category_choices = tuple([(None, '---------')]+[(cat, _(cat.title())) for cat in  cat_ls])
+        self.fields['profile_category'] = forms.ChoiceField(choices=category_choices, required=False,)
+
+    class Meta:
+        model = BinderLicense
+        fields = '__all__'
 
 
 class BinderLicenseAdmin(admin.ModelAdmin):
@@ -69,6 +64,8 @@ class BinderLicenseAdmin(admin.ModelAdmin):
                 'license_type',
                 'profile_category',
                 'premises_apn',
+                'issue_date',
+                'expiration_date',
             ),
         }),
         ('Premises Address', {
@@ -90,8 +87,6 @@ class BinderLicenseAdmin(admin.ModelAdmin):
         ('Extra Info', {
             'fields': (
                 'status',
-                'issue_date',
-                'expiration_date',
                 'is_updated_in_crm',
                 'zoho_crm_id',
                 'zoho_books_id',
@@ -103,7 +98,7 @@ class BinderLicenseAdmin(admin.ModelAdmin):
     )
 
 
-
+    form = BinderLicenseForm
 
     # formfield_overrides = {
     #     JSONField: {'widget': JSONEditorWidget(options={'modes':['code', 'text'], 'search': True, }, attrs={'disabled': 'disabled'})},
@@ -158,11 +153,27 @@ class BinderLicenseAdmin(admin.ModelAdmin):
                             obj.zip_code = lic.get('Premises_Zipcode')
                             obj.issue_date = lic.get('Issue_Date')
                             obj.expiration_date = lic.get('Expiration_Date')
-                            # obj.uploaded_license_to = lic.get('')
-                            # obj.uploaded_sellers_permit_to = lic.get('')
-                            # obj.uploaded_w9_to = lic.get('')
+                            obj.uploaded_license_to = lic.get('License_Box_Link')
+                            obj.uploaded_sellers_permit_to = lic.get('Sellers_Permit_Box_Link')
+                            obj.uploaded_w9_to = lic.get('W9_Box_Link')
             else:
                 obj.profile_license = lic_obj
+        else:
+            if not obj.profile_license:
+                data = {
+                    k: v
+                    for k, v in obj.__dict__.items()
+                    if k in form.changed_data and k not in ('updated_on', 'created_on', 'Status')
+                }
+                if data and obj.__dict__.get('zoho_crm_id'):
+                    data['id'] = obj.__dict__.get('zoho_crm_id')
+                    response = update_records('Licenses', data)
+                    if response.get('Status_code') != 200:
+                        self.message_user(
+                            request=request,
+                            message='Error while updating changes to CRM.',
+                            level='warning'
+                        )
         return super().save_model(request, obj, form, change)
 
 
