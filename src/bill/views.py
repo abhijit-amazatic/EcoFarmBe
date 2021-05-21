@@ -83,7 +83,7 @@ class EstimateWebappView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             estimate = response
             estimate['db_status'] = 'sent'
-            line_items = request.data.get('line_items')
+            # line_items = request.data.get('line_items')
             line_items = parse_fields('item', line_items, many=True)
             estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
             items = list()
