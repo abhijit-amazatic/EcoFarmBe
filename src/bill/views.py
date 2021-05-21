@@ -52,6 +52,7 @@ class EstimateWebappView(APIView):
         id = kwargs.get('id', None)
         is_draft = request.query_params.get('is_draft')
         notification_methods = request.data.get('notification_methods')
+        del request.data['notification_methods']
         organization_name = request.query_params.get('organization_name')
         if is_draft == 'true' or is_draft == 'True':
             estimate_obj = save_estimate(request)
