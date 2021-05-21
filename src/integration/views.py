@@ -309,10 +309,10 @@ class EstimateView(APIView):
         Create and estimate in Zoho Books. 
         """
         organization_name = request.query_params.get('organization_name')
-        estimate_obj = save_estimate(request)
         response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        estimate_obj = save_estimate(request)
         return Response(response)
         
     def put(self, request):
@@ -323,10 +323,10 @@ class EstimateView(APIView):
         is_draft = request.query_params.get('is_draft')
         estimate_id = request.data['estimate_id']
         if is_draft == 'true' or is_draft == 'True':
-            estimate_obj = save_estimate(request)
             response = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            estimate_obj = save_estimate(request)
             return Response(response)
         else:
             estimate = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())

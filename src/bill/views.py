@@ -60,14 +60,15 @@ class EstimateWebappView(APIView):
                 return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'message': 'Updated', 'id': id})
         else:
-            line_items = request.data.get('line_items')
-            estimate_obj = save_estimate(request)
-            estimate = Estimate.objects.get(customer_name=request.data.get('customer_name'))
-            response = update_estimate(organization_name,
-                                        estimate_id=estimate.estimate_id,
-                                        data=request.data, params=request.query_params.dict())
-            if response.get('status_code') and response['status_code'] != 0:
-                response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
+            # estimate_obj = save_estimate(data)
+            # estimate = Estimate.objects.get(customer_name=request.data.get('customer_name'))
+            # response = update_estimate(organization_name,
+            #                             estimate_id=estimate.estimate_id,
+            #                             data=request.data, params=request.query_params.dict())
+            # if response.get('status_code') and response['status_code'] != 0:
+            response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
+            if response.get('code') and response.get('code') != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
             response = parse_fields('estimate', response)
             if notification_methods:
                 notify_addresses = get_notify_addresses(notification_methods)
@@ -79,12 +80,11 @@ class EstimateWebappView(APIView):
             response['request_id'] = sign_obj.get('request_id')
             sign_url = sign_obj.get('sign_url')
             notify_estimate(notification_methods, sign_url)
-            if response.get('code') and response.get('code') != 0:
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
             estimate = response
             estimate['db_status'] = 'sent'
-            # line_items = request.data.get('line_items')
+            line_items = request.data.get('line_items')
             line_items = parse_fields('item', line_items, many=True)
+            estimate_obj = save_estimate(request)
             estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
             items = list()
             for item in line_items:
