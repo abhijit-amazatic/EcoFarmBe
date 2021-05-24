@@ -539,6 +539,7 @@ class NurseryOverview(models.Model):
     cultivars_in_production = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
     minimun_order_qty = models.IntegerField(_('clones Per Productions'), blank=True, null=True)
     order_hold_days =  models.IntegerField(_('clones Per Productions'), blank=True, null=True)
+    ipm_practices_qa = JSONField(_('IPM Practices & QA'), null=True, blank=True, default=dict)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
 
     pending_cultivars = models.ManyToManyField(
