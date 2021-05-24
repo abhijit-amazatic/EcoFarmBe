@@ -64,7 +64,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
                              InventoryWebHook,InventoryExportViewSet,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
-                             SalesReturnView, PackageView)
+                             SalesReturnView, PackageView, ContactView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -259,6 +259,7 @@ urlpatterns = [
     path(r'campaign/', CampaignView.as_view(), name="campaign"),
     path(r'inventory/package/', PackageView.as_view(), name="inventory-packages"),
     path(r'inventory/sales-return/', SalesReturnView.as_view(), name="inventory-sales-returns"),
+    path(r'inventory/contact/', ContactView.as_view(), name="inventory-contact"),
 
 ] + router.urls
 

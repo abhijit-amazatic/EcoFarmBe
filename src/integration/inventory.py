@@ -218,6 +218,14 @@ def update_sales_return(inventory_name, sales_return_id, record, params={}):
     obj = inventory.SalesReturn()
     return obj.update_sales_return(sales_return_id=sales_return_id, record=record, params=params)
 
+def get_contacts(inventory_name, contact_id=None, params={}):
+    """
+    Return a contacts or list of contacts.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.Contact()
+    return obj.get_contacts(contact_id=contact_id, params=params)
+
 def get_inventory_name(item_id):
     """
     Get inventory name.

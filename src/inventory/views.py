@@ -41,8 +41,9 @@ from .models import (
 )
 from core.settings import (AWS_BUCKET,)
 from integration.inventory import (sync_inventory, upload_inventory_document,
-                                   get_inventory_name, update_inventory_item)
-from integration.apps.aws import (create_presigned_url, create_presigned_post)
+                                   get_inventory_name, update_inventory_item,
+                                   get_contacts)
+from integration.apps.aws import (create_presigned_url, create_presigned_post,)
 from .permissions import (DocumentPermission, InventoryPermission, )
 from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
@@ -1009,6 +1010,30 @@ class SalesReturnView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
         response = get_sales_returns(organization_name, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)
+
+class ContactView(APIView):
+    """
+    View class for Zoho inventory contact.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get/List contacts.
+        """
+        organization_name = request.query_params.get('organization_name')
+        if request.query_params.get('contact_id', None):
+            response = get_contacts(
+                organization_name,
+                request.query_params.get('contact_id'),
+                params=request.query_params.dict())
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+        response = get_contacts(organization_name, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
