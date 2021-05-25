@@ -49,7 +49,9 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                BillView, SalesOrderView, EstimateAddressView,
                                ContactPersonView, CRMVendorTierView, GetNewsFeedView,
                                GetRecordView, LabTestView, GetAutoComplete,NotificationView,
-                               DownloadSignDocumentView, CampaignView)
+                               DownloadSignDocumentView, CampaignView, MarkEstimateView,
+                               ApproveEstimateView, MarkSalesOrderView, ApproveSalesOrderView,
+                               SalesOrderSubStatusesView)
 
 from fee_variable.views import (OrderVariableView,
                                 CustomInventoryVariableView,
@@ -260,6 +262,11 @@ urlpatterns = [
     path(r'inventory/package/', PackageView.as_view(), name="inventory-packages"),
     path(r'inventory/sales-return/', SalesReturnView.as_view(), name="inventory-sales-returns"),
     path(r'inventory/contact/', ContactView.as_view(), name="inventory-contact"),
+    path(r'books/estimate/status', MarkEstimateView.as_view(), name="mark-estimate"),
+    path(r'books/estimate/approve', ApproveEstimateView.as_view(), name="approve-estimate"),
+    path(r'books/salesorder/status', MarkSalesOrderView.as_view(), name="mark-salesorder"),
+    path(r'books/salesorder/approve', ApproveSalesOrderView.as_view(), name="approve-sales-order"),
+    path(r'books/salesorder/sub-statuses', SalesOrderSubStatusesView.as_view(), name="sales-order-sub-statuses"),
 
 ] + router.urls
 

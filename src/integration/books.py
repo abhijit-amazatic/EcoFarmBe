@@ -596,6 +596,30 @@ def mark_estimate(books_name, estimate_id, status, params=None):
     estimate_obj = obj.Estimates()
     return estimate_obj.mark_as(estimate_id, status, parameters=params)
 
+def approve_estimate(books_name, estimate_id, params=None):
+    """
+    Approve estimate.
+    """
+    obj = get_books_obj(books_name)
+    estimate_obj = obj.Estimates()
+    return estimate_obj.approve_estimate(estimate_id, parameters=params)
+
+def mark_salesorder(books_name, so_id, status, params=None):
+    """
+    Mark statement.
+    """
+    obj = get_books_obj(books_name)
+    estimate_obj = obj.SalesOrders()
+    return estimate_obj.mark_as(so_id, status, parameters=params)
+
+def approve_salesorder(books_name, so_id, params=None):
+    """
+    Approve estimate.
+    """
+    obj = get_books_obj(books_name)
+    estimate_obj = obj.SalesOrders()
+    return estimate_obj.approve_salesorder(so_id, parameters=params)
+
 def list_contacts(books_name, params=None):
     """
     List contact.
@@ -1034,3 +1058,11 @@ def list_salesorders(books_name, params=None):
         return result
     else:
         return _list(books_name)
+
+def get_sub_statuses(books_name, params=None):
+    """
+    Get sub-statuses.
+    """
+    obj = get_books_obj(books_name)
+    invoice_obj = obj.SalesOrders()
+    return invoice_obj.get_sub_statuses(parameters=params)

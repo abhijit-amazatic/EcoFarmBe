@@ -51,7 +51,9 @@ from integration.books import (
     add_contact_address, edit_contact_address,
     get_contact_person, list_contact_persons,
     create_contact_person, update_contact_person,
-    get_unpaid_invoices, update_available_for_sale)
+    get_unpaid_invoices, update_available_for_sale,
+    get_sub_statuses, approve_estimate, mark_salesorder,
+    approve_salesorder, )
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
@@ -716,6 +718,20 @@ class SalesOrderView(APIView):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
 
+class SalesOrderSubStatusesView(APIView):
+    """
+    View class for Zoho books sales order sub statuses.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get/List sales orders sub statuses.
+        """
+        organization_name = request.query_params.get('organization_name')
+        response = get_sub_statuses(organization_name, params=request.query_params.dict())
+        return Response(response, status=status.HTTP_200_OK)
+
 class VendorCreditView(APIView):
     """
     View class for Zoho books vendor credit.
@@ -1154,3 +1170,73 @@ class CampaignView(APIView):
         for mailing_list in mailing_list_ids:
             list_details[mailing_list] = []
         return Response(create_campaign(campaign_name, vars['from_email'], campaign_subject, list_details, content_url))
+
+class MarkEstimateView(APIView):
+    """
+    View class for Zoho status.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Change status.
+        """
+        organization_name = request.query_params.get('organization_name')
+        status = request.data.get('status')
+        estimate_id = request.data.get('estimate_id')
+        if estimate_id and status:
+            mark_estimate(organization_name, estimate_id, status)
+            return Response({'response': 'Success'})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class ApproveEstimateView(APIView):
+    """
+    View class for Zoho status.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Change status.
+        """
+        organization_name = request.query_params.get('organization_name')
+        estimate_id = request.data.get('estimate_id')
+        if estimate_id:
+            approve_estimate(organization_name, estimate_id)
+            return Response({'response': 'Success'})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class MarkSalesOrderView(APIView):
+    """
+    View class for Zoho status.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Change status.
+        """
+        organization_name = request.query_params.get('organization_name')
+        status = request.data.get('status')
+        salesorder_id = request.data.get('salesorder_id')
+        if salesorder_id and status:
+            mark_salesorder(organization_name, salesorder_id, status)
+            return Response({'response': 'Success'})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class ApproveSalesOrderView(APIView):
+    """
+    View class for Zoho status.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Change status.
+        """
+        organization_name = request.query_params.get('organization_name')
+        salesorder_id = request.data.get('salesorder_id')
+        if salesorder_id:
+            approve_salesorder(organization_name, salesorder_id)
+            return Response({'response': 'Success'})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
