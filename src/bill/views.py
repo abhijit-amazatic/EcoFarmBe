@@ -79,7 +79,6 @@ class EstimateWebappView(APIView):
                                              notify_addresses=notify_addresses)
             response['request_id'] = sign_obj.get('request_id')
             sign_url = sign_obj.get('sign_url')
-            notify_estimate(notification_methods, sign_url)
             estimate = response
             estimate['db_status'] = 'sent'
             line_items = request.data.get('line_items')
@@ -89,5 +88,6 @@ class EstimateWebappView(APIView):
             items = list()
             for item in line_items:
                 item_obj = LineItem.objects.filter(estimate_id=response.get('estimate_id'), item_id=item.get('item_id')).update(**item)
+            notify_estimate(notification_methods, sign_url,estimate_obj.id,estimate.get('customer_name'))    
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
