@@ -226,6 +226,13 @@ def get_contacts(inventory_name, contact_id=None, params={}):
     obj = inventory.Contact()
     return obj.get_contacts(contact_id=contact_id, params=params)
 
+def get_inventory_metadata(inventory_name, params={}):
+    """
+    Return inventory meta data.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    return inventory.get_metadata(params=params)
+
 def get_inventory_name(item_id):
     """
     Get inventory name.

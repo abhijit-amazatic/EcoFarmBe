@@ -66,7 +66,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
                              InventoryWebHook,InventoryExportViewSet,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
-                             SalesReturnView, PackageView, ContactView)
+                             SalesReturnView, PackageView, ContactView, InventoryMetaDataView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -267,6 +267,7 @@ urlpatterns = [
     path(r'books/salesorder/status', MarkSalesOrderView.as_view(), name="mark-salesorder"),
     path(r'books/salesorder/approve', ApproveSalesOrderView.as_view(), name="approve-sales-order"),
     path(r'books/salesorder/sub-statuses', SalesOrderSubStatusesView.as_view(), name="sales-order-sub-statuses"),
+    path(r'inventory/metadata/', InventoryMetaDataView.as_view(), name="inventory-metadata"),
 
 ] + router.urls
 

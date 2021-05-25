@@ -50,7 +50,9 @@ from brand.models import (License, Brand, LicenseProfile)
 from user.models import (User, )
 from labtest.models import (LabTest, )
 from cultivar.models import (Cultivar, )
-from integration.inventory import (get_inventory_summary, get_category_count, get_packages, get_sales_returns)
+from integration.inventory import (
+    get_inventory_summary, get_category_count,
+    get_packages, get_sales_returns, get_inventory_metadata)
 from .tasks import (
     notify_inventory_item_added_task,
     create_duplicate_crm_vendor_from_crm_account_task,
@@ -1034,6 +1036,22 @@ class ContactView(APIView):
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
         response = get_contacts(organization_name, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response, status=status.HTTP_200_OK)
+
+class InventoryMetaDataView(APIView):
+    """
+    View class for Zoho inventory metadata.
+    """
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
+        """
+        Get inventory meta data.
+        """
+        organization_name = request.query_params.get('organization_name')
+        response = get_inventory_metadata(organization_name, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
