@@ -3,7 +3,8 @@ from django.utils import timezone
 from django.contrib import messages
 from django.conf import settings
 
-from fee_variable.utils import (get_tax_and_mcsp_fee,)
+from fee_variable.models import (TaxVariable, )
+from fee_variable.utils import (get_mcsp_fee,)
 from integration.inventory import (
     get_inventory_obj,
     update_inventory_item,
@@ -12,7 +13,7 @@ from integration.inventory import (
 )
 from brand.models import (LicenseProfile, )
 from .notify_item_change_approved import (notify_inventory_item_change_approved_task, )
-
+from  ..data import (CATEGORY_GROUP_MAP)
 
 def get_approved_by(request=None):
     approved_by = {
@@ -87,43 +88,45 @@ def create_custom_inventory_item_po(inventory_name, sku, quantity, vendor_name, 
 
 def inventory_item_change(obj, request=None):
     if obj.status == 'pending_for_approval':
-        tax_and_mcsp_fee = get_tax_and_mcsp_fee(obj.item.cf_vendor_name, request)
-        if tax_and_mcsp_fee:
-            data = obj.get_item_update_data()
-            if obj.farm_price:
-                data['price'] = obj.farm_price + sum(tax_and_mcsp_fee)
-                data['rate'] = obj.farm_price + sum(tax_and_mcsp_fee)
-            inventory_org = data.get('inventory_name', '').lower()
-            if inventory_org in ('efd', 'efn', 'efl'):
-                inventory_name = 'inventory_{inventory_org}'
-                data.pop('inventory_name')
-                try:
-                    result = update_inventory_item(inventory_name, data.get('item_id'), data)
-                except Exception as exc:
-                    if request:
-                        messages.error(request, 'Error while updating item in Zoho Inventory',)
-                    print('Error while updating item in Zoho Inventory')
-                    print(exc)
-                    print(data)
-                else:
-                    if result.get('code') == 0:
-                        obj.status = 'approved'
-                        obj.approved_on = timezone.now()
-                        obj.approved_by = get_approved_by(request=request)
-                        obj.save()
+        mcsp_fee = get_mcsp_fee(obj.item.cf_vendor_name, request)
+        if mcsp_fee:
+            tax = get_item_tax(obj, request)
+            if tax:
+                data = obj.get_item_update_data()
+                if obj.farm_price:
+                    data['price'] = obj.farm_price + mcsp_fee + tax
+                    data['rate'] = obj.farm_price + mcsp_fee + tax
+                inventory_org = data.get('inventory_name', '').lower()
+                if inventory_org in ('efd', 'efn', 'efl'):
+                    inventory_name = 'inventory_{inventory_org}'
+                    data.pop('inventory_name')
+                    try:
+                        result = update_inventory_item(inventory_name, data.get('item_id'), data)
+                    except Exception as exc:
                         if request:
-                            messages.success(request, 'This change is approved and updated in Zoho Inventory')
-                        notify_inventory_item_change_approved_task.delay(obj.id)
-                    else:
-                        if request:
-                            messages.error(request, 'Error while updating item in Zoho Inventory')
+                            messages.error(request, 'Error while updating item in Zoho Inventory',)
                         print('Error while updating item in Zoho Inventory')
-                        print(result)
+                        print(exc)
                         print(data)
-            else:
-                if request:
-                    messages.error(request, 'Item have invalid inventory name.')
-                print('Item have invalid inventory name.')
+                    else:
+                        if result.get('code') == 0:
+                            obj.status = 'approved'
+                            obj.approved_on = timezone.now()
+                            obj.approved_by = get_approved_by(request=request)
+                            obj.save()
+                            if request:
+                                messages.success(request, 'This change is approved and updated in Zoho Inventory')
+                            notify_inventory_item_change_approved_task.delay(obj.id)
+                        else:
+                            if request:
+                                messages.error(request, 'Error while updating item in Zoho Inventory')
+                            print('Error while updating item in Zoho Inventory')
+                            print(result)
+                            print(data)
+                else:
+                    if request:
+                        messages.error(request, 'Item have invalid inventory name.')
+                    print('Item have invalid inventory name.')
 
 
 
@@ -210,3 +213,50 @@ def add_item_quantity(obj, request=None):
             submit_purchase_order(obj.po_id)
 
 
+def get_tax_from_db(tax='flower', request=None):
+    try:
+        tax_var = TaxVariable.objects.latest('-created_on')
+    except TaxVariable.DoesNotExist:
+        pass
+    else:
+        if tax=='flower':
+            tax='cultivar_tax'
+        elif tax=='trim':
+            tax='trim_tax'
+        else:
+            tax = None
+        if tax:
+            try:
+                return float(getattr(tax_var, tax))
+            except ValueError:
+                return None
+
+
+def get_item_tax(obj, request=None):
+    msg_error = lambda msg: messages.error(request, msg,) if request else None
+    CG = CATEGORY_GROUP_MAP
+    if obj.category_name:
+        if obj.category_name in CG['Flower']:
+            tax = get_tax_from_db(tax='flower')
+            if isinstance(tax, float):
+                return tax
+        if obj.category_name in CG['Trim']:
+            tax = get_tax_from_db(tax='trim')
+            if isinstance(tax, float):
+                return tax
+        if obj.category_name in CG['Isolates']+CG['Crude Oil']+CG['Distillate Oil']:
+            trim_tax = get_tax_from_db(tax='trim')
+            if isinstance(trim_tax, float):
+                if obj.trim_used:
+                    return (trim_tax * obj.trim_used) / obj.quantity_available
+                else:
+                    msg_error('Not provided quantity of Trim used to produce the oil.')
+                    return None
+        if obj.category_name in CG['Clones']:
+            return float(0.0)
+        else:
+            msg_error('No Cultivar Tax is defined for selected category.')
+            return None
+
+    msg_error('No Cultivar Tax found.')
+    return None

@@ -80,3 +80,56 @@ ITEM_CUSTOM_FIELD_ORG_MAP = {
     'efl': { x[0]: x[2] for x in ORG_ITEM_CUSTOM_FIELD_MAP_TABLE },
     'efn': { x[0]: x[3] for x in ORG_ITEM_CUSTOM_FIELD_MAP_TABLE },
 }
+
+
+
+
+CATEGORY_GROUP_MAP = {
+    'Flower': ('Wholesale - Flower',
+        'In the Field',
+        'Flower - Tops',
+        'Flower - Bucked Untrimmed',
+        'Flower - Bucked Untrimmed - Seeded',
+        'Flower - Bucked Untrimmed - Contaminated',
+        'Flower - Small',
+    ),
+    'Trim': (
+        'Trim',
+    ),
+    # 'Packaged Goods',
+    'Isolates': (
+        'Isolates',
+        'Isolates - CBD',
+        'Isolates - THC',
+        'Isolates - CBG',
+        'Isolates - CBN',
+    ),
+    # 'Wholesale - Concentrates',
+    'Crude Oil': (
+        'Crude Oil',
+        'Crude Oil - THC',
+        'Crude Oil - CBD',
+    ),
+    'Distillate Oil': (
+        'Distillate Oil',
+        'Distillate Oil - THC',
+        'Distillate Oil - CBD',
+    ),
+    # 'Shatter',
+    # 'Sauce',
+    # 'Crumble',
+    # 'Kief',
+    # 'Lab Testing',
+    'Terpenes': (
+        'Terpenes',
+        'Terpenes - Cultivar Specific',
+        'Terpenes - Cultivar Blended',
+    ),
+    # 'Services',
+    # 'QC',
+    # 'Transport',
+    # 'Secure Cash Handling',
+    'Clones': (
+        'Clones',
+    )
+}

@@ -37,7 +37,7 @@ custom_inventory_variable_program_map = {
 
 
 
-def get_tax_and_mcsp_fee(vendor_name, request=None, no_tier_fee=True ):
+def get_mcsp_fee(vendor_name, request=None, no_tier_fee=True ):
     lp = LicenseProfile.objects.filter(name=vendor_name).first()
     if lp:
         if lp.license.status == 'approved':
@@ -58,12 +58,8 @@ def get_tax_and_mcsp_fee(vendor_name, request=None, no_tier_fee=True ):
 
             tier = custom_inventory_variable_program_map.get(program_name, {})
             InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
-            if InventoryVariable and getattr(InventoryVariable, 'mcsp_fee'):
-                tax_var = TaxVariable.objects.latest('-created_on')
-                if tax_var and tax_var.cultivar_tax:
-                    return float(InventoryVariable.mcsp_fee), float(tax_var.cultivar_tax)
-                elif request:
-                    messages.error(request, 'No Cultivar Tax found.',)
+            if InventoryVariable and hasattr(InventoryVariable, 'mcsp_fee'):
+                return float(InventoryVariable.mcsp_fee)
             else:
                 program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
                 program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
@@ -76,10 +72,10 @@ def get_tax_and_mcsp_fee(vendor_name, request=None, no_tier_fee=True ):
                             f"and Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
                         ),
                     )
-
         else:
             if request:
                 messages.error(request, 'Profile is not approved.')
     else:
         if request:
             messages.error(request, 'License Profile not found.')
+

@@ -452,6 +452,12 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     product_quality_notes = models.TextField(_('Product Quality Notes'), blank=True, null=True)
     extra_documents = GenericRelation(Documents)
 
+    trim_used = models.FloatField(
+        _('Trim Used (lbs)'),
+        help_text='This field is used to calculate tax for Isolates, Crude Oil and Distillate Oil.',
+        blank=True,
+        null=True,
+    )
     farm_ask_price = models.FloatField(_('Farm Ask Price'), blank=True, null=True,)
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
     have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)

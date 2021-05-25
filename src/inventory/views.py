@@ -484,7 +484,6 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
         )
 
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-        print(filter_kwargs)
 
         obj, created = queryset.model.objects.get_or_create(**filter_kwargs)
 

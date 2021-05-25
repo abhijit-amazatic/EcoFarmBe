@@ -234,7 +234,7 @@ class InTransitOrderAdmin(admin.ModelAdmin):
 admin.site.register(Inventory, InventoryAdmin)
 admin.site.register(InventoryItemEdit, InventoryItemEditAdmin)
 admin.site.register(InventoryItemDelist, InventoryItemDelistAdmin)
-admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
+# admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
 admin.site.register(County, CountyAdmin)
 #admin.site.register(Vendor, VendorAdmin)
 admin.site.register(DailyInventoryAggrigatedSummary, DailyInventoryAggrigatedSummaryAdmin)

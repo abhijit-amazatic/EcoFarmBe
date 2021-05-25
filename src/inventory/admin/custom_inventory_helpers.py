@@ -12,7 +12,7 @@ from integration.inventory import (
 from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, )
 
 
-def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax_and_mcsp_fee):
+def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
     data = {}
     data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
     data['category_name'] = obj.category_name
@@ -61,7 +61,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax_and_mcsp_fee):
         if obj.farm_ask_price:
             data['cf_farm_price_2'] = obj.farm_ask_price
             # data['purchase_rate'] = obj.farm_ask_price
-            data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
+            data['rate'] = obj.farm_ask_price + tax + mcsp_fee
 
         if obj.pricing_position:
             data['cf_seller_position'] = obj.pricing_position
@@ -98,7 +98,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax_and_mcsp_fee):
         if obj.farm_ask_price:
             data['cf_farm_price'] = obj.farm_ask_price
             # data['purchase_rate'] = obj.farm_ask_price
-            data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
+            data['rate'] = obj.farm_ask_price + tax + mcsp_fee
 
         data['cf_status'] = obj.marketplace_status
         # data['cf_sample_in_house'] = 'Pending'
@@ -128,7 +128,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax_and_mcsp_fee):
         if obj.farm_ask_price:
             data['cf_farm_price_pretax'] = obj.farm_ask_price
             # data['purchase_rate'] = obj.farm_ask_price
-            data['rate'] = obj.farm_ask_price + sum(tax_and_mcsp_fee)
+            data['rate'] = obj.farm_ask_price + tax + mcsp_fee
 
         if obj.payment_terms:
             data['cf_payment_terms'] = obj.payment_terms
