@@ -445,7 +445,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, null=True, max_length=225)
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
-    harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
+    harvest_date = models.DateField(_('Harvest/Manufacturing/Clone Date'), auto_now=False, blank=True, null=True, default=None)
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
     grade_estimate = models.CharField(_('Grade Estimate'), choices=GRADE_ESTIMATE_CHOICES, max_length=255, blank=True, null=True)

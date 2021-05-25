@@ -50,7 +50,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
                 data['cf_grade_seller'] = obj.grade_estimate
 
         if obj.harvest_date:
-            data['cf_harvest_date'] = str(obj.harvest_date)  # not in inventor
+            data['cf_harvest_date'] = str(obj.harvest_date)
 
         if obj.product_quality_notes:
             data['cf_batch_quality_notes'] = obj.product_quality_notes
@@ -92,6 +92,9 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
             if obj.quantity_available:
                 data['cf_quantity_estimate'] = int(obj.quantity_available)
 
+        if obj.harvest_date:
+            data['cf_manufacturing_date'] = str(obj.harvest_date)
+
         if obj.product_quality_notes:
             data['cf_batch_notes'] = obj.product_quality_notes
 
@@ -121,6 +124,9 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
         if obj.marketplace_status in ('Rooting',):
             if obj.quantity_available:
                 data['cf_quantity_estimate'] = int(obj.quantity_available)
+
+        if obj.harvest_date:
+            data['cf_clone_date'] = str(obj.harvest_date)
 
         if obj.product_quality_notes:
             data['cf_batch_quality_notes'] = obj.product_quality_notes
