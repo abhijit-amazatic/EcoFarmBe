@@ -609,16 +609,64 @@ def mark_salesorder(books_name, so_id, status, params=None):
     Mark statement.
     """
     obj = get_books_obj(books_name)
-    estimate_obj = obj.SalesOrders()
-    return estimate_obj.mark_as(so_id, status, parameters=params)
+    so_obj = obj.SalesOrders()
+    return so_obj.mark_as(so_id, status, parameters=params)
 
 def approve_salesorder(books_name, so_id, params=None):
     """
-    Approve estimate.
+    Approve salesorder.
     """
     obj = get_books_obj(books_name)
-    estimate_obj = obj.SalesOrders()
-    return estimate_obj.approve_salesorder(so_id, parameters=params)
+    so_obj = obj.SalesOrders()
+    return so_obj.approve_sales_order(so_id, parameters=params)
+
+def mark_purchaseorder(books_name, po_id, status, params=None):
+    """
+    Mark statement.
+    """
+    obj = get_books_obj(books_name)
+    po_obj = obj.PurchaseOrders()
+    return po_obj.mark_as(po_id, status, parameters=params)
+
+def approve_purchaseorder(books_name, po_id, params=None):
+    """
+    Approve purchase order.
+    """
+    obj = get_books_obj(books_name)
+    po_obj = obj.SalesOrders()
+    return po_obj.approve_purchase_order(so_id, parameters=params)
+
+def mark_invoice(books_name, invoice_id, status, params=None):
+    """
+    Mark statement.
+    """
+    obj = get_books_obj(books_name)
+    invoice_obj = obj.Invoices()
+    return invoice_obj.mark_as(invoice_id, status, parameters=params)
+
+def approve_invoice(books_name, invoice_id, params=None):
+    """
+    Approve invoice.
+    """
+    obj = get_books_obj(books_name)
+    invoice_obj = obj.Invoices()
+    return invoice_obj.approve_invoice(invoice_id, parameters=params)
+
+def mark_bill(books_name, bill_id, status, params=None):
+    """
+    Mark statement.
+    """
+    obj = get_books_obj(books_name)
+    bill_obj = obj.Bills()
+    return bill_obj.mark_as(bill_id, status, parameters=params)
+
+def approve_bill(books_name, bill_id, params=None):
+    """
+    Approve bill.
+    """
+    obj = get_books_obj(books_name)
+    bill_obj = obj.Bills()
+    return bill_obj.approve_bill(bill_id, parameters=params)
 
 def list_contacts(books_name, params=None):
     """

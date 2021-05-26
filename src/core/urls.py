@@ -51,7 +51,9 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                GetRecordView, LabTestView, GetAutoComplete,NotificationView,
                                DownloadSignDocumentView, CampaignView, MarkEstimateView,
                                ApproveEstimateView, MarkSalesOrderView, ApproveSalesOrderView,
-                               SalesOrderSubStatusesView)
+                               SalesOrderSubStatusesView, MarkPurchaseOrderView, 
+                               ApprovePurchaseOrderView, MarkInvoiceView, 
+                               ApproveInvoiceView, MarkBillView, ApproveBillView)
 
 from fee_variable.views import (OrderVariableView,
                                 CustomInventoryVariableView,
@@ -265,7 +267,13 @@ urlpatterns = [
     path(r'books/estimate/status', MarkEstimateView.as_view(), name="mark-estimate"),
     path(r'books/estimate/approve', ApproveEstimateView.as_view(), name="approve-estimate"),
     path(r'books/salesorder/status', MarkSalesOrderView.as_view(), name="mark-salesorder"),
-    path(r'books/salesorder/approve', ApproveSalesOrderView.as_view(), name="approve-sales-order"),
+    path(r'books/salesorder/approve', ApproveSalesOrderView.as_view(), name="approve-salesorder"),
+    path(r'books/purchaseorder/status', MarkPurchaseOrderView.as_view(), name="mark-purchaseorder"),
+    path(r'books/purchaseorder/approve', ApprovePurchaseOrderView.as_view(), name="approve-purchaseorder"),
+    path(r'books/invoice/status', MarkInvoiceView.as_view(), name="mark-invoice"),
+    path(r'books/invoice/approve', ApproveInvoiceView.as_view(), name="approve-invoice"),
+    path(r'books/bill/status', MarkBillView.as_view(), name="mark-bill"),
+    path(r'books/bill/approve', ApproveBillView.as_view(), name="approve-bill"),
     path(r'books/salesorder/sub-statuses', SalesOrderSubStatusesView.as_view(), name="sales-order-sub-statuses"),
     path(r'inventory/metadata/', InventoryMetaDataView.as_view(), name="inventory-metadata"),
 
