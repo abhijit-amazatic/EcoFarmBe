@@ -61,7 +61,29 @@ def notify_admins(email,crm_link):
     slack.chat.post_message(settings.SLACK_CHANNEL_NAME,msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
     #mail_send("notify.html",{'link': email},"New User registration.", recipient_list=settings.ADMIN_EMAIL)
 
-    
+def get_update_db_contact(instance,response,status):
+    """
+    update db contact related data & return crm link.
+    """
+    try:
+        if status == 'new':
+            #print('in new contact+response',instance,'\n',response,'\n',status)
+            instance.is_updated_in_crm = True
+            instance.zoho_contact_id = response['response']['data'][0]['details']['id']
+            link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Contacts/"+response['response']['data'][0]['details']['id']+"/"
+            instance.crm_link = link
+            instance.save()
+            return link
+        elif status == 'exist':
+            instance.is_updated_in_crm = True
+            instance.zoho_contact_id = response['response'][0].get('id')
+            link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Contacts/"+response['response'][0].get('id')+"/"
+            instance.crm_link = link
+            instance.save()
+            return link
+    except Exception as e:
+        print('Exception while crm link db save', e)
+        
 class GetBoxTokensView(APIView):
     """
     Return Access and Refresh Tokens for Box.
@@ -125,27 +147,19 @@ class UserViewSet(ModelViewSet):
             data=request.data)
         if serializer.is_valid():
             instance = serializer.save()
-            if instance.existing_member:
-                contact = search_query('Contacts', request.data.get('email'), 'Email')
-                if contact['status_code'] == 200:
-                    request.data['id'] = contact.get('response')[0].get('id')
-                    response = update_records('Contacts', request.data)
+            contact = search_query('Contacts', request.data.get('email'), 'Email')
+            if contact['status_code'] == 200:
+                request.data['id'] = contact.get('response')[0].get('id')
+                response = update_records('Contacts', request.data)
+                crm_db_update_link = get_update_db_contact(instance,contact,'exist')
             else:
-                response = create_records('Contacts', request.data)
-                if response['status_code'] == 201:
-                    instance.is_updated_in_crm = True
-                    instance.zoho_contact_id = response['response']['data'][0]['details']['id']
-                    instance.crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Contacts/"+response['response']['data'][0]['details']['id']+"/"
-                    instance.save()
+                create_response = create_records('Contacts', request.data)
+                if create_response['status_code'] == 201:
+                    crm_db_update_link = get_update_db_contact(instance,create_response,'new')
             try:
-                if not instance.existing_member:
-                    pass
-                else:
-                    pass
-                    #get_from_crm_insert_to_vendor_or_account.delay(instance.id)
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link,'full_name': instance.full_name},"Thrive Society Verification.", instance.email)
-                notify_admins(instance.email,instance.crm_link)
+                notify_admins(instance.email,crm_db_update_link)
             except Exception as e:
                 print(e)
                 pass        
