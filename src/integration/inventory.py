@@ -406,6 +406,7 @@ def get_parent_category(category_name):
         'Wholesale - Flower': [
             'Tops', 'Tops - THC', 'Smalls', 'In the Field',
             'Flower - Tops',
+            'Flower - Small',
             'Flower - Bucked Untrimmed',
             'Flower - Bucked Untrimmed - Seeded',
             'Flower - Bucked Untrimmed - Contaminated'],
