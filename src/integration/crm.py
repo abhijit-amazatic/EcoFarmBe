@@ -523,7 +523,14 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 d['Layout_Name'] = 'vendor_cannabis'
             if is_update:
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
-                result = update_records('Vendors', d, True)
+                if d['id']:
+                    r = search_query('Vendors', d['name'], 'Vendor_Name')
+                    if r.get('status_code') == 200:
+                        d['id'] = r.get('response')[0]['id']
+                if d['id']:
+                    result = update_records('Vendors', d, True)
+                else:
+                    result = create_records('Vendors', d, True)
             else:
                 result = search_query('Vendors', d['name'], 'Vendor_Name')
                 if result.get('status_code') != 200:
@@ -717,6 +724,7 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         r = create_records('Brands_X_Vendors', [data])
                         final_dict['brand_vendor'] = r
             final_list[record.id] = final_dict
+        record.crm_output = final_dict
         return final_list
 
 def upload_file_s3_to_box(aws_bucket, aws_key):
@@ -1024,8 +1032,15 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 print(exc)
                 pass
         if is_update:
-            d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
-            result = update_records('Accounts', d, is_return_orginal_data=True)
+                d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
+                if d['id']:
+                    r = search_query('Accounts', d['name'], 'Account_Name')
+                    if r.get('status_code') == 200:
+                        d['id'] = r.get('response')[0]['id']
+                if d['id']:
+                    result = update_records('Accounts', d, is_return_orginal_data=True)
+                else:
+                    result = create_records('Accounts', d, True)
         else:
             result = search_query('Accounts', d['name'], 'Account_Name')
             if result.get('status_code') != 200:
@@ -1211,6 +1226,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 final_dict['exception'] = exc
                 continue
             final_list[record.id] = final_dict
+        record.crm_output = final_dict
         return final_list
 
 @app.task(queue="general")
