@@ -1225,7 +1225,6 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
             except Exception as exc:
                 print(exc)
                 final_dict['exception'] = exc
-                continue
             final_list[record.id] = final_dict
             record.crm_output = final_dict
             record.save()
