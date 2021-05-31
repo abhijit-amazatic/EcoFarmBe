@@ -724,7 +724,7 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         r = create_records('Brands_X_Vendors', [data])
                         final_dict['brand_vendor'] = r
             final_list[record.id] = final_dict
-            record.crm_output = final_dict
+            record.crm_output = {'output': final_dict}
             record.save()
         return final_list
 
@@ -1226,7 +1226,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 print(exc)
                 final_dict['exception'] = exc
             final_list[record.id] = final_dict
-            record.crm_output = final_dict
+            record.crm_output = {'output': final_dict}
             record.save()
         return final_list
 
