@@ -9,10 +9,10 @@ def reverse_admin_change_path(obj):
     )
 
 
-def get_fernet_key(salt:str=None):
+def get_fernet_key(key_salt:str=None):
     key = (settings.SECRET_KEY * int(1 + 32//len(settings.SECRET_KEY)))[:32]
-    if salt:
-        key = salt + key[len(salt):]
+    if key_salt:
+        key = key_salt + key[len(key_salt):]
     return base64.urlsafe_b64encode((key[:32].encode('utf-8'))).decode('utf-8')
 
 def base64_url_encode(string):

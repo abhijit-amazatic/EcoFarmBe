@@ -108,6 +108,10 @@ from compliance_binder.views import(
      BinderLicenseViewSet,
 )
 
+from internal_onboarding.views import (
+     InternalOnboardingView,
+)
+
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
@@ -144,6 +148,7 @@ router.register(r'two-factor/add-device/authenticator', AddAuthenticatorRequestV
 router.register(r'order-variables', OrderVariableView, base_name="order-variables")
 router.register(r'inventory-variables', CustomInventoryVariableView, base_name="inventory-variables")
 router.register(r'tax-variables', TaxVariableVariableView, base_name="tax-variables")
+router.register(r'internal-onboarding', InternalOnboardingView, base_name="internal-onboarding")
 
 
 
@@ -276,7 +281,6 @@ urlpatterns = [
     path(r'books/bill/approve', ApproveBillView.as_view(), name="approve-bill"),
     path(r'books/salesorder/sub-statuses', SalesOrderSubStatusesView.as_view(), name="sales-order-sub-statuses"),
     path(r'inventory/metadata/', InventoryMetaDataView.as_view(), name="inventory-metadata"),
-
 ] + router.urls
 
 

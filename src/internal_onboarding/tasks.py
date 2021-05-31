@@ -37,22 +37,28 @@ slack = Slacker(settings.SLACK_TOKEN)
 @app.task(queue="general")
 def send_internal_onboarding_invitation(invite_obj_id):
     """
-    Async send organization user invitation.
+    send organization user invitation.
     """
     try:
         invite_obj = InternalOnboardingInvite.objects.get(id=invite_obj_id)
     except InternalOnboardingInvite.DoesNotExist:
         pass
     else:
+        roles = [ x.name for x in invite_obj.roles.all()]
+        if roles[:-1]:
+            role_str = ', '.join(roles[:-1]) + ' and ' + roles[:-1]
+        else:
+            role_str = ', '.join(roles)
         context = {
             'full_name': invite_obj.user.get_full_name(),
             'email': invite_obj.user.email,
             'organization': invite_obj.organization.name,
-            'roles': [ x.name for x in invite_obj.roles.all()],
-            'license': f"{invite_obj.license.license_number} | {invite_obj.license.legal_business_name}",
+            'roles': roles,
+            'role_str': role_str,
+            'license': f"{invite_obj.license.legal_business_name} - {invite_obj.license.license_number}",
             'phone': invite_obj.user.phone.as_e164,
             # 'token': invite_obj.get_invite_token(),
-            'link':  '{}/verify-onboarding-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
+            'link':  '{}/verify-onboarding-invitation?token={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
         }
         # context['link'] = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), context['token'])
 
@@ -66,8 +72,12 @@ def send_internal_onboarding_invitation(invite_obj_id):
         except Exception as e:
             traceback.print_tb(e.__traceback__)
         else:
-            msg = 'You have been invited to join organization "{organization}" as {role}.\nPlease check your email {email}'.format(**context)
-            send_sms(context['phone'], msg)
+            # msg = 'You have been invited to join organization "{organization}" under the license {license} as {role_str} .\nPlease check your email {email}'.format(**context)
+            msg = (
+                'Your Thrive Society Account has been created under the following License: {license}.\n'
+                'Please check your email {email}'
+            )
+            send_sms(context['phone'], msg.format(**context))
 
 
 @app.task(queue="general")

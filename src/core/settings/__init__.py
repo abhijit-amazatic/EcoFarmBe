@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'fee_variable',
     'bill',
     'compliance_binder',
+    'internal_onboarding',
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',

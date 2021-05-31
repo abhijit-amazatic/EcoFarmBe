@@ -1,0 +1,31 @@
+@font-face {
+  font-family: Athelas-Reg;
+  src: url(./athelas-reg.eot);
+  src: url(./athelas-reg.eot) format("embedded-opentype"),
+    url(./athelas-reg.woff2) format("woff2"),
+    url(./athelas-reg.woff) format("woff"),
+    url(./athelas-reg.ttf) format("truetype"),
+    url(./athelas-reg.svg) format("svg");
+}
+@font-face {
+  font-family: BrandonText-Regular;
+  src: url(./brandon-reg.eot);
+  src: url(./brandon-reg.eot) format("embedded-opentype"),
+    url(./brandon-reg.woff2) format("woff2"),
+    url(./brandon-reg.woff) format("woff"),
+    url(./brandon-reg.ttf) format("truetype"),
+    url(./brandon-reg.svg) format("svg");
+}
+@font-face {
+  font-family: BrandonText-Grotesque;
+  src: url("./Brandon\ Grotesque.otf") format("opentype");
+}
+@font-face {
+  font-family: BrushScript-MT;
+  src: url(/static/BRUSHSCI.ttf) format("truetype");
+}
+/* body {
+  font-family: Athelas-Reg;
+  font-size: 18px;
+} */
+

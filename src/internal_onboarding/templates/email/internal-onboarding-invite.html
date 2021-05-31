@@ -5,20 +5,16 @@
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            You have been invited to join organization <strong>{{organization}}</strong> as <strong>{{role}}</strong>
-        {% if licenses %} for
+            Your Thrive Society Account has been created under the following License: <strong>{{license}}</strong>.
+            {% comment %} You have been invited to join organization <strong>{{organization}}</strong> under the license <strong>{{license}}</strong> as 
+            {% for role in roles %}
+                {% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}<strong>{{role}}</strong>
+            {% endfor %}. {% endcomment %}
         </p>
-        <ul style='font-size:16px !important;color: #013c48;'>
-            {% for lic in licenses %}
-            <li>{{lic}}</li>
-            {% endfor %}
-        </ul>
         <p style='font-size:16px !important;color: #013c48;'>
-        {% else %}
-            <br>
-        {% endif %}
-            Please click the link below to accept invitation.<br>
-            <span style="font-size:12px !important;color: #013c48;">(Link is valid for 24 hours.)</span><br>
+            {% comment %} Please click the link below to accept invitation<br> {% endcomment %}
+            Please follow the link below to create a password and log in:<br>
+            <span style="font-size:12px !important;color: #013c48;">(Link is valid for 7 days.)</span><br>
             <a style="font-size:16px !important;color: #90835c;" href="{{link}}">{{link}}</a>
         </p>
     </div>

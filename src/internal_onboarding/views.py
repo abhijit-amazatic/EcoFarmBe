@@ -5,7 +5,7 @@ import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission as DjangoPermission
-from django.db import transaction
+from django.db import (transaction, DatabaseError) 
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,19 +34,38 @@ from .models import (
     InternalOnboardingInvite,
 )
 from .serializers import (
+    InternalOnboardingSerializer,
     InternalOnboardingInviteVerifySerializer,
     InternalOnboardingInviteSetPassSerializer,
 )
 
 
-class InternalOnboardingInviteVerifyView(GenericAPIView):
+class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     User Invitation Verification View.
     """
     permission_classes = (AllowAny, )
-    serializer_class = InternalOnboardingInviteVerifySerializer
+    serializer_class = InternalOnboardingSerializer
 
     def post(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                pass
+        except DatabaseError as exc:
+            return Response({'detail': f'Error: {exc}'}, status=400)
+
+
+
+    @action(
+        detail=False,
+        methods=['post'],
+        name='Invite Verify',
+        url_name='internal-onboarding-invite-verify',
+        url_path='invite-verify',
+        permission_classes=(AllowAny,),
+        serializer_class=InternalOnboardingInviteVerifySerializer
+    )
+    def invite_verify(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data,)
         serializer.is_valid(raise_exception=True)
         instance = serializer.validated_data['token']
@@ -75,25 +94,21 @@ class InternalOnboardingInviteVerifyView(GenericAPIView):
             response_data['detail'] = 'Accepted'
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'completed':
-            response = Response(
-                {'detail': 'Already accepted'},
-                status=200,
-            )
+            response = Response({'detail': 'Already accepted'},status=200)
         else:
-            response = Response(
-                {'detail': 'invalid token'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            response = Response({'detail': 'invalid token'},status=400)
         return response
 
-class InternalOnboardingInviteSetPassView(GenericAPIView):
-    """
-    User Invitation Verification View.
-    """
-    permission_classes = (AllowAny, )
-    serializer_class = InternalOnboardingInviteSetPassSerializer,
-
-    def post(self, request, *args, **kwargs):
+    @action(
+        detail=False,
+        methods=['post'],
+        name='Set Password',
+        url_name='internal-onboarding-invite-set-pass',
+        url_path='invite-set-password',
+        permission_classes=(AllowAny,),
+        serializer_class=InternalOnboardingInviteSetPassSerializer,
+    )
+    def set_password(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data,)
         serializer.is_valid(raise_exception=True)
         instance = serializer.validated_data['token']
