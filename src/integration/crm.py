@@ -1,3 +1,5 @@
+import sys
+import traceback
 import ast
 import json
 from io import BytesIO
@@ -535,6 +537,9 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 result = search_query('Vendors', d['name'], 'Vendor_Name')
                 if result.get('status_code') != 200:
                     result = create_records('Vendors', d, True)
+                else:
+                    d['id'] = result.get('response')[0]['id']
+                    result = update_records('Accounts', d, True)
             final_dict['vendor'] = result
             if response['status_code'] == 200 and result['status_code'] in [201]:
                 record_response = result['response']['response']['data']
@@ -600,7 +605,9 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     contact_response = create_records('Vendors_X_Contacts', request)
         except Exception as exc:
             print(exc)
-            final_dict['exception'] = exc
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_dict['exception'] = e
         final_list[license_db_id] = final_dict
     return final_list
             
@@ -1046,6 +1053,9 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             result = search_query('Accounts', d['name'], 'Account_Name')
             if result.get('status_code') != 200:
                 result = create_records('Accounts', d, is_return_orginal_data=True)
+            else:
+                d['id'] = result.get('response')[0]['id']
+                result = update_records('Accounts', d, True)
         final_dict['account'] = result
         if response['status_code'] == 200 and result['status_code'] in [200, 201]:
             record_response = result['response']['response']['data']
@@ -1224,7 +1234,9 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                             final_dict['brand_account'] = r
             except Exception as exc:
                 print(exc)
-                final_dict['exception'] = exc
+                exc_info = sys.exc_info()
+                e = ''.join(traceback.format_exception(*exc_info))
+                final_dict['exception'] = e
             final_list[record.id] = final_dict
             record.crm_output = {'output': final_dict}
             record.save()
