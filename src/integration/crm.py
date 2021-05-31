@@ -724,8 +724,8 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                         r = create_records('Brands_X_Vendors', [data])
                         final_dict['brand_vendor'] = r
             final_list[record.id] = final_dict
-        record.crm_output = final_dict
-        record.save()
+            record.crm_output = final_dict
+            record.save()
         return final_list
 
 def upload_file_s3_to_box(aws_bucket, aws_key):
@@ -1227,8 +1227,8 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 final_dict['exception'] = exc
                 continue
             final_list[record.id] = final_dict
-        record.crm_output = final_dict
-        record.save()
+            record.crm_output = final_dict
+            record.save()
         return final_list
 
 @app.task(queue="general")
