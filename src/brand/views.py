@@ -34,7 +34,7 @@ from integration.books import  get_buyer_summary
 from integration.apps.aws import (create_presigned_url, )
 from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,email_admins_on_profile_progress, )
 from core.mailer import (mail, mail_send,)
-from integration.crm import (get_licenses, update_program_selection, create_records, search_query, update_records)
+from integration.crm import (get_licenses, update_program_selection, create_records, search_query, update_records, create_or_update_org_in_crm)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
 from permission.filterqueryset import (filterQuerySet, )
@@ -164,30 +164,7 @@ class OrganizationViewSet(PermissionQuerysetFilterMixin,
 
     def perform_create(self, serializer):
         obj = serializer.save()
-        result = search_query('Orgs', obj.__dict__['name'], 'Name')
-        if result.get('status_code') == 200:
-            organization_id = result.get('response')[0].get('id')
-            result = update_records('Orgs', obj.__dict__, True)
-        else:
-            try:
-                result = create_records('Orgs', obj.__dict__)
-            except Exception as exc:
-                    print('Error while creating Organization in Zoho CRM')
-                    print(exc)
-            if result.get('status_code') in [200, 201]:
-                try:
-                    organization_id = result['response'][0]['id']
-                except KeyError:
-                    organization_id = result['response']['data'][0]['details']['id']
-                if organization_id:
-                    obj.zoho_crm_id = organization_id
-                    obj.save()
-                else:
-                    print('Error while Extrating zoho_crm_id for created Organization in Zoho CRM')
-                    print(result)
-            else:
-                print('Error while creating Organization in Zoho CRM')
-                print(result)
+        create_or_update_org_in_crm(obj)
 
 
 class BrandViewSet(PermissionQuerysetFilterMixin,
