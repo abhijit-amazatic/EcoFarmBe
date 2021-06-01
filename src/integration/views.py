@@ -316,8 +316,8 @@ class EstimateView(APIView):
         response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        estimate_obj = save_estimate(request)
-        return Response(response)
+        # estimate_obj = save_estimate(request)
+        return Response(response) 
         
     def put(self, request):
         """
@@ -330,7 +330,7 @@ class EstimateView(APIView):
             response = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            estimate_obj = save_estimate(request)
+            # estimate_obj = save_estimate(request)
             return Response(response)
         else:
             estimate = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
