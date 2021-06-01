@@ -1744,7 +1744,10 @@ def create_or_update_org_in_crm(org_obj):
             try:
                 organization_id = result['response'][0]['id']
             except KeyError:
-                organization_id = result['response']['data'][0]['details']['id']
+                try:
+                    organization_id = result['response']['data'][0]['details']['id']
+                except KeyError:
+                    organization_id = None
             if organization_id:
                 org_obj.zoho_crm_id = organization_id
                 org_obj.save()

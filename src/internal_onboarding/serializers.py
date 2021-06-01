@@ -23,9 +23,11 @@ class OrganizationSerializer(serializers.ModelSerializer):
     """
 
     def validate(self, attrs):
+        validated_data = super().validate(attrs=attrs)
         if not attrs.get('id'):
-            if Organization.filter(name=attrs.get('name', '')).exists():
+            if Organization.objects.filter(name=attrs.get('name', '')).exists():
                 raise serializers.ValidationError({'name': 'Organization name already exist'})
+        return validated_data
 
     # def create(self, validated_data):
     #     request = self.context.get('request')
@@ -45,8 +47,8 @@ class ContactsSerializer(serializers.Serializer):
     """
     This defines ProgramOverviewSerializer
     """
-    zoho_contact: serializers.CharField(max_length=255, required=True)
-    roles: serializers.ListField(child=serializers.CharField(), allow_empty=False,)
+    zoho_contact = serializers.CharField(max_length=255, required=True)
+    roles = serializers.ListField(child=serializers.CharField(), allow_empty=False, required=True)
     send_mail = serializers.BooleanField(required=True)
 
     class Meta:
@@ -65,7 +67,7 @@ class InternalOnboardingSerializer(serializers.Serializer):
     zoho_account = serializers.CharField(max_length=255, required=False)
     zoho_vendor = serializers.CharField(max_length=255, required=False)
     license_number = serializers.CharField(max_length=255, required=True)
-    category = serializers.CharField(max_length=255, required=True)
+    license_category = serializers.CharField(max_length=255, required=True)
     ein_or_ssn = serializers.IntegerField(required=True)
 
     business_structure = serializers.CharField(max_length=255, required=False)
@@ -76,7 +78,7 @@ class InternalOnboardingSerializer(serializers.Serializer):
 
     docs_already_on_file = serializers.BooleanField()
 
-    contacts = ContactsSerializer(many=True)
+    contacts = ContactsSerializer(many=True, required=True)
 
     organization = OrganizationSerializer()
 
@@ -92,17 +94,17 @@ class InternalOnboardingSerializer(serializers.Serializer):
             raise serializers.ValidationError(f'Profile for license number \'{value}\' already exist.')
         return value
 
-    def validate_contacts(self, attrs):
-        if not len(attrs) > 0:
-            raise serializers.ValidationError('At least one contacts is required')
-        return attrs
+    # def validate_contacts(self, attrs):
+    #     if not len(attrs) > 0:
+    #         raise serializers.ValidationError('At least one contacts is required')
+    #     return attrs
 
     class Meta:
         fields = (
             'zoho_account',
             'zoho_vendor',
             'license_number',
-            'category',
+            'license_category',
             'ein_or_ssn',
             'business_structure',
             'license_url',

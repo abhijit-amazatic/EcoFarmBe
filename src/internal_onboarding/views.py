@@ -15,7 +15,7 @@ from rest_framework import serializers
 from rest_framework import (permissions, viewsets, status, filters, mixins)
 from rest_framework.authentication import (TokenAuthentication, )
 from rest_framework.decorators import action
-from rest_framework.exceptions import (NotFound, PermissionDenied,)
+from rest_framework.exceptions import (NotFound, PermissionDenied, APIException)
 from rest_framework.generics import (GenericAPIView, CreateAPIView,)
 from rest_framework.views import APIView
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
@@ -35,13 +35,14 @@ from integration.crm import (
     get_account_associations,
     get_vendor_associations,
     create_or_update_org_in_crm,
+    get_format_dict,
 )
 from permission.filterqueryset import (filterQuerySet, )
 from brand.models import (
     Organization,
     OrganizationUser,
     OrganizationUserRole,
-    OrganizationUserInvite,
+    License,
 )
 from .models import (
     InternalOnboardingInvite,
@@ -51,6 +52,26 @@ from .serializers import (
     InternalOnboardingInviteVerifySerializer,
     InternalOnboardingInviteSetPassSerializer,
 )
+
+
+class APIError(Exception):
+    """
+    exceptions.
+    """
+    code = 'detail'
+    def __init__(self, msg, status_code=400, code=None):
+        self.msg = msg
+        self.status_code = status_code
+        if code:
+            self.code = code
+
+    def __str__(self):
+        return str(self.msg)
+
+    def get_response(self):
+        return Response({self.code: self.msg}, status=self.status_code)
+
+
 
 
 class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -80,7 +101,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         vendor_data = None
         vendor_associations = {}
         if vendor_id:
-            resp_vendor =  get_record(module='Vendors', record_id=account_id, full=True)
+            resp_vendor = get_record(module='Vendors', record_id=vendor_id, full=True)
             if not resp_vendor.get('status_code') == 200:
                 return Response({'zoho_vendor': 'Invalid crm vendor id.'}, status=400)
             else:
@@ -107,13 +128,13 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         org_owner_contact_id = None
         contacts_dict = {}
         constacts_data_dict = {}
-        for c in data.get['contacts']:
+        for c in data.get('contacts'):
             c_id = c['zoho_contact']
             resp_contact = get_record(module='Contacts', record_id=c_id, full=True)
             if not resp_contact.get('status_code') == 200:
                 return Response({'details': f'Invalid crm contact id: {c_id}.'}, status=400)
             else:
-                constacts_data_dict[c_id] = resp_account.get('response', {})
+                constacts_data_dict[c_id] = resp_contact.get('response', {})
                 if not re.match(r"^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$", constacts_data_dict[c_id].get('Email')):
                     return Response(
                         {
@@ -167,15 +188,49 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     user.categories.add(*mem_cat)
                     constacts_user_dict[contact_id] = (user, created)
 
-                if not data['organization']['id']:
+                organization_id = None
+                organization_obj = None
+                if not data['organization'].get('id'):
                     organization_create_data = copy.deepcopy(data['organization'])
                     organization_create_data.pop('id')
                     organization_create_data['created_by'] = constacts_user_dict[org_owner_contact_id][0]
                     organization_obj = Organization.objects.create(**organization_create_data)
                     create_or_update_org_in_crm(organization_obj)
+                    organization_id = organization_obj.zoho_crm_id
+                else:
+                    organization_obj = Organization.objects.get(data['organization']['id'])
+                    if not organization_obj.zoho_crm_id:
+                        create_or_update_org_in_crm(organization_obj)
+                    organization_id = organization_obj.zoho_crm_id
+
+                if not organization_id:
+                    raise APIError('Unable to get organization crm id')
+
+                license_create_data = {
+                    'created_by':                request.user,
+                    'organization':              organization_obj,
+                    'license_number':            license_number,
+                    'zoho_crm_id':               license_id,
+                    'legal_business_name':       license_data.get('Legal_Business_Name',''),
+                    'is_seller':                 data.get('is_seller'),
+                    'is_buyer':                  data.get('is_buyer'),
+                    'profile_category':          data.get('license_category'),
+                }
+
+                license_obj = License.objects.create(**license_create_data)
+
+                for k, v in get_format_dict('Licenses_To_DB').items():
+                    if k in license_obj.__dict__:
+                        license_obj.__dict__[k] = license_data.get(v)
+                license_obj.save()
+
+                raise APIError('testing')
+
 
         except DatabaseError as e:
-            return Response({'detail': f'Error: {e}'}, status=400)
+            return Response({'details': f'Error: {e}'}, status=400)
+        except APIError as e:
+            return e.get_response()
 
     @action(
         detail=False,
