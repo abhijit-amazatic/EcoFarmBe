@@ -1,4 +1,5 @@
 import json
+from os import name
 import re
 import traceback
 import datetime
@@ -25,10 +26,6 @@ from rest_framework.response import Response
 from phonenumber_field.phonenumber import to_python as phonenumber_parse
 
 
-from user.models import (
-    User,
-    MemberCategory,
-)
 from integration.crm import (
     get_record,
     search_query,
@@ -38,13 +35,22 @@ from integration.crm import (
     get_format_dict,
 )
 from permission.filterqueryset import (filterQuerySet, )
+from user.models import (
+    User,
+    MemberCategory,
+)
 from brand.models import (
     Organization,
+    OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
     License,
 )
+from brand.serializers import (
+    LicenseSerializer,
+)
 from .models import (
+    InternalOnboarding,
     InternalOnboardingInvite,
 )
 from .serializers import (
@@ -52,7 +58,10 @@ from .serializers import (
     InternalOnboardingInviteVerifySerializer,
     InternalOnboardingInviteSetPassSerializer,
 )
-
+from .tasks import (
+    send_internal_onboarding_invitation,
+    create_crm_associations_and_fetch_data,
+)
 
 class APIError(Exception):
     """
@@ -86,27 +95,24 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        account_id = data.get('zoho_account')
-        account_data = None
-        account_associations = {}
-        if account_id:
-            resp_account =  get_record(module='Accounts', record_id=account_id, full=True)
-            if not resp_account.get('status_code') == 200:
-                return Response({'zoho_account': 'Invalid crm account id.'}, status=400)
-            else:
-                account_data = resp_account.get('response')
-                account_associations = get_account_associations(account_id=account_id, brands=False)
-
         vendor_id = data.get('zoho_vendor')
         vendor_data = None
-        vendor_associations = {}
         if vendor_id:
             resp_vendor = get_record(module='Vendors', record_id=vendor_id, full=True)
             if not resp_vendor.get('status_code') == 200:
                 return Response({'zoho_vendor': 'Invalid crm vendor id.'}, status=400)
             else:
                 vendor_data = resp_vendor.get('response')
-                vendor_associations = get_vendor_associations(vendor_id=vendor_id, brands=False, cultivars=False)
+
+        account_id = data.get('zoho_account')
+        account_data = None
+        if account_id:
+            resp_account =  get_record(module='Accounts', record_id=account_id, full=True)
+            if not resp_account.get('status_code') == 200:
+                return Response({'zoho_account': 'Invalid crm account id.'}, status=400)
+            else:
+                account_data = resp_account.get('response')
+
 
         license_number = data.get('license_number')
         license_id = None
@@ -159,27 +165,24 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 constacts_user_dict = {}
                 for contact_id, contact_data in constacts_data_dict.items():
                     user_defaults = {
-                        'phone': contact_data.get('Phone'),
-                        'first_name': contact_data.get('Full_Name'),
-                        'last_name': contact_data.get('Last_Name'),
-                        'full_name': contact_data.get('Full_Name'),
-
-                        'linkedin': contact_data.get('Linkedin'),
-                        'instagram': contact_data.get('Instagram'),
-                        'facebook': contact_data.get('Facebook'),
-                        'twitter': contact_data.get('Twitter'),
-
-                        'city': contact_data.get('Mailing_City'),
-                        'state': contact_data.get('Mailing_State'),
-                        'country': contact_data.get('Mailing_Country'),
-                        'zip_code': contact_data.get('Mailing_Zip'),
-
-                        'zoho_contact_id': contact_id,
-                        'zoho_contact_id': contact_id,
+                        'phone':             contact_data.get('Phone'),
+                        'first_name':        contact_data.get('Full_Name'),
+                        'last_name':         contact_data.get('Last_Name'),
+                        'full_name':         contact_data.get('Full_Name'),
+                        'linkedin':          contact_data.get('Linkedin'),
+                        'instagram':         contact_data.get('Instagram'),
+                        'facebook':          contact_data.get('Facebook'),
+                        'twitter':           contact_data.get('Twitter'),
+                        'city':              contact_data.get('Mailing_City'),
+                        'state':             contact_data.get('Mailing_State'),
+                        'country':           contact_data.get('Mailing_Country'),
+                        'zip_code':          contact_data.get('Mailing_Zip'),
+                        'zoho_contact_id':   contact_id,
+                        'zoho_contact_id':   contact_id,
                         'is_updated_in_crm': True,
-                        'existing_member': True,
-                        'crm_link': f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Contacts/{contact_id}/",
-                        'membership_type': User.CATEGORY_BUSINESS,
+                        'existing_member':   True,
+                        'crm_link':          f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Contacts/{contact_id}/",
+                        'membership_type':   User.CATEGORY_BUSINESS,
                     }
                     user, created = User.objects.get_or_create(email=contact_data.get('Email'), defaults=user_defaults)
                     if created:
@@ -192,7 +195,8 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 organization_obj = None
                 if not data['organization'].get('id'):
                     organization_create_data = copy.deepcopy(data['organization'])
-                    organization_create_data.pop('id')
+                    if 'id' in organization_create_data:
+                        organization_create_data.pop('id')
                     organization_create_data['created_by'] = constacts_user_dict[org_owner_contact_id][0]
                     organization_obj = Organization.objects.create(**organization_create_data)
                     create_or_update_org_in_crm(organization_obj)
@@ -207,30 +211,84 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     raise APIError('Unable to get organization crm id')
 
                 license_create_data = {
-                    'created_by':                request.user,
-                    'organization':              organization_obj,
-                    'license_number':            license_number,
-                    'zoho_crm_id':               license_id,
-                    'legal_business_name':       license_data.get('Legal_Business_Name',''),
-                    'is_seller':                 data.get('is_seller'),
-                    'is_buyer':                  data.get('is_buyer'),
-                    'profile_category':          data.get('license_category'),
+                    'created_by':          request.user,
+                    'organization':        organization_obj,
+                    'license_number':      license_number,
+                    'zoho_crm_id':         license_id,
+                    'legal_business_name': license_data.get('Legal_Business_Name',''),
+                    'ein_or_ssn':          data.get('ein_or_ssn'),
+                    'tax_identification':  data.get('tax_identification'),
+                    'is_seller':           data.get('is_seller'),
+                    'is_buyer':            data.get('is_buyer'),
+                    'profile_category':    data.get('license_category'),
                 }
 
                 license_obj = License.objects.create(**license_create_data)
 
                 for k, v in get_format_dict('Licenses_To_DB').items():
-                    if k in license_obj.__dict__:
+                    if k in license_obj.__dict__ and k not in ('license_number', 'legal_business_name'):
                         license_obj.__dict__[k] = license_data.get(v)
+                license_obj.step = 1
                 license_obj.save()
 
-                raise APIError('testing')
+                invite_id_list = []
+                for contact_id, (user, created) in constacts_user_dict.items():
+                    organization_user, _ = OrganizationUser.objects.get_or_create(
+                        organization=organization_obj,
+                        user=user,
+                    )
+                    roles_ls = []
+                    for role_name in contacts_dict[contact_id]['roles']:
+                        role, _ = OrganizationRole.objects.get_or_create(organization=organization_obj, name=role_name)
+                        roles_ls.append(role)
+                        organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
+                            organization_user=organization_user,
+                            role=role,
+                        )
+                        organization_user_role.licenses.add(license_obj)
+                    inv_obj = InternalOnboardingInvite.objects.create(
+                        organization=organization_obj,
+                        user=user,
+                        license=license_obj,
+                        created_by=request.user,
+                        is_user_created=created,
+                        is_user_do_onboarding=contacts_dict[contact_id]['send_mail'],
+                    )
+                    inv_obj.roles.add(*roles_ls)
+                    invite_id_list.append(inv_obj.id)
 
 
+                InternalOnboarding.objects.create(
+                    license_number=license_number,
+                    submitted_data=request.data,
+                    created_by=request.user,
+                )
+
+                # raise APIError('testing')
         except DatabaseError as e:
             return Response({'details': f'Error: {e}'}, status=400)
         except APIError as e:
             return e.get_response()
+        else:
+            send_internal_onboarding_invitation.delay(invite_id_list)
+            create_crm_associations_and_fetch_data.delay(
+                create_crm_associations_kwargs={
+                    'vendor_id':     vendor_id,
+                    'account_id':    account_id,
+                    'license_id':    license_id,
+                    'org_id':        organization_id,
+                    'contact_id_ls': list(contacts_dict.keys()),
+                    'vendor_data':   vendor_data,
+                    'account_data':  account_data,
+                },
+                fetch_data_kwargs={
+                    'user_id': request.user.id,
+                    'license_number': license_number, 
+                    'license_obj_id': license_obj.id,
+                },
+            )
+            lic_serializer = LicenseSerializer(license_obj, context=self.get_serializer_context())
+            return Response(lic_serializer.data)
 
     @action(
         detail=False,
@@ -247,30 +305,23 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         instance = serializer.validated_data['token']
         user = instance.user
         response_data = {
-            'new_user': True if not user.last_login else False,
+            # 'new_user': True if not user.last_login else False,
             'is_password_set': user.has_usable_password(),
             'email': user.email,
             'full_name': user.get_full_name(),
+            'phone': user.phone,
         }
         if instance.status in ('pending',):
-            organization_user, _ = OrganizationUser.objects.get_or_create(
-                organization=instance.organization,
-                user=user,
-            )
-
-            for role in instance.roles.all():
-                organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
-                    organization_user=organization_user,
-                    role=role,
-                )
-                organization_user_role.licenses.add(instance.license)
-                instance.completed_on = timezone.now()
+            user.is_verified = True
+            user.save()
+            instance.completed_on = timezone.now()
             instance.status = 'completed'
             instance.save()
             response_data['detail'] = 'Accepted'
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'completed':
-            response = Response({'detail': 'Already accepted'},status=200)
+            response_data['detail'] = 'Already accepted'
+            response = Response(response_data, status=200)
         else:
             response = Response({'detail': 'invalid token'},status=400)
         return response
@@ -290,7 +341,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         instance = serializer.validated_data['token']
         user = instance.user
         if instance.status == 'completed':
-            if not user.last_login and not user.has_usable_password():
+            if not user.has_usable_password():
                 with transaction.atomic():
                     user.date_of_birth = serializer.validated_data['dob']
                     user.phone = serializer.validated_data['phone']

@@ -17,10 +17,17 @@ from .serializers_mixin import InternalOnboardingInviteTokenField
 
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(serializers.Serializer):
     """
     This defines OrganizationSerializer
     """
+    id = serializers.IntegerField(allow_null=True, required=True)
+    name = serializers.CharField(max_length=255, required=True)
+    email = serializers.EmailField(max_length=255, required=True)
+    phone = PhoneNumberField(label="Phone no.", required=False)
+    category = serializers.CharField(max_length=255, required=False)
+    about = serializers.CharField(max_length=255, required=False)
+    ethics_and_certifications = serializers.ListField(child=serializers.CharField(), allow_empty=True)
 
     def validate(self, attrs):
         validated_data = super().validate(attrs=attrs)
@@ -37,10 +44,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
     #     return super().create(validated_data)
 
     class Meta:
-        model = Organization
         # read_only_fields = ('created_on', 'updated_on')
-        # fields = ('__all__')
-        exclude = ('created_by', 'created_on', 'updated_on')
+        # exclude = ('created_by', 'created_on', 'updated_on')
+        fields = ('__all__')
 
 
 class ContactsSerializer(serializers.Serializer):
@@ -68,6 +74,8 @@ class InternalOnboardingSerializer(serializers.Serializer):
     zoho_vendor = serializers.CharField(max_length=255, required=False)
     license_number = serializers.CharField(max_length=255, required=True)
     license_category = serializers.CharField(max_length=255, required=True)
+    is_seller = serializers.BooleanField(required=True)
+    is_buyer = serializers.BooleanField(required=True)
     ein_or_ssn = serializers.IntegerField(required=True)
 
     business_structure = serializers.CharField(max_length=255, required=False)
@@ -76,8 +84,11 @@ class InternalOnboardingSerializer(serializers.Serializer):
     seller_permit_url = serializers.CharField(max_length=255, required=False)
     w9_url = serializers.CharField(max_length=255, required=False)
 
+    tax_identification = serializers.CharField(max_length=255, required=True)
+
     docs_already_on_file = serializers.BooleanField()
 
+ 
     contacts = ContactsSerializer(many=True, required=True)
 
     organization = OrganizationSerializer()
@@ -105,11 +116,14 @@ class InternalOnboardingSerializer(serializers.Serializer):
             'zoho_vendor',
             'license_number',
             'license_category',
+            'is_seller',
+            'is_buyer',
             'ein_or_ssn',
             'business_structure',
             'license_url',
             'seller_permit_url',
             'w9_url',
+            'tax_identification',
             'docs_already_on_file',
             'contacts',
             'organization',

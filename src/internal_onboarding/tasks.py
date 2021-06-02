@@ -12,7 +12,22 @@ from django.utils import  timezone
 from slacker import Slacker
 
 from integration.apps.twilio import (send_sms,)
-from integration.crm import (get_records_from_crm, search_query, insert_vendors, insert_accounts)
+from integration.crm import (
+    get_crm_obj,
+    get_records_from_crm,
+    search_query,
+    insert_vendors,
+    insert_accounts,
+    get_record,
+    search_query,
+    create_records,
+    get_account_associations,
+    get_vendor_associations,
+    create_or_update_org_in_crm,
+    get_format_dict,
+)
+
+
 from brand.task_helpers import insert_data_from_crm
 from core.celery import app
 from core.utility import (
@@ -35,18 +50,15 @@ slack = Slacker(settings.SLACK_TOKEN)
 
 
 @app.task(queue="general")
-def send_internal_onboarding_invitation(invite_obj_id):
+def send_internal_onboarding_invitation(invite_obj_id_list):
     """
     send organization user invitation.
     """
-    try:
-        invite_obj = InternalOnboardingInvite.objects.get(id=invite_obj_id)
-    except InternalOnboardingInvite.DoesNotExist:
-        pass
-    else:
+    qs = InternalOnboardingInvite.objects.filter(id__in=invite_obj_id_list)
+    for invite_obj in qs:
         roles = [ x.name for x in invite_obj.roles.all()]
         if roles[:-1]:
-            role_str = ', '.join(roles[:-1]) + ' and ' + roles[:-1]
+            role_str = ', '.join(roles[:-1]) + ' and ' + roles[-1:][0]
         else:
             role_str = ', '.join(roles)
         context = {
@@ -81,65 +93,8 @@ def send_internal_onboarding_invitation(invite_obj_id):
 
 
 
-# @app.task(queue="urgent")
-# def send_onboarding_data_fetch_verification(license_id, user_id):
-#     """
-#     async task for existing user.Insert/create license based on license number.
-#     We use this while fetching data after first step(license creation).
-#     """
-#     instance = License.objects.filter(id=license_id).first()
-#     response_data = search_query('Licenses', instance.license_number, 'Name', is_license=True)
-#     status_code = response_data.get('status_code')
-#     if status_code == 200:
-#         data = response_data.get('response', {})
-#         if data:
-#             if isinstance(data, list):
-#                 data = data[0]
-#             instance.crm_license_data = data
-#             instance.owner_email = data.get("License_Email")
-#             owner_name = data.get("Owner_First_Name","")+' '+data.get("Owner_Last_Name","")
-#             instance.owner_name = owner_name.strip()
-#             instance.legal_business_name = data.get("Legal_Business_Name")
-#             if instance.owner_email:
-#                 pass
-#                 # try:
-#                 #     send_onboarding_data_fetch_verification_mail(instance, user_id)
-#                 # except Exception as e:
-#                 #     traceback.print_tb(e.__traceback__)
-#                 else:
-#                     instance.owner_verification_status = 'verification_code_sent'
-#             else:
-#                 instance.owner_verification_status = 'owner_email_not_found'
-#         else:
-#             instance.owner_verification_status = 'licence_data_not_found'
-#             instance.data_fetch_status = 'licence_data_not_found'
-#     elif status_code == 204:
-#         instance.owner_verification_status = 'licence_data_not_found'
-#         instance.data_fetch_status = 'licence_data_not_found'
-#     else:
-#         print(response_data)
-#         instance.owner_verification_status = 'error'
-#     instance.save()
-#     if instance.owner_verification_status == 'verification_code_sent':
-#         response_data = get_records_from_crm(license_number=instance.license_number)
-#         status_code = response_data.get('status_code')
-#         if not status_code:
-#             data = response_data.get(instance.license_number, {})
-#             if data and not data.get('error'):
-#                 instance.crm_profile_data = response_data
-#                 instance.data_fetch_status = 'fetched'
-#             else:
-#                 instance.data_fetch_status = 'licence_association_not_found'
-#         else:
-#             print(response_data)
-#             instance.data_fetch_status = 'error'
-#         instance.save()
-
-
-
-
 @app.task(queue="general")
-def fetch_onboarding_data_to_db(user_id, license_number, license_id):
+def fetch_onboarding_data_to_db(user_id, license_number, license_obj_id):
     """
     async task for existing user.Insert/create license based on license number.
     We use this while fetching data after first step(license creation).
@@ -149,14 +104,13 @@ def fetch_onboarding_data_to_db(user_id, license_number, license_id):
     except User.DoesNotExist as e:
         traceback.print_tb(e.__traceback__)
     else:
-
         response_data = get_records_from_crm(license_number=license_number)
         status_code = response_data.get('status_code')
         if not status_code:
             data = response_data.get(license_number, {})
             if data and not data.get('error'):
                 try:
-                    insert_data_from_crm(user, response_data, license_id, license_number)
+                    insert_data_from_crm(user, response_data, license_obj_id, license_number)
                 except Exception as e:
                     print('Error in insert_data_from_crm')
                     traceback.print_tb(e.__traceback__)
@@ -167,3 +121,57 @@ def fetch_onboarding_data_to_db(user_id, license_number, license_id):
             print(response_data)
 
 
+
+@app.task(queue="general")
+def create_crm_associations(vendor_id, account_id, org_id, license_id, contact_id_ls=[], vendor_data={}, account_data={}):
+    if vendor_id:
+        vendor_associations = get_vendor_associations(vendor_id=vendor_id, brands=False, cultivars=False)
+        if license_id not in [x['id'] for x in vendor_associations['Licenses']]:
+            r = create_records('Vendors_X_Licenses', [{'Licenses_Module': vendor_id, 'Licenses': license_id}])
+            if r.get('status_code') != 201:
+                print(r)
+        if org_id not in [x['id'] for x in vendor_associations['Orgs']]:
+            r = create_records('Orgs_X_Vendors', [{'Vendor': vendor_id, 'Org': org_id} ])
+            if r.get('status_code') != 201:
+                print(r)
+        associated_contact_ids = [x['id'] for x in vendor_associations['Contacts']]
+        contact_ids_to_associate = [id for id in contact_id_ls if id not in  associated_contact_ids]
+        if contact_ids_to_associate:
+            r = create_records('Vendors_X_Contacts', [{'Vendor': vendor_id, 'Contact': x} for x in contact_ids_to_associate])
+            if r.get('status_code') != 201:
+                print(r)
+
+    if account_id:
+        account_associations = get_account_associations(account_id=account_id, brands=False)
+        if license_id not in [x['id'] for x in account_associations['Licenses']]:
+            r = create_records('Accounts_X_Licenses', [{'Licenses_Module': account_id, 'Licenses': license_id}])
+            if r.get('status_code') != 201:
+                print(r)
+        if org_id not in [x['id'] for x in account_associations['Orgs']]:
+            r = create_records('Orgs_X_Accounts', [{'Account': account_id, 'Org': org_id}])
+            if r.get('status_code') != 201:
+                print(r)
+        associated_contact_ids = [x['id'] for x in account_associations['Contacts']]
+        contact_ids_to_associate = [id for id in contact_id_ls if id not in  associated_contact_ids]
+        if contact_ids_to_associate:
+            r = create_records('Accounts_X_Contacts', [{'Accounts': account_id, 'Contacts': x} for x in contact_ids_to_associate])
+            if r.get('status_code') != 201:
+                print(r)
+
+    if vendor_id and account_id:
+        crm_obj = get_crm_obj()
+        if vendor_data and not vendor_data.get('Associated_Account_Record'):
+            r = crm_obj.update_records('Vendors', [{'id': vendor_id, 'Associated_Account_Record': account_id}])
+            if r.get('status_code') != 201:
+                print(r)
+
+        if account_data and not account_data.get('Associated_Vendor_Record'):
+            r = crm_obj.update_records('Accounts', [{'id': account_id, 'Associated_Vendor_Record': vendor_id}])
+            if r.get('status_code') != 201:
+                print(r)
+
+
+@app.task(queue="general")
+def create_crm_associations_and_fetch_data(create_crm_associations_kwargs, fetch_data_kwargs={}):
+    create_crm_associations(**create_crm_associations_kwargs)
+    fetch_onboarding_data_to_db(**fetch_data_kwargs)

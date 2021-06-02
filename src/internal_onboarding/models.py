@@ -81,6 +81,8 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
         choices=STATUS_CHOICES,
         default='pending',
     )
+    is_user_created = models.BooleanField(default=False)
+    is_user_do_onboarding = models.BooleanField(default=False)
     completed_on = models.DateTimeField(blank=True, null=True)
 
     class Meta:
