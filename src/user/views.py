@@ -36,11 +36,12 @@ from .serializers import (
     TermsAndConditionAcceptanceSerializer,
     HelpDocumentationSerializer,
 )
+from permission.filterqueryset import (filterQuerySet, )
 from integration.crm import (search_query, create_records, update_records)
 from integration.box import(get_box_tokens, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
 from slacker import Slacker
-from brand.models import (License,)
+from brand.models import (License,Organization,)
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)
@@ -207,6 +208,28 @@ class CategoryView(APIView):
             ordered_response.append(self.search(category,items)[0])
         return Response(ordered_response)
     
+
+class PendoView(APIView):
+    
+    """
+    Get Logged in user's information for pendo mapping.
+    """
+
+    def get(self, request):
+        """
+        Map data according to pendo structure.
+        """
+        qs_license = filterQuerySet.for_user(License.objects.all(), request.user)
+        qs_org = filterQuerySet.for_user(Organization.objects.all(), request.user)
+        return Response({
+            "has_access_to_organizations":qs_org.values_list('name', flat=True).distinct(),
+            "created_organizations":qs_org.filter(created_by=request.user).values_list('name',flat=True).distinct(),
+            "has_access_to_license_names":qs_license.values_list('legal_business_name', flat=True).distinct(),
+            "created_license_names":qs_license.filter(created_by=request.user).values_list('legal_business_name',flat=True).distinct(),
+            "has_access_to_license_numbers":qs_license.values_list('license_number', flat=True).distinct(),
+            "created_license_numbers":qs_license.filter(created_by=request.user).values_list('license_number',flat=True).distinct(),
+            "associated_profile_categories":qs_license.values_list('profile_category', flat=True).distinct()
+        }, status=200)
 
 
 class LogInView(APIView):

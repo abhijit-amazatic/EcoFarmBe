@@ -29,6 +29,7 @@ from user.views import (UserViewSet, MeView, LogInView,
                         GetPhoneNumberVerificationCodeCallView,
                         PhoneNumberVerificationView,
                         HelpDocumentationView,
+                        PendoView,
                         TermsAndConditionAcceptanceView,)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
@@ -281,6 +282,7 @@ urlpatterns = [
     path(r'books/bill/approve', ApproveBillView.as_view(), name="approve-bill"),
     path(r'books/salesorder/sub-statuses', SalesOrderSubStatusesView.as_view(), name="sales-order-sub-statuses"),
     path(r'inventory/metadata/', InventoryMetaDataView.as_view(), name="inventory-metadata"),
+    path(r'pendo/me/', PendoView.as_view(), name='pendo-me'),
 ] + router.urls
 
 
