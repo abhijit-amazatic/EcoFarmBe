@@ -60,7 +60,7 @@ from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
                               send_template)
-from integration.tasks import (send_estimate, )
+from integration.tasks import (send_estimate, delete_estimate_task, )
 from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET
@@ -317,7 +317,9 @@ class EstimateView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         # estimate_obj = save_estimate(request)
-        return Response(response) 
+        customer_name = response.get('customer_name')
+        delete_estimate_task.delay(customer_name)
+        return Response(response)
         
     def put(self, request):
         """
@@ -331,12 +333,16 @@ class EstimateView(APIView):
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             # estimate_obj = save_estimate(request)
+            customer_name = response.get('customer_name')
+            delete_estimate_task.delay(customer_name)
             return Response(response)
         else:
             estimate = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
             if estimate.get('code') and estimate['code'] != 0:
                 return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
             # update_available_for_sale(request.data)
+            customer_name = response.get('customer_name')
+            delete_estimate_task.delay(customer_name)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -345,9 +351,12 @@ class EstimateView(APIView):
         Delete an estimate from Zoho books.
         """
         organization_name = request.query_params.get('organization_name')
-        estimate_id = request.data['estimate_id']
+        estimate_id = request.data.get('estimate_id')
+        customer_name = request.data.get('customer_name')
         if estimate_id:
             return Response(delete_estimate(organization_name, estimate_id=estimate_id, params=request.query_params.dict()))
+        if customer_name:
+            delete_estimate_task.delay(customer_name)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -34,3 +34,17 @@ def save_estimate(request):
     for item in line_items:
         item_obj, created = LineItem.objects.update_or_create(estimate=estimate_obj, item_id=item.get('item_id'), defaults=item)
     return estimate_obj
+
+def delete_estimate(customer_name=None):
+    """
+    Delete estimate from db.
+    """
+    if customer_name:
+        try:
+            obj = Estimate.objects.get(customer_name=customer_name)
+            LineItem.objects.filter(estimate=obj).delete()
+            obj.delete()
+            return True
+        except (LineItem.DoesNotExist, Estimate.DoesNotExist):
+            return False
+    return False

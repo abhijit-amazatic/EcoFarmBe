@@ -15,6 +15,7 @@ from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses)
 from integration.apps.bcc import (post_licenses_to_crm, )
+from bill.utils import (delete_estimate, )
 
 
 def get_price_data():
@@ -76,3 +77,9 @@ def update_in_crm_task(module, record_id):
 @app.task(queue="general")
 def update_license_task(dba, license_id):
     update_license(dba=dba, license=None, license_id=license_id)
+
+@app.task(queue="urgent")
+def delete_estimate_task(customer_name):
+    is_deleted = delete_estimate(customer_name=customer_name)
+    if not is_deleted:
+        print(f'Estimate of {customer_name} cannot be deleted from db.')
