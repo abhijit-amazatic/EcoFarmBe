@@ -170,7 +170,7 @@ class InternalOnboardingInviteSetPassSerializer(serializers.Serializer):
         """
         Check current password.
         """
-        if self.initial_data['password'] != value:
+        if self.initial_data['new_password'] != value:
             raise serializers.ValidationError("Password does not match.")
         return value
 

@@ -70,7 +70,7 @@ def send_internal_onboarding_invitation(invite_obj_id_list):
             'license': f"{invite_obj.license.legal_business_name} - {invite_obj.license.license_number}",
             'phone': invite_obj.user.phone.as_e164,
             # 'token': invite_obj.get_invite_token(),
-            'link':  '{}/verify-onboarding-invitation?token={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
+            'link':  '{}/verify-internal-onboarding-invite?token={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
         }
         # context['link'] = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), context['token'])
 
@@ -162,12 +162,12 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contact_i
         crm_obj = get_crm_obj()
         if vendor_data and not vendor_data.get('Associated_Account_Record'):
             r = crm_obj.update_records('Vendors', [{'id': vendor_id, 'Associated_Account_Record': account_id}])
-            if r.get('status_code') != 201:
+            if r.get('status_code') != 200:
                 print(r)
 
         if account_data and not account_data.get('Associated_Vendor_Record'):
             r = crm_obj.update_records('Accounts', [{'id': account_id, 'Associated_Vendor_Record': vendor_id}])
-            if r.get('status_code') != 201:
+            if r.get('status_code') != 200:
                 print(r)
 
 

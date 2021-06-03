@@ -93,10 +93,10 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
         return f'{self.user} | {self.license}'
 
     def get_invite_token(self):
-        context = "{0}|{1}|{2}".format(self.id, self.user_id,)
+        context = "{0}|{1}|{2}".format(self.id, self.user_id, self.license_id)
         token_bytes = self.fernet.encrypt(context.encode('utf-8'))
         # removing '=' to use token as url param
-        return token_bytes.decode('utf-8').rstrip("=")
+        return token_bytes.decode('utf-8').rstrip('=')
 
     @classmethod
     def get_object_from_invite_token(cls, token):

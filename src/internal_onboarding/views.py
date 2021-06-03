@@ -306,10 +306,13 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         user = instance.user
         response_data = {
             # 'new_user': True if not user.last_login else False,
-            'is_password_set': user.has_usable_password(),
-            'email': user.email,
-            'full_name': user.get_full_name(),
-            'phone': user.phone,
+            'is_new_user': not user.has_usable_password() and not user.last_login,
+            'user': {
+                'email': user.email,
+                'full_name': user.get_full_name(),
+                'phone': user.phone.as_e164,
+                'dob': user.date_of_birth,
+            },
         }
         if instance.status in ('pending',):
             user.is_verified = True
@@ -321,9 +324,9 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'completed':
             response_data['detail'] = 'Already accepted'
-            response = Response(response_data, status=200)
+            response = Response(response_data, status=status.HTTP_200_OK)
         else:
-            response = Response({'detail': 'invalid token'},status=400)
+            response = Response({'detail': 'invalid token'}, status=400)
         return response
 
     @action(
@@ -347,9 +350,9 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     user.phone = serializer.validated_data['phone']
                     user.save()
                     user.set_password(serializer.validated_data['new_password'])
-                response = Response({'detail': 'Password set successfull'}, status=200)
+                response = Response({'detail': 'Password is set successfully'}, status=200)
             else:
-                response = Response({'detail': 'Already have a password for this account'}, status=400)
+                response = Response({'detail': 'Already have a password set for this account'}, status=400)
         else:
             response = Response({'detail': 'Invite is not completed'}, status=400)
         return response
