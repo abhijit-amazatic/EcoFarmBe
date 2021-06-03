@@ -12,6 +12,7 @@ from django.utils import  timezone
 from slacker import Slacker
 
 from integration.apps.twilio import (send_sms,)
+from utils import (parse_domain_from_link, )
 from integration.crm import (
     get_crm_obj,
     get_records_from_crm,
@@ -67,12 +68,21 @@ def send_internal_onboarding_invitation(invite_obj_id_list):
             'organization': invite_obj.organization.name,
             'roles': roles,
             'role_str': role_str,
-            'license': f"{invite_obj.license.legal_business_name} - {invite_obj.license.license_number}",
+            'license_number': invite_obj.license.license_number,
+            'legal_business_name': invite_obj.license.legal_business_name,
             'phone': invite_obj.user.phone.as_e164,
-            # 'token': invite_obj.get_invite_token(),
-            'link':  '{}/verify-internal-onboarding-invite?token={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
+            'is_new_user': invite_obj.is_user_created,
+            'is_user_do_onboarding': invite_obj.is_user_do_onboarding,
         }
-        # context['link'] = '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), context['token'])
+        f_domain = parse_domain_from_link(settings.FRONTEND_DOMAIN_NAME)
+        if invite_obj.is_user_created:
+            context['link'] = f'https://{f_domain}/verify-internal-onboarding-invite?token={invite_obj.get_invite_token()}'
+            msg = ('Your Thrive Society Account has been created under the following License: {license_number} - {legal_business_name}.\n'
+                'Please check your email {email}.')
+        else:
+            context['link'] = f'https://{f_domain}/login'
+            msg = ('New license profile is assigned to your Thrive Society Account.\n'
+                'Please check your email {email}.')
 
         try:
             mail_send(
@@ -85,10 +95,6 @@ def send_internal_onboarding_invitation(invite_obj_id_list):
             traceback.print_tb(e.__traceback__)
         else:
             # msg = 'You have been invited to join organization "{organization}" under the license {license} as {role_str} .\nPlease check your email {email}'.format(**context)
-            msg = (
-                'Your Thrive Society Account has been created under the following License: {license}.\n'
-                'Please check your email {email}'
-            )
             send_sms(context['phone'], msg.format(**context))
 
 

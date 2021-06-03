@@ -5,17 +5,29 @@
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            Your Thrive Society Account has been created under the following License: <strong>{{license}}</strong>.
+            {%if is_new_user%} 
+                    Your Thrive Society Account has been created under the following License:
+            {% else %}
+                    Your Thrive Society Account has been assigned to the License:
+            {% endif %}
+            <strong>{{license_number}}</strong> - <strong>{{legal_business_name}}</strong>.
+            {% if is_user_do_onboarding %}
+                Please log in and complete profile onboarding for the license.
+            {% endif %}
             {% comment %} You have been invited to join organization <strong>{{organization}}</strong> under the license <strong>{{license}}</strong> as 
             {% for role in roles %}
                 {% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}<strong>{{role}}</strong>
             {% endfor %}. {% endcomment %}
         </p>
         <p style='font-size:16px !important;color: #013c48;'>
+            {%if is_new_user%} 
+                Please follow the link below to create a password and log in (login with user id: <strong>{{email}}</strong>):<br>
+                <span style="font-size:12px !important;">(Link is valid for 7 days.)</span><br>
+            {% else %}
+                Please follow the link below to log in.<br>
+            {% endif %}
             {% comment %} Please click the link below to accept invitation<br> {% endcomment %}
-            Please follow the link below to create a password and log in:<br>
-            <span style="font-size:12px !important;color: #013c48;">(Link is valid for 7 days.)</span><br>
-            <a style="font-size:16px !important;color: #90835c;" href="{{link}}">{{link}}</a>
+            <a style="color: #90835c !important;" href="{{link}}"><span style="color: #90835c !important;">{{link}}</span></a>
         </p>
     </div>
 </div>
