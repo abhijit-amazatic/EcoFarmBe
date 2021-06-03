@@ -539,7 +539,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     result = create_records('Vendors', d, True)
                 else:
                     d['id'] = result.get('response')[0]['id']
-                    result = update_records('Accounts', d, True)
+                    result = update_records('Vendors', d, True)
             final_dict['vendor'] = result
             if response['status_code'] == 200 and result['status_code'] in [201]:
                 record_response = result['response']['response']['data']
