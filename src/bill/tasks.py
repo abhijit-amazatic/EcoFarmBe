@@ -8,11 +8,11 @@ from inventory.models import Inventory
 from brand.models import License
 
 @app.task(queue="urgent")
-def notify_estimate(notification_methods,sign_url,estimate_id,customer_name,external_contacts):
+def notify_estimate(notification_methods,sign_url,customer_name,external_contacts):
     """
     Send estimate notifications.
     """
-    order_data = list(LineItem.objects.filter(estimate_id=estimate_id,estimate__db_status='sent').values())
+    order_data = list(LineItem.objects.filter(estimate__customer_name=customer_name).values())
     item_total = '{:,.2f}'.format(sum(i['item_total'] for i in order_data))
     quantity = sum(i['quantity'] for i in order_data)
     prod_category = Inventory.objects.filter(item_id__in=[i['item_id'] for i in  order_data],parent_category_name__isnull=False).values_list('parent_category_name',flat=True).distinct()
@@ -45,27 +45,28 @@ def notify_estimate(notification_methods,sign_url,estimate_id,customer_name,exte
                 pass
         except Exception as e:
             print('exception while sending estimate notifications',e)
-            
-    for contact in external_contacts:
-        try:
-            if contact.get('email'):
-                mail_send("order-notify.html",{'sign_url': sign_url,'full_name':contact.get('party_name'),'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order','business_name': customer_name, 'license_number': get_license_number(license_obj),'order_amount':item_total,'quantity':quantity,'product_category':category},"Your Thrive-Society Order.", recipient_list=contact.get('email'))
-            if contact.get('text'):
-                context = {
-                    'sign_url': sign_url,
-                    'full_name':contact.get('party_name'),
-                    'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order',
-                    'item_total':item_total,
-                    'quantity':quantity,
-                    'category':category,
-                    'license_number': get_license_number(license_obj),
-                    'business_name':customer_name,
-                    'phone': contact.get('text')
-                }
-                msg = 'Hi {full_name},\n\nYour Thrive Society Marketplace(Pending Order) is ready for your review & approval by accessing the following link\n: {order_url}.\nThis order is placed on behalf of {business_name}-License #{license_number}.\n\nOrder- Pending\nOrder Amount- {item_total}\nQuantity- {quantity}\nProduct Category- {category}'.format(**context)
-                send_sms(context['phone'], msg)
-        except Exception as e:
-            print('exception while sending notification to external contact',e)
+
+    if external_contacts:         
+        for contact in external_contacts:
+            try:
+                if contact.get('email'):
+                    mail_send("order-notify.html",{'sign_url': sign_url,'full_name':contact.get('party_name'),'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order','business_name': customer_name, 'license_number': get_license_number(license_obj),'order_amount':item_total,'quantity':quantity,'product_category':category},"Your Thrive-Society Order.", recipient_list=contact.get('email'))
+                if contact.get('text'):
+                    context = {
+                        'sign_url': sign_url,
+                        'full_name':contact.get('party_name'),
+                        'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order',
+                        'item_total':item_total,
+                        'quantity':quantity,
+                        'category':category,
+                        'license_number': get_license_number(license_obj),
+                        'business_name':customer_name,
+                        'phone': contact.get('text')
+                    }
+                    msg = 'Hi {full_name},\n\nYour Thrive Society Marketplace(Pending Order) is ready for your review & approval by accessing the following link\n: {order_url}.\nThis order is placed on behalf of {business_name}-License #{license_number}.\n\nOrder- Pending\nOrder Amount- {item_total}\nQuantity- {quantity}\nProduct Category- {category}'.format(**context)
+                    send_sms(context['phone'], msg)
+            except Exception as e:
+                print('exception while sending notification to external contact',e)
                 
             
         
