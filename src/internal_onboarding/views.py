@@ -273,17 +273,18 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             send_internal_onboarding_invitation.delay(invite_id_list)
             create_crm_associations_and_fetch_data.delay(
                 create_crm_associations_kwargs={
-                    'vendor_id':     vendor_id,
-                    'account_id':    account_id,
-                    'license_id':    license_id,
-                    'org_id':        organization_id,
-                    'contact_id_ls': list(contacts_dict.keys()),
-                    'vendor_data':   vendor_data,
-                    'account_data':  account_data,
+                    'vendor_id':         vendor_id,
+                    'account_id':        account_id,
+                    'license_id':        license_id,
+                    'org_id':            organization_id,
+                    'contacts_dict':      contacts_dict,
+                    'constacts_data_dict': {ck: {k: v for k, v in cv.items() if k in ('Contact_Company_Role',)} for ck, cv in constacts_data_dict.items()},
+                    'vendor_data':       vendor_data,
+                    'account_data':      account_data,
                 },
                 fetch_data_kwargs={
                     'user_id': request.user.id,
-                    'license_number': license_number, 
+                    'license_number': license_number,
                     'license_obj_id': license_obj.id,
                 },
             )
