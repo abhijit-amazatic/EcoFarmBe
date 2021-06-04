@@ -246,16 +246,18 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                             role=role,
                         )
                         organization_user_role.licenses.add(license_obj)
-                    inv_obj = InternalOnboardingInvite.objects.create(
-                        organization=organization_obj,
-                        user=user,
-                        license=license_obj,
-                        created_by=request.user,
-                        is_user_created=created,
-                        is_user_do_onboarding=contacts_dict[contact_id]['send_mail'],
-                    )
-                    inv_obj.roles.add(*roles_ls)
-                    invite_id_list.append(inv_obj.id)
+
+                    if contacts_dict[contact_id]['send_mail'] or created:
+                        inv_obj = InternalOnboardingInvite.objects.create(
+                            organization=organization_obj,
+                            user=user,
+                            license=license_obj,
+                            created_by=request.user,
+                            is_user_created=created,
+                            is_user_do_onboarding=contacts_dict[contact_id]['send_mail'],
+                        )
+                        inv_obj.roles.add(*roles_ls)
+                        invite_id_list.append(inv_obj.id)
 
 
                 InternalOnboarding.objects.create(

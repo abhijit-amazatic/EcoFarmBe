@@ -77,12 +77,8 @@ def send_internal_onboarding_invitation(invite_obj_id_list):
         f_domain = parse_domain_from_link(settings.FRONTEND_DOMAIN_NAME)
         if invite_obj.is_user_created:
             context['link'] = f'https://{f_domain}/verify-internal-onboarding-invite?token={invite_obj.get_invite_token()}'
-            msg = ('Your Thrive Society Account has been created under the following License: {license_number} - {legal_business_name}.\n'
-                'Please check your email {email}.')
         else:
             context['link'] = f'https://{f_domain}/login'
-            msg = ('New license profile is assigned to your Thrive Society Account.\n'
-                'Please check your email {email}.')
 
         try:
             mail_send(
@@ -94,8 +90,13 @@ def send_internal_onboarding_invitation(invite_obj_id_list):
         except Exception as e:
             traceback.print_tb(e.__traceback__)
         else:
-            # msg = 'You have been invited to join organization "{organization}" under the license {license} as {role_str} .\nPlease check your email {email}'.format(**context)
-            send_sms(context['phone'], msg.format(**context))
+            if invite_obj.is_user_created:
+                # msg = 'You have been invited to join organization "{organization}" under the license {license} as {role_str} .\nPlease check your email {email}'.format(**context)
+                msg = (
+                    'Your Thrive Society Account has been created under the following License: {license_number} - {legal_business_name}.\n'
+                    'Please check your email {email}.'
+                )
+                send_sms(context['phone'], msg.format(**context))
 
 
 

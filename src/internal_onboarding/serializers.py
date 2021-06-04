@@ -105,10 +105,10 @@ class InternalOnboardingSerializer(serializers.Serializer):
             raise serializers.ValidationError(f'Profile for license number \'{value}\' already exist.')
         return value
 
-    # def validate_contacts(self, attrs):
-    #     if not len(attrs) > 0:
-    #         raise serializers.ValidationError('At least one contacts is required')
-    #     return attrs
+    def validate_contacts(self, attrs):
+        if not [x for x in attrs if x.get('send_mail') == True ]:
+            raise serializers.ValidationError('At least one contacts Should be marked to send onboarding email')
+        return attrs
 
     class Meta:
         fields = (
