@@ -18,6 +18,7 @@ from user.models import (User, )
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
+                         VENDOR_LICENSE_TYPES, ACCOUNT_LICENSE_TYPES,
                          ACCOUNT_TYPES)
 from .box import (get_shared_link, move_file,
                   create_folder, upload_file_stream)
@@ -842,13 +843,17 @@ def get_records_from_crm(license_number):
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         for license_dict in licenses.get('response'):
             license_number = license_dict['Name']
-            vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
-            if vendor['status_code'] != 200:
-                vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+            vendor_id = None
+            account_id = None
+
+            if license_dict.get('License_Type') in VENDOR_LICENSE_TYPES:
+                vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+                if vendor['status_code'] != 200:
+                    vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+                else:
+                    vendor = vendor['response'][0]['Licenses_Module']
+                    vendor_id = vendor['id']
             else:
-                vendor = vendor['response'][0]['Licenses_Module']
-                vendor_id = vendor['id']
-            if not vendor_id:
                 account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
                 if account['status_code'] != 200:
                     account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
@@ -856,8 +861,15 @@ def get_records_from_crm(license_number):
                     account = account['response'][0]['Licenses_Module']
                     account_id = account['id']
                 if not account_id:
-                    final_response[license_number] = {'error': 'No association found for legal business name'}
-                    continue
+                    vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+                    if vendor['status_code'] != 200:
+                        vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+                    else:
+                        vendor = vendor['response'][0]['Licenses_Module']
+                        vendor_id = vendor['id']
+                    if not vendor_id:
+                        final_response[license_number] = {'error': 'No association found for legal business name'}
+                        continue
             if vendor_id:
                 org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
             elif account_id:

@@ -1196,3 +1196,42 @@ ACCOUNT_TYPES = {
 }
 
 
+# License Cultivator Layout
+VENDOR_LICENSE_TYPES = [
+    'Large Indoor',
+    'Large Mixed-Light',
+    'Large Outdoor',
+    'Medium Indoor',
+    'Medium Mixed-Light Tier 1',
+    'Medium Mixed-Light Tier 2',
+    'Medium Outdoor',
+    'Nursery',
+    'Processor',
+    'Small Indoor',
+    'Small Mixed-Light Tier 1',
+    'Small Mixed-Light Tier 2',
+    'Small Outdoor',
+    'Specialty Cottage Indoor',
+    'Specialty Cottage Mixed-Light Tier 1',
+    'Specialty Cottage Mixed-Light Tier 2',
+    'Specialty Cottage Outdoor',
+    'Specialty Indoor',
+    'Specialty Mixed-Light Tier 1',
+    'Specialty Mixed-Light Tier 2',
+    'Specialty Outdoor',
+]
+# License Non Cultivator Layout
+ACCOUNT_LICENSE_TYPES = [
+    'Distributor',
+    'Distributor Transport Only',
+    'Event Organizer',
+    'Manufacturer - Type 6',
+    'Manufacturer - Type 7',
+    'Manufacturer - Type N',
+    'Manufacturer - Type P',
+    'Manufacturer - Type S',
+    'Microbusiness',
+    'Retailer - Delivery',
+    'Retailer - Storefront',
+    'Testing Laboratory',
+]
