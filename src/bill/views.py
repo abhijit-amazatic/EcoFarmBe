@@ -78,7 +78,8 @@ class EstimateWebappView(APIView):
             # estimate['db_status'] = 'sent'
             line_items = request.data.get('line_items')
             line_items = parse_fields('item', line_items, many=True)
-            notify_estimate(notification_methods, sign_url, estimate.get('customer_name'),request.data, line_items)    
+            notify_estimate(notification_methods, sign_url, estimate.get('customer_name'),request.data, line_items)
+            del request.data['external_contacts']
             estimate_obj = save_estimate(request)
             estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
             items = list()
