@@ -83,6 +83,6 @@ class EstimateWebappView(APIView):
             items = list()
             for item in line_items:
                 item_obj = LineItem.objects.filter(estimate=estimate_obj, id=item.get('id')).update(**item)
-            notify_estimate(notification_methods, sign_url, estimate.get('customer_name'), request.data.get('external_contacts'))    
+            notify_estimate(notification_methods, sign_url, estimate.get('customer_name'),request.data, line_items)    
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)

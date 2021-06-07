@@ -8,13 +8,15 @@ from inventory.models import Inventory
 from brand.models import License
 
 @app.task(queue="urgent")
-def notify_estimate(notification_methods,sign_url,customer_name,external_contacts):
+def notify_estimate(notification_methods,sign_url,customer_name,request_data, line_items):
     """
     Send estimate notifications.
     """
+    print('>>>>>', request_data)
+    print('====', line_items)
     order_data = list(LineItem.objects.filter(estimate__customer_name=customer_name).values())
-    item_total = '{:,.2f}'.format(sum(i['item_total'] for i in order_data))
-    quantity = sum(i['quantity'] for i in order_data)
+    item_total = request_data.get('total')  #'{:,.2f}'.format(sum(i['item_total'] for i in order_data))
+    quantity = sum(i['quantity'] for i in line_items)
     prod_category = Inventory.objects.filter(item_id__in=[i['item_id'] for i in  order_data],parent_category_name__isnull=False).values_list('parent_category_name',flat=True).distinct()
     category = ",".join(list(prod_category))
     license_obj = License.objects.filter(legal_business_name=customer_name).values('license_number')
@@ -46,8 +48,8 @@ def notify_estimate(notification_methods,sign_url,customer_name,external_contact
         except Exception as e:
             print('exception while sending estimate notifications',e)
 
-    if external_contacts:         
-        for contact in external_contacts:
+    if request_data.get('external_contacts'):         
+        for contact in request_data.get('external_contacts'):
             try:
                 if contact.get('email'):
                     mail_send("order-notify.html",{'sign_url': sign_url,'full_name':contact.get('party_name'),'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order','business_name': customer_name, 'license_number': get_license_number(license_obj),'order_amount':item_total,'quantity':quantity,'product_category':category},"Your Thrive-Society Order.", recipient_list=contact.get('email'))
