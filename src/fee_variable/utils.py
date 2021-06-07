@@ -37,8 +37,11 @@ custom_inventory_variable_program_map = {
 
 
 
-def get_mcsp_fee(vendor_name, request=None, no_tier_fee=True ):
-    lp = LicenseProfile.objects.filter(name=vendor_name).first()
+def get_mcsp_fee(vendor_name, license_profile=None, request=None, no_tier_fee=True ):
+    if not license_profile:
+        lp = LicenseProfile.objects.filter(name=vendor_name).first()
+    else:
+        lp = license_profile
     if lp:
         if lp.license.status == 'approved':
             program_name = None

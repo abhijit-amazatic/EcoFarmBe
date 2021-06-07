@@ -72,15 +72,24 @@ def get_inventory_obj(inventory_name):
         )
     return inventory
 
+def get_matched_vendor_id(contact_ls, vendor_name):
+    for vendor in contact_ls:
+        if vendor.get('vendor_name') == vendor_name and vendor.get('contact_type') == 'vendor':
+            return vendor.get('contact_id')
+
 def get_vendor_id(inventory, vendor_name):
     """
     Get vendor id from zoho.
     """
+    vendor_id = None
     resp = inventory.get_contact(params={'contact_name': vendor_name})
     if resp.get('code') == 0:
-        for vendor in resp.get('contacts'):
-            if vendor.get('vendor_name') == vendor_name and vendor.get('contact_type') == 'vendor':
-                return vendor.get('contact_id')
+        vendor_id = get_matched_vendor_id(resp.get('contacts'), vendor_name)
+    if not vendor_id:
+        resp = inventory.get_contact(params={'company_name': vendor_name})
+        if resp.get('code') == 0:
+            vendor_id = get_matched_vendor_id(resp.get('contacts'), vendor_name)
+    return vendor_id
 
 def get_user_id(inventory, email):
     """

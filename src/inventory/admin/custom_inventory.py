@@ -129,7 +129,7 @@ class CustomInventoryForm(forms.ModelForm):
 
 class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
     """
-    OrganizationRoleAdmin
+    Vendors Inventory Admin
     """
     form = CustomInventoryForm
     list_display = (
@@ -320,7 +320,7 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            mcsp_fee = get_mcsp_fee(obj.vendor_name, request,)
+            mcsp_fee = get_mcsp_fee(obj.vendor_name, license_profile=obj.license_profile, request=request)
             if mcsp_fee:
                 tax = get_item_tax(obj, request)
                 if tax:
@@ -333,6 +333,8 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
                             if category_id:
                                 if obj.vendor_name:
                                     vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
+                                    if not vendor_id and obj.license_profile:
+                                        vendor_id = get_vendor_id(inv_obj, obj.license_profile.license.legal_business_name)
                                     if vendor_id:
                                         data = get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee)
                                         self._approve(request, obj, inv_obj, data,)
