@@ -96,6 +96,12 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'custom_button_tags': 'core.templatetags.custom_button_tags',
+                'custom_submit_row_tags': 'core.templatetags.custom_submit_row_tags',
+                # 'admin.urls': 'django.contrib.admin.templatetags.admin_urls',
+            },
+
         },
     },
 ]

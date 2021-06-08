@@ -43,7 +43,7 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
     fernet = Fernet(get_fernet_key(key_salt='intinv'))
     STATUS_CHOICES = (
         ('pending', _('Pending')),
-        ('user_joining_platform', _('User Joining Platform')),
+        ('accepted', _('Accepted')),
         ('completed', _('Completed')),
     )
 
@@ -55,19 +55,19 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
     )
     user = models.ForeignKey(
         User,
-        verbose_name=_('Organization'),
+        verbose_name=_('User'),
         related_name='internal_onboarding_invites',
         on_delete=models.CASCADE,
     )
     license = models.ForeignKey(
         License,
-        verbose_name=_('Licenses'),
+        verbose_name=_('License'),
         related_name='internal_onboarding_invites',
         on_delete=models.CASCADE,
     )
     roles = models.ManyToManyField(
         OrganizationRole,
-        verbose_name=_('Organization Roles'),
+        verbose_name=_('Roles'),
         related_name='internal_onboarding_invites',
     )
     created_by = models.ForeignKey(
@@ -81,9 +81,9 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
         choices=STATUS_CHOICES,
         default='pending',
     )
-    is_user_created = models.BooleanField(default=False)
-    is_user_do_onboarding = models.BooleanField(default=False)
-    completed_on = models.DateTimeField(blank=True, null=True)
+    is_user_created = models.BooleanField(verbose_name=_('Is User Created'), default=False)
+    is_user_do_onboarding = models.BooleanField(verbose_name=_('Is User Do Onboarding'), default=False)
+    completed_on = models.DateTimeField(verbose_name=_('Completed On'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('Internal Onboarding Invite')

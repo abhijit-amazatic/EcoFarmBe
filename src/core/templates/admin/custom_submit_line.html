@@ -1,0 +1,10 @@
+{% extends 'admin/submit_line.html' %}
+{% load i18n admin_urls custom_button_tags %}
+
+{% block submit-row %}
+    {% for b in custom_buttons %}
+        {% show_button b as show_b %}
+        {% if show_b %}<input type="submit" value="{% button_label b %}" name="_{{b}}" style="background: {% button_color b %};">{% endif %}
+    {% endfor %}
+    {{ block.super }}
+{% endblock %}

@@ -323,13 +323,25 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             user.is_verified = True
             user.save()
             instance.completed_on = timezone.now()
-            instance.status = 'completed'
-            instance.save()
-            response_data['detail'] = 'Accepted'
+            if response_data['is_new_user']:
+                instance.status = 'accepted'
+                instance.save()
+                response_data['detail'] = 'Accepted'
+            else:
+                instance.status = 'completed'
+                instance.save()
+                response_data['detail'] = 'completed'
+            response = Response(response_data, status=status.HTTP_200_OK)
+        elif instance.status == 'accepted':
+            if not response_data['is_new_user']:
+                instance.status = 'completed'
+                instance.save()
+                response_data['detail'] = 'completed'
+            else:
+                response_data['detail'] = 'Already accepted'
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'completed':
-            response_data['detail'] = 'Already accepted'
-            response = Response(response_data, status=status.HTTP_200_OK)
+            response = Response({'detail': 'Invite is already completed'}, status=400)
         else:
             response = Response({'detail': 'invalid token'}, status=400)
         return response
@@ -348,16 +360,20 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         instance = serializer.validated_data['token']
         user = instance.user
-        if instance.status == 'completed':
+        if instance.status == 'accepted':
             if not user.has_usable_password():
                 with transaction.atomic():
                     user.date_of_birth = serializer.validated_data['dob']
                     user.phone = serializer.validated_data['phone']
                     user.save()
                     user.set_password(serializer.validated_data['new_password'])
+                    instance.status = 'completed'
+                    instance.save()
                 response = Response({'detail': 'Password is set successfully'}, status=200)
             else:
                 response = Response({'detail': 'Already have a password set for this account'}, status=400)
+        elif instance.status == 'completed':
+            response = Response({'detail': 'Invite is completed'}, status=400)
         else:
-            response = Response({'detail': 'Invite is not completed'}, status=400)
+            response = Response({'detail': 'Invite is not verified'}, status=400)
         return response
