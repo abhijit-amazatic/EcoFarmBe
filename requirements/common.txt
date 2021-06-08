@@ -41,4 +41,4 @@ PyYAML==5.4.1
 django-admin-interface==0.15.5
 django-import-export==2.5.0
 # django-simple-history==2.12.0
--e git+ssh://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@github.com/Eco-Farm/pyzoho.git#egg=pyzoho
+-e git+ssh://git@github.com:Eco-Farm/pyzoho.git#egg=pyzoho
