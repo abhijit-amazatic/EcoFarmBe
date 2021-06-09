@@ -231,6 +231,8 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         license_obj.__dict__[k] = license_data.get(v)
                 license_obj.step = 1
                 license_obj.status = StatusFlagMixin.STATUS_IN_PROGRESS
+                if data.get('business_structure'):
+                    license_obj.business_structure = data.get('business_structure')
                 license_obj.save()
 
                 invite_id_list = []
@@ -311,7 +313,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         user = instance.user
         response_data = {
             # 'new_user': True if not user.last_login else False,
-            'is_new_user': not user.has_usable_password(),
+            'is_new_user': not bool(user.last_login),
             'user': {
                 'email': user.email,
                 'full_name': user.get_full_name(),
@@ -323,7 +325,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             user.is_verified = True
             user.save()
             instance.completed_on = timezone.now()
-            if user.has_usable_password():
+            if user.last_login:
                 instance.status = 'completed'
                 instance.save()
                 response_data['detail'] = 'completed'
@@ -333,7 +335,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 response_data['detail'] = 'Accepted'
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'accepted':
-            if user.has_usable_password():
+            if user.last_login:
                 instance.status = 'completed'
                 instance.save()
                 response_data['detail'] = 'completed'
@@ -363,7 +365,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         instance = serializer.validated_data['token']
         user = instance.user
         if instance.status == 'accepted':
-            if not user.has_usable_password():
+            if not bool(user.last_login):
                 with transaction.atomic():
                     user.date_of_birth = serializer.validated_data['dob']
                     user.phone = serializer.validated_data['phone']
