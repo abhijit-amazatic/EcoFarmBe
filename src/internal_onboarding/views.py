@@ -341,7 +341,9 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 response_data['detail'] = 'Already accepted'
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'completed':
-            response = Response({'detail': 'Invite is already completed'}, status=400)
+            response_data['detail'] = 'Invite is already completed'
+            response_data['is_new_user'] = False
+            response = Response(response_data, status=status.HTTP_200_OK)
         else:
             response = Response({'detail': 'invalid token'}, status=400)
         return response
@@ -365,8 +367,8 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 with transaction.atomic():
                     user.date_of_birth = serializer.validated_data['dob']
                     user.phone = serializer.validated_data['phone']
-                    user.save()
                     user.set_password(serializer.validated_data['new_password'])
+                    user.save()
                     instance.status = 'completed'
                     instance.save()
                 response = Response({'detail': 'Password is set successfully'}, status=200)
