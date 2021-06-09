@@ -149,6 +149,7 @@ class UserViewSet(ModelViewSet):
         if serializer.is_valid():
             instance = serializer.save()
             contact = search_query('Contacts', request.data.get('email'), 'Email')
+            request.data['Contact_Type'] = [i['name'] for i in instance.categories.values()]
             if contact['status_code'] == 200:
                 request.data['id'] = contact.get('response')[0].get('id')
                 response = update_records('Contacts', request.data)
