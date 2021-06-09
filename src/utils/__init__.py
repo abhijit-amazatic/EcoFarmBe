@@ -32,7 +32,7 @@ def base64_url_dencode(string):
     return base64.urlsafe_b64decode(string)
 
 def parse_domain_from_link(string):
-    d = re.sub(r'^(http[s]?://)?(?P<domain>[^/]*)(/[^/]*)*$', r'\g<domain>', string)
+    d = re.sub(r'^[\s]?http[s]?://(?P<domain>[^/]+)(/[^/]*)*$', r'\g<domain>', string)
     if d:
         return d
     return string

@@ -1683,6 +1683,8 @@ def get_vendor_associations(vendor_id, organizations=True, brands=True, licenses
                 r = dict()
                 r['name'] = ct['Contact']['name']
                 r['id'] = ct['Contact']['id']
+                r['roles'] = ct['Contact_Company_Role']
+                r['linking_module_id'] = ct['id']
                 final_response['Contacts'].append(r)
     if cultivars:
         final_response['Cultivars'] = []
@@ -1735,6 +1737,8 @@ def get_account_associations(account_id, organizations=True, brands=True, licens
                 r = dict()
                 r['name'] = ct['Contacts']['name']
                 r['id'] = ct['Contacts']['id']
+                r['roles'] = ct['Contact_Company_Role']
+                r['linking_module_id'] = ct['id']
                 final_response['Contacts'].append(r)
     return final_response
 

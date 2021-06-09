@@ -131,6 +131,7 @@ def fetch_onboarding_data_to_db(user_id, license_number, license_obj_id):
 
 @app.task(queue="general")
 def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_dict={}, constacts_data_dict={}, vendor_data={}, account_data={}):
+    crm_obj = get_crm_obj()
     if vendor_id:
         vendor_associations = get_vendor_associations(vendor_id=vendor_id, brands=False, cultivars=False)
         if license_id not in [x['id'] for x in vendor_associations['Licenses']]:
@@ -141,11 +142,25 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
             r = create_records('Orgs_X_Vendors', [{'Vendor': vendor_id, 'Org': org_id} ])
             if r.get('status_code') != 201:
                 print(r)
-        associated_contact_ids = [x['id'] for x in vendor_associations['Contacts']]
-        contact_ids_to_associate = [id for id in contacts_dict.keys() if id not in  associated_contact_ids]
-        if contact_ids_to_associate:
-            r = create_records('Vendors_X_Contacts', [{'Vendor': vendor_id, 'Contact': x} for x in contact_ids_to_associate])
+
+        associated_contact = {
+            x['id']: {'roles': x['roles'], 'linking_module_id': x['linking_module_id']}
+            for x in vendor_associations['Contacts']
+        }
+        contact_ids_to_create_associate = [id for id in contacts_dict.keys() if id not in  associated_contact.keys()]
+        if contact_ids_to_create_associate:
+            create_data = [{'Vendor': vendor_id, 'Contact': x, 'Contact_Company_Role': contacts_dict[x]['roles']} for x in contact_ids_to_create_associate]
+            r = create_records('Vendors_X_Contacts', create_data)
             if r.get('status_code') != 201:
+                print(r)
+        contact_ids_to_update_associate = [contact_id for contact_id in contacts_dict.keys() if contact_id in  associated_contact.keys()]
+        if contact_ids_to_update_associate:
+            update_data = [
+                {'id': associated_contact[id]['linking_module_id'], 'Contact_Company_Role': contacts_dict[id]['roles']}
+                for id in contact_ids_to_update_associate
+            ]
+            r = crm_obj.update_records('Vendors_X_Contacts', update_data)
+            if r.get('status_code') != 200:
                 print(r)
 
     if account_id:
@@ -158,15 +173,28 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
             r = create_records('Orgs_X_Accounts', [{'Account': account_id, 'Org': org_id}])
             if r.get('status_code') != 201:
                 print(r)
-        associated_contact_ids = [x['id'] for x in account_associations['Contacts']]
-        contact_ids_to_associate = [id for id in contacts_dict.keys() if id not in  associated_contact_ids]
-        if contact_ids_to_associate:
-            r = create_records('Accounts_X_Contacts', [{'Accounts': account_id, 'Contacts': x} for x in contact_ids_to_associate])
+
+        associated_contact = {
+            x['id']: {'roles': x['roles'], 'linking_module_id': x['linking_module_id']}
+            for x in account_associations['Contacts']
+        }
+        contact_ids_to_create_associate = [id for id in contacts_dict.keys() if id not in  associated_contact.keys()]
+        if contact_ids_to_create_associate:
+            create_data = [{'Vendor': vendor_id, 'Contact': x, 'Contact_Company_Role': contacts_dict[x]['roles']} for x in contact_ids_to_create_associate]
+            r = create_records('Accounts_X_Contacts', create_data)
             if r.get('status_code') != 201:
+                print(r)
+        contact_ids_to_update_associate = [contact_id for contact_id in contacts_dict.keys() if contact_id in  associated_contact.keys()]
+        if contact_ids_to_update_associate:
+            update_data = [
+                { 'id': associated_contact[id]['linking_module_id'], 'Contact_Company_Role': contacts_dict[id]['roles'] }
+                for id in contact_ids_to_update_associate
+            ]
+            r = crm_obj.update_records('Accounts_X_Contacts', update_data)
+            if r.get('status_code') != 200:
                 print(r)
 
     if vendor_id and account_id:
-        crm_obj = get_crm_obj()
         if vendor_data and not vendor_data.get('Associated_Account_Record'):
             r = crm_obj.update_records('Vendors', [{'id': vendor_id, 'Associated_Account_Record': account_id}])
             if r.get('status_code') != 200:
@@ -176,15 +204,6 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
             r = crm_obj.update_records('Accounts', [{'id': account_id, 'Associated_Vendor_Record': vendor_id}])
             if r.get('status_code') != 200:
                 print(r)
-    contacts_update_data = []
-    for contact_id in contacts_dict.keys():
-        contact_roles = set(constacts_data_dict[contact_id].get('Contact_Company_Role', []))
-        contact_roles.update(contacts_dict[contact_id].get('roles', []))
-        contacts_update_data.append({'id': contact_id, 'Contact_Company_Role': list(contact_roles)})
-
-    r = crm_obj.update_records(module='Contacts', data=contacts_update_data)
-    if r.get('status_code') != 200:
-        print(r)
 
 
 @app.task(queue="general")
