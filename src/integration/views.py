@@ -175,8 +175,15 @@ class GetRecordView(APIView):
             field_dict = {
                 'Accounts': 'Account_Name',
                 'Vendors': 'Vendor_Name',
-                'Contacts': 'Last_Name'
+                'Contacts': ('First_Name', 'Last_Name')
             }
+            if module == 'Contacts':
+                for field in field_dict.get(module):
+                    response_1 = search_query(module, name, field, case_insensitive=True)
+                    response_2 = search_query(module, name, field, case_insensitive=True)
+                    if response_1['status_code'] == 200 and response_2['status_code'] == 200:
+                        response_1['response'].append(response_2['response'])
+                        return Response(response_1)
             response = search_query(module, name, field_dict.get(module), case_insensitive=True)
             if response['status_code'] == 200:
                 return Response(response, status=status.HTTP_200_OK)
