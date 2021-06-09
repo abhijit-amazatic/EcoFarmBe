@@ -311,7 +311,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         user = instance.user
         response_data = {
             # 'new_user': True if not user.last_login else False,
-            'is_new_user': not user.has_usable_password() and not user.last_login,
+            'is_new_user': not user.has_usable_password(),
             'user': {
                 'email': user.email,
                 'full_name': user.get_full_name(),
@@ -323,17 +323,17 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             user.is_verified = True
             user.save()
             instance.completed_on = timezone.now()
-            if response_data['is_new_user']:
-                instance.status = 'accepted'
-                instance.save()
-                response_data['detail'] = 'Accepted'
-            else:
+            if user.has_usable_password():
                 instance.status = 'completed'
                 instance.save()
                 response_data['detail'] = 'completed'
+            else:
+                instance.status = 'accepted'
+                instance.save()
+                response_data['detail'] = 'Accepted'
             response = Response(response_data, status=status.HTTP_200_OK)
         elif instance.status == 'accepted':
-            if not response_data['is_new_user']:
+            if user.has_usable_password():
                 instance.status = 'completed'
                 instance.save()
                 response_data['detail'] = 'completed'
