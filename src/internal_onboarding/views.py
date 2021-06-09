@@ -142,7 +142,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 return Response({'details': f'Invalid crm contact id: {c_id}.'}, status=400)
             else:
                 constacts_data_dict[c_id] = resp_contact.get('response', {})
-                if not re.match(r"^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$", constacts_data_dict[c_id].get('Email')):
+                if not re.match(r"^([a-zA-Z0-9._%-+]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$", constacts_data_dict[c_id].get('Email')):
                     return Response(
                         {
                             'details': f"contact {constacts_data_dict[c_id].get('Full_Name')} (id: {c_id}) have invalid email: {constacts_data_dict[c_id].get('Email')}."
@@ -203,7 +203,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     create_or_update_org_in_crm(organization_obj)
                     organization_id = organization_obj.zoho_crm_id
                 else:
-                    organization_obj = Organization.objects.get(data['organization']['id'])
+                    organization_obj = Organization.objects.get(id=data['organization']['id'])
                     if not organization_obj.zoho_crm_id:
                         create_or_update_org_in_crm(organization_obj)
                     organization_id = organization_obj.zoho_crm_id

@@ -18,8 +18,8 @@ class InternalOnboardingInviteAdmin(CustomButtonMixin, admin.ModelAdmin):
     Admin
     """
     verbose_name = "Invites"
-    custom_buttons=('resend_invite', )
-    custom_buttons_prop={
+    custom_buttons = ('resend_invite', )
+    custom_buttons_prop = {
         'resend_invite': {
             'label': 'Resend Invite',
             'color': '#f2910a',
