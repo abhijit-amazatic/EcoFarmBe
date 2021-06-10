@@ -9,6 +9,7 @@ from brand.models import (
     CultivationOverview,
     FinancialOverview,
     CropOverview,
+    OrganizationRole,
 )
 
 User = get_user_model()
@@ -19,7 +20,7 @@ class ErrorDataNotFound(Exception):
 class ErrorNoAssociationFound(Exception):
     pass
 
-def extract_map_role(data):
+def extract_map_role(data, existing_roles):
     role_map = {
         "Owner":"License Owner",
         "Cultivation Manager":"Farm Manager",
@@ -27,9 +28,10 @@ def extract_map_role(data):
         "Logistics Manager":"Logistics",
         "Billing / Accounting":"Billing",
     }
-    return [role_map.get(i) for i in data if i in role_map] or ['Employee']
+    updated_roles = [role_map.get(r, r) for r in data]
+    return  [r for r in updated_roles if r in existing_roles] or ['Employee']
 
-def get_employee(data_l_p):
+def get_employee(data_l_p, existing_roles):
     """
     structure employee according to db format & insert empty data also.
     (currently inserted empty contacts)
@@ -42,7 +44,7 @@ def get_employee(data_l_p):
                 "employee_name": employee.get('Full_Name'),
                 "employee_email": employee.get('Email'),
                 "phone": "",
-                "roles": extract_map_role(employee.get('Contact_Company_Role', [])),
+                "roles": extract_map_role(employee.get('Contact_Company_Role', []), existing_roles),
             })
     return tmp_data
 
@@ -136,6 +138,9 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
             with transaction.atomic():
                 #STEP3:create profile contact
                 print("3.Inserting Profile contacts")
+                existing_roles = list(
+                    OrganizationRole.objects.filter(organization=license_obj.organization).values_list('name', flat=True)
+                )
                 formatted_data = {
                     "company_email":data_l_p.get('company_email', ''),
                     "company_phone":data_l_p.get('company_phone', ''),
@@ -163,7 +168,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                         data_l_p.get('billing_address_state', ''),
                         data_l_p.get('billing_address_country', '')
                     ),
-                    "employees":get_employee(data_l_p),
+                    "employees":get_employee(data_l_p, existing_roles),
                 }
 
                 ProfileContact.objects.create(
