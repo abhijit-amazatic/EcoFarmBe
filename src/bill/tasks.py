@@ -25,20 +25,20 @@ def notify_estimate(notification_methods,sign_url,customer_name,request_data, li
         try:
             full_name = User.objects.filter(email=email)[0].full_name
             if 'email' in notification_methods:
-                mail_send("order-notify.html",{'sign_url': sign_url,'full_name':full_name,'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order','business_name': customer_name, 'license_number': get_license_number(license_obj),'order_amount':item_total,'quantity':quantity,'product_category':category},"Your Thrive-Society Order.", recipient_list=email)
+                mail_send("order-notify.html",{'sign_url': sign_url,'full_name':full_name,'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order','business_name': customer_name, 'license_number': get_license_number(license_obj),'order_amount':item_total,'quantity':"{:.2f}".format(quantity),'product_category':category},"Your Thrive-Society Order.", recipient_list=email)
             if 'sms' in notification_methods:
                 context = {
                     'sign_url': sign_url,
                     'full_name':full_name,
                     'order_url':settings.FRONTEND_DOMAIN_NAME+'marketplace/order',
                     'item_total':item_total,
-                    'quantity':quantity,
+                    'quantity':"{:.2f}".format(quantity),
                     'category':category,
                     'license_number': get_license_number(license_obj),
                     'business_name':customer_name,
                     'phone': User.objects.filter(email=email).only('phone')[0].phone.as_e164
                 }
-                msg = 'Hi {full_name},\n\nYour Thrive Society Marketplace(Pending Order) is ready for your review & approval by accessing the following link\n: {order_url}.\nThis order is placed on behalf of {business_name}-License #{license_number}.\n\nOrder- Pending\nOrder Amount- {item_total}\nQuantity- {quantity}\nProduct Category- {category}'.format(**context)
+                msg = 'Hi {full_name},\n\nYour Thrive Society Marketplace(Pending Order) is ready for your review & approval by accessing the following link\n: {order_url}.\nThis order is placed on behalf of {business_name}-License #{license_number}.\n\nOrder #- Pending\nOrder Amount- {item_total}\nQuantity- {quantity} lbs\nProduct Category- {category}'.format(**context)
                 send_sms(context['phone'], msg)
             if 'notify' in notification_methods:
                 # send_notification() To attch file to email, use mail function like this.
