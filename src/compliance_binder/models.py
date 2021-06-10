@@ -65,10 +65,13 @@ class BinderLicense(TimeStampFlagModelMixin, models.Model):
     def status(self):
         if self.license_status:
             return self.license_status
-        elif self.expiration_date >= timezone.now().date():
-            return 'Active'
+        elif self.expiration_date:
+            if self.expiration_date >= timezone.now().date():
+                return 'Active'
+            else:
+                return 'Expired'
         else:
-            return 'Expired'
+            return ''
 
     def __str__(self):
         return self.legal_business_name
