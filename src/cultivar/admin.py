@@ -9,6 +9,7 @@ from django.contrib.admin.utils import (unquote,)
 
 from integration.crm import (create_records, update_records)
 from brand.models import (NurseryOverview)
+from core.mixins.admin import (CustomButtonMixin,)
 from .models import Cultivar
 from .tasks import (notify_slack_cultivar_added, notify_slack_cultivar_Approved)
 
@@ -54,34 +55,30 @@ class InlineNurseryOverviewAdmin(admin.TabularInline):
     organization.short_description = 'Organization'
 
 # Register your models here.
-class CultivarAdmin(admin.ModelAdmin):
+class CultivarAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
     list_display = ('cultivar_name', 'cultivar_type', 'cultivar_crm_id', 'status', 'modified_by', 'modify_time', 'created_by', 'create_time',)
     readonly_fields = ('status',)
-    change_form_template = "inventory/custom_inventory_change_form.html"
     actions = ['approve_selected_cultivars', ]
+
+    custom_buttons=('approve',)
+    # custom_buttons_prop = {
+    #     'approve': {
+    #         'label': 'Approve',
+    #         'color': '#ba2121',
+    #     }
+    # }
+
+    def show_approve_button(self, request, obj,  add=False, change=False):
+        return change and obj and obj.status == 'pending_for_approval'
 
     def get_inline_instances(self, request, obj=None):
         inline_instances = super().get_inline_instances(request, obj=obj)
         if obj and obj.status == 'pending_for_approval':
             inline_instances.append(InlineNurseryOverviewAdmin(self.model, self.admin_site))
         return inline_instances
-
-    def response_change(self, request, obj):
-        if "_approve" in request.POST:
-            if obj.status == 'pending_for_approval':
-                self.approve(request, obj)
-            return HttpResponseRedirect(".")
-        return super().response_change(request, obj)
-
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        if obj and obj.status == 'pending_for_approval' and change:
-            context['show_approve'] = True
-        context['approve_button_label'] = getattr(self, 'approve_button_label', 'Approve')
-        context['approve_button_color'] = getattr(self, 'approve_button_color', '#21ba21')
-        return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def approve(self, request, obj):
         if not obj.cultivar_crm_id:
@@ -148,4 +145,6 @@ class CultivarAdmin(admin.ModelAdmin):
                     print('Error while updating Cultivar in Zoho CRM')
                     print(result)
         return ret
+
+
 admin.site.register(Cultivar, CultivarAdmin)

@@ -51,7 +51,7 @@ class InternalOnboardingInviteAdmin(CustomButtonMixin, admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    def show_button_resend_invite(self, request, obj, add=False, change=False):
+    def show_resend_invite_button(self, request, obj, add=False, change=False):
         if obj and change:
             if obj.status in ('pending', 'accepted'):
                 return True

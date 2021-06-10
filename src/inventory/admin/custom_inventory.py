@@ -28,7 +28,7 @@ from integration.inventory import (
 from integration.crm import search_query
 from brand.models import (License, LicenseProfile,)
 from fee_variable.utils import (get_mcsp_fee,)
-from .mixin import AdminApproveMixin
+from core.mixins.admin import (CustomButtonMixin,)
 from ..models import (
     Inventory,
     CustomInventory,
@@ -127,7 +127,7 @@ class CustomInventoryForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
+class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     Vendors Inventory Admin
     """
@@ -227,6 +227,16 @@ class CustomInventoryAdmin(AdminApproveMixin, admin.ModelAdmin):
     )
     inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
+    custom_buttons=('approve',)
+    # custom_buttons_prop = {
+    #     'approve': {
+    #         'label': 'Approve',
+    #         'color': '#ba2121',
+    #     }
+    # }
+
+    def show_approve_button(self, request, obj,  add=False, change=False):
+        return change and obj and obj.status == 'pending_for_approval'
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)

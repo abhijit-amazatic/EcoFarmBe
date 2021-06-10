@@ -17,8 +17,8 @@ class CustomButtonMixin:
     change_form_template = 'admin/custom_button_change_form.html'
 
     def show_button(self, button_name, request, obj, add=False, change=False):
-        if hasattr(self, f'show_button_{button_name}'):
-            return getattr(self, f'show_button_{button_name}', self.show_button)(request, obj, add=add, change=change)
+        if hasattr(self, f'show_{button_name}_button'):
+            return getattr(self, f'show_{button_name}_button', self.show_button)(request, obj, add=add, change=change)
         return change
 
     def response_change(self, request, obj):
@@ -35,7 +35,7 @@ class CustomButtonMixin:
                 if self.show_button(button, request, obj, add=True):
                     getattr(self, button, lambda x, y: None)(request, obj)
                 return HttpResponseRedirect('.')
-        return super().response_change(request, obj, post_url_continue)
+        return super().response_add(request, obj, post_url_continue=post_url_continue)
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['custom_buttons'] = list(self.custom_buttons)

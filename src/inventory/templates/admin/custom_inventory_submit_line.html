@@ -1,7 +1,0 @@
-{% extends 'admin/submit_line.html' %}
-{% load i18n admin_urls %}
-
-{% block submit-row %}
-{% if show_approve %}<input type="submit" value="{% trans approve_button_label %}" name="_approve" style="background: {{ approve_button_color }};">{% endif %}
-    {{ block.super }}
-{% endblock %}

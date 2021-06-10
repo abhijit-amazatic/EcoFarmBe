@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .mixin import AdminApproveMixin
+from core.mixins.admin import (CustomButtonMixin,)
 from ..tasks.helpers import (
     inventory_item_change,
     add_item_quantity,
@@ -9,7 +9,7 @@ from ..tasks.helpers import (
 
 
 
-class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
+class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
@@ -56,17 +56,26 @@ class InventoryItemEditAdmin(AdminApproveMixin, admin.ModelAdmin):
     # inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
 
+    custom_buttons=('approve',)
+    # custom_buttons_prop = {
+    #     'approve': {
+    #         'label': 'Approve',
+    #         'color': '#ba2121',
+    #     }
+    # }
+
+    def show_approve_button(self, request, obj,  add=False, change=False):
+        return change and obj and obj.status == 'pending_for_approval'
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             inventory_item_change(obj, request)
 
-
     def cultivar_name(self, obj):
         return obj.item.cultivar.cultivar_name
 
 
-class InventoryItemQuantityAdditionAdmin(AdminApproveMixin, admin.ModelAdmin):
+class InventoryItemQuantityAdditionAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
@@ -110,6 +119,16 @@ class InventoryItemQuantityAdditionAdmin(AdminApproveMixin, admin.ModelAdmin):
     # inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
 
+    custom_buttons=('approve',)
+    # custom_buttons_prop = {
+    #     'approve': {
+    #         'label': 'Approve',
+    #         'color': '#ba2121',
+    #     }
+    # }
+
+    def show_approve_button(self, request, obj,  add=False, change=False):
+        return change and obj and obj.status == 'pending_for_approval'
 
     def approve(self, request, obj):
         add_item_quantity(obj, request)

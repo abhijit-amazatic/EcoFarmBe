@@ -8,6 +8,7 @@ from django_json_widget.widgets import JSONEditorWidget
 from integration.inventory import (
     get_inventory_obj,
 )
+from core.mixins.admin import (CustomButtonMixin,)
 from  ..models import (
     Inventory,
     InventoryItemDelist,
@@ -18,11 +19,10 @@ from ..tasks import (
 from ..tasks.helpers import (
     get_approved_by
 )
-from .mixin import AdminApproveMixin
 from ..data import(ITEM_CUSTOM_FIELD_ORG_MAP)
 
 
-class InventoryItemDelistAdmin(AdminApproveMixin, admin.ModelAdmin):
+class InventoryItemDelistAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
@@ -76,13 +76,22 @@ class InventoryItemDelistAdmin(AdminApproveMixin, admin.ModelAdmin):
             ),
         }),
     )
-    approve_button_label = 'Approve'
-    # approve_button_color = '#ba2121'
 
     # formfield_overrides = {
     #     JSONField: {'widget': JSONEditorWidget(options={'modes':['code', 'text'], 'search': True, }, attrs={'disabled': 'disabled'})},
     #     # JSONField: {'widget': JSONEditorWidget},
     # }
+
+    custom_buttons=('approve',)
+    # custom_buttons_prop = {
+    #     'approve': {
+    #         'label': 'Approve',
+    #         'color': '#ba2121',
+    #     }
+    # }
+
+    def show_approve_button(self, request, obj,  add=False, change=False):
+        return change and obj and obj.status == 'pending_for_approval'
 
     def get_fieldsets(self, request, obj=None):
         """
