@@ -167,7 +167,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 for contact_id, contact_data in constacts_data_dict.items():
                     user_defaults = {
                         'phone':             contact_data.get('Phone'),
-                        'first_name':        contact_data.get('Full_Name'),
+                        'first_name':        contact_data.get('First_Name'),
                         'last_name':         contact_data.get('Last_Name'),
                         'full_name':         contact_data.get('Full_Name'),
                         'linkedin':          contact_data.get('Linkedin'),
