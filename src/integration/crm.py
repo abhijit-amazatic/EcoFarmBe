@@ -853,6 +853,17 @@ def get_records_from_crm(license_number):
                 else:
                     vendor = vendor['response'][0]['Licenses_Module']
                     vendor_id = vendor['id']
+                if not vendor_id:
+                    account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
+                    if account['status_code'] != 200:
+                        account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
+                    else:
+                        account = account['response'][0]['Licenses_Module']
+                        account_id = account['id']
+                    if not account_id:
+                        final_response[license_number] = {'error': 'No association found for legal business name'}
+                        continue
+
             else:
                 account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
                 if account['status_code'] != 200:
