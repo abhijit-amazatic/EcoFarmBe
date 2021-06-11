@@ -48,7 +48,7 @@ class Organization(TimeStampFlagModelMixin,models.Model):
         related_name='organizations',
         on_delete=models.CASCADE
     )
-    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID - Organization'), max_length=100, blank=True, null=True)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     email = models.EmailField(_('Email Address'), null=True, blank=True)
     phone = PhoneNumberField(_('Phone'), null=True, blank=True)
@@ -154,7 +154,7 @@ class Brand(TimeStampFlagModelMixin, models.Model):
     is_buyer = models.BooleanField(_('Is Buyer/accounts'), default=False)
     is_seller = models.BooleanField(_('Is Seller/Vendor'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
-    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID - Brand'), max_length=100, blank=True, null=True)
     zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
     documents = GenericRelation(Documents)
     #brand_image = models.CharField( _('Brand Image'), blank=True, null=True, max_length=255)
@@ -216,7 +216,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
-    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID - License'), max_length=100, blank=True, null=True)
     zoho_books_id = models.CharField(_('Zoho Books ID'), max_length=100, blank=True, null=True)
     documents = GenericRelation(Documents)
     is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
@@ -493,7 +493,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     farm_photo_sharable_link = models.CharField(
         _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
-    zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
+    zoho_crm_id = models.CharField(_('Zoho CRM ID - Profile(Account/Vendor)'), max_length=100, blank=True, null=True)
     lab_test_issues = models.TextField(blank=True, null=True)
 
     preferred_payment = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
