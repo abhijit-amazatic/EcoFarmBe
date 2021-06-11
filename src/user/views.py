@@ -166,12 +166,14 @@ class UserViewSet(ModelViewSet):
                 request.data['id'] = contact.get('response')[0].get('id')
                 response = update_records('Contacts', request.data)
                 crm_db_update_link = get_update_db_contact(instance,contact,'exist')
-                create_contact_license_linking(instance, response)
+                if instance.legal_business_name:
+                    create_contact_license_linking(instance, response)
             else:
                 create_response = create_records('Contacts', request.data)
                 if create_response['status_code'] == 201:
                     crm_db_update_link = get_update_db_contact(instance,create_response,'new')
-                    create_contact_license_linking(instance, create_response)
+                    if instance.legal_business_name:
+                        create_contact_license_linking(instance, create_response)
             try:
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link,'full_name': instance.full_name},"Thrive Society Verification.", instance.email)
