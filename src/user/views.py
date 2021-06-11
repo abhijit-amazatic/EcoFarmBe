@@ -123,6 +123,18 @@ class SearchQueryView(APIView):
             result = search_query('Licenses', license_number, 'Name', is_license=True)
         return Response(result)
 
+def create_contact_license_linking(instance, response):
+    data = dict()
+    data['Contacts'] = response.get('response').get('data')[0].get('details').get('id')
+    licenses = search_query('Licenses', instance.legal_business_name, 'Legal_Business_Name')
+    for l in licenses['response']:
+        if l['Legal_Business_Name'] == instance.legal_business_name:
+            l = license
+            break
+    data['License'] = l['id']
+    response = create_records('Licenses_X_Contacts', [data])
+    return response
+
 class UserViewSet(ModelViewSet):
     """
     User view set used for CRUD operations.
@@ -154,10 +166,12 @@ class UserViewSet(ModelViewSet):
                 request.data['id'] = contact.get('response')[0].get('id')
                 response = update_records('Contacts', request.data)
                 crm_db_update_link = get_update_db_contact(instance,contact,'exist')
+                create_contact_license_linking(instance, response)
             else:
                 create_response = create_records('Contacts', request.data)
                 if create_response['status_code'] == 201:
                     crm_db_update_link = get_update_db_contact(instance,create_response,'new')
+                    create_contact_license_linking(instance, create_response)
             try:
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link,'full_name': instance.full_name},"Thrive Society Verification.", instance.email)

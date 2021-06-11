@@ -507,6 +507,10 @@ CRM_FORMAT  = {
         "Org": "Org",
         "License": "License"
     },
+    "Licenses_X_Contacts": {
+        "Contacts": "Contacts",
+        "License": "License",
+    },
     "Vendors_To_DB" : {
         "db_id": "db_id",
         "profile_id": "id",
