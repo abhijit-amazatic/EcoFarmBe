@@ -57,13 +57,18 @@ def parse_field(license, key, value):
         return datetime.strptime(v, "%m/%d/%Y").date()
     if value.startswith('licenseType'):
         license_types = {
-            "Cannabis - Retailer License":"Retailer - Storefront",
-            "Cannabis - Retailer Nonstorefront License":"Retailer - Delivery",
-            "Cannabis - Microbusiness License":"Microbusiness",
-            "Cannabis - Distributor License":"Distributor",
-            "Cannabis - Distributor-Transport Only License":"Distributor Transport Only",
-            "Cannabis - Event Organizer License":"Event Organizer",
-            "Cannabis - Testing Laboratory License":"Testing Laboratory",
+            "Cannabis - Retailer License": "Retailer - Storefront",
+            "Cannabis - Retailer Nonstorefront License": "Retailer - Delivery",
+            "Cannabis - Microbusiness License": "Microbusiness",
+            "Cannabis - Distributor License": "Distributor",
+            "Cannabis - Distributor-Transport Only License": "Distributor Transport Only",
+            "Cannabis - Event Organizer License": "Event Organizer",
+            "Cannabis - Testing Laboratory License": "Testing Laboratory",
+            "Cannabis - Distributor-Transport Only Temporary License": "Distributor Transport Only",
+            "Cannabis - Distributor Temporary License": "Distributor",
+            "Cannabis - Retailer Nonstorefront Temporary License": "Retailer - Delivery",
+            "Cannabis - Microbusiness Temporary License": "Microbusiness",
+            "Cannabis - Retailer Temporary License": "Retailer - Storefront"
         }
         if license_types.get(v):
             return license_types.get(v)
