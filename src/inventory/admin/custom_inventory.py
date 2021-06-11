@@ -27,7 +27,7 @@ from integration.inventory import (
 )
 from integration.crm import search_query
 from brand.models import (License, LicenseProfile,)
-from fee_variable.utils import (get_mcsp_fee,)
+from fee_variable.utils import (get_item_mcsp_fee,)
 from core.mixins.admin import (CustomButtonMixin,)
 from ..models import (
     Inventory,
@@ -41,8 +41,10 @@ from ..tasks import (
 from ..tasks.helpers import (
     get_item_tax,
 )
-from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, )
+from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, CATEGORY_GROUP_MAP)
 from .custom_inventory_helpers import (get_new_item_data,)
+
+CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
 
 
 class InlineDocumentsAdmin(GenericStackedInline):
@@ -121,6 +123,9 @@ class CustomInventoryForm(forms.ModelForm):
     #             )
     #             self.fields['marketplace_status'] = forms.ChoiceField(choices=marketplace_status_choices, required=True)
     #             self.fields['harvest_date'].label='Clone Date'
+
+    def clean_category_name(val):
+        return super().clean()
 
     class Meta:
         model = CustomInventory
@@ -330,7 +335,12 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            mcsp_fee = get_mcsp_fee(obj.vendor_name, license_profile=obj.license_profile, request=request)
+            mcsp_fee = get_item_mcsp_fee(
+                obj.vendor_name,
+                license_profile=obj.license_profile,
+                item_category_group=CG.get(obj.category_name),
+                request=request,
+            )
             if mcsp_fee:
                 tax = get_item_tax(obj, request)
                 if tax:

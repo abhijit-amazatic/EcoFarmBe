@@ -18,7 +18,7 @@ class CustomInventoryVariableAdmin(admin.ModelAdmin):
     """
     Custom Inventory Variables
     """
-    list_display = ('program_type', 'tier', 'mcsp_fee', 'updated_on', 'created_on')
+    list_display = ('program_type', 'tier', 'mcsp_fee', 'mcsp_fee_per_g', 'mcsp_fee_per_pcs', 'updated_on', 'created_on')
 
 class TaxVariableAdmin(admin.ModelAdmin):
     """

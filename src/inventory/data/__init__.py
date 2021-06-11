@@ -85,7 +85,8 @@ ITEM_CUSTOM_FIELD_ORG_MAP = {
 
 
 CATEGORY_GROUP_MAP = {
-    'Flower': ('Wholesale - Flower',
+    'Flowers': (
+        'Wholesale - Flower',
         'In the Field',
         'Flower - Tops',
         'Flower - Bucked Untrimmed',
@@ -93,7 +94,7 @@ CATEGORY_GROUP_MAP = {
         'Flower - Bucked Untrimmed - Contaminated',
         'Flower - Small',
     ),
-    'Trim': (
+    'Trims': (
         'Trim',
     ),
     # 'Packaged Goods',
@@ -104,27 +105,25 @@ CATEGORY_GROUP_MAP = {
         'Isolates - CBG',
         'Isolates - CBN',
     ),
-    # 'Wholesale - Concentrates',
-    'Crude Oil': (
+    'Concentrates': (
+        'Wholesale - Concentrates'
         'Crude Oil',
         'Crude Oil - THC',
         'Crude Oil - CBD',
-    ),
-    'Distillate Oil': (
         'Distillate Oil',
         'Distillate Oil - THC',
         'Distillate Oil - CBD',
+        'Shatter',
+        'Sauce',
+        'Crumble',
+        'Kief',
     ),
-    # 'Shatter',
-    # 'Sauce',
-    # 'Crumble',
-    # 'Kief',
-    # 'Lab Testing',
     'Terpenes': (
         'Terpenes',
         'Terpenes - Cultivar Specific',
         'Terpenes - Cultivar Blended',
     ),
+    # 'Lab Testing',
     # 'Services',
     # 'QC',
     # 'Transport',

@@ -35,7 +35,8 @@ class OrderVariable(TimeStampFlagModelMixin,models.Model):
     class Meta:
         verbose_name = _('Order Variable')
         verbose_name_plural = _('Order Variables')      
-        
+
+
 class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
     """
     Class implementing  CustomInventory variables
@@ -49,7 +50,6 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         (PROGRAM_TIER_SILVER, _('Silver')),
         (PROGRAM_TIER_BRONZE, _('Bronze')),
         (PROGRAM_TIER_NO_TIER, _('No Tier')),
-        
     )
     PROGRAM_TYPE_IFP = 'ifp'
     PROGRAM_TYPE_IBP = 'ibp'
@@ -58,18 +58,45 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         (PROGRAM_TYPE_IBP, _('IBP Program')),
     )
 
-    
-    program_type = models.CharField(verbose_name=_("Program Type"), max_length=255, choices=PROGRAM_TYPE_CHOICES)
-    tier = models.CharField(verbose_name=_("Tier"), max_length=255, choices=PROGRAM_TIER_CHOICES)
-    mcsp_fee = models.CharField(verbose_name=_("MCSP Fee"), max_length=255,blank=True, null=True)
-    
+    program_type = models.CharField(
+        verbose_name=_("Program Type"),
+        max_length=255,
+        choices=PROGRAM_TYPE_CHOICES
+    )
+    tier = models.CharField(
+        verbose_name=_("Tier"),
+        max_length=255,
+        choices=PROGRAM_TIER_CHOICES
+    )
+    mcsp_fee = models.CharField(
+        verbose_name=_("MCSP Fee ($per lb)"),
+        help_text='This fee will be for Flowers and Trims',
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    mcsp_fee_per_g = models.CharField(
+        verbose_name=_("MCSP Fee (per gram)"),
+        help_text='This fee will be used for Isolates, Concentrates and Terpenes',
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    mcsp_fee_per_pcs = models.CharField(
+        verbose_name=_("MCSP Fee (per pcs)"),
+        help_text='This fee will be used for Clones',
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
     def __str__(self):
         return self.program_type
 
     class Meta:
         verbose_name = _('Vendor Inventory Variable')
-        verbose_name_plural = _('Vendor Inventory Variables')      
-       
+        verbose_name_plural = _('Vendor Inventory Variables')
+
 
 class TaxVariable(TimeStampFlagModelMixin,models.Model):
     """
@@ -79,14 +106,15 @@ class TaxVariable(TimeStampFlagModelMixin,models.Model):
     trim_tax = models.CharField(verbose_name=_("Trim Tax"), max_length=255,blank=True, null=True)
     cultivar_tax_item = models.CharField(verbose_name=_("Cultivar Tax Item"), max_length=255, blank=True, null=True)
     trim_tax_item = models.CharField(verbose_name=_("Trim Tax Item"), max_length=255, blank=True, null=True)
-    
+
     def __str__(self):
         return f'{self.cultivar_tax} | {self.trim_tax}'
 
     class Meta:
         verbose_name = _('Tax Variable')
-        verbose_name_plural = _('Tax Variables')      
-        
+        verbose_name_plural = _('Tax Variables')
+
+
 class CampaignVariable(TimeStampFlagModelMixin,models.Model):
     """
     Zoho campaign variables.

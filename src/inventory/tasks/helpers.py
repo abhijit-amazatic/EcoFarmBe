@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.conf import settings
 
 from fee_variable.models import (TaxVariable, )
-from fee_variable.utils import (get_mcsp_fee,)
+from fee_variable.utils import (get_item_mcsp_fee,)
 from integration.inventory import (
     get_inventory_obj,
     update_inventory_item,
@@ -14,6 +14,8 @@ from integration.inventory import (
 from brand.models import (LicenseProfile, )
 from .notify_item_change_approved import (notify_inventory_item_change_approved_task, )
 from  ..data import (CATEGORY_GROUP_MAP)
+
+CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
 
 def get_approved_by(request=None):
     approved_by = {
@@ -88,7 +90,12 @@ def create_custom_inventory_item_po(inventory_name, sku, quantity, vendor_name, 
 
 def inventory_item_change(obj, request=None):
     if obj.status == 'pending_for_approval':
-        mcsp_fee = get_mcsp_fee(obj.item.cf_vendor_name, request)
+        mcsp_fee = get_item_mcsp_fee(
+            obj.vendor_name,
+            license_profile=obj.license_profile,
+            item_category_group=CG.get(obj.category_name),
+            request=request,
+        )
         if mcsp_fee:
             tax = get_item_tax(obj, request)
             if tax:
@@ -234,17 +241,17 @@ def get_tax_from_db(tax='flower', request=None):
 
 def get_item_tax(obj, request=None):
     msg_error = lambda msg: messages.error(request, msg,) if request else None
-    CG = CATEGORY_GROUP_MAP
+    # CG = CATEGORY_GROUP_MAP
     if obj.category_name:
-        if obj.category_name in CG['Flower']:
+        if CG.get(obj.category_name, '')  == 'Flowers':
             tax = get_tax_from_db(tax='flower')
             if isinstance(tax, float):
                 return tax
-        if obj.category_name in CG['Trim']:
+        if CG.get(obj.category_name, '') == 'Trims':
             tax = get_tax_from_db(tax='trim')
             if isinstance(tax, float):
                 return tax
-        if obj.category_name in CG['Isolates']+CG['Crude Oil']+CG['Distillate Oil']:
+        if CG.get(obj.category_name, '') in ('Isolates', 'Concentrates', 'Terpenes'):
             trim_tax = get_tax_from_db(tax='trim')
             if isinstance(trim_tax, float):
                 if obj.trim_used:
@@ -252,7 +259,7 @@ def get_item_tax(obj, request=None):
                 else:
                     msg_error('Not provided quantity of Trim used to produce the oil.')
                     return None
-        if obj.category_name in CG['Clones']:
+        if CG.get(obj.category_name, '') == 'Clones':
             return float(0.0)
         else:
             msg_error('No Cultivar Tax is defined for selected category.')
