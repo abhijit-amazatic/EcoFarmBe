@@ -3,6 +3,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
@@ -51,6 +52,8 @@ class InlineDocumentsAdmin(GenericStackedInline):
     """
     Configuring field admin view for ProfileContact model.
     """
+    verbose_name = 'Document'
+    verbose_name_plural = 'Documents'
     extra = 0
     readonly_fields = ('doc_type', 'file',)
     fields = ('doc_type', 'file',)
@@ -93,6 +96,9 @@ class InlineDocumentsAdmin(GenericStackedInline):
 
 
 class CustomInventoryForm(forms.ModelForm):
+    # trim_used_verified = forms.BooleanField(label='Used Trim Verified', initial=False, required=False)
+
+
     # def __init__(self, *args, **kwargs):
     #     super().__init__(*args, **kwargs)
     #     instance = kwargs.get('instance')
@@ -124,8 +130,21 @@ class CustomInventoryForm(forms.ModelForm):
     #             self.fields['marketplace_status'] = forms.ChoiceField(choices=marketplace_status_choices, required=True)
     #             self.fields['harvest_date'].label='Clone Date'
 
-    def clean_category_name(val):
-        return super().clean()
+    # def clean_category_name(val):
+    #     return super().clean_category_name()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cat = cleaned_data.get('category_name')
+        if getattr(self, 'instance'):
+            if self.instance.status == 'pending_for_approval':
+                if cat and CG.get(cat, '') in ('Isolates', 'Concentrates', 'Terpenes'):
+                    if not cleaned_data.get('trim_used'):
+                        self.add_error('trim_used', "This value is required for current item category.")
+                    if not cleaned_data.get('trim_used_verified'):
+                        self.add_error('trim_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
+                        # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
+        return cleaned_data
 
     class Meta:
         model = CustomInventory
@@ -151,6 +170,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         'updated_on',
     )
     readonly_fields = (
+        'trim_used_doc',
         'status',
         'cultivar_name',
         # 'vendor_name',
@@ -180,7 +200,8 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 'category_name',
                 'marketplace_status',
                 'quantity_available',
-                'trim_used',
+                ('trim_used', 'trim_used_doc'),
+                'trim_used_verified',
                 'harvest_date',
                 'need_lab_testing_service',
                 'batch_availability_date',
@@ -415,3 +436,27 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
 
     # def test_action(self, request, queryset):
     #     pass
+
+
+    def get_doc_url(self, obj, doc_type):
+        """
+        Return s3 license url.
+        """
+        try:
+            license = Documents.objects.filter(object_id=obj.id, doc_type=doc_type).latest('created_on')
+            if license.box_url:
+                return license.box_url
+            else:
+                path = license.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
+        except Exception:
+            return None
+
+    def trim_used_doc(self, obj):
+        url = self.get_doc_url(obj, doc_type='item_image')
+        if url:
+            return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
+    trim_used_doc.short_description = 'Document'
+    trim_used_doc.allow_tags = True

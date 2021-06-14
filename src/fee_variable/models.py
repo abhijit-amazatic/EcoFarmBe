@@ -69,7 +69,7 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         choices=PROGRAM_TIER_CHOICES
     )
     mcsp_fee = models.CharField(
-        verbose_name=_("MCSP Fee ($per lb)"),
+        verbose_name=_("MCSP Fee (per lb)"),
         help_text='This fee will be for Flowers and Trims',
         max_length=255,
         blank=True,

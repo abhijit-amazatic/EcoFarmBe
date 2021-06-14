@@ -454,10 +454,12 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     trim_used = models.FloatField(
         _('Trim Used (lbs)'),
-        help_text='This field is used to calculate tax for Isolates, Crude Oil and Distillate Oil.',
+        help_text='This field is used to calculate tax for Isolates, Concentrates and Terpenes.',
         blank=True,
         null=True,
     )
+    trim_used_verified = models.BooleanField(_('Trim Used Verified'), default=False)
+
     farm_ask_price = models.FloatField(_('Farm Ask Price'), blank=True, null=True,)
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
     have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
