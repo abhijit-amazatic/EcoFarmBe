@@ -60,6 +60,10 @@ class InlineDocumentsAdmin(GenericStackedInline):
     model = Documents
     can_delete = False
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.filter(doc_type__in=('item_image', 'labtest'))
+
     def has_add_permission(self, request):
         return False
 
@@ -299,7 +303,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         if obj.vendor_name:
             try:
                 result = search_query('Vendors', obj.vendor_name, 'Vendor_Name')
-            except Exception :
+            except Exception:
                 self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
             else:
                 if result.get('status_code') == 200:
@@ -455,7 +459,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
             return None
 
     def trim_used_doc(self, obj):
-        url = self.get_doc_url(obj, doc_type='item_image')
+        url = self.get_doc_url(obj, doc_type='trim_used_doc')
         if url:
             return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
     trim_used_doc.short_description = 'Document'

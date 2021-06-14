@@ -9,7 +9,18 @@ from integration.inventory import (
     get_user_id,
 )
 
-from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, )
+from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, CATEGORY_GROUP_MAP)
+
+CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
+
+ITEM_CATEGORY_UNIT_MAP = {
+    'Flowers':      'lb',
+    'Trims':        'lb',
+    'Isolates':     'g',
+    'Concentrates': 'g',
+    'Terpenes':     'g',
+    'Clones':       'pcs',
+}
 
 
 def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
@@ -19,11 +30,12 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
     data['category_id'] = category_id
     data['name'] = obj.cultivar.cultivar_name
     data['item_type'] = 'inventory'
-    data['unit'] = 'lb'
+    data['unit'] = ITEM_CATEGORY_UNIT_MAP.get(CG.get(obj.category_name, ''), '')
     data['is_taxable'] = True
     data['product_type'] = 'goods'
 
     if obj.zoho_organization == 'efd':
+
         data['cf_vendor_name'] = vendor_id
         if obj.procurement_rep:
             pro_rep_id = get_user_id(inv_obj, obj.procurement_rep)
@@ -79,6 +91,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
         data['cf_cfi_published'] = True
 
     elif obj.zoho_organization == 'efl': #################  EFL
+
         data['cf_vendor_name'] = vendor_id
         data['cf_client_code'] = obj.client_code
 
@@ -111,7 +124,6 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
             data['cf_cfi_published'] = False
 
     elif obj.zoho_organization == 'efn':  #################  EFN
-        data['unit'] = 'pcs'
 
         data['cf_vendor'] = vendor_id
         data['cf_client_code'] = obj.client_code

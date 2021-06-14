@@ -169,7 +169,8 @@ def get_po_for_item_quantity_change(obj, request=None, po_obj=None):
 
 def add_item_quantity(obj, request=None):
     item_id = obj.item.item_id
-    inv_obj = get_inventory_obj(inventory_name='inventory_efd',)
+    inventory_org = obj.inventory_name.lower()
+    inv_obj = get_inventory_obj(inventory_name=f'inventory_{inventory_org}',)
     po_obj = inv_obj.PurchaseOrders()
     # pr_obj = inv_obj.PurchaseReceives()
     po = get_po_for_item_quantity_change(obj, request, po_obj=po_obj)
@@ -205,6 +206,7 @@ def add_item_quantity(obj, request=None):
                     return False
     else:
         result = create_custom_inventory_item_po(
+            inventory_name=f'inventory_{inventory_org}',
             sku=obj.item.sku,
             quantity=obj.quantity,
             vendor_name=obj.item.cf_vendor_name,
@@ -217,7 +219,7 @@ def add_item_quantity(obj, request=None):
             obj.approved_on = timezone.now()
             obj.approved_by = get_approved_by(request=request)
             obj.save()
-            submit_purchase_order(obj.po_id)
+            submit_purchase_order(inventory_name=f'inventory_{inventory_org}', po_id=obj.po_id)
 
 
 def get_tax_from_db(tax='flower', request=None):
