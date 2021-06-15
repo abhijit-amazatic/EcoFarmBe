@@ -13,7 +13,7 @@ class CustomButtonMixin:
     """
     Admin change form with custom buttons and method call.
     """
-    custom_buttons=()
+    custom_buttons = ()
     change_form_template = 'admin/custom_button_change_form.html'
 
     def show_button(self, button_name, request, obj, add=False, change=False):

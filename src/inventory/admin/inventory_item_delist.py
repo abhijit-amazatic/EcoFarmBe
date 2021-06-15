@@ -1,23 +1,15 @@
 from django.contrib import admin
-from django import forms
-from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from django.utils import timezone
-
-from django_json_widget.widgets import JSONEditorWidget
 
 from integration.inventory import (
     get_inventory_obj,
 )
 from core.mixins.admin import (CustomButtonMixin,)
-from  ..models import (
-    Inventory,
-    InventoryItemDelist,
+from utils import (
+    get_approved_by,
 )
 from ..tasks import (
     notify_inventory_item_delist_approved_task,
-)
-from ..tasks.helpers import (
-    get_approved_by
 )
 from ..data import(ITEM_CUSTOM_FIELD_ORG_MAP)
 
@@ -82,7 +74,7 @@ class InventoryItemDelistAdmin(CustomButtonMixin, admin.ModelAdmin):
     #     # JSONField: {'widget': JSONEditorWidget},
     # }
 
-    custom_buttons=('approve',)
+    custom_buttons = ('approve',)
     # custom_buttons_prop = {
     #     'approve': {
     #         'label': 'Approve',
@@ -90,7 +82,7 @@ class InventoryItemDelistAdmin(CustomButtonMixin, admin.ModelAdmin):
     #     }
     # }
 
-    def show_approve_button(self, request, obj,  add=False, change=False):
+    def show_approve_button(self, request, obj, add=False, change=False):
         return change and obj and obj.status == 'pending_for_approval'
 
     def get_fieldsets(self, request, obj=None):
@@ -118,10 +110,10 @@ class InventoryItemDelistAdmin(CustomButtonMixin, admin.ModelAdmin):
                 if obj.item.inventory_name and obj.item.inventory_name.lower() in ['efd', 'efl', 'efn']:
                     org = obj.item.inventory_name.lower()
                     inv_obj = get_inventory_obj(inventory_name=f'inventory_{org}')
-                    data={'cf_cfi_published': False}
+                    data = {'cf_cfi_published': False}
                     if org in ITEM_CUSTOM_FIELD_ORG_MAP:
                         org_cf_map = ITEM_CUSTOM_FIELD_ORG_MAP[org]
-                        data={ org_cf_map[k]: v for k, v in data.items() if k in org_cf_map }
+                        data={org_cf_map[k]: v for k, v in data.items() if k in org_cf_map}
                     try:
                         result = inv_obj.update_item(obj.item.item_id, data, params={})
                     except Exception as exc:
@@ -132,10 +124,10 @@ class InventoryItemDelistAdmin(CustomButtonMixin, admin.ModelAdmin):
                         if result.get('code') == 0:
                             obj.status = 'approved'
                             obj.approved_on = timezone.now()
-                            obj.approved_by = get_approved_by(request=request)
+                            obj.approved_by = get_approved_by(user=request.user)
                             obj.save()
                             obj.item.cf_cfi_published = False
-                            obj.item.save
+                            obj.item.save()
                             self.message_user(request, 'This delisting is approved and item is delisted', level='success')
                             notify_inventory_item_delist_approved_task.delay(obj.id,)
 

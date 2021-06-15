@@ -1,17 +1,14 @@
-from os import urandom
+# from os import urandom
 from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
-from django.contrib.postgres.fields import (ArrayField, JSONField,)
-from django.core.exceptions import ValidationError
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.db.models.query import QuerySet
+# from django.contrib.postgres.fields import (ArrayField, JSONField,)
+# from django.core.exceptions import ValidationError
+# from django.db import models
+# from django.db.models.query import QuerySet
 from django.utils import timezone
-from django.utils.encoding import force_str
+# from django.utils.encoding import force_str
 from django.utils.html import mark_safe
-
-import nested_admin
 
 
 from core import settings
@@ -22,30 +19,27 @@ from core.settings import (
 from integration.apps.aws import (create_presigned_url, )
 from integration.inventory import (
     get_inventory_obj,
-    get_user_id,
     get_item_category_id,
     get_vendor_id,
 )
 from integration.crm import search_query
-from brand.models import (License, LicenseProfile,)
 from fee_variable.utils import (get_item_mcsp_fee,)
 from core.mixins.admin import (CustomButtonMixin,)
+from utils import (get_approved_by, )
 from ..models import (
-    Inventory,
     CustomInventory,
     Documents,
 )
 from ..tasks import (
-    create_approved_item_po,
+    create_approved_item_po_task,
     notify_inventory_item_approved_task,
 )
-from ..tasks.helpers import (
+from ..utils import (
     get_item_tax,
 )
-from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, CATEGORY_GROUP_MAP)
+from ..data import (CG, )
 from .custom_inventory_helpers import (get_new_item_data,)
 
-CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
 
 
 class InlineDocumentsAdmin(GenericStackedInline):
@@ -271,7 +265,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'cultivar':
-                field.queryset = field.queryset.filter(status='approved')
+            field.queryset = field.queryset.filter(status='approved')
         return field
 
     def has_change_permission(self, request, obj=None):
@@ -409,16 +403,12 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                     obj.zoho_item_id = item_id
                     obj.sku = sku
                     obj.approved_on = timezone.now()
-                    obj.approved_by = {
-                        'email': request.user.email,
-                        'phone': request.user.phone.as_e164,
-                        'name': request.user.get_full_name(),
-                    }
+                    obj.approved_by = get_approved_by(user=request.user)
                     obj.save()
                     self.message_user(request, 'This item is approved', level='success')
                     if obj.marketplace_status in ('In-Testing', 'Available'):
                         if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
-                            create_approved_item_po.delay(obj.id)
+                            create_approved_item_po_task.delay(obj.id)
                         notify_inventory_item_approved_task.delay(obj.id)
                     else:
                         notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
@@ -436,7 +426,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 print(data)
 
     def cultivar_name(self, obj):
-            return obj.cultivar.cultivar_name
+        return obj.cultivar.cultivar_name
 
     # def test_action(self, request, queryset):
     #     pass
@@ -447,11 +437,11 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         Return s3 license url.
         """
         try:
-            license = Documents.objects.filter(object_id=obj.id, doc_type=doc_type).latest('created_on')
-            if license.box_url:
-                return license.box_url
+            document_obj = Documents.objects.filter(object_id=obj.id, doc_type=doc_type).latest('created_on')
+            if document_obj.box_url:
+                return document_obj.box_url
             else:
-                path = license.path
+                path = document_obj.path
                 url = create_presigned_url(AWS_BUCKET, path)
                 if url.get('response'):
                     return url.get('response')

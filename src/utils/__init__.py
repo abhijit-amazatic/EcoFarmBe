@@ -36,3 +36,17 @@ def parse_domain_from_link(string):
     if d:
         return d
     return string
+
+def get_approved_by(user=None):
+    approved_by = {
+        'email': 'connect@thrive-society.com',
+        'phone': '',
+        'name':  'Automated Bot',
+    }
+    if user:
+        approved_by = {
+            'email': user.email,
+            'phone': user.phone.as_e164,
+            'name':  user.get_full_name(),
+        }
+    return approved_by

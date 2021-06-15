@@ -30,6 +30,8 @@ from ..models import (
 from .custom_inventory import CustomInventoryAdmin
 from .inventory_item_edit import (
     InventoryItemEditAdmin,
+)
+from .inventory_item_quantity_addition import (
     InventoryItemQuantityAdditionAdmin,
 )
 from .inventory_item_delist import (InventoryItemDelistAdmin, )

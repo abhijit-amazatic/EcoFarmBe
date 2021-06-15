@@ -1,6 +1,6 @@
 
 """
-All tasks related to inventory. 
+All tasks related to inventory.
 """
 
 from django.conf import settings
@@ -13,29 +13,6 @@ from slacker import Slacker
 
 from core.celery import (app,)
 from core.mailer import (mail, mail_send)
-
-from integration.box import (upload_file, upload_file_stream, )
-from integration.inventory import (
-    get_inventory_obj,
-    update_inventory_item,
-    create_purchase_order,
-    submit_purchase_order
-)
-
-from .helpers import (
-    inventory_item_change,
-    add_item_quantity,
-    create_custom_inventory_item_po,
-)
-from ..models import (
-    Inventory,
-    CustomInventory,
-    DailyInventoryAggrigatedSummary,
-    County,
-    CountyDailySummary,
-    InventoryItemEdit,
-    InventoryItemQuantityAddition,
-)
 
 from .export_csv import (
     county_update_create,
@@ -52,27 +29,9 @@ from .notify_item_change_approved import (notify_inventory_item_change_approved_
 from .notify_item_delist_submitted import (notify_inventory_item_delist_submitted_task,)
 from .notify_item_delist_approved import (notify_inventory_item_delist_approved_task,)
 from .crm_vendor_from_crm_account import (create_duplicate_crm_vendor_from_crm_account_task, )
-from .custom_inventory_data_from_crm import (get_custom_inventory_data_from_crm_task )
-
-
-@app.task(queue="general")
-def create_approved_item_po(custom_inventory_id):
-    item = CustomInventory.objects.get(id=custom_inventory_id)
-    if item.status == 'approved':
-        inventory_name = f'inventory_{item.zoho_organization}'
-        result = create_custom_inventory_item_po(
-            inventory_name=inventory_name,
-            sku=item.sku,
-            quantity=item.quantity_available,
-            vendor_name=item.vendor_name,
-            client_code=item.client_code
-        )
-        if result.get('code') == 0:
-            item.po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
-            item.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
-            item.save()
-            submit_purchase_order(inventory_name=inventory_name, po_id=item.po_id)
-
+from .custom_inventory_data_from_crm import (get_custom_inventory_data_from_crm_task, )
+from .create_approved_item_po import (create_approved_item_po_task, )
+from .inventory_item_quantity_addition import (inventory_item_quantity_addition_task, )
 
 # @app.task(queue="general")
 # def inventory_item_change_task(inventory_items_change_request_id):
@@ -90,7 +49,3 @@ def create_approved_item_po(custom_inventory_id):
 #         # inventory_item_change(obj)
 #     inventory_item_change(obj)
 
-@app.task(queue="general")
-def inventory_item_quantity_addition_task(item_quantity_addition_id):
-    obj = InventoryItemQuantityAddition.objects.get(id=item_quantity_addition_id)
-    add_item_quantity(obj)

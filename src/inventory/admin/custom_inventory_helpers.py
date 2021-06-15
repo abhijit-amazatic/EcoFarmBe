@@ -9,9 +9,7 @@ from integration.inventory import (
     get_user_id,
 )
 
-from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, CATEGORY_GROUP_MAP)
-
-CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
+from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, CG)
 
 ITEM_CATEGORY_UNIT_MAP = {
     'Flowers':      'lb',

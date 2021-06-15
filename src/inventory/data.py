@@ -132,3 +132,5 @@ CATEGORY_GROUP_MAP = {
         'Clones',
     )
 }
+
+CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
