@@ -74,8 +74,8 @@ class DataFilter(FilterSet):
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
     vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
-    cf_client_code__in = CharInFilter(field_name='cf_client_code', lookup_expr='in')
     cf_strain_name = CharInFilter(method='cf_strain_name__in', lookup_expr='in')
+    cf_client_code = CharInFilter(method='cf_client_code__in', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
@@ -131,6 +131,10 @@ class DataFilter(FilterSet):
         #items = queryset.filter(cf_cfi_published=True,cf_strain_name__in=values)
         items = queryset.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in values)))
         return items
+
+    def cf_client_code__in(self, queryset, name, values):
+        items = queryset.filter(reduce(operator.or_, (Q(cf_client_code__icontains=x) for x in values)))
+        return items
     
     def filter_cf_pesticide_summary__in(self, queryset, name, values):
         values = ['ND' if val == 'Non-Detect' else val for val in values ]
@@ -161,9 +165,6 @@ class DataFilter(FilterSet):
         'cf_vendor_name': ['icontains', 'exact'],
         'parent_category_name':['icontains', 'exact'],
         'cf_cultivar_type':['icontains', 'exact'],
-        # 'county_grown':['icontains', 'exact'],
-        'cf_client_code':['icontains', 'exact'],   
-        #'cf_strain_name':['icontains', 'exact'],
         'price':['gte', 'lte', 'gt', 'lt'],
         'available_stock':['gte', 'lte', 'gt', 'lt'],
         'stock_on_hand':['gte', 'lte', 'gt', 'lt'],
