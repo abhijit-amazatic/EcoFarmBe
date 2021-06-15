@@ -128,8 +128,8 @@ class DataFilter(FilterSet):
         return items
     
     def cf_strain_name__in(self, queryset, name, values):
-        items = queryset.filter(cf_cfi_published=True,cf_strain_name__in=values)
-        #items = queryset.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in values)))
+        #items = queryset.filter(cf_cfi_published=True,cf_strain_name__in=values)
+        items = queryset.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in values)))
         return items
     
     def filter_cf_pesticide_summary__in(self, queryset, name, values):
