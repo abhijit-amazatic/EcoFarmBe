@@ -34,7 +34,7 @@ def notify_slack_inventory_item_delist_submitted(data):
 
     )
     slack.chat.post_message(
-        settings.SLACK_INVENTORY_CHANNEL,
+        settings.SLACK_ITEM_DELIST_CHANNEL,
         msg, as_user=False,
         username=settings.BOT_NAME,
         icon_url=settings.BOT_ICON_URL

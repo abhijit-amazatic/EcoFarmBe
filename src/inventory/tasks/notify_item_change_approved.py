@@ -33,7 +33,7 @@ def notify_slack_inventory_item_change_approved(data):
         f"- *Webapp Item Link:* {data.get('webapp_item_link')}\n"
 
     )
-    slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
+    slack.chat.post_message(settings.SLACK_ITEM_EDIT_CHANNEL, msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
 
 def notify_email_inventory_item_change_approved(data):
     """

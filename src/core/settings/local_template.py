@@ -133,6 +133,10 @@ SLACK_SALES_CHANNEL = 'tech_dev_slack_testing' #PROD:'sales_leads'
 SLACK_PROFILE_CHANNEL = 'tech_dev_slack_testing' #PROD: 'tech_new_website_onboarding_profiles'
 #inventory channel
 SLACK_INVENTORY_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_new_inventory_items_web_app'
+#inventory item edit channel
+SLACK_ITEM_EDIT_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_inventory_item_edit_web_app'
+#inventory item delist channel
+SLACK_ITEM_DELIST_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_inventory_item_delist_web_app'
 #Logistics Transport channel
 SLACK_LOGISTICS_TRANSPORT_CHANNEL = 'tech_dev_slack_testing' #PROD: 'distro_logistics_transport_requests_web_app'
 

@@ -120,6 +120,11 @@ SLACK_SALES_CHANNEL = os.environ.get("SLACK_SALES_CHANNEL")
 SLACK_PROFILE_CHANNEL = os.environ.get("SLACK_PROFILE_CHANNEL")
 #Inventory
 SLACK_INVENTORY_CHANNEL = os.environ.get("SLACK_INVENTORY_CHANNEL")
+#inventory item edit channel
+SLACK_ITEM_EDIT_CHANNEL = os.environ.get("SLACK_ITEM_EDIT_CHANNEL")
+#inventory item delist channel
+SLACK_ITEM_DELIST_CHANNEL = os.environ.get("SLACK_ITEM_DELIST_CHANNEL")
+
 #Logistics Transport channel
 SLACK_LOGISTICS_TRANSPORT_CHANNEL = os.environ.get("SLACK_LOGISTICS_TRANSPORT_CHANNEL")
 
