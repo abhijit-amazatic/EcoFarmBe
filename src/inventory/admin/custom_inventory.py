@@ -368,7 +368,15 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                     if obj.client_code:
                         if obj.zoho_organization:
                             inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
-                            category_id = get_item_category_id(inv_obj.ORGANIZATION_ID, obj.category_name)
+                            metadata = {}
+                            resp_metadata = inv_obj.get_metadata(params={})
+                            if resp_metadata.get('code') == 0:
+                                metadata = resp_metadata
+                            category_id = get_item_category_id(
+                                inv_obj=inv_obj,
+                                category_name=obj.category_name,
+                                metadata=metadata,
+                            )
                             if category_id:
                                 if obj.vendor_name:
                                     vendor_id = get_vendor_id(inv_obj, obj.vendor_name)

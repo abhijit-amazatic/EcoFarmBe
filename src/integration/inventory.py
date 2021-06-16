@@ -101,8 +101,21 @@ def get_user_id(inventory, email):
             if user.get('email') == email:
                 return user.get('user_id')
 
-def get_item_category_id(org_id, category_name):
-    return INVENTORY_ITEM_CATEGORY_NAME_ID_MAP.get(org_id, {}).get(category_name, '')
+def get_item_category_id(inv_obj, category_name, metadata={}):
+    cat_id = ''
+    if not metadata:
+        resp_metadata = inv_obj.get_metadata(params={})
+        if resp_metadata.get('code') == 0:
+            metadata = resp_metadata
+    if isinstance(metadata, dict) and metadata.get('categories'):
+        categories = metadata.get('categories')
+        for category in categories:
+            if category.get('name') == category_name:
+                cat_id = category.get('category_id')
+    if not cat_id:
+        org_id = inv_obj.ORGANIZATION_ID
+        cat_id = INVENTORY_ITEM_CATEGORY_NAME_ID_MAP.get(org_id, {}).get(category_name, '')
+    return cat_id
 
 def create_inventory_item(inventory_name, record, params={}):
     """
