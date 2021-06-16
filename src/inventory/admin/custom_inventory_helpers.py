@@ -4,12 +4,16 @@ from django.utils.encoding import force_str
 from django.utils.html import mark_safe
 
 from core import settings
+from  fee_variable.utils import (get_new_items_accounts,)
 
 from integration.inventory import (
     get_user_id,
 )
 
-from ..data import (CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS, CG)
+from ..data import (
+    # CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS,
+    CG
+)
 
 ITEM_CATEGORY_UNIT_MAP = {
     'Flowers':      'lb',
@@ -23,7 +27,8 @@ ITEM_CATEGORY_UNIT_MAP = {
 
 def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
     data = {}
-    data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
+    # data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
+    data.update(get_new_items_accounts(zoho_organization=obj.zoho_organization))
     data['category_name'] = obj.category_name
     data['category_id'] = category_id
     data['name'] = obj.cultivar.cultivar_name

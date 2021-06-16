@@ -1,7 +1,7 @@
 from django.contrib import messages
 
 from brand.models import (License, LicenseProfile,)
-from .models import (CustomInventoryVariable, TaxVariable)
+from .models import (CustomInventoryVariable, TaxVariable, VendorInventoryDefaultAccounts)
 
 
 custom_inventory_variable_program_map = {
@@ -96,3 +96,28 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
         if request:
             messages.error(request, 'Item category not defined or not valid.')
 
+def get_new_items_accounts(zoho_organization: str):
+    """
+        get ids of sales account, purchase account and inventory account from database for new item.
+
+    Args:
+        zoho_org (str): Zoho inventory organization.
+                        choices: 'efd', 'efl', 'efn'.
+
+    Returns:
+        dict: Dictionary of account ids for new vendor inventory item.
+              sample:
+              {
+                  'account_id':           '2158711000001027029',
+                  'purchase_account_id':  '2158711000001027033',
+                  'inventory_account_id': '2158711000000198057',
+              }
+    """
+    resp_dict = {}
+    try:
+        obj = VendorInventoryDefaultAccounts.objects.get(zoho_organization=zoho_organization)
+    except VendorInventoryDefaultAccounts.DoesNotExist:
+        pass
+    else:
+        resp_dict = obj.get_new_item_accounts_dict()
+    return resp_dict

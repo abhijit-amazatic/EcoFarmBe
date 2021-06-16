@@ -125,3 +125,40 @@ class CampaignVariable(TimeStampFlagModelMixin,models.Model):
     class Meta:
         verbose_name = _('Campaign Variable')
         verbose_name_plural = _('Campaign Variables')
+
+
+class VendorInventoryDefaultAccounts(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing  CustomInventory variables
+    """
+    ZOHO_ORG_EFD = 'efd'
+    ZOHO_ORG_EFL = 'efl'
+    ZOHO_ORG_EFN = 'efn'
+    ZOHO_ORG_CHOICES = (
+        (ZOHO_ORG_EFD, _('Thrive Society (EFD LLC)')),
+        (ZOHO_ORG_EFL, _('Eco Farm Labs (EFL LLC)')),
+        (ZOHO_ORG_EFN, _('Eco Farm Nursery (EFN LLC)')),
+    )
+
+    zoho_organization = models.CharField(_('Zoho Organization'), unique=True, choices=ZOHO_ORG_CHOICES, max_length=20)
+
+    sales_account = models.CharField(verbose_name=_("Sales Account"), max_length=255, null=True, blank=True)
+    purchase_account = models.CharField(verbose_name=_("Purchase Account"), max_length=255, null=True, blank=True)
+    inventory_account = models.CharField(verbose_name=_("inventory Account"), max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.zoho_organization
+
+    def get_new_item_accounts_dict(self):
+        resp = {}
+        if self.sales_account:
+            resp['account_id'] = self.sales_account
+        if self.purchase_account:
+            resp['purchase_account_id'] = self.purchase_account
+        if self.inventory_account:
+            resp['inventory_account_id'] = self.inventory_account
+        return resp
+
+    class Meta:
+        verbose_name = _('Vendor Inventory Default Accounts')
+        verbose_name_plural = _('Vendor Inventory Default Accounts')

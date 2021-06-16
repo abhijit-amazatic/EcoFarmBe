@@ -5,6 +5,8 @@ from django import forms
 from django.contrib import admin
 from django.conf import settings
 from django.db import models
+
+from integration.inventory import (get_inventory_obj, )
 from .models import *
 
 
@@ -29,7 +31,97 @@ class CampaignVariableAdmin(admin.ModelAdmin):
     """
     Zoho campaign Variables
     """
+
+
+class VendorInventoryDefaultAccountsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        if instance and instance.zoho_organization:
+            inv_obj = get_inventory_obj(inventory_name=f'inventory_{instance.zoho_organization}')
+            metadata = {}
+            resp_metadata = inv_obj.get_metadata(params={})
+            if resp_metadata.get('code') == 0:
+                metadata = resp_metadata
+            if metadata:
+                if metadata.get('income_accounts_list'):
+                    sales_account_choices = tuple(
+                        [(None, '---------')] + [
+                            (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
+                            for acc in metadata.get('income_accounts_list')
+                        ]
+                    )
+                    self.fields['sales_account'] = forms.ChoiceField(choices=sales_account_choices, required=False)
+
+                if metadata.get('purchase_accounts_list'):
+                    purchase_account_choices = tuple(
+                        [(None, '---------')] + [
+                            (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
+                            for acc in metadata.get('purchase_accounts_list')
+                        ]
+                    )
+                    self.fields['purchase_account'] = forms.ChoiceField(choices=purchase_account_choices, required=False)
+
+                if metadata.get('inventory_accounts_list'):
+                    inventory_account_choices = tuple(
+                        [(None, '---------')] + [
+                            (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
+                            for acc in metadata.get('inventory_accounts_list')
+                        ]
+                    )
+                    self.fields['inventory_account'] = forms.ChoiceField(choices=inventory_account_choices, required=False)
+
+
+    class Meta:
+        model = VendorInventoryDefaultAccounts
+        fields = '__all__'
+
+
+
+class VendorInventoryDefaultAccountsAdmin(admin.ModelAdmin):
+    """
+    Vendor Inventory Default Accounts Admin
+    """
+    form = VendorInventoryDefaultAccountsForm
+    list_display = ('zoho_organization', 'sales_account', 'purchase_account', 'inventory_account', 'updated_on', 'created_on')
+    readonly_fields = ('updated_on', 'created_on')
+    create_fields = ('zoho_organization',)
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'zoho_organization',
+                'sales_account',
+                'purchase_account',
+                'inventory_account',
+            )
+        }),
+    )
+
+    def get_fieldsets(self, request, obj=None):
+        """
+        Hook for specifying fieldsets.
+        """
+        fieldsets = super().get_fieldsets(request, obj=obj)
+        if not obj:
+            fs = tuple((x[0], {k: [f for f in v if f in self.create_fields] for k, v in x[1].items()}) for x in fieldsets)
+            return ((x[0], x[1]) for x in fs if any(x[1].values()))
+        return fieldsets
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj=obj)
+        if obj:
+            f = set(('zoho_organization',))
+            f.update(readonly_fields)
+            return tuple(f)
+        return readonly_fields
+
+
+
+
 admin.site.register(OrderVariable, OrderVariableAdmin)
 admin.site.register(CustomInventoryVariable, CustomInventoryVariableAdmin)
 admin.site.register(TaxVariable, TaxVariableAdmin)
 admin.site.register(CampaignVariable, CampaignVariableAdmin)
+admin.site.register(VendorInventoryDefaultAccounts, VendorInventoryDefaultAccountsAdmin)
