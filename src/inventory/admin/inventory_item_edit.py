@@ -76,13 +76,15 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             mcsp_fee = get_item_mcsp_fee(
-                obj.vendor_name,
-                license_profile=obj.license_profile,
-                item_category_group=CG.get(obj.category_name),
+                obj.item.cf_vendor_name,
+                item_category_group=CG.get(obj.item.category_name),
                 request=request,
             )
             if mcsp_fee:
-                tax = get_item_tax(obj, request)
+                tax = get_item_tax(
+                    category_name=obj.item.category_name,
+                    request=request,
+                )
                 if tax:
                     data = obj.get_item_update_data()
                     if obj.farm_price:
@@ -90,7 +92,7 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                         data['rate'] = obj.farm_price + mcsp_fee + tax
                     inventory_org = data.get('inventory_name', '').lower()
                     if inventory_org in ('efd', 'efn', 'efl'):
-                        inventory_name = 'inventory_{inventory_org}'
+                        inventory_name = f'inventory_{inventory_org}'
                         data.pop('inventory_name')
                         try:
                             result = update_inventory_item(inventory_name, data.get('item_id'), data)

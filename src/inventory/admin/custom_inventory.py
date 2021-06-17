@@ -361,7 +361,11 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 request=request,
             )
             if mcsp_fee:
-                tax = get_item_tax(obj, request)
+                tax = get_item_tax(
+                    category_name=obj.category_name,
+                    trim_used=obj.trim_used,
+                    item_quantity=obj.quantity_available,
+                    request=request,)
                 if tax:
                     if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                         self.get_crm_data(request, obj)

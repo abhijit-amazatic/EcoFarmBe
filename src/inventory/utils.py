@@ -23,26 +23,26 @@ def get_tax_from_db(tax='flower', request=None):
                 return None
 
 
-def get_item_tax(obj, request=None):
+def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None):
     msg_error = lambda msg: messages.error(request, msg,) if request else None
-    if obj.category_name:
-        if CG.get(obj.category_name, '')  == 'Flowers':
+    if category_name:
+        if CG.get(category_name, '')  == 'Flowers':
             tax = get_tax_from_db(tax='flower')
             if isinstance(tax, float):
                 return tax
-        if CG.get(obj.category_name, '') == 'Trims':
+        if CG.get(category_name, '') == 'Trims':
             tax = get_tax_from_db(tax='trim')
             if isinstance(tax, float):
                 return tax
-        if CG.get(obj.category_name, '') in ('Isolates', 'Concentrates', 'Terpenes'):
+        if CG.get(category_name, '') in ('Isolates', 'Concentrates', 'Terpenes'):
             trim_tax = get_tax_from_db(tax='trim')
             if isinstance(trim_tax, float):
-                if obj.trim_used:
-                    return (trim_tax * obj.trim_used) / obj.quantity_available
+                if trim_used:
+                    return (trim_tax * trim_used) / item_quantity
                 else:
                     msg_error('Not provided quantity of Trim used to produce the item.')
                     return None
-        if CG.get(obj.category_name, '') == 'Clones':
+        if CG.get(category_name, '') == 'Clones':
             return float(0.0)
         else:
             msg_error('No Cultivar Tax is defined for selected category.')
