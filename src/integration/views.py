@@ -55,7 +55,9 @@ from integration.books import (
     get_sub_statuses, approve_estimate, mark_salesorder,
     approve_salesorder, mark_purchaseorder, 
     approve_purchaseorder, mark_invoice, 
-    approve_invoice, mark_bill, approve_bill )
+    approve_invoice, mark_bill, approve_bill,
+    create_sales_order, create_invoice, parse_book_object,
+    create_purchase_order)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
@@ -1364,4 +1366,88 @@ class ApproveBillView(APIView):
         if bill_id:
             approve_bill(organization_name, bill_id)
             return Response({'response': 'Success'})
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class ConvertEstimateToSalesOrder(APIView):
+    """
+    View class to convert Estimate to Sales order.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Convert document.
+        """
+        organization_name = request.query_params.get('organization_name')
+        estimate_id = request.data.get('estimate_id')
+        if estimate_id:
+            estimate = get_estimate(organization_name, estimate_id=estimate_id, params={})
+            estimate = parse_book_object('sales_order', estimate)
+            so = create_sales_order(organization_name, estimate)
+            if so.get('code') != 0:
+                return Response(so, status=status.HTTP_400_BAD_REQUEST)
+            return Response(so)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class ConvertSalesOrderToInvoice(APIView):
+    """
+    View class to convert Sales order to Invoice.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Convert document.
+        """
+        organization_name = request.query_params.get('organization_name')
+        sales_order_id = request.data.get('salesorder_id')
+        if sales_order_id:
+            so = get_salesorder(organization_name, so_id=sales_order_id, params={})
+            so = parse_book_object('invoice', so)
+            invoice = create_invoice(organization_name, so)
+            if invoice.get('code') != 0:
+                return Response(invoice, status=status.HTTP_400_BAD_REQUEST)
+            return Response(invoice)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class ConvertEstimateToInvoice(APIView):
+    """
+    View class to convert estimate to Invoice.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Convert document.
+        """
+        organization_name = request.query_params.get('organization_name')
+        estimate_id = request.data.get('estimate_id')
+        if estimate_id:
+            estimate = get_estimate(organization_name, estimate_id=estimate_id, params={})
+            estimate = parse_book_object('invoice', estimate)
+            invoice = create_invoice(organization_name, estimate)
+            if invoice.get('code') != 0:
+                return Response(invoice, status=status.HTTP_400_BAD_REQUEST)
+            return Response(invoice)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+class ConvertSalesOrderToPurchaseOrder(APIView):
+    """
+    View class to convert Sales order to Purchase order.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Convert document.
+        """
+        organization_name = request.query_params.get('organization_name')
+        sales_order_id = request.data.get('salesorder_id')
+        if sales_order_id:
+            so = get_salesorder(organization_name, so_id=sales_order_id, params={})
+            so = parse_book_object('purchase_order', so)
+            purchase_order = create_purchase_order(organization_name, so)
+            if purchase_order.get('code') != 0:
+                return Response(purchase_order, status=status.HTTP_400_BAD_REQUEST)
+            return Response(purchase_order)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)

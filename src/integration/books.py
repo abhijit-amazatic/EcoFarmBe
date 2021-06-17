@@ -19,6 +19,7 @@ from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
 from .models import (Integration, )
 from .crm_format import (CRM_FORMAT, )
+from .books_format import (BOOKS_FORMAT_DICT, )
 from .inventory import (get_inventory_items, update_inventory_item, get_inventory_name)
 from .sign import (submit_estimate, )
 from inventory.models import Inventory
@@ -449,7 +450,7 @@ def get_vendor(obj, data):
     """
     contact_obj = obj.Contacts()
     try:
-        vendor = contact_obj.list_contacts(parameters={'contact_name': data['vendor_name']})
+        vendor = contact_obj.list_contacts(parameters={'contact_name': data['vendor_name'], 'contact_type': 'vendor'})
         vendor = vendor['response']
     except KeyError:
         return {"code": 1003, "error": "vendor name not provided"}
@@ -546,7 +547,6 @@ def list_estimates(books_name, params=None):
     else:
         return _list(books_name)
 
-
 def update_estimate_address(books_name, estimate_id, address_type, data, params=None):
     """
     Update estimate address in zoho books.
@@ -604,6 +604,20 @@ def approve_estimate(books_name, estimate_id, params=None):
     estimate_obj = obj.Estimates()
     return estimate_obj.approve_estimate(estimate_id, parameters=params)
 
+def create_sales_order(books_name, record, params=None):
+    """
+    Create sales order.
+    """
+    try:
+        obj = get_books_obj(books_name)
+        so_obj = obj.SalesOrders()
+        return so_obj.create_sales_order(record, parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
+
 def mark_salesorder(books_name, so_id, status, params=None):
     """
     Mark statement.
@@ -635,6 +649,20 @@ def approve_purchaseorder(books_name, po_id, params=None):
     obj = get_books_obj(books_name)
     po_obj = obj.SalesOrders()
     return po_obj.approve_purchase_order(so_id, parameters=params)
+
+def create_invoice(books_name, record, params=None):
+    """
+    Create invoice.
+    """
+    try:
+        obj = get_books_obj(books_name)
+        so_obj = obj.Invoices()
+        return so_obj.create_invoice(record, parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
 
 def mark_invoice(books_name, invoice_id, status, params=None):
     """
@@ -1114,3 +1142,27 @@ def get_sub_statuses(books_name, params=None):
     obj = get_books_obj(books_name)
     invoice_obj = obj.SalesOrders()
     return invoice_obj.get_sub_statuses(parameters=params)
+
+def get(record, v):
+    """
+    Return value from record.
+    """
+    value = record.get(v, None)
+    if v == 'line_items':
+        line_item = parse_book_object('item', value)
+        return line_item
+    if v == 'custom_fields':
+        custom_fields = parse_book_object('custom_fields', value)
+        return custom_fields
+    return value
+
+def parse_book_object(module, record):
+    """
+    Parser for books objects.
+    """
+    if isinstance(record, list):
+        result = list()
+        for obj in record:
+            result.append({k:get(obj, v) for k, v in BOOKS_FORMAT_DICT[module].items() if get(obj, v) != None})
+        return result
+    return {k:get(record, v) for k, v in BOOKS_FORMAT_DICT[module].items() if get(record, v) != None}
