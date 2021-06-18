@@ -165,9 +165,9 @@ CRM_FORMAT  = {
         "Do_you_work_with_other_Distributors": "other_distributors",
         "Can_you_Process_on_Site": "cr.process_on_site_parse",
         "Packaged_Flower_Line": "Packaged_Flower_Line",
-        "Farm_Co_Branding_Interest": "Farm_Co_Branding_Interest",
-        "Marketing_material": "Marketing_material",
-        "Featured_on_our_website_and_social_media": "Featured_on_our_website_and_social_media",
+        "Farm_Co_Branding_Interest": "interested_in_co_branding",
+        "Marketing_material": "have_marketing",
+        "Featured_on_our_website_and_social_media": "featured_on_our_site",
         #Mailing/Billing address
         "Billing_Street": "billing_address.street_parse",
         "Billing_City": "billing_address.city_parse",
@@ -250,7 +250,6 @@ CRM_FORMAT  = {
         "Unhide_Back_End_Fields": "Unhide_Back_End_Fields",
         "Vendor_Type": "Vendor_Type",
         "Which_third_party_lab_do_you_use": "Which_third_party_lab_do_you_use",
-        "Do_you_work_with_other_Distributors": "Do_you_work_with_other_Distributors"
     },
     "Licenses":{
         "id": "id",
