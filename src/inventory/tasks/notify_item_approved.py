@@ -122,7 +122,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
             notify_slack_inventory_item_approved(data)
             notify_email_inventory_item_approved(data)
             if notify_logistics:
-                if obj.transportation or obj.best_contact_Day_of_week or obj.best_contact_time_from or obj.best_contact_time_to:
+                if obj.transportation:
                     notify_logistics_slack_inventory_item_approved(data)
                     notify_logistics_email_inventory_item_approved(data)
 
