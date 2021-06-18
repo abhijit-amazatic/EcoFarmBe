@@ -542,7 +542,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     d['id'] = result.get('response')[0]['id']
                     result = update_records('Vendors', d, True)
             final_dict['vendor'] = result
-            if response['status_code'] == 200 and result['status_code'] in [201]:
+            if response['status_code'] == 200 and result['status_code'] in [200, 201]:
                 record_response = result['response']['response']['data']
                 try:
                     record_obj = LicenseProfile.objects.get(id=vendor_id)
