@@ -287,7 +287,7 @@ urlpatterns = [
     path(r'pendo/me/', PendoView.as_view(), name='pendo-me'),
     path(r'books/estimate/convert/sales-order/', ConvertEstimateToSalesOrder.as_view(), name="convert-estimate-to-salesorder"),
     path(r'books/sales-order/convert/invoice/', ConvertSalesOrderToInvoice.as_view(), name="convert-so-to-invoice"),
-    path(r'books/esitmate/convert/invoice/', ConvertEstimateToInvoice.as_view(), name="convert-estimate-to-invoice"),
+    path(r'books/estimate/convert/invoice/', ConvertEstimateToInvoice.as_view(), name="convert-estimate-to-invoice"),
     path(r'books/sales-order/convert/purchase-order/', ConvertSalesOrderToPurchaseOrder.as_view(), name="convert-so-to-po"),
 ] + router.urls
 
