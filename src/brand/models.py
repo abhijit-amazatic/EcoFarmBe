@@ -221,6 +221,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     documents = GenericRelation(Documents)
     is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
     status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
+    is_notified_before_expiry = models.BooleanField(_('Is Notified Before Expiry'), default=False)
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict)
 

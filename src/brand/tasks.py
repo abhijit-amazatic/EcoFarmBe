@@ -56,8 +56,11 @@ def update_before_expire():
                 obj.status_before_expiry = obj.status
                 obj.save()
                 print('updated license before status for ',obj.license_number)
-            mail_send("license-expiry.html",{'license_number':obj.license_number,'expiration_date': obj.expiration_date.strftime('%Y-%m-%d')},"Your license will expire soon.", obj.created_by.email)   
-
+            if not obj.is_notified_before_expiry:    
+                mail_send("license-expiry.html",{'license_number':obj.license_number,'expiration_date': obj.expiration_date.strftime('%Y-%m-%d')},"Your license will expire soon.", obj.created_by.email)   
+                obj.is_notified_before_expiry = True
+                obj.save()
+                print('Notified License before expiry & flagged as notified',obj.license_number)
 
 @app.task(queue="general")
 def send_async_invitation(invite_obj_id):
