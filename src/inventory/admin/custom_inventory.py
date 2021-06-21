@@ -1,4 +1,5 @@
 # from os import urandom
+import random
 from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
@@ -281,11 +282,14 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         sku.append(obj.client_code)
         sku.append(obj.cultivar.cultivar_name.replace(' ', '-'))
 
-        if obj.harvest_date:
-            sku.append(obj.harvest_date.strftime('%m-%d-%y'))
+        # if obj.harvest_date:
+        #     sku.append(obj.harvest_date.strftime('%m-%d-%y'))
+
+        sku.append('{0:0>4}'.format(random.randint(1, 9999)))
 
         if postfix:
             sku.append(str(postfix))
+
 
         # if not settings.PRODUCTION:
         #     sku.append(force_str(urandom(3).hex()))
@@ -426,7 +430,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                         notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
 
             elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
-                self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix+1)
+                self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix)
             else:
                 msg = result.get('message')
                 if msg:
