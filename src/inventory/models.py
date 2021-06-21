@@ -208,6 +208,9 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     )
 
     item = models.ForeignKey(Inventory, verbose_name=_('item'), related_name='edits', on_delete=models.CASCADE)
+    item_data = JSONField(_('item_data'), null=True, blank=True, default=dict)
+    name = models.CharField(_('Name'), blank=True, null=True, max_length=255)
+
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
 
@@ -222,6 +225,11 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, blank=True, null=True,)
 
     extra_documents = GenericRelation(Documents)
+
+    sku = models.CharField(_('SKU'), blank=True, null=True, max_length=255)
+    cultivar_name = models.CharField(_('Cultivar Name'), blank=True, null=True, max_length=255)
+    vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
+    zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
 
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
     created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
