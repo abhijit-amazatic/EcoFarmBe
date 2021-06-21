@@ -36,6 +36,10 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
     data['unit'] = ITEM_CATEGORY_UNIT_MAP.get(CG.get(obj.category_name, ''), '')
     data['is_taxable'] = True
     data['product_type'] = 'goods'
+    if CG.get(obj.category_name, '') in ('Isolates', 'Concentrates', 'Terpenes'):
+        data['cf_trim_qty_lbs'] = obj.trim_used
+        data['cf_batch_qty_g'] = obj.quantity_available
+
 
     if obj.zoho_organization == 'efd':
 

@@ -20,9 +20,25 @@ def post_save_custom_inventory(sender, instance, created, **kwargs):
                 instance.zoho_organization = 'efd'
                 instance.save()
 
-@receiver(signals.pre_save, sender=apps.get_model('inventory', 'InventoryItemEdit'))
 @receiver(signals.pre_save, sender=apps.get_model('inventory', 'InventoryItemDelist'))
-def pre_save_item_edit_or_delisting_request(sender, instance, **kwargs):
+def pre_save_item_delisting_request(sender, instance, **kwargs):
+    if not instance.status == 'approved':
+        item = instance.item
+        if item:
+            data = {
+                k: str(v) if isinstance(v, datetime.date) or isinstance(v, datetime.time) else v
+                for k, v in item.__dict__.items()
+                if not k.startswith('_')
+            }
+            instance.name = item.name
+            instance.item_data = data
+            instance.vendor_name = item.cf_vendor_name
+            instance.cultivar_name = getattr(item.cultivar, 'cultivar_name') if item.cultivar else ''
+            instance.sku = item.sku
+            instance.zoho_item_id = item.item_id
+
+@receiver(signals.pre_save, sender=apps.get_model('inventory', 'InventoryItemEdit'))
+def pre_save_item_edit_request(sender, instance, **kwargs):
     if not instance.status == 'approved':
         item = instance.item
         if item:

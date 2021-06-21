@@ -38,9 +38,13 @@ def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None
             trim_tax = get_tax_from_db(tax='trim')
             if isinstance(trim_tax, float):
                 if trim_used:
-                    return (trim_tax * trim_used) / item_quantity
+                    if item_quantity:
+                        return (trim_tax * trim_used) / item_quantity
+                    else:
+                        msg_error('Item does not have a Batch quantity to calculate.')
+                        return None
                 else:
-                    msg_error('Not provided quantity of Trim used to produce the item.')
+                    msg_error('Item does not have a quantity of Trim used to produce the item.')
                     return None
         if CG.get(category_name, '') == 'Clones':
             return float(0.0)
