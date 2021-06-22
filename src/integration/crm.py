@@ -315,8 +315,14 @@ def update_in_crm(module, record_id):
             request = License.objects.get(id=record_id)
             request = request.__dict__
         elif module in ['Vendors', 'Accounts']:
-            request = LicenseProfile.objects.get(id=record_id)
-            request = request.__dict__
+            lp_obj = LicenseProfile.objects.get(id=record_id)
+            request = lp_obj.__dict__
+            if module == 'Vendors':
+                if lp_obj.license.profile_category == 'nursery':
+                    request['Layout_Name'] = 'vendor_cannabis_nursery'
+                else:
+                    request['Layout_Name'] = 'vendor_cannabis'
+
         elif module == 'Orgs':
             request = Organization.objects.get(id=record_id)
             request = request.__dict__
