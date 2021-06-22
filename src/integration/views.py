@@ -57,7 +57,7 @@ from integration.books import (
     approve_purchaseorder, mark_invoice, 
     approve_invoice, mark_bill, approve_bill,
     create_sales_order, create_invoice, parse_book_object,
-    create_purchase_order)
+    create_purchase_order, update_sales_order, update_invoice)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
@@ -338,17 +338,21 @@ class EstimateView(APIView):
         """
         organization_name = request.query_params.get('organization_name')
         is_draft = request.query_params.get('is_draft')
+        delete_estimate_from_db = request.query_params.get('delete_estimate_from_db', False)
         estimate_id = request.data['estimate_id']
         if is_draft == 'true' or is_draft == 'True':
-            response = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            response = update_estimate(organization_name, estimate_id=estimate_id, \
+                data=request.data, params=request.query_params.dict())
             if response.get('code') and response['code'] != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             # estimate_obj = save_estimate(request)
-            customer_name = response.get('customer_name')
-            delete_estimate_task.delay(customer_name)
+            if delete_estimate_from_db:
+                customer_name = response.get('customer_name')
+                delete_estimate_task.delay(customer_name)
             return Response(response)
         else:
-            estimate = update_estimate(organization_name, estimate_id=estimate_id, data=request.data, params=request.query_params.dict())
+            estimate = update_estimate(organization_name, estimate_id=estimate_id, \
+                data=request.data, params=request.query_params.dict())
             if estimate.get('code') and estimate['code'] != 0:
                 return Response(estimate, status=status.HTTP_400_BAD_REQUEST)
             # update_available_for_sale(request.data)
@@ -692,6 +696,18 @@ class InvoiceView(APIView):
                 params=request.query_params.dict()))
         return Response(list_invoices(organization_name, params=request.query_params.dict()))
 
+    def put(self, request):
+        """
+        Update invoice.
+        """
+        organization_name = request.query_params.get('organization_name')
+        invoice_id = request.data['invoice_id']
+        response = update_invoice(organization_name, invoice_id=invoice_id, data=request.data, params=request.query_params.dict())
+        print(response)
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response)
+
 class BillView(APIView):
     """
     View class for Zoho books bills.
@@ -739,6 +755,17 @@ class SalesOrderView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        """
+        Update sales order.
+        """
+        organization_name = request.query_params.get('organization_name')
+        salesorder_id = request.data['salesorder_id']
+        response = update_sales_order(organization_name, salesorder_id=salesorder_id, data=request.data, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response)
 
 class SalesOrderSubStatusesView(APIView):
     """

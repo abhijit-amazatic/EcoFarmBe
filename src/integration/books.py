@@ -618,6 +618,20 @@ def create_sales_order(books_name, record, params=None):
             "error": exc
         }
 
+def update_sales_order(books_name, salesorder_id, data, params=None):
+    """
+    Update purchase order to Zoho books.
+    """
+    try:
+        obj = get_books_obj(books_name)
+        so_obj = obj.SalesOrders()
+        return so_obj.update_sales_order(salesorder_id, data, parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
+
 def mark_salesorder(books_name, so_id, status, params=None):
     """
     Mark statement.
@@ -648,7 +662,7 @@ def approve_purchaseorder(books_name, po_id, params=None):
     """
     obj = get_books_obj(books_name)
     po_obj = obj.SalesOrders()
-    return po_obj.approve_purchase_order(so_id, parameters=params)
+    return po_obj.approve_purchase_order(po_id, parameters=params)
 
 def create_invoice(books_name, record, params=None):
     """
@@ -658,6 +672,20 @@ def create_invoice(books_name, record, params=None):
         obj = get_books_obj(books_name)
         so_obj = obj.Invoices()
         return so_obj.create_invoice(record, parameters=params)
+    except Exception as exc:
+        return {
+            "status_code": 400,
+            "error": exc
+        }
+
+def update_invoice(books_name, invoice_id, data, params=None):
+    """
+    Update purchase order to Zoho books.
+    """
+    try:
+        obj = get_books_obj(books_name)
+        invoice_obj = obj.Invoices()
+        return invoice_obj.update_invoice(invoice_id, data, parameters=params)
     except Exception as exc:
         return {
             "status_code": 400,
