@@ -1171,12 +1171,15 @@ def get_sub_statuses(books_name, params=None):
     invoice_obj = obj.SalesOrders()
     return invoice_obj.get_sub_statuses(parameters=params)
 
-def get(record, v):
+def get(record, v, **kwargs):
     """
     Return value from record.
     """
     value = record.get(v, None)
     if v == 'line_items':
+        if kwargs.get('line_item_parser') == 'salesorder_parser':
+            line_item = parse_book_object('salesorder_line_item', value)
+            return line_item    
         line_item = parse_book_object('item', value)
         return line_item
     if v == 'custom_fields':
@@ -1184,13 +1187,13 @@ def get(record, v):
         return custom_fields
     return value
 
-def parse_book_object(module, record):
+def parse_book_object(module, record, **kwargs):
     """
     Parser for books objects.
     """
     if isinstance(record, list):
         result = list()
         for obj in record:
-            result.append({k:get(obj, v) for k, v in BOOKS_FORMAT_DICT[module].items() if get(obj, v) != None})
+            result.append({k:get(obj, v, **kwargs) for k, v in BOOKS_FORMAT_DICT[module].items() if get(obj, v) != None})
         return result
-    return {k:get(record, v) for k, v in BOOKS_FORMAT_DICT[module].items() if get(record, v) != None}
+    return {k:get(record, v, **kwargs) for k, v in BOOKS_FORMAT_DICT[module].items() if get(record, v) != None}

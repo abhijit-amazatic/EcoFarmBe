@@ -225,7 +225,7 @@ def get_sales_returns(inventory_name, sales_return_id=None, params={}):
 
 def create_sales_return(inventory_name, record, params={}):
     """
-    Create packages.
+    Create sales return.
     """
     inventory = get_inventory_obj(inventory_name)
     obj = inventory.SalesReturn()
@@ -233,7 +233,7 @@ def create_sales_return(inventory_name, record, params={}):
 
 def update_sales_return(inventory_name, sales_return_id, record, params={}):
     """
-    Update packages.
+    Update sales return.
     """
     inventory = get_inventory_obj(inventory_name)
     obj = inventory.SalesReturn()
@@ -246,6 +246,22 @@ def get_contacts(inventory_name, contact_id=None, params={}):
     inventory = get_inventory_obj(inventory_name)
     obj = inventory.Contact()
     return obj.get_contacts(contact_id=contact_id, params=params)
+
+def create_contact(inventory_name, record, params={}):
+    """
+    Create contact.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.Contact()
+    return obj.create_contact(record=record, params=params)
+
+def update_contact(inventory_name, contact_id, record, params={}):
+    """
+    Update contact.
+    """
+    inventory = get_inventory_obj(inventory_name)
+    obj = inventory.Contact()
+    return obj.update_contact(contact_id=contact_id, record=record, params=params)
 
 def get_inventory_metadata(inventory_name, params={}):
     """
@@ -265,6 +281,17 @@ def get_inventory_name(item_id):
         'EFN': 'inventory_efn',
     }
     return inventory_names[item.inventory_name]
+
+def get_books_name_from_inventory_name(inventory_name):
+    """
+    Return books organization name from inventory organization name.
+    """
+    books_names = {
+        'inventory_efl': 'books_efl',
+        'inventory_efd': 'books_efd',
+        'inventory_efn': 'books_efn',
+    }
+    return books_names[inventory_name]
 
 def get_cultivar_from_db(cultivar_name):
     """

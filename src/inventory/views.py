@@ -42,10 +42,6 @@ from .models import (
     InventoryItemDelist,
 )
 from core.settings import (AWS_BUCKET,)
-from integration.inventory import (sync_inventory, upload_inventory_document,
-                                   get_inventory_name, update_inventory_item,
-                                   get_contacts)
-from integration.apps.aws import (create_presigned_url, create_presigned_post,)
 from .permissions import (DocumentPermission, InventoryPermission, )
 from integration.box import (delete_file, get_file_obj,)
 from brand.models import (License, Brand, LicenseProfile)
@@ -53,8 +49,12 @@ from user.models import (User, )
 from labtest.models import (LabTest, )
 from cultivar.models import (Cultivar, )
 from integration.inventory import (
+    sync_inventory, upload_inventory_document,
+    get_inventory_name, update_inventory_item, get_contacts,
     get_inventory_summary, get_category_count,
-    get_packages, get_sales_returns, get_inventory_metadata)
+    get_packages, get_sales_returns, get_inventory_metadata,
+    update_package, update_sales_return, update_contact, create_package,
+    get_books_name_from_inventory_name, get_books_name_from_inventory_name)
 from .tasks import (
     notify_inventory_item_added_task,
     create_duplicate_crm_vendor_from_crm_account_task,
@@ -63,6 +63,7 @@ from .tasks import (
     notify_inventory_item_change_submitted_task,
     notify_inventory_item_delist_submitted_task,
 )
+from integration.books import (get_salesorder, parse_book_object)
 
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -996,6 +997,18 @@ class PackageView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        """
+        Update package.
+        """
+        organization_name = request.query_params.get('organization_name')
+        package_id = request.data['package_id']
+        response = update_package(organization_name, package_id=package_id, data=request.data, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response)
+
 
 class SalesReturnView(APIView):
     """
@@ -1020,6 +1033,17 @@ class SalesReturnView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        """
+        Update sales return.
+        """
+        organization_name = request.query_params.get('organization_name')
+        salesreturn_id = request.data['salesreturn_id']
+        response = update_sales_return(organization_name, salesreturn_id=salesreturn_id, data=request.data, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response)
 
 class ContactView(APIView):
     """
@@ -1044,6 +1068,17 @@ class ContactView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        """
+        Update contact.
+        """
+        organization_name = request.query_params.get('organization_name')
+        contact_id = request.data['contact_id']
+        response = update_contact(organization_name, package_id=package_id, data=request.data, params=request.query_params.dict())
+        if response.get('code') and response['code'] != 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response)
 
 class InventoryMetaDataView(APIView):
     """
@@ -1060,3 +1095,26 @@ class InventoryMetaDataView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
+
+class ConvertSalesOrderToInvoice(APIView):
+    """
+    View class to convert Sales order to package.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Convert document.
+        """
+        organization_name = request.query_params.get('organization_name')
+        sales_order_id = request.data.get('salesorder_id')
+        if sales_order_id:
+            books_name = get_books_name_from_inventory_name(organization_name)
+            so = get_salesorder(books_name, so_id=sales_order_id, params={})
+            so = parse_book_object('package', so, line_item_parser='salesorder_parser')
+            print(so)
+            package = create_package(organization_name, so)
+            if package.get('code') != 0:
+                return Response(package, status=status.HTTP_400_BAD_REQUEST)
+            return Response(package)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)

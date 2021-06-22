@@ -71,7 +71,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryEthicsView, CustomInventoryViewSet,InventoryClientCodeView,
                              InventoryWebHook,InventoryExportViewSet,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
-                             SalesReturnView, PackageView, ContactView, InventoryMetaDataView)
+                             SalesReturnView, PackageView, ContactView, InventoryMetaDataView,
+                             ConvertSalesOrderToInvoice)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -289,6 +290,7 @@ urlpatterns = [
     path(r'books/sales-order/convert/invoice/', ConvertSalesOrderToInvoice.as_view(), name="convert-so-to-invoice"),
     path(r'books/estimate/convert/invoice/', ConvertEstimateToInvoice.as_view(), name="convert-estimate-to-invoice"),
     path(r'books/sales-order/convert/purchase-order/', ConvertSalesOrderToPurchaseOrder.as_view(), name="convert-so-to-po"),
+    path(r'inventory/sales-order/convert/package/', ConvertSalesOrderToInvoice.as_view(), name="convert-so-to-package"),
 ] + router.urls
 
 
