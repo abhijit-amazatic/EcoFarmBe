@@ -516,8 +516,8 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
             # farm_name = license_db.license_profile.__dict__['name']
             farm_name = i['legal_business_name']
-            if d['is_buyer'] == True:
-                continue
+            # if d['is_buyer'] == True:
+            #     continue
             response = update_license(dba=farm_name, license=d)
             final_dict['license'] = response
             if response['status_code'] == 200:
@@ -1057,8 +1057,8 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
         # farm_name = license_db.license_profile.__dict__['name']
         farm_name = i['legal_business_name']
-        if d['is_seller'] == True:
-                continue
+        # if d['is_seller'] == True:
+        #         continue
         response = update_license(dba=farm_name, license=d)
         final_dict['license'] = response
         if response['status_code'] == 200:
