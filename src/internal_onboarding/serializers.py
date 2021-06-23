@@ -86,7 +86,7 @@ class InternalOnboardingSerializer(serializers.Serializer):
 
     tax_identification = serializers.CharField(max_length=255, required=True)
 
-    docs_already_on_file = serializers.BooleanField()
+    docs_already_on_file = serializers.BooleanField(required=False)
 
  
     contacts = ContactsSerializer(many=True, required=True)
