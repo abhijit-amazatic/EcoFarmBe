@@ -176,6 +176,10 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     )
     if value.startswith('county') or value.startswith('appellation'):
         return obj.get(value).split(',')
+    if value.startswith('County2') or value.startswith('Appellations'):
+        if isinstance(obj.get(value), list):
+            return ','.join(obj.get(value))
+        return obj.get(value)
     if value.startswith('ethics_and_certification'):
         if isinstance(obj.get(value), list) and len(obj.get(value)) > 0:
             return obj.get(value)
@@ -851,7 +855,6 @@ def get_records_from_crm(license_number):
             license_number = license_dict['Name']
             vendor_id = None
             account_id = None
-
             if license_dict.get('License_Type') in VENDOR_LICENSE_TYPES:
                 vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
                 if vendor['status_code'] != 200:

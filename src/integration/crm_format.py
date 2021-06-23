@@ -510,7 +510,7 @@ CRM_FORMAT  = {
         "Contacts": "Contacts",
         "License": "License",
     },
-    "Vendors_To_DB" : {
+    "Vendors_To_DB": {
         "db_id": "db_id",
         "profile_id": "id",
         "layout": "Layout",
@@ -519,10 +519,10 @@ CRM_FORMAT  = {
         "Client_Code": "Client_Code",
         "cultivation_type": "Cultivation_Type",
         "vendor_type": "Vendor_Type",
-        "county": "County2",
+        "county": "County2_parse",
         "region": "Region",
         "ethics_and_certifications": "Special_Certifications",
-        "appellation": "Appellations",
+        "appellation": "Appellations_parse",
         "transportation_methods": "Transportation_Method",
         "program_details": "Program_Selection",
         "about": "About_Company",
@@ -1136,7 +1136,7 @@ CRM_FORMAT  = {
     "Books_Customer":
         {
             "contact_id": "contact_id",
-            "contact_name": "name",
+            "contact_name": "legal_business_name",
             "company_name": "legal_business_name",
             "first_name": "first_name",
             "last_name": "last_name",
