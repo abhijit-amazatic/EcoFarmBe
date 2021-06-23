@@ -420,24 +420,31 @@ def get_item(obj, data):
     data['line_items'] = line_items
     return {"code": 0, "data": data}
 
+def search_contact(books_obj, value, contact_type):
+    contact_obj = books_obj.Contacts()
+    contact = None
+    for field in ('contact_name', 'company_name', 'cf_legal_business_name'):
+        try:
+            resp = contact_obj.list_contacts(parameters={field: value, 'contact_type': contact_type})
+            contacts = resp['response']
+        except KeyError:
+            return {"code": 1003, "error": f"{contact_type} name not provided"}
+        if contacts and value:
+            for i in contacts:
+                if i.get(field, '') == value or i.get('custom_field_hash', {}).get(field, '') == value:
+                    if i['contact_type'] == contact_type:
+                        contact = i
+                        break
+        if contact:
+            break
+    return contact
+
 def get_customer(obj, data):
     """
     Return customer from Zoho books using Zoho Inventory name.
     """
-    contact_obj = obj.Contacts()
-    try:
-        customer = contact_obj.list_contacts(parameters={'contact_name': data['customer_name']})
-        customer = customer['response']
-    except KeyError:
-        return {"code": 1003, "error": "Customer name not provided"}
-    if len(customer) == 1:
-        customer = customer[0]
-    elif len(customer) > 1:
-        for i in customer:
-            if i['contact_name'] == data['customer_name'] and i['contact_type'] == 'customer':
-                customer = i
-                break
-    else:
+    customer = search_contact(obj, value=data['customer_name'], contact_type='customer')
+    if customer is None:
         return {"code": 1003, "message": "Contact not in zoho books."}
     if customer.get('email') == '':
         return {"code": 1003, "message": "Contact don't have email associated with it."}
@@ -448,20 +455,8 @@ def get_vendor(obj, data):
     """
     Return vendor from Zoho books using Zoho Inventory name.
     """
-    contact_obj = obj.Contacts()
-    try:
-        vendor = contact_obj.list_contacts(parameters={'contact_name': data['vendor_name'], 'contact_type': 'vendor'})
-        vendor = vendor['response']
-    except KeyError:
-        return {"code": 1003, "error": "vendor name not provided"}
-    if len(vendor) == 1:
-        vendor = vendor[0]
-    elif len(vendor) > 1:
-        for i in vendor:
-            if i['contact_name'] == data['vendor_name'] and i['contact_type'] == 'vendor':
-                vendor = i
-                break
-    else:
+    vendor = search_contact(obj, value=data['vendor_name'], contact_type='vendor')
+    if vendor is None:
         return {"code": 1003, "message": "Contact not in zoho books."}
     if vendor.get('email') == '':
         return {"code": 1003, "message": "Contact don't have email associated with it."}

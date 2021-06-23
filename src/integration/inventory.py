@@ -72,22 +72,21 @@ def get_inventory_obj(inventory_name):
         )
     return inventory
 
-def get_vendor_id(inventory, vendor_name):
+def get_vendor_id(inventory_obj, vendor_name):
     """
     Get vendor id from zoho.
     """
     vendor_id = None
-    resp = inventory.get_contact(params={'contact_name': vendor_name})
-    if resp.get('code') == 0:
-        for vendor in resp.get('contacts'):
-            if vendor.get('contact_name') == vendor_name and vendor.get('contact_type') == 'vendor':
-                vendor_id = vendor.get('contact_id')
-    if not vendor_id:
-        resp = inventory.get_contact(params={'company_name': vendor_name})
+    for field in ('contact_name', 'company_name', 'cf_legal_business_name'):
+        resp = inventory_obj.get_contact(params={field: vendor_name, 'contact_type': 'vendor'})
         if resp.get('code') == 0:
             for vendor in resp.get('contacts'):
-                if vendor.get('company_name') == vendor_name and vendor.get('contact_type') == 'vendor':
-                    vendor_id = vendor.get('contact_id')
+                if vendor.get(field, '') == vendor_name or vendor.get('custom_field_hash', {}).get(field, '') == vendor_name:
+                    if vendor.get('contact_type') == 'vendor':
+                        vendor_id = vendor.get('contact_id')
+                        break
+        if vendor_id:
+            break
     return vendor_id
 
 def get_user_id(inventory, email):
