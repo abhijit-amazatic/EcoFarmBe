@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.urls import path
 from django.views.static import serve
-from knox.views import LogoutView
+from knox.views import LogoutView, LogoutAllView
 from rest_framework.routers import SimpleRouter
 from user.views import (UserViewSet, MeView, LogInView,
                         ChangePasswordView, SendMailView,
@@ -160,7 +160,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'user/me/', MeView.as_view(), name='user-me'),
     # path(r'user/login/', LogInView.as_view(), name='login'),
-    path(r'user/logout/', LogoutView.as_view(), name='logout'),
+    path(r'user/logout/', LogoutAllView.as_view(), name='logout'), #LogoutView - removes only single related token from DB.
     path(r'user/change-password/',
          ChangePasswordView.as_view(), name='change-password'),
     path(r'user/forgot-password/', SendMailView.as_view(), name='forgot-password'),
