@@ -88,7 +88,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     User Invitation Verification View.
     """
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticated, )
     serializer_class = InternalOnboardingSerializer
 
     def create(self, request, *args, **kwargs):
