@@ -180,7 +180,7 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
         }
         contact_ids_to_create_associate = [id for id in contacts_dict.keys() if id not in  associated_contact.keys()]
         if contact_ids_to_create_associate:
-            create_data = [{'Vendor': vendor_id, 'Contact': x, 'Contact_Company_Role': contacts_dict[x]['roles']} for x in contact_ids_to_create_associate]
+            create_data = [{'Accounts': vendor_id, 'Contacts': x, 'Contact_Company_Role': contacts_dict[x]['roles']} for x in contact_ids_to_create_associate]
             r = create_records('Accounts_X_Contacts', create_data)
             if r.get('status_code') != 201:
                 print(r)

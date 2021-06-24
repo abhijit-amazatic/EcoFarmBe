@@ -76,24 +76,22 @@ class InternalOnboardingSerializer(serializers.Serializer):
     license_category = serializers.CharField(max_length=255, required=True)
     is_seller = serializers.BooleanField(required=True)
     is_buyer = serializers.BooleanField(required=True)
-    ein_or_ssn = serializers.IntegerField(required=True)
-
     business_structure = serializers.CharField(max_length=255, required=False)
+    tax_identification = serializers.CharField(max_length=255, required=True)
+    ein_or_ssn = serializers.IntegerField(required=True)
 
     license_url = serializers.CharField(max_length=255, required=False)
     seller_permit_url = serializers.CharField(max_length=255, required=False)
     w9_url = serializers.CharField(max_length=255, required=False)
 
-    tax_identification = serializers.CharField(max_length=255, required=True)
 
     docs_already_on_file = serializers.BooleanField(required=False)
 
- 
     contacts = ContactsSerializer(many=True, required=True)
 
     organization = OrganizationSerializer()
 
-    def validate_category(self, value):
+    def validate_license_category(self, value):
         queryset = ProfileCategory.objects.filter(name=value)
         if not queryset.exists():
             raise serializers.ValidationError(f'Profile category name \'{value}\' does not exist.')
