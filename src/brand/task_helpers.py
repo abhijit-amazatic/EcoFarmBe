@@ -82,7 +82,6 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
             with transaction.atomic():
                 #STEP1:insert/create license
                 print('1.Inserting license')
-                license_obj = license_id
                 # license_obj = License.objects.create(
                 #     created_by=user,
                 #     zoho_crm_id=data_l.get('license_id',''),
@@ -107,12 +106,13 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 #       data.get('vendor_type')[0] if len(data.get('vendor_type')) else None
                 #     ),
                 # )
+                license_obj = License.objects.get(id=license_id)
 
             with transaction.atomic():
                 #STEP2:create License profile
                 print('2.Inserting License profile')
                 LicenseProfile.objects.create(
-                    license_id=license_obj,
+                    license=license_obj,
                     zoho_crm_id=data_l_p.get('profile_id', ''),
                     name=data_l_p.get('name', ''),
                     appellation=data_l_p.get('appellation', ''),
@@ -172,7 +172,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 }
 
                 ProfileContact.objects.create(
-                    license_id=license_obj,
+                    license=license_obj,
                     is_draft=False,
                     profile_contact_details=formatted_data
                 )
@@ -181,7 +181,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 #STEP4:CultivationOverview
                 print('4.Inserting Cultivation overview')
                 CultivationOverview.objects.create(
-                    license_id=license_obj,
+                    license=license_obj,
                     autoflower=data_l_p.get('Cultivation_Style_Autoflower', False),
                     lighting_type=data_l_p.get('lighting_type', []),
                     type_of_nutrients=data_l_p.get('type_of_nutrients', []),
@@ -195,7 +195,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 #STEP5:FinancialOverview
                 print('5.Inserting Financial overview')
                 FinancialOverview.objects.create(
-                    license_id=license_obj,
+                    license=license_obj,
                     know_annual_budget=data.get('license_profile').get('know_annual_budget', ''),
                     annual_budget=data.get('license_profile').get('annual_budget', ''),
                     overview=[{
@@ -216,7 +216,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 #STEP6: CropOverview
                 print('6.Inserting Crop overview')
                 CropOverview.objects.create(
-                    license_id=license_obj,
+                    license=license_obj,
                     process_on_site=data.get('license').get('Can_you_Process_Onsite', ''),
                     overview=[{
                         'cultivars':[{
@@ -235,7 +235,8 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     }],
                 )
             print('Updating license is_data_fetching_complete flag')
-            License.objects.filter(id=license_obj).update(is_data_fetching_complete=True)
+            license_obj.is_data_fetching_complete=True
+            license_obj.save()
         return {"success":"Data successfully fetched to DB"}
 
 

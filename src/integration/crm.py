@@ -939,15 +939,15 @@ def get_records_from_crm(license_number):
                     vendor = record['response'][account_id]
                 # licenses = [licenses['response'][0]]
                 licenses = license_dict
-                if vendor.get('Licenses'):
-                    license_list = vendor.get('Licenses').split(',')
-                    license_list.remove(license_number)
-                    for l in license_list:
-                        license = search_query('Licenses', l.strip(), 'Name')
-                        if license['status_code'] == 200:
-                            license_dict.append(license['response'][0])
-                        else:
-                            license_dict.append(license)
+                # if vendor.get('Licenses'):
+                #     license_list = vendor.get('Licenses').split(',')
+                #     license_list.remove(license_number)
+                #     for l in license_list:
+                #         license = search_query('Licenses', l.strip(), 'Name')
+                #         if license['status_code'] == 200:
+                #             license_dict.append(license['response'][0])
+                #         else:
+                #             license_dict.append(license)
                 crm_dict = get_format_dict('Licenses_To_DB')
                 r = dict()
                 for k, v in crm_dict.items():
