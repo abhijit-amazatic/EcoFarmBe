@@ -456,8 +456,10 @@ class TemplateSignView(APIView):
             if obj:
                 is_agreement_changed = self.compare_fields(obj.fields)
                 if not is_agreement_changed:
-                    return Response(get_embedded_url_from_sign(obj.request_id, obj.action_id))
-        except (License.DoesNotExist, Sign.DoesNotExist):
+                    response = get_embedded_url_from_sign(obj.request_id, obj.action_id)
+                    if response['code'] == 0:
+                        return Response(response)
+        except (License.DoesNotExist, Sign.DoesNotExist) as exc:
             pass
 
         if template_id and recipient:

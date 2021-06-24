@@ -162,6 +162,7 @@ def get_embedded_url_from_sign(request_id, action_id):
         response['request_id'] = request_id
         response['action_id'] = action_id
         return response
+    return response
 
 def get_template(template_id):
     """
