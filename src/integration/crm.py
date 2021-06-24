@@ -829,7 +829,8 @@ def update_license(dba, license=None, license_id=None):
             pass
     license_obj = License.objects.filter(pk=license['license_db_id']).update(
         uploaded_license_to=license.get('uploaded_license_to'),
-        uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to')
+        uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
+        is_notified_before_expiry=False
     )
     data.append(license)
     response = update_records('Licenses', data)
