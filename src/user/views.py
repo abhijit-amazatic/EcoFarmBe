@@ -37,7 +37,7 @@ from .serializers import (
     HelpDocumentationSerializer,
 )
 from permission.filterqueryset import (filterQuerySet, )
-from integration.crm import (search_query, create_records, update_records)
+from integration.crm import (get_crm_obj, search_query, create_records, update_records)
 from integration.box import(get_box_tokens, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
 from slacker import Slacker
@@ -122,6 +122,43 @@ class SearchQueryView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             result = search_query('Licenses', license_number, 'Name', is_license=True)
         return Response(result)
+
+class SearchLicenseView(APIView):
+    """
+    Return access token to frontend.
+    """
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        if request.query_params.get('license_number', None):
+            license_number = request.query_params['license_number'].strip()
+            is_allow_all = request.query_params.get('is_allow_all', False)
+            if is_allow_all not in [True, 'true']:
+                if License.objects.filter(license_number=license_number).exists():
+                    return Response({'error': 'License already in database.'}, status=status.HTTP_400_BAD_REQUEST)
+            crm_obj = get_crm_obj()
+            query = (
+                "SELECT "
+                "id,Name,License_Email,Owner_First_Name,License_Phone,Owner_Last_Name,"
+                "License_Type,Business_DBA,Legal_Business_Name,Issue_Date,Expiration_Date,License_Status,"
+                "Premises_APN_Number,Premises_City,Premises_County,Premises_State,Premises_Zipcode "
+                f"FROM Licenses WHERE Name like '%{license_number}%'"
+            )
+            resp = crm_obj.get_coql_query(query=query)
+            if resp is not None:
+                if resp.get('status_code') in (200, 204):
+                    resp['response'] = resp.get('data', [])
+                    if 'data' in resp:
+                        resp.pop('data')
+                    resp['info'] = resp.get('info', {"count": 0, "more_records": False})
+                    resp['status_code'] = 200
+                    return Response(resp)
+                else:
+                    resp.pop('status_code')
+                    return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Something went wrong.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'license_number': 'Query Parameter is quired.'}, status=status.HTTP_400_BAD_REQUEST)
 
 def create_contact_license_linking(instance, response):
     data = dict()
