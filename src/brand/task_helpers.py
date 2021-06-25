@@ -43,7 +43,7 @@ def get_employee(data_l_p, existing_roles):
             tmp_data.append({
                 "employee_name": employee.get('Full_Name'),
                 "employee_email": employee.get('Email'),
-                "phone": "",
+                "phone": employee.get('Phone', ""),
                 "roles": extract_map_role(employee.get('Contact_Company_Role', []), existing_roles),
             })
     return tmp_data
@@ -111,6 +111,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
             with transaction.atomic():
                 #STEP2:create License profile
                 print('2.Inserting License profile')
+                data_l_p__owner = data_l_p.get('Owner') or {}
                 LicenseProfile.objects.create(
                     license=license_obj,
                     zoho_crm_id=data_l_p.get('profile_id', ''),
@@ -133,6 +134,8 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     bank_street=data_l_p.get('bank_street', ''),
                     bank_city=data_l_p.get('bank_city', ''),
                     bank_zip_code=data_l_p.get('bank_zip_code', ''),
+                    crm_owner_id=data_l_p__owner.get('id', ''),
+                    crm_owner_email=data_l_p__owner.get('email', ''),
                 )
 
             with transaction.atomic():
