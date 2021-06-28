@@ -46,7 +46,7 @@ ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
 
 
 def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=None, request=None, no_tier_fee=True ):
-
+    msg_error = lambda msg: messages.error(request, msg,) if request else None
     if item_category_group and item_category_group in ITEM_CATEGORY_MSCP_FEE_VAR_MAP :
         fee_var = ITEM_CATEGORY_MSCP_FEE_VAR_MAP[item_category_group]
         if not license_profile:
@@ -73,28 +73,26 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
                 tier = custom_inventory_variable_program_map.get(program_name, {})
                 InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
                 if InventoryVariable and hasattr(InventoryVariable, fee_var):
-                    return float(getattr(InventoryVariable, fee_var))
+                    try:
+                        return float(getattr(InventoryVariable, fee_var))
+                    except ValueError:
+                        msg_error('Error while parsing tax from db.')
+                        return None
+
                 else:
                     program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
                     program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
-                    if request:
-                        messages.error(
-                            request,
-                            (
-                                f"MCSP fee not found in Vendor Inventory Variables (fee var: '{fee_var}') for "
-                                f"Program Type: '{program_type_choices_dict.get(tier.get('program_type'))}', "
-                                f" Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
-                            ),
-                        )
+                    msg_error(
+                        f"MCSP fee not found in Vendor Inventory Variables (fee var: '{fee_var}') for "
+                        f"Program Type: '{program_type_choices_dict.get(tier.get('program_type'))}', "
+                        f" Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
+                    )
             else:
-                if request:
-                    messages.error(request, 'Profile is not approved.')
+                msg_error('Profile is not approved.')
         else:
-            if request:
-                messages.error(request, 'License Profile not found.')
+            msg_error('License Profile not found.')
     else:
-        if request:
-            messages.error(request, 'Item category not defined or not valid.')
+        msg_error('Item category not defined or not valid.')
 
 def get_new_items_accounts(zoho_organization: str):
     """

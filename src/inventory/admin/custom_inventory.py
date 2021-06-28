@@ -364,13 +364,13 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 item_category_group=CG.get(obj.category_name),
                 request=request,
             )
-            if mcsp_fee:
+            if isinstance(mcsp_fee, float):
                 tax = get_item_tax(
                     category_name=obj.category_name,
                     trim_used=obj.trim_used,
                     item_quantity=obj.quantity_available,
                     request=request,)
-                if tax:
+                if isinstance(tax, float):
                     if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                         self.get_crm_data(request, obj)
                     if obj.client_code:

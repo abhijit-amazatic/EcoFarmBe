@@ -139,14 +139,14 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                 item_category_group=CG.get(obj.item.category_name),
                 request=request,
             )
-            if mcsp_fee:
+            if isinstance(mcsp_fee, float):
                 tax = get_item_tax(
                     category_name=obj.item.category_name,
                     trim_used=obj.item.cf_trim_qty_lbs,
                     item_quantity=obj.item.cf_batch_qty_g,
                     request=request,
                 )
-                if tax:
+                if isinstance(tax, float):
                     data = obj.get_item_update_data()
                     if obj.farm_price:
                         data['price'] = obj.farm_price + mcsp_fee + tax
