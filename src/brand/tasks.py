@@ -12,7 +12,7 @@ from django.utils import  timezone
 from slacker import Slacker
 
 from integration.apps.twilio import (send_sms,)
-from integration.crm import (get_records_from_crm, search_query, insert_vendors, insert_accounts)
+from integration.crm import (get_format_dict, get_records_from_crm, search_query, insert_vendors, insert_accounts)
 from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
@@ -190,12 +190,18 @@ def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):
             response_data = get_records_from_crm(license_number=instance.license_number)
             status_code = response_data.get('status_code')
             if not status_code:
-                data = response_data.get(instance.license_number, {})
-                if data and not data.get('error'):
+                response_license_data = response_data.get(instance.license_number, {})
+                if response_license_data and not response_license_data.get('error'):
                     instance.crm_profile_data = response_data
                     instance.data_fetch_status = 'fetched'
                 else:
+                    crm_dict = get_format_dict('Licenses_To_DB')
+                    license_data = dict()
+                    for k, v in crm_dict.items():
+                        license_data[k] = data.get(v)
+                    instance.crm_profile_data = {instance.license_number: {"license": license_data}}
                     instance.data_fetch_status = 'licence_association_not_found'
+
             else:
                 print(response_data)
                 instance.data_fetch_status = 'error'
@@ -252,7 +258,7 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
                         instance.data_fetch_status = 'error'
                     instance.save()
 
-                if instance.data_fetch_status == 'fetched':
+                if instance.data_fetch_status in ('fetched', 'licence_association_not_found'):
                     try:
                         insert_data_from_crm(user, instance.crm_profile_data, license_id, instance.license_number)
                     except Exception as e:

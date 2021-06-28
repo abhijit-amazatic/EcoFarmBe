@@ -119,15 +119,15 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     appellation=data_l_p.get('appellation', ''),
                     county=data_l_p.get('county', ''),
                     region=data_l_p.get('region', ''),
-                    ethics_and_certification=data_l_p.get('ethics_and_certifications', None),
-                    cultivars_of_interest=data_l_p.get('cultivars_of_interest', None),
+                    ethics_and_certification=data_l_p.get('ethics_and_certifications', []),
+                    cultivars_of_interest=data_l_p.get('cultivars_of_interest', []),
                     about=data_l_p.get('about', ''),
-                    product_of_interest=data_l_p.get('product_of_interest', None),
+                    product_of_interest=data_l_p.get('product_of_interest', []),
                     transportation=data_l_p.get('transportation_methods', None),
                     issues_with_failed_labtest=data_l_p.get('issues_with_failed_labtest', ''),
                     lab_test_issues=data_l_p.get('lab_test_issues', ''),
                     agreement_link=data_l_p.get('Contract_Box_Link', ''),
-                    preferred_payment=data_l_p.get('preferred_payment', ''),
+                    preferred_payment=data_l_p.get('preferred_payment', []),
                     bank_routing_number=data_l_p.get('bank_routing_number', ''),
                     bank_account_number=data_l_p.get('bank_account_number', ''),
                     bank_name=data_l_p.get('bank_name', ''),
@@ -186,21 +186,28 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 CultivationOverview.objects.create(
                     license=license_obj,
                     autoflower=data_l_p.get('Cultivation_Style_Autoflower', False),
-                    lighting_type=data_l_p.get('lighting_type', []),
-                    type_of_nutrients=data_l_p.get('type_of_nutrients', []),
-                    overview=[{
-                        "canopy_sqf":data_l_p.get('canopy_square_feet', 0),
-                        "no_of_harvest":data_l_p.get('annual_harvests', 0),
-                        "plants_per_cycle":data_l_p.get('plants_per_cycle', 0)
-                    }],
+                    lighting_type=data_l.get('lighting_type') or data_l_p.get('lighting_type', []),
+                    type_of_nutrients=data_l.get('types_of_nutrients') or data_l_p.get('type_of_nutrients', []),
+                    overview=[
+                        {
+                            "canopy_sqf":data_l.get('canopy_square_feet_mixed_light', 0),
+                            "no_of_harvest":data_l.get('annual_harvests_mixed_light', 0),
+                            "plants_per_cycle":data_l.get('plants_per_cycle_mixed_light', 0)
+                        },
+                        {
+                            "canopy_sqf":data_l.get('canopy_square_feet_autoflower', 0),
+                            "no_of_harvest":data_l.get('annual_harvests_autoflower', 0),
+                            "plants_per_cycle":data_l.get('plants_per_cycle_autoflower', 0)
+                        },
+                    ],
                 )
             with transaction.atomic():
                 #STEP5:FinancialOverview
                 print('5.Inserting Financial overview')
                 FinancialOverview.objects.create(
                     license=license_obj,
-                    know_annual_budget=data.get('license_profile').get('know_annual_budget', ''),
-                    annual_budget=data.get('license_profile').get('annual_budget', ''),
+                    know_annual_budget=data_l_p.get('know_annual_budget', ''),
+                    annual_budget=data_l_p.get('annual_budget', ''),
                     overview=[{
                         'cost_per_lbs':data_l.get('cost_per_lb', ''),
                         'cost_per_sqf':data_l.get('cost_per_square_foot', ''),
@@ -220,7 +227,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 print('6.Inserting Crop overview')
                 CropOverview.objects.create(
                     license=license_obj,
-                    process_on_site=data.get('license').get('Can_you_Process_Onsite', ''),
+                    process_on_site=data_l.get('Can_you_Process_Onsite', ''),
                     overview=[{
                         'cultivars':[{
                             'harvest_date': '',

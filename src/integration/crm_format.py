@@ -662,10 +662,15 @@ CRM_FORMAT  = {
         "license_email": "License_Email",
         "license_phone": "License_Phone",
         "title": "Title",
+        #Cultivation Overview
         "types_of_nutrients": "Types_of_Nutrients",
-        "canopy_square_feet": "Canopy_Square_Feet_Mixed_Light",
-        "annual_harvests": "Annual_Harvests_Mixed_Light",
-        "plants_per_cycle": "Plants_per_Cycle_Mixed_Light",
+        "canopy_square_feet_mixed_light": "Canopy_Square_Feet_Mixed_Light",
+        "annual_harvests_mixed_light": "Annual_Harvests_Mixed_Light",
+        "plants_per_cycle_mixed_light": "Plants_per_Cycle_Mixed_Light",
+        "canopy_square_feet_autoflower": "Canopy_Square_Feet_Autoflower",
+        "annual_harvests_autoflower": "Annual_Harvests_Autoflower",
+        "plants_per_cycle_autoflower": "Plants_per_Cycle_Autoflower",
+
         "ethics_certification": "Ethics_Certification",
         "region": "Region",
         "appellation": "Appellations",

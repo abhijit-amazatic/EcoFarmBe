@@ -56,19 +56,19 @@ cwd = os.getcwd()
 
 #Zoho Take credential from the team.
 PYZOHO_CONFIG = {
-'apiBaseUrl':'https://www.zohoapis.com',
-'apiVersion':'v2',
-'currentUserEmail':'',
-'sandbox':'false',
-'applicationLogFilePath':'',
-'client_id':'',
-'client_secret':'',
-'redirect_uri':'',
-'accounts_url':'',
-# 'token_persistence_path':'',
-# 'access_type':'offline',
-'persistence_handler_class' : 'ZohoOAuthHandler',
-'persistence_handler_path': cwd + '/src/core/persist_crm_token.py'
+    'apiBaseUrl':'https://www.zohoapis.com',
+    'apiVersion':'v2',
+    'currentUserEmail':'',
+    'sandbox':'false',
+    'applicationLogFilePath':'',
+    'client_id':'',
+    'client_secret':'',
+    'redirect_uri':'',
+    'accounts_url':'',
+    # 'token_persistence_path':'',
+    # 'access_type':'offline',
+    'persistence_handler_class' : 'ZohoOAuthHandler',
+    'persistence_handler_path': cwd + '/src/core/persist_crm_token.py'
 }
 
 if DEBUG:
