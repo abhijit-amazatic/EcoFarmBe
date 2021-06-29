@@ -39,6 +39,7 @@ from .serializers import (
 from permission.filterqueryset import (filterQuerySet, )
 from integration.crm import (get_crm_obj, search_query, create_records, update_records)
 from integration.box import(get_box_tokens, )
+from integration.books import(get_zoho_user_permission, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
 from slacker import Slacker
 from brand.models import (License,Organization,)
@@ -573,3 +574,14 @@ class HelpDocumentationView(ReadOnlyModelViewSet):
     #ordering = 'title'
 
 
+class ZohoPermissionsView(APIView):
+    """
+    Zoho user permissions view.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        """
+        Get user permissions from zoho.
+        """
+        return Response(get_zoho_user_permission(user_email=request.user.email))

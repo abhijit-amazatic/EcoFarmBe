@@ -1192,3 +1192,18 @@ def parse_book_object(module, record, **kwargs):
             result.append({k:get(obj, v, **kwargs) for k, v in BOOKS_FORMAT_DICT[module].items() if get(obj, v) != None})
         return result
     return {k:get(record, v, **kwargs) for k, v in BOOKS_FORMAT_DICT[module].items() if get(record, v) != None}
+
+def get_zoho_user_permission(books_name='books_efd', user_email=None):
+    """
+    Return zoho user permissions.
+    """
+    if user_email:
+        obj = get_books_obj(books_name)
+        user_obj = obj.Users()
+        role_obj = obj.Roles()
+        user = user_obj.list_users({"email": user_email})
+        if user.get('response'):
+            user = user.get('response')[0]
+            user['permissions'] = role_obj.get_role(user.get('role_id'))
+        return user
+    return None

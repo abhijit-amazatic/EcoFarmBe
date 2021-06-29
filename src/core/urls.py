@@ -30,7 +30,8 @@ from user.views import (UserViewSet, MeView, LogInView,
                         PhoneNumberVerificationView,
                         HelpDocumentationView,
                         PendoView,
-                        TermsAndConditionAcceptanceView,)
+                        TermsAndConditionAcceptanceView,
+                        ZohoPermissionsView, )
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView, SearchCultivars,
@@ -292,6 +293,7 @@ urlpatterns = [
     path(r'books/estimate/convert/invoice/', ConvertEstimateToInvoice.as_view(), name="convert-estimate-to-invoice"),
     path(r'books/sales-order/convert/purchase-order/', ConvertSalesOrderToPurchaseOrder.as_view(), name="convert-so-to-po"),
     path(r'inventory/sales-order/convert/package/', ConvertSalesOrderToInvoice.as_view(), name="convert-so-to-package"),
+    path(r'books/permission/', ZohoPermissionsView.as_view(), name="zoho-permission"),
 ] + router.urls
 
 
