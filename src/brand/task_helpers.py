@@ -183,23 +183,23 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
             with transaction.atomic():
                 #STEP4:CultivationOverview
                 print('4.Inserting Cultivation overview')
+                co_data = [{
+                    "canopy_sqf":data_l.get('canopy_square_feet_mixed_light', 0),
+                    "no_of_harvest":data_l.get('annual_harvests_mixed_light', 0),
+                    "plants_per_cycle":data_l.get('plants_per_cycle_mixed_light', 0)
+                }]
+                if data_l_p.get('Cultivation_Style_Autoflower', False):
+                    co_data.append({
+                        "canopy_sqf":data_l.get('canopy_square_feet_autoflower', 0),
+                        "no_of_harvest":data_l.get('annual_harvests_autoflower', 0),
+                        "plants_per_cycle":data_l.get('plants_per_cycle_autoflower', 0)
+                    })
                 CultivationOverview.objects.create(
                     license=license_obj,
                     autoflower=data_l_p.get('Cultivation_Style_Autoflower', False),
                     lighting_type=data_l.get('lighting_type') or data_l_p.get('lighting_type', []),
                     type_of_nutrients=data_l.get('types_of_nutrients') or data_l_p.get('type_of_nutrients', []),
-                    overview=[
-                        {
-                            "canopy_sqf":data_l.get('canopy_square_feet_mixed_light', 0),
-                            "no_of_harvest":data_l.get('annual_harvests_mixed_light', 0),
-                            "plants_per_cycle":data_l.get('plants_per_cycle_mixed_light', 0)
-                        },
-                        {
-                            "canopy_sqf":data_l.get('canopy_square_feet_autoflower', 0),
-                            "no_of_harvest":data_l.get('annual_harvests_autoflower', 0),
-                            "plants_per_cycle":data_l.get('plants_per_cycle_autoflower', 0)
-                        },
-                    ],
+                    overview=co_data,
                 )
             with transaction.atomic():
                 #STEP5:FinancialOverview
