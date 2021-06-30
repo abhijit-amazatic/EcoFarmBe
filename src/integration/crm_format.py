@@ -507,7 +507,7 @@ CRM_FORMAT  = {
         "License": "License"
     },
     "Licenses_X_Contacts": {
-        "Contacts": "Contacts",
+        "Contact": "Contacts",
         "License": "License",
     },
     "Vendors_To_DB": {
