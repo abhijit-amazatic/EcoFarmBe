@@ -69,6 +69,7 @@ class APIError(Exception):
     exceptions.
     """
     code = 'detail'
+
     def __init__(self, msg, status_code=400, code=None):
         self.msg = msg
         self.status_code = status_code
@@ -139,24 +140,40 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             c_id = c['zoho_contact']
             resp_contact = get_record(module='Contacts', record_id=c_id, full=True)
             if not resp_contact.get('status_code') == 200:
-                return Response({'details': f'Invalid crm contact id: {c_id}.'}, status=400)
+                return Response({'detail': f'Invalid crm contact id: {c_id}.'}, status=400)
             else:
-                constacts_data_dict[c_id] = resp_contact.get('response', {})
-                if not re.match(r"^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$", constacts_data_dict[c_id].get('Email')):
+                constacts_data_dict[c_id] = c_data = resp_contact.get('response', {})
+                if not re.match(r"^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})$", c_data.get('Email')):
                     return Response(
                         {
-                            'details': f"contact {constacts_data_dict[c_id].get('Full_Name')} (id: {c_id}) have invalid email: {constacts_data_dict[c_id].get('Email')}."
+                            'detail': f"contact {c_data.get('Full_Name')} (id: {c_id}) have invalid email: {c_data.get('Email')}."
                         },
                         status=400
                     )
-                phone_number = phonenumber_parse(constacts_data_dict[c_id].get('Phone'))
+                phone_number = phonenumber_parse(c_data.get('Phone'))
                 if not phone_number.is_valid():
                     return Response(
                         {
-                            'details': f"contact {constacts_data_dict[c_id].get('Full_Name')} (id: {c_id}) have invalid phone no.: {constacts_data_dict[c_id].get('Phone')}."
+                            'detail': f"contact {c_data.get('Full_Name')} (id: {c_id}) have invalid phone no.: {c_data.get('Phone')}."
                         },
                         status=400
                     )
+                try:
+                    user = User.objects.get(phone=phone_number.as_e164)
+                except User.DoesNotExist:
+                    pass
+                else:
+                    if user.email != c_data.get('Email'):
+                        return Response(
+                            {
+                                'detail': (
+                                    f"contact {c_data.get('Full_Name')} (email: {c_data.get('Email')}) "
+                                    f"have phone number ({c_data.get('Phone')}) "
+                                    f"which is already present and associated to another user (email: {user.email}) on Web App."
+                                )
+                            },
+                            status=400
+                        )
                 contacts_dict[c_id] = {'roles': c['roles'], 'send_mail': c['send_mail']}
                 if not org_owner_contact_id:
                     org_owner_contact_id = c_id
@@ -272,7 +289,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 # raise APIError('testing')
         except DatabaseError as e:
-            return Response({'details': f'Error: {e}'}, status=400)
+            return Response({'detail': f'Error: {e}'}, status=400)
         except APIError as e:
             return e.get_response()
         else:
