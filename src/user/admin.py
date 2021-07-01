@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import models
 from datetime import datetime
 from .models import (User, MemberCategory,TermsAndCondition, TermsAndConditionAcceptance, HelpDocumentation)
+from .views import (create_contact_license_linking, )
 from core.utility import (send_async_user_approval_mail, send_verification_link_user_instance,)
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
@@ -19,6 +20,7 @@ import nested_admin
 from ckeditor.fields import RichTextField       
 from core.widgets import CKEditorWidget
 from django.http import HttpResponseRedirect
+from integration.crm import (create_records, update_records, )
 
 class MyUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
@@ -74,7 +76,21 @@ def approve_user(modeladmin, request, queryset):
     messages.success(request,'Users Approved!')    
 approve_user.short_description = 'Approve Selected Users'      
 
-    
+def sync_records(modeladmin, request, queryset):
+    result = list()
+    for record in queryset:
+        r = dict()
+        record.__dict__['phone'] = record.__dict__['phone'].as_international
+        create_response = create_records('Contacts', record.__dict__)
+        r['Contact'] = create_response
+        if create_response['status_code'] in [201, 202]:
+            if record.legal_business_name:
+                response = create_contact_license_linking(record, create_response)
+                r['License_X_Contact'] = response
+        result.append(r)
+    messages.success(request, result)
+sync_records.short_description = "Insert Records To CRM"
+
 class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     
     def approved_by_member(self, obj):
@@ -96,7 +112,7 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
     readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','unique_user_id',] #'phone'
-    actions = [approve_user, ] 
+    actions = [approve_user, sync_records, ]
     filter_horizontal = ('groups', 'user_permissions', 'internal_roles')
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
