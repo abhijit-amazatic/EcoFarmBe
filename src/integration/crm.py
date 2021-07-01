@@ -29,7 +29,7 @@ from core.mailer import mail, mail_send
 from brand.models import (Brand, License, LicenseProfile, Organization, ProgramOverview, NurseryOverview)
 from integration.models import (Integration,)
 from integration.apps.aws import (get_boto_client, )
-from inventory.models import (Documents, )
+from inventory.models import (Documents, Inventory)
 from slacker import Slacker
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -1556,6 +1556,10 @@ def sync_labtest(record):
             labtest_crm_id=record['labtest_crm_id'],
             Name=record['Name'],
             defaults=record)
+        if obj.Sample_I_D:
+            items = Inventory.objects.filter(cf_lab_test_sample_id=obj.Sample_I_D)
+            if items.exists():
+                items.update(labtest=obj)
         return created
     except Exception as exc:
         print(exc)
