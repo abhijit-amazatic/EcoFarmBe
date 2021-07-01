@@ -86,6 +86,8 @@ from integration.campaign import (create_campaign, )
 from fee_variable.models import (CampaignVariable, )
 from integration.apps.aws import (get_boto_client, create_presigned_url)
 from bill.utils import (save_estimate, )
+from twilio.twiml.messaging_response import MessagingResponse
+
 
 slack = Slacker(settings.SLACK_TOKEN)
 
@@ -1480,3 +1482,33 @@ class ConvertSalesOrderToPurchaseOrder(APIView):
                 return Response(purchase_order, status=status.HTTP_400_BAD_REQUEST)
             return Response(purchase_order)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChatbotView(APIView):
+    """
+    Webhook for twilio chatbot.Currenty this is a sample view & can be modified according to logic once that is clear.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """
+        Accepts post requests for messages 
+        """
+        incoming_msg = request.data.get('Body', '').lower()
+        resp = MessagingResponse()
+        msg = resp.message()
+        responded = False
+        if 'quote' in incoming_msg:
+            # return a quote
+            quote = f'This is only For quote testing.'
+            msg.body(quote)
+            responded = True
+        if 'image' in incoming_msg:
+            # return a test product image 
+            msg.media('https://dev.ecofarm.app/static/media/new_logo.4ae646fa.png')
+            responded = True
+        if not responded:
+            msg.body('I only know about related quotes and product images, sorry!')
+        return Response({str(resp)})
+
+    

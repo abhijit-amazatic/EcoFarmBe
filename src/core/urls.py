@@ -56,7 +56,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                SalesOrderSubStatusesView, MarkPurchaseOrderView, 
                                ApprovePurchaseOrderView, MarkInvoiceView, 
                                ApproveInvoiceView, MarkBillView, ApproveBillView,
-                               ConvertEstimateToSalesOrder, ConvertSalesOrderToInvoice,
+                               ConvertEstimateToSalesOrder, ConvertSalesOrderToInvoice,ChatbotView,
                                ConvertEstimateToInvoice, ConvertSalesOrderToPurchaseOrder)
 
 from fee_variable.views import (OrderVariableView,
@@ -294,6 +294,7 @@ urlpatterns = [
     path(r'books/sales-order/convert/purchase-order/', ConvertSalesOrderToPurchaseOrder.as_view(), name="convert-so-to-po"),
     path(r'inventory/sales-order/convert/package/', ConvertSalesOrderToInvoice.as_view(), name="convert-so-to-package"),
     path(r'books/permission/', ZohoPermissionsView.as_view(), name="zoho-permission"),
+    path(r'bot/', ChatbotView.as_view(), name="chat-bot"),
 ] + router.urls
 
 
