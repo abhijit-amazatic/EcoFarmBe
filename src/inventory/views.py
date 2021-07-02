@@ -45,7 +45,7 @@ from core.settings import (AWS_BUCKET,)
 from integration.apps.aws import (create_presigned_url, create_presigned_post,)
 from .permissions import (DocumentPermission, InventoryPermission, )
 from integration.box import (delete_file, get_file_obj,)
-from brand.models import (License, Brand, LicenseProfile)
+from brand.models import (License, Brand, LicenseProfile, Organization, )
 from user.models import (User, )
 from labtest.models import (LabTest, )
 from cultivar.models import (Cultivar, )
@@ -527,6 +527,7 @@ class DocumentPreSignedView(APIView):
         object_name = request.data.get('object_name')
         user_id = request.data.get('user_id')
         brand_id = request.data.get('brand_id')
+        organization_id = request.data.get('organization_id')
         doc_type = request.data.get('doc_type')
         custom_inventory_id = request.data.get('custom_inventory_id')
         expiry = request.data.get('expiration', 3600)
@@ -553,6 +554,12 @@ class DocumentPreSignedView(APIView):
                 obj = CustomInventory.objects.get(id=custom_inventory_id)
             except CustomInventory.DoesNotExist:
                 return Response({'error': 'Custom inventory not in database'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        elif organization_id:
+            try:
+                obj = Organization.objects.get(id=organization_id)
+            except Organization.DoesNotExist:
+                return Response({'error': 'License not in database'},
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
