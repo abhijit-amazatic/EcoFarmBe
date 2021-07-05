@@ -225,6 +225,8 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict)
 
+    license_status = models.CharField(blank=True, null=True, max_length=255,)
+
     def __str__(self):
         return self.legal_business_name
 

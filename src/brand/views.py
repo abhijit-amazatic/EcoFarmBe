@@ -810,6 +810,8 @@ class LicenseSyncView(APIView):
                 license_obj.expiration_date = date_time_obj.date()
                 license_obj.is_updated_via_trigger = True
                 license_obj.issue_date = issue
+                if license_status or license_status_2:
+                    license_obj.license_status = license_status or license_status_2
                 license_obj.save()
                 if license_obj.expiration_date >= timezone.now().date():
                     if license_obj.status_before_expiry:
@@ -820,19 +822,6 @@ class LicenseSyncView(APIView):
                         license_obj.save()
                 response = Response(status=status.HTTP_202_ACCEPTED)
             except License.DoesNotExist:
-                pass
-
-            try:
-                binder_license_obj = BinderLicense.objects.get(license_number=license_number)
-                if not binder_license_obj.profile_license:
-                    date_time_obj = datetime.datetime.strptime(expiry, '%Y-%m-%d')
-                    binder_license_obj.expiration_date = date_time_obj.date()
-                    binder_license_obj.issue_date = issue
-                    binder_license_obj.is_updated_via_trigger = True
-                    if license_status or license_status_2:
-                        binder_license_obj.license_status = license_status or license_status_2
-                    binder_license_obj.save()
-            except BinderLicense.DoesNotExist:
                 pass
 
         elif record_id and owner_id and owner_email:

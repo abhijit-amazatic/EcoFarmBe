@@ -55,9 +55,8 @@ class BinderLicense(TimeStampFlagModelMixin, models.Model):
     uploaded_w9_to = models.CharField(_('Uploaded W9  To'), blank=True, null=True, max_length=255)
     zoho_crm_id = models.CharField(_('Zoho CRM ID'), max_length=100, blank=True, null=True)
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
-    status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
 
-    license_status = models.CharField(choices=STATUS_CHOICES, blank=True, null=True, max_length=50,)
+    license_status = models.CharField(choices=STATUS_CHOICES, blank=True, null=True, max_length=255,)
 
     documents = GenericRelation(Documents)
 
