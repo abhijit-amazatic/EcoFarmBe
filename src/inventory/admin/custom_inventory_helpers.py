@@ -61,7 +61,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
         if obj.category_name in ('Flower - Small',):
             data['cf_flower_smalls'] = True
 
-        if obj.marketplace_status in ('Vegging', 'Processing'):
+        if obj.marketplace_status in ('Vegging', 'Flowering', 'Processing'):
             if obj.quantity_available:
                 data['cf_quantity_estimate'] = int(obj.quantity_available)
         else:
