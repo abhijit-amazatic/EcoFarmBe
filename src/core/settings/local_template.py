@@ -227,5 +227,6 @@ SLACK_ONBOARDING_PROGRESS = ''
 SLACK_ONBOARDING_COMPLETED = {}
 
 PRODUCTION = 'false'
-
 INTERNAL_USER_DEFAULT_ORG_ID = ''
+#bypass email & phone verification for listed signed up email
+BYPASS_VERIFICATION_FOR_EMAILS = []

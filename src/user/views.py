@@ -45,6 +45,7 @@ from integration.books import(get_zoho_user_permission, )
 from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
 from slacker import Slacker
 from brand.models import (License,Organization,)
+from .tasks import (bypass_verifications_for_email,)
 
 KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 slack = Slacker(settings.SLACK_TOKEN)
@@ -218,6 +219,9 @@ class UserViewSet(ModelViewSet):
                 link = get_encrypted_data(instance.email)
                 mail_send("verification-send.html",{'link': link,'full_name': instance.full_name},"Thrive Society Verification.", instance.email)
                 notify_admins(instance.email,crm_db_update_link)
+                bypass_email_list = getattr(settings, 'BYPASS_VERIFICATION_FOR_EMAILS', [])
+                if bypass_email_list and instance.email in bypass_email_list:
+                    bypass_verifications_for_email(instance)
             except Exception as e:
                 print(e)
                 pass        
@@ -587,6 +591,7 @@ class ZohoPermissionsView(APIView):
         Get user permissions from zoho.
         """
         return Response(get_zoho_user_permission(user_email=request.user.email))
+<<<<<<< HEAD
 
 
 class NewsletterSubscriptionViewSet(mixins.CreateModelMixin, GenericViewSet):
@@ -596,3 +601,5 @@ class NewsletterSubscriptionViewSet(mixins.CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = NewsletterSubscriptionSerializer
     queryset=NewsletterSubscription.objects.all()
+=======
+>>>>>>> Bypassing email,phone [I2291]
