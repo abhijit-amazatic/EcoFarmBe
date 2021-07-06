@@ -223,6 +223,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
     is_notified_before_expiry = models.BooleanField(_('Is Notified Before Expiry'), default=False)
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
+    is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict)
 
     license_status = models.CharField(blank=True, null=True, max_length=255,)

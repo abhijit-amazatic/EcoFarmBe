@@ -508,6 +508,7 @@ class DownloadSignDocumentView(APIView):
                 filename = document.get('document_name')
                 file_id = upload_pdf_box(request_id, offline_folder, filename, True)
                 response.append(get_download_url(file_id))
+                License.objects.filter(legal_business_name=business_dba).update(is_contract_downloaded=True)
         return Response(response)
 
 class EstimateTaxView(APIView):
