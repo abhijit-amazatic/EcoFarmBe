@@ -31,7 +31,8 @@ from user.views import (UserViewSet, MeView, LogInView,
                         HelpDocumentationView,
                         PendoView,
                         TermsAndConditionAcceptanceView,
-                        ZohoPermissionsView, )
+                        ZohoPermissionsView,
+                        NewsletterSubscriptionViewSet,)
 from integration.views import (GetBoxTokensView, InventoryView,
                                GetPickListView, EstimateView,
                                ContactView, CRMContactView, SearchCultivars,
@@ -154,6 +155,7 @@ router.register(r'order-variables', OrderVariableView, base_name="order-variable
 router.register(r'inventory-variables', CustomInventoryVariableView, base_name="inventory-variables")
 router.register(r'tax-variables', TaxVariableVariableView, base_name="tax-variables")
 router.register(r'internal-onboarding', InternalOnboardingView, base_name="internal-onboarding")
+router.register(r'newsletter-subscription', NewsletterSubscriptionViewSet, base_name="newsletter-subscription")
 
 
 

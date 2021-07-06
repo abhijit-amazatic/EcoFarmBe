@@ -273,3 +273,13 @@ class HelpDocumentation(TimeStampFlagModelMixin, models.Model):
 
     class Meta:
         verbose_name = _('Help Documentation')        
+
+class NewsletterSubscription(TimeStampFlagModelMixin, models.Model):
+    """
+    Class implementing a newsletter model.
+    """
+    email = models.EmailField(_('Email address'), unique=True)
+
+    class Meta:
+        verbose_name = _('Newsletter Subscription')
+        verbose_name_plural = _('Newsletter Subscriptions')

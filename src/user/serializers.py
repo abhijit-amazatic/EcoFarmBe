@@ -16,7 +16,7 @@ from Crypto import Random
 from phonenumber_field.serializerfields import PhoneNumberField
 
 from permission.models import InternalRole
-from .models import User, TermsAndCondition, HelpDocumentation
+from .models import User, TermsAndCondition, HelpDocumentation, NewsletterSubscription
 from integration.box import (get_preview_url, )
 from core.utility import send_async_user_approval_mail
 from brand.models import (License, Organization)
@@ -465,3 +465,11 @@ class HelpDocumentationSerializer(serializers.ModelSerializer):
         model = HelpDocumentation
         fields = ('__all__')
     
+
+class NewsletterSubscriptionSerializer(serializers.ModelSerializer):
+    """
+    This defines NewsletterSubscriptionSerializer
+    """
+    class Meta:
+        model = NewsletterSubscription
+        fields = ('__all__')

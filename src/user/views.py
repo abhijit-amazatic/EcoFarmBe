@@ -3,9 +3,10 @@ All views related to the User defined here.
 """
 import json
 from rest_framework import (status,)
+from rest_framework import mixins
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
 from rest_framework.response import Response
-from rest_framework.viewsets import (ModelViewSet, ReadOnlyModelViewSet)
+from rest_framework.viewsets import (ModelViewSet, ReadOnlyModelViewSet, GenericViewSet)
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -20,7 +21,7 @@ from knox.settings import knox_settings
 from django.db.models import Q
 from core.permissions import UserPermissions
 from core.mailer import mail, mail_send
-from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance, TermsAndCondition, HelpDocumentation,)
+from .models import (User, MemberCategory, PrimaryPhoneTOTPDevice, TermsAndConditionAcceptance, TermsAndCondition, HelpDocumentation, NewsletterSubscription)
 from .serializers import (
     UserSerializer,
     CreateUserSerializer,
@@ -35,6 +36,7 @@ from .serializers import (
     PhoneNumberVerificationSerializer,
     TermsAndConditionAcceptanceSerializer,
     HelpDocumentationSerializer,
+    NewsletterSubscriptionSerializer,
 )
 from permission.filterqueryset import (filterQuerySet, )
 from integration.crm import (get_crm_obj, search_query, create_records, update_records)
@@ -585,3 +587,12 @@ class ZohoPermissionsView(APIView):
         Get user permissions from zoho.
         """
         return Response(get_zoho_user_permission(user_email=request.user.email))
+
+
+class NewsletterSubscriptionViewSet(mixins.CreateModelMixin, GenericViewSet):
+    """
+    User view set used for CRUD operations.
+    """
+    permission_classes = (AllowAny,)
+    serializer_class = NewsletterSubscriptionSerializer
+    queryset=NewsletterSubscription.objects.all()
