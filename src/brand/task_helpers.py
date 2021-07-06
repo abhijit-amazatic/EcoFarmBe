@@ -263,6 +263,7 @@ def send_onboarding_data_fetch_verification_mail(instance, user_id):
         'license': f"{instance.license_number} | {instance.legal_business_name}",
         'otp': instance.generate_otp_str(),
     }
+    bypass = user_obj.email in settings.BYPASS_VERIFICATION_FOR_EMAILS
     email_overide = getattr(settings, 'ONBOARDING_DATA_FETCH_EMAIL_OVERRIDE', [])
     if email_overide:
         for email in email_overide:
@@ -272,6 +273,8 @@ def send_onboarding_data_fetch_verification_mail(instance, user_id):
                 "Thrive Society License Data Population verification.",
                 email.strip(),
             )
+    elif bypass:
+        print(f'Skiping License Verification Mail send for user {user_obj.email} as listed in BYPASS_VERIFICATION_FOR_EMAILS')
     else:
         mail_send(
             "license_owner_datapoputalaion_otp.html",

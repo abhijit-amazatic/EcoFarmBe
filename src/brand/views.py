@@ -898,7 +898,8 @@ class OnboardingDataFetchViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMi
         serializer.is_valid(raise_exception=True)
         instance = self.get_object()
         if instance.owner_verification_status == 'verification_code_sent':
-            if instance.verify_otp(serializer.validated_data['otp']):
+            bypass = request.user.email in settings.BYPASS_VERIFICATION_FOR_EMAILS
+            if bypass or instance.verify_otp(serializer.validated_data['otp']):
                 instance.owner_verification_status = 'verified'
                 instance.save()
                 return Response({}, status=status.HTTP_200_OK,)

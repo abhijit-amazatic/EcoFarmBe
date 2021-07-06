@@ -591,7 +591,6 @@ class ZohoPermissionsView(APIView):
         Get user permissions from zoho.
         """
         return Response(get_zoho_user_permission(user_email=request.user.email))
-<<<<<<< HEAD
 
 
 class NewsletterSubscriptionViewSet(mixins.CreateModelMixin, GenericViewSet):
@@ -601,5 +600,3 @@ class NewsletterSubscriptionViewSet(mixins.CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = NewsletterSubscriptionSerializer
     queryset=NewsletterSubscription.objects.all()
-=======
->>>>>>> Bypassing email,phone [I2291]
