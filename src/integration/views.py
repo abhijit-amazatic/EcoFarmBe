@@ -171,7 +171,7 @@ class GetRecordView(APIView):
                 return Response(record, status=status.HTTP_200_OK)
             return Response(record, status=status.HTTP_400_BAD_REQUEST)
         elif module and legal_business_name:
-            record = search_query('Accounts', legal_business_name, 'Account_Business_DBA')
+            record = search_query(module, legal_business_name, 'Account_Business_DBA')
             if record['status_code'] == 200:
                 return Response(record, status=status.HTTP_200_OK)
             return Response(record, status=status.HTTP_400_BAD_REQUEST)
@@ -708,7 +708,6 @@ class InvoiceView(APIView):
         organization_name = request.query_params.get('organization_name')
         invoice_id = request.data['invoice_id']
         response = update_invoice(organization_name, invoice_id=invoice_id, data=request.data, params=request.query_params.dict())
-        print(response)
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response)
