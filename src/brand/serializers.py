@@ -59,19 +59,32 @@ from utils import (reverse_admin_change_path,)
 def insert_or_update_vendor_accounts(profile, instance):
     """
     Insert/update vendors/accounts based on existing user or not. 
+    is_user_existing returns tuple e.g (False, None)
     """
     is_existing_user = is_user_existing(license_number=instance.license_number)
-    
     if is_existing_user and is_existing_user[0]:
-        if profile.license.profile_category == 'cultivation':
-            insert_vendors.delay(id=instance.id, is_update=True)
-        else:
-            insert_accounts.delay(id=instance.id,is_update=True)
+        is_update = True
     else:
-        if profile.license.profile_category == 'cultivation':
-            insert_vendors.delay(id=instance.id)
-        else:
-            insert_accounts.delay(id=instance.id)
+        is_update =False
+        
+    if instance.is_seller and instance.is_buyer:
+        insert_vendors.delay(id=instance.id, is_update=is_update)
+        insert_accounts.delay(id=instance.id,is_update=is_update)
+    elif instance.is_seller:
+        insert_vendors.delay(id=instance.id, is_update=is_update)
+    elif instance.is_buyer:
+        insert_accounts.delay(id=instance.id,is_update=is_update)
+        
+    # if is_existing_user and is_existing_user[0]:
+    #     if profile.license.profile_category == 'cultivation':
+    #         insert_vendors.delay(id=instance.id, is_update=True)
+    #     else:
+    #         insert_accounts.delay(id=instance.id,is_update=True)
+    # else:
+    #     if profile.license.profile_category == 'cultivation':
+    #         insert_vendors.delay(id=instance.id)
+    #     else:
+    #         insert_accounts.delay(id=instance.id)
 
 class OrganizationSerializer(serializers.ModelSerializer):
     """
