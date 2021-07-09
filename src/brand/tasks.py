@@ -273,6 +273,10 @@ def insert_record_to_crm(record_id, is_buyer, is_seller, is_update=False):
     """
     Insert record according to buyer/seller to crm.
     """
+    response = dict()
+    if is_seller and is_buyer:
+        response['vendor'] = insert_vendors(id=record_id, is_update=is_update)
+        response['account'] = insert_accounts(id=record_id, is_update=is_update)
     if is_seller:
         response = insert_vendors(id=record_id, is_update=is_update)
     elif is_buyer:
