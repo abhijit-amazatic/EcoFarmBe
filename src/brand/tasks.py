@@ -268,7 +268,7 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
                         instance.data_fetch_status = 'complete'
                         instance.save()
 
-@app.task(queue="urgent")
+@app.task(queue="general")
 def insert_record_to_crm(record_id, is_buyer, is_seller, is_update=False):
     """
     Insert record according to buyer/seller to crm.

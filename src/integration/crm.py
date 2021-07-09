@@ -426,13 +426,16 @@ def insert_users():
     else:
         return response
 
-def get_licenses(license_field):
+
+def get_licenses(license_field, license_number):
     """
     Get license from Zoho CRM.
     """
     licenses = search_query('Licenses', license_field, 'Legal_Business_Name')
     if licenses['status_code'] == 200:
-        return licenses['response']
+        for license in licenses['response']:
+            if license.get('Name') == license_number:
+                return license
 
 def is_user_existing(license_number):
     """
@@ -480,7 +483,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             license_db_id= i['id']
             d.update({'license_db_id': license_db_id})
             license_db = License.objects.select_related().get(id=license_db_id)
-            licenses = get_licenses(i['legal_business_name'])
+            licenses = get_licenses(i['legal_business_name'], license_db.license_number)
             d.update(license_db.license_profile.__dict__)
             try:
                 d.update(license_db.profile_contact.profile_contact_details)
@@ -511,7 +514,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 d.update(license_db.program_overview.__dict__)
             except Exception:
                 pass
-            d.update({'id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
+            d.update({'id':licenses['id'], 'Owner':licenses['Owner']['id']})
             l.append(d['id'])
             d.update({'licenses': l})
             if id and is_single_user and is_update:
@@ -554,6 +557,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                     d['id'] = result.get('response')[0]['id']
                     result = update_records('Vendors', d, True)
             final_dict['vendor'] = result
+            print(result)
             if response['status_code'] == 200 and result['status_code'] in [200, 201]:
                 record_response = result['response']['response']['data']
                 try:
