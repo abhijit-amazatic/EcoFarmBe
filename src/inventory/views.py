@@ -1104,7 +1104,7 @@ class InventoryMetaDataView(APIView):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response, status=status.HTTP_200_OK)
 
-class ConvertSalesOrderToInvoice(APIView):
+class ConvertSalesOrderToPackage(APIView):
     """
     View class to convert Sales order to package.
     """
