@@ -515,7 +515,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             l.append(d['id'])
             d.update({'licenses': l})
             if id and is_single_user and is_update:
-                d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
+                d['id'] = license_db.license_profile.__dict__['zoho_crm_vendor_id']
             # farm_name = license_db.license_profile.__dict__['name']
             farm_name = i['legal_business_name']
             # if d['is_buyer'] == True:
@@ -537,7 +537,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
             else:
                 d['Layout_Name'] = 'vendor_cannabis'
             if is_update:
-                d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
+                d['id'] = license_db.license_profile.__dict__['zoho_crm_vendor_id']
                 if d['id']:
                     r = search_query('Vendors', d['name'], 'Vendor_Name')
                     if r.get('status_code') == 200:
@@ -558,7 +558,7 @@ def insert_record(record=None, is_update=False, id=None, is_single_user=False):
                 record_response = result['response']['response']['data']
                 try:
                     record_obj = LicenseProfile.objects.get(id=vendor_id)
-                    record_obj.zoho_crm_id = record_response[0]['details']['id']
+                    record_obj.zoho_crm_vendor_id = record_response[0]['details']['id']
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
                 except KeyError as exc:
@@ -1064,7 +1064,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             l.append(d['id'])
             d.update({'licenses': l})    
             if id and is_single_user and is_update:
-                d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
+                d['id'] = license_db.license_profile.__dict__['zoho_crm_account_id']
             # farm_name = license_db.license_profile.__dict__['name']
             farm_name = i['legal_business_name']
             # if d['is_seller'] == True:
@@ -1082,7 +1082,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                     print(exc)
                     pass
             if is_update:
-                    d['id'] = license_db.license_profile.__dict__['zoho_crm_id']
+                    d['id'] = license_db.license_profile.__dict__['zoho_crm_account_id']
                     if d['id']:
                         r = search_query('Accounts', d['name'], 'Account_Name')
                         if r.get('status_code') == 200:
@@ -1103,7 +1103,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                 record_response = result['response']['response']['data']
                 try:
                     record_obj = LicenseProfile.objects.get(id=vendor_id)
-                    record_obj.zoho_crm_id = record_response[0]['details']['id']
+                    record_obj.zoho_crm_account_id = record_response[0]['details']['id']
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
                 except KeyError as exc:
@@ -1617,7 +1617,9 @@ def update_program_selection(record_id, tier_selection):
     Sync program selection from crm to webapp.
     """
     try:
-        license_profile = LicenseProfile.objects.get(zoho_crm_id=record_id)
+        license_profile = LicenseProfile.objects.get(zoho_crm_vendor_id=record_id)
+        if not license_profile:
+            license_profile = LicenseProfile.objects.get(zoho_crm_account_id=record_id)
         try:
             license_profile.license.program_overview
         except License.program_overview.RelatedObjectDoesNotExist:
