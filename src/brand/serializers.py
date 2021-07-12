@@ -347,11 +347,10 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         updated_instance = super().update(instance, validated_data)
         updated_instance.license.brand = updated_instance.brand_association
         updated_instance.license.save()
+        if updated_instance.license.is_buyer:
+            update_in_crm_task.delay('Accounts', instance.id)
         if updated_instance.license.is_seller:
-            module_name = 'Vendors'
-        else:
-            module_name = 'Accounts'
-        update_in_crm_task.delay(module_name, instance.id)
+            update_in_crm_task.delay('Vendors', instance.id)
         return updated_instance
 
     class Meta:
@@ -407,11 +406,10 @@ class BillingInformationSerializer(serializers.ModelSerializer):
         Update for licenseprofile
         """
         updated_instance = super().update(instance, validated_data)
+        if updated_instance.license.is_buyer:
+            update_in_crm_task.delay('Accounts', instance.id)
         if updated_instance.license.is_seller:
-            module_name = 'Vendors'
-        else:
-            module_name = 'Accounts'
-        update_in_crm_task.delay(module_name, instance.id)
+            update_in_crm_task.delay('Vendors', instance.id)
         return updated_instance
 
 

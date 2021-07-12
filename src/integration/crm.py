@@ -316,30 +316,37 @@ def update_in_crm(module, record_id):
     """
     Update record in zoho crm.
     """
+    request = None
     try:
-        if module == 'Licenses':
-            request = License.objects.get(id=record_id)
-            request = request.__dict__
-        elif module in ['Vendors', 'Accounts']:
+        if module in ['Vendors', 'Accounts']:
             lp_obj = LicenseProfile.objects.get(id=record_id)
             request = lp_obj.__dict__
-            if module == 'Vendors':
+            if module == 'Accounts':
+                request['id'] = request.get('zoho_crm_account_id')
+            else:
+                request['id'] = request.get('zoho_crm_vendor_id')
                 if lp_obj.license.profile_category == 'nursery':
                     request['Layout_Name'] = 'vendor_cannabis_nursery'
                 else:
                     request['Layout_Name'] = 'vendor_cannabis'
+        else:
+            if module == 'Licenses':
+                request = License.objects.get(id=record_id)
+                request = request.__dict__
+            elif module == 'Orgs':
+                request = Organization.objects.get(id=record_id)
+                request = request.__dict__
+            elif module == 'Brands':
+                request = Brand.objects.get(id=record_id)
+                request = request.__dict__
 
-        elif module == 'Orgs':
-            request = Organization.objects.get(id=record_id)
-            request = request.__dict__
-        elif module == 'Brands':
-            request = Brand.objects.get(id=record_id)
-            request = request.__dict__
+            if request:
+                request['id'] = request.get('zoho_crm_id')
+
     except Exception as exc:
         print(exc)
         return {'error': 'Record not in database'}
-    if request.get('zoho_crm_id'):
-        request['id'] = request.get('zoho_crm_id')
+    if request.get('id'):
         return update_records(module, request)
     return {'error': 'Record not in CRM'}
 
