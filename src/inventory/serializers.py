@@ -117,24 +117,27 @@ class CustomInventorySerializer(serializers.ModelSerializer):
     Inventory Serializer
     """
     cultivar_name = CustomInventoryCultivarNameField(source='cultivar')
-    item_image_url = serializers.SerializerMethodField()
+    item_image_urls = serializers.SerializerMethodField()
     labtest_url = serializers.SerializerMethodField()
 
-    def get_item_image_url(self, obj):
+    def get_item_image_urls(self, obj):
         """
         Return s3 item image.
         """
+        image_urls = list()
         try:
-            document = obj.extra_documents.filter(doc_type='item_image').latest('created_on')
-            if document.box_url:
-                return document.box_url
-            else:
-                path = document.path
-                url = create_presigned_url(AWS_BUCKET, path)
-                if url.get('response'):
-                    return url.get('response')
+            documents = obj.extra_documents.filter(doc_type='item_image')
+            for document in documents:
+                if document.box_url:
+                    image_urls.append(document.box_url)
+                else:
+                    path = document.path
+                    url = create_presigned_url(AWS_BUCKET, path)
+                    if url.get('response'):
+                        image_urls.append(url.get('response'))
         except Exception:
-            return None
+            pass
+        return image_urls
 
     def get_labtest_url(self, obj):
         """
