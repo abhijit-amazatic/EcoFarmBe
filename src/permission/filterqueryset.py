@@ -70,7 +70,11 @@ class filterQuerySet:
                 else:
                     q |= Q(
                         profile_category__in=p_cats,
-                        license_profile__crm_owner_email=self.user.email,
+                        license_profile__crm_account_owner_email=self.user.email,
+                    )
+                    q |= Q(
+                        profile_category__in=p_cats,
+                        license_profile__crm_vendor_owner_email=self.user.email,
                     )
         q |= Q(organization__created_by=self.user)
         if self.view and self.view.action == 'list':

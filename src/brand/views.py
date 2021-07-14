@@ -801,7 +801,8 @@ class LicenseSyncView(APIView):
         expiry = request.data.get('expiry')
         license_status = request.data.get('license_status')
         license_status_2 = request.data.get('license_status_2')
-        record_id = request.data.get('account_id')
+        account_id = request.data.get('account_id')
+        vendor_id = request.data.get('vendor_id')
         owner_id = request.data.get('owner_id')
         owner_email = request.data.get('owner_email')
         if license_number and expiry:
@@ -825,17 +826,22 @@ class LicenseSyncView(APIView):
             except License.DoesNotExist:
                 pass
 
-        elif record_id and owner_id and owner_email:
-            record = LicenseProfile.objects.get(zoho_crm_id=record_id)
-            record.crm_owner_id = owner_id
-            record.crm_owner_email = owner_email
+        elif account_id and owner_id and owner_email:
+            record = LicenseProfile.objects.get(zoho_crm_account_id=account_id)
+            record.crm_account_owner_id = owner_id
+            record.crm_account_owner_email = owner_email
+            record.save()
+            response = Response(status=status.HTTP_202_ACCEPTED)
+        elif vendor_id and owner_id and owner_email:
+            record = LicenseProfile.objects.get(zoho_crm_vendor_id=vendor_id)
+            record.crm_vendor_owner_id = owner_id
+            record.crm_vendor_owner_email = owner_email
             record.save()
             response = Response(status=status.HTTP_202_ACCEPTED)
 
         if response:
             return response
-        else:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProgramSelectionSyncView(APIView):
     """
