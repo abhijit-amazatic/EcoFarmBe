@@ -111,11 +111,11 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     list_per_page = 25
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
-    readonly_fields = ['is_verified','approved_on','approved_by','is_phone_verified','unique_user_id',] #'phone'
+    readonly_fields = ['is_verified','approved_on','is_2fa_enabled','approved_by','created_on','updated_on','is_phone_verified','unique_user_id',] #'phone'
     actions = [approve_user, sync_records, ]
     filter_horizontal = ('groups', 'user_permissions', 'internal_roles')
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('phone', 'is_phone_verified', 'is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
+            (('User'), {'fields': ('full_name','phone', 'country','state','date_of_birth','city','zip_code','recovery_email','alternate_email','is_phone_verified','legal_business_name','business_dba','existing_member','membership_type','is_updated_in_crm','profile_photo','profile_photo_sharable_link','website','title','department','instagram','facebook','twitter','linkedin','about','zoho_crm_id','is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
             (('Internal Permission'), {'fields': ('internal_roles',)}),
     )
 
