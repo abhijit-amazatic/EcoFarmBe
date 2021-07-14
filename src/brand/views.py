@@ -751,7 +751,7 @@ class UserInvitationVerificationView(GenericAPIView):
                 'new_user': True,
                 'full_name': instance.full_name,
                 'email': instance.email,
-                'phone': instance.phone,
+                'phone': instance.phone.as_e164,
             }
             try:
                 user = Auth_User.objects.get(email=instance.email)
