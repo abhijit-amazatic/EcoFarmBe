@@ -290,7 +290,7 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name')
     readonly_fields = ('created_on','updated_on', 'crm_output')
     list_filter = (
-        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded',
+        ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
     actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records]
