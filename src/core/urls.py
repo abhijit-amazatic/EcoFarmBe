@@ -118,6 +118,8 @@ from internal_onboarding.views import (
      InternalOnboardingView,
 )
 
+from core.admin_sites import logger_admin_site
+
 router = SimpleRouter()
 router.register(r'user/login', TwoFactoLogInViewSet, base_name="login-2fa")
 router.register(r'user', UserViewSet, base_name="user")
@@ -161,6 +163,7 @@ router.register(r'newsletter-subscription', NewsletterSubscriptionViewSet, base_
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('logger/', logger_admin_site.urls),
     path(r'user/me/', MeView.as_view(), name='user-me'),
     # path(r'user/login/', LogInView.as_view(), name='login'),
     path(r'user/logout/', LogoutAllView.as_view(), name='logout'), #LogoutView - removes only single related token from DB.
