@@ -10,7 +10,17 @@ DEBUG = os.environ.get('DEBUG', 'true').lower() == "true"
 PRODUCTION = os.environ.get('PRODUCTION', 'false').lower() == "true"
 DEFAULT_CONNECTION = dj_database_url.parse(os.environ.get("DATABASE_URL"))
 DEFAULT_CONNECTION.update({"CONN_MAX_AGE": 600})
-DATABASES = {"default": DEFAULT_CONNECTION}
+LOGGER_CONNECTION = dj_database_url.parse(os.environ.get("LOGGER_DATABASE_URL"))
+LOGGER_CONNECTION.update({"CONN_MAX_AGE": 600})
+DATABASES = {
+    "default": DEFAULT_CONNECTION,
+    'logger': LOGGER_CONNECTION,
+
+}
+DATABASE_ROUTERS = [
+    'core.db_routers.LoggerRouter',
+    # 'core.db_routers.defaultRouter',
+]
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[\"*\"]"))
 CORS_ORIGIN_REGEX_WHITELIST = json.loads(os.environ.get("CORS_ORIGIN", "[]"))
 FRONTEND_DOMAIN_NAME = os.environ.get("FRONTEND_DOMAIN_NAME")
@@ -211,3 +221,9 @@ SLACK_ONBOARDING_COMPLETED = os.environ.get('SLACK_ONBOARDING_COMPLETED')
 
 INTERNAL_USER_DEFAULT_ORG_ID = os.environ.get('INTERNAL_USER_DEFAULT_ORG_ID')
 BYPASS_VERIFICATION_FOR_EMAILS = json.loads(os.environ.get("BYPASS_VERIFICATION_FOR_EMAILS", "[]"))
+
+
+# DRF API Logger
+DRF_API_LOGGER_DATABASE = True
+DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token', 'access', 'refresh', 'Token']
+DRF_API_LOGGER_DEFAULT_DATABASE = 'logger'

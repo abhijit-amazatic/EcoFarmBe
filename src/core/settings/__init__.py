@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'bill',
     'compliance_binder',
     'internal_onboarding',
+    'drf_api_logger',
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',
@@ -81,6 +82,7 @@ MIDDLEWARE += [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',
+    'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

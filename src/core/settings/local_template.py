@@ -12,8 +12,18 @@ DATABASES = {
         'NAME': '',
         'USER': '',
         'PASSWORD': ''
-    }
+    },
+    'logger': {
+        'ENGINE': '',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': ''
+    },
 }
+DATABASE_ROUTERS = [
+    'core.db_routers.LoggerRouter',
+    # 'core.db_routers.defaultRouter',
+]
 ALLOWED_HOSTS = []
 
 CORS_ORIGIN_REGEX_WHITELIST = (
@@ -230,3 +240,9 @@ PRODUCTION = 'false'
 INTERNAL_USER_DEFAULT_ORG_ID = ''
 #bypass email & phone verification for listed signed up email
 BYPASS_VERIFICATION_FOR_EMAILS = []
+
+
+# DRF API Logger
+DRF_API_LOGGER_DATABASE = True
+DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token', 'access', 'refresh', 'Token']
+DRF_API_LOGGER_DEFAULT_DATABASE = 'logger'
