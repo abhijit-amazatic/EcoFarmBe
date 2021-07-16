@@ -214,7 +214,7 @@ class InTransitForm(forms.ModelForm):
         model = InTransitOrder
         fields = '__all__'
         widgets = {
-            'order_data': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
+            'order_data': JSONEditorWidget(options={'mode':'tree','search': True}),
         }
         
 class InTransitOrderAdmin(admin.ModelAdmin):
