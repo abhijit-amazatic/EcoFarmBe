@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'bill',
     'compliance_binder',
     'internal_onboarding',
+    'seo',
     'drf_api_logger',
     # 'django_extensions',
     # 'rest_social_auth',
