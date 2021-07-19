@@ -15,7 +15,7 @@ from .serializers import (
 
 class PageMetaView(APIView):
     """
-    Return Access and Refresh Tokens for Box.
+    Return Page Meta info from db.
     """
     permission_classes = (AllowAny, )
 
@@ -33,7 +33,7 @@ class PageMetaView(APIView):
                 return Response({"detail": "Query parameter 'url' is required"}, status=400)
             instance = PageMeta.objects.get(page_url=url)
         except PageMeta.DoesNotExist:
-            return Response({"detail": "Mata not found for this url"}, status=404)
+            return Response({"detail": "Meta not found for this url"}, status=404)
         except Exception as exc:
             return Response({"detail": exc}, status=400)
         else:
