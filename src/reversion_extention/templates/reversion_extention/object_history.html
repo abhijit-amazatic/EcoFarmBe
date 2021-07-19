@@ -1,0 +1,78 @@
+{% extends "admin/object_history.html" %}
+{% load i18n %}
+
+{% block extrastyle %}{{ block.super }}
+<style type="text/css">
+    /* minimal style for the diffs */
+    pre.highlight {
+        max-width: 500px;
+    }
+    del, ins {
+        color: #000;
+        text-decoration: none;
+    }
+    del { background-color: #fdb8c0 }
+    ins { background-color: #acf2bd; }
+    sup.follow { color: #5555ff; }
+    .diff-line {
+      display: inline-block;
+      width: 100%;
+      margin-left: -1.0em;
+      padding-left: 0.5em;
+      background-color: #f6f6f6;
+      color: #222;
+    }
+    .diff-line.diff-ins { border-left: 0.5em solid #bef5cb; background-color: #e6ffed; }
+    .diff-line.diff-del { border-left: 0.5em solid #fdaeb7; background-color: #ffeef0; }
+    .diff-line.diff-ins.diff-del { border-left: 0.5em solid #bef5cb; background-color: #e6ffed; } /* mixed del/ins == green */
+</style>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+
+        <p>{% blocktrans %}Choose a date from the list below to revert to a previous version of this object.{% endblocktrans %}</p>
+
+        <div class="module">
+            {% if action_list %}
+                <table id="change-history" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans 'Date/time' %}</th>
+                            <th scope="col">{% trans 'IP Address' %}</th>
+                            <th scope="col">{% trans 'User Agent' %}</th>
+                            <th scope="col">{% trans 'Path' %}</th>
+                            {% comment %} <th scope="col">{% trans 'Deleted Objects' %}</th> {% endcomment %}
+                            {% comment %} <th scope="col">{% trans 'Created Objects' %}</th> {% endcomment %}
+                            <th scope="col">{% trans 'User' %}</th>
+                            <th scope="col">{% trans 'Action' %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for action in action_list %}
+                            <tr>
+                                <th scope="row"><a href="{{action.url}}">{{action.revision.date_created|date:"DATETIME_FORMAT"}}</a></th>
+                                <td>{{action.revision.reversion_meta.ip_address|default:""}}</td>
+                                <td>{{action.revision.reversion_meta.user_agent|default:""}}</td>
+                                <td>{{action.revision.reversion_meta.path|default:""}}</td>
+                                {% comment %} <td>{{action.revision.reversion_meta.deleted_objects|default:""}}</td> {% endcomment %}
+                                {% comment %} <td>{{action.revision.reversion_meta.created_objects|default:""}}</td> {% endcomment %}
+                                <td>
+                                    {% if action.revision.user %}
+                                        {{action.revision.user.get_username}}
+                                        {% if action.revision.user.get_full_name %} ({{action.revision.user.get_full_name}}){% endif %}
+                                    {% else %}
+                                        &mdash;
+                                    {% endif %}
+                                </td>
+                                <td>{{action.revision.get_comment|safe|linebreaksbr|truncatewords_html:10|default:""}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>{% trans "This object doesn't have a change history. It probably wasn't added via this admin site." %}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

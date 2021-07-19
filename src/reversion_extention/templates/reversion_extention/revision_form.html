@@ -1,0 +1,13 @@
+{% extends "reversion_extention/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans "Home" %}</a> &rsaquo;
+        <a href="{% url 'admin:app_list' opts.app_label %}">{{parent_opts.app_config.verbose_name}}</a> &rsaquo;
+        <a href="{% url parent_opts|admin_urlname:'changelist' %}">{{parent_opts.verbose_name_plural|capfirst}}</a> &rsaquo;
+        <a href="{% url parent_opts|admin_urlname:'change' parent_object_id %}">{{Parent_name|truncatewords:"18"}}</a> &rsaquo;
+        <a href="{% url parent_opts|admin_urlname:'history' parent_object_id %}">{% trans "History" %}</a> &rsaquo;
+        {% blocktrans with opts.verbose_name as verbose_name %}Revert {{verbose_name}}{% endblocktrans %}
+    </div>
+{% endblock %}

@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'internal_onboarding',
     'seo',
     'drf_api_logger',
+    'reversion',
+    'reversion_extention',
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',
@@ -84,6 +86,7 @@ MIDDLEWARE += [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsPostCsrfMiddleware',
     'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware',
+    'reversion_extention.middleware.RevisionMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

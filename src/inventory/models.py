@@ -665,7 +665,7 @@ class Vendor(models.Model):
     cf_client_code = models.CharField(_('Client Code'), blank=True, null=True, max_length=50)
     
     def __str__(self):
-        return self.cf_client_code
+        return self.cf_client_code or ''
 
     class Meta:
         verbose_name = _('Vendor')
