@@ -21,6 +21,10 @@ from ckeditor.fields import RichTextField
 from core.widgets import CKEditorWidget
 from django.http import HttpResponseRedirect
 from integration.crm import (create_records, update_records, )
+from import_export import resources, fields
+from import_export.admin import (ImportExportModelAdmin, ExportActionMixin,)
+from import_export.widgets import JSONWidget, ManyToManyWidget, ForeignKeyWidget
+
 
 class MyUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
@@ -28,28 +32,6 @@ class MyUserChangeForm(UserChangeForm):
         fields = '__all__'
 
     username = forms.CharField(required=False)
-
-    # def clean(self):
-    #     if self.cleaned_data.get('is_approved'):
-    #         self.cleaned_data.pop('is_approved', False)
-    #         return self.cleaned_data
-
-        
-    # def save(self, commit=True):
-    #     user = super(MyUserChangeForm, self).save(commit=False)
-    #     username = self.cleaned_data["username"]
-    #     if username:
-    #         print('in if username', username, type(username))
-    #         user.username = username
-    #     if commit:
-    #         user.save()
-    #     print("======USER", user)    
-    #     return user
- 
-    #def clean(self):
-        # if self.cleaned_data.get('is_approved'):
-        #     mail_send("approved.html",{'link': settings.FRONTEND_DOMAIN_NAME},"Account Approved.", self.cleaned_data.get('email'))
-        #     return self.cleaned_data
 
     
 def get_user_data(request):
@@ -91,8 +73,56 @@ def sync_records(modeladmin, request, queryset):
     messages.success(request, result)
 sync_records.short_description = "Insert Records To CRM"
 
+class UserResource(resources.ModelResource):
+    categories=fields.Field(attribute='categories', widget=ManyToManyWidget(MemberCategory, field='name'), column_name='MemberCategory')
+
+    class Meta:
+        model = User
+        fields = (
+            'unique_user_id',
+            'email',
+            'phone',
+            'username',
+            'categories',
+            'first_name',
+            'last_name',
+            'full_name',
+            'country',
+            'state',
+            'date_of_birth',
+            'city',
+            'zip_code',
+            'is_phone_verified',
+            'is_2fa_enabled',
+            'legal_business_name',
+            'business_dba',
+            'recovery_email',
+            'alternate_email',
+            'existing_member',
+            'membership_type',
+            'is_verified',
+            'is_approved',
+            'zoho_contact_id',
+            'is_updated_in_crm',
+            'profile_photo',
+            'profile_photo_sharable_link',
+            'approved_on',
+            'website',
+            'instagram',
+            'facebook',
+            'linkedin',
+            'about',
+            'created_on',
+            'updated_on',
+            'crm_link',
+            'zoho_crm_id',
+            'internal_roles',
+        )
+        export_order = fields
+
         
-class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
+    
+class MyUserAdmin(ImportExportModelAdmin,UserAdmin): #nested_admin.NestedModelAdmin, #
     
     def approved_by_member(self, obj):
         if hasattr(obj,'approved_by') and obj.approved_by is not None :
@@ -101,25 +131,25 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
             return "N/A"
 
     def member_categories(self, obj):
-        return "\n".join([member.name for member in obj.categories.all()])    
+        return "\n".join([member.name for member in obj.categories.all()])
 
-    # def created_on(self,obj):
-    #     return obj.created_on
     
     form = MyUserChangeForm
     change_form_template = 'user/custom_user_change_form.html'
     list_display = ('email', 'is_approved', 'phone','member_categories','approved_on','last_login','approved_by_member','date_joined',)
-    list_filter = ('is_approved', 'is_verified',)
+    list_filter = ('is_approved', 'is_verified','categories',)
     list_per_page = 25
+    list_max_show_all = 500
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
     readonly_fields = ['is_verified','approved_on','is_2fa_enabled','approved_by','created_on','updated_on','is_phone_verified','unique_user_id',] #'phone'
     actions = [approve_user, sync_records, ]
-    filter_horizontal = ('groups', 'user_permissions', 'internal_roles',)
+    filter_horizontal = ('groups', 'user_permissions', 'internal_roles','categories',)
     fieldsets = UserAdmin.fieldsets + (
             (('User'), {'fields': ('full_name','phone', 'country','categories','state','date_of_birth','city','zip_code','recovery_email','alternate_email','is_phone_verified','legal_business_name','business_dba','existing_member','membership_type','is_updated_in_crm','profile_photo','profile_photo_sharable_link','website','title','department','instagram','facebook','twitter','linkedin','about','zoho_crm_id','is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
             (('Internal Permission'), {'fields': ('internal_roles',)}),
     )
+    resource_class = UserResource
 
     def response_change(self, request, obj):
         if "_resend-mail" in request.POST:
