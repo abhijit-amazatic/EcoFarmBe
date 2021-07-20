@@ -392,7 +392,7 @@ def check_documents(inventory_name, record):
         return response, thumbnail_url, mobile_url
     except Exception as exc:
         print(exc)
-        return None, None
+        return None, None, None
 
 def upload_file_to_box(item_name, item_id, file_obj):
     """
