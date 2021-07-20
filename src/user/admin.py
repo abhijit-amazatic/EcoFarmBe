@@ -91,6 +91,7 @@ def sync_records(modeladmin, request, queryset):
     messages.success(request, result)
 sync_records.short_description = "Insert Records To CRM"
 
+        
 class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
     
     def approved_by_member(self, obj):
@@ -98,24 +99,25 @@ class MyUserAdmin(UserAdmin,):#nested_admin.NestedModelAdmin,
            return obj.approved_by.get('email',"N/A")
         else:
             return "N/A"
-        
+
+    def member_categories(self, obj):
+        return "\n".join([member.name for member in obj.categories.all()])    
 
     # def created_on(self,obj):
     #     return obj.created_on
     
-    #inlines = [VendorInlineAdmin]
     form = MyUserChangeForm
     change_form_template = 'user/custom_user_change_form.html'
-    list_display = ('email', 'is_approved', 'phone', 'approved_on','last_login','approved_by_member','date_joined',)
+    list_display = ('email', 'is_approved', 'phone','member_categories','approved_on','last_login','approved_by_member','date_joined',)
     list_filter = ('is_approved', 'is_verified',)
     list_per_page = 25
     search_fields = ('username','email',)
     ordering = ('-date_joined',)
     readonly_fields = ['is_verified','approved_on','is_2fa_enabled','approved_by','created_on','updated_on','is_phone_verified','unique_user_id',] #'phone'
     actions = [approve_user, sync_records, ]
-    filter_horizontal = ('groups', 'user_permissions', 'internal_roles')
+    filter_horizontal = ('groups', 'user_permissions', 'internal_roles',)
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('full_name','phone', 'country','state','date_of_birth','city','zip_code','recovery_email','alternate_email','is_phone_verified','legal_business_name','business_dba','existing_member','membership_type','is_updated_in_crm','profile_photo','profile_photo_sharable_link','website','title','department','instagram','facebook','twitter','linkedin','about','zoho_crm_id','is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
+            (('User'), {'fields': ('full_name','phone', 'country','categories','state','date_of_birth','city','zip_code','recovery_email','alternate_email','is_phone_verified','legal_business_name','business_dba','existing_member','membership_type','is_updated_in_crm','profile_photo','profile_photo_sharable_link','website','title','department','instagram','facebook','twitter','linkedin','about','zoho_crm_id','is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
             (('Internal Permission'), {'fields': ('internal_roles',)}),
     )
 
