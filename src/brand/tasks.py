@@ -37,7 +37,7 @@ from .task_helpers import (
 slack = Slacker(settings.SLACK_TOKEN)
 
 @periodic_task(run_every=(crontab(hour=[1], minute=0)), options={'queue': 'general'})
-def update_expired_licence_status():
+def update_expired_license_status():
     """
     Update expired licence status to 'expired'.
     """
