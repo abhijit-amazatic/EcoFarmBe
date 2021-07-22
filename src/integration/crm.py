@@ -260,11 +260,7 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         return []
     if value.startswith('Created_By'):
         return value
-    if value.startswith('Total_Terpenes'):
-        if obj.get(value):
-            return obj.get(value)
-        return 0
-    
+
 def get_record(module, record_id, full=False):
     """
     Get record.
@@ -1462,6 +1458,11 @@ def get_field(record, key, field):
         return datetime.strptime(record.get(key), '%Y-%m-%dT%H:%M:%S%z').date()
     if field in date_fields:
         return datetime.strptime(record.get(key), '%Y-%m-%d')
+    if field.startswith('Total_Terpenes'):
+        if record.get(key):
+            return record.get(key)
+        return 0
+
 
 def parse_crm_record(module, records):
     """
