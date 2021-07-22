@@ -5,7 +5,7 @@ All periodic tasks related to integrations.
 from celery.task import periodic_task
 from celery.schedules import crontab
 from core.celery import app
-from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY)
+from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY,PRODUCTION)
 
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
@@ -44,7 +44,8 @@ def fetch_inventory_on_interval():
         labtests = LabTest.objects.all().count()
         fetch_inventory('inventory_efd', days=days, price_data=price_data)
         # Commenting below only for staging. We do not have test book organization for staging.
-        # fetch_inventory('inventory_efl', days=days, price_data=price_data)
+        if PRODUCTION:
+            fetch_inventory('inventory_efl', days=days, price_data=price_data)
         inventory_after = Inventory.objects.all().count()
         return {'status_code': 200,
                 'labtest': labtests,
