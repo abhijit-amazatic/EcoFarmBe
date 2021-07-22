@@ -1098,7 +1098,7 @@ CRM_FORMAT  = {
             "Total_Cannabinoids": "Total_Cannabinoids_parse",
             "Single_Line_176": "Total_Residual_Solvent",
             "Total_THC": "Total_THC_parse",
-            "Total_Terpenes": "Total_Terpenes",
+            "Total_Terpenes": "Total_Terpenes_parse",
             "Single_Line_141": "Total_Xylenes",
             "Single_Line_118": "Trichloroethylene",
             "Trifloxystrobin": "Trifloxystrobin",

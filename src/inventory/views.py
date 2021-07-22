@@ -78,6 +78,7 @@ class DataFilter(FilterSet):
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     cf_strain_name = CharInFilter(method='cf_strain_name__in', lookup_expr='in')
     cf_client_code = CharInFilter(method='cf_client_code__in', lookup_expr='in')
+    cf_cultivation_type = CharInFilter(method='cf_cultivation_type__in', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
@@ -201,6 +202,7 @@ class DataFilter(FilterSet):
         'labtest__THCVA':['gte', 'lte', 'gt', 'lt'],
         'labtest__THCV':['gte', 'lte', 'gt', 'lt'],
         'labtest__CBDV':['gte', 'lte', 'gt', 'lt'],
+        'labtest__Total_Terpenes':['gte', 'lte', 'gt', 'lt'],    
         'cf_quantity_estimate': ['gte', 'lte', 'gt', 'lt'],
         'labtest__Total_THC':['gte', 'lte', 'gt', 'lt'],
         'labtest__Total_CBD':['gte', 'lte', 'gt', 'lt'],
