@@ -139,6 +139,10 @@ class DataFilter(FilterSet):
         items = queryset.filter(reduce(operator.or_, (Q(cf_client_code__icontains=x) for x in values)))
         return items
     
+    def cf_cultivation_type__in(self, queryset, name, values):
+        items = queryset.filter(reduce(operator.or_, (Q(cf_cultivation_type__icontains=x) for x in values)))
+        return items
+    
     def filter_cf_pesticide_summary__in(self, queryset, name, values):
         values = ['ND' if val == 'Non-Detect' else val for val in values ]
         queryset.select_related('labtest')
@@ -434,6 +438,32 @@ class InventoryClientCodeView(APIView):
                 'label': i['cf_client_code'],
                 'value': i['cf_client_code']} for i in items if i['cf_client_code'] != None]})    
 
+class InventoryCultivationTypeView(APIView):
+    """
+    Return distinct cultivation type
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Return QuerySet.
+        """
+        if request.query_params.get('cf_cultivation_type'):
+            items = Inventory.objects.filter(
+                cf_cfi_published=True,
+                cf_cultivation_type__icontains=request.query_params.get('cf_cultivation_type')
+                ).values('cf_cultivation_type').distinct()
+        else:
+            items = Inventory.objects.filter(
+                cf_cfi_published=True,
+                ).values('cf_cultivation_type').distinct()
+        return Response({
+            'status_code': 200,
+            'response': [{
+                'label': i['cf_cultivation_type'],
+                'value': i['cf_cultivation_type']} for i in items if i['cf_cultivation_type'] != None]})
+
+    
 class InventoryStatusTypeView(APIView):
     """
     Return distinct status types.
