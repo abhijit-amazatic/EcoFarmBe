@@ -76,9 +76,7 @@ class User(StatusFlagMixin,AbstractUser):
     categories = models.ManyToManyField(
         to='MemberCategory',
         related_name='member_category',
-        blank=True,
         verbose_name='Member Categories',
-
     )
     is_updated_in_crm = models.BooleanField('Is Updated In CRM', default=False)
     profile_photo = models.CharField(
