@@ -4,7 +4,7 @@ from django.contrib.admin import widgets
 from django.contrib import admin
 from django.db import models
 from django.db.models.query import QuerySet
-from django.shortcuts import HttpResponseRedirect
+from django.http.response import HttpResponseBase, HttpResponseRedirect
 from django.utils import timezone
 
 
@@ -25,7 +25,9 @@ class CustomButtonMixin:
         for button in self.custom_buttons:
             if f'_{button}' in request.POST:
                 if self.show_button(button, request, obj, change=True):
-                    getattr(self, button, lambda x, y: None)(request, obj)
+                    resp = getattr(self, button, lambda x, y: None)(request, obj)
+                    if resp and issubclass(type(resp), HttpResponseBase):
+                        return resp
                 return HttpResponseRedirect('.')
         return super().response_change(request, obj)
 
@@ -33,7 +35,9 @@ class CustomButtonMixin:
         for button in self.custom_buttons:
             if f'_{button}' in request.POST:
                 if self.show_button(button, request, obj, add=True):
-                    getattr(self, button, lambda x, y: None)(request, obj)
+                    resp = getattr(self, button, lambda x, y: None)(request, obj)
+                    if resp and issubclass(type(resp), HttpResponseBase):
+                        return resp
                 return HttpResponseRedirect('.')
         return super().response_add(request, obj, post_url_continue=post_url_continue)
 
