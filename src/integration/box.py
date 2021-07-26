@@ -100,8 +100,8 @@ def get_box_tokens():
     """
     try:
         oauth2 = get_oauth2_obj()
-        # client = Client(oauth2)
-        # user = client.user().get()
+        client = Client(oauth2)
+        client.user().get()
         return {'status': 'success', 'access_token': oauth2.access_token, 'refresh_token': oauth2._refresh_token}
     except BoxException as exc:
         return {'status_code': 'error', 'error': exc}
