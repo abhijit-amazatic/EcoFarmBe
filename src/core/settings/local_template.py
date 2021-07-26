@@ -24,6 +24,9 @@ DATABASE_ROUTERS = [
     'core.db_routers.LoggerRouter',
     # 'core.db_routers.defaultRouter',
 ]
+
+REDIS_URL = ''
+
 ALLOWED_HOSTS = []
 
 CORS_ORIGIN_REGEX_WHITELIST = (
@@ -64,6 +67,12 @@ GOOGLE_AUTH = {
 import os
 cwd = os.getcwd()
 
+# Zoho Default configuration
+ZOHO_CLIENT_ID = ''
+ZOHO_CLIENT_SECRET = ''
+ZOHO_REDIRECT_URI = ''
+
+
 #Zoho Take credential from the team.
 PYZOHO_CONFIG = {
     'apiBaseUrl':'https://www.zohoapis.com',
@@ -88,8 +97,55 @@ if DEBUG:
     PYZOHO_REFRESH_TOKEN=''
     PYZOHO_USER_IDENTIFIER=''
 
+PYZOHO_SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL,ZohoCRM.org.ALL,ZohoCRM.coql.READ'
 
-REDIS_URL = ''
+
+#Zoho Inventory configuration
+INVENTORY_CLIENT_ID=''
+INVENTORY_CLIENT_SECRET=''
+INVENTORY_REDIRECT_URI=''
+INVENTORY_SCOPE = 'ZohoInventory.fullaccess.all'
+INVENTORY_REFRESH_TOKEN=''
+INVENTORY_ORGANIZATION_ID = ''
+INVENTORY_EFD_ORGANIZATION_ID=''
+INVENTORY_EFL_ORGANIZATION_ID=''
+INVENTORY_EFN_ORGANIZATION_ID = ''
+INVENTORY_TAXES = ''
+INVENTORY_BOX_ID='118042804025'
+
+#Zoho Books configuration
+BOOKS_CLIENT_ID=''
+BOOKS_CLIENT_SECRET=''
+BOOKS_REDIRECT_URI=''
+BOOKS_SCOPE = 'ZohoBooks.fullaccess.all'
+BOOKS_REFRESH_TOKEN=''
+BOOKS_ORGANIZATION_ID=''
+BOOKS_ORGANIZATION_EFD_ID=''
+BOOKS_ORGANIZATION_EFL_ID=''
+BOOKS_ORGANIZATION_EFN_ID=''
+ESTIMATE_TAXES = {'Flower': 'Cultivation Tax - Flower (2020)', 'Trim': 'Cultivation Tax - Trim (2020)'}
+TRANSPORTATION_FEES = 'Transportation Fees'
+#BOOKS_ORGANIZATION_LIST = ['books_efd', 'books_efl', 'books_efn']
+BOOKS_ORGANIZATION_LIST = "books_efd,books_efl,books_efn"
+
+#Zoho Sign configuration
+SIGN_CLIENT_ID=''
+SIGN_CLIENT_SECRET=''
+SIGN_REDIRECT_URI=''
+SIGN_SCOPE = 'ZohoSign.documents.ALL,ZohoSign.templates.ALL'
+SIGN_REFRESH_TOKEN=''
+SIGN_HOST_URL = ''
+ESTIMATE_UPLOAD_FOLDER_ID=''
+FARM_FOLDER_ID = ''
+
+#Zoho Campaign configs
+CAMPAIGN_CLIENT_ID=''
+CAMPAIGN_CLIENT_SECRET=''
+CAMPAIGN_REDIRECT_URI=''
+CAMPAIGN_SCOPE = 'ZohoCampaigns.campaign.ALL,ZohoCampaigns.contact.ALL'
+CAMPAIGN_REFRESH_TOKEN=''
+CAMPAIGN_HTML_BUCKET=''
+
 #Box configuration get those tokens from heroku or team mate.
 BOX_CLIENT_ID=''
 BOX_CLIENT_SECRET=''
@@ -100,39 +156,6 @@ TEMP_LICENSE_FOLDER='111282192684'
 BOX_JWT_DICT = {}
 BOX_JWT_USER = ''
 
-#Zoho Inventory configuration
-INVENTORY_CLIENT_ID=''
-INVENTORY_CLIENT_SECRET=''
-INVENTORY_REFRESH_TOKEN=''
-INVENTORY_REDIRECT_URI=''
-INVENTORY_EFD_ORGANIZATION_ID=''
-INVENTORY_EFL_ORGANIZATION_ID=''
-INVENTORY_TAXES = ''
-INVENTORY_BOX_ID='118042804025'
-INVENTORY_EFN_ORGANIZATION_ID = ''
-
-#Zoho Books configuration
-BOOKS_CLIENT_ID=''
-BOOKS_CLIENT_SECRET=''
-BOOKS_ORGANIZATION_ID=''
-BOOKS_ORGANIZATION_EFD_ID=''
-BOOKS_ORGANIZATION_EFL_ID=''
-BOOKS_ORGANIZATION_EFN_ID=''
-BOOKS_REDIRECT_URI=''
-BOOKS_REFRESH_TOKEN=''
-ESTIMATE_TAXES = {'Flower': 'Cultivation Tax - Flower (2020)', 'Trim': 'Cultivation Tax - Trim (2020)'}
-TRANSPORTATION_FEES = 'Transportation Fees'
-#BOOKS_ORGANIZATION_LIST = ['books_efd', 'books_efl', 'books_efn']
-BOOKS_ORGANIZATION_LIST = "books_efd,books_efl,books_efn"
-
-#Zoho Sign configuration
-SIGN_CLIENT_ID=''
-SIGN_CLIENT_SECRET=''
-SIGN_REDIRECT_URI=''
-SIGN_REFRESH_TOKEN=''
-SIGN_HOST_URL = ''
-ESTIMATE_UPLOAD_FOLDER_ID=''
-FARM_FOLDER_ID = ''
 
 #Slack config
 SLACK_TOKEN = ''
@@ -218,13 +241,6 @@ CUSTOM_INVENTORY_WAREHOUSE_NAME = 'Test Books Organization'
 
 INVENTORY_CSV_UPLOAD_FOLDER_ID = '133586884521'
 
-#Zoho Campaign configs
-CAMPAIGN_CLIENT_ID=''
-CAMPAIGN_CLIENT_SECRET=''
-CAMPAIGN_REFRESH_TOKEN=''
-CAMPAIGN_REDIRECT_URI=''
-CAMPAIGN_HTML_BUCKET=''
-
 IS_SANDBOX = True
 ENV_PREFIX ='' #'dev-' for stag & 'prod-' for prod
 
@@ -247,4 +263,5 @@ DRF_API_LOGGER_DATABASE = True
 DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token', 'access', 'refresh', 'Token']
 DRF_API_LOGGER_DEFAULT_DATABASE = 'logger'
 
-AUTH_ADMIN_EMAILS = []
+INTEGRATION_ADMIN_EMAILS = []
+INTEGRATION_ADMIN_TOKEN_MASK = True

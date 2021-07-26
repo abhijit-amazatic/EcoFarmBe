@@ -21,6 +21,8 @@ DATABASE_ROUTERS = [
     'core.db_routers.LoggerRouter',
     # 'core.db_routers.defaultRouter',
 ]
+REDIS_URL = os.environ.get('REDIS_URL')
+
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[\"*\"]"))
 CORS_ORIGIN_REGEX_WHITELIST = json.loads(os.environ.get("CORS_ORIGIN", "[]"))
 FRONTEND_DOMAIN_NAME = os.environ.get("FRONTEND_DOMAIN_NAME")
@@ -54,28 +56,84 @@ CELERY_BROKER_POOL_LIMIT = int(os.environ.get('CELERY_BROKER_POOL_LIMIT'))
 # For persistence handler class
 # cwd = os.getcwd()
 
+# Integration Admin
+INTEGRATION_ADMIN_EMAILS = json.loads(os.environ.get("INTEGRATION_ADMIN_EMAILS", "[]"))
+INTEGRATION_ADMIN_TOKEN_MASK = os.environ.get('INTEGRATION_ADMIN_TOKEN_MASK', 'true').lower() != 'false'
+
+# Zoho Default configuration
+ZOHO_CLIENT_ID = os.environ.get('ZOHO_CLIENT_ID')
+ZOHO_CLIENT_SECRET = os.environ.get('ZOHO_CLIENT_SECRET')
+ZOHO_REDIRECT_URI = os.environ.get('ZOHO_REDIRECT_URI')
+
 PYZOHO_CONFIG = {
     'apiBaseUrl': 'https://www.zohoapis.com',
     'apiVersion': 'v2',
     'currentUserEmail': os.environ.get('PYZOHO_USER'),
     'sandbox': os.environ.get('IS_SANDBOX'),
     'applicationLogFilePath': '',
-    'client_id': os.environ.get('PYZOHO_CLIENT_ID'),
-    'client_secret': os.environ.get('PYZOHO_CLIENT_SECRET'),
-    'redirect_uri': os.environ.get('PYZOHO_REDIRECT_URL'),
+    'client_id': os.environ.get('PYZOHO_CLIENT_ID', ZOHO_CLIENT_ID),
+    'client_secret': os.environ.get('PYZOHO_CLIENT_SECRET', ZOHO_CLIENT_SECRET),
+    'redirect_uri': os.environ.get('PYZOHO_REDIRECT_URL', ZOHO_REDIRECT_URI),
     'accounts_url': os.environ.get('PYZOHO_ACCOUNT_URL'),
     # 'token_persistence_path': os.environ.get('TOKEN_PERSISTENCE_PATH'),
     # 'access_type': 'offline',
     'persistence_handler_class' : 'ZohoOAuthHandler',
     'persistence_handler_path': '/app/src/core/persist_crm_token.py'
 }
-
 # if DEBUG:
 #     PYZOHO_CONFIG['sandbox'] = 'true'
 
+PYZOHO_SCOPE = os.environ.get(
+    'PYZOHO_SCOPE',
+    'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL,ZohoCRM.org.ALL,ZohoCRM.coql.READ',
+)
 PYZOHO_REFRESH_TOKEN = os.environ.get('PYZOHO_REFRESH_TOKEN')
 PYZOHO_USER_IDENTIFIER = os.environ.get('PYZOHO_USER')
-REDIS_URL = os.environ.get('REDIS_URL')
+
+# Zoho Inventory configuration
+INVENTORY_CLIENT_ID = os.environ.get('INVENTORY_CLIENT_ID', ZOHO_CLIENT_ID)
+INVENTORY_CLIENT_SECRET = os.environ.get('INVENTORY_CLIENT_SECRET', ZOHO_CLIENT_SECRET)
+INVENTORY_REDIRECT_URI = os.environ.get('INVENTORY_REDIRECT_URI', ZOHO_REDIRECT_URI)
+INVENTORY_SCOPE = os.environ.get('INVENTORY_SCOPE', 'ZohoInventory.fullaccess.all')
+INVENTORY_REFRESH_TOKEN = os.environ.get('INVENTORY_REFRESH_TOKEN')
+INVENTORY_ORGANIZATION_ID = os.environ.get('INVENTORY_ORGANIZATION_ID')
+INVENTORY_EFD_ORGANIZATION_ID = os.environ.get('INVENTORY_EFD_ORGANIZATION_ID')
+INVENTORY_EFL_ORGANIZATION_ID = os.environ.get('INVENTORY_EFL_ORGANIZATION_ID')
+INVENTORY_EFN_ORGANIZATION_ID = os.environ.get('INVENTORY_EFN_ORGANIZATION_ID')
+INVENTORY_TAXES = os.environ.get('INVENTORY_TAXES')
+INVENTORY_BOX_ID = os.environ.get('INVENTORY_BOX_ID')
+
+# Zoho Books configuration
+BOOKS_CLIENT_ID = os.environ.get('BOOKS_CLIENT_ID', ZOHO_CLIENT_ID)
+BOOKS_CLIENT_SECRET = os.environ.get('BOOKS_CLIENT_SECRET', ZOHO_CLIENT_SECRET)
+BOOKS_REDIRECT_URI = os.environ.get('BOOKS_REDIRECT_URI', ZOHO_REDIRECT_URI)
+BOOKS_SCOPE = os.environ.get('BOOKS_SCOPE', 'ZohoBooks.fullaccess.all')
+BOOKS_REFRESH_TOKEN = os.environ.get('BOOKS_REFRESH_TOKEN')
+BOOKS_ORGANIZATION_ID = os.environ.get('BOOKS_ORGANIZATION_ID')
+BOOKS_ORGANIZATION_EFD_ID = os.environ.get('BOOKS_ORGANIZATION_EFD_ID'),
+BOOKS_ORGANIZATION_EFL_ID = os.environ.get('BOOKS_ORGANIZATION_EFL_ID'),
+BOOKS_ORGANIZATION_EFN_ID = os.environ.get('BOOKS_ORGANIZATION_EFN_ID'),
+ESTIMATE_TAXES = os.environ.get('ESTIMATE_TAXES')
+BOOKS_ORGANIZATION_LIST = os.environ.get('BOOKS_ORGANIZATION_LIST')
+
+# Zoho Sign configuration
+SIGN_CLIENT_ID = os.environ.get('SIGN_CLIENT_ID', ZOHO_CLIENT_ID)
+SIGN_CLIENT_SECRET = os.environ.get('SIGN_CLIENT_SECRET', ZOHO_CLIENT_SECRET)
+SIGN_REDIRECT_URI = os.environ.get('SIGN_REDIRECT_URI', ZOHO_REDIRECT_URI)
+SIGN_SCOPE = os.environ.get('SIGN_SCOPE', 'ZohoSign.documents.ALL,ZohoSign.templates.ALL')
+SIGN_REFRESH_TOKEN = os.environ.get('SIGN_REFRESH_TOKEN')
+SIGN_HOST_URL = os.environ.get('SIGN_HOST_URL')
+ESTIMATE_UPLOAD_FOLDER_ID = os.environ.get('ESTIMATE_UPLOAD_FOLDER_ID')
+TRANSPORTATION_FEES = os.environ.get('TRANSPORTATION_FEES')
+FARM_FOLDER_ID = os.environ.get('FARM_FOLDER_ID')
+
+#Zoho Campaign configs
+CAMPAIGN_CLIENT_ID = os.environ.get('CAMPAIGN_CLIENT_ID', ZOHO_CLIENT_ID)
+CAMPAIGN_CLIENT_SECRET = os.environ.get('CAMPAIGN_CLIENT_SECRET', ZOHO_CLIENT_SECRET)
+CAMPAIGN_REDIRECT_URI = os.environ.get('CAMPAIGN_REDIRECT_URI', ZOHO_REDIRECT_URI)
+CAMPAIGN_SCOPE = os.environ.get('CAMPAIGN_SCOPE', 'ZohoCampaigns.campaign.ALL,ZohoCampaigns.contact.ALL')
+CAMPAIGN_REFRESH_TOKEN = os.environ.get('CAMPAIGN_REFRESH_TOKEN')
+CAMPAIGN_HTML_BUCKET = os.environ.get('CAMPAIGN_HTML_BUCKET')
 
 # Box configuration
 BOX_CLIENT_ID = os.environ.get('BOX_CLIENT_ID')
@@ -86,40 +144,6 @@ LICENSE_PARENT_FOLDER_ID = os.environ.get('LICENSE_PARENT_FOLDER_ID')
 TEMP_LICENSE_FOLDER = os.environ.get('TEMP_LICENSE_FOLDER')
 BOX_JWT_DICT = os.environ.get('BOX_JWT_DICT')
 BOX_JWT_USER = os.environ.get('BOX_JWT_USER')
-
-# Zoho Inventory configuration
-INVENTORY_CLIENT_ID = os.environ.get('INVENTORY_CLIENT_ID')
-INVENTORY_CLIENT_SECRET = os.environ.get('INVENTORY_CLIENT_SECRET')
-INVENTORY_REFRESH_TOKEN = os.environ.get('INVENTORY_REFRESH_TOKEN')
-INVENTORY_REDIRECT_URI = os.environ.get('INVENTORY_REDIRECT_URI')
-INVENTORY_ORGANIZATION_ID = os.environ.get('INVENTORY_ORGANIZATION_ID')
-INVENTORY_EFD_ORGANIZATION_ID = os.environ.get('INVENTORY_EFD_ORGANIZATION_ID')
-INVENTORY_EFL_ORGANIZATION_ID = os.environ.get('INVENTORY_EFL_ORGANIZATION_ID')
-INVENTORY_TAXES = os.environ.get('INVENTORY_TAXES')
-INVENTORY_BOX_ID = os.environ.get('INVENTORY_BOX_ID')
-INVENTORY_EFN_ORGANIZATION_ID = os.environ.get('INVENTORY_EFN_ORGANIZATION_ID')
-
-# Zoho Books configuration
-BOOKS_CLIENT_ID = os.environ.get('BOOKS_CLIENT_ID')
-BOOKS_CLIENT_SECRET = os.environ.get('BOOKS_CLIENT_SECRET')
-BOOKS_ORGANIZATION_ID = os.environ.get('BOOKS_ORGANIZATION_ID')
-BOOKS_REDIRECT_URI = os.environ.get('BOOKS_REDIRECT_URI')
-BOOKS_REFRESH_TOKEN = os.environ.get('BOOKS_REFRESH_TOKEN')
-BOOKS_ORGANIZATION_EFD_ID=os.environ.get('BOOKS_ORGANIZATION_EFD_ID'),
-BOOKS_ORGANIZATION_EFL_ID=os.environ.get('BOOKS_ORGANIZATION_EFL_ID'),
-BOOKS_ORGANIZATION_EFN_ID=os.environ.get('BOOKS_ORGANIZATION_EFN_ID'),
-ESTIMATE_TAXES = os.environ.get('ESTIMATE_TAXES')
-BOOKS_ORGANIZATION_LIST = os.environ.get('BOOKS_ORGANIZATION_LIST')
-
-# Zoho Sign configuration
-SIGN_CLIENT_ID = os.environ.get('SIGN_CLIENT_ID')
-SIGN_CLIENT_SECRET = os.environ.get('SIGN_CLIENT_SECRET')
-SIGN_REDIRECT_URI = os.environ.get('SIGN_REDIRECT_URI')
-SIGN_REFRESH_TOKEN = os.environ.get('SIGN_REFRESH_TOKEN')
-SIGN_HOST_URL = os.environ.get('SIGN_HOST_URL')
-ESTIMATE_UPLOAD_FOLDER_ID = os.environ.get('ESTIMATE_UPLOAD_FOLDER_ID')
-TRANSPORTATION_FEES = os.environ.get('TRANSPORTATION_FEES')
-FARM_FOLDER_ID = os.environ.get('FARM_FOLDER_ID')
 
 # slack tokens'
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
@@ -201,12 +225,6 @@ CUSTOM_INVENTORY_WAREHOUSE_NAME = os.environ.get("CUSTOM_INVENTORY_WAREHOUSE_NAM
 
 INVENTORY_CSV_UPLOAD_FOLDER_ID = os.environ.get('INVENTORY_CSV_UPLOAD_FOLDER_ID')
 
-#Zoho Campaign configs
-CAMPAIGN_CLIENT_ID=os.environ.get('CAMPAIGN_CLIENT_ID')
-CAMPAIGN_CLIENT_SECRET=os.environ.get('CAMPAIGN_CLIENT_SECRET')
-CAMPAIGN_REFRESH_TOKEN=os.environ.get('CAMPAIGN_REFRESH_TOKEN')
-CAMPAIGN_REDIRECT_URI=os.environ.get('CAMPAIGN_REDIRECT_URI')
-CAMPAIGN_HTML_BUCKET=os.environ.get('CAMPAIGN_HTML_BUCKET')
 IS_SANDBOX = os.environ.get('IS_SANDBOX')
 ENV_PREFIX = os.environ.get('ENV_PREFIX')
 
@@ -227,5 +245,3 @@ BYPASS_VERIFICATION_FOR_EMAILS = json.loads(os.environ.get("BYPASS_VERIFICATION_
 DRF_API_LOGGER_DATABASE = True
 DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token', 'access', 'refresh', 'Token']
 DRF_API_LOGGER_DEFAULT_DATABASE = 'logger'
-
-AUTH_ADMIN_EMAILS = json.loads(os.environ.get("AUTH_ADMIN_EMAILS", "[]"))

@@ -58,6 +58,7 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
             ),
         }),
     )
+    ordering = ('name',)
 
     custom_buttons = ('generate_new_tokens',)
     custom_buttons_prop = {
@@ -75,7 +76,7 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_superuser:
-            return request.user.email in getattr(settings, 'AUTH_ADMIN_EMAILS', [])
+            return request.user.email in getattr(settings, 'INTEGRATION_ADMIN_EMAILS', [])
         return False
 
     def has_view_permission(self, request, obj=None):
@@ -151,6 +152,10 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
                                 if resp_data.get('expires_in'):
                                     expire_in_delta = timedelta(seconds=resp_data.get('expires_in'))
                                     update_data['access_expiry'] = time_now + expire_in_delta
+                                if oauth_info.get('client_id'):
+                                    update_data['client_id'] = oauth_info.get('client_id')
+                                if oauth_info.get('client_secret'):
+                                    update_data['client_secret'] = oauth_info.get('client_secret')
                     else:
                         self.message_user(request, response.text, level='error')
                 else:
@@ -198,7 +203,7 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
         )
 
     def access_token_masked(self, obj):
-        if obj.access_token:
+        if obj.access_token and settings.INTEGRATION_ADMIN_TOKEN_MASK:
             mask_len = int(len(obj.access_token)*0.9)
             return ('*'*mask_len) + obj.access_token[mask_len:]
         else:
@@ -206,7 +211,7 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
     access_token_masked.short_description = 'Access Token'
 
     def refresh_token_masked(self, obj):
-        if obj.refresh_token:
+        if obj.refresh_token and settings.INTEGRATION_ADMIN_TOKEN_MASK:
             mask_len = int(len(obj.refresh_token)*0.9)
             return ('*'*mask_len) + obj.refresh_token[mask_len:]
         else:
