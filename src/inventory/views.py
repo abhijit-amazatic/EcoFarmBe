@@ -138,6 +138,10 @@ class DataFilter(FilterSet):
     def cf_client_code__in(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cf_client_code__icontains=x) for x in values)))
         return items
+
+    def get_cultivar_type(self, queryset, name, values):
+        items = queryset.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__icontains=x) for x in values)))
+        return items
     
     def cf_cultivation_type__in(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cf_cultivation_type__icontains=x) for x in values)))
@@ -413,6 +417,25 @@ class CultivarCategoryView(APIView):
                 'label': i['cf_strain_name'],
                 'value': i['cf_strain_name']} for i in categories if i['cf_strain_name'] != None]})
 
+class CultivarTypesView(APIView):
+    """
+    Return distinct cultivar types.
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Return distinct cultivar types.
+        """
+        categories = Cultivar.objects.filter(
+                ).values('cultivar_type').distinct()
+        return Response({
+            'status_code': 200,
+            'response': [{
+                'label': i['cultivar_type'],
+                'value': i['cultivar_type']} for i in categories if i['cultivar_type'] != None]})
+    
+    
 class InventoryClientCodeView(APIView):
     """
     Return distinct client code
