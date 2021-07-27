@@ -1310,7 +1310,7 @@ def get_accounts_from_crm(legal_business_name):
         license_number = licenses['response'][0]['Name']
         account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
         if account['status_code'] != 200:
-            account_id = get_vendors_from_licenses('Account_Name_Lookup', licenses)
+            account_id = get_vendors_from_licenses('Account_Name_Lookup', licenses['response'][0])
         else:
             account = account['response'][0]['Licenses_Module']
             account_id = account['id']
