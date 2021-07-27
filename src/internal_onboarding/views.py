@@ -19,7 +19,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import (NotFound, PermissionDenied, APIException)
 from rest_framework.generics import (GenericAPIView, CreateAPIView,)
 from rest_framework.views import APIView
-from rest_framework.permissions import (AllowAny, IsAuthenticated, )
+from rest_framework.permissions import (AllowAny, IsAuthenticated, IsAdminUser)
 from rest_framework.response import Response
 # from brand.task_helpers import User
 
@@ -89,7 +89,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     User Invitation Verification View.
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAdminUser, )
     serializer_class = InternalOnboardingSerializer
 
     def create(self, request, *args, **kwargs):
