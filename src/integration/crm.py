@@ -1049,7 +1049,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
             license_db_id= i['id']
             d.update({'license_db_id': license_db_id})
             license_db = License.objects.select_related().get(id=license_db_id)
-            licenses = get_licenses(i['legal_business_name'])
+            licenses = get_licenses(i['legal_business_name'], license_db.license_number)
             d.update(license_db.license_profile.__dict__)
             try:
                 d.update(license_db.profile_contact.profile_contact_details)
@@ -1071,7 +1071,7 @@ def insert_account_record(record=None, is_update=False, id=None, is_single_user=
                     d.update({'cr.' + k:v})
             except Exception:
                 pass
-            d.update({'id':licenses[0]['id'], 'Owner':licenses[0]['Owner']['id']})
+            d.update({'id':licenses['id'], 'Owner':licenses['Owner']['id']})
             l.append(d['id'])
             d.update({'licenses': l})    
             if id and is_single_user and is_update:
