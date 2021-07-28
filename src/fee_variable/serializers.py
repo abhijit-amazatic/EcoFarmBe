@@ -16,10 +16,22 @@ class OrderVariableSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 
+class McspCharField(serializers.CharField):
+    read_only = True
+
+    def to_representation(self, value):
+        try:
+            return str(int(float(value)))
+        except:
+            return None
+
 class CustomInventoryVariableSerializer(serializers.ModelSerializer):
     """
     This defines CustomInventoryVariableVariableSerializer
     """
+    mcsp_fee = serializers.CharField(source='mcsp_fee_flowers_trims', read_only=True)
+    mcsp_fee_per_g = serializers.CharField(source='mcsp_fee_concentrates_isolates_terpenes', read_only=True)
+    mcsp_fee_per_pcs = serializers.CharField(source='mcsp_fee_clones', read_only=True)
     class Meta:
         model = CustomInventoryVariable
         fields = ('__all__')
@@ -31,8 +43,4 @@ class TaxVariableVariableSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = TaxVariable
-        fields = ('__all__')        
-
-
-        
-        
+        fields = ('__all__')

@@ -35,17 +35,26 @@ custom_inventory_variable_program_map = {
     },
 }
 
+# ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
+#     'Flowers':       mcsp_fee',
+#     'Trims':         mcsp_fee',
+#     'Isolates':     'mcsp_fee_per_g',
+#     'Concentrates': 'mcsp_fee_per_g',
+#     'Terpenes':     'mcsp_fee_per_g',
+#     'Clones':       'mcsp_fee_per_pcs',
+
 ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
-    'Flowers':       'mcsp_fee',
-    'Trims':         'mcsp_fee',
-    'Isolates':     'mcsp_fee_per_g',
-    'Concentrates': 'mcsp_fee_per_g',
-    'Terpenes':     'mcsp_fee_per_g',
-    'Clones':       'mcsp_fee_per_pcs',
+    'Flowers':      'mcsp_fee_flowers_trims',
+    'Trims':        'mcsp_fee_flowers_trims',
+    'Isolates':     'mcsp_fee_concentrates_isolates_terpenes',
+    'Concentrates': 'mcsp_fee_concentrates_isolates_terpenes',
+    'Terpenes':     'mcsp_fee_concentrates_isolates_terpenes',
+    'Clones':       'mcsp_fee_clones',
 }
+ITEM_CATEGORY_MSCP_FEE_IN_PERCENTAGE = ('Isolates', 'Concentrates', 'Terpenes')
 
 
-def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=None, request=None, no_tier_fee=True ):
+def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=None, farm_price=None, request=None, no_tier_fee=True ):
     msg_error = lambda msg: messages.error(request, msg,) if request else None
     if item_category_group and item_category_group in ITEM_CATEGORY_MSCP_FEE_VAR_MAP :
         fee_var = ITEM_CATEGORY_MSCP_FEE_VAR_MAP[item_category_group]
@@ -74,11 +83,25 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
                 InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
                 if InventoryVariable and hasattr(InventoryVariable, fee_var):
                     try:
-                        return float(getattr(InventoryVariable, fee_var))
+                        db_val = float(getattr(InventoryVariable, fee_var))
                     except ValueError:
-                        msg_error('Error while parsing tax from db.')
+                        msg_error('Error while parsing MCSP fee from db.')
                         return None
-
+                    else:
+                        if item_category_group in ITEM_CATEGORY_MSCP_FEE_IN_PERCENTAGE:
+                            if farm_price is not None:
+                                try:
+                                    fp = float(farm_price)
+                                except ValueError:
+                                    msg_error('Error while parsingfarm price for MCSP fee calculation.')
+                                    return None
+                                else:
+                                    return round((fp*db_val)/100, 2)
+                            else:
+                                msg_error('Farm price not provided for MCSP fee calculation.')
+                                return None
+                        else:
+                            return db_val
                 else:
                     program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
                     program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)

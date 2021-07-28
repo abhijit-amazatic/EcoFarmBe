@@ -68,24 +68,27 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         max_length=255,
         choices=PROGRAM_TIER_CHOICES
     )
-    mcsp_fee = models.CharField(
-        verbose_name=_("MCSP Fee (per lb)"),
-        help_text='This fee will be for Flowers and Trims',
-        max_length=255,
+    mcsp_fee_flowers_trims = models.DecimalField(
+        verbose_name=_("MCSP Fee - Flower/Trim ($/lb)"),
+        help_text='This fee will be for Flowers and Trims.',
+        decimal_places=2,
+        max_digits=6,
         blank=True,
         null=True
     )
-    mcsp_fee_per_g = models.CharField(
-        verbose_name=_("MCSP Fee (per gram)"),
-        help_text='This fee will be used for Isolates, Concentrates and Terpenes',
-        max_length=255,
+    mcsp_fee_concentrates_isolates_terpenes = models.DecimalField(
+        verbose_name=_("MCSP Fee - Concentrates/Isolates/Terpenes (%)"),
+        help_text='This percentage will be used in MCSP Fee calculation for Concentrates, Isolates and Terpenes.',
+        decimal_places=2,
+        max_digits=6,
         blank=True,
         null=True
     )
-    mcsp_fee_per_pcs = models.CharField(
-        verbose_name=_("MCSP Fee (per pcs)"),
+    mcsp_fee_clones = models.DecimalField(
+        verbose_name=_("MCSP Fee - Clones ($/pcs)"),
         help_text='This fee will be used for Clones',
-        max_length=255,
+        decimal_places=2,
+        max_digits=6,
         blank=True,
         null=True,
     )

@@ -353,7 +353,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                             self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
                 else:
                     self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
-
         return None
 
     def approve(self, request, obj):
@@ -363,6 +362,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 license_profile=obj.license_profile,
                 item_category_group=CG.get(obj.category_name),
                 request=request,
+                farm_price=obj.farm_ask_price
             )
             if isinstance(mcsp_fee, float):
                 tax = get_item_tax(
