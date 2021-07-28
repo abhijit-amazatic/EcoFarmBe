@@ -1486,6 +1486,15 @@ def parse_crm_record(module, records):
         record_list.append(record_dict)
     return record_list
 
+def update_or_create_cultivar(record):
+    qs = Cultivar.objects.filter(cultivar_crm_id=record['cultivar_crm_id'])
+    if qs.exists():
+        qs.update(**record)
+        return False
+    else:
+        obj = Cultivar.objects.create(**record)
+        return True
+
 def sync_cultivars(record):
     """
     Webhook for Zoho CRM to sync cultivars real time.
@@ -1495,11 +1504,7 @@ def sync_cultivars(record):
     record = parse_crm_record('Cultivars', [record])[0]
     record['status'] = 'approved'
     try:
-        obj, created = Cultivar.objects.update_or_create(
-            cultivar_crm_id=record['cultivar_crm_id'],
-            cultivar_name=record['cultivar_name'],
-            defaults=record)
-        return created
+        return update_or_create_cultivar(record)
     except Exception as exc:
         print(exc)
         return {}
@@ -1521,9 +1526,9 @@ def fetch_cultivars(days=1):
         page = records['info']['page'] + 1
         records = parse_crm_record('Cultivars', records['data'])
         for record in records:
+            record['status'] = 'approved'
             try:
-                obj, created = Cultivar.objects.update_or_create(
-                    cultivar_crm_id=record['cultivar_crm_id'], cultivar_name=record['cultivar_name'], defaults=record)
+                created = update_or_create_cultivar(record)
             except Exception as exc:
                 print(exc)
                 continue
