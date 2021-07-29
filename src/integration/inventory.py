@@ -770,13 +770,18 @@ def get_inventory_summary(inventory, statuses):
 def get_updated_params(params):
     """
     Update params if Array fields are present.
+    Char Fields used for multiselect filters should be included here.
     """
-    db_array_fields = ['ethics_and_certification', 'nutrients','county_grown','appellation']
+    db_array_fields = ['ethics_and_certification', 'nutrients','county_grown','appellation','cf_strain_name']
     for i in db_array_fields:
         if i in params.keys():
             val = params[i].split(',')
-            params[i+'__overlap'] = params.pop(i)
-            params[i+'__overlap'] = val
+            if i == 'cf_strain_name':
+                params[i+'__in'] = params.pop(i)
+                params[i+'__in'] = val
+            else:
+                params[i+'__overlap'] = params.pop(i)
+                params[i+'__overlap'] = val
     return params        
     
 def get_category_count(params):
