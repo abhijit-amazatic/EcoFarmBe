@@ -74,7 +74,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryWebHook,InventoryExportViewSet,InventoryCultivationTypeView,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
                              SalesReturnView, PackageView, ContactView, InventoryMetaDataView,
-                             ConvertSalesOrderToPackage,CultivarTypesView)
+                             ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -276,7 +276,8 @@ urlpatterns = [
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     path(r'inventory/county/', InventoryCountyView.as_view(), name='get-county'),
     path(r'inventory/appellation/', InventoryAppellationView.as_view(), name='get-appellation'),
-    path(r'inventory/nutrients/', InventoryNutrientsView.as_view(), name='get-nutrients'),
+    path(r'inventory/nutrients/', InventoryNutrientsView.as_view(), name='get-nutrients'),#
+    path(r'inventory/tags/', InventoryTagsView.as_view(), name='get-tags'),
     path(r'inventory/ethics-and-certification/', InventoryEthicsView.as_view(), name='get-ethics_and_certification'),
     path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
     path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),

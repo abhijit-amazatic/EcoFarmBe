@@ -85,6 +85,7 @@ class DataFilter(FilterSet):
     cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
     cf_quantity_estimate__in = CharInFilter(field_name='cf_quantity_estimate', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
+    tags = django_filters.CharFilter(method='get_tags')
     nutrients = django_filters.CharFilter(method='get_nutrients')
     ethics_and_certification = django_filters.CharFilter(method='get_ethics_and_certification')
     county_grown = django_filters.CharFilter(method='get_county_grown')
@@ -116,6 +117,10 @@ class DataFilter(FilterSet):
 
     def get_nutrients(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,nutrients__overlap=value.split(','))
+        return items
+
+    def get_tags(self, queryset, name, value):
+        items = queryset.filter(cf_cfi_published=True,tags__overlap=value.split(','))
         return items
 
     def get_ethics_and_certification(self, queryset, name, value):
@@ -819,6 +824,22 @@ class InventoryNutrientsView(APIView):
         return Response({
             'status_code': 200,
             'response':list(set([item for sublist in clean_nutrients for item in sublist]))})
+
+class InventoryTagsView(APIView):
+    """
+    Return Inventory tags
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory tags
+        """
+        tags = Inventory.objects.filter(cf_cfi_published=True).values_list('tags',flat=True).distinct()
+        clean_tags = list(filter(None,list(tags)))
+        return Response({
+            'status_code': 200,
+            'response':list(set([item for sublist in clean_tags for item in sublist]))})
     
 class InventoryEthicsView(APIView):
     """

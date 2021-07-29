@@ -123,7 +123,7 @@ class Inventory(models.Model):
     purchase_account_id = models.CharField(_('Purchase Account Id'), blank=True, null=True, max_length=100)
     inventory_account_id = models.CharField(_('Inventory Account Id'), blank=True, null=True, max_length=100)
     inventory_account_name = models.CharField(_('Inventory Account Name'), blank=True, null=True, max_length=100)
-    tags = ArrayField(models.CharField(max_length=50), blank=True, null=True)
+    tags = ArrayField(models.CharField(max_length=50), blank=True, null=True,default=list)
     available_for_sale_stock = models.FloatField(_('Available For Sale Stock'), blank=True, null=True)
     actual_available_for_sale_stock = models.FloatField(_('Actual Available For Sale Stock'), blank=True, null=True)
     actual_available_stock = models.FloatField(_('Actual Available For Sale Stock'), blank=True, null=True)
