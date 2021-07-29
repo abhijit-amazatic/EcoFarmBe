@@ -761,6 +761,7 @@ def insert_vendors(id=None, is_update=False, is_single_user=False):
                 e = ''.join(traceback.format_exception(*exc_info))
                 final_dict['exception'] = e
             final_list[record.id] = final_dict
+            record.refresh_from_db()
             record.crm_output = {'output': final_dict}
             record.save()
         return final_list
@@ -1296,6 +1297,7 @@ def insert_accounts(id=None, is_update=False, is_single_user=False):
                 e = ''.join(traceback.format_exception(*exc_info))
                 final_dict['exception'] = e
             final_list[record.id] = final_dict
+            record.refresh_from_db()
             record.crm_output = {'output': final_dict}
             record.save()
         return final_list
