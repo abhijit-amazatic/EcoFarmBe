@@ -28,10 +28,15 @@ class PageMetaView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            url = request.query_params.get('url')
+            url = request.query_params.get('url', '')
             if not url:
                 return Response({"detail": "Query parameter 'url' is required"}, status=400)
-            instance = PageMeta.objects.get(page_url=url)
+            url = url.strip()
+            if not url.startswith('/'):
+                url = '/' + url
+            if not url.endswith('/'):
+                url = url + '/'
+            instance = PageMeta.objects.get(page_url__iexact=url)
         except PageMeta.DoesNotExist:
             return Response({"detail": "Meta not found for this url"}, status=404)
         except Exception as exc:
