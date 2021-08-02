@@ -40,7 +40,7 @@
                         <tr>
                             <th scope="col">{% trans 'Date/time' %}</th>
                             <th scope="col">{% trans 'IP Address' %}</th>
-                            <th scope="col">{% trans 'User Agent' %}</th>
+                            {% comment %} <th scope="col">{% trans 'User Agent' %}</th> {% endcomment %}
                             <th scope="col">{% trans 'Path' %}</th>
                             {% comment %} <th scope="col">{% trans 'Deleted Objects' %}</th> {% endcomment %}
                             {% comment %} <th scope="col">{% trans 'Created Objects' %}</th> {% endcomment %}
@@ -53,7 +53,7 @@
                             <tr>
                                 <th scope="row"><a href="{{action.url}}">{{action.revision.date_created|date:"DATETIME_FORMAT"}}</a></th>
                                 <td>{{action.revision.reversion_meta.ip_address|default:""}}</td>
-                                <td>{{action.revision.reversion_meta.user_agent|default:""}}</td>
+                                {% comment %} <td>{{action.revision.reversion_meta.user_agent|default:""}}</td> {% endcomment %}
                                 <td>{{action.revision.reversion_meta.path|default:""}}</td>
                                 {% comment %} <td>{{action.revision.reversion_meta.deleted_objects|default:""}}</td> {% endcomment %}
                                 {% comment %} <td>{{action.revision.reversion_meta.created_objects|default:""}}</td> {% endcomment %}
@@ -65,7 +65,7 @@
                                         &mdash;
                                     {% endif %}
                                 </td>
-                                <td>{{action.revision.get_comment|safe|linebreaksbr|truncatewords_html:10|default:""}}</td>
+                                <td>{{action.revision.get_comment|safe|linebreaksbr|truncatewords_html:100|default:""}}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
