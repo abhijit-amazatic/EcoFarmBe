@@ -527,7 +527,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                         'premises_county': "N/A" if not hasattr(license, 'premises_county') else license.premises_county,
                         'zip_code': "N/A" if not hasattr(license, 'zip_code') else license.zip_code,
                         'premises_apn': "N/A" if not hasattr(license, 'premises_apn') else license.premises_apn,
-                        'resale_certificate_url': "N/A" if not hasattr(license, 'resale_certificate_url') else license.resale_certificate_url,
+                        'uploaded_resale_certificate_to': "N/A" if not hasattr(license, 'uploaded_resale_certificate_to') else license.uploaded_resale_certificate_to,
                         'premises_state': "N/A" if not hasattr(license, 'premises_state') else license.premises_state,
                         'uploaded_license_to': "N/A" if not hasattr(license, 'uploaded_license_to') else license.uploaded_license_to,
                         'uploaded_sellers_permit_to': "N/A" if not hasattr(license, 'uploaded_sellers_permit_to') else license.uploaded_sellers_permit_to,
@@ -536,6 +536,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                         'profile_category': "N/A" if not hasattr(license, 'profile_category') else license.profile_category,
                         'license_url': license_data.get('license_url'),
                         'seller_permit_url': license_data.get('seller_permit_url'),
+                        'resale_certificate_url':license_data.get('resale_certificate_url'),
                         'license_profile_url': license_data.get('license_profile_url'),
                     }
                 })

@@ -170,6 +170,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
     """
     license_url = serializers.SerializerMethodField()
     seller_permit_url = serializers.SerializerMethodField()
+    resale_certificate_url = serializers.SerializerMethodField()
     license_profile_url = serializers.SerializerMethodField()
     is_existing_user = serializers.SerializerMethodField()
     approved_on = serializers.SerializerMethodField()
@@ -239,6 +240,22 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                     return url.get('response')
         except Exception:
             return None
+
+    def get_resale_certificate_url(self, obj):
+        """
+        Return s3 resale certificate url.
+        """
+        try:
+            resale = Documents.objects.filter(object_id=obj.id, doc_type='resale-certificate').latest('created_on')
+            if resale.box_url:
+                return resale.box_url
+            else:
+                path = resale.path
+                url = create_presigned_url(AWS_BUCKET, path)
+                if url.get('response'):
+                    return url.get('response')
+        except Exception:
+            return None    
 
     def validate(self, attrs):
         if self.context['view'].action == 'create':
