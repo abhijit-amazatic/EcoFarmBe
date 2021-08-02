@@ -204,6 +204,8 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         _('Premises APN'), blank=True, null=True, max_length=255)
     premises_state = models.CharField(
         _('Premises State'), blank=True, null=True, max_length=255)
+    resale_certificate_url = models.CharField(
+        _('Resale Certificate Url'), blank=True, null=True, max_length=255)
     uploaded_license_to = models.CharField(
         _('Uploaded To'), blank=True, null=True, max_length=255)
     uploaded_sellers_permit_to = models.CharField(
@@ -479,8 +481,8 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     appellation = models.CharField(_('Appellation'), blank=True, null=True, max_length=255)
     region = models.CharField(_('Region'), blank=True, null=True, max_length=255)
     ethics_and_certification = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    product_of_interest = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
-    cultivars_of_interest = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
+    product_of_interest = ArrayField(models.CharField(max_length=255, blank=True, null=True),blank=True, null=True, default=list)
+    cultivars_of_interest = ArrayField(models.CharField(max_length=255, blank=True, null=True),blank=True, null=True, default=list)
     about = models.TextField(blank=True, null=True)
     other_distributors = models.CharField(blank=True, null=True, max_length=255)
     transportation = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)

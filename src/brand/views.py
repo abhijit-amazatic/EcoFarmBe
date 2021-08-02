@@ -527,6 +527,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                         'premises_county': "N/A" if not hasattr(license, 'premises_county') else license.premises_county,
                         'zip_code': "N/A" if not hasattr(license, 'zip_code') else license.zip_code,
                         'premises_apn': "N/A" if not hasattr(license, 'premises_apn') else license.premises_apn,
+                        'resale_certificate_url': "N/A" if not hasattr(license, 'resale_certificate_url') else license.resale_certificate_url,
                         'premises_state': "N/A" if not hasattr(license, 'premises_state') else license.premises_state,
                         'uploaded_license_to': "N/A" if not hasattr(license, 'uploaded_license_to') else license.uploaded_license_to,
                         'uploaded_sellers_permit_to': "N/A" if not hasattr(license, 'uploaded_sellers_permit_to') else license.uploaded_sellers_permit_to,
