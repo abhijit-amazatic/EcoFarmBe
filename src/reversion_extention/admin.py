@@ -247,21 +247,22 @@ class VersionAdmin(admin.ModelAdmin):
         object_id = unquote(object_id)  # Underscores in primary key get quoted to "_5F"
         # version = get_object_or_404(Version, pk=version_id, object_id=object_id)        
         obj_main = get_object_or_404(self.model, pk=object_id)
-        version = get_object_or_404(Version, pk=version_id,)
+        # version = get_object_or_404(Version, pk=version_id,)
+        revision = get_object_or_404(Revision, pk=version_id,)
 
         context = {
-            "title": _("Revert %(name)s") % {"name": version.object_repr},
+            "title": _("Revert %(name)s") % {"name": str(revision.pk)},
             "revert": True,
             "parent_object_id": object_id,
             "parent_opts": self.model._meta,
-            "Parent_name":str(obj_main) or str(version.revision)
+            "Parent_name":str(obj_main) or str(revision)
 
         }
         context.update(extra_context or {})
         # admin_obj = RevisionAdmin(model=version.revision.__class__, admin_site=self.admin_site.name)
         admin_obj = admin.site._registry[Revision]
         # admin_obj = reversion_admin
-        response = admin_obj.changeform_view(request, quote(str(version.revision.pk)), request.path, context)
+        response = admin_obj.changeform_view(request, quote(str(revision.pk)), request.path, context)
         # response = self.changeform_view(request, quote(version.object_id), request.path, context)
         response.template_name = self.revision_form_template
         response.render()  #
@@ -301,16 +302,17 @@ class VersionAdmin(admin.ModelAdmin):
         #     for version
         #     in self._reversion_order_version_queryset(Version.objects.filter(q).select_related("revision__user").select_related("revision__reversion_meta"))
         # ]
+        revision_ids = Version.objects.filter(q).values_list('revision_id', flat=True).distinct()
         action_list = [
             {
-                "revision": version.revision,
+                "revision": revision,
                 "url": reverse(
                     "%s:%s_%s_revision" % (self.admin_site.name, opts.app_label, opts.model_name),
-                    args=(quote(object_id), version.id)
+                    args=(quote(object_id), revision.id)
                 ),
             }
-            for version
-            in self._reversion_order_version_queryset(Version.objects.filter(q).select_related("revision__user").select_related("revision__reversion_meta"))
+            for revision
+            in self._reversion_order_version_queryset(Revision.objects.filter(id__in=revision_ids).select_related("user").select_related("reversion_meta"))
         ]
         # Compile the context.
         context = {"action_list": action_list}
