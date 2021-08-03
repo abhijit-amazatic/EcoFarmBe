@@ -7,13 +7,13 @@
         type: organizational
         description: ''
         group: 1
--   model: permission.permission
-    pk: add_organization
-    fields:
-        name: Add Organization
-        type: organizational
-        description: ''
-        group: 1
+# -   model: permission.permission
+#     pk: add_organization
+#     fields:
+#         name: Add Organization
+#         type: organizational
+#         description: ''
+#         group: 1
 -   model: permission.permission
     pk: edit_organization
     fields:
@@ -128,35 +128,35 @@
 
 
 
-# Organization User Role
--   model: permission.permission
-    pk: view_organization_user_role
-    fields:
-        name: View Organization User Role
-        type: organizational
-        description: ''
-        group: 1
--   model: permission.permission
-    pk: add_organization_user_role
-    fields:
-        name: Add Organization User Role
-        type: organizational
-        description: ''
-        group: 1
--   model: permission.permission
-    pk: edit_organization_user_role
-    fields:
-        name: Edit Organization User Role
-        type: organizational
-        description: ''
-        group: 1
--   model: permission.permission
-    pk: delete_organization_user_role
-    fields:
-        name: Delete Organization User Role
-        type: organizational
-        description: ''
-        group: 1
+# # Organization User Role
+# -   model: permission.permission
+#     pk: view_organization_user_role
+#     fields:
+#         name: View Organization User Role
+#         type: organizational
+#         description: ''
+#         group: 1
+# -   model: permission.permission
+#     pk: add_organization_user_role
+#     fields:
+#         name: Add Organization User Role
+#         type: organizational
+#         description: ''
+#         group: 1
+# -   model: permission.permission
+#     pk: edit_organization_user_role
+#     fields:
+#         name: Edit Organization User Role
+#         type: organizational
+#         description: ''
+#         group: 1
+# -   model: permission.permission
+#     pk: delete_organization_user_role
+#     fields:
+#         name: Delete Organization User Role
+#         type: organizational
+#         description: ''
+#         group: 1
 
 
 # Invite User To Organization
@@ -167,6 +167,36 @@
         type: organizational
         description: ''
         group: 1
+
+-   model: permission.permission
+    pk: view_organization_invite
+    fields:
+        name: View Organization Invites
+        type: organizational
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: send_organization_invite
+    fields:
+        name: Send Organization Invites
+        type: organizational
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: resend_organization_invite
+    fields:
+        name: Resend Organization Invites
+        type: organizational
+        description: ''
+        group: 1
+-   model: permission.permission
+    pk: delete_organization_invite
+    fields:
+        name: Delete Organization Invites
+        type: organizational
+        description: ''
+        group: 1
+
 
 
 

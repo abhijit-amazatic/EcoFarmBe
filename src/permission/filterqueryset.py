@@ -88,3 +88,15 @@ class filterQuerySet:
         q |= Q(organization__created_by=self.user)
         q |= Q(organization_user_role__role__permissions='view_organization_user')
         return self.queryset.filter(q).distinct()
+
+    def brand_organizationuserinvite(self):
+        for role in self.user.internal_roles.all():
+            if role.permissions.filter(id='view_organization_invite').exists():
+                return self.queryset
+        q = Q()
+        q |= Q(organization__created_by=self.user)
+        q |= Q(
+            organization__organization_user__user=self.user,
+            organization__organization_user__organization_user_role__role__permissions='view_organization_invite',
+        )
+        return self.queryset.filter(q).distinct()

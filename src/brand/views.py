@@ -103,6 +103,7 @@ from .views_permissions import (
     OrganizationRoleViewSetPermission,
     OrganizationUserViewSetPermission,
     OrganizationUserRoleViewSetPermission,
+    OrganizationInvitePermission,
 )
 
 from utils import (reverse_admin_change_path,)
@@ -709,7 +710,7 @@ class InviteUserViewSet(NestedViewSetMixin,
     Invite User view
     """
     queryset=OrganizationUserInvite.objects.all()
-    permission_classes = (IsAuthenticatedBrandPermission, )
+    permission_classes = (IsAuthenticated, OrganizationInvitePermission)
     serializer_class = InviteUserSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status',]
@@ -726,6 +727,7 @@ class InviteUserViewSet(NestedViewSetMixin,
         url_name='resend-invitation',
         url_path='resend',
         serializer_class=serializers.Serializer,
+        permission_classes=(IsAuthenticated, OrganizationInvitePermission),
     )
     def resend_invitation(self, request, pk, *args, **kwargs):
         """

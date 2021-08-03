@@ -143,18 +143,40 @@ class OrganizationUserViewSetPermission(ViewPermission):
 class OrganizationUserRoleViewSetPermission(ViewPermission):
     action_perm_map = {
         'retrieve': {
-            'get': 'view_organization_user_role',
+            'get': 'view_organization_user',
         },
         'create': {
-            'post': 'add_organization_user_role',
+            'post': 'send_organization_invite',
         },
         'update': {
-            'put': 'edit_organization_user_role',
+            'put': 'edit_organization_user',
         },
         'partial_update': {
-            'patch': 'edit_organization_user_role',
+            'patch': 'edit_organization_user',
         },
         'destroy': {
-            'delete':'delete_organization_user_role',
+            'delete':'delete_organization_user',
+        },
+    }
+
+class OrganizationInvitePermission(ViewPermission):
+    action_perm_map = {
+        'retrieve': {
+            'get': 'view_organization_invite',
+        },
+        'create': {
+            'post': 'add_organization_user',
+        },
+        'update': {
+            'put': False,
+        },
+        'partial_update': {
+            'patch': False,
+        },
+        'destroy': {
+            'delete':'delete_organization_invite',
+        },
+        'resend_invitation': {
+            'post':'resend_organization_invite',
         },
     }
