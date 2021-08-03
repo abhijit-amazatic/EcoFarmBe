@@ -53,6 +53,7 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'cultivar',
             'labtest',
             'cf_date_available',
+            'tags',
             'thumbnail_url')
         
 class ItemFeedbackSerializer(serializers.ModelSerializer):
