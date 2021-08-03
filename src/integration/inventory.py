@@ -772,7 +772,7 @@ def get_updated_params(params):
     Update params if Array fields are present.
     Char Fields used for multiselect filters should be included here.
     """
-    db_array_fields = ['ethics_and_certification', 'nutrients','county_grown','appellation','cf_strain_name']
+    db_array_fields = ['ethics_and_certification', 'nutrients','tags','county_grown','appellation','cf_strain_name']
     for i in db_array_fields:
         if i in params.keys():
             val = params[i].split(',')
