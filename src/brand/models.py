@@ -204,8 +204,6 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         _('Premises APN'), blank=True, null=True, max_length=255)
     premises_state = models.CharField(
         _('Premises State'), blank=True, null=True, max_length=255)
-    uploaded_resale_certificate_to = models.CharField(
-        _('Resale Certificate Url'), blank=True, null=True, max_length=255)
     uploaded_license_to = models.CharField(
         _('Uploaded To'), blank=True, null=True, max_length=255)
     uploaded_sellers_permit_to = models.CharField(

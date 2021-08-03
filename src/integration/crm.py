@@ -827,26 +827,6 @@ def update_license(dba, license=None, license_id=None):
             print('Error in update license', exc)
             pass
     # documents = create_folder(new_folder, 'documents')
-    if not license.get('uploaded_resale_certificate_to') or license_id:
-        try:
-            resale_certificate_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='resale-certificate').first()
-            resale_certificate_to_path = resale_certificate_to.path
-            aws_bucket = AWS_BUCKET
-            box_file = upload_file_s3_to_box(aws_bucket, resale_certificate_to_path)
-            if isinstance(box_file, str):
-                file_id = box_file
-            else:
-                file_id = box_file.id
-            moved_file = move_file(file_id, license_folder)
-            resale_certificate_url = get_shared_link(file_id)
-            if resale_certificate_url:
-                license['uploaded_resale_certificate_to'] = resale_certificate_url + "?id=" + moved_file.id
-                resale_certificate_to.box_url = resale_certificate_url
-                resale_certificate_to.box_id = moved_file.id
-                resale_certificate_to.save()
-        except Exception as exc:
-            print('Error in updating resale certificate', exc)
-            pass
     if not license.get('uploaded_sellers_permit_to') or license_id:
         try:
             seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
@@ -870,7 +850,6 @@ def update_license(dba, license=None, license_id=None):
     license_obj = License.objects.filter(pk=license['license_db_id']).update(
         uploaded_license_to=license.get('uploaded_license_to'),
         uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
-        uploaded_resale_certificate_to=license.get('uploaded_resale_certificate_to'),
         is_notified_before_expiry=False
     )
     data.append(license)
