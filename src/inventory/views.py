@@ -2,12 +2,14 @@
 Views for Inventory
 """
 import operator
+from datetime import datetime, timedelta
 from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
 from functools import reduce
 import django_filters
 from django.shortcuts import (render, )
-from django.db.models import (Sum, F, Min, Max, Avg, Q)
+from django.db.models import (Sum, F, Min, Max, Avg, Q, Func)
+from django.utils import  timezone
 from rest_framework.views import APIView
 from rest_framework.viewsets import (GenericViewSet, mixins)
 from rest_framework.response import (Response, )
@@ -110,7 +112,7 @@ class DataFilter(FilterSet):
     labtest__Box_Link__in = CharInFilter(field_name='labtest__Box_Link', lookup_expr='in')
     actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
     pre_tax_price = CharInFilter(field_name='pre_tax_price', lookup_expr='in')
-
+    
     def get_cultivars(self, queryset, name, value):
         items = queryset.filter(
             cf_strain_name__icontains=value).filter(cf_cfi_published=True)
@@ -119,7 +121,7 @@ class DataFilter(FilterSet):
     def get_nutrients(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,nutrients__overlap=value.split(','))
         return items
-
+    
     def get_tags(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,tags__overlap=value.split(','))
         return items

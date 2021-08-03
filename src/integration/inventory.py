@@ -1,4 +1,6 @@
 import json
+import operator
+from functools import reduce
 from datetime import (datetime, timedelta)
 from io import BytesIO
 from urllib.parse import (unquote, )
@@ -799,7 +801,14 @@ def get_category_count(params):
     }
     params['cf_cfi_published'] = True
     updated_params = get_updated_params(params)
+    strain_list = []
+    #Adjustments as of want to filter icontains & in to cf_strain_name
+    if 'cf_strain_name__in' in updated_params.keys():
+        strain_list.extend(updated_params['cf_strain_name__in'])
+        updated_params.pop('cf_strain_name__in')
     inventory = InventoryModel.objects.filter(**updated_params)
+    if strain_list:
+        inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response
