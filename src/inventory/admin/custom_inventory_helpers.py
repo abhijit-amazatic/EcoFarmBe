@@ -55,6 +55,9 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
         if obj.cultivar.cultivar_type:
             data['cf_cultivar_type'] = obj.cultivar.cultivar_type
 
+        if obj.cultivation_type:
+            data['cf_cultivation_type'] = obj.cultivation_type
+
         if obj.batch_availability_date:
             data['cf_date_available'] = str(obj.batch_availability_date)
 
