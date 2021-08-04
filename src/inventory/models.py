@@ -397,21 +397,21 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     )
 
     CATEGORY_NAME_CHOICES = (
-        ('Wholesale - Flower', _('Wholesale - Flower')),
-        ('In the Field', _('In the Field')),
+        # ('Wholesale - Flower', _('Wholesale - Flower')),
+        # ('In the Field', _('In the Field')),
         ('Flower - Tops', _('Flower - Tops')),
-        ('Flower - Bucked Untrimmed', _('Flower - Bucked Untrimmed')),
-        ('Flower - Bucked Untrimmed - Seeded', _('Flower - Bucked Untrimmed - Seeded')),
-        ('Flower - Bucked Untrimmed - Contaminated', _('Flower - Bucked Untrimmed - Contaminated')),
+        # ('Flower - Bucked Untrimmed', _('Flower - Bucked Untrimmed')),
+        # ('Flower - Bucked Untrimmed - Seeded', _('Flower - Bucked Untrimmed - Seeded')),
+        # ('Flower - Bucked Untrimmed - Contaminated', _('Flower - Bucked Untrimmed - Contaminated')),
         ('Flower - Small', _('Flower - Small')),
         ('Trim', _('Trim')),
-        ('Packaged Goods', _('Packaged Goods')),
-        ('Isolates', _('Isolates')),
+        # ('Packaged Goods', _('Packaged Goods')),
+        # ('Isolates', _('Isolates')),
         ('Isolates - CBD', _('Isolates - CBD')),
         ('Isolates - THC', _('Isolates - THC')),
         ('Isolates - CBG', _('Isolates - CBG')),
         ('Isolates - CBN', _('Isolates - CBN')),
-        ('Wholesale - Concentrates', _('Wholesale - Concentrates')),
+        # ('Wholesale - Concentrates', _('Wholesale - Concentrates')),
         ('Crude Oil', _('Crude Oil')),
         ('Crude Oil - THC', _('Crude Oil - THC')),
         ('Crude Oil - CBD', _('Crude Oil - CBD')),
@@ -422,14 +422,14 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Sauce', _('Sauce')),
         ('Crumble', _('Crumble')),
         ('Kief', _('Kief')),
-        ('Lab Testing', _('Lab Testing')),
-        ('Terpenes', _('Terpenes')),
+        # ('Lab Testing', _('Lab Testing')),
+        # ('Terpenes', _('Terpenes')),
         ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
         ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
-        ('Services', _('Services')),
-        ('QC', _('QC')),
-        ('Transport', _('Transport')),
-        ('Secure Cash Handling', _('Secure Cash Handling')),
+        # ('Services', _('Services')),
+        # ('QC', _('QC')),
+        # ('Transport', _('Transport')),
+        # ('Secure Cash Handling', _('Secure Cash Handling')),
         ('Clones', _('Clones')),
     )
 
@@ -452,7 +452,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivation_type = models.CharField(_('Cultivation Type'), blank=True, null=True, max_length=255)
-    category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, null=True, max_length=225)
+    category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, max_length=225)
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
     harvest_date = models.DateField(_('Harvest/Manufacturing/Clone Date'), auto_now=False, blank=True, null=True, default=None)
