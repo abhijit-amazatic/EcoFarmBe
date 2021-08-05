@@ -1,6 +1,7 @@
 from django.contrib import messages
 
 from fee_variable.models import (TaxVariable, )
+from .models import InTransitOrder
 from .data import (CG, )
 
 
@@ -57,3 +58,13 @@ def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None
 
     msg_error('No Cultivar Tax found.')
     return None
+
+
+def delete_in_transit_item(estimate_id):
+    """
+    Remove item from InTransitOrder
+    """
+    transit_orders = InTransitOrder.objects.filter(order_data__estimate_id=estimate_id)
+    if transit_orders:
+        transit_orders.delete()
+        

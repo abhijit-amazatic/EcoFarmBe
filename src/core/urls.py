@@ -74,7 +74,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryWebHook,InventoryExportViewSet,InventoryCultivationTypeView,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
                              SalesReturnView, PackageView, ContactView, InventoryMetaDataView,
-                             ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView)
+                             ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView, InTransitDeleteSyncView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -307,6 +307,7 @@ urlpatterns = [
     path(r'books/estimate/convert/invoice/', ConvertEstimateToInvoice.as_view(), name="convert-estimate-to-invoice"),
     path(r'books/sales-order/convert/purchase-order/', ConvertSalesOrderToPurchaseOrder.as_view(), name="convert-so-to-po"),
     path(r'inventory/sales-order/convert/package/', ConvertSalesOrderToPackage.as_view(), name="convert-so-to-package"),
+    path(r'intransit/sync/', InTransitDeleteSyncView.as_view(), name="intransit-delete-sync"),
     path(r'books/permission/', ZohoPermissionsView.as_view(), name="zoho-permission"),
     path(r'seo/page-meta/', PageMetaView.as_view(), name="page-meta"),
     path(r'bot/', ChatbotView.as_view(), name="chat-bot"),

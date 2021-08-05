@@ -65,6 +65,7 @@ from .tasks import (
     notify_inventory_item_delist_submitted_task,
 )
 from integration.books import (get_salesorder, parse_book_object)
+from .utils import delete_in_transit_item
 
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -1202,3 +1203,22 @@ class ConvertSalesOrderToPackage(APIView):
                 return Response(package, status=status.HTTP_400_BAD_REQUEST)
             return Response(package)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InTransitDeleteSyncView(APIView):
+    """
+    Removes Intransit items.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def post(self, request):
+        """
+        Remove intransit items
+        """
+        estimate_id = request.data.get('estimate_id')
+        if estimate_id:
+            delete_in_transit_item(estimate_id)
+            return Response({"In Transit order item removed successfully for estimate_id %s " % estimate_id},status=status.HTTP_200_OK)
+        return Response({"Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)        
+
+    
