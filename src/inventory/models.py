@@ -524,11 +524,10 @@ class InTransitOrder(TimeStampFlagModelMixin, models.Model):
     In-transit order details.
     """
     user = models.ForeignKey(User, verbose_name=_('User'), related_name='in_transit_order', on_delete=models.CASCADE,null=True,blank=True)
-    profile_id = models.IntegerField(_('profile_id'), null=False, blank=False)
+    profile_id = models.IntegerField(_('profile_id'), null=False, blank=False, unique=True)
     order_data = JSONField(null=False, blank=False, default=dict)
 
     class Meta:
-        unique_together = (('user', 'profile_id'), )
         verbose_name = _('In Transit order')
         verbose_name_plural = _('In Transit orders')
     

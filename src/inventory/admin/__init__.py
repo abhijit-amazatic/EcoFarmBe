@@ -223,7 +223,7 @@ class InTransitOrderAdmin(admin.ModelAdmin):
     """
     model = InTransitOrder
     search_fields = ('user__email',)
-    list_display = ('user','profile','created_on',)
+    list_display = ('user','profile_id', 'profile','created_on',)
     ordering = ('-created_on',)
     readonly_fields = ('profile_id',)
     form = InTransitForm
