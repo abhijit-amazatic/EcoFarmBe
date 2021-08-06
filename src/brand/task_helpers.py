@@ -20,24 +20,25 @@ class ErrorDataNotFound(Exception):
 class ErrorNoAssociationFound(Exception):
     pass
 
+ROLE_MAP = {
+    "Owner":                "License Owner",
+    "Cultivation Manager":  "Farm Manager",
+    "Sales Manager":        "Sales/Inventory",
+    "Logistics Manager":    "Logistics",
+    "Billing / Accounting": "Billing",
+}
+
+
 def extract_map_role(data, existing_roles):
-    role_map = {
-        "Owner":"License Owner",
-        "Cultivation Manager":"Farm Manager",
-        "Sales Manager":"Sales/Inventory",
-        "Logistics Manager":"Logistics",
-        "Billing / Accounting":"Billing",
-    }
-    updated_roles = [role_map.get(r, r) for r in data]
+    updated_roles = [ROLE_MAP.get(r, r) for r in data]
     return  [r for r in updated_roles if r in existing_roles] or ['Employee']
 
-def get_employee(data_l_p, existing_roles):
+def get_employee(employees_list, existing_roles):
     """
     structure employee according to db format & insert empty data also.
     (currently inserted empty contacts)
     """
     tmp_data = []
-    employees_list = data_l_p.get('employees')
     if employees_list:
         for employee in employees_list:
             tmp_data.append({
@@ -77,7 +78,13 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
         if data:
         # for license_number, data in response_data.items():
             data_l = data.get('license', {})
-            data_l_p = data.get('license_profile', {})
+            # data_l_p = data.get('license_profile', {})
+            data_v = data.get('vendor', {})
+            data_a = data.get('account', {})
+            get_a = lambda field, default='': data_a.get(field) or default
+            get_v = lambda field, default='': data_v.get(field) or default
+            get_a_v = lambda field, default='': data_a.get(field) or data_v.get(field) or default
+
             print(f'Inserting data for:-> {license_number}')
             with transaction.atomic():
                 #STEP1:insert/create license
@@ -111,32 +118,36 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
             with transaction.atomic():
                 #STEP2:create License profile
                 print('2.Inserting License profile')
-                data_l_p__owner = data_l_p.get('Owner') or {}
-                LicenseProfile.objects.create(
-                    license=license_obj,
-                    zoho_crm_id=data_l_p.get('profile_id', ''),
-                    name=data_l_p.get('name', ''),
-                    appellation=data_l_p.get('appellation', ''),
-                    county=data_l_p.get('county', ''),
-                    region=data_l_p.get('region', ''),
-                    ethics_and_certification=data_l_p.get('ethics_and_certifications', []),
-                    cultivars_of_interest=data_l_p.get('cultivars_of_interest', []),
-                    about=data_l_p.get('about', ''),
-                    product_of_interest=data_l_p.get('product_of_interest', []),
-                    transportation=data_l_p.get('transportation_methods', None),
-                    issues_with_failed_labtest=data_l_p.get('issues_with_failed_labtest', ''),
-                    lab_test_issues=data_l_p.get('lab_test_issues', ''),
-                    agreement_link=data_l_p.get('Contract_Box_Link', ''),
-                    preferred_payment=data_l_p.get('preferred_payment', []),
-                    bank_routing_number=data_l_p.get('bank_routing_number', ''),
-                    bank_account_number=data_l_p.get('bank_account_number', ''),
-                    bank_name=data_l_p.get('bank_name', ''),
-                    bank_street=data_l_p.get('bank_street', ''),
-                    bank_city=data_l_p.get('bank_city', ''),
-                    bank_zip_code=data_l_p.get('bank_zip_code', ''),
-                    crm_owner_id=data_l_p__owner.get('id', ''),
-                    crm_owner_email=data_l_p__owner.get('email', ''),
-                )
+                data_v__owner = data_a.get('Owner') or {}
+                data_a__owner = data_v.get('Owner') or {}
+                LicenseProfile.objects.create(**{
+                    'license': license_obj,
+                    'name':                       get_a('name'),
+                    'appellation':                get_a_v('appellation'),
+                    'county':                     get_a_v('county'),
+                    'region':                     get_a_v('region'),
+                    'ethics_and_certification':   get_a_v('ethics_and_certifications', []),
+                    'cultivars_of_interest':      get_a_v('cultivars_of_interest', []),
+                    'about':                      get_a_v('about', ''),
+                    'product_of_interest':        get_a_v('product_of_interest', []),
+                    'transportation':             get_a_v('transportation_methods', None),
+                    'issues_with_failed_labtest': get_a_v('issues_with_failed_labtest'),
+                    'lab_test_issues':            get_a_v('lab_test_issues'),
+                    'agreement_link':             get_a_v('Contract_Box_Link'),
+                    'preferred_payment':          get_a_v('preferred_payment', []),
+                    'bank_routing_number':        get_a_v('bank_routing_number'),
+                    'bank_account_number':        get_a_v('bank_account_number'),
+                    'bank_name':                  get_a_v('bank_name'),
+                    'bank_street':                get_a_v('bank_street'),
+                    'bank_city':                  get_a_v('bank_city'),
+                    'bank_zip_code':              get_a_v('bank_zip_code'),
+                    'zoho_crm_vendor_id':         data_v.get('profile_id'),
+                    'crm_vendor_owner_id':        data_v__owner.get('id'),
+                    'crm_vendor_owner_email':     data_v__owner.get('email'),
+                    'zoho_crm_account_id':        data_a.get('profile_id'),
+                    'crm_account_owner_id':       data_a__owner.get('id'),
+                    'crm_account_owner_email':    data_a__owner.get('email'),
+                })
 
             with transaction.atomic():
                 #STEP3:create profile contact
@@ -145,35 +156,34 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     OrganizationRole.objects.filter(organization=license_obj.organization).values_list('name', flat=True)
                 )
                 formatted_data = {
-                    "company_email":data_l_p.get('company_email', ''),
-                    "company_phone":data_l_p.get('company_phone', ''),
-                    "website":data_l_p.get('website', ''),
-                    "instagram":data_l_p.get('instagram', ''),
-                    "facebook":data_l_p.get('facebook', ''),
-                    "linkedin":data_l_p.get('linkedIn', ''),
-                    "twitter":data_l_p.get('twitter', ''),
-                    "no_of_employees":data_l_p.get('no_of_employees', ''),
-                    "mailing_address":get_address(
-                        data_l_p.get('name', ''),
-                        data_l_p.get('mailing_address_street', ''),
-                        data_l_p.get('mailing_address_street_line_2', ''),
-                        data_l_p.get('mailing_address_city', ''),
-                        data_l_p.get('mailing_address_zip_code', ''),
-                        data_l_p.get('mailing_address_state', ''),
-                        data_l_p.get('mailing_address_country', ''),
+                    "company_email":   get_a_v('company_email'),
+                    "company_phone":   get_a_v('company_phone'),
+                    "website":         get_a_v('website'),
+                    "instagram":       get_a_v('instagram'),
+                    "facebook":        get_a_v('facebook'),
+                    "linkedin":        get_a_v('linkedIn'),
+                    "twitter":         get_a_v('twitter'),
+                    "no_of_employees": get_a_v('no_of_employees'),
+                    "mailing_address": get_address(
+                        get_a_v('name'),
+                        get_a_v('mailing_address_street'),
+                        get_a_v('mailing_address_street_line_2'),
+                        get_a_v('mailing_address_city'),
+                        get_a_v('mailing_address_zip_code'),
+                        get_a_v('mailing_address_state'),
+                        get_a_v('mailing_address_country'),
                     ),
-                    "billing_address":get_address(
-                        data_l_p.get('name', ''),
-                        data_l_p.get('billing_address_street', ''),
-                        data_l_p.get('billing_address_street_line_2', ''),
-                        data_l_p.get('billing_address_city', ''),
-                        data_l_p.get('billing_address_zip_code', ''),
-                        data_l_p.get('billing_address_state', ''),
-                        data_l_p.get('billing_address_country', '')
+                    "billing_address": get_address(
+                        get_a_v('name'),
+                        get_a_v('billing_address_street'),
+                        get_a_v('billing_address_street_line_2'),
+                        get_a_v('billing_address_city'),
+                        get_a_v('billing_address_zip_code'),
+                        get_a_v('billing_address_state'),
+                        get_a_v('billing_address_country')
                     ),
-                    "employees":get_employee(data_l_p, existing_roles),
+                    "employees":get_employee(get_a('employees', []) + get_v('employees', []), existing_roles),
                 }
-
                 ProfileContact.objects.create(
                     license=license_obj,
                     is_draft=False,
@@ -188,7 +198,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     "no_of_harvest":data_l.get('annual_harvests_mixed_light', 0),
                     "plants_per_cycle":data_l.get('plants_per_cycle_mixed_light', 0)
                 }]
-                if data_l_p.get('Cultivation_Style_Autoflower', False):
+                if get_a_v('Cultivation_Style_Autoflower', False):
                     co_data.append({
                         "canopy_sqf":data_l.get('canopy_square_feet_autoflower', 0),
                         "no_of_harvest":data_l.get('annual_harvests_autoflower', 0),
@@ -196,9 +206,9 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     })
                 CultivationOverview.objects.create(
                     license=license_obj,
-                    autoflower=data_l_p.get('Cultivation_Style_Autoflower', False),
-                    lighting_type=data_l.get('lighting_type') or data_l_p.get('lighting_type', []),
-                    type_of_nutrients=data_l.get('types_of_nutrients') or data_l_p.get('type_of_nutrients', []),
+                    autoflower=get_a_v('Cultivation_Style_Autoflower', False),
+                    lighting_type=data_l.get('lighting_type') or get_a_v('lighting_type', []),
+                    type_of_nutrients=data_l.get('types_of_nutrients') or get_a_v('type_of_nutrients', []),
                     overview=co_data,
                 )
             with transaction.atomic():
@@ -206,8 +216,8 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 print('5.Inserting Financial overview')
                 FinancialOverview.objects.create(
                     license=license_obj,
-                    know_annual_budget=data_l_p.get('know_annual_budget', ''),
-                    annual_budget=data_l_p.get('annual_budget', ''),
+                    know_annual_budget=get_a_v('know_annual_budget', ''),
+                    annual_budget=get_a_v('annual_budget', ''),
                     overview=[{
                         'cost_per_lbs':data_l.get('cost_per_lb', ''),
                         'cost_per_sqf':data_l.get('cost_per_square_foot', ''),

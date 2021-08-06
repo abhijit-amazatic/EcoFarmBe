@@ -42,7 +42,7 @@ from permission.filterqueryset import (filterQuerySet, )
 from integration.crm import (get_crm_obj, search_query, create_records, update_records)
 from integration.box import(get_box_tokens, )
 from integration.books import(get_zoho_user_permission, )
-from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,get_from_crm_insert_to_vendor_or_account,)
+from core.utility import (NOUN_PROCESS_MAP,send_verification_link,send_async_user_approval_mail,)
 from slacker import Slacker
 from brand.models import (License,Organization,)
 from .tasks import (bypass_verifications_for_email,)

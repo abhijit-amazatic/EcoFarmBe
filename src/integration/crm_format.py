@@ -764,7 +764,7 @@ CRM_FORMAT  = {
         "facebook": "Facebook",
         "billing_compony_name": "Billing_Company_Name",
         "billing_address_street": "Billing_Street",
-        "billing_street_line_2": "",
+        "billing_address_street_line_2": "",
         "billing_address_city": "Billing_City",
         "billing_address_state": "Billing_State",
         "billing_address_country": "Billing_Country",

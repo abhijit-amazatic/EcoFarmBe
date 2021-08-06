@@ -32,7 +32,7 @@ from core.permissions import IsAuthenticatedBrandPermission
 from inventory.models import (Documents, )
 from integration.books import  get_buyer_summary
 from integration.apps.aws import (create_presigned_url, )
-from core.utility import (get_license_from_crm_insert_to_db,notify_admins_on_slack,email_admins_on_profile_progress, )
+from core.utility import (notify_admins_on_slack,email_admins_on_profile_progress, )
 from core.mailer import (mail, mail_send,)
 from integration.crm import (update_program_selection, create_records, search_query, update_records, create_or_update_org_in_crm)
 from user.serializers import (get_encrypted_data,)
