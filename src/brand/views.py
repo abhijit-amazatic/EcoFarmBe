@@ -487,6 +487,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                     'approved_on': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.approved_on,
                     'approved_by': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.approved_by,
                     'agreement_signed': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.agreement_signed,
+                    'signed_program_name': "" if not hasattr(license, 'license_profile') else license.license_profile.signed_program_name,
                     'agreement_link': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.agreement_link,
                     'farm_profile_photo': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.farm_profile_photo,
                     'farm_photo_sharable_link': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.farm_photo_sharable_link,

@@ -496,6 +496,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
         _('Farm Profile Photo Box ID'), blank=True, null=True, max_length=255)
     farm_photo_sharable_link = models.CharField(
         _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
+    signed_program_name = models.CharField(_('Signed Program Name'), blank=True, null=True, max_length=255)
     is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID - Profile(Account/Vendor)'), max_length=100, blank=True, null=True)
     zoho_crm_account_id = models.CharField(_('Zoho CRM Account ID'), max_length=100, blank=True, null=True)

@@ -194,7 +194,8 @@ class FinancialForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'overview': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
-        }    
+        }
+
 
 class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
     """
@@ -206,6 +207,7 @@ class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
     readonly_fields = ('is_draft','overview',)
     form = FinancialForm
 
+
 class CropForm(forms.ModelForm):
     class Meta:
         model = CropOverview
@@ -213,6 +215,7 @@ class CropForm(forms.ModelForm):
         widgets = {
             'overview': JSONEditorWidget(options={'modes':['code','text'],'search': True}),
         }        
+
 
 class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     """
@@ -223,7 +226,7 @@ class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
     can_delete = False
     readonly_fields = ('is_draft','overview',)
     form = CropForm
-    
+
 
 class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
     """
@@ -233,7 +236,8 @@ class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
     model = ProgramOverview
     can_delete = False
     readonly_fields = ('is_draft',)
- 
+
+
 class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
     """
     Configuring field admin view for InlineLicenseProfile  model
@@ -241,11 +245,13 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = LicenseProfile
     can_delete = False
-    readonly_fields = ('is_draft',)   
-    
+    readonly_fields = ('is_draft', 'agreement_signed')
+
+
 # class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
 #     extra = 0
 #     model = LicenseUser
+
 
 def get_user_data(request):
     """

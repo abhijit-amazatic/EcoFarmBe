@@ -1,6 +1,7 @@
 from django.dispatch import receiver
 from django.db.models import signals
 from django.apps import apps
+from django.core.exceptions import ObjectDoesNotExist
 
 from .permission_defaults import (DEFAULT_ROLE_PERM,)
 
@@ -29,3 +30,21 @@ def post_save_license(sender, instance, created, **kwargs):
         instance.binderlicense.save()
     except Exception:
         pass
+
+@receiver(signals.pre_save, sender=apps.get_model('brand', 'LicenseProfile'))
+def pre_save_license_profile(sender, instance, **kwargs):
+    """
+    Deletes old file.
+    """
+    if not instance.pk:
+        return
+    try:
+        old_instance = sender.objects.get(pk=instance.pk)
+    except sender.DoesNotExist:
+        return
+
+    if instance.agreement_signed and not old_instance.agreement_signed:
+        try:
+            instance.signed_program_name = instance.license.program_overview.program_details.get('program_name')
+        except ObjectDoesNotExist:
+            pass
