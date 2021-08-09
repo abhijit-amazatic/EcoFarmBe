@@ -182,13 +182,13 @@
         type: organizational
         description: ''
         group: 1
--   model: permission.permission
-    pk: resend_organization_invite
-    fields:
-        name: Resend Organization Invites
-        type: organizational
-        description: ''
-        group: 1
+# -   model: permission.permission
+#     pk: resend_organization_invite
+#     fields:
+#         name: Resend Organization Invites
+#         type: organizational
+#         description: ''
+#         group: 1
 -   model: permission.permission
     pk: delete_organization_invite
     fields:
@@ -646,6 +646,21 @@
         group: 5
 
 
+# Inventory Item Tags
+-   model: permission.permission
+    pk: add_inventory_item_tags
+    fields:
+        name: Add Inventory Item Tags
+        type: internal
+        description: ''
+        group: 5
+-   model: permission.permission
+    pk: edit_inventory_item_tags
+    fields:
+        name: Edit Inventory Item Tags
+        type: internal
+        description: ''
+        group: 5
 
 
 

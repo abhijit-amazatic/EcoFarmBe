@@ -37,7 +37,6 @@ DEFAULT_ROLE_PERM = {
         "edit_organization_role",
         "edit_organization_user",
         "send_organization_invite",
-        "resend_organization_invite",
         "view_brand",
         # "view_organization",
         "view_organization_role",

@@ -165,7 +165,7 @@ class OrganizationInvitePermission(ViewPermission):
             'get': 'view_organization_invite',
         },
         'create': {
-            'post': 'add_organization_user',
+            'post': 'send_organization_invite',
         },
         'update': {
             'put': False,
@@ -177,6 +177,6 @@ class OrganizationInvitePermission(ViewPermission):
             'delete':'delete_organization_invite',
         },
         'resend_invitation': {
-            'post':'resend_organization_invite',
+            'post':'send_organization_invite',
         },
     }
