@@ -534,7 +534,7 @@ def get_inventory_name_from_db(inventory_name):
     elif 'efn' in inventory_name:
         return 'EFN'
 
-def fetch_inventory_from_list(inventory_name, inventory_list):
+def fetch_inventory_from_list(inventory_name, inventory_list, is_composite=False):
     """
     Fetch list of inventory from Zoho Inventory.
     """
