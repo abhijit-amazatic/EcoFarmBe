@@ -366,6 +366,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Processing', _('Processing')),
         ('Flowering', _('Flowering')),
         ('Vegging', _('Vegging')),
+        ('Cut to Order', _('Cut to Order')),
         ('Rooting', _('Rooting')),
     )
 
