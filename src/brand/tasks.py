@@ -42,8 +42,7 @@ def update_expired_license_status():
     Update expired licence status to 'expired'.
     """
     qs = License.objects.filter(expiration_date__lt=timezone.now())
-    # qs.update(status='expired')
-    qs.update(is_expired=True)
+    qs.update(status='expired')
 
 @periodic_task(run_every=(crontab(hour=[1], minute=0)), options={'queue': 'general'})
 def update_before_expire():

@@ -227,7 +227,6 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict)
 
     license_status = models.CharField(blank=True, null=True, max_length=255,)
-    is_expired = models.BooleanField(_('Is Expired'), default=False)
 
     def __str__(self):
         return self.legal_business_name
