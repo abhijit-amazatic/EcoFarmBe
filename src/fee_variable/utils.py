@@ -47,8 +47,8 @@ custom_inventory_variable_program_map = {
 ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
     'Flowers':      'mcsp_fee_flowers',
     'Trims':        'mcsp_fee_trims',
-    'Isolates':     'mcsp_fee_concentrates',
-    'Concentrates': 'mcsp_fee_isolates',
+    'Concentrates': 'mcsp_fee_concentrates',
+    'Isolates':     'mcsp_fee_isolates',
     'Terpenes':     'mcsp_fee_terpenes',
     'Clones':       'mcsp_fee_clones',
 }
@@ -82,7 +82,7 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
 
                 tier = custom_inventory_variable_program_map.get(program_name, {})
                 InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
-                if InventoryVariable and hasattr(InventoryVariable, fee_var):
+                if InventoryVariable and hasattr(InventoryVariable, fee_var) and getattr(InventoryVariable, fee_var) is not None:
                     try:
                         db_val = float(getattr(InventoryVariable, fee_var))
                     except ValueError:

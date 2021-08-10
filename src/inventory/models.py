@@ -355,48 +355,6 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     """
     Custom Inventory Model Class
     """
-    STATUS_CHOICES = (
-        ('pending_for_approval', _('Pending For Approval')),
-        ('approved', _('Approved')),
-    )
-
-    MARKETPLACE_STATUS_CHOICES = (
-        ('Available', _('Available')),
-        ('In-Testing', _('In-Testing')),
-        ('Processing', _('Processing')),
-        ('Flowering', _('Flowering')),
-        ('Vegging', _('Vegging')),
-        ('Cut to Order', _('Cut to Order')),
-        ('Rooting', _('Rooting')),
-    )
-
-    PRICING_POSITION_CHOICES = (
-        ('Negotiable', _('Negotiable')),
-        ('Firm', _('Firm')),
-        ('Min Quantity', _('Min Quantity')),
-        ('Offers Open', _('Offers Open')),
-    )
-    DAY_OF_WEEK = (
-        ('monday', _('Monday')),
-        ('tuesday', _('Tuesday')),
-        ('wednesday', _('Wednesday')),
-        ('thursday', _('Thursday')),
-        ('friday', _('Friday')),
-        ('saturday', _('Saturday')),
-        ('sunday', _('Sunday')),
-    )
-    GRADE_ESTIMATE_CHOICES = (
-        ('Smalls A', _('Smalls A')),
-        ('Smalls B', _('Smalls B')),
-        ('Smalls C', _('Smalls C')),
-        ('Tops A', _('Tops A')),
-        ('Tops AA', _('Tops AA')),
-        ('Tops AAA', _('Tops AAA')),
-        ('Tops B', _('Tops B')),
-        ('Tops C', _('Tops C')),
-        # ('Trim', _('Trim')),
-    )
-
     CATEGORY_NAME_CHOICES = (
         ('Flower - Tops', _('Flower - Tops')),
         ('Flower - Small', _('Flower - Small')),
@@ -419,6 +377,38 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
         ('Clones', _('Clones')),
     )
+    MARKETPLACE_STATUS_CHOICES = (
+        ('Available', _('Available')),
+        ('In-Testing', _('In-Testing')),
+        ('Processing', _('Processing')),
+        ('Flowering', _('Flowering')),
+        ('Vegging', _('Vegging')),
+        ('Cut to Order', _('Cut to Order')),
+        ('Rooting', _('Rooting')),
+    )
+
+    CULTIVAR_TYPE_CHOICES = (
+        ('Sativa', _('Sativa')),
+        ('Indica', _('Indica')),
+        ('Hybrid', _('Hybrid')),
+    )
+    CULTIVATION_TYPE_CHOICES = (
+        ('Indoor',  _('Indoor')),
+        ('Outdoor', _('Outdoor')),
+        ('Mixed-Light', _('Mixed-Light')),
+    )
+
+    GRADE_ESTIMATE_CHOICES = (
+        ('Smalls A', _('Smalls A')),
+        ('Smalls B', _('Smalls B')),
+        ('Smalls C', _('Smalls C')),
+        ('Tops A', _('Tops A')),
+        ('Tops AA', _('Tops AA')),
+        ('Tops AAA', _('Tops AAA')),
+        ('Tops B', _('Tops B')),
+        ('Tops C', _('Tops C')),
+        # ('Trim', _('Trim')),
+    )
 
     PAYMENT_TERMS_CHOICES = (
         ('60 Days', _('60 Days')),
@@ -430,29 +420,57 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Check', _('Check')),
         ('Bank Wire', _('Bank Wire')),
     )
+    PRICING_POSITION_CHOICES = (
+        ('Negotiable', _('Negotiable')),
+        ('Firm', _('Firm')),
+        ('Min Quantity', _('Min Quantity')),
+        ('Offers Open', _('Offers Open')),
+    )
+
+    DAY_OF_WEEK = (
+        ('monday', _('Monday')),
+        ('tuesday', _('Tuesday')),
+        ('wednesday', _('Wednesday')),
+        ('thursday', _('Thursday')),
+        ('friday', _('Friday')),
+        ('saturday', _('Saturday')),
+        ('sunday', _('Sunday')),
+    )
+
+    STATUS_CHOICES = (
+        ('pending_for_approval', _('Pending For Approval')),
+        ('approved', _('Approved')),
+    )
     ZOHO_ORG_CHOICES = (
         ('efd', _('Thrive Society (EFD LLC)')),
         ('efl', _('Eco Farm Labs (EFL LLC)')),
         ('efn', _('Eco Farm Nursery (EFN LLC)')),
     )
-    CULTIVATION_TYPE_CHOICES = (
-        ('Indoor',  _('Indoor')),
-        ('Outdoor', _('Outdoor')),
-        ('Mixed-Light', _('Mixed-Light')),
-    )
     license_profile = models.ForeignKey('brand.LicenseProfile', verbose_name=_('License Profile'), related_name='custom_inventory', null=True, on_delete=models.SET_NULL)
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
+ 
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
+    # cultivar_type = models.CharField(_('Cultivar Type'), choices=CULTIVAR_TYPE_CHOICES, blank=True, null=True, max_length=255, )
+ 
     cultivation_type = models.CharField(_('Cultivation Type'), choices=CULTIVATION_TYPE_CHOICES, blank=True, null=True, max_length=255)
     category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, max_length=225)
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
+
     quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
-    harvest_date = models.DateField(_('Harvest/Manufacturing/Clone Date'), auto_now=False, blank=True, null=True, default=None)
-    need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
+    total_batch_quantity = models.IntegerField(_('Total Batch Output'), blank=True, null=True,)
+
+
+    harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
+    manufacturing_date = models.DateField(_('Manufacturing Date'), auto_now=False, blank=True, null=True, default=None)
+    clone_date = models.DateField(_('Clone Date'), auto_now=False, blank=True, null=True, default=None)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
+
+    need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
     grade_estimate = models.CharField(_('Grade Estimate'), choices=GRADE_ESTIMATE_CHOICES, max_length=255, blank=True, null=True)
     product_quality_notes = models.TextField(_('Product Quality Notes'), blank=True, null=True)
-    extra_documents = GenericRelation(Documents)
+
+    clone_size = models.IntegerField(_('Clone Size (inch)'), blank=True, null=True,)
+    days_to_prepare_clones = models.IntegerField(_('Days To Prepare Clones'), blank=True, null=True,)
 
     trim_used = models.FloatField(
         _('Trim Used (lbs)'),
@@ -464,8 +482,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     farm_ask_price = models.FloatField(_('Farm Ask Price'), blank=True, null=True,)
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
-    have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
-    minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
+    # have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
+    # minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
 
     transportation = models.CharField(_("Transportation / Sample Pickup"), max_length=255, blank=True, null=True)
     best_contact_Day_of_week = models.CharField(_("Best Contact Day Of Week"), max_length=50, choices=DAY_OF_WEEK, blank=True, null=True,)
@@ -490,6 +508,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
 
     zoho_organization = models.CharField(_('Zoho Organization'), choices=ZOHO_ORG_CHOICES, null=True, max_length=100)
+
+    extra_documents = GenericRelation(Documents)
 
     class Meta:
         verbose_name = _('Vendor Inventory')

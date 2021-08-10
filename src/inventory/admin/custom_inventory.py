@@ -40,7 +40,7 @@ from ..utils import (
 )
 from ..data import (CG, )
 from .custom_inventory_helpers import (get_new_item_data,)
-
+from .custom_inventory_fieldsets import fieldsets
 
 
 class InlineDocumentsAdmin(GenericStackedInline):
@@ -135,7 +135,7 @@ class CustomInventoryForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         cat = cleaned_data.get('category_name')
-        if getattr(self, 'instance'):
+        if getattr(self, 'instance') and '_approve' in self.data:
             if self.instance.status == 'pending_for_approval':
                 if cat and CG.get(cat, '') in ('Isolates', 'Concentrates', 'Terpenes'):
                     if not cleaned_data.get('trim_used'):
@@ -186,71 +186,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         'created_on',
         'updated_on',
     )
-    fieldsets = (
-        (None, {
-            'fields': (
-                'zoho_organization',
-            ),
-        }),
-        ('BATCH & QUALITY INFORMATION', {
-            'fields': (
-                'cultivar',
-                # 'cultivar_name',
-                'category_name',
-                'marketplace_status',
-                'cultivation_type',
-                'quantity_available',
-                ('trim_used', 'trim_used_doc'),
-                'trim_used_verified',
-                'harvest_date',
-                'need_lab_testing_service',
-                'batch_availability_date',
-                'grade_estimate',
-                'product_quality_notes',
-        ),
-        }),
-        ('PRICING INFORMATION', {
-            'fields': (
-                'farm_ask_price',
-                'pricing_position',
-                # 'have_minimum_order_quantity',
-                # 'minimum_order_quantity',
-            ),
-        }),
-        ('SAMPLE LOGISTICS (PICKUP OR DROP OFF)', {
-            'fields': (
-                'transportation',
-                'best_contact_Day_of_week',
-                'best_contact_time_from',
-                'best_contact_time_to',
-            ),
-        }),
-        ('PAYMENT', {
-            'fields': (
-                'payment_terms',
-                'payment_method',
-            ),
-        }),
-        ('Extra Info', {
-            'fields': (
-                'status',
-                'license_profile',
-                'vendor_name',
-                'crm_vendor_id',
-                'client_code',
-                'procurement_rep',
-                'zoho_item_id',
-                'sku',
-                'po_id',
-                'po_number',
-                'approved_by',
-                'approved_on',
-                'created_by',
-                'created_on',
-                'updated_on',
-            ),
-        }),
-    )
     inlines = [InlineDocumentsAdmin,]
     # actions = ['test_action', ]
     custom_buttons=('approve',)
@@ -274,6 +209,18 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         if obj and obj.status == 'pending_for_approval':
             return True
         return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def get_fieldsets(self, request, obj=None):
+        """
+        Hook for specifying fieldsets.
+        """
+        cg_name = CG.get(obj.category_name)
+        if obj and cg_name in fieldsets:
+            return fieldsets.get(cg_name, {})
+        return fieldsets.get('default', {})
 
     def generate_sku(self, obj, postfix):
         sku = []
