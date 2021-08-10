@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 
 from brand.models import (License, LicenseProfile,)
 from .models import (CustomInventoryVariable, TaxVariable, VendorInventoryDefaultAccounts)
@@ -44,11 +45,11 @@ custom_inventory_variable_program_map = {
 #     'Clones':       'mcsp_fee_per_pcs',
 
 ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
-    'Flowers':      'mcsp_fee_flowers_trims',
-    'Trims':        'mcsp_fee_flowers_trims',
-    'Isolates':     'mcsp_fee_concentrates_isolates_terpenes',
-    'Concentrates': 'mcsp_fee_concentrates_isolates_terpenes',
-    'Terpenes':     'mcsp_fee_concentrates_isolates_terpenes',
+    'Flowers':      'mcsp_fee_flowers',
+    'Trims':        'mcsp_fee_trims',
+    'Isolates':     'mcsp_fee_concentrates',
+    'Concentrates': 'mcsp_fee_isolates',
+    'Terpenes':     'mcsp_fee_terpenes',
     'Clones':       'mcsp_fee_clones',
 }
 ITEM_CATEGORY_MSCP_FEE_IN_PERCENTAGE = ('Isolates', 'Concentrates', 'Terpenes')
@@ -68,7 +69,7 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
                 try:
                     program_overview = lp.license.program_overview
                     program_name = program_overview.program_details.get('program_name')
-                except License.program_overview.RelatedObjectDoesNotExist:
+                except ObjectDoesNotExist:
                     pass
                     # self.message_user(request, 'program overview not exist', level='error')
                 if not program_name and no_tier_fee:

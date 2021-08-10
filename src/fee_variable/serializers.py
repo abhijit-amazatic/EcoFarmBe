@@ -29,8 +29,8 @@ class CustomInventoryVariableSerializer(serializers.ModelSerializer):
     """
     This defines CustomInventoryVariableVariableSerializer
     """
-    mcsp_fee = serializers.CharField(source='mcsp_fee_flowers_trims', read_only=True)
-    mcsp_fee_per_g = serializers.CharField(source='mcsp_fee_concentrates_isolates_terpenes', read_only=True)
+    mcsp_fee = serializers.CharField(source='mcsp_fee_flowers', read_only=True)
+    mcsp_fee_per_g = serializers.CharField(source='mcsp_fee_concentrates', read_only=True)
     mcsp_fee_per_pcs = serializers.CharField(source='mcsp_fee_clones', read_only=True)
     class Meta:
         model = CustomInventoryVariable

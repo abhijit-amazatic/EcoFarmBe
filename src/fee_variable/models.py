@@ -68,17 +68,41 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         max_length=255,
         choices=PROGRAM_TIER_CHOICES
     )
-    mcsp_fee_flowers_trims = models.DecimalField(
-        verbose_name=_("MCSP Fee - Flower/Trim ($/lb)"),
-        help_text='This fee will be for Flowers and Trims.',
+    mcsp_fee_flowers = models.DecimalField(
+        verbose_name=_("MCSP Fee - Flowers ($/lb)"),
+        # help_text='This fee will be for Flowers.',
         decimal_places=2,
         max_digits=6,
         blank=True,
         null=True
     )
-    mcsp_fee_concentrates_isolates_terpenes = models.DecimalField(
-        verbose_name=_("MCSP Fee - Concentrates/Isolates/Terpenes (%)"),
-        help_text='This percentage will be used in MCSP Fee calculation for Concentrates, Isolates and Terpenes.',
+    mcsp_fee_trims = models.DecimalField(
+        verbose_name=_("MCSP Fee - Trims ($/lb)"),
+        # help_text='This fee will be for Trims.',
+        decimal_places=2,
+        max_digits=6,
+        blank=True,
+        null=True
+    )
+    mcsp_fee_concentrates = models.DecimalField(
+        verbose_name=_("MCSP Fee - Concentrates (%)"),
+        # help_text='This percentage will be used in MCSP Fee calculation for Concentrates.',
+        decimal_places=2,
+        max_digits=6,
+        blank=True,
+        null=True
+    )
+    mcsp_fee_isolates = models.DecimalField(
+        verbose_name=_("MCSP Fee - Isolates (%)"),
+        # help_text='This percentage will be used in MCSP Fee calculation for Isolates.',
+        decimal_places=2,
+        max_digits=6,
+        blank=True,
+        null=True
+    )
+    mcsp_fee_terpenes = models.DecimalField(
+        verbose_name=_("MCSP Fee - Terpenes (%)"),
+        # help_text='This percentage will be used in MCSP Fee calculation for Terpenes.',
         decimal_places=2,
         max_digits=6,
         blank=True,
@@ -86,7 +110,7 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
     )
     mcsp_fee_clones = models.DecimalField(
         verbose_name=_("MCSP Fee - Clones ($/pcs)"),
-        help_text='This fee will be used for Clones',
+        # help_text='This fee will be used for Clones',
         decimal_places=2,
         max_digits=6,
         blank=True,

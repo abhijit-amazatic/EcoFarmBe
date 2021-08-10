@@ -398,21 +398,13 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     )
 
     CATEGORY_NAME_CHOICES = (
-        # ('Wholesale - Flower', _('Wholesale - Flower')),
-        # ('In the Field', _('In the Field')),
         ('Flower - Tops', _('Flower - Tops')),
-        # ('Flower - Bucked Untrimmed', _('Flower - Bucked Untrimmed')),
-        # ('Flower - Bucked Untrimmed - Seeded', _('Flower - Bucked Untrimmed - Seeded')),
-        # ('Flower - Bucked Untrimmed - Contaminated', _('Flower - Bucked Untrimmed - Contaminated')),
         ('Flower - Small', _('Flower - Small')),
         ('Trim', _('Trim')),
-        # ('Packaged Goods', _('Packaged Goods')),
-        # ('Isolates', _('Isolates')),
         ('Isolates - CBD', _('Isolates - CBD')),
         ('Isolates - THC', _('Isolates - THC')),
         ('Isolates - CBG', _('Isolates - CBG')),
         ('Isolates - CBN', _('Isolates - CBN')),
-        # ('Wholesale - Concentrates', _('Wholesale - Concentrates')),
         ('Crude Oil', _('Crude Oil')),
         ('Crude Oil - THC', _('Crude Oil - THC')),
         ('Crude Oil - CBD', _('Crude Oil - CBD')),
@@ -423,14 +415,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Sauce', _('Sauce')),
         ('Crumble', _('Crumble')),
         ('Kief', _('Kief')),
-        # ('Lab Testing', _('Lab Testing')),
-        # ('Terpenes', _('Terpenes')),
         ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
         ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
-        # ('Services', _('Services')),
-        # ('QC', _('QC')),
-        # ('Transport', _('Transport')),
-        # ('Secure Cash Handling', _('Secure Cash Handling')),
         ('Clones', _('Clones')),
     )
 
