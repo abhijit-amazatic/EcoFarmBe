@@ -19,7 +19,7 @@ from .models import (
     InventoryItemQuantityAddition,
     InventoryItemDelist,
 )
-
+from .data import CG
 
 class InventorySerializer(serializers.ModelSerializer):
     """
@@ -122,6 +122,16 @@ class CustomInventorySerializer(serializers.ModelSerializer):
     item_image_urls = serializers.SerializerMethodField()
     labtest_url = serializers.SerializerMethodField()
 
+    category_required_fields = {
+        'Flowers':      ('batch_availability_date', 'harvest_date', 'grade_estimate',),
+        'Trims':        ('batch_availability_date', 'harvest_date',),
+        'Concentrates': ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
+        'Isolates':     ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
+        'Terpenes':     ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
+        'Clones':       ('days_to_prepare_clones',),
+    }
+
+
     def get_item_image_urls(self, obj):
         """
         Return s3 item image.
@@ -156,6 +166,21 @@ class CustomInventorySerializer(serializers.ModelSerializer):
                     return url.get('response')
         except Exception:
             return None
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        errors = dict()
+        category_name = attrs.get('category_name', '')
+        if not category_name:
+            required_fields = ('category_name',)
+        else:
+            required_fields = self.category_required_fields.get(CG.get(category_name), ())
+            for field in required_fields:
+                if not attrs.get(field):
+                    errors[field] = f'This field is required for category \'{category_name}\'.'
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
 
     def validate_vendor_name(self, val):
         queryset = filterQuerySet.for_user(LicenseProfile.objects.all(), self.context['request'].user)

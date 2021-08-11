@@ -71,8 +71,8 @@ _fieldsets = {
             'fields': (
                 'cultivation_type',
                 'quantity_available',
-                'harvest_date',
                 'batch_availability_date',
+                'harvest_date',
                 'grade_estimate',
                 'product_quality_notes',
                 'need_lab_testing_service',
@@ -103,7 +103,6 @@ _fieldsets = {
                 'trim_used_verified',
                 'manufacturing_date',
                 'batch_availability_date',
-                'grade_estimate',
                 'product_quality_notes',
                 'need_lab_testing_service',
             ),
@@ -147,7 +146,6 @@ _fieldsets = {
             'fields': (
                 'clone_size',
                 'quantity_available',
-                'clone_date',
                 'days_to_prepare_clones',
                 'product_quality_notes',
             ),

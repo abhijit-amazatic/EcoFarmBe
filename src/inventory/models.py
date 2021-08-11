@@ -456,13 +456,14 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, max_length=225)
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
 
-    quantity_available = models.FloatField(_('Quantity Available'), blank=True, null=True,)
+    quantity_available = models.FloatField(_('Quantity Available'))
     total_batch_quantity = models.IntegerField(_('Total Batch Output'), blank=True, null=True,)
 
 
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     manufacturing_date = models.DateField(_('Manufacturing Date'), auto_now=False, blank=True, null=True, default=None)
     clone_date = models.DateField(_('Clone Date'), auto_now=False, blank=True, null=True, default=None)
+    days_to_prepare_clones = models.IntegerField(_('Days To Prepare Clones'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
 
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
@@ -470,7 +471,6 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     product_quality_notes = models.TextField(_('Product Quality Notes'), blank=True, null=True)
 
     clone_size = models.IntegerField(_('Clone Size (inch)'), blank=True, null=True,)
-    days_to_prepare_clones = models.IntegerField(_('Days To Prepare Clones'), blank=True, null=True,)
 
     trim_used = models.FloatField(
         _('Trim Used (lbs)'),

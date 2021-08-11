@@ -169,6 +169,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         'updated_on',
     )
     readonly_fields = (
+        'cultivar',
+        # 'cultivar_name',
+        'category_name',
         'trim_used_doc',
         'status',
         'cultivar_name',
@@ -187,7 +190,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         'updated_on',
     )
     inlines = [InlineDocumentsAdmin,]
-    # actions = ['test_action', ]
     custom_buttons=('approve',)
     # custom_buttons_prop = {
     #     'approve': {
@@ -273,31 +275,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
 
                 elif result.get('status_code') == 204:
                     self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
-                    # try:
-                    #     result = search_query('Accounts', obj.vendor_name, 'Account_Name')
-                    # except Exception:
-                    #     self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
-                    # else:
-                    #     if result.get('status_code') == 200:
-                    #         data_ls = result.get('response')
-                    #         if data_ls and isinstance(data_ls, list):
-                    #             for vendor in data_ls:
-                    #                 if vendor.get('Account_Name') == obj.vendor_name:
-                    #                     if not obj.procurement_rep:
-                    #                         p_rep = vendor.get('Owner', {}).get('email')
-                    #                         if p_rep:
-                    #                             obj.procurement_rep = p_rep
-                    #                         p_rep_name = vendor.get('Owner', {}).get('name')
-                    #                         if p_rep_name:
-                    #                             obj.procurement_rep_name = p_rep_name
-                    #                     client_code = vendor.get('Client_Code')
-                    #                     if client_code:
-                    #                         obj.client_code = client_code
-                    #                         return client_code
-                    #                     else:
-                    #                         self.message_user(request, f'client code not found for vendor \'{obj.vendor_name}\' in Zoho CRM', level='error')
-                    #             self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
-                    #     elif result.get('status_code') == 204 or not found_code:
                 else:
                     self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
         return None
