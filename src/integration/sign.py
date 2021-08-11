@@ -197,6 +197,7 @@ def send_template(
             premise_state, premise_city, premise_zip,
             license_owner_email
         )
+        print('In send_template method response===>', response)
         if response['code'] == 0:
             return get_embedded_url_from_sign(
                 response['requests']['request_id'],

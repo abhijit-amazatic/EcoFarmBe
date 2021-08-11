@@ -472,6 +472,7 @@ class TemplateSignView(APIView):
                                      license_owner_name, premise_address,
                                      premise_state, premise_city, premise_zip,
                                      license_owner_email)
+            print('Send_template in API view  >>>', response, dir(response))
             try:
                 license = License.objects.get(license_number=licenses[0])
                 data = {"request_id":response['request_id'],
