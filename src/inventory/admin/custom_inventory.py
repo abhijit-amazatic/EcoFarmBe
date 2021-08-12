@@ -8,6 +8,7 @@ from django.contrib.contenttypes.admin import GenericStackedInline
 # from django.db import models
 # from django.db.models.query import QuerySet
 from django.utils import timezone
+from django.utils.text import Truncator
 # from django.utils.encoding import force_str
 from django.utils.html import mark_safe
 
@@ -391,6 +392,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     def trim_used_doc(self, obj):
         url = self.get_doc_url(obj, doc_type='trim_used_doc')
         if url:
-            return mark_safe(f'<a href="{url}" target="_blank">{url}</a>')
-    trim_used_doc.short_description = 'Document'
+            return mark_safe(f'<a href="{url}" target="_blank">{Truncator(url).chars(100)}</a>')
+        else:
+            return '-'
+    # trim_used_doc.short_description = 'Document'
+    trim_used_doc.short_description = 'Batch Record File'
     trim_used_doc.allow_tags = True

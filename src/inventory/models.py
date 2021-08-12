@@ -457,20 +457,20 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
 
     quantity_available = models.FloatField(_('Quantity Available'))
-    total_batch_quantity = models.IntegerField(_('Total Batch Output'), blank=True, null=True,)
+    total_batch_quantity = models.PositiveIntegerField(_('Total Batch Output'), blank=True, null=True,)
 
 
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     manufacturing_date = models.DateField(_('Manufacturing Date'), auto_now=False, blank=True, null=True, default=None)
     clone_date = models.DateField(_('Clone Date'), auto_now=False, blank=True, null=True, default=None)
-    days_to_prepare_clones = models.IntegerField(_('Days To Prepare Clones'), blank=True, null=True,)
+    days_to_prepare_clones = models.PositiveIntegerField(_('Days To Prepare Clones'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
 
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
     grade_estimate = models.CharField(_('Grade Estimate'), choices=GRADE_ESTIMATE_CHOICES, max_length=255, blank=True, null=True)
     product_quality_notes = models.TextField(_('Product Quality Notes'), blank=True, null=True)
 
-    clone_size = models.IntegerField(_('Clone Size (inch)'), blank=True, null=True,)
+    clone_size = models.PositiveIntegerField(_('Clone Size (inch)'), blank=True, null=True,)
 
     trim_used = models.FloatField(
         _('Trim Used (lbs)'),
