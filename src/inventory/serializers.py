@@ -128,7 +128,7 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         'Concentrates': ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
         'Isolates':     ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
         'Terpenes':     ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
-        'Clones':       ('days_to_prepare_clones',),
+        'Clones':       ('rooting_days',),
     }
 
 

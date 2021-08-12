@@ -146,7 +146,7 @@ _fieldsets = {
             'fields': (
                 'clone_size',
                 'quantity_available',
-                'days_to_prepare_clones',
+                'rooting_days',
                 'product_quality_notes',
             ),
         },

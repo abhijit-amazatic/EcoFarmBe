@@ -463,7 +463,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     manufacturing_date = models.DateField(_('Manufacturing Date'), auto_now=False, blank=True, null=True, default=None)
     clone_date = models.DateField(_('Clone Date'), auto_now=False, blank=True, null=True, default=None)
-    days_to_prepare_clones = models.PositiveIntegerField(_('Days To Prepare Clones'), blank=True, null=True,)
+    rooting_days = models.PositiveIntegerField(_('Rooting Days'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
 
     need_lab_testing_service = models.BooleanField(_('Need Lab Testing Service'),)
