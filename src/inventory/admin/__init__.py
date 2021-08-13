@@ -223,11 +223,18 @@ class InTransitOrderAdmin(admin.ModelAdmin):
     """
     model = InTransitOrder
     search_fields = ('user__email',)
-    list_display = ('user','profile_id', 'profile','created_on',)
+    list_display = ('user','profile_id','total_cart_item','profile','created_on',)
     ordering = ('-created_on',)
     readonly_fields = ('profile_id',)
     form = InTransitForm
 
+    def total_cart_item(self, obj):
+        if obj.order_data:
+            obj_list  = obj.order_data.get('cart_item',[])
+            return len(obj_list)
+        return 0
+    total_cart_item.short_description = 'Total Items'
+    
     def profile(self, obj):
         return LicenseProfile.objects.get(id=obj.profile_id)
     
