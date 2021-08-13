@@ -171,7 +171,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     )
     readonly_fields = (
         'cultivar',
-        # 'cultivar_name',
+        'cultivar_name',
         'category_name',
         'trim_used_doc',
         'status',

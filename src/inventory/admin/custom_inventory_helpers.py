@@ -41,7 +41,6 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
     data['cf_vendor_name'] = vendor_id
     data['cf_client_code'] = obj.client_code
     data['cf_strain_name'] = obj.cultivar.cultivar_name
-    data['cf_cultivar_name'] = obj.cultivar.cultivar_name
 
     if obj.cultivar.cultivar_type:
         data['cf_cultivar_type'] = obj.cultivar.cultivar_type
@@ -126,10 +125,15 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
         data = {}
 
     if data and obj.zoho_organization in ITEM_CUSTOM_FIELD_ORG_MAP:
+        final_data = dict()
         org_cf_map = ITEM_CUSTOM_FIELD_ORG_MAP[obj.zoho_organization]
-        data = {org_cf_map[k]: v for k, v in data.items() if k in org_cf_map}
-
-
-    return data
+        for k, v in data.items():
+            if k.startswith('cf_'):
+                if k in org_cf_map:
+                    final_data[org_cf_map[k]] = v
+            else:
+                final_data[k] = v
+        return final_data
+    return {}
 
 
