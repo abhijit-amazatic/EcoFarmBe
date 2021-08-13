@@ -69,7 +69,7 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
     User item feedback serializer.
     """
     order_data = serializers.JSONField(allow_null=False)
-
+    profile_id = serializers.IntegerField(required=True)
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         try:
