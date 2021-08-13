@@ -25,7 +25,7 @@ def notify_slack_inventory_item_approved(data):
     details = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('details_display', [])])
     links = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('links_display', [])])
     msg = (
-        f"<!channel> Inventory item *{data.get('item_name')}* is approved by *{data.get('created_by_name')}* (User ID: `{data.get('created_by_email')}`).\n\n"
+        f"<!channel> Inventory item *{data.get('item_name')}* is approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`).\n\n"
         f"Item details are as follows!\n"
         f"{details}"
         f"\n\n"
