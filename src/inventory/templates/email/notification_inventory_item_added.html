@@ -5,24 +5,29 @@
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            New Inventory item is Submitted by user associated with the EmailID <strong>{{user_email}}</strong>. Please review and approve the item!
+            New Inventory item <strong>{{item_name}}</strong> is Submitted by <strong>{{created_by_name}}</strong> (User ID: {{created_by_email}}). Please review and approve the item!
         </p>
         <p style='font-size:16px !important;color: #013c48;'>
-                <strong>Vendor Name: </strong>             {{vendor_name}}
-            <br><strong>Client Code: </strong>             {{client_code}}
-            <br><strong>Cultivar Name: </strong>           {{cultivar_name}}
-            <br><strong>Cultivar Type: </strong>           {{cultivar_type}}
-            <br><strong>Quantity: </strong>                {{quantity_available}}
-            <br><strong>Farm Price: </strong>              {{farm_price_formated}}
-            <br><strong>Pricing Position: </strong>        {{pricing_position}}
-            {% comment %} <br><strong>Min Qty Purchase: </strong>        {{minimum_order_quantity}} {% endcomment %}
-            <br><strong>Grade Estimate: </strong>          {{grade_estimate}}
-            <br><strong>Need Testing: </strong>    {% if need_lab_testing_service %}Yes{% else %}No{% endif %}
-            <br><strong>Batch Availability Date: </strong> {{batch_availability_date}}
-            <br><strong>Harvest Date: </strong>            {{harvest_date}}
-            <br><strong>Batch Quality Notes: </strong>     {{product_quality_notes}}
-            <br><strong>Admin Link: </strong>              {{admin_link}}
+            Item details are as follows!
         </p>
+        <table style='font-size:16px !important;color: #013c48;' border='0'>
+            {% for v in details_display %}
+                <tr>
+                    <td style="padding: 5px 10px;">
+                        <strong>{{v.0}}:</strong>
+                    </td>
+                    <td style="padding: 5px 10px;">
+                        {{v.1}}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p style='font-size:16px !important;color: #013c48;'>
+            {% for v in links_display %}
+                <br><strong>{{v.0}}: </strong>{{v.1}}
+            {% endfor %}
+        </p>
+
     </div>
 </div>
 {% endblock %}
