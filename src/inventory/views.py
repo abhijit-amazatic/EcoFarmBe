@@ -59,7 +59,7 @@ from integration.inventory import (
     update_package, update_sales_return, update_contact, create_package,
     get_books_name_from_inventory_name, get_books_name_from_inventory_name)
 from .tasks import (
-    notify_inventory_item_added_task,
+    notify_inventory_item_submitted_task,
     create_duplicate_crm_vendor_from_crm_account_task,
     get_custom_inventory_data_from_crm_task,
     inventory_item_quantity_addition_task,
@@ -898,7 +898,7 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
         }
         obj.save()
         get_custom_inventory_data_from_crm_task(obj.id)
-        notify_inventory_item_added_task.delay(obj.id)
+        notify_inventory_item_submitted_task.delay(obj.id)
         create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
 
 

@@ -7,18 +7,26 @@
         <p style='font-size:16px !important;color: #013c48;'>
             New Inventory item is added. Logistics detail summary for the item is as follows:
         </p>
-        <p style='font-size:16px !important;color: #013c48;'>
-                <strong>Transportation / Sample Pickup: </strong>           {{transportation}}
-            <br><strong>Best time to call to arrange for pickup: </strong>  {{best_contact_Day_of_week}} {{best_contact_time_from}} - {{best_contact_time_to}}
+        <table style='font-size:16px !important;color: #013c48;' border='0'>
+            {% for v in details_display %}
+                <tr>
+                    <td style="padding: 5px 10px;">
+                        <strong>{{v.0}}:</strong>
+                    </td>
+                    <td style="padding: 5px 10px;">
+                        {{v.1}}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
 
-            <br><strong>Vendor Name: </strong>              {{vendor_name}}
-            <br><strong>Client Code: </strong>              {{client_code}}
-            <br><strong>Product Category: </strong>         {{category_name}}
-            <br><strong>Cultivar Name: </strong>            {{cultivar_name}}
-            <br><strong>Quantity Available: </strong>       {{quantity_available}}
-            <br><strong>Admin Link: </strong>               {{admin_link}}
-            <br><strong>CRM Vendor Link: </strong>          {{crm_vendor_link}}
+        <p style='font-size:16px !important;color: #013c48;'>
+            {% for v in links_display %}
+                <br><strong>{{v.0}}: </strong>{{v.1}}
+            {% endfor %}
+            <br>
         </p>
+
     </div>
 </div>
 {% endblock %}

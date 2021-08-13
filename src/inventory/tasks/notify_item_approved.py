@@ -22,26 +22,17 @@ def notify_slack_inventory_item_approved(data):
     """
     as new Inventory item approved, inform admin on slack.
     """
-    msg = (f"<!channel>Inventory item is approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`).\n"
-        f"- *Vendor Name:* {data.get('vendor_name')}\n"
-        f"- *Client Code:* {data.get('client_code')}\n"
-        f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
-        f"- *Cultivar Type:* {data.get('cultivar_type')}\n"
-        f"- *SKU:* {data.get('sku')}\n"
-        f"- *Quantity:* {data.get('quantity_available')}\n"
-        f"- *Marketplace Status:* {data.get('marketplace_status')}\n"
-        f"- *Farm Price:* {data.get('farm_price_formated')}\n"
-        f"- *Pricing Position:* {data.get('pricing_position')}\n"
-        # f"- *Min Qty Purchase:* {data.get('minimum_order_quantity')}\n"
-        f"- *Seller Grade Estimate:* {data.get('grade_estimate')}\n"
-        f"- *Need Testing:* { 'Yes' if data.get('need_lab_testing_service') else 'No'}\n"
-        f"- *Batch Availability Date:* {data.get('batch_availability_date')}\n"
-        f"- *Harvest Date:* {data.get('harvest_date')}\n"
-        f"- *Batch Quality Notes:* {data.get('product_quality_notes')}\n"
-        f"- *Procurement Rep:* {data.get('procurement_rep_name')}\n"
-        f"- *Admin Link:* {data.get('admin_link')}\n"
-        f"- *Zoho Inventory Item Link:* {data.get('zoho_item_link')}\n"
+    details = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('details_display', [])])
+    links = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('links_display', [])])
+    msg = (
+        f"<!channel> Inventory item *{data.get('item_name')}* is approved by *{data.get('created_by_name')}* (User ID: `{data.get('created_by_email')}`).\n\n"
+        f"Item details are as follows!\n"
+        f"{details}"
+        f"\n\n"
+        f"{links}"
+        f"\n"
     )
+
     slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
 
 def notify_email_inventory_item_approved(data):
@@ -63,17 +54,14 @@ def notify_logistics_slack_inventory_item_approved(data):
     """
     as new Inventory item approved, inform Logistic on slack.
     """
-    msg = (f"<!channel>New Inventory item is added. Logistics detail summary for the item is as follows:\n"
-        f"- *Transportation / Sample Pickup:* {data.get('transportation')}\n"
-        f"- *Best time to call to arrange for pickup:* "
-        f"{data.get('best_day')} {data.get('best_time_from')} - {data.get('best_time_to')}\n"
-        f"- *Vendor Name:* {data.get('vendor_name')}\n"
-        f"- *Client Code:* {data.get('client_code')}\n"
-        f"- *Product Category:* {data.get('category_name')}\n"
-        f"- *Cultivar Name:* {data.get('cultivar_name')}\n"
-        f"- *Quantity:* {data.get('quantity_available')}\n"
-        f"- *Admin Link:* {data.get('admin_link')}\n"
-        f"- *CRM Vendor Link:* {data.get('crm_vendor_link')}\n"
+    details = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('details_display', [])])
+    links = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('links_display', [])])
+    msg = (
+        f"<!channel> New Inventory item is added. Logistics detail summary for the item is as follows:\n"
+        f"{details}"
+        f"\n\n"
+        f"{links}"
+        f"\n"
     )
     slack.chat.post_message(settings.SLACK_LOGISTICS_TRANSPORT_CHANNEL, msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
 
@@ -99,30 +87,75 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
     if qs.exists():
         obj = qs.first()
         if obj.status == 'approved':
-            data = copy.deepcopy(obj.__dict__)
-            data['cultivar_name'] = obj.cultivar.cultivar_name
-            data['cultivar_type'] = obj.cultivar.cultivar_type
-            data['admin_link'] = f"https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}"
+            # data = copy.deepcopy(obj.__dict__)
+            data = dict()
+            data['item_name'] = obj.cultivar.cultivar_name
             data['approved_by_email'] = obj.approved_by.get('email')
             data['approved_by_name'] = obj.approved_by.get('name')
             data['created_by_email'] = obj.created_by.get('email')
             data['created_by_name'] = obj.created_by.get('name')
-            data['zoho_item_link'] = f"https://inventory.zoho.com/app#/inventory/items/{obj.zoho_item_id}"
-            data['webapp_item_link'] = f"{settings.FRONTEND_DOMAIN_NAME.rstrip('/')}/marketplace/{obj.zoho_item_id}/item/"
-            if obj.farm_ask_price:
-                data['farm_price_formated'] = "${:,.2f}".format(obj.farm_ask_price)
-            if obj.best_contact_Day_of_week:
-                data['best_day'] = obj.best_contact_Day_of_week.title()
-            if obj.best_contact_time_from:
-                data['best_time_from'] = obj.best_contact_time_from.strftime("%I:%M %p")
-            if obj.best_contact_time_to:
-                data['best_time_to'] = obj.best_contact_time_to.strftime("%I:%M %p")
-            if obj.crm_vendor_id:
-                data['crm_vendor_link'] = f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Vendors/{obj.crm_vendor_id}"
+
+
+
+            data['details_display'] = {
+                'Vendor Name':             obj.vendor_name,
+                'Client Code':             obj.client_code,
+                'Product Category':        obj.category_name,
+                'Cultivar Name':           obj.cultivar.cultivar_name,
+                'Cultivar Type':           obj.cultivar.cultivar_type,
+                'SKU':                     obj.sku,
+                'Marketplace Status':      obj.marketplace_status,
+                'Quantity':                obj.quantity_available,
+                'Farm Price':              "${:,.2f}".format(obj.farm_ask_price) if obj.farm_ask_price else '',
+                'Pricing Position':        obj.pricing_position,
+                # 'Min Qty Purchase':        obj.minimum_order_quantity,
+                'Seller Grade Estimate':   obj.grade_estimate,
+                'Need Testing':            'Yes' if data.get('need_lab_testing_service') else 'No',
+                'Batch Availability Date': obj.batch_availability_date,
+                'Harvest Date':            obj.harvest_date,
+                'Batch Quality Notes':     obj.product_quality_notes,
+                'Procurement Rep':         obj.procurement_rep_name,
+            }.items()
+
+            data['links_display'] = {
+                'Admin Link':               f'https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}',
+                'Zoho Inventory Item Link': f'https://inventory.zoho.com/app#/inventory/items/{obj.zoho_item_id}',
+                # 'Webapp Item Link':         f'{settings.FRONTEND_DOMAIN_NAME.rstrip("/")}/marketplace/{obj.zoho_item_id}/item/',
+                # 'CRM Vendor Link':          f'{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Vendors/{obj.crm_vendor_id}' if obj.crm_vendor_id else '',
+            }.items()
+
+
             notify_slack_inventory_item_approved(data)
             notify_email_inventory_item_approved(data)
             if notify_logistics:
                 if obj.transportation:
+                    pick_time = []
+                    if obj.best_contact_time_from:
+                        pick_time.append(obj.best_contact_time_from.strftime("%I:%M %p"))
+                    if obj.best_contact_time_to:
+                        pick_time.append(obj.best_contact_time_to.strftime("%I:%M %p"))
+
+                    pickup = []
+                    if obj.best_contact_Day_of_week:
+                        pickup.append(obj.best_contact_Day_of_week.title())
+                    if pick_time:
+                        pickup.append(' - '.join(pick_time))
+
+                    data['details_display'] = {
+                        'Transportation / Sample Pickup':          obj.transportation,
+                        'Best time to call to arrange for pickup': ' '.join(pickup),
+                        'Vendor Name':                             obj.vendor_name,
+                        'Client Code':                             obj.client_code,
+                        'Product Category':                        obj.category_name,
+                        'Cultivar Name':                           obj.cultivar.cultivar_name,
+                        'Quantity Available':                      obj.quantity_available,
+                    }.items()
+
+                    data['links_display'] = {
+                        'Admin Link':      f'https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}',
+                        'CRM Vendor Link': f'{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Vendors/{obj.crm_vendor_id}' if obj.crm_vendor_id else '',
+                    }.items()
+
                     notify_logistics_slack_inventory_item_approved(data)
                     notify_logistics_email_inventory_item_approved(data)
 

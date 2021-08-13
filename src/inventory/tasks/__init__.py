@@ -22,7 +22,7 @@ from .export_csv import (
     export_inventory_aggrigated_csv,
     export_inventory_aggrigated_county_csv,
 )
-from .notify_item_added import (notify_inventory_item_added_task, )
+from .notify_item_submitted import (notify_inventory_item_submitted_task, )
 from .notify_item_approved import (notify_inventory_item_approved_task, )
 from .notify_item_change_submitted import (notify_inventory_item_change_submitted_task, )
 from .notify_item_change_approved import (notify_inventory_item_change_approved_task, )

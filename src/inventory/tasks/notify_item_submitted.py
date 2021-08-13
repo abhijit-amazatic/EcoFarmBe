@@ -17,14 +17,14 @@ slack = Slacker(settings.SLACK_TOKEN)
 User = get_user_model()
 
 
-def notify_slack_inventory_item_added(data):
+def notify_slack_inventory_item_submitted(data):
     """
-    as new Inventory item added, inform admin on slack.
+    as new Inventory item submitted, inform admin on slack.
     """
-    details = "".join([ f"- *{v[0]}:* {v[1]} \n" for v in data.get('details_display', [])])
-    links = "".join([ f"- *{v[0]}:* {v[1]} \n" for v in data.get('links_display', [])])
+    details = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('details_display', [])])
+    links = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('links_display', [])])
     msg = (
-        f"<!channel>New Inventory item *{data.get('item_name')}* is Submitted by *{data.get('created_by_name')}* (User ID: `{data.get('created_by_email')}`). Please review and approve the item!\n\n"
+        f"<!channel> New Inventory item *{data.get('item_name')}* is submitted by *{data.get('created_by_name')}* (User ID: `{data.get('created_by_email')}`). Please review and approve the item!\n\n"
         f"Item details are as follows!\n"
         f"{details}"
         f"\n\n"
@@ -33,9 +33,9 @@ def notify_slack_inventory_item_added(data):
     )
     slack.chat.post_message(settings.SLACK_INVENTORY_CHANNEL, msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
 
-def notify_email_inventory_item_added(data):
+def notify_email_inventory_item_submitted(data):
     """
-    as new Inventory item added, send notification mail.
+    as new Inventory item submitted, send notification mail.
     """
     qs = User.objects.all()
     qs = qs.filter(
@@ -49,7 +49,7 @@ def notify_email_inventory_item_added(data):
     for email in emails:
         try:
             mail_send(
-                "email/notification_inventory_item_added.html",
+                "email/notification_inventory_item_submitted.html",
                 data,
                 "New Inventory Item.",
                 email,
@@ -59,24 +59,22 @@ def notify_email_inventory_item_added(data):
 
 
 @app.task(queue="general")
-def notify_inventory_item_added_task(custom_inventory_id):
+def notify_inventory_item_submitted_task(custom_inventory_id):
     qs = CustomInventory.objects.filter(id=custom_inventory_id)
     if qs.exists():
         obj = qs.first()
         data = copy.deepcopy(obj.__dict__)
+        data = dict()
         data['item_name'] = obj.cultivar.cultivar_name
         data['created_by_email'] = obj.created_by.get('email')
         data['created_by_name'] = obj.created_by.get('name')
-
-        if obj.farm_ask_price:
-            data['farm_price_formated'] = "${:,.2f}".format(obj.farm_ask_price)
 
         data['details_display'] = {
             'Vendor Name':             obj.vendor_name,
             'Client Code':             obj.client_code,
             'Cultivar Name':           obj.cultivar.cultivar_name,
             'Cultivar Type':           obj.cultivar.cultivar_type,
-            'Category':                obj.category_name,
+            'Product Category':        obj.category_name,
             'Marketplace Status':      obj.marketplace_status,
             'Quantity':                obj.quantity_available,
             'Farm Price':              "${:,.2f}".format(obj.farm_ask_price) if obj.farm_ask_price else '',
@@ -93,5 +91,5 @@ def notify_inventory_item_added_task(custom_inventory_id):
             'Admin Link': f'https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}',
         }.items()
 
-        notify_slack_inventory_item_added(data)
-        notify_email_inventory_item_added(data)
+        notify_slack_inventory_item_submitted(data)
+        notify_email_inventory_item_submitted(data)
