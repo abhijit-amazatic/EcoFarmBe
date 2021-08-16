@@ -103,8 +103,8 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
                 request.update(license_db.profile_contact.profile_contact_details)
             except Exception:
                 pass
-            if is_update:
-                request.update({'id': request['zoho_books_id']})
+            # if is_update:
+            #     request.update({'id': request['zoho_books_id']})
             books_dict = get_format_dict('Books_Customer')
             try:
                 if not is_update:
@@ -126,6 +126,7 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
             for customer_type in ['vendor', 'customer']:
                 record_dict['contact_type'] = customer_type
                 if is_update:
+                    record_dict['contact_id'] = request[f'zoho_books_{customer_type}_id']
                     response = update_contact(books_name, record_dict, params=params)
                 else:
                     response = create_contact(books_name, record_dict, params=params)
@@ -136,7 +137,8 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
                         record_obj = License.objects.get(id=record_id)
                     else:
                         record_obj = License.objects.get(id=record_id)
-                    record_obj.zoho_books_id = zoho_books_ids
+                    record_obj.zoho_books_customer_id = zoho_books_ids.get('customer')
+                    record_obj.zoho_books_vendor_id = zoho_books_ids.get('vendor')
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
