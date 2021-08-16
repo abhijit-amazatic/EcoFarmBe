@@ -20,30 +20,10 @@ from integration.crm import (insert_vendors, insert_accounts,is_user_existing,)
 from integration.box import upload_file
 from integration.apps.aws import (create_presigned_url, )
 from user.models import (User,)
+from utils import (reverse_admin_change_path,)
 from .models import (
     BinderLicense,
 )
-
-from utils import (reverse_admin_change_path,)
-
-
-def insert_or_update_vendor_accounts(profile, instance):
-    """
-    Insert/update vendors/accounts based on existing user or not. 
-    """
-    is_existing_user = is_user_existing(license_number=instance.license_number)
-    
-    if is_existing_user and is_existing_user[0]:
-        if profile.license.profile_category == 'cultivation':
-            insert_vendors.delay(id=instance.id, is_update=True)
-        else:
-            insert_accounts.delay(id=instance.id,is_update=True)
-    else:
-        if profile.license.profile_category == 'cultivation':
-            insert_vendors.delay(id=instance.id)
-        else:
-            insert_accounts.delay(id=instance.id)
-
 
 
 class ListGroupBySerializer(serializers.ListSerializer):

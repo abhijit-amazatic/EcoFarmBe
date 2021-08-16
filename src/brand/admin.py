@@ -120,8 +120,6 @@ def sync_records(modeladmin, request, queryset):
     for record in queryset:
         insert_record_to_crm.delay(
             record_id=record.id,
-            is_buyer=record.is_buyer,
-            is_seller=record.is_seller,
             is_update=False)
 sync_records.short_description = "Insert Records To CRM"
 
@@ -129,14 +127,12 @@ def update_records(modeladmin, request, queryset):
     for record in queryset:
         insert_record_to_crm.delay(
             record_id=record.id,
-            is_buyer=record.is_buyer,
-            is_seller=record.is_seller,
             is_update=True)
 update_records.short_description = "Update Records To CRM"
 
 def update_status_to_in_progress(modeladmin, request, queryset):
     for profile in queryset:
-        profile.status ='in_progress'
+        profile.status = 'in_progress'
         profile.save()
     messages.success(request,'Status Updated to in_progress!')    
 update_status_to_in_progress.short_description = "Update Status To in_progress"

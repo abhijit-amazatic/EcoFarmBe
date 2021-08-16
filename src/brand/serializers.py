@@ -65,16 +65,11 @@ def insert_or_update_vendor_accounts(profile, instance):
     if is_existing_user and is_existing_user[0]:
         is_update = True
     else:
-        is_update =False
-        
-    if instance.is_seller and instance.is_buyer:
-        insert_vendors.delay(id=instance.id, is_update=is_update)
-        insert_accounts.delay(id=instance.id,is_update=is_update)
-    elif instance.is_seller:
-        insert_vendors.delay(id=instance.id, is_update=is_update)
-    elif instance.is_buyer:
-        insert_accounts.delay(id=instance.id,is_update=is_update)
-        
+        is_update = False
+
+    insert_vendors.delay(id=instance.id, is_update=is_update)
+    insert_accounts.delay(id=instance.id,is_update=is_update)
+
     # if is_existing_user and is_existing_user[0]:
     #     if profile.license.profile_category == 'cultivation':
     #         insert_vendors.delay(id=instance.id, is_update=True)
