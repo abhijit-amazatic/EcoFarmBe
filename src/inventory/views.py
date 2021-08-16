@@ -65,6 +65,7 @@ from .tasks import (
     inventory_item_quantity_addition_task,
     notify_inventory_item_change_submitted_task,
     notify_inventory_item_delist_submitted_task,
+    async_update_inventory_item,
 )
 from integration.books import (get_salesorder, parse_book_object)
 from .utils import delete_in_transit_item
@@ -1240,8 +1241,8 @@ class InventoryUpdateView(APIView):
             obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
             item['cf_tags'] = item.pop('tags') #Added cf_tags insted of tags
             inventory_name = get_inventory_name(item.get('item_id'))
-            response = update_inventory_item(inventory_name,item.get('item_id'), item)
-            return Response(response)
+            response = async_update_inventory_item.delay(inventory_name,item.get('item_id'), item)
+            return Response({"Item Updated Successfully!"},status=status.HTTP_200_OK)
         return Response({"item_id is missing!"}, status=status.HTTP_400_BAD_REQUEST)        
 
 

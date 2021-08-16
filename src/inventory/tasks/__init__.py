@@ -22,6 +22,7 @@ from .export_csv import (
     export_inventory_aggrigated_csv,
     export_inventory_aggrigated_county_csv,
 )
+from integration.inventory import update_inventory_item
 from .notify_item_submitted import (notify_inventory_item_submitted_task, )
 from .notify_item_approved import (notify_inventory_item_approved_task, )
 from .notify_item_change_submitted import (notify_inventory_item_change_submitted_task, )
@@ -32,6 +33,16 @@ from .crm_vendor_from_crm_account import (create_duplicate_crm_vendor_from_crm_a
 from .custom_inventory_data_from_crm import (get_custom_inventory_data_from_crm_task, )
 from .create_approved_item_po import (create_approved_item_po_task, )
 from .inventory_item_quantity_addition import (inventory_item_quantity_addition_task, )
+
+
+@app.task(queue="urgent", serializer='json')
+def async_update_inventory_item(inventory_name,item_id,item):
+    """
+    async task for insert inventory items.
+    """
+    update_inventory = update_inventory_item(inventory_name,item_id,item)
+    return {"Task Processed": True} 
+
 
 # @app.task(queue="general")
 # def inventory_item_change_task(inventory_items_change_request_id):
