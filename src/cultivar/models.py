@@ -10,9 +10,15 @@ class Cultivar(models.Model):
         ('pending_for_approval', _('Pending For Approval')),
         ('approved', _('Approved')),
     )
+    CULTIVAR_TYPE_CHOICES = (
+        ('Sativa', _('Sativa')),
+        ('Indica', _('Indica')),
+        ('Hybrid', _('Hybrid')),
+    )
+
     cultivar_crm_id = models.CharField(_('Cultivar ID'), blank=True, null=True, max_length=255)
     cultivar_name = models.CharField(_('Cultivar Name'), blank=True, null=True, max_length=255)
-    cultivar_type = models.CharField(_('Cultivar Type'), blank=True, null=True, max_length=50)
+    cultivar_type = models.CharField(_('Cultivar Type'), choices=CULTIVAR_TYPE_CHOICES, blank=True, null=True, max_length=50)
     description = models.TextField(_('Description'), blank=True, null=True)
     thc_range = models.FloatField(_('THC'), blank=True, null=True)
     cbd_range = models.FloatField(_('CBD'), blank=True, null=True)
