@@ -74,7 +74,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryWebHook,InventoryExportViewSet,InventoryCultivationTypeView,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
                              SalesReturnView, PackageView, ContactView, InventoryMetaDataView,
-                             ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView, InTransitDeleteSyncView)
+                             ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView,
+                             InTransitDeleteSyncView, InventoryUpdateView)
 from cultivar.views import (CultivarViewSet, CultivarSyncView, )
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -285,6 +286,7 @@ urlpatterns = [
     path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
+    path(r'inventory-update/', InventoryUpdateView.as_view(), name="inventory-update"),
     path(r'campaign/', CampaignView.as_view(), name="campaign"),
     path(r'inventory/package/', PackageView.as_view(), name="inventory-packages"),
     path(r'inventory/sales-return/', SalesReturnView.as_view(), name="inventory-sales-returns"),

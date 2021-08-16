@@ -1223,4 +1223,26 @@ class InTransitDeleteSyncView(APIView):
             return Response({"In Transit order item removed successfully for estimate_id %s " % estimate_id},status=status.HTTP_200_OK)
         return Response({"Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)        
 
+class InventoryUpdateView(APIView):
+    """
+    Inventory item update in inventory.
+    """
+    permission_classes = (InventoryPermission, )
+
+    def put(self, request):
+        """
+        Update inventory item in DB & ZOHO.
+        tags: Field in DB
+        cf_tags: Field in zoho
+        """
+        item = request.data
+        if item.get('item_id') and item.get('inventory_name'):
+            obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
+            item['cf_tags'] = item.pop('tags') #Added cf_tags insted of tags
+            inventory_name = get_inventory_name(item.get('item_id'))
+            response = update_inventory_item(inventory_name,item.get('item_id'), item)
+            return Response(response)
+        return Response({"item_id orinventory_name is missing!"}, status=status.HTTP_400_BAD_REQUEST)        
+
+
     
