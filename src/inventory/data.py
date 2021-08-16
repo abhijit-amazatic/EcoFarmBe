@@ -41,7 +41,7 @@ ORG_ITEM_CUSTOM_FIELD_MAP_TABLE = (
     ('cf_lab_test_sample_id',          'cf_lab_test_sample_id',          '',                               'cf_lab_sample_id',          ),
     ('cf_sample_in_house',             'cf_sample_in_house',             '',                               '',                          ),
     ('cf_seller_position',             'cf_seller_position',             '',                               '',                          ),
-    # ('cf_ifp_farm',                    'cf_ifp_farm',                    '',                               '',                          ),
+    ('cf_ifp_farm',                    'cf_ifp_farm',                    '',                               '',                          ), # inactive
     ('cf_marge_per_unit',              'cf_marge_per_unit',              '',                               '',                          ),
     ('cf_gross_margin_per_unit',       'cf_gross_margin_per_unit',       '',                               '',                          ),
     ('cf_total_margin_per_item',       'cf_total_margin_per_item',       '',                               '',                          ),
@@ -54,11 +54,11 @@ ORG_ITEM_CUSTOM_FIELD_MAP_TABLE = (
     ('cf_date_available',              'cf_date_available',              '',                               '',                          ),
     ('cf_metrc_source_package_id',     'cf_metrc_source_package_id',     '',                               '',                          ),
     ('cf_harvest_date',                'cf_harvest_date',                '',                               '',                          ),
-    # ('cf_market_feedback',             'cf_market_feedback',             '',                               '',                          ),
+    ('cf_market_feedback',             'cf_market_feedback',             '',                               '',                          ), # inactive
     ('cf_available_date',              'cf_available_date',              'cf_availability_date',           'cf_available_date',         ),
-    # ('cf_offer_price',                 'cf_offer_price',                 '',                               '',                          ),
-    # ('cf_price_change',                'cf_price_change',                '',                               '',                          ),
-    # ('cf_price_change_date',           'cf_price_change_date',           '',                               '',                          ),
+    ('cf_offer_price',                 'cf_offer_price',                 '',                               '',                          ), # inactive
+    ('cf_price_change',                'cf_price_change',                '',                               '',                          ), # inactive
+    ('cf_price_change_date',           'cf_price_change_date',           '',                               '',                          ), # inactive
     ('cf_payment_method',              'cf_payment_method',              '',                               '',                          ),
     ('cf_batch_quality_notes',         'cf_batch_quality_notes',         'cf_batch_notes',                 'cf_batch_quality_notes',    ),
     ('cf_lab_testing_services',        'cf_lab_testing_services',        '',                               '',                          ),

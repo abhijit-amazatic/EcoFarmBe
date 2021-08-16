@@ -135,16 +135,17 @@ class CustomInventoryForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        cat = cleaned_data.get('category_name')
-        if getattr(self, 'instance') and '_approve' in self.data:
-            if self.instance.status == 'pending_for_approval':
-                if cat and CG.get(cat, '') in ('Isolates', 'Concentrates', 'Terpenes'):
-                    if not cleaned_data.get('trim_used'):
-                        self.add_error('trim_used', "This value is required for current item category.")
-                    if not cleaned_data.get('trim_used_verified'):
-                        self.add_error('trim_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
-                        # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
-        return cleaned_data
+        if hasattr(self, 'instance') and self.instance:
+            cat = self.instance.category_name
+            if getattr(self, 'instance') and '_approve' in self.data:
+                if self.instance.status == 'pending_for_approval':
+                    if cat and CG.get(cat, '') in ('Isolates', 'Concentrates', 'Terpenes'):
+                        if not cleaned_data.get('trim_used'):
+                            self.add_error('trim_used', "This value is required for current item category.")
+                        if not cleaned_data.get('trim_used_verified'):
+                            self.add_error('trim_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
+                            # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
+            return cleaned_data
 
     class Meta:
         model = CustomInventory

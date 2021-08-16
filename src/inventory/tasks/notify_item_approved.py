@@ -13,6 +13,9 @@ from utils import (reverse_admin_change_path,)
 from ..models import (
     CustomInventory,
 )
+from ..data import (
+    CG
+)
 
 slack = Slacker(settings.SLACK_TOKEN)
 User = get_user_model()
@@ -87,6 +90,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
     if qs.exists():
         obj = qs.first()
         if obj.status == 'approved':
+            category_group = CG.get(obj.category_name, '')
             # data = copy.deepcopy(obj.__dict__)
             data = dict()
             data['item_name'] = obj.cultivar.cultivar_name
@@ -95,9 +99,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
             data['created_by_email'] = obj.created_by.get('email')
             data['created_by_name'] = obj.created_by.get('name')
 
-
-
-            data['details_display'] = {
+            details_display = {
                 'Vendor Name':             obj.vendor_name,
                 'Client Code':             obj.client_code,
                 'Product Category':        obj.category_name,
@@ -106,16 +108,39 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                 'SKU':                     obj.sku,
                 'Marketplace Status':      obj.marketplace_status,
                 'Quantity':                obj.quantity_available,
-                'Farm Price':              "${:,.2f}".format(obj.farm_ask_price) if obj.farm_ask_price else '',
-                'Pricing Position':        obj.pricing_position,
-                # 'Min Qty Purchase':        obj.minimum_order_quantity,
-                'Seller Grade Estimate':   obj.grade_estimate,
-                'Need Testing':            'Yes' if data.get('need_lab_testing_service') else 'No',
-                'Batch Availability Date': obj.batch_availability_date,
-                'Harvest Date':            obj.harvest_date,
-                'Batch Quality Notes':     obj.product_quality_notes,
-                'Procurement Rep':         obj.procurement_rep_name,
-            }.items()
+            }
+
+            if category_group in ('Flowers', 'Trims', ''):
+                details_display.update({
+                    'Farm Price':              "${:,.2f}".format(obj.farm_ask_price) if obj.farm_ask_price else '',
+                    'Pricing Position':        obj.pricing_position,
+                    # 'Min Qty Purchase':        obj.minimum_order_quantity,
+                    'Seller Grade Estimate':   obj.grade_estimate,
+                    'Need Testing':            'Yes' if data.get('need_lab_testing_service') else 'No',
+                    'Batch Availability Date': obj.batch_availability_date,
+                    'Harvest Date':            obj.harvest_date,
+                })
+            elif category_group in ('Isolates', 'Concentrates', 'Terpenes'):
+                details_display.update({
+                    'Farm Price':             "${:,.2f}".format(obj.farm_ask_price) if obj.farm_ask_price else '',
+                    'Pricing Position':        obj.pricing_position,
+                    'Need Testing':            'Yes' if data.get('need_lab_testing_service') else 'No',
+                    'Batch Availability Date': obj.batch_availability_date,
+                    'Manufacturing Date':            obj.manufacturing_date,
+                })
+            elif category_group in ('Clones'):
+                details_display.update({
+                    'Farm Price':        "${:,.2f}".format(obj.farm_ask_price) if obj.farm_ask_price else '',
+                    'Pricing Position':  obj.pricing_position,
+                    # 'Need Testing':      'Yes' if data.get('need_lab_testing_service') else 'No',
+                    'Rooting Days':      obj.rooting_days,
+                    'Clone Size (inch)': obj.clone_size,
+                })
+
+            details_display['Batch Quality Notes'] = obj.product_quality_notes
+            details_display['Procurement Rep'] = obj.obj.procurement_rep_name
+
+            data['details_display'] = details_display.items()
 
             data['links_display'] = {
                 'Admin Link':               f'https://{settings.BACKEND_DOMAIN_NAME}{reverse_admin_change_path(obj)}',
