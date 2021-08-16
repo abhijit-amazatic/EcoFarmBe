@@ -133,12 +133,13 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
                 zoho_books_ids[customer_type] = response.get('contact_id')
             if all(zoho_books_ids.values()):
                 try:
+                    org_name = books_name.lstrip('books_')
                     if is_single_user:
                         record_obj = License.objects.get(id=record_id)
                     else:
                         record_obj = License.objects.get(id=record_id)
-                    record_obj.zoho_books_customer_id = zoho_books_ids.get('customer')
-                    record_obj.zoho_books_vendor_id = zoho_books_ids.get('vendor')
+                    record_obj.zoho_books_customer_ids.update({org_name: zoho_books_ids.get('customer', '')})
+                    record_obj.zoho_books_vendor_ids.update({org_name: zoho_books_ids.get('vendor', '')})
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
