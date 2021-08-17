@@ -100,7 +100,7 @@ def get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee):
 
         data['cf_date_available'] = str(obj.batch_availability_date or '')
         data['cf_trim_qty_lbs'] = obj.trim_used
-        data['cf_batch_qty_g'] = obj.quantity_available
+        data['cf_batch_qty_g'] = obj.total_batch_quantity
         if obj.manufacturing_date:
             data['cf_manufacturing_date'] = str(obj.manufacturing_date)
 
