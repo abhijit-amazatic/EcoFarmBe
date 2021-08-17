@@ -451,6 +451,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
  
     # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
     # cultivar_type = models.CharField(_('Cultivar Type'), choices=CULTIVAR_TYPE_CHOICES, blank=True, null=True, max_length=255, )
+    mfg_batch_id = models.CharField(_('MFG Batch ID'), blank=True, null=True, max_length=255)
  
     cultivation_type = models.CharField(_('Cultivation Type'), choices=CULTIVATION_TYPE_CHOICES, blank=True, null=True, max_length=255)
     category_name = models.CharField(_('Item Category Name'), choices=CATEGORY_NAME_CHOICES, max_length=225)
@@ -462,6 +463,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     manufacturing_date = models.DateField(_('Manufacturing Date'), auto_now=False, blank=True, null=True, default=None)
+    cannabinoid_percentage = models.FloatField(_("Cannabinoid Percentage"), blank=True, null=True)
     clone_date = models.DateField(_('Clone Date'), auto_now=False, blank=True, null=True, default=None)
     rooting_days = models.PositiveIntegerField(_('Rooting Days'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
