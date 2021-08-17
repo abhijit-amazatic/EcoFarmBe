@@ -369,7 +369,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                     tax = get_item_tax(
                         category_name=obj.category_name,
                         trim_used=obj.trim_used,
-                        item_quantity=obj.quantity_available,
+                        item_quantity=obj.total_batch_quantity,
                         request=request,)
                     if isinstance(tax, float):
                         if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id or not obj.cultivation_type:

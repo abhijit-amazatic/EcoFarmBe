@@ -6,7 +6,7 @@ from django.apps import apps
 
 
 @receiver(signals.pre_save, sender=apps.get_model('inventory', 'CustomInventory'))
-def pre_save_custom_inventory(sender, instance, created, **kwargs):
+def pre_save_custom_inventory(sender, instance, **kwargs):
     if instance.cultivar:
         instance.cultivar_name = instance.cultivar.cultivar_name
         instance.cultivar_type = instance.cultivar.cultivar_type
