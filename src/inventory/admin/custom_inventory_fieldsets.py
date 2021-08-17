@@ -2,9 +2,11 @@ fieldsets_default = {
     None: {
         'fields': (
             'zoho_organization',
-            'cultivar',
-            # 'cultivar_name',
             'category_name',
+            'cultivar',
+            'cultivar_name',
+            'cultivar_type',
+            'cultivar_crm_id',
             'marketplace_status',
         ),
     },

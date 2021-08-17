@@ -173,10 +173,11 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     readonly_fields = (
         'cultivar',
         'cultivar_name',
+        'cultivar_type',
+        'cultivar_crm_id',
         'category_name',
         'trim_used_doc',
         'status',
-        'cultivar_name',
         # 'vendor_name',
         'crm_vendor_id',
         # 'client_code',
@@ -391,9 +392,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 print('Error while creating item in Zoho Inventory')
                 print(result)
                 print(data)
-
-    def cultivar_name(self, obj):
-        return obj.cultivar.cultivar_name
 
     # def test_action(self, request, queryset):
     #     pass

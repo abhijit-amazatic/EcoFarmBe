@@ -101,12 +101,15 @@ class CustomInventoryCultivarNameField(serializers.RelatedField):
         return obj.cultivar_name
 
     def to_internal_value(self, data):
-        queryset = self.get_queryset()
-        queryset = queryset.filter(cultivar_name=data)
-        if not queryset.exists():
-            raise serializers.ValidationError(f'Cultivar name \'{data}\' does not exist or not approved.')
+        if data:
+            queryset = self.get_queryset()
+            queryset = queryset.filter(cultivar_name=data)
+            if not queryset.exists():
+                raise serializers.ValidationError(f'Cultivar name \'{data}\' does not exist or not approved.')
+            else:
+                return queryset.latest('create_time')
         else:
-            return queryset.latest('create_time')
+            return None
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -118,7 +121,7 @@ class CustomInventorySerializer(serializers.ModelSerializer):
     """
     Inventory Serializer
     """
-    cultivar_name = CustomInventoryCultivarNameField(source='cultivar')
+    cultivar_name = CustomInventoryCultivarNameField(source='cultivar', required=False, allow_null=True, allow_empty=True)
     item_image_urls = serializers.SerializerMethodField()
     labtest_url = serializers.SerializerMethodField()
 

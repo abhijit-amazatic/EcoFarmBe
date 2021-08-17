@@ -447,10 +447,11 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('efn', _('Eco Farm Nursery (EFN LLC)')),
     )
     license_profile = models.ForeignKey('brand.LicenseProfile', verbose_name=_('License Profile'), related_name='custom_inventory', null=True, on_delete=models.SET_NULL)
-    cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.PROTECT)
+    cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.SET_NULL, blank=True, null=True,)
  
-    # cultivar_name = models.CharField(_('Cultivar Name'), max_length=255,)
-    # cultivar_type = models.CharField(_('Cultivar Type'), choices=CULTIVAR_TYPE_CHOICES, blank=True, null=True, max_length=255, )
+    cultivar_name = models.CharField(_('Cultivar Name'), blank=True, null=True, max_length=255,)
+    cultivar_type = models.CharField(_('Cultivar Type'), choices=CULTIVAR_TYPE_CHOICES, blank=True, null=True, max_length=255, )
+    cultivar_crm_id = models.CharField(_('Cultivar CRM ID'), blank=True, null=True, max_length=255)
     mfg_batch_id = models.CharField(_('MFG Batch ID'), blank=True, null=True, max_length=255)
  
     cultivation_type = models.CharField(_('Cultivation Type'), choices=CULTIVATION_TYPE_CHOICES, blank=True, null=True, max_length=255)

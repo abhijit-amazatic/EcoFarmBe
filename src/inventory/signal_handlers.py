@@ -5,6 +5,14 @@ from django.db.models import signals
 from django.apps import apps
 
 
+@receiver(signals.pre_save, sender=apps.get_model('inventory', 'CustomInventory'))
+def pre_save_custom_inventory(sender, instance, created, **kwargs):
+    if instance.cultivar:
+        instance.cultivar_name = instance.cultivar.cultivar_name
+        instance.cultivar_type = instance.cultivar.cultivar_type
+        instance.cultivar_crm_id = instance.cultivar.cultivar_crm_id
+
+
 @receiver(signals.post_save, sender=apps.get_model('inventory', 'CustomInventory'))
 def post_save_custom_inventory(sender, instance, created, **kwargs):
     if created:
