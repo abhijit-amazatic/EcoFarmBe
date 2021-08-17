@@ -29,7 +29,7 @@ def get_tax_from_db(tax='flower', request=None):
 def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None):
     msg_error = lambda msg: messages.error(request, msg,) if request else None
     if category_name:
-        if CG.get(category_name, '')  == 'Flowers':
+        if CG.get(category_name, '') == 'Flowers':
             tax = get_tax_from_db(tax='flower')
             if isinstance(tax, float):
                 return tax
@@ -37,7 +37,11 @@ def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None
             tax = get_tax_from_db(tax='trim')
             if isinstance(tax, float):
                 return tax
-        if CG.get(category_name, '') in ('Isolates', 'Concentrates'):
+        if CG.get(category_name, '') == 'Kief':
+            tax = get_tax_from_db(tax='trim')
+            if isinstance(tax, float):
+                return round(tax/454, 2)
+        if CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
             trim_tax = get_tax_from_db(tax='trim')
             if isinstance(trim_tax, float):
                 if trim_used:

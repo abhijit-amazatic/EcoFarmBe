@@ -126,12 +126,14 @@ class CustomInventorySerializer(serializers.ModelSerializer):
     labtest_url = serializers.SerializerMethodField()
 
     category_required_fields = {
-        'Flowers':      ('batch_availability_date', 'harvest_date', 'grade_estimate',),
-        'Trims':        ('batch_availability_date', 'harvest_date',),
-        'Concentrates': ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
-        'Isolates':     ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
-        'Terpenes':     ('batch_availability_date', 'total_batch_quantity', 'manufacturing_date',),
-        'Clones':       ('rooting_days',),
+        'Flowers':      ('cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
+        'Trims':        ('cultivar_name', 'batch_availability_date', 'harvest_date',),
+        'Kief':         ('cultivar_name', 'batch_availability_date', 'manufacturing_date',),
+        'Concentrates': ('cultivar_name', 'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'trim_used',),
+        'Distillates':  ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'trim_used', 'cannabinoid_percentage',),
+        'Isolates':     ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'trim_used', 'cannabinoid_percentage',),
+        'Terpenes':     ('cultivar_name', 'batch_availability_date', 'manufacturing_date', ),
+        'Clones':       ('cultivar_name', 'rooting_days',),
     }
 
 

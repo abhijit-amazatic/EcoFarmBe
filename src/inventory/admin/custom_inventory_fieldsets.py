@@ -5,8 +5,8 @@ fieldsets_default = {
             'category_name',
             'cultivar',
             'cultivar_name',
-            'cultivar_type',
-            'cultivar_crm_id',
+            # 'cultivar_type',
+            # 'cultivar_crm_id',
             'marketplace_status',
         ),
     },
@@ -95,6 +95,18 @@ _fieldsets = {
             ),
         },
     },
+    'Kief': {
+        **fieldsets_default,
+        'BATCH & QUALITY INFORMATION': {
+            'fields': (
+                'quantity_available',
+                'manufacturing_date',
+                'batch_availability_date',
+                'product_quality_notes',
+                'need_lab_testing_service',
+            ),
+        },
+    },
     'Concentrates': {
         **fieldsets_default,
         'BATCH & QUALITY INFORMATION': {
@@ -110,8 +122,41 @@ _fieldsets = {
             ),
         },
     },
+    'Distillates': {
+        **fieldsets_default,
+        None: {
+            'fields': (
+                'zoho_organization',
+                'category_name',
+                'mfg_batch_id',
+                'cannabinoid_percentage',
+                'marketplace_status',
+            ),
+        },
+        'BATCH & QUALITY INFORMATION': {
+            'fields': (
+                'quantity_available',
+                'total_batch_quantity',
+                ('trim_used', 'trim_used_doc'),
+                'trim_used_verified',
+                'manufacturing_date',
+                'batch_availability_date',
+                'product_quality_notes',
+                'need_lab_testing_service',
+            ),
+        },
+    },
     'Isolates': {
         **fieldsets_default,
+        None: {
+            'fields': (
+                'zoho_organization',
+                'category_name',
+                'mfg_batch_id',
+                'cannabinoid_percentage',
+                'marketplace_status',
+            ),
+        },
         'BATCH & QUALITY INFORMATION': {
             'fields': (
                 'quantity_available',

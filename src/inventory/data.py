@@ -109,6 +109,9 @@ CATEGORY_GROUP_MAP = {
     'Trims': (
         'Trim',
     ),
+    'Kief': (
+        'Kief',
+    ),
     # 'Packaged Goods',
     'Concentrates': (
         'Wholesale - Concentrates'
@@ -118,12 +121,11 @@ CATEGORY_GROUP_MAP = {
         'Shatter',
         'Sauce',
         'Crumble',
-        'Kief',
+    ),
+    'Distillates': (
         'Distillate Oil',
         'Distillate Oil - THC',
         'Distillate Oil - CBD',
-    ),
-    'Distillates': (
     ),
     'Isolates': (
         'Isolates',
@@ -148,3 +150,26 @@ CATEGORY_GROUP_MAP = {
 }
 
 CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
+
+
+
+_CATEGORY_CANNABINOID_TYPE_MAP = {
+    'THC': (
+        'Crude Oil - THC',
+        'Distillate Oil - THC',
+        'Isolates - THC',
+    ),
+    'CBD': (
+        'Crude Oil - CBD',
+        'Distillate Oil - CBD',
+        'Isolates - CBD',
+    ),
+    'CBG': (
+        'Isolates - CBG',
+    ),
+    'CBN': (
+        'Isolates - CBN',
+    ),
+}
+
+CATEGORY_CANNABINOID_TYPE_MAP = {cat: k for k, v in _CATEGORY_CANNABINOID_TYPE_MAP.items() for cat in v}

@@ -139,7 +139,7 @@ class CustomInventoryForm(forms.ModelForm):
             cat = self.instance.category_name
             if getattr(self, 'instance') and '_approve' in self.data:
                 if self.instance.status == 'pending_for_approval':
-                    if cat and CG.get(cat, '') in ('Isolates', 'Concentrates', 'Terpenes'):
+                    if cat and CG.get(cat, '') in ('Isolates', 'Distillates', 'Concentrates', 'Terpenes'):
                         if not cleaned_data.get('trim_used'):
                             self.add_error('trim_used', "This value is required for current item category.")
                         if not cleaned_data.get('trim_used_verified'):
@@ -227,21 +227,70 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
             return fieldsets.get(cg_name, {})
         return fieldsets.get('default', {})
 
-    def generate_sku(self, obj, postfix):
+    def cultivar_name(self, obj):
+        if obj.cultivar:
+            return obj.cultivar.cultivar_name or obj.cultivar_name
+        return obj.cultivar_name
+
+    def generate_name(self, obj, request=None):
+        name = []
+        category_group = CG.get(obj.category_name)
+
+        if category_group in ('Isolates', 'Distillates',):
+
+            if category_group == 'Distillates':
+                name.append('Isolate')
+            elif category_group == 'Distillates':
+                name.append('Distillate')
+            if not obj.cannabinoid_percentage:
+                if request:
+                    self.message_user(request, 'Error while generating item name, cannabinoid percentage not provided', level='error')
+                return None
+            cb_percent_val = round(obj.cannabinoid_percentage, 2)
+            cb_percentage = str(cb_percent_val) if cb_percent_val%1 else str(int(cb_percent_val))
+            name.append(cb_percentage+'%')
+
+        elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
+
+            name.append(self.cultivar_name(obj))
+
+        return ' '.join(name)
+
+    def generate_sku(self, obj, postfix, request=None):
         sku = []
         if not settings.PRODUCTION and obj.zoho_organization in ['efl', 'efn']:
             sku.append('test')
             sku.append('sku')
         sku.append(obj.client_code)
-        sku.append(obj.cultivar.cultivar_name.replace(' ', '-'))
 
-        # if obj.harvest_date:
-        #     sku.append(obj.harvest_date.strftime('%m-%d-%y'))
+        category_group = CG.get(obj.category_name)
 
-        sku.append('{0:0>4}'.format(random.randint(1, 9999)))
+        if category_group in ('Isolates', 'Distillates',):
 
-        if postfix:
-            sku.append(str(postfix))
+            if not obj.mfg_batch_id:
+                if request:
+                    self.message_user(request, 'Error while generating SKU, MFG Batch ID not provided', level='error')
+                return None
+            sku.append(obj.mfg_batch_id)
+
+            # if postfix:
+            #     sku.append(str(postfix))
+
+        elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
+
+            cultivar_name = self.cultivar_name(obj)
+
+            if not cultivar_name:
+                if request:
+                    self.message_user(request, 'Error while generating SKU, cultivar name not provided', level='error')
+                return None
+
+            sku.append(cultivar_name.replace(' ', '-'))
+
+            # if obj.harvest_date:
+            #     sku.append(obj.harvest_date.strftime('%m-%d-%y'))
+
+            sku.append('{0:0>4}'.format(random.randint(1, 9999)))
 
 
         # if not settings.PRODUCTION:
@@ -305,93 +354,102 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                     self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
         return None
 
-
-
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            mcsp_fee = get_item_mcsp_fee(
-                obj.vendor_name,
-                license_profile=obj.license_profile,
-                item_category_group=CG.get(obj.category_name),
-                request=request,
-                farm_price=obj.farm_ask_price
-            )
-            if isinstance(mcsp_fee, float):
-                tax = get_item_tax(
-                    category_name=obj.category_name,
-                    trim_used=obj.trim_used,
-                    item_quantity=obj.quantity_available,
-                    request=request,)
-                if isinstance(tax, float):
-                    if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id or not obj.cultivation_type:
-                        self.get_crm_data(request, obj)
-                    if obj.client_code:
-                        if obj.zoho_organization:
-                            inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
-                            metadata = {}
-                            resp_metadata = inv_obj.get_metadata(params={})
-                            if resp_metadata.get('code') == 0:
-                                metadata = resp_metadata
-                            category_id = get_item_category_id(
-                                inv_obj=inv_obj,
-                                category_name=obj.category_name,
-                                metadata=metadata,
-                            )
-                            if category_id:
-                                if obj.vendor_name:
-                                    vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
-                                    if not vendor_id and obj.license_profile:
-                                        vendor_id = get_vendor_id(inv_obj, obj.license_profile.license.legal_business_name)
-                                    if vendor_id:
-                                        data = get_new_item_data(obj, inv_obj, category_id, vendor_id, tax, mcsp_fee)
-                                        self._approve(request, obj, inv_obj, data,)
+            item_name = self.generate_name(obj, request=request,)
+            if item_name:
+                mcsp_fee = get_item_mcsp_fee(
+                    obj.vendor_name,
+                    license_profile=obj.license_profile,
+                    item_category_group=CG.get(obj.category_name),
+                    request=request,
+                    farm_price=obj.farm_ask_price
+                )
+                if isinstance(mcsp_fee, float):
+                    tax = get_item_tax(
+                        category_name=obj.category_name,
+                        trim_used=obj.trim_used,
+                        item_quantity=obj.quantity_available,
+                        request=request,)
+                    if isinstance(tax, float):
+                        if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id or not obj.cultivation_type:
+                            self.get_crm_data(request, obj)
+                        if obj.client_code:
+                            if obj.zoho_organization:
+                                inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
+                                metadata = {}
+                                resp_metadata = inv_obj.get_metadata(params={})
+                                if resp_metadata.get('code') == 0:
+                                    metadata = resp_metadata
+                                category_id = get_item_category_id(
+                                    inv_obj=inv_obj,
+                                    category_name=obj.category_name,
+                                    metadata=metadata,
+                                )
+                                if category_id:
+                                    if obj.vendor_name:
+                                        vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
+                                        if not vendor_id and obj.license_profile:
+                                            vendor_id = get_vendor_id(inv_obj, obj.license_profile.license.legal_business_name)
+                                        if vendor_id:
+                                            data = get_new_item_data(
+                                                obj=obj,
+                                                inv_obj=inv_obj,
+                                                item_name=item_name,
+                                                category_id=category_id,
+                                                vendor_id=vendor_id,
+                                                tax=tax,
+                                                mcsp_fee=mcsp_fee,
+                                            )
+                                            self._approve(request, obj, inv_obj, data,)
+                                        else:
+                                            self.message_user(request, 'Vendor not found on zoho', level='error')
                                     else:
-                                        self.message_user(request, 'Vendor not found on zoho', level='error')
+                                        self.message_user(request, 'Vendor Name is not set', level='error')
                                 else:
-                                    self.message_user(request, 'Vendor Name is not set', level='error')
-                            else:
-                                self.message_user(request, 'Invalid item category for selected Zoho inventory Organization', level='error')
+                                    self.message_user(request, 'Invalid item category for selected Zoho inventory Organization', level='error')
 
 
     def _approve(self, request, obj, inv_obj, data, sku_postfix=0):
-        sku = self.generate_sku(obj, sku_postfix)
-        data['sku'] = sku
-        try:
-            result = inv_obj.create_item(data, params={})
-        except Exception as exc:
-            self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
-            print('Error while creating item in Zoho Inventory')
-            print(exc)
-            print(data)
-        else:
-            if result.get('code') == 0:
-                item_id = result.get('item', {}).get('item_id')
-                if item_id:
-                    obj.status = 'approved'
-                    obj.zoho_item_id = item_id
-                    obj.sku = sku
-                    obj.approved_on = timezone.now()
-                    obj.approved_by = get_approved_by(user=request.user)
-                    obj.save()
-                    self.message_user(request, 'This item is approved', level='success')
-                    if obj.marketplace_status in ('In-Testing', 'Available'):
-                        if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
-                            create_approved_item_po_task.delay(obj.id)
-                        notify_inventory_item_approved_task.delay(obj.id)
-                    else:
-                        notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
-
-            elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
-                self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix)
-            else:
-                msg = result.get('message')
-                if msg:
-                    self.message_user(request, f'Error while creating item in Zoho Inventory:  {msg}', level='error')
-                else:
-                    self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
+        sku = self.generate_sku(obj, postfix=sku_postfix, request=request,)
+        if sku:
+            data['sku'] = sku
+            try:
+                result = inv_obj.create_item(data, params={})
+            except Exception as exc:
+                self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
                 print('Error while creating item in Zoho Inventory')
-                print(result)
+                print(exc)
                 print(data)
+            else:
+                if result.get('code') == 0:
+                    item_id = result.get('item', {}).get('item_id')
+                    if item_id:
+                        obj.status = 'approved'
+                        obj.zoho_item_id = item_id
+                        obj.sku = sku
+                        obj.approved_on = timezone.now()
+                        obj.approved_by = get_approved_by(user=request.user)
+                        obj.save()
+                        self.message_user(request, 'This item is approved', level='success')
+                        if obj.marketplace_status in ('In-Testing', 'Available'):
+                            if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
+                                create_approved_item_po_task.delay(obj.id)
+                            notify_inventory_item_approved_task.delay(obj.id)
+                        else:
+                            notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
+
+                elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
+                    self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix)
+                else:
+                    msg = result.get('message')
+                    if msg:
+                        self.message_user(request, f'Error while creating item in Zoho Inventory:  {msg}', level='error')
+                    else:
+                        self.message_user(request, 'Error while creating item in Zoho Inventory', level='error')
+                    print('Error while creating item in Zoho Inventory')
+                    print(result)
+                    print(data)
 
     # def test_action(self, request, queryset):
     #     pass

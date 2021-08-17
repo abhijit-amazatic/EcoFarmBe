@@ -48,6 +48,7 @@ ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
     'Flowers':      'mcsp_fee_flowers',
     'Trims':        'mcsp_fee_trims',
     'Concentrates': 'mcsp_fee_concentrates',
+    'Distillates':  'mcsp_fee_concentrates',
     'Isolates':     'mcsp_fee_isolates',
     'Terpenes':     'mcsp_fee_terpenes',
     'Clones':       'mcsp_fee_clones',
