@@ -181,8 +181,12 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         else:
             required_fields = self.category_required_fields.get(CG.get(category_name), ())
             for field in required_fields:
-                if not attrs.get(field):
-                    errors[field] = f'This field is required for category \'{category_name}\'.'
+                if field == 'cultivar_name':
+                    if not attrs.get('cultivar'):
+                        errors[field] = f'This field is required for category \'{category_name}\'.'
+                else:
+                    if not attrs.get(field):
+                        errors[field] = f'This field is required for category \'{category_name}\'.'
         if errors:
             raise serializers.ValidationError(errors)
         return attrs
