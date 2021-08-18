@@ -574,6 +574,24 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
             return name
         elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
             return self.get_cultivar_name
+        return self.get_cultivar_name
+
+    @property
+    def pick_contact_time_formatted(self):
+        contact_time = []
+        if self.best_contact_time_from:
+            contact_time.append(self.best_contact_time_from.strftime("%I:%M %p"))
+        if self.best_contact_time_to:
+            contact_time.append(self.best_contact_time_to.strftime("%I:%M %p"))
+
+        pick_contact_time = []
+        if self.best_contact_Day_of_week:
+            pick_contact_time.append(self.best_contact_Day_of_week.title())
+        if contact_time:
+            pick_contact_time.append(' - '.join(contact_time))
+        if pick_contact_time:
+            return ' '.join(pick_contact_time)
+        return ''
 
     class Meta:
         verbose_name = _('Vendor Inventory')
