@@ -205,6 +205,10 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     def show_approve_button(self, request, obj,  add=False, change=False):
         return change and obj and obj.status == 'pending_for_approval'
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('cultivar', 'license_profile', ).prefetch_related('extra_documents')
+
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         field = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'cultivar':
@@ -449,7 +453,8 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         Return s3 license url.
         """
         try:
-            document_obj = Documents.objects.filter(object_id=obj.id, doc_type=doc_type).latest('created_on')
+            # document_obj = Documents.objects.filter(object_id=obj.id, doc_type=doc_type).latest('created_on')
+            document_obj = obj.extra_documents.filter(doc_type=doc_type).latest('created_on')
             if document_obj.box_url:
                 return document_obj.box_url
             else:
