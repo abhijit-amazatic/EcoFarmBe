@@ -116,8 +116,8 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
         if obj.manufacturing_date:
             data['cf_manufacturing_date'] = str(obj.manufacturing_date)
 
-        if CATEGORY_CANNABINOID_TYPE_MAP.get(obj.category_name):
-            data['cf_cannabinoid_type'] = obj.category_name
+        if obj.cannabinoid_type:
+            data['cf_cannabinoid_type'] = obj.cannabinoid_type
 
         if obj.cannabinoid_percentage:
             data['cf_cannabinoid_percentage'] = obj.cannabinoid_percentage

@@ -3,6 +3,7 @@ fieldsets_default = {
         'fields': (
             'zoho_organization',
             'category_name',
+            'item_name',
             'cultivar',
             'cultivar_name',
             # 'cultivar_type',
@@ -128,6 +129,7 @@ _fieldsets = {
             'fields': (
                 'zoho_organization',
                 'category_name',
+                'item_name',
                 'mfg_batch_id',
                 'cannabinoid_percentage',
                 'marketplace_status',
@@ -152,6 +154,7 @@ _fieldsets = {
             'fields': (
                 'zoho_organization',
                 'category_name',
+                'item_name',
                 'mfg_batch_id',
                 'cannabinoid_percentage',
                 'marketplace_status',

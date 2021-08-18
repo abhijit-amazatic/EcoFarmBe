@@ -158,7 +158,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     form = CustomInventoryForm
     list_display = (
-        'cultivar_name',
+        'item_name',
         'category_name',
         'vendor_name',
         'license_profile',
@@ -171,6 +171,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         'updated_on',
     )
     readonly_fields = (
+        'item_name',
         'cultivar',
         'cultivar_name',
         'cultivar_type',

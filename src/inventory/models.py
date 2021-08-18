@@ -11,8 +11,13 @@ from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
+from core.db.models import (PercentField, )
 from user.models import (User, )
 from .fields import (ChoiceArrayField,)
+from .data import (
+    CG,
+    CATEGORY_CANNABINOID_TYPE_MAP,
+)
 
 class Documents(TimeStampFlagModelMixin, models.Model):
     """
@@ -464,7 +469,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
     manufacturing_date = models.DateField(_('Manufacturing Date'), auto_now=False, blank=True, null=True, default=None)
-    cannabinoid_percentage = models.FloatField(_("Cannabinoid Percentage"), blank=True, null=True)
+    cannabinoid_percentage = PercentField(_("Cannabinoid Percentage"), blank=True, null=True)
     clone_date = models.DateField(_('Clone Date'), auto_now=False, blank=True, null=True, default=None)
     rooting_days = models.PositiveIntegerField(_('Rooting Days'), blank=True, null=True,)
     batch_availability_date = models.DateField(_('Batch Availability Date'), auto_now=False, blank=True, null=True, default=None)
@@ -513,6 +518,62 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     zoho_organization = models.CharField(_('Zoho Organization'), choices=ZOHO_ORG_CHOICES, null=True, max_length=100)
 
     extra_documents = GenericRelation(Documents)
+
+    @property
+    def get_cultivar_name(self):
+        if self.cultivar:
+            return self.cultivar.cultivar_name or self.cultivar_name
+        return self.cultivar_name
+
+    @property
+    def get_cultivar_type(self):
+        if self.cultivar:
+            return self.cultivar.cultivar_type or self.cultivar_type
+        return self.cultivar_type
+
+    @property
+    def category_group(self):
+        return CG.get(self.category_name, '')
+
+    @property
+    def cannabinoid_type(self):
+        return CATEGORY_CANNABINOID_TYPE_MAP.get(self.category_name, '')
+
+    @property
+    def cannabinoid_percentage_str(self):
+        if self.cannabinoid_percentage:
+            percent_val = round(self.cannabinoid_percentage, 2)
+            return str(percent_val) if percent_val%1 else str(int(percent_val))
+        return ''
+
+    @property
+    def cannabinoid_percentage_formatted(self):
+        if self.cannabinoid_percentage_str:
+            return self.cannabinoid_percentage_str.strip()+'%'
+        return ''
+
+    @property
+    def farm_ask_price_formatted(self):
+        return '${:,.2f}'.format(self.farm_ask_price) if self.farm_ask_price else ''
+
+    @property
+    def need_lab_testing_service_formatted(self):
+        return 'Yes' if self.need_lab_testing_service else 'No'
+
+    @property
+    def item_name(self):
+        category_group = CG.get(self.category_name)
+        if category_group in ('Isolates', 'Distillates',):
+            name = ''
+            if category_group == 'Isolates':
+                name += 'Isolate'
+            elif category_group == 'Distillates':
+                name += 'Distillate'
+            if name and self.cannabinoid_percentage_formatted:
+                name += f' {self.cannabinoid_percentage_formatted}'
+            return name
+        elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
+            return self.get_cultivar_name
 
     class Meta:
         verbose_name = _('Vendor Inventory')
