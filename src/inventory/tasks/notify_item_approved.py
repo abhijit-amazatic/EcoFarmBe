@@ -13,9 +13,6 @@ from utils import (reverse_admin_change_path,)
 from ..models import (
     CustomInventory,
 )
-from ..data import (
-    CG
-)
 
 slack = Slacker(settings.SLACK_TOKEN)
 User = get_user_model()
@@ -28,7 +25,8 @@ def notify_slack_inventory_item_approved(data):
     details = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('details_display', [])])
     links = "".join([f"- *{v[0]}:* {v[1]} \n" for v in data.get('links_display', [])])
     msg = (
-        f"<!channel> Inventory item *{data.get('item_name')}* is approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`).\n\n"
+        f"<!channel> Inventory item *{data.get('item_name')}* (sku: `{data.get('item_sku')}`) is"
+        f" approved by *{data.get('approved_by_name')}* (User ID: `{data.get('approved_by_email')}`).\n\n"
         f"Item details are as follows!\n"
         f"{details}"
         f"\n\n"
@@ -90,11 +88,10 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
     if qs.exists():
         obj = qs.first()
         if obj.status == 'approved':
-            # category_group = CG.get(obj.category_name, '')
             # data = copy.deepcopy(obj.__dict__)
             data = dict()
             data['item_name'] = obj.item_name
-            data['sku'] = obj.sku
+            data['item_sku'] = obj.sku
             data['approved_by_email'] = obj.approved_by.get('email')
             data['approved_by_name'] = obj.approved_by.get('name')
             data['created_by_email'] = obj.created_by.get('email')

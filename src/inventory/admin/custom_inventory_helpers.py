@@ -13,24 +13,9 @@ from integration.inventory import (
 from ..data import (
     # CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS,
     ITEM_CUSTOM_FIELD_ORG_MAP,
-    CG,
-    CATEGORY_CANNABINOID_TYPE_MAP
 )
 
-ITEM_CATEGORY_UNIT_MAP = {
-    'Flowers':      'lb',
-    'Trims':        'lb',
-    'Kief':         'g',
-    'Isolates':     'g',
-    'Distillates':  'g',
-    'Concentrates': 'g',
-    'Terpenes':     'g',
-    'Clones':       'pcs',
-}
-
-
 def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp_fee):
-    category_group = CG.get(obj.category_name, '')
     data = {}
     # data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
     data.update(get_new_items_accounts(zoho_organization=obj.zoho_organization))
@@ -38,17 +23,14 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
     data['category_id'] = category_id
     data['name'] = item_name
     data['item_type'] = 'inventory'
-    data['unit'] = ITEM_CATEGORY_UNIT_MAP.get(category_group, '')
+    data['unit'] = obj.unit
     data['is_taxable'] = True
     data['product_type'] = 'goods'
     data['cf_vendor_name'] = vendor_id
     data['cf_client_code'] = obj.client_code
 
-    if obj.cultivar and obj.cultivar.cultivar_name or obj.cultivar.cultivar_name:
-        data['cf_strain_name'] = obj.cultivar.cultivar_name or obj.cultivar.cultivar_name
-
-    if obj.cultivar and obj.cultivar.cultivar_type or obj.cultivar.cultivar_type:
-        data['cf_cultivar_type'] = obj.cultivar.cultivar_type or obj.cultivar.cultivar_type
+    data['cf_strain_name'] = obj.get_cultivar_name
+    data['cf_cultivar_type'] = obj.get_cultivar_type
 
     if obj.product_quality_notes:
         data['cf_batch_quality_notes'] = obj.product_quality_notes
@@ -90,7 +72,7 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
         data['cf_cfi_published'] = True
 
 
-    if category_group in ('Flowers', 'Trims'):
+    if obj.category_group in ('Flowers', 'Trims'):
 
         data['cf_date_available'] = str(obj.batch_availability_date or '')
         data['cf_harvest_date'] = str(obj.harvest_date or '')
@@ -99,16 +81,16 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
             if obj.quantity_available:
                 data['cf_quantity_estimate'] = int(obj.quantity_available)
         else:
-            if category_group == 'Flowers':
+            if obj.category_group == 'Flowers':
                 data['cf_grade_seller'] = obj.grade_estimate
 
-    elif category_group in ('Kief', 'Terpenes',):
+    elif obj.category_group in ('Kief', 'Terpenes',):
 
         data['cf_date_available'] = str(obj.batch_availability_date or '')
         if obj.manufacturing_date:
             data['cf_manufacturing_date'] = str(obj.manufacturing_date)
 
-    elif category_group in ('Concentrates', 'Isolates', 'Distillates'):
+    elif obj.category_group in ('Concentrates', 'Isolates', 'Distillates'):
 
         data['cf_date_available'] = str(obj.batch_availability_date or '')
         data['cf_trim_qty_lbs'] = obj.trim_used
@@ -122,7 +104,7 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
         if obj.cannabinoid_percentage:
             data['cf_cannabinoid_percentage'] = obj.cannabinoid_percentage
 
-    elif category_group in ('Clones'):
+    elif obj.category_group in ('Clones'):
 
         data['cf_rooting_time'] = obj.rooting_days
 

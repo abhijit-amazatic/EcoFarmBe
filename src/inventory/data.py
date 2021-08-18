@@ -173,3 +173,14 @@ _CATEGORY_CANNABINOID_TYPE_MAP = {
 }
 
 CATEGORY_CANNABINOID_TYPE_MAP = {cat: k for k, v in _CATEGORY_CANNABINOID_TYPE_MAP.items() for cat in v}
+
+ITEM_CATEGORY_UNIT_MAP = {
+    'Flowers':      'lb',
+    'Trims':        'lb',
+    'Kief':         'g',
+    'Isolates':     'g',
+    'Distillates':  'g',
+    'Concentrates': 'g',
+    'Terpenes':     'g',
+    'Clones':       'pcs',
+}

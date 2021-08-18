@@ -39,7 +39,6 @@ from ..tasks import (
 from ..utils import (
     get_item_tax,
 )
-from ..data import (CG, )
 from .custom_inventory_helpers import (get_new_item_data,)
 from .custom_inventory_fieldsets import fieldsets
 
@@ -136,15 +135,15 @@ class CustomInventoryForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if hasattr(self, 'instance') and self.instance:
-            cat = self.instance.category_name
             if getattr(self, 'instance') and '_approve' in self.data:
                 if self.instance.status == 'pending_for_approval':
-                    if cat and CG.get(cat, '') in ('Isolates', 'Distillates', 'Concentrates', 'Terpenes'):
-                        if not cleaned_data.get('trim_used'):
-                            self.add_error('trim_used', "This value is required for current item category.")
-                        if not cleaned_data.get('trim_used_verified'):
-                            self.add_error('trim_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
-                            # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
+                    if self.instance.category_name:
+                        if self.instance.category_group in ('Isolates', 'Distillates', 'Concentrates', 'Terpenes'):
+                            if not cleaned_data.get('trim_used'):
+                                self.add_error('trim_used', "This value is required for current item category.")
+                            if not cleaned_data.get('trim_used_verified'):
+                                self.add_error('trim_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
+                                # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
             return cleaned_data
 
     class Meta:
@@ -159,6 +158,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     form = CustomInventoryForm
     list_display = (
         'item_name',
+        # 'sku',
         'category_name',
         'vendor_name',
         'license_profile',
@@ -223,37 +223,28 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         """
         Hook for specifying fieldsets.
         """
-        cg_name = CG.get(obj.category_name)
-        if obj and cg_name in fieldsets:
-            return fieldsets.get(cg_name, {})
+        if obj and obj.category_group in fieldsets:
+            return fieldsets.get(obj.category_group, {})
         return fieldsets.get('default', {})
 
     def cultivar_name(self, obj):
-        if obj.cultivar:
-            return obj.cultivar.cultivar_name or obj.cultivar_name
-        return obj.cultivar_name
+        return obj.get_cultivar_name
 
     def generate_name(self, obj, request=None):
         name = []
-        category_group = CG.get(obj.category_name)
-
-        if category_group in ('Isolates', 'Distillates',):
-
-            if category_group == 'Distillates':
+        if obj.category_group in ('Isolates', 'Distillates',):
+            if obj.category_group == 'Isolates':
                 name.append('Isolate')
-            elif category_group == 'Distillates':
+            elif obj.category_group == 'Distillates':
                 name.append('Distillate')
             if not obj.cannabinoid_percentage:
                 if request:
                     self.message_user(request, 'Error while generating item name, cannabinoid percentage not provided', level='error')
                 return None
-            cb_percent_val = round(obj.cannabinoid_percentage, 2)
-            cb_percentage = str(cb_percent_val) if cb_percent_val%1 else str(int(cb_percent_val))
-            name.append(cb_percentage+'%')
+            name.append(obj.cannabinoid_percentage_formatted)
 
-        elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
-
-            name.append(self.cultivar_name(obj))
+        elif obj.category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
+            name.append(obj.get_cultivar_name)
 
         return ' '.join(name)
 
@@ -264,10 +255,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
             sku.append('sku')
         sku.append(obj.client_code)
 
-        category_group = CG.get(obj.category_name)
-
-        if category_group in ('Isolates', 'Distillates',):
-
+        if obj.category_group in ('Isolates', 'Distillates',):
             if not obj.mfg_batch_id:
                 if request:
                     self.message_user(request, 'Error while generating SKU, MFG Batch ID not provided', level='error')
@@ -277,7 +265,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
             # if postfix:
             #     sku.append(str(postfix))
 
-        elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
+        elif obj.category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
 
             cultivar_name = self.cultivar_name(obj)
 
@@ -362,7 +350,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 mcsp_fee = get_item_mcsp_fee(
                     obj.vendor_name,
                     license_profile=obj.license_profile,
-                    item_category_group=CG.get(obj.category_name),
+                    item_category_group=obj.category_group,
                     request=request,
                     farm_price=obj.farm_ask_price
                 )

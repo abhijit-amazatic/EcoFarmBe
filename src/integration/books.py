@@ -155,7 +155,7 @@ def parse_books_fields(k, v, request):
         return {
             'address': value.get('street'),
             'street2': value.get('street_line_2'),
-            'state_code': value.get('state'),
+            # 'state_code': value.get('state'),
             'city': value.get('city'),
             'state': value.get('state'),
             'zip': value.get('zip_code'),

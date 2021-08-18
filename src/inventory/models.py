@@ -17,6 +17,7 @@ from .fields import (ChoiceArrayField,)
 from .data import (
     CG,
     CATEGORY_CANNABINOID_TYPE_MAP,
+    ITEM_CATEGORY_UNIT_MAP
 )
 
 class Documents(TimeStampFlagModelMixin, models.Model):
@@ -522,18 +523,22 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     @property
     def get_cultivar_name(self):
         if self.cultivar:
-            return self.cultivar.cultivar_name or self.cultivar_name
-        return self.cultivar_name
+            return self.cultivar.cultivar_name or self.cultivar_name or ''
+        return self.cultivar_name or ''
 
     @property
     def get_cultivar_type(self):
         if self.cultivar:
-            return self.cultivar.cultivar_type or self.cultivar_type
-        return self.cultivar_type
+            return self.cultivar.cultivar_type or self.cultivar_type or ''
+        return self.cultivar_type or ''
 
     @property
     def category_group(self):
         return CG.get(self.category_name, '')
+
+    @property
+    def unit(self):
+        return ITEM_CATEGORY_UNIT_MAP.get(self.category_group, '')
 
     @property
     def cannabinoid_type(self):

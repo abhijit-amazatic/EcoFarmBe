@@ -117,7 +117,10 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
         else:
             msg_error('License Profile not found.')
     else:
-        msg_error('Item category not defined or not valid.')
+        if item_category_group:
+                msg_error(f'MCSP fee is not mapped for Item category type \'{item_category_group}\'.')
+        else:
+            msg_error('Item category not supported or not defined.')
 
 def get_new_items_accounts(zoho_organization: str):
     """
