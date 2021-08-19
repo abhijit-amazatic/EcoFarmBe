@@ -73,7 +73,7 @@ def notify_inventory_item_submitted_task(custom_inventory_id):
             'vendor_name':              ('Vendor Name',             obj.vendor_name                        ),
             'client_code':              ('Client Code',             obj.client_code                        ),
             'category_name':            ('Product Category',        obj.category_name                      ),
-            'mfg_batch_id':             ('MFG Batch ID',            obj.mfg_batch_id                       ),
+            'mfg_batch_id':             ('Batch ID',                obj.mfg_batch_id                       ),
             'cannabinoid_type':         ('Cannabinoid type',        obj.cannabinoid_type                   ),
             'cannabinoid_percentage':   ('Cannabinoid Percentage',  obj.cannabinoid_percentage_formatted   ),
             'cultivar_name':            ('Cultivar Name',           obj.get_cultivar_name                  ),
