@@ -266,8 +266,8 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 return None
             sku.append(obj.mfg_batch_id)
 
-            # if postfix:
-            #     sku.append(str(postfix))
+            if postfix:
+                sku.append(str(postfix))
 
         elif obj.category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
 
@@ -433,7 +433,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                             notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
 
                 elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
-                    self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix)
+                    self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix+1)
                 else:
                     msg = result.get('message')
                     if msg:
