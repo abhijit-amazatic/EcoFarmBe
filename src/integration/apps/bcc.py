@@ -58,17 +58,24 @@ def parse_field(license, key, value):
     if value.startswith('licenseType'):
         license_types = {
             "Cannabis - Retailer License": "Retailer - Storefront",
+            "Cannabis - Retailer Temporary License": "Retailer - Storefront",
+            "Commercial -  Retailer": "Retailer - Storefront",
             "Cannabis - Retailer Nonstorefront License": "Retailer - Delivery",
-            "Cannabis - Microbusiness License": "Microbusiness",
-            "Cannabis - Distributor License": "Distributor",
-            "Cannabis - Distributor-Transport Only License": "Distributor Transport Only",
-            "Cannabis - Event Organizer License": "Event Organizer",
-            "Cannabis - Testing Laboratory License": "Testing Laboratory",
-            "Cannabis - Distributor-Transport Only Temporary License": "Distributor Transport Only",
-            "Cannabis - Distributor Temporary License": "Distributor",
             "Cannabis - Retailer Nonstorefront Temporary License": "Retailer - Delivery",
+            "Commercial -  Retailer - Non-Storefront": "Retailer - Delivery",
+            "Cannabis - Microbusiness License": "Microbusiness",
             "Cannabis - Microbusiness Temporary License": "Microbusiness",
-            "Cannabis - Retailer Temporary License": "Retailer - Storefront"
+            "Commercial -  Microbusiness": "Microbusiness",
+            "Cannabis - Distributor License": "Distributor",
+            "Cannabis - Distributor Temporary License": "Distributor",
+            "Commercial -  Distributor": "Distributor",
+            "Cannabis - Distributor-Transport Only License": "Distributor Transport Only",
+            "Cannabis - Distributor-Transport Only Temporary License": "Distributor Transport Only",
+            "Commercial -  Distributor - Transport Only": "Distributor Transport Only", 
+            "Cannabis - Event Organizer License": "Event Organizer",
+            "Commercial -  Event Organizer": "Event Organizer",
+            "Cannabis - Testing Laboratory License": "Testing Laboratory",
+            "Commercial -  Testing Laboratory": "Testing Laboratory"
         }
         if license_types.get(v):
             return license_types.get(v)
