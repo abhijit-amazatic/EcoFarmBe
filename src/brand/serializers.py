@@ -260,8 +260,11 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                 email_admins_on_profile_registration_completed(instance.created_by.email,profile.name,instance,admin_link)
                 notify_admins_on_slack_complete(instance.created_by.email,instance,admin_link)
                 #Create zoho books customer
-                for book in ['books_efd', 'books_efl', 'books_efn']:
-                    if settings.PRODUCTION or book in ('books_efd',):
+                if settings.PRODUCTION:
+                    books_ls = ('books_efd', 'books_efl', 'books_efn')
+                else:
+                    books_ls = ('books_efd',)
+                for book in books_ls:
                         create_customer_in_books(book, id=profile.license.id, is_update=False, params={})
                 #insert or update vendors/accounts
                 insert_or_update_vendor_accounts(profile,instance)

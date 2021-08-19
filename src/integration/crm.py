@@ -453,14 +453,14 @@ def is_user_existing(license_number):
         for license_dict in licenses.get('response'):
             vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
             if vendor['status_code'] != 200:
-                vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+                vendor_id = get_lookup_id(license_dict, 'Vendor_Name_Lookup',)
             else:
                 vendor = vendor['response'][0]['Licenses_Module']
                 vendor_id = vendor['id']
             if not vendor_id:
                 account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
                 if account['status_code'] != 200:
-                    account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
+                    account_id = get_lookup_id(license_dict, 'Account_Name_Lookup')
                 else:
                     account = account['response'][0]['Licenses_Module']
                     account_id = account['id']
@@ -856,153 +856,35 @@ def update_license(dba, license=None, license_id=None):
     response = update_records('Licenses', data)
     return response
 
-def get_vendors_from_licenses(field, licenses):
+def get_lookup_id(data_dict, field):
     """
-    Get vendor id from licenses.
+    Get id from lookup field in data_dict.
     """
-    vendor_lookup = licenses.get(field)
-    if vendor_lookup:
-        return vendor_lookup.get('id')
+    lookup_info = data_dict.get(field)
+    if lookup_info:
+        return lookup_info.get('id')
 
-@app.task(queue="general")
-def get_records_from_crm_old(license_number):
-    """
-    Get records from Zoho CRM using license number.
-    """
-    final_response = dict()
-    licenses = search_query('Licenses', license_number, 'Name')
-    if licenses['status_code'] == 200 and len(licenses['response']) > 0:
-        for license_dict in licenses.get('response'):
-            license_number = license_dict['Name']
-            vendor_id = None
-            account_id = None
-            if license_dict.get('License_Type') in VENDOR_LICENSE_TYPES:
-                vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
-                if vendor['status_code'] != 200:
-                    vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
-                else:
-                    vendor = vendor['response'][0]['Licenses_Module']
-                    vendor_id = vendor['id']
-                if not vendor_id:
-                    account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
-                    if account['status_code'] != 200:
-                        account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
-                    else:
-                        account = account['response'][0]['Licenses_Module']
-                        account_id = account['id']
-                    if not account_id:
-                        final_response[license_number] = {'error': 'No association found for legal business name'}
-                        continue
+def get_associated_vendor_from_license(crm_license_dict):
+    vendor_id = None
+    license_number = crm_license_dict['Name']
+    vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+    if vendor['status_code'] != 200:
+        vendor_id = get_lookup_id(crm_license_dict, 'Vendor_Name_Lookup')
+    else:
+        vendor = vendor['response'][0]['Licenses_Module']
+        vendor_id = vendor['id']
+    return vendor_id
 
-            else:
-                account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
-                if account['status_code'] != 200:
-                    account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
-                else:
-                    account = account['response'][0]['Licenses_Module']
-                    account_id = account['id']
-                if not account_id:
-                    vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
-                    if vendor['status_code'] != 200:
-                        vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
-                    else:
-                        vendor = vendor['response'][0]['Licenses_Module']
-                        vendor_id = vendor['id']
-                    if not vendor_id:
-                        final_response[license_number] = {'error': 'No association found for legal business name'}
-                        continue
-            if vendor_id:
-                org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
-            elif account_id:
-                org = search_query('Orgs_X_Accounts', account_id, 'Account')
-            else:
-                org = dict()
-            if org.get('status_code') == 200:
-                org_list = list()
-                for o in org.get('response'):
-                    r = dict()
-                    if o.get('Org'):
-                        r['name'] = o['Org']['name']
-                        r['id'] = o['Org']['id']
-                        org_list.append(r)
-                final_response['organization'] = org_list
-            else:
-                final_response['organization'] = org
-            if vendor_id:
-                brand = search_query('Brands_X_Vendors', vendor_id, 'Vendor')
-            elif account_id:
-                brand = search_query('Brands_X_Accounts', account_id, 'Account')
-            else:
-                brand = dict()
-            if brand.get('status_code') == 200:
-                try:
-                    brand_list = list()
-                    for b in brand.get('response'):
-                        r = dict()
-                        r['name'] = b['Brand']['name']
-                        r['id'] = b['Brand']['id']
-                        brand_list.append(r)
-                    final_response['Brand'] = brand_list
-                except TypeError:
-                    pass
-            else:
-                final_response['Brand'] = brand
-            crm_obj = get_crm_obj()
-            if vendor_id:
-                record = crm_obj.get_record('Vendors', vendor_id)
-            elif account_id:
-                record = crm_obj.get_record('Accounts', account_id)
-            if record['status_code'] == 200:
-                if vendor_id:
-                    vendor = record['response'][vendor_id]
-                elif account_id:
-                    vendor = record['response'][account_id]
-                # licenses = [licenses['response'][0]]
-                licenses = license_dict
-                # if vendor.get('Licenses'):
-                #     license_list = vendor.get('Licenses').split(',')
-                #     license_list.remove(license_number)
-                #     for l in license_list:
-                #         license = search_query('Licenses', l.strip(), 'Name')
-                #         if license['status_code'] == 200:
-                #             license_dict.append(license['response'][0])
-                #         else:
-                #             license_dict.append(license)
-                crm_dict = get_format_dict('Licenses_To_DB')
-                r = dict()
-                for k, v in crm_dict.items():
-                    r[k] = licenses.get(v)
-                response = dict()
-                if vendor_id:
-                    crm_dict = get_format_dict('Vendors_To_DB')
-                    response['vendor_type'] = get_vendor_types(vendor['Vendor_Type'], True)
-                elif account_id:
-                    crm_dict = get_format_dict('Accounts_To_DB')
-                    response['vendor_type'] = get_vendor_types(vendor['Company_Type'], True)
-                response['license'] = r
-                record_dict = dict()
-                for k,v in crm_dict.items():
-                    if v.endswith('_parse'):
-                        value = v.split('_parse')[0]
-                        if vendor_id:
-                            value = parse_fields('Vendors', k, value, vendor, crm_obj, vendor_id=vendor_id)
-                        elif account_id:
-                            value = parse_fields('Accounts', k, value, vendor, crm_obj, account_id=account_id)
-                        record_dict[k] = value
-                    else:
-                        record_dict[k] = vendor.get(v)
-                if vendor_id:
-                    record_dict['profile_id'] = vendor_id
-                    response['is_seller'] = True
-                    response['is_buyer'] = False
-                elif account_id:
-                    record_dict['profile_id'] = account_id
-                    response['is_seller'] = False
-                    response['is_buyer'] = True
-                response['license_profile'] = record_dict
-                final_response[license_number] = response
-        return final_response
-    return licenses
+def get_associated_account_from_license(crm_license_dict):
+    account_id = None
+    license_number = crm_license_dict['Name']
+    account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
+    if account['status_code'] != 200:
+        account_id = get_lookup_id(crm_license_dict, 'Account_Name_Lookup')
+    else:
+        account = account['response'][0]['Licenses_Module']
+        account_id = account['id']
+    return account_id
 
 def get_crm_vendor_to_db(vendor_id):
     if vendor_id:
@@ -1044,7 +926,6 @@ def get_crm_account_to_db(account_id):
             return record_dict
     return {}
 
-
 def get_records_from_crm(license_number):
     """
     Get records from Zoho CRM using license number.
@@ -1054,22 +935,8 @@ def get_records_from_crm(license_number):
     if licenses['status_code'] == 200 and len(licenses['response']) > 0:
         for license_dict in licenses.get('response'):
             license_number = license_dict['Name']
-            vendor_id = None
-            account_id = None
-
-            vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
-            if vendor['status_code'] != 200:
-                vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
-            else:
-                vendor = vendor['response'][0]['Licenses_Module']
-                vendor_id = vendor['id']
-
-            account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
-            if account['status_code'] != 200:
-                account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
-            else:
-                account = account['response'][0]['Licenses_Module']
-                account_id = account['id']
+            vendor_id = get_associated_vendor_from_license(license_dict)
+            account_id = get_associated_account_from_license(license_dict)
 
             if vendor_id:
                 org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
@@ -1444,7 +1311,7 @@ def get_accounts_from_crm(legal_business_name):
         license_number = licenses['response'][0]['Name']
         account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
         if account['status_code'] != 200:
-            account_id = get_vendors_from_licenses('Account_Name_Lookup', licenses['response'][0])
+            account_id = get_lookup_id(licenses['response'][0], 'Account_Name_Lookup',)
         else:
             account = account['response'][0]['Licenses_Module']
             account_id = account['id']
@@ -1492,7 +1359,7 @@ def get_vendors_from_crm(legal_business_name):
         license_number = licenses['response'][0]['Name']
         vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
         if vendor['status_code'] != 200:
-            vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', licenses)
+            vendor_id = get_lookup_id(licenses['response'][0], 'Vendor_Name_Lookup')
         else:
             vendor = vendor['response'][0]['Licenses_Module']
             vendor_id = vendor['id']
@@ -1807,14 +1674,14 @@ def fetch_record_owners(license_number=None, update_all=False):
             for license_dict in licenses.get('response'):
                 vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
                 if vendor['status_code'] != 200:
-                    vendor_id = get_vendors_from_licenses('Vendor_Name_Lookup', license_dict)
+                    vendor_id = get_lookup_id(license_dict, 'Vendor_Name_Lookup')
                 else:
                     vendor = vendor['response'][0]['Licenses_Module']
                     vendor_id = vendor['id']
                 if not vendor_id:
                     account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
                     if account['status_code'] != 200:
-                        account_id = get_vendors_from_licenses('Account_Name_Lookup', license_dict)
+                        account_id = get_lookup_id(license_dict, 'Account_Name_Lookup')
                     else:
                         account = account['response'][0]['Licenses_Module']
                         account_id = account['id']

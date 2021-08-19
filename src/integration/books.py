@@ -426,7 +426,7 @@ def get_item(obj, data):
 def search_contact(books_obj, value, contact_type):
     contact_obj = books_obj.Contacts()
     contact = None
-    for field in ('contact_name', 'company_name', 'cf_legal_business_name'):
+    for field in ('cf_legal_business_name', 'company_name', 'contact_name',):
         try:
             resp = contact_obj.list_contacts(parameters={field: value, 'contact_type': contact_type})
             contacts = resp['response']
@@ -448,7 +448,7 @@ def get_customer(obj, data):
     """
     customer = search_contact(obj, value=data['customer_name'], contact_type='customer')
     if customer is None:
-        return {"code": 1003, "message": "Contact not in zoho books."}
+        return {"code": 1003, "message": f"Customer \'{data['customer_name']}\' not in zoho books."}
     if customer.get('email') == '':
         return {"code": 1003, "message": "Contact don't have email associated with it."}
     data['customer_id'] = customer['contact_id']

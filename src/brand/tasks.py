@@ -3,16 +3,34 @@
 All periodic tasks related to brand.
 """
 import datetime
+from re import search
 import traceback
 from core.mailer import mail, mail_send
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from celery.task import periodic_task
 from celery.schedules import crontab
 from django.utils import  timezone
 from slacker import Slacker
 
 from integration.apps.twilio import (send_sms,)
-from integration.crm import (get_format_dict, get_records_from_crm, search_query, insert_vendors, insert_accounts)
+from integration.books import (
+    get_books_obj,
+    search_contact,
+)
+from integration.crm import (
+    get_licenses,
+    get_record,
+    get_format_dict,
+    get_records_from_crm,
+    search_query,
+    insert_vendors,
+    insert_accounts,
+    get_associated_vendor_from_license,
+    get_associated_account_from_license,
+    get_crm_vendor_to_db,
+    get_crm_account_to_db,
+)
 from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
@@ -281,3 +299,80 @@ def insert_record_to_crm(record_id, is_buyer=True, is_seller=True, is_update=Fal
     if is_buyer:
         response['account'] = insert_accounts(id=record_id, is_update=is_update)
     return response
+
+
+
+@app.task(queue="general")
+def populate_integration_ids(license_id=None):
+    """
+    Populate Integration records id to respective fields.
+    """
+    if license_id:
+        qs = License.objects.filter(id=license_id)
+    else:
+        qs = License.objects.filter(status__in=('approved', 'completed'))
+    for license_obj in qs:
+        license_dict = {}
+        if not license_obj.zoho_crm_id:
+            license_dict = get_licenses(license_obj.legal_business_name, license_obj.license_number)
+            if license_dict:
+                license_obj.zoho_crm_id = license_dict.get('id')
+                license_obj.save()
+            else:
+                print(f"License {license_obj.license_number} not found on crm.")
+
+        if settings.PRODUCTION:
+            books_name_ls = ('books_efd', 'books_efl', 'books_efn')
+        else:
+            books_name_ls = ('books_efd',)
+        for books_name in books_name_ls:
+            org_name = books_name.lstrip('books_')
+            books_obj = get_books_obj(books_name)
+            for contact_type in ('vendor', 'customer'):
+                field_name = f'zoho_books_{contact_type}_ids'
+                if hasattr(license_obj, field_name):
+                    field = getattr(license_obj, field_name)
+                    if not field.get(org_name):
+                        contact = search_contact(books_obj, value=license_obj.legal_business_name, contact_type=contact_type)
+                        if contact:
+                            field.update({org_name: contact.get('contact_id', '')})
+
+        license_obj.save()
+
+        if license_obj.zoho_crm_id:
+            if not license_dict:
+                response = get_record(module='Licenses', record_id=license_obj.zoho_crm_id, full=True)
+                if response.get('status_code') == 200:
+                    license_dict = response.get('response')
+                else:
+                    print(response)
+
+            if license_dict:
+                try:
+                    license_profile = license_obj.license_profile
+                except ObjectDoesNotExist:
+                    pass
+                else:
+                    vendor_id = None
+                    account_id = None
+                    if not license_profile.zoho_crm_vendor_id:
+                        vendor_id = get_associated_vendor_from_license(license_dict)
+                        license_profile.zoho_crm_vendor_id = vendor_id
+                        vendor_dict = get_crm_vendor_to_db(vendor_id)
+                        if vendor_dict:
+                            vendor_owner = vendor_dict.get('Owner') or {}
+                            license_profile.crm_vendor_owner_id = vendor_owner.get('id'),
+                            license_profile.crm_vendor_owner_email = vendor_owner.get('email'),
+
+                    if not license_profile.zoho_crm_account_id:
+                        account_id = get_associated_account_from_license(license_dict)
+                        license_profile.zoho_crm_account_id = account_id
+                        account_dict = get_crm_account_to_db(account_id)
+                        if account_dict:
+                            account_owner = account_dict.get('Owner') or {}
+                            license_profile.crm_account_owner_id = account_owner.get('id'),
+                            license_profile.crm_account_owner_email = account_owner.get('email'),
+
+                    if vendor_id or account_id:
+                        license_profile.save()
+    return None
