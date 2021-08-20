@@ -14,6 +14,8 @@ class Cultivar(models.Model):
         ('Sativa', _('Sativa')),
         ('Indica', _('Indica')),
         ('Hybrid', _('Hybrid')),
+        ('Hybrid - Indica Dominant', _('Hybrid - Indica Dominant')),
+        ('Hybrid - Sativa Dominant', _('Hybrid - Sativa Dominant')),
     )
 
     cultivar_crm_id = models.CharField(_('Cultivar ID'), blank=True, null=True, max_length=255)
