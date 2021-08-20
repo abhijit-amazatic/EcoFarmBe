@@ -18,7 +18,7 @@ from core.settings import (
 from brand.models import (Brand, License, LicenseProfile, )
 from pyzoho.books import (Books, )
 from .models import (Integration, )
-from .crm_format import (CRM_FORMAT, )
+from .crm.crm_format import (CRM_FORMAT, )
 from .books_format import (BOOKS_FORMAT_DICT, )
 from .inventory import (get_inventory_items, update_inventory_item, get_inventory_name)
 from .sign import (submit_estimate, )

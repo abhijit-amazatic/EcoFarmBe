@@ -11,7 +11,7 @@ from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
 
-from .crm_format import (ACCOUNT_TYPES, )
+from .crm.crm_format import (ACCOUNT_TYPES, )
 from core.settings import (
     VENDOR_LAYOUT, LEADS_LAYOUT, GOOGLEMAPS_API_KEY,
     GOOGLEPLACES_API_KEY,)

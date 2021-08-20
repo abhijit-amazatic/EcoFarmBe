@@ -289,15 +289,13 @@ def onboarding_fetched_data_insert_to_db(user_id, onboarding_data_fetch_id, lice
                         instance.save()
 
 @app.task(queue="general")
-def insert_record_to_crm(record_id, is_buyer=True, is_seller=True, is_update=False):
+def insert_record_to_crm(record_id, is_update=False):
     """
     Insert record according to buyer/seller to crm.
     """
     response = dict()
-    if is_seller:
-        response['vendor'] = insert_vendors(id=record_id, is_update=is_update)
-    if is_buyer:
-        response['account'] = insert_accounts(id=record_id, is_update=is_update)
+    response['vendor'] = insert_vendors(id=record_id, is_update=is_update)
+    response['account'] = insert_accounts(id=record_id, is_update=is_update)
     return response
 
 

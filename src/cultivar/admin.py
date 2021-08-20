@@ -109,8 +109,6 @@ class CultivarAdmin(CustomButtonMixin, admin.ModelAdmin):
                                     lic_obj = no_obj.license
                                     insert_record_to_crm.delay(
                                         record_id=lic_obj.id,
-                                        is_buyer=lic_obj.is_buyer,
-                                        is_seller=lic_obj.is_seller,
                                         is_update=True,
                                     )
                                     obj.nursery_overview.remove(no_obj)
