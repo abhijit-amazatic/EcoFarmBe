@@ -235,22 +235,12 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         return obj.get_cultivar_name
 
     def generate_name(self, obj, request=None):
-        name = []
         if obj.category_group in ('Isolates', 'Distillates',):
-            if obj.category_group == 'Isolates':
-                name.append('Isolate')
-            elif obj.category_group == 'Distillates':
-                name.append('Distillate')
             if not obj.cannabinoid_percentage:
                 if request:
                     self.message_user(request, 'Error while generating item name, cannabinoid percentage not provided', level='error')
                 return None
-            name.append(obj.cannabinoid_percentage_formatted)
-
-        elif obj.category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
-            name.append(obj.get_cultivar_name)
-
-        return ' '.join(name)
+        return obj.item_name
 
     def generate_sku(self, obj, postfix, request=None):
         sku = []

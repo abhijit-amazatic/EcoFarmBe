@@ -40,6 +40,7 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
         fields = (
             'created_time',
             'item_id',
+            'name',
             'cf_strain_name',
             'cf_cultivation_type',
             'cf_cannabis_grade_and_category',

@@ -568,18 +568,26 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     @property
     def item_name(self):
         category_group = CG.get(self.category_name)
+        name = ''
         if category_group in ('Isolates', 'Distillates',):
-            name = ''
             if category_group == 'Isolates':
                 name += 'Isolate'
             elif category_group == 'Distillates':
                 name += 'Distillate'
             if name and self.cannabinoid_percentage_formatted:
                 name += f' {self.cannabinoid_percentage_formatted}'
+            if self.cannabinoid_type:
+                name = f'{self.cannabinoid_type} {name}'
             return name
-        elif category_group in ('Flowers', 'Trims', 'Kief', 'Concentrates', 'Terpenes', 'Clones',):
-            return self.get_cultivar_name
-        return self.get_cultivar_name
+        elif category_group in ('Concentrates',):
+            if self.category_name in ('Crude Oil - THC','Crude Oil - CBD'):
+                name = f'{self.get_cultivar_name} {self.cannabinoid_type} Crude Oil'
+            else:
+                name = f'{self.get_cultivar_name} {self.category_name}'
+        elif category_group in ('Flowers', 'Trims', 'Kief', 'Terpenes', 'Clones',):
+            name = self.get_cultivar_name
+
+        return name
 
     @property
     def pick_contact_time_formatted(self):
