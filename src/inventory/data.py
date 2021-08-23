@@ -51,11 +51,11 @@ ORG_ITEM_CUSTOM_FIELD_MAP_TABLE = (
     ('cf_received_date',               'cf_received_date',               'cf_received_date',               '',                          ),
     ('cf_quantity_estimate',           'cf_quantity_estimate',           '',                               'cf_quantity_estimate',      ),
     ('cf_next_harvest_date',           'cf_next_harvest_date',           '',                               '',                          ),
-    ('cf_date_available',              'cf_date_available',              '',                               '',                          ),
+    ('cf_date_available',              'cf_date_available',              'cf_availability_date',           'cf_available_date',         ),
     ('cf_metrc_source_package_id',     'cf_metrc_source_package_id',     '',                               '',                          ),
     ('cf_harvest_date',                'cf_harvest_date',                '',                               '',                          ),
     ('cf_market_feedback',             'cf_market_feedback',             '',                               '',                          ), # inactive
-    ('cf_available_date',              'cf_available_date',              'cf_availability_date',           'cf_available_date',         ),
+    ('cf_available_date',              'cf_available_date',              '',                               '',                          ),
     ('cf_offer_price',                 'cf_offer_price',                 '',                               '',                          ), # inactive
     ('cf_price_change',                'cf_price_change',                '',                               '',                          ), # inactive
     ('cf_price_change_date',           'cf_price_change_date',           '',                               '',                          ), # inactive

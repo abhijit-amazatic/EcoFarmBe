@@ -123,23 +123,22 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
                     v = request.get(v)
                     record_dict[k] = v
             zoho_books_ids = dict()
+            org_name = books_name.lstrip('books_')
             for customer_type in ['vendor', 'customer']:
                 record_dict['contact_type'] = customer_type
                 if is_update:
-                    record_dict['contact_id'] = request[f'zoho_books_{customer_type}_id']
+                    record_dict['contact_id'] = request.get(f'zoho_books_{customer_type}_id', {}).get(org_name, '')
                     response = update_contact(books_name, record_dict, params=params)
                 else:
                     response = create_contact(books_name, record_dict, params=params)
                 zoho_books_ids[customer_type] = response.get('contact_id')
-            if all(zoho_books_ids.values()):
+            if any(zoho_books_ids.values()):
                 try:
-                    org_name = books_name.lstrip('books_')
-                    if is_single_user:
-                        record_obj = License.objects.get(id=record_id)
-                    else:
-                        record_obj = License.objects.get(id=record_id)
-                    record_obj.zoho_books_customer_ids.update({org_name: zoho_books_ids.get('customer', '')})
-                    record_obj.zoho_books_vendor_ids.update({org_name: zoho_books_ids.get('vendor', '')})
+                    record_obj = License.objects.get(id=record_id)
+                    if zoho_books_ids.get('customer'):
+                        record_obj.zoho_books_customer_ids.update({org_name: zoho_books_ids.get('customer')})
+                    if zoho_books_ids.get('vendor'):
+                        record_obj.zoho_books_vendor_ids.update({org_name: zoho_books_ids.get('vendor')})
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)

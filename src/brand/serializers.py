@@ -267,6 +267,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                 for book in ('books_efd', 'books_efl', 'books_efn'):
                         create_customer_in_books(book, id=profile.license.id, is_update=False, params={})
                 #insert or update vendors/accounts
+                instance.refresh_from_db()
                 insert_or_update_vendor_accounts(profile,instance)
             except Exception as e:
                 print(e)
@@ -292,7 +293,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         # fields = ('__all__')
         read_only_fields = ['approved_on', 'approved_by',
                             'uploaded_sellers_permit_to', 'uploaded_license_to']
-        exclude = ('organization', )
+        exclude = ('organization', 'crm_output', 'zoho_crm_id', 'zoho_books_customer_ids', 'zoho_books_vendor_ids')
 
 
 class ProfileContactSerializer(serializers.ModelSerializer):
@@ -347,15 +348,13 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         updated_instance = super().update(instance, validated_data)
         updated_instance.license.brand = updated_instance.brand_association
         updated_instance.license.save()
-        if updated_instance.license.is_buyer:
-            update_in_crm_task.delay('Accounts', instance.id)
-        if updated_instance.license.is_seller:
-            update_in_crm_task.delay('Vendors', instance.id)
+        update_in_crm_task.delay('Accounts', instance.id)
+        update_in_crm_task.delay('Vendors', instance.id)
         return updated_instance
 
     class Meta:
         model = LicenseProfile
-        fields = ('__all__')
+        exclude = ('zoho_crm_account_id', 'zoho_crm_vendor_id', 'crm_account_owner_id', 'crm_vendor_owner_id')
 
 class FinancialOverviewSerializer(serializers.ModelSerializer):
     """
