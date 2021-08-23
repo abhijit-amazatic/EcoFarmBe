@@ -492,7 +492,8 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                     'farm_profile_photo': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.farm_profile_photo,
                     'farm_photo_sharable_link': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.farm_photo_sharable_link,
                     'is_updated_in_crm': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.is_updated_in_crm,
-                    'zoho_crm_id': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.zoho_crm_id,
+                    'zoho_crm_account_id': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.zoho_crm_account_id,
+                    'zoho_crm_vendor_id': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.zoho_crm_vendor_id,
                     'is_draft': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.is_draft,
                     'program_name': '' if not hasattr(license, 'program_overview') else license.program_overview.program_details.get('program_name', ''),
                     'brand': "N/A" if not hasattr(license, 'brand') else {
