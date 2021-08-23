@@ -819,9 +819,6 @@ class AccountSummaryView(APIView):
         """
         organization_name = request.query_params.get('organization_name')
         vendor = request.query_params.get('vendor_name')
-        total_unpaid_bills = get_unpaid_bills(organization_name, vendor)
-        total_credits = get_available_credit(organization_name, vendor)
-        total_unpaid_invoices = get_unpaid_invoices(organization_name, vendor)
         try:
             if organization_name == 'all':
                 org_result = dict()
@@ -829,14 +826,16 @@ class AccountSummaryView(APIView):
                     org_result[org] = {"Available_Credits":get_available_credit(org,vendor),
                                        "Overdue_Bills": get_unpaid_bills(org,vendor),
                                        "Outstanding_Invoices": get_unpaid_invoices(org,vendor)}
-                    time.sleep(1)
-                print('org wise overview', org_result)    
+                    time.sleep(0.5)
                 if org_result:
                     return Response({
                         "Available_Credits": sum([i['Available_Credits'] for i in org_result.values()]),
                         "Overdue_Bills": sum([i['Overdue_Bills'] for i in org_result.values()]),
                         "Outstanding_Invoices": sum([i['Outstanding_Invoices'] for i in org_result.values()])
                     })
+            total_unpaid_bills = get_unpaid_bills(organization_name, vendor)
+            total_credits = get_available_credit(organization_name, vendor)
+            total_unpaid_invoices = get_unpaid_invoices(organization_name, vendor)    
             return Response({
                 "Available_Credits": total_credits,
                 "Overdue_Bills": total_unpaid_bills,

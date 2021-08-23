@@ -954,7 +954,8 @@ def get_unpaid_bills(books_name, vendor, status='unpaid', start_date=None, end_d
         'vendor_name': vendor,
         'status': status,
         'date_start': start_date,
-        'date_end': end_date})['response']
+        'date_end': end_date})
+    response = response.get('response', [])
     unpaid = sum([i['balance'] for i in response])
     return unpaid
 
@@ -964,7 +965,8 @@ def get_available_credit(books_name, vendor, status='open'):
     """
     response = list_vendor_credits(books_name, {
         'vendor_name': vendor,
-        'status':status})['response']
+        'status':status})
+    response = response.get('response', [])
     credits = sum([i['total'] for i in response])
     return credits
 
@@ -974,7 +976,8 @@ def get_unpaid_invoices(books_name, customer, status='unpaid'):
     """
     response = list_invoices(books_name, {
         'customer_name': customer,
-        'status': status})['response']
+        'status': status})
+    response = response.get('response', [])
     unpaid = sum([i['balance'] for i in response])
     return unpaid
 
