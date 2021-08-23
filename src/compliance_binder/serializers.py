@@ -16,7 +16,6 @@ from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (email_admins_on_profile_registration_completed,notify_admins_on_slack_complete,)
 from inventory.models import (Documents, )
-from integration.crm import (insert_vendors, insert_accounts,is_user_existing,)
 from integration.box import upload_file
 from integration.apps.aws import (create_presigned_url, )
 from user.models import (User,)

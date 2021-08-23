@@ -9,8 +9,8 @@ from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY,PRODUCTION)
 
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
-from .crm import (insert_users, insert_vendors,
-                  fetch_labtests, update_in_crm, update_license)
+from .crm import (insert_users, fetch_labtests,
+                  update_in_crm, update_license)
 from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses)

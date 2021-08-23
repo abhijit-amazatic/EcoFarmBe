@@ -17,8 +17,6 @@ from integration.crm import (
     get_crm_obj,
     get_records_from_crm,
     search_query,
-    insert_vendors,
-    insert_accounts,
     get_record,
     search_query,
     create_records,

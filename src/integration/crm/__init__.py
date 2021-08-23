@@ -1,9 +1,6 @@
 from .core import *
 from .insert_records import (
-    insert_record,
-    insert_vendors,
-    insert_account_record,
-    insert_accounts,
+    insert_records,
 )
 from .get_records import (
     get_associated_vendor_from_license,

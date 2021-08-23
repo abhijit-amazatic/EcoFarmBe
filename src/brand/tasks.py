@@ -24,8 +24,7 @@ from integration.crm import (
     get_format_dict,
     get_records_from_crm,
     search_query,
-    insert_vendors,
-    insert_accounts,
+    insert_records,
     get_associated_vendor_from_license,
     get_associated_account_from_license,
     get_crm_vendor_to_db,
@@ -293,10 +292,7 @@ def insert_record_to_crm(record_id, is_update=False):
     """
     Insert record according to buyer/seller to crm.
     """
-    response = dict()
-    response['vendor'] = insert_vendors(id=record_id, is_update=is_update)
-    response['account'] = insert_accounts(id=record_id, is_update=is_update)
-    return response
+    return insert_records.delay(id=record_id, is_update=is_update)
 
 
 

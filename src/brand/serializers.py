@@ -15,7 +15,7 @@ from user.models import User
 from inventory.models import (Documents, )
 from core.utility import (email_admins_on_profile_registration_completed,notify_admins_on_slack_complete,)
 from inventory.models import (Documents, )
-from integration.crm import (insert_vendors, insert_accounts,is_user_existing,)
+from integration.crm import (insert_records,is_user_existing,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
@@ -67,8 +67,7 @@ def insert_or_update_vendor_accounts(profile, instance):
     else:
         is_update = False
 
-    insert_vendors.delay(id=instance.id, is_update=is_update)
-    insert_accounts.delay(id=instance.id,is_update=is_update)
+    insert_records.delay(id=instance.id, is_update=is_update)
 
     # if is_existing_user and is_existing_user[0]:
     #     if profile.license.profile_category == 'cultivation':
