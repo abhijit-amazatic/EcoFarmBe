@@ -553,6 +553,26 @@ def update_license(dba, license=None, license_id=None):
         except Exception as exc:
             print('Error in update license', exc)
             pass
+    if not license.get('uploaded_w9_to') or license_id:
+        try:
+            w9_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='w9').first()
+            w9_to_path = w9_to.path
+            aws_bucket = AWS_BUCKET
+            box_file = upload_file_s3_to_box(aws_bucket, w9_to_path)
+            if isinstance(box_file, str):
+                file_id = box_file
+            else:
+                file_id = box_file.id
+            moved_file = move_file(file_id, license_folder)
+            w9_url = get_shared_link(file_id)
+            if w9_url:
+                license['uploaded_sellers_permit_to'] = w9_url + "?id=" + moved_file.id
+                license_to.box_url = w9_url
+                license_to.box_id = moved_file.id
+                license_to.save()
+        except Exception as exc:
+            print('Error in update license', exc)
+            pass
     license_obj = License.objects.filter(pk=license['license_db_id']).update(
         uploaded_license_to=license.get('uploaded_license_to'),
         uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
