@@ -1,6 +1,7 @@
 """
 Integration views
 """
+import time
 from datetime import (datetime, timedelta)
 import base64
 import ast
@@ -65,7 +66,7 @@ from integration.sign import (upload_pdf_box, get_document,
 from integration.tasks import (send_estimate, delete_estimate_task, )
 from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
-                           BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET
+                           BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET, BOOKS_ORGANIZATION_LIST,
     )
 from slacker import Slacker
 from core.mailer import (mail, mail_send,)
@@ -88,7 +89,9 @@ from integration.apps.aws import (get_boto_client, create_presigned_url)
 from bill.utils import (save_estimate, )
 from twilio.twiml.messaging_response import MessagingResponse
 
-
+if not isinstance(BOOKS_ORGANIZATION_LIST, tuple):
+    BOOKS_ORGANIZATION_LIST = BOOKS_ORGANIZATION_LIST.split(',')
+    
 slack = Slacker(settings.SLACK_TOKEN)
 
 class GetBoxTokensView(APIView):
@@ -819,12 +822,21 @@ class AccountSummaryView(APIView):
         total_unpaid_bills = get_unpaid_bills(organization_name, vendor)
         total_credits = get_available_credit(organization_name, vendor)
         total_unpaid_invoices = get_unpaid_invoices(organization_name, vendor)
-        return Response({
-            "Available_Credits": total_credits,
-            "Overdue_Bills": total_unpaid_bills,
-            "Outstanding_Invoices": total_unpaid_invoices
+        try:
+            if organization_name == 'all':
+                return Response({
+                    "Available_Credits": sum([get_available_credit(org,vendor) for org in BOOKS_ORGANIZATION_LIST if time.sleep(1) is None]),
+                    "Overdue_Bills": sum([get_unpaid_bills(org,vendor) for org in BOOKS_ORGANIZATION_LIST if time.sleep(1) is None]),
+                    "Outstanding_Invoices": sum([get_unpaid_invoices(org,vendor) for org in BOOKS_ORGANIZATION_LIST if time.sleep(1) is None])
+                })
+            return Response({
+                "Available_Credits": total_credits,
+                "Overdue_Bills": total_unpaid_bills,
+                "Outstanding_Invoices": total_unpaid_invoices
             })
-
+        except Exception as e:
+            return Response({"status":"Something went wrong!Pleae check vendor/legal business names.","error": e})
+        
 class ContactView(APIView):
     """
     View class for Zoho books contacts.
