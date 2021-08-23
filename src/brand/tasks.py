@@ -319,11 +319,11 @@ def populate_integration_ids(license_id=None):
             else:
                 print(f"License {license_obj.license_number} not found on crm.")
 
-        if settings.PRODUCTION:
-            books_name_ls = ('books_efd', 'books_efl', 'books_efn')
-        else:
-            books_name_ls = ('books_efd',)
-        for books_name in books_name_ls:
+        # if settings.PRODUCTION:
+        #     books_name_ls = ('books_efd', 'books_efl', 'books_efn')
+        # else:
+        #     books_name_ls = ('books_efd',)
+        for books_name in ('books_efd', 'books_efl', 'books_efn'):
             org_name = books_name.lstrip('books_')
             books_obj = get_books_obj(books_name)
             for contact_type in ('vendor', 'customer'):

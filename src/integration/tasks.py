@@ -44,8 +44,9 @@ def fetch_inventory_on_interval():
         labtests = LabTest.objects.all().count()
         fetch_inventory('inventory_efd', days=days, price_data=price_data)
         # Commenting below only for staging. We do not have test book organization for staging.
-        if PRODUCTION:
-            fetch_inventory('inventory_efl', days=days, price_data=price_data)
+        # if PRODUCTION:
+        #     fetch_inventory('inventory_efl', days=days, price_data=price_data)
+        fetch_inventory('inventory_efl', days=days, price_data=price_data)
         inventory_after = Inventory.objects.all().count()
         return {'status_code': 200,
                 'labtest': labtests,

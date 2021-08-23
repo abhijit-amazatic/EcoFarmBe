@@ -66,10 +66,11 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
     # if obj.have_minimum_order_quantity:
     #     data['cf_minimum_quantity'] = int(obj.minimum_order_quantity)
 
-    if not settings.PRODUCTION and obj.zoho_organization in ('efl', 'efn'):
-        data['cf_cfi_published'] = False
-    else:
-        data['cf_cfi_published'] = True
+    # if not settings.PRODUCTION and obj.zoho_organization in ('efl', 'efn'):
+    #     data['cf_cfi_published'] = False
+    # else:
+    #     data['cf_cfi_published'] = True
+    data['cf_cfi_published'] = True
 
 
     if obj.category_group in ('Flowers', 'Trims'):

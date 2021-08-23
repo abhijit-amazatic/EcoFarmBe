@@ -244,9 +244,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
 
     def generate_sku(self, obj, postfix, request=None):
         sku = []
-        if not settings.PRODUCTION and obj.zoho_organization in ['efl', 'efn']:
-            sku.append('test')
-            sku.append('sku')
+        # if not settings.PRODUCTION and obj.zoho_organization in ['efl', 'efn']:
+        #     sku.append('test')
+        #     sku.append('sku')
         sku.append(obj.client_code)
 
         if obj.category_group in ('Isolates', 'Distillates',):
@@ -416,8 +416,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                         obj.save()
                         self.message_user(request, 'This item is approved', level='success')
                         if obj.marketplace_status in ('In-Testing', 'Available'):
-                            if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
-                                create_approved_item_po_task.delay(obj.id)
+                            # if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
+                            #     create_approved_item_po_task.delay(obj.id)
+                            create_approved_item_po_task.delay(obj.id)
                             notify_inventory_item_approved_task.delay(obj.id)
                         else:
                             notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
