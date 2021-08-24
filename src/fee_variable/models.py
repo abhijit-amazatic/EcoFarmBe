@@ -68,8 +68,16 @@ class CustomInventoryVariable(TimeStampFlagModelMixin,models.Model):
         max_length=255,
         choices=PROGRAM_TIER_CHOICES
     )
-    mcsp_fee_flowers = models.DecimalField(
-        verbose_name=_("MCSP Fee - Flowers ($/lb)"),
+    mcsp_fee_flower_tops = models.DecimalField(
+        verbose_name=_("MCSP Fee - Flower Tops ($/lb)"),
+        # help_text='This fee will be for Flowers.',
+        decimal_places=2,
+        max_digits=6,
+        blank=True,
+        null=True
+    )
+    mcsp_fee_flower_smalls = models.DecimalField(
+        verbose_name=_("MCSP Fee - Flower Smalls ($/lb)"),
         # help_text='This fee will be for Flowers.',
         decimal_places=2,
         max_digits=6,

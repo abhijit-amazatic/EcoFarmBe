@@ -45,21 +45,57 @@ custom_inventory_variable_program_map = {
 #     'Clones':       'mcsp_fee_per_pcs',
 
 ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
-    'Flowers':      'mcsp_fee_flowers',
-    'Trims':        'mcsp_fee_trims',
-    'Concentrates': 'mcsp_fee_concentrates',
-    'Distillates':  'mcsp_fee_concentrates',
-    'Isolates':     'mcsp_fee_isolates',
-    'Terpenes':     'mcsp_fee_terpenes',
-    'Clones':       'mcsp_fee_clones',
+    'Flower - Tops':                'mcsp_fee_flower_tops',
+    'Flower - Small':               'mcsp_fee_flower_smalls',
+    'Trim':                         'mcsp_fee_trims',
+    'Kief':                         'mcsp_fee_flower_tops',
+    'Isolates':                     'mcsp_fee_isolates',
+    'Isolates - CBD':               'mcsp_fee_isolates',
+    'Isolates - THC':               'mcsp_fee_isolates',
+    'Isolates - CBG':               'mcsp_fee_isolates',
+    'Isolates - CBN':               'mcsp_fee_isolates',
+    'Crude Oil':                    'mcsp_fee_concentrates',
+    'Crude Oil - THC':              'mcsp_fee_concentrates',
+    'Crude Oil - CBD':              'mcsp_fee_concentrates',
+    'Distillate Oil':               'mcsp_fee_concentrates',
+    'Distillate Oil - THC':         'mcsp_fee_concentrates',
+    'Distillate Oil - CBD':         'mcsp_fee_concentrates',
+    'Shatter':                      'mcsp_fee_concentrates',
+    'Sauce':                        'mcsp_fee_concentrates',
+    'Crumble':                      'mcsp_fee_concentrates',
+    'Terpenes':                     'mcsp_fee_terpenes',
+    'Terpenes - Cultivar Specific': 'mcsp_fee_terpenes',
+    'Terpenes - Cultivar Blended':  'mcsp_fee_terpenes',
+    'Clones':                       'mcsp_fee_clones',
 }
-ITEM_CATEGORY_MSCP_FEE_IN_PERCENTAGE = ('Isolates', 'Concentrates', 'Terpenes')
+
+ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP = {
+    'Kief': lambda val: val/454, # convert lb to gram
+}
+
+PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES = (
+    'Isolates - CBD',
+    'Isolates - THC',
+    'Isolates - CBG',
+    'Isolates - CBN',
+    'Crude Oil',
+    'Crude Oil - THC',
+    'Crude Oil - CBD',
+    'Distillate Oil',
+    'Distillate Oil - THC',
+    'Distillate Oil - CBD',
+    'Shatter',
+    'Sauce',
+    'Crumble',
+    'Terpenes - Cultivar Specific',
+    'Terpenes - Cultivar Blended',
+)
 
 
-def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=None, farm_price=None, request=None, no_tier_fee=True ):
+def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, farm_price=None, request=None, no_tier_fee=True ):
     msg_error = lambda msg: messages.error(request, msg,) if request else None
-    if item_category_group and item_category_group in ITEM_CATEGORY_MSCP_FEE_VAR_MAP :
-        fee_var = ITEM_CATEGORY_MSCP_FEE_VAR_MAP[item_category_group]
+    if item_category and item_category in ITEM_CATEGORY_MSCP_FEE_VAR_MAP:
+        fee_var = ITEM_CATEGORY_MSCP_FEE_VAR_MAP[item_category]
         if not license_profile:
             lp = LicenseProfile.objects.filter(name=vendor_name).first()
         else:
@@ -82,15 +118,17 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
                         messages.warning(request, f'No program tier found for profile, using {program_name} MCSP fee.',)
 
                 tier = custom_inventory_variable_program_map.get(program_name, {})
-                InventoryVariable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
-                if InventoryVariable and hasattr(InventoryVariable, fee_var) and getattr(InventoryVariable, fee_var) is not None:
+                inventory_variable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
+                if inventory_variable and hasattr(inventory_variable, fee_var) and getattr(inventory_variable, fee_var) is not None:
                     try:
-                        db_val = float(getattr(InventoryVariable, fee_var))
+                        db_val = float(getattr(inventory_variable, fee_var))
                     except ValueError:
                         msg_error('Error while parsing MCSP fee from db.')
                         return None
                     else:
-                        if item_category_group in ITEM_CATEGORY_MSCP_FEE_IN_PERCENTAGE:
+                        if item_category in ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP:
+                            db_val = ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP[item_category](db_val)
+                        if item_category in PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES:
                             if farm_price is not None:
                                 try:
                                     fp = float(farm_price)
@@ -103,7 +141,7 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
                                 msg_error('Farm price not provided for MCSP fee calculation.')
                                 return None
                         else:
-                            return db_val
+                            return round(db_val, 2)
                 else:
                     program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
                     program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
@@ -117,8 +155,8 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category_group=Non
         else:
             msg_error('License Profile not found.')
     else:
-        if item_category_group:
-                msg_error(f'MCSP fee is not mapped for Item category type \'{item_category_group}\'.')
+        if item_category:
+                msg_error(f'MCSP fee is not mapped for Item category type \'{item_category}\'.')
         else:
             msg_error('Item category not supported or not defined.')
 

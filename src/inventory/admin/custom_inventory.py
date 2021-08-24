@@ -344,7 +344,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 mcsp_fee = get_item_mcsp_fee(
                     obj.vendor_name,
                     license_profile=obj.license_profile,
-                    item_category_group=obj.category_group,
+                    item_category=obj.category_name,
                     request=request,
                     farm_price=obj.farm_ask_price
                 )

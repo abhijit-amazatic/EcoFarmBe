@@ -14,7 +14,6 @@ from ..tasks import (
     notify_inventory_item_change_approved_task,
 )
 from ..utils import (get_item_tax,)
-from ..data import (CG,)
 
 # str_fixed = lambda x : "{0:_<20}".format(str(x))
 def span_fixed(x):
@@ -136,7 +135,7 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         if obj.status == 'pending_for_approval':
             mcsp_fee = get_item_mcsp_fee(
                 obj.item.cf_vendor_name,
-                item_category_group=CG.get(obj.item.category_name),
+                item_category=obj.item.category_name,
                 request=request,
                 farm_price=obj.item.cf_farm_price_2
             )
