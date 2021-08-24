@@ -2,6 +2,7 @@
 """
 All periodic tasks related to integrations. 
 """
+from datetime import datetime, timedelta
 from celery.task import periodic_task
 from celery.schedules import crontab
 from core.celery import app
@@ -16,7 +17,7 @@ from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses)
 from integration.apps.bcc import (post_licenses_to_crm, )
 from bill.utils import (delete_estimate, )
-
+from drf_api_logger.models import APILogsModel
 
 def get_price_data():
     """
@@ -85,3 +86,18 @@ def delete_estimate_task(customer_name):
     is_deleted = delete_estimate(customer_name=customer_name)
     if not is_deleted:
         print(f'Estimate of {customer_name} cannot be deleted from db.')
+
+@periodic_task(run_every=(crontab(day_of_week='sun', hour=[7], minute=0)), options={'queue': 'general'})
+def remove_logger_data():
+    """
+    Keep logger data for 15 day window.
+    """
+    days_diff = datetime.today() - timedelta(days=15)
+    logs_to_remove = APILogsModel.objects.exclude(added_on__gte=days_diff)
+    if logs_to_remove:
+        logs_to_remove.delete()
+         
+     
+     
+    
+        
