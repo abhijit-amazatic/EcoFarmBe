@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission as DjangoPermission
 from django.db import transaction
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
@@ -233,13 +234,14 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
     filterset_class = DataFilter
 
     action_select_related_fields_map = {
-        'list':                 ('brand',),
-        'profile_contact':      ('profile_contact',),
-        'cultivation_overview': ('cultivation_overview',),
-        'license_profile':      ('license_profile',),
-        'financial_overview':   ('financial_overview',),
-        'crop_overview':        ('crop_overview',),
-        'program_overview':     ('program_overview',),
+        'list':                    ('brand',),
+        'profile_contact':         ('profile_contact',),
+        'cultivation_overview':    ('cultivation_overview',),
+        'license_profile':         ('license_profile',),
+        'financial_overview':      ('financial_overview',),
+        'crop_overview':           ('crop_overview',),
+        'program_overview':        ('program_overview',),
+        'update_signed_program': ('license_profile', 'program_overview',),
     }
 
     def get_queryset(self):
@@ -272,6 +274,8 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
             return ProgramOverviewSerializer
         elif self.action == 'billing_information':
             return BillingInformationSerializer
+        elif self.action == 'update_signed_program':
+            return  None
         return LicenseSerializer
 
     def perform_create(self, serializer):
@@ -427,6 +431,33 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
             return Response({'buyer_summary':get_buyer_summary(request.query_params.get('books_name'),license_obj.legal_business_name)},status=200)
         else:
             return Response({'detail':"License is not asscoaited with buyer account or couldn't fetch summary!"}, status=400)
+
+    @action(detail=True, url_path='update-signed-program', methods=['post'])
+    def update_signed_program(self, request, pk, *args, **kwargs):
+        """
+        get buyer summary
+        """
+        license_obj = self.get_object()
+
+        try:
+            license_profile = license_obj.license_profile
+        except ObjectDoesNotExist:
+            return Response({'detail':"License Profile does not exist!"}, status=400)
+        else:
+            if not license_profile.agreement_signed:
+                return Response({'detail':"agreement is not signed!"}, status=400)
+            try:
+                program_name = license_obj.program_overview.program_details.get('program_name')
+            except ObjectDoesNotExist:
+                return Response({'detail':"Programe Overview does not exist!"}, status=400)
+            else:
+                if program_name:
+                    license_profile.signed_program_name = program_name
+                    license_profile.save()
+                    return Response({'detail':f"program name  '{license_profile.signed_program_name}' updated successfully"}, status=200)
+                else:
+                    return Response({'detail':"No program_name in Programe Overview."}, status=400)
+
 
 
 
