@@ -7,6 +7,7 @@ import base64
 import ast
 from io import (BytesIO, )
 from django.http import (QueryDict,)
+from django.core.exceptions import (ObjectDoesNotExist,)
 from rest_framework import (status,)
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
 from rest_framework.response import Response
@@ -63,7 +64,7 @@ from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
                               send_template)
-from integration.tasks import (send_estimate, delete_estimate_task, )
+from integration.tasks import (send_estimate, delete_estimate_task, upload_agreement_pdf_to_box)
 from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET, BOOKS_ORGANIZATION_LIST,
@@ -574,6 +575,8 @@ class EstimateSignCompleteView(APIView):
             folder_id = get_client_folder_id(dir_name)
             if is_agreement:
                 new_folder = create_folder(folder_id, 'agreements')
+                upload_agreement_pdf_to_box(request_id, new_folder, filename, document_number)
+                # upload_agreement_pdf_to_box.delay(request_id, new_folder, filename, document_number)
             else:
                 a = mark_estimate(organization_name, estimate_id, 'sent')
                 a = mark_estimate(organization_name, estimate_id, 'accepted')
@@ -584,7 +587,7 @@ class EstimateSignCompleteView(APIView):
                     estimate_obj.save()
                 except Estimate.DoesNotExist:
                     pass
-            upload_pdf_box.delay(request_id, new_folder, filename, is_agreement)
+                upload_pdf_box.delay(request_id, new_folder, filename, is_agreement)
         if order_number:
             try:
                 order_data = get_estimate(estimate_id,params={})

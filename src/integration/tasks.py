@@ -3,6 +3,7 @@
 All periodic tasks related to integrations. 
 """
 from datetime import datetime, timedelta
+from django.core.exceptions import (ObjectDoesNotExist,)
 from celery.task import periodic_task
 from celery.schedules import crontab
 from core.celery import app
@@ -10,11 +11,16 @@ from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY,PRODUCTION)
 
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
+from brand.models import (License)
 from .crm import (insert_users, fetch_labtests,
                   update_in_crm, update_license)
 from .inventory import (fetch_inventory, )
 from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses)
+from  .sign import (upload_pdf_box,)
+from .box import(
+    get_shared_link,
+)
 from integration.apps.bcc import (post_licenses_to_crm, )
 from bill.utils import (delete_estimate, )
 from drf_api_logger.models import APILogsModel
@@ -96,8 +102,24 @@ def remove_logger_data():
     logs_to_remove = APILogsModel.objects.exclude(added_on__gte=days_diff)
     if logs_to_remove:
         logs_to_remove.delete()
-         
-     
-     
-    
-        
+
+
+@app.task(queue="urgent")
+def upload_agreement_pdf_to_box(request_id, folder_id, file_name, license_number):
+    """
+    Upload document to box.
+    """
+    file_id = upload_pdf_box(request_id, folder_id, file_name, is_agreement=True)
+    if license_number:
+        obj = License.objects.order_by('-created_on').filter(license_number=license_number).select_related('license_profile').first()
+        if obj:
+            if 'agreement' in file_name.lower():
+                try:
+                    obj.license_profile.agreement_link = get_shared_link(file_id)
+                except ObjectDoesNotExist:
+                    pass
+                else:
+                    obj.license_profile.save()
+            elif 'w-9' in file_name.lower():
+                obj.uploaded_w9_to = get_shared_link(file_id)
+                obj.save()
