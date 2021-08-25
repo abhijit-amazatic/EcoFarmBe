@@ -1,3 +1,4 @@
+from django.core import exceptions
 from django.dispatch import receiver
 from django.db.models import signals
 from django.apps import apps
@@ -48,3 +49,24 @@ def pre_save_license_profile(sender, instance, **kwargs):
             instance.signed_program_name = instance.license.program_overview.program_details.get('program_name')
         except ObjectDoesNotExist:
             pass
+
+# @receiver(signals.pre_save, sender=apps.get_model('brand', 'ProfileContact'))
+# def pre_save_profile_contact(sender, instance, **kwargs):
+#     """
+#     Deletes old file.
+#     """
+#     if instance.profile_contact_details and isinstance(instance.profile_contact_details, dict):
+#         try:
+#             parsed_employees = dict()
+#             employees = instance.profile_contact_details['employees']
+#             for employee in employees:
+#                 email = employee.get('employee_email')
+#                 if not email in parsed_employees:
+#                     parsed_employees[email] = employee
+#                 else:
+#                     for role in employee['roles']:
+#                         if not role in parsed_employees[email]['roles']:
+#                             parsed_employees[email]['roles'].append(role)
+#             instance.profile_contact_details['employees'] = list(parsed_employees.values())
+#         except Exception as exc:
+#             print(exc)

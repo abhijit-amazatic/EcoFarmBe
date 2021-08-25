@@ -142,7 +142,7 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
                 print(r)
 
         associated_contact = {
-            x['id']: {'roles': x['roles'], 'linking_module_id': x['linking_module_id']}
+            x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']}
             for x in vendor_associations['Contacts']
         }
         contact_ids_to_create_associate = [id for id in contacts_dict.keys() if id not in  associated_contact.keys()]
@@ -154,7 +154,7 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
         contact_ids_to_update_associate = [contact_id for contact_id in contacts_dict.keys() if contact_id in  associated_contact.keys()]
         if contact_ids_to_update_associate:
             update_data = [
-                {'id': associated_contact[id]['linking_module_id'], 'Contact_Company_Role': contacts_dict[id]['roles']}
+                {'id': associated_contact[id]['linking_obj_id'], 'Contact_Company_Role': contacts_dict[id]['roles']}
                 for id in contact_ids_to_update_associate
             ]
             r = crm_obj.update_records('Vendors_X_Contacts', update_data)
@@ -173,7 +173,7 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
                 print(r)
 
         associated_contact = {
-            x['id']: {'roles': x['roles'], 'linking_module_id': x['linking_module_id']}
+            x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']}
             for x in account_associations['Contacts']
         }
         contact_ids_to_create_associate = [id for id in contacts_dict.keys() if id not in  associated_contact.keys()]
@@ -185,7 +185,7 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
         contact_ids_to_update_associate = [contact_id for contact_id in contacts_dict.keys() if contact_id in  associated_contact.keys()]
         if contact_ids_to_update_associate:
             update_data = [
-                { 'id': associated_contact[id]['linking_module_id'], 'Contact_Company_Role': contacts_dict[id]['roles'] }
+                { 'id': associated_contact[id]['linking_obj_id'], 'Contact_Company_Role': contacts_dict[id]['roles'] }
                 for id in contact_ids_to_update_associate
             ]
             r = crm_obj.update_records('Accounts_X_Contacts', update_data)

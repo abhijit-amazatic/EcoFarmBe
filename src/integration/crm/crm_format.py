@@ -65,6 +65,7 @@ CRM_FORMAT  = {
         "Skype_ID":"Skype_ID",
     },
     "Vendors_X_Contacts": {
+        "id": "id",
         "Currency": "Currency",
         "Exchange_Rate": "Exchange_Rate",
         "Record_Image": "Record_Image",
@@ -74,6 +75,7 @@ CRM_FORMAT  = {
         "Vendor": "Vendor",
     },
     "Accounts_X_Contacts": {
+        "id": "id",
         "Currency": "Currency",
         "Exchange_Rate": "Exchange_Rate",
         "Record_Image": "Record_Image",
@@ -128,6 +130,7 @@ CRM_FORMAT  = {
         "Title": "Title",
         "Phone": "company_phone",
         "Email": "company_email",
+        "Contacts_List": "employees_parse",
         "Contact_1": "employees_parse",
         "Contact_3": "employees_parse",
         "Contact_2": "employees_parse",
@@ -394,6 +397,7 @@ CRM_FORMAT  = {
         "County": "county",
         "Phone": "phone",
         "Region": "region",
+        "Contacts_List": "employees_parse",
         "Contact_1": "employees_parse",
         "Contact_3": "employees_parse",
         "Contact_2": "employees_parse",

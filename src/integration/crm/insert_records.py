@@ -11,11 +11,46 @@ from brand.models import (
 )
 from .core import (
     search_query,
+    get_crm_obj,
+    get_record,
     get_licenses,
     create_records,
     update_records,
     update_license,
+    get_lookup_id,
 )
+from .get_records import(
+    get_account_associated_contacts,
+    get_vendor_associated_contacts,
+)
+
+
+def get_associated_vendor(license_crm_id):
+    vendor_id = None
+    vendor = search_query('Vendors_X_Licenses', license_crm_id, 'Licenses')
+    if vendor['status_code'] != 200:
+        license_response = get_record('Licenses', license_crm_id)
+        if license_response.get('status_code') == 200:
+            license_record = license_response.get('response', {}).get(license_crm_id, {})
+            vendor_id = get_lookup_id(license_record, 'Vendor_Name_Lookup')
+    else:
+        vendor = vendor['response'][0]['Licenses_Module']
+        vendor_id = vendor['id']
+    return vendor_id
+
+def get_associated_account(license_crm_id):
+    account_id = None
+    account = search_query('Accounts_X_Licenses', license_crm_id, 'Licenses')
+    if account['status_code'] != 200:
+        license_response = get_record('Licenses', license_crm_id)
+        if license_response.get('status_code') == 200:
+            license_record = license_response.get('response', {}).get(license_crm_id, {})
+            account_id = get_lookup_id(license_record, 'Account_Name_Lookup')
+    else:
+        account = account['response'][0]['Licenses_Module']
+        account_id = account['id']
+    return account_id
+
 
 
 def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_update=False):
@@ -25,36 +60,33 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
     d = dict()
     d.update(data_dict)
     license_profile_id = license_db_obj.license_profile.__dict__['id']
-    if is_update:
-        d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_account_id']
-        if not d['id']:
-            r = search_query('Accounts', d['name'], 'Account_Name')
-            if r.get('status_code') == 200:
-                d['id'] = r.get('response')[0]['id']
-        if d['id']:
-            result = update_records('Accounts', d, is_return_orginal_data=True)
-        else:
-            result = create_records('Accounts', d, True)
+    d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_account_id']
+    if not d['id']:
+        r = search_query('Accounts', d['name'], 'Account_Name')
+        if r.get('status_code') == 200:
+            d['id'] = r.get('response')[0]['id']
+    if not d['id']:
+        d['id'] = get_associated_account(license_crm_id)
+
+    if d['id']:
+        result = update_records('Accounts', d, is_return_orginal_data=True)
     else:
-        result = search_query('Accounts', d['name'], 'Account_Name')
-        if result.get('status_code') != 200:
-            result = create_records('Accounts', d, is_return_orginal_data=True)
-        else:
-            d['id'] = result.get('response')[0]['id']
-            result = update_records('Accounts', d, True)
+        result = create_records('Accounts', d, is_return_orginal_data=True)
+
     if license_crm_id and result['status_code'] in [200, 201]:
         record_response = result['response']['response']['data']
         try:
             record_obj = LicenseProfile.objects.get(id=license_profile_id)
-            record_obj.zoho_crm_account_id = record_response[0]['details']['id']
+            if record_response[0]['details']['id']:
+                record_obj.zoho_crm_account_id = record_response[0]['details']['id']
             record_obj.is_updated_in_crm = True
             record_obj.save()
         except KeyError as exc:
             print(exc)
-            pass
+        account_id = record_response[0]['details']['id']
         if (result['response']['orignal_data'][0].get('Licenses_List')):
             data = dict()
-            data['Licenses_Module'] = record_response[0]['details']['id']
+            data['Licenses_Module'] = account_id
             for license in result['response']['orignal_data'][0]['Licenses_List']:
                 data['Licenses'] = license
                 if is_update:
@@ -64,41 +96,53 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
                 else:
                     r = create_records('Accounts_X_Licenses', [data])
 
-            request = list()
-            contact_dict = {
-                'Owner1': 'Owner',
-                'Contact_1': 'Cultivation Manager',
-                'Contact_2': 'Logistics Manager',
-                'Contact_3': 'Sales Manager'}
-            for contact in ['Owner1', 'Contact_1', 'Contact_2', 'Contact_3']:
-                data = dict()
-                user_id = result['response']['orignal_data'][0].get(contact)
-                if user_id:
-                    if len(request) == 0:
-                        data['Contacts'] = user_id
-                        data['Contact_Company_Role'] = [contact_dict[contact]]
-                        data['Accounts'] = record_response[0]['details']['id']
-                        request.append(data)
-                    else:
-                        inserted = False
-                        for j in request:
-                            if j.get('Contacts') == user_id:
-                                j['Contact_Company_Role'].append(contact_dict[contact])
-                                inserted = True
-                        if not inserted:
-                            data['Contacts'] = user_id
-                            data['Contact_Company_Role'] = [contact_dict[contact]]
-                            data['Accounts'] = record_response[0]['details']['id']
-                            request.append(data)
-            if is_update:
-                contact_response = update_records('Accounts_X_Contacts', request)
-                if r.get('status_code') == 202:
-                    contact_response = create_records('Accounts_X_Contacts', request)
+        associated_contacts = get_account_associated_contacts(account_id)
+        associated_contacts = {
+            x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']} for x in associated_contacts
+        }
+        update_request = list()
+        create_request = list()
+        for contact in result['response']['orignal_data'][0].get('Contacts_List', []):
+            contact_id = contact['contact_crm_id']
+            if contact_id in associated_contacts:
+                if is_update:
+                    data = dict()
+                    insert = True
+                    for j in update_request:
+                        if j.get('Contacts') == contact_id:
+                            if contact.get('roles'):
+                                j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                            insert = False
+                    if insert:
+                        data['id'] = associated_contacts[contact_id]['linking_obj_id']
+                        data['Contacts'] = contact_id
+                        if contact.get('roles'):
+                            data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
+                        else:
+                            data['Contact_Company_Role'] = associated_contacts[contact_id]['roles']
+                        data['Accounts'] = account_id
+                        update_request.append(data)
             else:
-                contact_response = create_records('Accounts_X_Contacts', request)
+                data = dict()
+                insert = True
+                for j in create_request:
+                    if j.get('Contacts') == contact_id:
+                        if contact.get('roles'):
+                            j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                        insert = False
+                if insert:
+                    data['Contacts'] = contact_id
+                    data['Contact_Company_Role'] = contact.get('roles')
+                    data['Accounts'] = account_id
+                    create_request.append(data)
+
+        if is_update and update_request:
+            contact_update_response = update_records('Accounts_X_Contacts', update_request)
+
+        if create_request:
+            contact_create_response = create_records('Accounts_X_Contacts', create_request)
+
     return result
-
-
 
 
 def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_update=False):
@@ -109,24 +153,21 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
         d['Layout_Name'] = 'vendor_cannabis_nursery'
     else:
         d['Layout_Name'] = 'vendor_cannabis'
-    if is_update:
-        d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_vendor_id']
-        if d['id']:
-            r = search_query('Vendors', d['name'], 'Vendor_Name')
-            if r.get('status_code') == 200:
-                d['id'] = r.get('response')[0]['id']
-        if d['id']:
-            result = update_records('Vendors', d, True)
-        else:
-            result = create_records('Vendors', d, True)
+
+    d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_vendor_id']
+    if not d['id']:
+        r = search_query('Vendors', d['name'], 'Vendor_Name')
+        if r.get('status_code') == 200:
+            d['id'] = r.get('response')[0]['id']
+
+    if not d['id']:
+        d['id'] = get_associated_vendor(license_crm_id)
+
+    if d['id']:
+        result = update_records('Vendors', d, is_return_orginal_data=True)
     else:
-        result = search_query('Vendors', d['name'], 'Vendor_Name')
-        if result.get('status_code') != 200:
-            result = create_records('Vendors', d, True)
-        else:
-            d['id'] = result.get('response')[0]['id']
-            result = update_records('Vendors', d, True)
-    
+        result = create_records('Vendors', d, is_return_orginal_data=True)
+
     if license_crm_id and result['status_code'] in [200, 201]:
         record_response = result['response']['response']['data']
         try:
@@ -136,9 +177,10 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
             record_obj.save()
         except KeyError as exc:
             print(exc)
+        vendor_id = record_response[0]['details']['id']
         if (result['response']['orignal_data'][0].get('Licenses_List')):
             data = dict()
-            data['Licenses_Module'] = record_response[0]['details']['id']
+            data['Licenses_Module'] = vendor_id
             for license in result['response']['orignal_data'][0]['Licenses_List']:
                 data['Licenses'] = license
                 if is_update:
@@ -151,44 +193,60 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
         if result['response']['orignal_data'][0].get('Cultivars_List'):
             data = dict()
             l = list()
-            data['Cultivar_Associations'] = record_response[0]['details']['id']
+            data['Cultivar_Associations'] = vendor_id
             for j in result['response']['orignal_data'][0]['Cultivars_List']:
                 r = search_query('Cultivars', j, 'Name')
                 if r['status_code'] == 200:
                     data['Cultivars'] = r['response'][0]['id']
                     r = create_records('Vendors_X_Cultivars', [data])
-        request = list()
-        contact_dict = {
-            'Owner1': 'Owner',
-            'Contact_1': 'Cultivation Manager',
-            'Contact_2': 'Logistics Manager',
-            'Contact_3': 'Sales Manager'}
-        for contact in ['Owner1', 'Contact_1', 'Contact_2', 'Contact_3']:
-            data = dict()
-            user_id = result['response']['orignal_data'][0].get(contact)
-            if user_id:
-                if len(request) == 0:
-                    data['Contact'] = user_id
-                    data['Contact_Company_Role'] = [contact_dict[contact]]
-                    data['Vendor'] = record_response[0]['details']['id']
-                    request.append(data)
-                else:
-                    inserted = False
-                    for j in request:
-                        if j.get('Contact') == user_id:
-                            j['Contact_Company_Role'].append(contact_dict[contact])
-                            inserted = True
-                    if not inserted:
-                        data['Contact'] = user_id
-                        data['Contact_Company_Role'] = [contact_dict[contact]]
-                        data['Vendor'] = record_response[0]['details']['id']
-                        request.append(data)
-        if is_update:
-            contact_response = update_records('Vendors_X_Contacts', request)
-            if r.get('status_code') == 202:
-                contact_response = create_records('Vendors_X_Contacts', request)
-        else:
-            contact_response = create_records('Vendors_X_Contacts', request)
+
+        associated_contacts = get_vendor_associated_contacts(vendor_id)
+        associated_contacts = {
+            x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']} for x in associated_contacts
+        }
+        update_request = list()
+        create_request = list()
+        for contact in result['response']['orignal_data'][0].get('Contacts_List', []):
+            contact_id = contact['contact_crm_id']
+            if contact_id in associated_contacts:
+                if is_update:
+                    data = dict()
+                    insert = True
+                    for j in update_request:
+                        if j.get('Contact') == contact_id:
+                            if contact.get('roles'):
+                                j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                            insert = False
+                    if insert:
+                        data['id'] = associated_contacts[contact_id]['linking_obj_id']
+                        data['Contact'] = contact_id
+                        if contact.get('roles'):
+                            data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
+                        else:
+                            data['Contact_Company_Role'] = associated_contacts[contact_id]['roles']
+                        data['Vendor'] = vendor_id
+                        update_request.append(data)
+            else:
+                data = dict()
+                insert = True
+                for j in create_request:
+                    if j.get('Contacts') == contact_id:
+                        if contact.get('roles'):
+                            j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                        insert = False
+                if insert:
+                    data['Contact'] = contact_id
+                    data['Contact_Company_Role'] = contact.get('roles')
+                    data['Vendor'] = vendor_id
+                    create_request.append(data)
+
+
+        if is_update and update_request:
+            contact_update_response = update_records('Vendors_X_Contacts', update_request)
+
+        if create_request:
+            contact_create_response = create_records('Vendors_X_Contacts', create_request)
+
     return result
 
 

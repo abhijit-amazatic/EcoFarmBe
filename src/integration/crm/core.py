@@ -121,28 +121,42 @@ def create_employees(key, value, obj, crm_obj):
     """
     Create contacts in Zoho CRM.
     """
-    user = None
     d = obj.get(value)
     cd = {
         'last_name': 'employee_name',
         'email': 'employee_email',
         'phone': 'phone',
     }
-    try:
-        for i in d:
-            if 'Farm Manager' in i['roles'] and key == 'Contact_1':
-                user = get_dict(cd, i)
-            elif 'Logistics' in i['roles'] and key == 'Contact_2':
-                user = get_dict(cd, i)
-            elif 'Sales/Inventory' in i['roles'] and key == 'Contact_3':
-                user = get_dict(cd, i)
-            elif 'License Owner' in i['roles'] and key == 'Owner1':
-                user = get_dict(cd, i)
-        return user
-    except IndexError:
-        return []
-    except TypeError:
-        return []
+    if key == 'Contacts_List':
+        contacts = list()
+        try:
+            for i in d:
+                contacts.append({
+                    'roles': i.get('roles', []),
+                    'contact_crm_id': get_dict(cd, i),
+                })
+            return contacts
+        except IndexError:
+            return []
+        except TypeError:
+            return []
+    else:
+        user = None
+        try:
+            for i in d:
+                if 'Farm Manager' in i['roles'] and key == 'Contact_1':
+                    user = get_dict(cd, i)
+                elif 'Logistics' in i['roles'] and key == 'Contact_2':
+                    user = get_dict(cd, i)
+                elif 'Sales/Inventory' in i['roles'] and key == 'Contact_3':
+                    user = get_dict(cd, i)
+                elif 'License Owner' in i['roles'] and key == 'Owner1':
+                    user = get_dict(cd, i)
+            return user
+        except IndexError:
+            return []
+        except TypeError:
+            return []
 
 def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     """

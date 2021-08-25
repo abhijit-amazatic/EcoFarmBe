@@ -246,98 +246,133 @@ def get_vendors_from_crm(legal_business_name):
             return response
     return {}
 
+def get_vendor_associated_organizations(vendor_id):
+    final_response = []
+    org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
+    if org.get('status_code') == 200:
+        for o in org.get('response'):
+            r = dict()
+            r['name'] = o['Org']['name']
+            r['id'] = o['Org']['id']
+            final_response.append(r)
+    return final_response
+
+def get_vendor_associated_brands(vendor_id):
+    final_response = []
+    brand = search_query('Brands_X_Vendors', vendor_id, 'Vendor')
+    if brand.get('status_code') == 200:
+        for b in brand.get('response'):
+            r = dict()
+            r['name'] = b['Brand']['name']
+            r['id'] = b['Brand']['id']
+            final_response.append(r)
+    return final_response
+
+def get_vendor_associated_licenses(vendor_id):
+    final_response = []
+    license = search_query('Vendors_X_Licenses', vendor_id, 'Licenses_Module')
+    if license.get('status_code') == 200:
+        for l in license.get('response'):
+            r = dict()
+            r['name'] = l['Licenses']['name']
+            r['id'] = l['Licenses']['id']
+            final_response.append(r)
+    return final_response
+
+def get_vendor_associated_contacts(vendor_id):
+    final_response = []
+    contact = search_query('Vendors_X_Contacts', vendor_id, 'Vendor')
+    if contact.get('status_code') == 200:
+        for ct in contact.get('response'):
+            r = dict()
+            r['name'] = ct['Contact']['name']
+            r['id'] = ct['Contact']['id']
+            r['roles'] = ct['Contact_Company_Role']
+            r['linking_obj_id'] = ct['id']
+            final_response.append(r)
+    return final_response
+
+def get_vendor_associated_cultivars(vendor_id):
+    final_response = []
+    cultivar = search_query('Vendors_X_Cultivars', vendor_id, 'Cultivar_Associations')
+    if cultivar.get('status_code') == 200:
+        for cl in cultivar.get('response'):
+            r = dict()
+            r['name'] = cl['Cultivars']['name']
+            r['id'] = cl['Cultivars']['id']
+            final_response.append(r)
+    return final_response
 
 def get_vendor_associations(vendor_id, organizations=True, brands=True, licenses=True, contacts=True, cultivars=True):
     final_response = {}
     if organizations:
-        final_response['Orgs'] = []
-        org = search_query('Orgs_X_Vendors', vendor_id, 'Vendor')
-        if org.get('status_code') == 200:
-            for o in org.get('response'):
-                r = dict()
-                r['name'] = o['Org']['name']
-                r['id'] = o['Org']['id']
-                final_response['Orgs'].append(r)
+        final_response['Orgs'] = get_vendor_associated_organizations(vendor_id)
     if brands:
-        final_response['Brands'] = []
-        brand = search_query('Brands_X_Vendors', vendor_id, 'Vendor')
-        if brand.get('status_code') == 200:
-            for b in brand.get('response'):
-                r = dict()
-                r['name'] = b['Brand']['name']
-                r['id'] = b['Brand']['id']
-                final_response['Brands'].append(r)
+        final_response['Brands'] = get_vendor_associated_brands(vendor_id)
     if licenses:
-        final_response['Licenses'] = []
-        license = search_query('Vendors_X_Licenses', vendor_id, 'Licenses_Module')
-        if license.get('status_code') == 200:
-            for l in license.get('response'):
-                r = dict()
-                r['name'] = l['Licenses']['name']
-                r['id'] = l['Licenses']['id']
-                final_response['Licenses'].append(r)
+        final_response['Licenses'] = get_vendor_associated_licenses(vendor_id)
     if contacts:
-        final_response['Contacts'] = []
-        contact = search_query('Vendors_X_Contacts', vendor_id, 'Vendor')
-        if contact.get('status_code') == 200:
-            for ct in contact.get('response'):
-                r = dict()
-                r['name'] = ct['Contact']['name']
-                r['id'] = ct['Contact']['id']
-                r['roles'] = ct['Contact_Company_Role']
-                r['linking_module_id'] = ct['id']
-                final_response['Contacts'].append(r)
+        final_response['Contacts'] = get_vendor_associated_contacts(vendor_id)
     if cultivars:
-        final_response['Cultivars'] = []
-        cultivar = search_query('Vendors_X_Cultivars', vendor_id, 'Cultivar_Associations')
-        final_response['cultivar'] = []
-        if cultivar.get('status_code') == 200:
-            for cl in cultivar.get('response'):
-                r = dict()
-                r['name'] = cl['Cultivars']['name']
-                r['id'] = cl['Cultivars']['id']
-                final_response['Cultivars'].append(r)
+        final_response['Cultivars'] = get_vendor_associated_cultivars(vendor_id)
+    return final_response
+
+
+def get_account_associated_organizations(account_id):
+    final_response = []
+    org = search_query('Orgs_X_Accounts', account_id, 'Account')
+    if org.get('status_code') == 200:
+        for o in org.get('response'):
+            r = dict()
+            r['name'] = o['Org']['name']
+            r['id'] = o['Org']['id']
+            final_response.append(r)
+    return final_response
+
+def get_account_associated_brands(account_id):
+    final_response = []
+    brand = search_query('Brands_X_Accounts', account_id, 'Account')
+    if brand.get('status_code') == 200:
+        for b in brand.get('response'):
+            r = dict()
+            r['name'] = b['Brand']['name']
+            r['id'] = b['Brand']['id']
+            final_response.append(r)
+    return final_response
+
+def get_account_associated_licenses(account_id):
+    final_response = []
+    license = search_query('Accounts_X_Licenses', account_id, 'Licenses_Module')
+    if license.get('status_code') == 200:
+        for l in license.get('response'):
+            r = dict()
+            r['name'] = l['Licenses']['name']
+            r['id'] = l['Licenses']['id']
+            final_response.append(r)
+    return final_response
+
+def get_account_associated_contacts(account_id):
+    final_response = []
+    contact = search_query('Accounts_X_Contacts', account_id, 'Accounts')
+    if contact.get('status_code') == 200:
+        for ct in contact.get('response'):
+            r = dict()
+            r['name'] = ct['Contacts']['name']
+            r['id'] = ct['Contacts']['id']
+            r['roles'] = ct['Contact_Company_Role']
+            r['linking_obj_id'] = ct['id']
+            final_response.append(r)
     return final_response
 
 
 def get_account_associations(account_id, organizations=True, brands=True, licenses=True, contacts=True):
     final_response = {}
     if organizations:
-        final_response['Orgs'] = []
-        org = search_query('Orgs_X_Accounts', account_id, 'Account')
-        if org.get('status_code') == 200:
-            for o in org.get('response'):
-                r = dict()
-                r['name'] = o['Org']['name']
-                r['id'] = o['Org']['id']
-                final_response['Orgs'].append(r)
+        final_response['Orgs'] = get_account_associated_organizations(account_id)
     if brands:
-        final_response['Brands'] = []
-        brand = search_query('Brands_X_Accounts', account_id, 'Account')
-        if brand.get('status_code') == 200:
-            for b in brand.get('response'):
-                r = dict()
-                r['name'] = b['Brand']['name']
-                r['id'] = b['Brand']['id']
-                final_response['Brands'].append(r)
+        final_response['Brands'] = get_account_associated_brands(account_id)
     if licenses:
-        final_response['Licenses'] = []
-        license = search_query('Accounts_X_Licenses', account_id, 'Licenses_Module')
-        if license.get('status_code') == 200:
-            for l in license.get('response'):
-                r = dict()
-                r['name'] = l['Licenses']['name']
-                r['id'] = l['Licenses']['id']
-                final_response['Licenses'].append(r)
+        final_response['Licenses'] = get_account_associated_licenses(account_id)
     if contacts:
-        final_response['Contacts'] = []
-        contact = search_query('Accounts_X_Contacts', account_id, 'Accounts')
-        if contact.get('status_code') == 200:
-            for ct in contact.get('response'):
-                r = dict()
-                r['name'] = ct['Contacts']['name']
-                r['id'] = ct['Contacts']['id']
-                r['roles'] = ct['Contact_Company_Role']
-                r['linking_module_id'] = ct['id']
-                final_response['Contacts'].append(r)
+        final_response['Contacts'] = get_account_associated_contacts(account_id)
     return final_response
