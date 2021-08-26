@@ -178,8 +178,9 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
                         obj.__dict__.update(update_data)
                         obj.save()
                         self.message_user(request, "Tokens updated successfully.", level='success')
-                        self.revoke_token(oauth_info, old_refresh_token, token_type=state+' refresh')
-                        self.revoke_token(oauth_info, old_access_token, token_type=state+' access')
+                        if not settings.DEBUG:
+                            self.revoke_token(oauth_info, old_refresh_token, token_type=state+' refresh')
+                            self.revoke_token(oauth_info, old_access_token, token_type=state+' access')
                     return HttpResponseRedirect(reverse_admin_change_path(obj))
             else:
                 return HttpResponse('Integration for current state Not Supported')
