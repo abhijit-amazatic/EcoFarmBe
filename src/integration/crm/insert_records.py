@@ -20,12 +20,17 @@ from .core import (
     get_lookup_id,
 )
 from .get_records import(
+    get_associations,
     get_account_associated_contacts,
     get_vendor_associated_contacts,
+    get_account_associated_organizations,
+    get_account_associated_brands,
+    get_vendor_associated_brands,
+    get_vendor_associated_organizations,
 )
 
 
-def get_associated_vendor(license_crm_id):
+def get_associated_vendor(license_crm_id,):
     vendor_id = None
     vendor = search_query('Vendors_X_Licenses', license_crm_id, 'Licenses')
     if vendor['status_code'] != 200:
@@ -350,15 +355,18 @@ def insert_records(id=None, is_update=False):
         final_dict = dict()
         try:
             organization_id = None
-            result = search_query('Orgs', record.organization.name, 'Name')
-            if result.get('status_code') == 200:
-                organization_id = result.get('response')[0].get('id')
-                if is_update:
-                    result = update_records('Orgs', record.organization.__dict__, True)
-            else:
-                result = create_records('Orgs', record.organization.__dict__, True)
-                if result.get('status_code') == 201:
-                    organization_id = result['response']['response']['data'][0]['details']['id']
+            try:
+                result = search_query('Orgs', record.organization.name, 'Name')
+                if result.get('status_code') == 200:
+                    organization_id = result.get('response')[0].get('id')
+                    if is_update:
+                        result = update_records('Orgs', record.organization.__dict__, True)
+                else:
+                    result = create_records('Orgs', record.organization.__dict__, True)
+                    if result.get('status_code') == 201:
+                        organization_id = result['response']['response']['data'][0]['details']['id']
+            except Exception as exc:
+                print(exc)
 
             brand_id = None
             try:
@@ -371,9 +379,9 @@ def insert_records(id=None, is_update=False):
                     result = create_records('Brands', record.brand.__dict__, True)
                     if result.get('status_code') == 201:
                         brand_id = result['response']['response']['data'][0]['details']['id']
-
             except Exception as exc:
                 print(exc)
+
             final_dict['org'] = organization_id
             final_dict['brand'] = brand_id
             if brand_id:
@@ -392,80 +400,76 @@ def insert_records(id=None, is_update=False):
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
+
             record_response = _insert_record(record=record, is_update=is_update)
             final_dict.update(record_response)
+
             for k, response in record_response.items():
-                if (brand_id or \
-                    response['license']['status_code'] == 200 and \
-                    response['vendor']['status_code'] in [200, 201] and \
-                    organization_id):
+                if response['license']['status_code'] == 200:
                     data = dict()
-                    resp_brand = brand_id
-                    try:
-                        resp_vendor = response['vendor']['response']['response']['data']
-                        data['Vendor'] = resp_vendor[0]['details']['id']
-                    except TypeError:
-                        resp_vendor = response['vendor']['response'][0]
-                        data['Vendor'] = resp_vendor['id']
+                    account_id = None
+                    vendor_id = None
+
+                    if response['account']['status_code'] in [200, 201]:
+                        try:
+                            resp_account = response['account']['response']['response']['data']
+                            account_id = resp_account[0]['details']['id']
+                        except TypeError:
+                            resp_account = response['account']['response'][0]
+                            account_id = resp_account['id']
+
+                    if response['vendor']['status_code'] in [200, 201]:
+                        try:
+                            resp_vendor = response['vendor']['response']['response']['data']
+                            vendor_id = resp_vendor[0]['details']['id']
+                        except TypeError:
+                            resp_vendor = response['vendor']['response'][0]
+                            vendor_id = resp_vendor['id']
+
+                    data['Account'] = account_id
+                    data['Vendor'] = vendor_id
                     data['Org'] = organization_id
                     data['Brand'] = brand_id
-                    if is_update:
-                        r = update_records('Orgs_X_Vendors', [data])
-                        if r.get('status_code') == 202:
-                            r = create_records('Orgs_X_Vendors', [data])
-                        final_dict['org_vendor'] = r
 
-                        r = update_records('Orgs_X_Brands', [data])
-                        if r.get('status_code') == 202:
+                    if account_id:
+                        if organization_id:
+                            associated_org_ids = get_account_associated_organizations(account_id, id_flat=True)
+                            if organization_id not in associated_org_ids:
+                                r = create_records('Orgs_X_Accounts', [data])
+                            else:
+                                r = {'msg': 'Association already exist'}
+                            final_dict['org_account'] = r
+                        if brand_id:
+                            associated_brand_ids = get_account_associated_brands(account_id, id_flat=True)
+                            if brand_id not in associated_brand_ids:
+                                r = create_records('Brands_X_Accounts', [data])
+                            else:
+                                r = {'msg': 'Association already exist'}
+                            final_dict['brand_account'] = r
+
+                    if vendor_id:
+                        if organization_id:
+                            associated_org_ids = get_vendor_associated_organizations(vendor_id, id_flat=True)
+                            if organization_id not in associated_org_ids:
+                                r = create_records('Orgs_X_Vendors', [data])
+                            else:
+                                r = {'msg': 'Association already exist'}
+                            final_dict['org_vendor'] = r
+                        if brand_id:
+                            associated_brand_ids = get_vendor_associated_brands(vendor_id, id_flat=True)
+                            if brand_id not in associated_brand_ids:
+                                r = create_records('Brands_X_Vendors', [data])
+                            else:
+                                r = {'msg': 'Association already exist'}
+                            final_dict['brand_vendor'] = r
+
+                    if organization_id and brand_id:
+                        org_associated_brand_ids = get_associations('Orgs_X_Brands', 'Org', organization_id, 'Brand', id_flat=True)
+                        if brand_id not in org_associated_brand_ids:
                             r = create_records('Orgs_X_Brands', [data])
+                        else:
+                            r = {'msg': 'Association already exist'}
                         final_dict['org_brand'] = r
-
-                        r = update_records('Brands_X_Vendors', [data])
-                        if r.get('status_code') == 202:
-                            r = create_records('Brands_X_Vendors', [data])
-                        final_dict['brand_vendor'] = r
-                    else:
-                        r = create_records('Orgs_X_Vendors', [data])
-                        final_dict['org_vendor'] = r
-                        r = create_records('Orgs_X_Brands', [data])
-                        final_dict['org_brand'] = r
-                        r = create_records('Brands_X_Vendors', [data])
-                        final_dict['brand_vendor'] = r
-
-                if (brand_id or \
-                    response['license']['status_code'] == 200 and \
-                    response['account']['status_code'] in [200, 201] and organization_id):
-                    data = dict()
-                    try:
-                        resp_account = response['account']['response']['response']['data']
-                        data['Account'] = resp_account[0]['details']['id']
-                    except TypeError:
-                        resp_account = response['account']['response'][0]
-                        data['Account'] = resp_account['id']
-                    data['Org'] = organization_id
-                    data['Brand'] = brand_id
-                    if is_update:
-                        r = update_records('Orgs_X_Accounts', [data])
-                        if r.get('status_code') == 202:
-                            r = create_records('Orgs_X_Accounts', [data])
-                        final_dict['org_account'] = r
-
-                        r = update_records('Orgs_X_Brands', [data])
-                        if r.get('status_code') == 202:
-                            r = create_records('Orgs_X_Brands', [data])
-                        final_dict['org_brand'] = r
-
-                        r = update_records('Brands_X_Accounts', [data])
-                        if r.get('status_code') == 202:
-                            r = create_records('Brands_X_Accounts', [data])
-                        final_dict['brand_account'] = r
-                    else:
-                        r = create_records('Orgs_X_Accounts', [data])
-                        final_dict['org_account'] = r
-                        r = create_records('Orgs_X_Brands', [data])
-                        final_dict['org_brand'] = r
-                        r = create_records('Brands_X_Accounts', [data])
-                        final_dict['brand_account'] = r
 
         except Exception as exc:
             print(exc)
