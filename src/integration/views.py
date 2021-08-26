@@ -1435,6 +1435,7 @@ class ConvertEstimateToSalesOrder(APIView):
         estimate_id = request.data.get('estimate_id')
         if estimate_id:
             estimate = get_estimate(organization_name, estimate_id=estimate_id, params={})
+            estimate['custom_fields'] = [f for f in estimate.get('custom_fields', []) if f.get('placeholder') not in ('cf_payment_terms', 'cf_payment_method',)]
             estimate = parse_book_object('sales_order', estimate)
             so = create_sales_order(organization_name, estimate)
             if so.get('code') != 0:
