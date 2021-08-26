@@ -575,8 +575,7 @@ class EstimateSignCompleteView(APIView):
             folder_id = get_client_folder_id(dir_name)
             if is_agreement:
                 new_folder = create_folder(folder_id, 'agreements')
-                upload_agreement_pdf_to_box(request_id, new_folder, filename, document_number)
-                # upload_agreement_pdf_to_box.delay(request_id, new_folder, filename, document_number)
+                upload_agreement_pdf_to_box.delay(request_id, new_folder, filename, document_number)
             else:
                 a = mark_estimate(organization_name, estimate_id, 'sent')
                 a = mark_estimate(organization_name, estimate_id, 'accepted')
