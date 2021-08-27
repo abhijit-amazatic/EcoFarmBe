@@ -2,6 +2,7 @@ import json
 import base64
 import redis
 from io import (BytesIO, )
+from django.core.exceptions import (ObjectDoesNotExist,)
 from datetime import (datetime, timedelta, )
 from core.settings import (
     BOOKS_CLIENT_ID,
@@ -79,74 +80,82 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
     """
     Create customer in the Zoho books.
     """
+    org_name = books_name.lstrip('books_')
     response_list = list()
-    if is_single_user:
-        records = [License.objects.select_related().get(id=id).__dict__]
+
+    if id:
+        qs = License.objects.filter(id=id)
     else:
-        if id:
-            records = License.objects.filter(id=id)
-        else:
-            records = License.objects.filter(is_updated_in_crm=False)
-    for record in records:
+        qs = License.objects.filter(is_updated_in_crm=False)
+
+    for license_obj in qs:
         request = dict()
-        record_id = record.id
-        if not is_single_user:
-            request.update(record.__dict__)
-            licenses = [record.__dict__]
-        else:
-            licenses = records
-        for license in licenses:
-            request.update(license)
-            license_db = License.objects.select_related().get(id=license['id'])
-            request.update(license_db.license_profile.__dict__)
-            try:
-                request.update(license_db.profile_contact.profile_contact_details)
-            except Exception:
-                pass
-            # if is_update:
-            #     request.update({'id': request['zoho_books_id']})
-            books_dict = get_format_dict('Books_Customer')
-            try:
-                if not is_update:
-                    del books_dict['contact_id']
-                else:
-                    del books_dict['contact_persons']
-            except KeyError:
-                pass
-            record_dict = dict()
-            for k,v in books_dict.items():
-                if v.endswith('_parse'):
-                    v = v.split('_parse')[0]
-                    v = parse_books_fields(k, v, request)
-                    record_dict[k] = v
-                else:
-                    v = request.get(v)
-                    record_dict[k] = v
-            zoho_books_ids = dict()
-            org_name = books_name.lstrip('books_')
-            for customer_type in ['vendor', 'customer']:
-                record_dict['contact_type'] = customer_type
-                # contact_id = request.get(f'zoho_books_{customer_type}_id', {}).get(org_name, '')
-                # if contact_id:
-                #     test = ''
-                if is_update:
-                    record_dict['contact_id'] = request.get(f'zoho_books_{customer_type}_id', {}).get(org_name, '')
-                    response = update_contact(books_name, record_dict, params=params)
-                else:
-                    response = create_contact(books_name, record_dict, params=params)
-                zoho_books_ids[customer_type] = response.get('contact_id')
-            if any(zoho_books_ids.values()):
-                try:
-                    record_obj = License.objects.get(id=record_id)
-                    if zoho_books_ids.get('customer'):
-                        record_obj.zoho_books_customer_ids.update({org_name: zoho_books_ids.get('customer')})
-                    if zoho_books_ids.get('vendor'):
-                        record_obj.zoho_books_vendor_ids.update({org_name: zoho_books_ids.get('vendor')})
-                    record_obj.save()
-                except KeyError as exc:
-                    print(exc)
+        request.update(license_obj.__dict__)
+        request.update(license_obj.license_profile.__dict__)
+        try:
+            request.update(license_obj.profile_contact.profile_contact_details)
+        except Exception:
+            pass
+
+        record_dict = parse_books_customer(request)
+
+        for contact_type in ['vendor', 'customer']:
+            record_dict['contact_type'] = contact_type
+            contact_id = db_contact_id = request.get(f'zoho_books_{contact_type}_ids', {}).get(org_name, '')
+
+            if not contact_id:
+                books_obj = get_books_obj(books_name)
+                contact_obj = books_obj.Contacts()
+                resp = search_contact_by_field(contact_obj, 'cf_client_id', request.get('client_id', ''), contact_type)
+                if resp and resp.get('contact_id'):
+                    contact_id = resp.get('contact_id')
+                if not contact_id:
+                    resp = search_contact(books_obj, request.get('legal_business_name', ''), contact_type)
+                    if resp and resp.get('contact_id'):
+                        contact_id = resp.get('contact_id')
+
+            if contact_id:
+                if 'contact_persons' in record_dict:
+                    record_dict.pop('contact_persons')
+                record_dict['contact_id'] = contact_id
+                response = update_contact(books_name, record_dict, params=params)
+            else:
+                if 'contact_id' in record_dict:
+                    record_dict.pop('contact_id')
+                response = create_contact(books_name, record_dict, params=params)
+                contact_id = response.get('contact_id')
+
+            if contact_id:
+                if not db_contact_id or db_contact_id != contact_id:
+                    license_obj.refresh_from_db()
+                    license_obj.__dict__[f'zoho_books_{contact_type}_ids'].update({org_name: contact_id})
+                    license_obj.save()
+
             response_list.append(response)
     return response_list
+
+def parse_books_customer(request):
+    books_dict = get_format_dict('Books_Customer')
+    # try:
+    #     if not is_update:
+    #         del books_dict['contact_id']
+    #     else:
+    #         del books_dict['contact_persons']
+    # except KeyError:
+    #     pass
+    record_dict = dict()
+    record_dict['custom_fields'] = []
+    for k, v in books_dict.items():
+        if v.endswith('_parse'):
+            v = v.split('_parse')[0]
+            v = parse_books_fields(k, v, request)
+        else:
+            v = request.get(v)
+        if k.startswith('cf_'):
+            record_dict['custom_fields'].append({'api_name': k, 'value': v})
+        else:
+            record_dict[k] = v
+    return record_dict
 
 def parse_books_fields(k, v, request):
     """
@@ -425,21 +434,27 @@ def get_item(obj, data):
     data['line_items'] = line_items
     return {"code": 0, "data": data}
 
+def search_contact_by_field(contact_obj, field, value, contact_type):
+    contact = None
+    try:
+        resp = contact_obj.list_contacts(parameters={field: value, 'contact_type': contact_type})
+        contacts = resp['response']
+    except KeyError:
+        return {"code": 1003, "error": f"{contact_type} name not provided"}
+    if contacts and value:
+        for i in contacts:
+            if i.get(field, '') == value or i.get('custom_field_hash', {}).get(field, '') == value:
+                if i['contact_type'] == contact_type:
+                    contact = i
+                    break
+    return contact
+
+
 def search_contact(books_obj, value, contact_type):
     contact_obj = books_obj.Contacts()
     contact = None
-    for field in ('cf_legal_business_name', 'company_name', 'contact_name',):
-        try:
-            resp = contact_obj.list_contacts(parameters={field: value, 'contact_type': contact_type})
-            contacts = resp['response']
-        except KeyError:
-            return {"code": 1003, "error": f"{contact_type} name not provided"}
-        if contacts and value:
-            for i in contacts:
-                if i.get(field, '') == value or i.get('custom_field_hash', {}).get(field, '') == value:
-                    if i['contact_type'] == contact_type:
-                        contact = i
-                        break
+    for field in ('cf_legal_business_name', 'contact_name', 'company_name',):
+        contact = search_contact_by_field(contact_obj, field, value, contact_type)
         if contact:
             break
     return contact
