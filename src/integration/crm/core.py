@@ -333,8 +333,9 @@ def update_in_crm(module, record_id):
     request = None
     try:
         if module in ['Vendors', 'Accounts']:
-            lp_obj = LicenseProfile.objects.get(id=record_id)
-            request = lp_obj.__dict__
+            lp_obj = LicenseProfile.objects.select_related('license').get(id=record_id)
+            request = lp_obj.license.__dict__
+            request.update(lp_obj.__dict__)
             if module == 'Accounts':
                 request['id'] = request.get('zoho_crm_account_id')
             else:

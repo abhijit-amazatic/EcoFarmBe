@@ -353,7 +353,12 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LicenseProfile
-        exclude = ('zoho_crm_account_id', 'zoho_crm_vendor_id', 'crm_account_owner_id', 'crm_vendor_owner_id')
+        exclude = (
+            'zoho_crm_account_id',
+            'zoho_crm_vendor_id',
+            'crm_account_owner_id',
+            'crm_vendor_owner_id',
+        )
 
 class FinancialOverviewSerializer(serializers.ModelSerializer):
     """
@@ -404,10 +409,8 @@ class BillingInformationSerializer(serializers.ModelSerializer):
         Update for licenseprofile
         """
         updated_instance = super().update(instance, validated_data)
-        if updated_instance.license.is_buyer:
-            update_in_crm_task.delay('Accounts', instance.id)
-        if updated_instance.license.is_seller:
-            update_in_crm_task.delay('Vendors', instance.id)
+        update_in_crm_task.delay('Accounts', instance.id)
+        update_in_crm_task.delay('Vendors', instance.id)
         return updated_instance
 
 
