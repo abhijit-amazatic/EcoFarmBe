@@ -287,10 +287,10 @@ class MyLicenseAdmin(nested_admin.NestedModelAdmin):
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('name', 'organization','license_number','legal_business_name','status','profile_category','brand','approved_on','approved_by','created_on','updated_on',)
+    list_display = ('name', 'organization','license_number','legal_business_name', 'client_id', 'status','profile_category','brand','approved_on','approved_by','created_on','updated_on',)
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
     search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name')
-    readonly_fields = ('created_on','updated_on', 'crm_output')
+    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output')
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )

@@ -2,6 +2,7 @@
 Brand related schemas defined here.
 """
 import time
+import random
 import traceback
 from binascii import (unhexlify, hexlify)
 from datetime import timedelta
@@ -9,12 +10,14 @@ from base64 import (urlsafe_b64encode, urlsafe_b64decode)
 
 from django.db import models
 from django.db.models import Q
+from django.db.utils import ProgrammingError
 from django.db.models.deletion import SET_NULL
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Permission as DjPermission
 from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
 from django.conf import settings
+from django.core.exceptions import (ValidationError, ObjectDoesNotExist,)
 from django.utils import timezone
 
 from django_otp.models import Device, ThrottlingMixin
@@ -30,7 +33,6 @@ from permission.models import (Permission)
 from two_factor.utils import (random_hex, random_hex_32, key_validator,)
 from inventory.models import (Documents, )
 from .exceptions import (InvalidInviteToken, ExpiredInviteToken,)
-
 
 FERNET_KEY = (settings.SECRET_KEY * int(1 + 32//len(settings.SECRET_KEY)))[:32]
 FERNET_KEY = urlsafe_b64encode((FERNET_KEY.encode('utf-8'))).decode('utf-8')
@@ -163,6 +165,32 @@ class Brand(TimeStampFlagModelMixin, models.Model):
         return self.brand_name
 
 
+def generate_random_number(length=6):
+    rand = random.SystemRandom()
+    digits = [rand.choice('123456789'),]
+    if hasattr(rand, 'choices'):
+        digits += rand.choices('0123456789', k=length-1)
+    else:
+        digits += (rand.choice('0123456789') for i in range(length-1))
+
+    return int(''.join(digits))
+
+def get_client_id():
+    while True:
+        c_id = generate_random_number(length=6)
+        if not License.objects.all().filter(client_id=c_id).exists():
+            return c_id
+
+def client_id_validator(value):
+    try:
+        int(value)
+    except ValueError:
+        raise ValidationError(f'{value} is not valid integer.')
+
+    if len(str(value)) != 6:
+        raise ValidationError(f'{value} is not valid 6 digit integer.')
+
+
 class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     """
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
@@ -175,6 +203,13 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         related_name='licenses',
         on_delete=models.CASCADE,
     )
+    client_id = models.PositiveIntegerField(
+        validators=[client_id_validator],
+        default=get_client_id,
+        unique=True,
+        help_text="Randomly genrated 6 digit number.",
+    )
+
     license_type = models.CharField(
         _('License Type'), blank=True, null=True, max_length=255)
     owner_or_manager = models.CharField(
@@ -230,7 +265,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     license_status = models.CharField(blank=True, null=True, max_length=255,)
 
     def __str__(self):
-        return self.legal_business_name
+        return self.legal_business_name or ''
 
     class Meta:
         verbose_name = _('License/Profile')

@@ -126,6 +126,9 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
             org_name = books_name.lstrip('books_')
             for customer_type in ['vendor', 'customer']:
                 record_dict['contact_type'] = customer_type
+                # contact_id = request.get(f'zoho_books_{customer_type}_id', {}).get(org_name, '')
+                # if contact_id:
+                #     test = ''
                 if is_update:
                     record_dict['contact_id'] = request.get(f'zoho_books_{customer_type}_id', {}).get(org_name, '')
                     response = update_contact(books_name, record_dict, params=params)
