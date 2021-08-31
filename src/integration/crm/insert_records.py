@@ -137,7 +137,7 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
                         insert = False
                 if insert:
                     data['Contacts'] = contact_id
-                    data['Contact_Company_Role'] = contact.get('roles')
+                    data['Contact_Company_Role'] = contact.get('roles') or []
                     data['Accounts'] = account_id
                     create_request.append(data)
 
@@ -241,7 +241,7 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
                         insert = False
                 if insert:
                     data['Contact'] = contact_id
-                    data['Contact_Company_Role'] = contact.get('roles')
+                    data['Contact_Company_Role'] = contact.get('roles') or []
                     data['Vendor'] = vendor_id
                     create_request.append(data)
 
