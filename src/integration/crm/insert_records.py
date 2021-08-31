@@ -62,6 +62,8 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
     """
     Insert account record to Zoho CRM.
     """
+    final_response = dict()
+
     d = dict()
     d.update(data_dict)
     license_profile_id = license_db_obj.license_profile.__dict__['id']
@@ -78,6 +80,8 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
     else:
         result = create_records('Accounts', d, is_return_orginal_data=True)
 
+    final_response['account'] = result
+
     if license_crm_id and result['status_code'] in [200, 201]:
         record_response = result['response']['response']['data']
         try:
@@ -88,69 +92,95 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
             record_obj.save()
         except KeyError as exc:
             print(exc)
-        account_id = record_response[0]['details']['id']
-        if (result['response']['orignal_data'][0].get('Licenses_List')):
-            data = dict()
-            data['Licenses_Module'] = account_id
-            for license in result['response']['orignal_data'][0]['Licenses_List']:
-                data['Licenses'] = license
-                if is_update:
-                    r = update_records('Accounts_X_Licenses', [data])
-                    if r.get('status_code') == 202:
-                        r = create_records('Accounts_X_Licenses', [data])
-                else:
-                    r = create_records('Accounts_X_Licenses', [data])
 
-        associated_contacts = get_account_associated_contacts(account_id)
-        associated_contacts = {
-            x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']} for x in associated_contacts
-        }
-        update_request = list()
-        create_request = list()
-        for contact in result['response']['orignal_data'][0].get('Contacts_List', []):
-            contact_id = contact['contact_crm_id']
-            if contact_id in associated_contacts:
-                if is_update:
+        final_response['Accounts_X_Licenses'] = dict()
+        try:
+            account_id = record_response[0]['details']['id']
+            if (result['response']['orignal_data'][0].get('Licenses_List')):
+                data = dict()
+                data['Licenses_Module'] = account_id
+                for license in result['response']['orignal_data'][0]['Licenses_List']:
+                    data['Licenses'] = license
+                    if is_update:
+                        r = update_records('Accounts_X_Licenses', [data])
+                        if r.get('status_code') == 202:
+                            r = create_records('Accounts_X_Licenses', [data])
+                    else:
+                        r = create_records('Accounts_X_Licenses', [data])
+                    final_response['Accounts_X_Licenses'] = r
+        except Exception as exc:
+            print(exc)
+            debug_vars = ('data', 'account_id',)
+            locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_response['Accounts_X_Licenses']['exception'] = e
+            final_response['Accounts_X_Licenses']['local_vars'] = locals_data
+
+
+        final_response['Accounts_X_Contacts'] = dict()
+        try:
+            associated_contacts = get_account_associated_contacts(account_id)
+            associated_contacts = {
+                x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']} for x in associated_contacts
+            }
+            update_request = list()
+            create_request = list()
+            for contact in result['response']['orignal_data'][0].get('Contacts_List', []):
+                contact_id = contact['contact_crm_id']
+                if contact_id in associated_contacts:
+                    if is_update:
+                        data = dict()
+                        insert = True
+                        for j in update_request:
+                            if j.get('Contacts') == contact_id:
+                                if contact.get('roles'):
+                                    j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                                insert = False
+                        if insert:
+                            data['id'] = associated_contacts[contact_id]['linking_obj_id']
+                            data['Contacts'] = contact_id
+                            if contact.get('roles'):
+                                data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
+                            else:
+                                data['Contact_Company_Role'] = associated_contacts[contact_id]['roles'] or []
+                            data['Accounts'] = account_id
+                            update_request.append(data)
+                else:
                     data = dict()
                     insert = True
-                    for j in update_request:
+                    for j in create_request:
                         if j.get('Contacts') == contact_id:
                             if contact.get('roles'):
                                 j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
                             insert = False
                     if insert:
-                        data['id'] = associated_contacts[contact_id]['linking_obj_id']
                         data['Contacts'] = contact_id
-                        if contact.get('roles'):
-                            data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
-                        else:
-                            data['Contact_Company_Role'] = associated_contacts[contact_id]['roles']
+                        data['Contact_Company_Role'] = contact.get('roles') or []
                         data['Accounts'] = account_id
-                        update_request.append(data)
-            else:
-                data = dict()
-                insert = True
-                for j in create_request:
-                    if j.get('Contacts') == contact_id:
-                        if contact.get('roles'):
-                            j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
-                        insert = False
-                if insert:
-                    data['Contacts'] = contact_id
-                    data['Contact_Company_Role'] = contact.get('roles') or []
-                    data['Accounts'] = account_id
-                    create_request.append(data)
+                        create_request.append(data)
 
-        if is_update and update_request:
-            contact_update_response = update_records('Accounts_X_Contacts', update_request)
+            if is_update and update_request:
+                final_response['Accounts_X_Contacts']['update'] = update_records('Accounts_X_Contacts', update_request)
 
-        if create_request:
-            contact_create_response = create_records('Accounts_X_Contacts', create_request)
+            if create_request:
+                final_response['Accounts_X_Contacts']['create'] = create_records('Accounts_X_Contacts', create_request)
 
-    return result
+        except Exception as exc:
+            print(exc)
+            debug_vars = ('associated_contacts', 'contact', 'create_request', 'update_request', 'contact_id')
+            locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_response['Accounts_X_Contacts']['exception'] = e
+            final_response['Accounts_X_Contacts']['local_vars'] = locals_data
+
+    return final_response
 
 
 def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_update=False):
+    final_response = dict()
+
     d = dict()
     d.update(data_dict)
     license_profile_id = license_db_obj.license_profile.__dict__['id']
@@ -173,6 +203,8 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
     else:
         result = create_records('Vendors', d, is_return_orginal_data=True)
 
+    final_response['vendor'] = result
+
     if license_crm_id and result['status_code'] in [200, 201]:
         record_response = result['response']['response']['data']
         try:
@@ -182,77 +214,111 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
             record_obj.save()
         except KeyError as exc:
             print(exc)
-        vendor_id = record_response[0]['details']['id']
-        if (result['response']['orignal_data'][0].get('Licenses_List')):
-            data = dict()
-            data['Licenses_Module'] = vendor_id
-            for license in result['response']['orignal_data'][0]['Licenses_List']:
-                data['Licenses'] = license
-                if is_update:
-                    r = update_records('Vendors_X_Licenses', [data])
-                    if r.get('status_code') == 202:
+
+
+        final_response['Vendors_X_Licenses'] = dict()
+        try:
+            vendor_id = record_response[0]['details']['id']
+            if (result['response']['orignal_data'][0].get('Licenses_List')):
+                data = dict()
+                data['Licenses_Module'] = vendor_id
+                for license in result['response']['orignal_data'][0]['Licenses_List']:
+                    data['Licenses'] = license
+                    if is_update:
+                        r = update_records('Vendors_X_Licenses', [data])
+                        if r.get('status_code') == 202:
+                            r = create_records('Vendors_X_Licenses', [data])
+                    else:
                         r = create_records('Vendors_X_Licenses', [data])
+                    final_response['Vendors_X_Licenses'] = r
+        except Exception as exc:
+            print(exc)
+            debug_vars = ('data', 'vendor_id')
+            locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_response['Vendors_X_Licenses']['exception'] = e
+            final_response['Vendors_X_Licenses']['local_vars'] = locals_data
+
+
+        final_response['Vendors_X_Cultivars'] = dict()
+        try:
+            if result['response']['orignal_data'][0].get('Cultivars_List'):
+                data = dict()
+                data['Cultivar_Associations'] = vendor_id
+                for j in result['response']['orignal_data'][0]['Cultivars_List']:
+                    r = search_query('Cultivars', j, 'Name')
+                    if r['status_code'] == 200:
+                        data['Cultivars'] = r['response'][0]['id']
+                        r = create_records('Vendors_X_Cultivars', [data])
+                        final_response['Vendors_X_Cultivars'] = r
+                final_response['Vendors_X_Cultivars'] = r
+        except Exception as exc:
+            print(exc)
+            debug_vars = ('data', 'vendor_id')
+            locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_response['Vendors_X_Cultivars']['exception'] = e
+            final_response['Vendors_X_Cultivars']['local_vars'] = locals_data
+
+
+        final_response['Vendors_X_Contacts'] = dict()
+        try:
+            associated_contacts = get_vendor_associated_contacts(vendor_id)
+            associated_contacts = {
+                x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']} for x in associated_contacts
+            }
+            update_request = list()
+            create_request = list()
+            for contact in result['response']['orignal_data'][0].get('Contacts_List', []):
+                contact_id = contact['contact_crm_id']
+                if contact_id in associated_contacts:
+                    if is_update:
+                        data = dict()
+                        insert = True
+                        for j in update_request:
+                            if j.get('Contact') == contact_id:
+                                if contact.get('roles'):
+                                    j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                                insert = False
+                        if insert:
+                            data['id'] = associated_contacts[contact_id]['linking_obj_id']
+                            data['Contact'] = contact_id
+                            if contact.get('roles'):
+                                data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
+                            else:
+                                data['Contact_Company_Role'] = associated_contacts[contact_id]['roles'] or []
+                            data['Vendor'] = vendor_id
+                            update_request.append(data)
                 else:
-                    r = create_records('Vendors_X_Licenses', [data])
-
-        if result['response']['orignal_data'][0].get('Cultivars_List'):
-            data = dict()
-            l = list()
-            data['Cultivar_Associations'] = vendor_id
-            for j in result['response']['orignal_data'][0]['Cultivars_List']:
-                r = search_query('Cultivars', j, 'Name')
-                if r['status_code'] == 200:
-                    data['Cultivars'] = r['response'][0]['id']
-                    r = create_records('Vendors_X_Cultivars', [data])
-
-        associated_contacts = get_vendor_associated_contacts(vendor_id)
-        associated_contacts = {
-            x['id']: {'roles': x['roles'], 'linking_obj_id': x['linking_obj_id']} for x in associated_contacts
-        }
-        update_request = list()
-        create_request = list()
-        for contact in result['response']['orignal_data'][0].get('Contacts_List', []):
-            contact_id = contact['contact_crm_id']
-            if contact_id in associated_contacts:
-                if is_update:
                     data = dict()
                     insert = True
-                    for j in update_request:
-                        if j.get('Contact') == contact_id:
+                    for j in create_request:
+                        if j.get('Contacts') == contact_id:
                             if contact.get('roles'):
                                 j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
                             insert = False
                     if insert:
-                        data['id'] = associated_contacts[contact_id]['linking_obj_id']
                         data['Contact'] = contact_id
-                        if contact.get('roles'):
-                            data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
-                        else:
-                            data['Contact_Company_Role'] = associated_contacts[contact_id]['roles']
+                        data['Contact_Company_Role'] = contact.get('roles') or []
                         data['Vendor'] = vendor_id
-                        update_request.append(data)
-            else:
-                data = dict()
-                insert = True
-                for j in create_request:
-                    if j.get('Contacts') == contact_id:
-                        if contact.get('roles'):
-                            j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
-                        insert = False
-                if insert:
-                    data['Contact'] = contact_id
-                    data['Contact_Company_Role'] = contact.get('roles') or []
-                    data['Vendor'] = vendor_id
-                    create_request.append(data)
+                        create_request.append(data)
+            if is_update and update_request:
+                final_response['Vendors_X_Contacts']['update'] = update_records('Vendors_X_Contacts', update_request)
 
+            if create_request:
+                final_response['Vendors_X_Contacts']['create'] = create_records('Vendors_X_Contacts', create_request)
+        except Exception as exc:
+            print(exc)
+            debug_vars = ('associated_contacts', 'contact', 'create_request', 'update_request', 'contact_id')
+            locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_response['Vendors_X_Contacts']['exception'] = e
+            final_response['Vendors_X_Contacts']['local_vars'] = locals_data
 
-        if is_update and update_request:
-            contact_update_response = update_records('Vendors_X_Contacts', update_request)
-
-        if create_request:
-            contact_create_response = create_records('Vendors_X_Contacts', create_request)
-
-    return result
+    return final_response
 
 
 def _insert_record(record=None, license_id=None, is_update=False):
@@ -327,8 +393,8 @@ def _insert_record(record=None, license_id=None, is_update=False):
                 except KeyError as exc:
                     print(exc)
 
-            final_dict['account'] = insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update)
-            final_dict['vendor'] = insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update)
+            final_dict.update(insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
+            final_dict.update(insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
 
         except Exception as exc:
             print(exc)
