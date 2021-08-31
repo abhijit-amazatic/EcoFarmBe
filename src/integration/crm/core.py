@@ -14,6 +14,7 @@ from core.settings import (PYZOHO_CONFIG,
     TEMP_LICENSE_FOLDER,
     AWS_BUCKET)
 from django.conf import settings
+from django.core.exceptions import (ObjectDoesNotExist,)
 from user.models import (User, )
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
@@ -877,21 +878,21 @@ def update_program_selection(record_id, tier_selection):
     """
     Sync program selection from crm to webapp.
     """
-    try:
-        license_profile = LicenseProfile.objects.get(zoho_crm_vendor_id=record_id)
-        if not license_profile:
-            license_profile = LicenseProfile.objects.get(zoho_crm_account_id=record_id)
+    qs = LicenseProfile.objects.filter(zoho_crm_vendor_id=record_id)
+    if not qs.exists():
+        qs = LicenseProfile.objects.filter(zoho_crm_account_id=record_id)
+        if not qs.exists():
+            error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
+            print(error)
+            return error
+    for license_profile in qs:
         try:
-            license_profile.license.program_overview
-        except License.program_overview.RelatedObjectDoesNotExist:
-            ProgramOverview.objects.create(license=license_profile.license)
-        license_profile.license.program_overview.program_details = {'program_name': tier_selection}
-        license_profile.license.program_overview.save()
-        return {'code': 0, 'message': 'Success'}
-    except LicenseProfile.DoesNotExist:
-        error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
-        print(error)
-        return error
+            program_overview = license_profile.license.program_overview
+        except ObjectDoesNotExist:
+            program_overview = ProgramOverview.objects.create(license=license_profile.license)
+        program_overview.program_details = {'program_name': tier_selection}
+        program_overview.save()
+    return {'code': 0, 'message': 'Success'}
 
 def fetch_record_owners(license_number=None, update_all=False):
     """

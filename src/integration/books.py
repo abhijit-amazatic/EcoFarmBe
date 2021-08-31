@@ -130,7 +130,10 @@ def create_customer_in_books(id=None, is_update=False, is_single_user=False, par
                             record_dict.pop('contact_id')
                         response = create_contact(books_name, record_dict, params=params)
                         contact_id = response.get('contact_id')
-                    response_dict[contact_type][org_name] = response
+                    if response.get('code'):
+                        response_dict[contact_type][org_name] = response
+                    elif contact_id == response.get('contact_id'):
+                        response_dict[contact_type][org_name] = 'OK'
                     if contact_id:
                         if not db_contact_id or db_contact_id != contact_id:
                             license_obj.refresh_from_db()
