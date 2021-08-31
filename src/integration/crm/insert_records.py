@@ -135,15 +135,14 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
                         for j in update_request:
                             if j.get('Contacts') == contact_id:
                                 if contact.get('roles'):
-                                    j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                                    j['Contact_Company_Role'].add(*contact['roles'])
                                 insert = False
                         if insert:
                             data['id'] = associated_contacts[contact_id]['linking_obj_id']
                             data['Contacts'] = contact_id
+                            data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles'] or [])
                             if contact.get('roles'):
-                                data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
-                            else:
-                                data['Contact_Company_Role'] = associated_contacts[contact_id]['roles'] or []
+                                data['Contact_Company_Role'].add(*contact['roles'])
                             data['Accounts'] = account_id
                             update_request.append(data)
                 else:
@@ -152,18 +151,18 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
                     for j in create_request:
                         if j.get('Contacts') == contact_id:
                             if contact.get('roles'):
-                                j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                                j['Contact_Company_Role'].add(*contact['roles'])
                             insert = False
                     if insert:
                         data['Contacts'] = contact_id
-                        data['Contact_Company_Role'] = contact.get('roles') or []
+                        data['Contact_Company_Role'] = set(contact.get('roles') or [])
                         data['Accounts'] = account_id
                         create_request.append(data)
-
             if is_update and update_request:
+                update_request = [{k: list(v) if isinstance(v, set) else v  for k, v in r.items()} for r in update_request]
                 final_response['Accounts_X_Contacts']['update'] = update_records('Accounts_X_Contacts', update_request)
-
             if create_request:
+                create_request = [{k: list(v) if isinstance(v, set) else v  for k, v in r.items()} for r in create_request]
                 final_response['Accounts_X_Contacts']['create'] = create_records('Accounts_X_Contacts', create_request)
 
         except Exception as exc:
@@ -280,15 +279,14 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
                         for j in update_request:
                             if j.get('Contact') == contact_id:
                                 if contact.get('roles'):
-                                    j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                                    j['Contact_Company_Role'].add(*contact['roles'])
                                 insert = False
                         if insert:
                             data['id'] = associated_contacts[contact_id]['linking_obj_id']
                             data['Contact'] = contact_id
+                            data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles'] or [])
                             if contact.get('roles'):
-                                data['Contact_Company_Role'] = set(associated_contacts[contact_id]['roles']).add(*contact['roles'])
-                            else:
-                                data['Contact_Company_Role'] = associated_contacts[contact_id]['roles'] or []
+                                data['Contact_Company_Role'].add(*contact['roles'])
                             data['Vendor'] = vendor_id
                             update_request.append(data)
                 else:
@@ -297,17 +295,19 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
                     for j in create_request:
                         if j.get('Contacts') == contact_id:
                             if contact.get('roles'):
-                                j['Contact_Company_Role'] = set(j['Contact_Company_Role']).add(*contact['roles'])
+                                j['Contact_Company_Role'].add(*contact['roles'])
                             insert = False
                     if insert:
                         data['Contact'] = contact_id
-                        data['Contact_Company_Role'] = contact.get('roles') or []
+                        data['Contact_Company_Role'] = set(contact.get('roles') or [])
                         data['Vendor'] = vendor_id
                         create_request.append(data)
             if is_update and update_request:
+                update_request = [{k: list(v) if isinstance(v, set) else v  for k, v in r.items()} for r in update_request]
                 final_response['Vendors_X_Contacts']['update'] = update_records('Vendors_X_Contacts', update_request)
 
             if create_request:
+                create_request = [{k: list(v) if isinstance(v, set) else v  for k, v in r.items()} for r in create_request]
                 final_response['Vendors_X_Contacts']['create'] = create_records('Vendors_X_Contacts', create_request)
         except Exception as exc:
             print(exc)
