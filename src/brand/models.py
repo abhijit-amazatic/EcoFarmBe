@@ -261,6 +261,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict)
+    books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict)
 
     license_status = models.CharField(blank=True, null=True, max_length=255,)
 

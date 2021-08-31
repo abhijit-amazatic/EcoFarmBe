@@ -1,6 +1,8 @@
+import sys
 import json
 import base64
 import redis
+import traceback
 from io import (BytesIO, )
 from django.core.exceptions import (ObjectDoesNotExist,)
 from datetime import (datetime, timedelta, )
@@ -76,12 +78,11 @@ def get_format_dict(module):
     """
     return CRM_FORMAT[module]
 
-def create_customer_in_books(books_name, id=None, is_update=False, is_single_user=False, params={}):
+def create_customer_in_books(id=None, is_update=False, is_single_user=False, params={}):
     """
     Create customer in the Zoho books.
     """
-    org_name = books_name.lstrip('books_')
-    response_list = list()
+    final_response_list = list()
 
     if id:
         qs = License.objects.filter(id=id)
@@ -89,6 +90,7 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
         qs = License.objects.filter(is_updated_in_crm=False)
 
     for license_obj in qs:
+        response_dict = dict()
         request = dict()
         request.update(license_obj.__dict__)
         request.update(license_obj.license_profile.__dict__)
@@ -98,41 +100,57 @@ def create_customer_in_books(books_name, id=None, is_update=False, is_single_use
             pass
 
         record_dict = parse_books_customer(request)
-
         for contact_type in ['vendor', 'customer']:
-            record_dict['contact_type'] = contact_type
-            contact_id = db_contact_id = request.get(f'zoho_books_{contact_type}_ids', {}).get(org_name, '')
+            response_dict[contact_type] = dict()
+            for org_name in ('efd', 'efl', 'efn'):
+                books_name = f'books_{org_name}'
+                response_dict[contact_type][org_name] = dict()
+                try:
+                    record_dict['contact_type'] = contact_type
+                    contact_id = db_contact_id = request.get(f'zoho_books_{contact_type}_ids', {}).get(org_name, '')
 
-            if not contact_id:
-                books_obj = get_books_obj(books_name)
-                contact_obj = books_obj.Contacts()
-                resp = search_contact_by_field(contact_obj, 'cf_client_id', request.get('client_id', ''), contact_type)
-                if resp and resp.get('contact_id'):
-                    contact_id = resp.get('contact_id')
-                if not contact_id:
-                    resp = search_contact(books_obj, request.get('legal_business_name', ''), contact_type)
-                    if resp and resp.get('contact_id'):
-                        contact_id = resp.get('contact_id')
+                    if not contact_id:
+                        books_obj = get_books_obj(f'books_{org_name}')
+                        contact_obj = books_obj.Contacts()
+                        resp = search_contact_by_field(contact_obj, 'cf_client_id', request.get('client_id', ''), contact_type)
+                        if resp and resp.get('contact_id'):
+                            contact_id = resp.get('contact_id')
+                        if not contact_id:
+                            resp = search_contact(books_obj, request.get('legal_business_name', ''), contact_type)
+                            if resp and resp.get('contact_id'):
+                                contact_id = resp.get('contact_id')
 
-            if contact_id:
-                if 'contact_persons' in record_dict:
-                    record_dict.pop('contact_persons')
-                record_dict['contact_id'] = contact_id
-                response = update_contact(books_name, record_dict, params=params)
-            else:
-                if 'contact_id' in record_dict:
-                    record_dict.pop('contact_id')
-                response = create_contact(books_name, record_dict, params=params)
-                contact_id = response.get('contact_id')
+                    if contact_id:
+                        if 'contact_persons' in record_dict:
+                            record_dict.pop('contact_persons')
+                        record_dict['contact_id'] = contact_id
+                        response = update_contact(books_name, record_dict, params=params)
+                    else:
+                        if 'contact_id' in record_dict:
+                            record_dict.pop('contact_id')
+                        response = create_contact(books_name, record_dict, params=params)
+                        contact_id = response.get('contact_id')
+                    response_dict[contact_type][org_name] = response
+                    if contact_id:
+                        if not db_contact_id or db_contact_id != contact_id:
+                            license_obj.refresh_from_db()
+                            license_obj.__dict__[f'zoho_books_{contact_type}_ids'].update({org_name: contact_id})
+                            license_obj.save()
+                except Exception as exc:
+                    print(exc)
+                    debug_vars = ('record_dict', 'contact_id', 'resp')
+                    locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+                    exc_info = sys.exc_info()
+                    e = ''.join(traceback.format_exception(*exc_info))
+                    response_dict[contact_type][org_name]['exception'] = e
+                    response_dict[contact_type][org_name]['local_vars'] = locals_data
 
-            if contact_id:
-                if not db_contact_id or db_contact_id != contact_id:
-                    license_obj.refresh_from_db()
-                    license_obj.__dict__[f'zoho_books_{contact_type}_ids'].update({org_name: contact_id})
-                    license_obj.save()
+        license_obj.refresh_from_db()
+        license_obj.books_output = response_dict
+        license_obj.save()
+        final_response_list.append(response_dict)
 
-            response_list.append(response)
-    return response_list
+    return final_response_list
 
 def parse_books_customer(request):
     books_dict = get_format_dict('Books_Customer')
