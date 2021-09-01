@@ -154,7 +154,7 @@ class Inventory(models.Model):
     cf_minimum_quantity = models.FloatField(_('Minimum Quantity'), blank=True, null=True)
     cf_available_date = models.DateField(auto_now=False, blank=True, null=True, default=None)
     cf_trim_qty_lbs = models.FloatField(_('Trim Quantity Used (lbs)'), blank=True, null=True)
-    cf_batch_qty_g = models.IntegerField(_('Batch Quantity (g)'), null=True, blank=True)
+    cf_batch_qty_g = models.FloatField(_('Batch Quantity (g)'), null=True, blank=True)
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)

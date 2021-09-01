@@ -27,7 +27,7 @@ def get_tax_from_db(tax='flower', request=None):
 
 
 def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None):
-    msg_error = lambda msg: messages.error(request, msg,) if request else None
+    msg_error = lambda msg: messages.error(request, msg,) if request else print(msg)
     if category_name:
         if CG.get(category_name, '') == 'Flowers':
             tax = get_tax_from_db(tax='flower')

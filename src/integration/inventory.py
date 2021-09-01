@@ -24,6 +24,7 @@ from labtest.models import (LabTest, )
 from inventory.models import PriceChange, Inventory as InventoryModel, Documents
 from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, search_query, get_record, )
+from inventory.utils import (get_item_tax, )
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
                              get_thumbnail_url, get_inventory_folder_id,
@@ -334,12 +335,18 @@ def get_pre_tax_price(record):
     """
     Get pre tax price.
     """
-    taxes = TaxVariable.objects.values('cultivar_tax','trim_tax')[0]
-    if 'Flower' in record['category_name']:
-        return record['price'] - float(taxes['cultivar_tax'])
-    elif 'Trim' in record['category_name']:
-        return record['price'] - float(taxes['trim_tax'])
-
+    # taxes = TaxVariable.objects.values('cultivar_tax','trim_tax')[0]
+    # if 'Flower' in record['category_name']:
+    #     return record['price'] - float(taxes['cultivar_tax'])
+    # elif 'Trim' in record['category_name']:
+    #     return record['price'] - float(taxes['trim_tax'])
+    tax = get_item_tax(
+        record.get('category_name'),
+        trim_used=float(record.get('cf_trim_qty_lbs')) if record.get('cf_trim_qty_lbs') else None,
+        item_quantity=float(record.get('cf_batch_qty_g')) if record.get('cf_batch_qty_g') else None ,
+    )
+    if isinstance(tax, float):
+        return record['price'] - tax
     # Issue:- It will call Books API multiple times.
     # taxes = get_tax_rates()
     # if 'Flower' in record['category_name']:
