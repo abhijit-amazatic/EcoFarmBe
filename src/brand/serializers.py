@@ -264,9 +264,9 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                 # else:
                 #     books_ls = ('books_efd',)
                 #insert or update vendors/accounts
-                create_customer_in_books(id=profile.license.id, is_update=False, params={})
-                instance.refresh_from_db()
                 insert_or_update_vendor_accounts(profile, instance)
+                create_customer_in_books(id=instance.id)
+                instance.refresh_from_db()
             except Exception as e:
                 print(e)
         user = super().update(instance, validated_data)

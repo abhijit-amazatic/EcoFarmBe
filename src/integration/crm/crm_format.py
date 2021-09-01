@@ -235,7 +235,7 @@ CRM_FORMAT  = {
     },
     "Accounts":{
         "id": "id",
-        # "Account_Business_DBA": "Legal_Entity_Names",
+        "Account_Business_DBA": "legal_business_name",
         "Account_Name": "name",
         "Website": "website",
         "Client_ID": "client_id",
@@ -328,7 +328,7 @@ CRM_FORMAT  = {
         "Layout_Name": "Layout_Name",
         #Farm Profile
         "Vendor_Name": "name",
-        "Legal_Entity_Names": "Legal_Entity_Names",
+        "Legal_Entity_Names": "legal_business_name",
         "Client_Code": "Client_Code",
         "Client_ID": "client_id",
         "Associated_Account_Record": "zoho_crm_account_id",
@@ -1152,7 +1152,7 @@ CRM_FORMAT  = {
     "Books_Customer":
         {
             "contact_id": "contact_id",
-            "contact_name": "legal_business_name",
+            "contact_name": "name",
             "company_name": "legal_business_name",
             "first_name": "first_name",
             "last_name": "last_name",
