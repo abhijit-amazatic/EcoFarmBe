@@ -745,15 +745,14 @@ def get_inventory_summary(inventory, statuses):
     """
     try:
         response = dict()
-        categories = ['In-Testing',
-                      'Processing',
+        categories = ['Processing',
                       'Vegging,Flowering,Under Contract', 'Sold']
         labtest = LabTest.objects.filter(id__in=inventory.values('labtest_id'))
         response['total_thc_min'] = labtest.aggregate(Min('Total_THC'))['Total_THC__min']
         response['total_thc_max'] = labtest.aggregate(Max('Total_THC'))['Total_THC__max']
         response['average_thc'] = get_average_thc(inventory)
         if statuses in categories:
-            response['total_quantity'] = inventory.filter(inventory_name='EFD').aggregate(Sum('cf_quantity_estimate'))['cf_quantity_estimate__sum']
+            response['total_quantity'] = inventory.filter(inventory_name__in=['EFD','EFL','EFN']).aggregate(Sum('cf_quantity_estimate'))['cf_quantity_estimate__sum']
             for category in ['Tops', 'Smalls', 'Trim']:
                 response[category.lower() + '_quantity'] = inventory.filter(
                     cf_cannabis_grade_and_category__contains=category).aggregate(
@@ -762,7 +761,7 @@ def get_inventory_summary(inventory, statuses):
                 category_name__contains='Flower').aggregate(
                     total=Sum(F('cf_quantity_estimate')*F('pre_tax_price')))['total']
         else:
-            response['total_quantity'] = inventory.filter(inventory_name='EFD').aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
+            response['total_quantity'] = inventory.filter(inventory_name__in=['EFD','EFL','EFN']).aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
             for category in ['Tops', 'Smalls', 'Trim']:
                 response[category.lower() + '_quantity'] = inventory.filter(
                     cf_cannabis_grade_and_category__contains=category).aggregate(
