@@ -885,13 +885,14 @@ def update_program_selection(record_id, tier_selection):
             error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
             print(error)
             return error
-    for license_profile in qs:
-        try:
-            program_overview = license_profile.license.program_overview
-        except ObjectDoesNotExist:
-            program_overview = ProgramOverview.objects.create(license=license_profile.license)
-        program_overview.program_details = {'program_name': tier_selection}
-        program_overview.save()
+    if tier_selection:
+        for license_profile in qs:
+            try:
+                program_overview = license_profile.license.program_overview
+            except ObjectDoesNotExist:
+                program_overview = ProgramOverview.objects.create(license=license_profile.license)
+            program_overview.program_details = {'program_name': tier_selection}
+            program_overview.save()
     return {'code': 0, 'message': 'Success'}
 
 def fetch_record_owners(license_number=None, update_all=False):
