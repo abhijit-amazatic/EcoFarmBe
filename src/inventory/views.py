@@ -277,7 +277,18 @@ class InventoryViewSet(viewsets.ModelViewSet):
     ordering_fields = '__all__'
     pagination_class = BasicPagination
     ordering = ('-Created_Time',)
-
+    
+    def extract_positive_value_queryset(self, qs):
+        """
+        -Get positive quantity values only
+        -For cf_status ['Pending Sale','Available','In-Testing'] get actual_available_stock > 0 values
+        -For other cf_staus viz ['Vegging','Processing', 'Sold', 'Under Contract','Flowering','Return to Vendor',None] get cf_quantity_estimate > 0
+        """
+        available_stock_qs = qs.filter(cf_status__in=['Pending Sale','Available','In-Testing'],actual_available_stock__gt=0,cf_cfi_published=True)
+        quantity_est_qs = qs.filter(cf_status__in=['Vegging','Processing', 'Sold', 'Under Contract','Flowering','Return to Vendor',None],cf_quantity_estimate__gt=0,cf_cfi_published=True)
+        final_qs = available_stock_qs | quantity_est_qs
+        return final_qs
+    
     def get_serializer_class(self):
         """
         Return serializer.
@@ -288,9 +299,12 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-         Return QuerySet.
+        Return QuerySet.
+        Note: Can reduce qs (one step for positive values) but if someone adds new cf_status to inv items,
+        then few items might be missed from list so keeping these two step qs.
         """
-        return Inventory.objects.filter(cf_cfi_published=True)
+        qs = Inventory.objects.filter(cf_cfi_published=True)
+        return self.extract_positive_value_queryset(qs)
 
     def list(self, request):
         """
