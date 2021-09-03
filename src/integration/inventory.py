@@ -757,8 +757,7 @@ def get_inventory_summary(inventory, statuses):
                 response[category.lower() + '_quantity'] = inventory.filter(
                     cf_cannabis_grade_and_category__contains=category).aggregate(
                         Sum('cf_quantity_estimate'))['cf_quantity_estimate__sum']
-            response['total_value'] = inventory.filter(
-                category_name__contains='Flower').aggregate(
+            response['total_value'] = inventory.filter().aggregate(
                     total=Sum(F('cf_quantity_estimate')*F('pre_tax_price')))['total']
         else:
             response['total_quantity'] = inventory.filter(inventory_name__in=['EFD','EFL','EFN']).aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
@@ -766,8 +765,7 @@ def get_inventory_summary(inventory, statuses):
                 response[category.lower() + '_quantity'] = inventory.filter(
                     cf_cannabis_grade_and_category__contains=category).aggregate(
                         Sum('actual_available_stock'))['actual_available_stock__sum']
-            response['total_value'] = inventory.filter(
-                category_name__contains='Flower').aggregate(
+            response['total_value'] = inventory.filter().aggregate(
                     total=Sum(F('actual_available_stock')*F('pre_tax_price')))['total']
         response['average'] = inventory.aggregate(Avg('pre_tax_price'))['pre_tax_price__avg']
         response['batch_varities'] = inventory.order_by().distinct('sku').count()
@@ -789,7 +787,7 @@ def get_updated_params(params):
                 params[i+'__in'] = val
             else:
                 params[i+'__overlap'] = params.pop(i)
-                params[i+'__overlap'] = val
+                params[i+'__overlap'] = val    
     return params        
     
 def get_category_count(params):
@@ -812,6 +810,9 @@ def get_category_count(params):
     if 'cf_strain_name__in' in updated_params.keys():
         strain_list.extend(updated_params['cf_strain_name__in'])
         updated_params.pop('cf_strain_name__in')
+    if 'cf_cannabis_grade_and_category__in' in updated_params.keys():
+        grade_val = updated_params['cf_cannabis_grade_and_category__in'].split(',')
+        updated_params['cf_cannabis_grade_and_category__in'] =  grade_val
     inventory = InventoryModel.objects.filter(**updated_params)
     if strain_list:
         inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
