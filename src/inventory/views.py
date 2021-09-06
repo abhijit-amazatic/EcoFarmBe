@@ -8,7 +8,7 @@ from mimetypes import MimeTypes
 from functools import reduce
 import django_filters
 from django.shortcuts import (render, )
-from django.db.models import (Sum, F, Min, Max, Avg, Q, Func)
+from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper, DateField,)
 from django.utils import  timezone
 from rest_framework.views import APIView
 from rest_framework.viewsets import (GenericViewSet, mixins)
@@ -20,6 +20,7 @@ from rest_framework.permissions import (IsAuthenticated, AllowAny)
 from django_filters import rest_framework as filters
 from django_filters import (BaseInFilter, CharFilter, FilterSet)
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_date
 
 from django.core.paginator import Paginator
 from core.pagination import PageNumberPagination
@@ -113,6 +114,13 @@ class DataFilter(FilterSet):
     labtest__Box_Link__in = CharInFilter(field_name='labtest__Box_Link', lookup_expr='in')
     actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
     pre_tax_price = CharInFilter(field_name='pre_tax_price', lookup_expr='in')
+    cf_date_available = django_filters.CharFilter(field_name ='cf_date_available',method='get_new_items', label='New Items')
+
+    def get_new_items(self, queryset, name, value):
+        items = queryset.annotate(
+            full_date=ExpressionWrapper(
+                F('cf_date_available') + timedelta(days=7),output_field=DateField())).filter(full_date__gt=timezone.now().date())
+        return items
     
     def get_cultivars(self, queryset, name, value):
         items = queryset.filter(
