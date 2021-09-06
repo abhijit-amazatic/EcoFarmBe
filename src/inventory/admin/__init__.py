@@ -190,13 +190,21 @@ class InventoryAdmin(admin.ModelAdmin):
     model = Inventory
     list_display = (
         'name',
-        'cf_vendor_name',
         'sku',
+        'category_name',
+        'cf_vendor_name',
         'actual_available_stock',
         'price',
+        'pre_tax_price',
         'cf_farm_price_2',
+        'cf_trim_qty_lbs',
+        'cf_batch_qty_g',
+        'cf_status',
+        'cf_cfi_published',
+        'inventory_name',
         'created_time'
     )
+    list_filter = ('category_name', 'status', 'cf_status', 'cf_cfi_published', 'inventory_name')
     search_fields = ('sku', 'name',)
     ordering = ('-created_time',)
 

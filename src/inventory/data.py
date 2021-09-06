@@ -99,8 +99,10 @@ ITEM_CUSTOM_FIELD_ORG_MAP = {
 CATEGORY_GROUP_MAP = {
     'Flowers': (
         'Wholesale - Flower',
+        'Flower',
         'In the Field',
         'Flower - Tops',
+        'Tops',
         'Flower - Bucked Untrimmed',
         'Flower - Bucked Untrimmed - Seeded',
         'Flower - Bucked Untrimmed - Contaminated',
@@ -108,6 +110,8 @@ CATEGORY_GROUP_MAP = {
     ),
     'Trims': (
         'Trim',
+        'Trim - CBD',
+        'Trim - THC',
     ),
     'Kief': (
         'Kief',
@@ -124,8 +128,10 @@ CATEGORY_GROUP_MAP = {
     ),
     'Distillates': (
         'Distillate Oil',
-        'Distillate Oil - THC',
         'Distillate Oil - CBD',
+        'Distillate Oil - THC',
+        'Distillate Oil - THC - First Pass',
+        'Distillate Oil - THC - Second Pass',
     ),
     'Isolates': (
         'Isolates',
@@ -146,7 +152,16 @@ CATEGORY_GROUP_MAP = {
     # 'Secure Cash Handling',
     'Clones': (
         'Clones',
-    )
+    ),
+    # 'tmp': (
+    #     'Jars 1/8',
+    #     'Mylar  1/8',
+    #     'Lab Testing',
+    #     'QC',
+    #     'Secure Cash Handling',
+    #     'Services',
+    #     'Transport',
+    # )
 }
 
 CG = {cat: k for k, v in CATEGORY_GROUP_MAP.items() for cat in v}
@@ -157,6 +172,8 @@ _CATEGORY_CANNABINOID_TYPE_MAP = {
     'THC': (
         'Crude Oil - THC',
         'Distillate Oil - THC',
+        'Distillate Oil - THC - First Pass',
+        'Distillate Oil - THC - Second Pass',
         'Isolates - THC',
     ),
     'CBD': (
