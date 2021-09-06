@@ -395,7 +395,7 @@ def _insert_record(record=None, license_id=None, is_update=False):
 
             final_dict.update(insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
             final_dict.update(insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
-
+            update_in_crm('Licenses', license_db_obj.id)
         except Exception as exc:
             print(exc)
             exc_info = sys.exc_info()

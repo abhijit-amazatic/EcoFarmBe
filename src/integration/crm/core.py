@@ -331,7 +331,7 @@ def update_in_crm(module, record_id):
     """
     Update record in zoho crm.
     """
-    request = None
+    request = dict()
     try:
         if module in ['Vendors', 'Accounts']:
             lp_obj = LicenseProfile.objects.select_related('license').get(id=record_id)
@@ -347,8 +347,12 @@ def update_in_crm(module, record_id):
                     request['Layout_Name'] = 'vendor_cannabis'
         else:
             if module == 'Licenses':
-                request = License.objects.get(id=record_id)
-                request = request.__dict__
+                license_obj = License.objects.select_related('license_profile').get(id=record_id)
+                try:
+                    request.update(license_obj.license_profile.__dict__)
+                except ObjectDoesNotExist:
+                    pass
+                request.update(license_obj.__dict__)
             elif module == 'Orgs':
                 request = Organization.objects.get(id=record_id)
                 request = request.__dict__
@@ -517,11 +521,16 @@ def update_license(dba, license=None, license_id=None):
     response = None
     data = list()
     if not license and license_id:
+        license = dict()
         try:
-            license = License.objects.get(id=license_id)
+            license_obj = License.objects.get(id=license_id)
+            try:
+                license.update(license_obj.license_profile.__dict__)
+            except ObjectDoesNotExist:
+                pass
         except License.DoesNotExist:
             return {'error': f'License {license_id} not in database'}
-        license = license.__dict__
+        license.update(license_obj.__dict__)
         license['license_db_id'] = license['id']
         license['id'] = license['zoho_crm_id']
     license_number = license['license_number']
