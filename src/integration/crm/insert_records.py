@@ -382,7 +382,7 @@ def _insert_record(record=None, license_id=None, is_update=False):
             license_response = update_license(dba=farm_name, license=d, is_return_orginal_data=True)
             final_dict['license'] = license_response
             license_crm_id = None
-            if license_response['response']['status_code'] == 200:
+            if license_response['status_code'] == 200:
                 license_record_data = license_response['response']['response']['data']
                 try:
                     record_obj = License.objects.get(id=license_db_id)

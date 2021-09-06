@@ -207,8 +207,8 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
                 result.append(contact)
             return result
         return []
-    if not obj.get(value):
-        return None
+    # if not obj.get(value):
+        # return None
     if value.startswith('county') or value.startswith('appellation'):
         return obj.get(value).split(',')
     if value.startswith('County2') or value.startswith('Appellations'):
