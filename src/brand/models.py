@@ -18,6 +18,7 @@ from django.contrib.postgres.fields import (ArrayField, JSONField, HStoreField,)
 from django.contrib.contenttypes.fields import (GenericRelation, )
 from django.conf import settings
 from django.core.exceptions import (ValidationError, ObjectDoesNotExist,)
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
 from django_otp.models import Device, ThrottlingMixin
@@ -260,8 +261,8 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     is_notified_before_expiry = models.BooleanField(_('Is Notified Before Expiry'), default=False)
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
-    crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict)
-    books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict)
+    crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
+    books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
 
     license_status = models.CharField(blank=True, null=True, max_length=255,)
 

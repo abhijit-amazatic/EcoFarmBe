@@ -18,6 +18,7 @@ from .core import (
     update_records,
     update_license,
     get_lookup_id,
+    update_in_crm,
 )
 from .get_records import(
     get_associations,
@@ -378,11 +379,11 @@ def _insert_record(record=None, license_id=None, is_update=False):
             farm_name = lic_record['legal_business_name']
             # if d['is_buyer'] == True:
             #     continue
-            license_response = update_license(dba=farm_name, license=d)
+            license_response = update_license(dba=farm_name, license=d, is_return_orginal_data=True)
             final_dict['license'] = license_response
             license_crm_id = None
-            if license_response['status_code'] == 200:
-                license_record_data = license_response['response']['data']
+            if license_response['response']['status_code'] == 200:
+                license_record_data = license_response['response']['response']['data']
                 try:
                     record_obj = License.objects.get(id=license_db_id)
                     license_crm_id = license_record_data[0]['details']['id']
@@ -395,7 +396,8 @@ def _insert_record(record=None, license_id=None, is_update=False):
 
             final_dict.update(insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
             final_dict.update(insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
-            update_in_crm('Licenses', license_db_obj.id)
+            if not d.get('zoho_crm_vendor_id') or not d.get('zoho_crm_account_id'):
+                update_in_crm('Licenses', license_db_obj.id)
         except Exception as exc:
             print(exc)
             exc_info = sys.exc_info()

@@ -514,7 +514,7 @@ def upload_file_s3_to_box(aws_bucket, aws_key):
        return box_file_obj
     return None
 
-def update_license(dba, license=None, license_id=None):
+def update_license(dba, license=None, license_id=None, is_return_orginal_data=False):
     """
     Update license with shareable link.
     """
@@ -604,7 +604,7 @@ def update_license(dba, license=None, license_id=None):
         is_notified_before_expiry=False
     )
     data.append(license)
-    response = update_records('Licenses', data)
+    response = update_records('Licenses', data, is_return_orginal_data)
     return response
 
 def get_lookup_id(data_dict, field):
