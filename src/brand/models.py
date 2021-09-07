@@ -217,6 +217,8 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         _('Owner or Manager'), blank=True, null=True, max_length=12)
     legal_business_name = models.CharField(
         _('Legal Business Name'), blank=True, null=True, max_length=255)
+    business_dba = models.CharField(
+        _('business DBA'), blank=True, null=True, max_length=255)
     license_number = models.CharField(
         _('License Number'), blank=True, null=True, max_length=255)
     expiration_date = models.DateField(
@@ -271,6 +273,13 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
 
     class Meta:
         verbose_name = _('License/Profile')
+
+    def get_profile_name(self):
+        if self.business_dba:
+            return f'{self.business_dba} {self.client_id}'
+        if self.legal_business_name:
+            return f'{self.legal_business_name} {self.client_id}'
+        return ''
 
 class OnboardingDataFetch(ThrottlingMixin, models.Model):
     OTP_DIGITS = 8

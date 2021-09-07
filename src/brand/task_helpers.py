@@ -114,6 +114,13 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 #     ),
                 # )
                 license_obj = License.objects.get(id=license_id)
+                license_obj.__dict__.update({
+                    'business_dba':               data_l.get('business_dba', ''),
+                    'uploaded_w9_to':             data_l.get('uploaded_w9_to', ''),
+                    'uploaded_license_to':        data_l.get('uploaded_license_to', ''),
+                    'uploaded_sellers_permit_to': data_l.get('uploaded_sellers_permit_to', ''),
+                })
+                license_obj.save()
 
             with transaction.atomic():
                 #STEP2:create License profile
@@ -122,7 +129,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                 data_a__owner = data_v.get('Owner') or {}
                 LicenseProfile.objects.create(**{
                     'license': license_obj,
-                    'name':                       get_a('name'),
+                    'name':                       license_obj.get_profile_name() or get_a('name'),
                     'appellation':                get_a_v('appellation'),
                     'county':                     get_a_v('county'),
                     'region':                     get_a_v('region'),
