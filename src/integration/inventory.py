@@ -16,7 +16,8 @@ from core.settings import (
     INVENTORY_BOX_ID,
     INVENTORY_TAXES,
 )
-from django.db.models import (Sum, F, Min, Max, Avg, Q)
+from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper, DateField,)
+from django.utils import  timezone
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
 from .inventory_data import(INVENTORY_ITEM_CATEGORY_NAME_ID_MAP, )
@@ -806,6 +807,7 @@ def get_category_count(params):
     params['cf_cfi_published'] = True
     updated_params = get_updated_params(params)
     strain_list = []
+    new_items_date = []
     #Adjustments as of want to filter icontains & in to cf_strain_name
     if 'cf_strain_name__in' in updated_params.keys():
         strain_list.extend(updated_params['cf_strain_name__in'])
@@ -814,10 +816,13 @@ def get_category_count(params):
         grade_val = updated_params['cf_cannabis_grade_and_category__in'].split(',')
         updated_params['cf_cannabis_grade_and_category__in'] =  grade_val
     if 'cf_date_available' in updated_params.keys():
-        updated_params.pop('cf_date_available')
+        new_items_date.extend(updated_params['cf_date_available'])
+        updated_params.pop('cf_date_available')        
     inventory = InventoryModel.objects.filter(**updated_params)
     if strain_list:
         inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
+    if new_items_date:
+        inventory = inventory.annotate(full_date=ExpressionWrapper(F('cf_date_available') + timedelta(days=7),output_field=DateField())).filter(full_date__gt=timezone.now().date())
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response
