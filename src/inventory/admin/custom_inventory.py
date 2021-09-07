@@ -247,9 +247,10 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         # if not settings.PRODUCTION and obj.zoho_organization in ['efl', 'efn']:
         #     sku.append('test')
         #     sku.append('sku')
-        sku.append(obj.client_code)
+        # sku.append(obj.client_code)
 
         if obj.category_group in ('Isolates', 'Distillates',):
+            sku.append(str(obj.license_profile.license.client_id))
             if not obj.mfg_batch_id:
                 if request:
                     self.message_user(request, 'Error while generating SKU, MFG Batch ID not provided', level='error')
@@ -269,6 +270,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 return None
 
             sku.append(cultivar_name.replace(' ', '-'))
+            sku.append(str(obj.license_profile.license.client_id))
 
             # if obj.harvest_date:
             #     sku.append(obj.harvest_date.strftime('%m-%d-%y'))
