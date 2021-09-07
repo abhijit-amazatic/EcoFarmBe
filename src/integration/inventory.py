@@ -813,6 +813,8 @@ def get_category_count(params):
     if 'cf_cannabis_grade_and_category__in' in updated_params.keys():
         grade_val = updated_params['cf_cannabis_grade_and_category__in'].split(',')
         updated_params['cf_cannabis_grade_and_category__in'] =  grade_val
+    if 'cf_date_available' in updated_params.keys():
+        updated_params.pop('cf_date_available')
     inventory = InventoryModel.objects.filter(**updated_params)
     if strain_list:
         inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
