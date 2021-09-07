@@ -15,8 +15,8 @@ from brand.models import (License)
 from .crm import (insert_users, fetch_labtests,
                   update_in_crm, update_license)
 from .inventory import (fetch_inventory, )
-from .books import (send_estimate_to_sign, )
-from .crm import (fetch_cultivars, fetch_licenses)
+from .books import (send_estimate_to_sign, create_customer_in_books)
+from .crm import (fetch_cultivars, fetch_licenses, insert_records)
 from  .sign import (upload_pdf_box,)
 from .box import(
     get_shared_link,
@@ -64,6 +64,15 @@ def fetch_inventory_on_interval():
         print(exc)
         return {'status_code': 400,
                 'error': exc}
+
+@app.task(queue="general")
+def insert_record_to_crm(license_id, is_update=False):
+    """
+    Insert record to crm and create/update customer and vendor to books.
+    """
+    insert_records(id=license_id, is_update=is_update)
+    create_customer_in_books(id=license_id)
+
 
 @app.task(queue="general")
 def send_estimate(organization_name, estimate_id, contact_id):

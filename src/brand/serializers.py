@@ -19,7 +19,7 @@ from integration.crm import (insert_records,is_user_existing,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
-from integration.tasks import (update_in_crm_task, update_license_task)
+from integration.tasks import (update_in_crm_task, update_license_task, insert_record_to_crm,)
 from user.models import (User,)
 from cultivar.models import (Cultivar,)
 from .tasks import (onboarding_fetched_data_insert_to_db,)
@@ -67,7 +67,7 @@ def insert_or_update_vendor_accounts(profile, instance):
     else:
         is_update = False
 
-    insert_records.delay(id=instance.id, is_update=is_update)
+    insert_record_to_crm.delay(license_id=instance.id, is_update=is_update)
 
     # if is_existing_user and is_existing_user[0]:
     #     if profile.license.profile_category == 'cultivation':
@@ -265,7 +265,7 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
                 #     books_ls = ('books_efd',)
                 #insert or update vendors/accounts
                 insert_or_update_vendor_accounts(profile, instance)
-                create_customer_in_books(id=instance.id)
+                # create_customer_in_books(id=instance.id)
                 instance.refresh_from_db()
             except Exception as e:
                 print(e)

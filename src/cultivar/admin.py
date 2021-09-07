@@ -4,10 +4,10 @@ from django.shortcuts import HttpResponseRedirect
 from django.db import models
 from django.db.models import Q
 from django import forms
-from brand.tasks import (insert_record_to_crm,)
 from django.contrib.admin.utils import (unquote,)
 
 from integration.crm import (create_records, update_records)
+from integration.tasks import (insert_record_to_crm,)
 from brand.models import (NurseryOverview)
 from core.mixins.admin import (CustomButtonMixin,)
 from .models import Cultivar
@@ -108,7 +108,7 @@ class CultivarAdmin(CustomButtonMixin, admin.ModelAdmin):
                                         no_obj.save()
                                     lic_obj = no_obj.license
                                     insert_record_to_crm.delay(
-                                        record_id=lic_obj.id,
+                                        license_id=lic_obj.id,
                                         is_update=True,
                                     )
                                     obj.nursery_overview.remove(no_obj)

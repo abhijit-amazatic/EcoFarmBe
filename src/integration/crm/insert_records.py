@@ -408,7 +408,6 @@ def _insert_record(record=None, license_id=None, is_update=False):
 
 
 
-@app.task(queue="general")
 def insert_records(id=None, is_update=False):
     """
     Insert Vendors into Zoho CRM.

@@ -21,8 +21,8 @@ from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
 from integration.box import (delete_file,)
+from integration.tasks import (insert_record_to_crm,)
 from core.utility import (send_async_approval_mail, get_profile_type,send_async_approval_mail_admin,)
-from .tasks import (invite_profile_contacts, insert_record_to_crm)
 from .models import (
     Organization,
     Brand,License,
@@ -119,14 +119,14 @@ delete_model.short_description = "Delete selected License Profile and it's box f
 def sync_records(modeladmin, request, queryset):
     for record in queryset:
         insert_record_to_crm.delay(
-            record_id=record.id,
+            license_id=record.id,
             is_update=False)
 sync_records.short_description = "Insert Records To CRM"
 
 def update_records(modeladmin, request, queryset):
     for record in queryset:
         insert_record_to_crm.delay(
-            record_id=record.id,
+            license_id=record.id,
             is_update=True)
 update_records.short_description = "Update Records To CRM"
 
