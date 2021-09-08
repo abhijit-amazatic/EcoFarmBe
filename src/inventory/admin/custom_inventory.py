@@ -24,6 +24,9 @@ from integration.inventory import (
     get_item_category_id,
     get_vendor_id,
 )
+from integration.tasks import (
+    fetch_inventory_from_list_task,
+)
 from integration.crm import search_query
 from fee_variable.utils import (get_item_mcsp_fee,)
 from core.mixins.admin import (CustomButtonMixin,)
@@ -424,8 +427,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                             notify_inventory_item_approved_task.delay(obj.id)
                         else:
                             notify_inventory_item_approved_task.delay(obj.id, notify_logistics=False)
+                        fetch_inventory_from_list_task.delay(f'inventory_{obj.zoho_organization}', [item_id])
 
-                elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', ''):
+                elif result.get('code') == 1001 and 'SKU' in result.get('message', '') and sku in result.get('message', 'item_id'):
                     self._approve(request, obj, inv_obj, data, sku_postfix=sku_postfix+1)
                 else:
                     msg = result.get('message')

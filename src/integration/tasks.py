@@ -14,7 +14,7 @@ from labtest.models import (LabTest, )
 from brand.models import (License)
 from .crm import (insert_users, fetch_labtests,
                   update_in_crm, update_license)
-from .inventory import (fetch_inventory, )
+from .inventory import (fetch_inventory, fetch_inventory_from_list)
 from .books import (send_estimate_to_sign, create_customer_in_books)
 from .crm import (fetch_cultivars, fetch_licenses, insert_records)
 from  .sign import (upload_pdf_box,)
@@ -132,3 +132,7 @@ def upload_agreement_pdf_to_box(request_id, folder_id, file_name, license_number
             elif 'w-9' in file_name.lower():
                 obj.uploaded_w9_to = get_shared_link(file_id)
                 obj.save()
+
+@app.task(queue="urgent")
+def fetch_inventory_from_list_task(inventory_name, inventory_list, is_composite=False):
+    fetch_inventory_from_list(inventory_name, inventory_list, is_composite)
