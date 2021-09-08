@@ -861,11 +861,11 @@ class InventoryTagsView(APIView):
         """
         Get inventory tags
         """
-        tags = Inventory.objects.filter(cf_cfi_published=True).values_list('tags',flat=True).distinct()
-        clean_tags = list(filter(None,list(tags)))
+        response = get_inventory_metadata('inventory_efd')
+        dynamic_tags = list(filter(lambda tags: tags['label'] == 'Tags', response['custom_fields']))
         return Response({
             'status_code': 200,
-            'response':list(set([item for sublist in clean_tags for item in sublist]))})
+            'response': [val['name'] for val in dynamic_tags[0]['values']]})
     
 class InventoryEthicsView(APIView):
     """
