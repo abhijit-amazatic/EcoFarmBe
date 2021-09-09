@@ -66,12 +66,20 @@ def fetch_inventory_on_interval():
                 'error': exc}
 
 @app.task(queue="general")
+def create_customer_in_books_task(license_id, is_update=False):
+    """
+    Insert record to crm and create/update customer and vendor to books.
+    """
+    create_customer_in_books(id=license_id)
+
+@app.task(queue="general")
 def insert_record_to_crm(license_id, is_update=False):
     """
     Insert record to crm and create/update customer and vendor to books.
     """
-    insert_records(id=license_id, is_update=is_update)
-    create_customer_in_books(id=license_id)
+    r = insert_records(id=license_id, is_update=is_update)
+    create_customer_in_books_task.delay(license_id=license_id)
+    return r
 
 
 @app.task(queue="general")

@@ -118,6 +118,27 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
             final_response['Accounts_X_Licenses']['exception'] = e
             final_response['Accounts_X_Licenses']['local_vars'] = locals_data
 
+        final_response['Accounts_X_Cultivars'] = dict()
+        try:
+            if result['response']['orignal_data'][0].get('Cultivars_List'):
+                data = dict()
+                data['Interested_Accounts'] = account_id
+                for j in result['response']['orignal_data'][0]['Cultivars_List']:
+                    r = search_query('Cultivars', j, 'Name')
+                    if r['status_code'] == 200:
+                        data['Cultivars_of_Interest'] = r['response'][0]['id']
+                        r = create_records('Accounts_X_Cultivars', [data])
+                    final_response['Accounts_X_Cultivars'][j] = r
+        except Exception as exc:
+            print(exc)
+            debug_vars = ('data', 'vendor_id')
+            locals_data = {k: v for k, v in locals().items() if k in debug_vars}
+            exc_info = sys.exc_info()
+            e = ''.join(traceback.format_exception(*exc_info))
+            final_response['Accounts_X_Cultivars']['exception'] = e
+            final_response['Accounts_X_Cultivars']['local_vars'] = locals_data
+
+
 
         final_response['Accounts_X_Contacts'] = dict()
         try:
@@ -251,8 +272,7 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
                     if r['status_code'] == 200:
                         data['Cultivars'] = r['response'][0]['id']
                         r = create_records('Vendors_X_Cultivars', [data])
-                        final_response['Vendors_X_Cultivars'] = r
-                final_response['Vendors_X_Cultivars'] = r
+                    final_response['Vendors_X_Cultivars'][j] = r
         except Exception as exc:
             print(exc)
             debug_vars = ('data', 'vendor_id')

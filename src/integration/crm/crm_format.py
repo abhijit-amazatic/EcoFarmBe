@@ -319,7 +319,9 @@ CRM_FORMAT  = {
         "Ownership": "",
         "Ethics_Certifications": "ethics_and_certification_parse",
         "Annual_Revenue": "",
-        "Tier_Selection": "Tier_Selection"
+        "Tier_Selection": "Tier_Selection",
+        "Cultivars_List": "cultivars_of_interest",
+
     },
     "Vendors": {
         "db_id": "db_id",
@@ -350,10 +352,10 @@ CRM_FORMAT  = {
         "Phone": "company_phone",
         "Email": "company_email",
         "Contacts_List": "employees_parse",
-        "Contact_1": "employees_parse",
-        "Contact_3": "employees_parse",
-        "Contact_2": "employees_parse",
-        "Owner1": "employees_parse",
+        # "Contact_1": "employees_parse",
+        # "Contact_3": "employees_parse",
+        # "Contact_2": "employees_parse",
+        # "Owner1": "employees_parse",
         "Number_of_Employees": "no_of_employees",
         "Gate_Code": "Gate_Code",
         #Logistic - Vendor arragned
@@ -492,6 +494,10 @@ CRM_FORMAT  = {
     "Vendors_X_Cultivars": {
         "Cultivar_Associations": "Cultivar_Associations",
         "Cultivars": "Cultivars"
+    },
+    "Accounts_X_Cultivars": {
+        "Interested_Accounts": "Interested_Accounts",
+        "Cultivars_of_Interest": "Cultivars_of_Interest"
     },
     "Orgs":{
         "id": "zoho_crm_id",

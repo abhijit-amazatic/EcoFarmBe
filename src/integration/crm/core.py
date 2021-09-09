@@ -210,11 +210,12 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     # if not obj.get(value):
         # return None
     if value.startswith('county') or value.startswith('appellation'):
-        return obj.get(value).split(',')
+        if obj.get(value):
+            return obj.get(value).split(',')
+        return []
     if value.startswith('County2') or value.startswith('Appellations'):
         if isinstance(obj.get(value), list):
             return ','.join(obj.get(value))
-        return obj.get(value)
     if value.startswith('ethics_and_certification'):
         if isinstance(obj.get(value), list) and len(obj.get(value)) > 0:
             return obj.get(value)
@@ -237,10 +238,6 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     if value.startswith('logistic_manager_email'):
         if obj.get('logistic_manager_name'):
             return create_or_get_user(obj.get('logistic_manager_name'), obj.get(value))
-    if value.startswith('Cultivars'):
-        if obj.get(value):
-            return obj.get(value).split(', ')
-        return []
     list_fields = (
         'transportation',
         'cultivation_type',
@@ -265,6 +262,22 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         v = value.split('.')
         if len(v) == 2 and obj.get(v[0]):
             return obj.get(v[0]).get(v[1])
+    if value.startswith('Cultivars'):
+        if obj.get(value):
+            return obj.get(value).split(', ')
+        return []
+    # if value.startswith('cultivars_of_interest'):
+    #     if isinstance(obj.get(value), list):
+    #         cult_ls = []
+    #         for cultivar in obj.get(value):
+    #             try:
+    #                 r = search_query('Cultivars', cultivar, 'Name')
+    #                 if r['status_code'] == 200:
+    #                     cult_ls.append(r['response'][0]['id'])
+    #             except Exception as e:
+    #                 print(e)
+    #         return cult_ls
+    #     return obj.get(value)
     if value.startswith('cultivars'):
         cultivars = list()
         dictionary = obj.get('cr.overview')
