@@ -311,7 +311,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Note: Can reduce qs (one step for positive values) but if someone adds new cf_status to inv items,
         then few items might be missed from list so keeping these two step qs.
         """
-        qs = Inventory.objects.filter(cf_cfi_published=True)
+        qs = Inventory.objects.filter(status='active',cf_cfi_published=True)
         return self.extract_positive_value_queryset(qs)
 
     def list(self, request):
