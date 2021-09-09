@@ -2,10 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.shortcuts import (reverse, )
 from django.contrib.contenttypes.admin import GenericStackedInline
-
 from import_export import resources
-
-
 from core import settings
 from core.settings import (AWS_BUCKET, )
 from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)

@@ -44,13 +44,39 @@ from reversion.models import Revision, Version
 from .models import ReversionMeta
 
 from django.contrib.admin import AdminSite
+from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
+from import_export import resources
 
 
 
-class RevisionAdmin(admin.ModelAdmin):
+
+class RevisionResource(resources.ModelResource):
+
+    class Meta:
+        model = Revision
+        fields = (
+            'id',
+            'date_created', 
+            'user__email',
+            'reversion_meta__ip_address',
+            'reversion_meta__user_agent',
+            'reversion_meta__path',
+            'comment',
+        )
+        export_order = ( 'id',
+                         'date_created', 
+                         'user__email',
+                         'reversion_meta__ip_address',
+                         'reversion_meta__user_agent',
+                         'reversion_meta__path',
+                         'comment')
+        
+        
+class RevisionAdmin(ExportActionMixin,admin.ModelAdmin):
     model = Revision
     change_form_template = "reversion_extention/change_form.html"
     list_display=('date_created', 'user', 'ip_address', 'user_agent', 'path', 'changes_trunc')
+    resource_class = RevisionResource
     fieldsets = (
         (None, {
             'fields': (
