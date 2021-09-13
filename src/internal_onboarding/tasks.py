@@ -25,7 +25,9 @@ from integration.crm import (
     create_or_update_org_in_crm,
     get_format_dict,
 )
-
+from integration.tasks import (
+    insert_record_to_crm,
+)
 
 from brand.task_helpers import insert_data_from_crm
 from core.celery import app
@@ -208,3 +210,4 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
 def create_crm_associations_and_fetch_data(create_crm_associations_kwargs, fetch_data_kwargs={}):
     create_crm_associations(**create_crm_associations_kwargs)
     fetch_onboarding_data_to_db(**fetch_data_kwargs)
+    insert_record_to_crm.delay(fetch_data_kwargs.get('license_obj_id'), True)
