@@ -67,7 +67,7 @@ def save_daily_aggrigated_vendor_summary():
     """
     vendors= Vendor.objects.filter()
     for vendor in vendors:
-        queryset = Inventory.objects.filter(cf_cfi_published=True,cf_client_code=vendor.cf_client_code,vendor_name=vendor.vendor_name)
+        queryset = Inventory.objects.filter(cf_cfi_published=True,status='active',cf_client_code=vendor.cf_client_code,vendor_name=vendor.vendor_name)
         summary = get_inventory_summary(queryset, statuses=None)
         fields_data = {
             'total_thc_max':summary['total_thc_max'],
@@ -94,7 +94,7 @@ def save_summary_by_product_category(daily_aggrigated_summary_id):
     save by parent/product cateory
     """
     prod_category = ['Wholesale - Terpenes','Wholesale - Flower', 'Wholesale - Isolates', 'Services', 'Wholesale - Trim', 'Lab Testing', 'Wholesale - Concentrates']
-    queryset = Inventory.objects.filter(cf_cfi_published=True)
+    queryset = Inventory.objects.filter(status='active',cf_cfi_published=True)
     try:
         for category in prod_category:
             qs = queryset.filter(parent_category_name = category)
@@ -122,7 +122,7 @@ def save_daily_aggrigated_summary():
     """
     Save daily inventory  aggrigated summary(without county).
     """
-    queryset = Inventory.objects.filter(cf_cfi_published=True)
+    queryset = Inventory.objects.filter(status='active',cf_cfi_published=True)
     summary = get_inventory_summary(queryset, statuses=None)
     fields_data = {
         'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
@@ -153,7 +153,7 @@ def save_daily_aggrigated_county_summary():
     counties= County.objects.filter().values('name','id')
 
     for county in counties:
-        queryset = Inventory.objects.filter(cf_cfi_published=True, county_grown__overlap=[county['name']])
+        queryset = Inventory.objects.filter(cf_cfi_published=True,status='active',county_grown__overlap=[county['name']])
         summary = get_inventory_summary(queryset, statuses=None)
         fields_data = {
             'date': datetime.datetime.now(pytz.timezone('US/Pacific')).date(),
