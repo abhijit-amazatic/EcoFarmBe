@@ -309,7 +309,10 @@ def get_account_associated_licenses(account_id, id_flat=False):
 def get_account_associated_contacts(account_id, id_flat=False):
     return get_associations('Accounts_X_Contacts', 'Accounts', account_id, 'Contacts', include_fields={'roles': 'Contact_Company_Role'}, id_flat=id_flat)
 
-def get_account_associations(account_id, organizations=True, brands=True, licenses=True, contacts=True):
+def get_account_associated_cultivars_of_interest(account_id, id_flat=False):
+    return get_associations('Accounts_X_Cultivars', 'Interested_Accounts', account_id, 'Cultivars_of_Interest', id_flat=id_flat)
+
+def get_account_associations(account_id, organizations=True, brands=True, licenses=True, contacts=True, cultivars=True):
     final_response = {}
     if organizations:
         final_response['Orgs'] = get_account_associated_organizations(account_id)
@@ -319,4 +322,6 @@ def get_account_associations(account_id, organizations=True, brands=True, licens
         final_response['Licenses'] = get_account_associated_licenses(account_id)
     if contacts:
         final_response['Contacts'] = get_account_associated_contacts(account_id)
+    if cultivars:
+        final_response['Cultivars'] = get_account_associated_cultivars_of_interest(account_id)
     return final_response

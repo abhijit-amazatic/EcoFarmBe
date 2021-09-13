@@ -94,6 +94,7 @@ from brand.views import (
     InviteUserViewSet,
     UserInvitationVerificationView,
     ProgramSelectionSyncView,
+    CultivarsOfInterestSyncView,
     OnboardingDataFetchViewSet,
     MyOrganizationRoleView,
 )
@@ -283,6 +284,7 @@ urlpatterns = [
     path(r'permission-list/', PermissionListView.as_view(), name="permission-list"),
     path(r'user-invitation-verify/', UserInvitationVerificationView.as_view(), name="user-invitation-verify"),
     path(r'update-program-selection/', ProgramSelectionSyncView.as_view(), name="update-program"),
+    path(r'update-account-cultivars-of-interest/', CultivarsOfInterestSyncView.as_view(), name="update-account-cultivars-of-interest"),
     path(r'autocomplete/', GetAutoComplete.as_view(), name="address-autocomplete"),
     path(r'sign/download/', DownloadSignDocumentView.as_view(), name="download-sign-document"),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),

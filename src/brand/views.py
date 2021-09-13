@@ -36,6 +36,7 @@ from integration.apps.aws import (create_presigned_url, )
 from core.utility import (notify_admins_on_slack,email_admins_on_profile_progress, )
 from core.mailer import (mail, mail_send,)
 from integration.crm import (update_program_selection, create_records, search_query, update_records, create_or_update_org_in_crm)
+from integration.crm.get_records import (get_account_associated_cultivars_of_interest)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
 from permission.filterqueryset import (filterQuerySet, )
@@ -895,6 +896,36 @@ class ProgramSelectionSyncView(APIView):
         if response['code'] == 0:
             return Response(response)
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+class CultivarsOfInterestSyncView(APIView):
+    """
+    Sync Cultivars Of Interest from crm to db.
+    """
+    authentication_classes = (TokenAuthentication, )
+
+    def put(self, request):
+        """
+        Update program selection.
+        """
+        account_id = request.data.get('account_id')
+
+        qs = LicenseProfile.objects.filter(zoho_crm_account_id=account_id)
+        if not qs.exists():
+            error = {'code': 1, 'error': f'account {account_id} not in database.'}
+            print(error)
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+        for license_profile in qs:
+                cultivars = get_account_associated_cultivars_of_interest(account_id)
+                if license_profile.cultivars_of_interest:
+                    cult_set = set(license_profile.cultivars_of_interest)
+                else:
+                    cult_set = set()
+                cult_set.update([c.get('name') for c in cultivars])
+                license_profile.cultivars_of_interest = list(cult_set)
+                license_profile.save()
+        response = {'code': 0, 'message': 'Success'}
+        return Response(response)
 
 class OnboardingDataFetchViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
                                                         viewsets.GenericViewSet):
