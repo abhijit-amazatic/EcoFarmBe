@@ -362,40 +362,39 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                     if isinstance(tax, float):
                         if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id or not obj.cultivation_type:
                             self.get_crm_data(request, obj)
-                        if obj.client_code:
-                            if obj.zoho_organization:
-                                inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
-                                metadata = {}
-                                resp_metadata = inv_obj.get_metadata(params={})
-                                if resp_metadata.get('code') == 0:
-                                    metadata = resp_metadata
-                                category_id = get_item_category_id(
-                                    inv_obj=inv_obj,
-                                    category_name=obj.category_name,
-                                    metadata=metadata,
-                                )
-                                if category_id:
-                                    if obj.vendor_name:
-                                        vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
-                                        if not vendor_id and obj.license_profile:
-                                            vendor_id = get_vendor_id(inv_obj, obj.license_profile.license.legal_business_name)
-                                        if vendor_id:
-                                            data = get_new_item_data(
-                                                obj=obj,
-                                                inv_obj=inv_obj,
-                                                item_name=item_name,
-                                                category_id=category_id,
-                                                vendor_id=vendor_id,
-                                                tax=tax,
-                                                mcsp_fee=mcsp_fee,
-                                            )
-                                            self._approve(request, obj, inv_obj, data,)
-                                        else:
-                                            self.message_user(request, 'Vendor not found on zoho', level='error')
+                        if obj.zoho_organization:
+                            inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
+                            metadata = {}
+                            resp_metadata = inv_obj.get_metadata(params={})
+                            if resp_metadata.get('code') == 0:
+                                metadata = resp_metadata
+                            category_id = get_item_category_id(
+                                inv_obj=inv_obj,
+                                category_name=obj.category_name,
+                                metadata=metadata,
+                            )
+                            if category_id:
+                                if obj.vendor_name:
+                                    vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
+                                    if not vendor_id and obj.license_profile:
+                                        vendor_id = get_vendor_id(inv_obj, obj.license_profile.license.legal_business_name)
+                                    if vendor_id:
+                                        data = get_new_item_data(
+                                            obj=obj,
+                                            inv_obj=inv_obj,
+                                            item_name=item_name,
+                                            category_id=category_id,
+                                            vendor_id=vendor_id,
+                                            tax=tax,
+                                            mcsp_fee=mcsp_fee,
+                                        )
+                                        self._approve(request, obj, inv_obj, data,)
                                     else:
-                                        self.message_user(request, 'Vendor Name is not set', level='error')
+                                        self.message_user(request, 'Vendor not found on zoho', level='error')
                                 else:
-                                    self.message_user(request, 'Invalid item category for selected Zoho inventory Organization', level='error')
+                                    self.message_user(request, 'Vendor Name is not set', level='error')
+                            else:
+                                self.message_user(request, 'Invalid item category for selected Zoho inventory Organization', level='error')
 
 
     def _approve(self, request, obj, inv_obj, data, sku_postfix=0):
