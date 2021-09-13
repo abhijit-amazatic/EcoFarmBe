@@ -346,7 +346,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     This defines LicenseProfileSerializer
     """
     brand_association = LicenseProfileBrandAssociationField(allow_null=True)
-    business_dba = DBAField(required=False,)
+    business_dba = DBAField(required=False, allow_null=True)
 
     def create(self, validated_data):
         """
@@ -369,7 +369,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         dba = None
         if validated_data.get('business_dba'):
             dba = validated_data.pop('business_dba')
-        update_cultivar_of_interest = 'cultivars_of_interest' in validated_data and validated_data.get('validated_data') == instance.cultivars_of_interest
+        update_cultivar_of_interest = 'cultivars_of_interest' in validated_data and validated_data.get('cultivars_of_interest') != instance.cultivars_of_interest
 
         instance = super().update(instance, validated_data)
         if dba:
@@ -379,10 +379,7 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         update_in_crm_task.delay('Accounts', instance.id)
         update_in_crm_task.delay('Vendors', instance.id)
         if update_cultivar_of_interest:
-            update_account_cultivars_of_interest_in_crm.delay(
-                instance.zoho_crm_account_id,
-                instance.cultivars_of_interest,
-            )
+            update_account_cultivars_of_interest_in_crm.delay(instance.id)
         return instance
 
     class Meta:

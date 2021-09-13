@@ -908,6 +908,7 @@ class CultivarsOfInterestSyncView(APIView):
         Update program selection.
         """
         account_id = request.data.get('account_id')
+        cultivar_name = request.data.get('cultivar_name')
 
         qs = LicenseProfile.objects.filter(zoho_crm_account_id=account_id)
         if not qs.exists():
@@ -916,14 +917,12 @@ class CultivarsOfInterestSyncView(APIView):
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
         for license_profile in qs:
-                cultivars = get_account_associated_cultivars_of_interest(account_id)
-                if license_profile.cultivars_of_interest:
-                    cult_set = set(license_profile.cultivars_of_interest)
-                else:
-                    cult_set = set()
-                cult_set.update([c.get('name') for c in cultivars])
-                license_profile.cultivars_of_interest = list(cult_set)
-                license_profile.save()
+            if license_profile.cultivars_of_interest is None:
+                license_profile.cultivars_of_interest = [cultivar_name]
+            else:
+                if cultivar_name not in license_profile.cultivars_of_interest:
+                    license_profile.cultivars_of_interest.append(cultivar_name)
+            license_profile.save()
         response = {'code': 0, 'message': 'Success'}
         return Response(response)
 
