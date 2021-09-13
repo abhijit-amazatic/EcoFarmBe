@@ -12,8 +12,9 @@ from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY,PRODUCTION)
 from inventory.models import (Inventory, )
 from labtest.models import (LabTest, )
 from brand.models import (License)
-from .crm import (insert_users, fetch_labtests,
-                  update_in_crm, update_license)
+from .crm import (insert_users, fetch_labtests, create_records, delete_record,
+                  update_in_crm, update_license, search_query)
+from .crm.get_records import (get_account_associated_cultivars_of_interest)
 from .inventory import (fetch_inventory, fetch_inventory_from_list)
 from .books import (send_estimate_to_sign, create_customer_in_books)
 from .crm import (fetch_cultivars, fetch_licenses, insert_records)
@@ -144,3 +145,21 @@ def upload_agreement_pdf_to_box(request_id, folder_id, file_name, license_number
 @app.task(queue="urgent")
 def fetch_inventory_from_list_task(inventory_name, inventory_list, is_composite=False):
     fetch_inventory_from_list(inventory_name, inventory_list, is_composite)
+
+@app.task(queue="general")
+def update_account_cultivars_of_interest_in_crm(account_id, cultivars):
+    associated_cultivars = get_account_associated_cultivars_of_interest(account_id)
+    associated_cultivar_ids = [x.get('id') for x in associated_cultivars if x.get('id')]
+    db_cultivars = []
+    for cultivar_name in cultivars:
+        r = search_query('Cultivars', cultivar_name, 'Name')
+        if r['status_code'] == 200:
+            cultivar_id = r['response'][0]['id']
+            if cultivar_id not in associated_cultivar_ids:
+                r = create_records('Accounts_X_Cultivars', [{'Cultivars_of_Interest': cultivar_id, 'Interested_Accounts': account_id}])
+            db_cultivars.append(cultivar_id)
+    for cultivar in associated_cultivars:
+        if cultivar not in db_cultivars:
+            r = delete_record('Accounts_X_Cultivars', cultivar.get('linking_obj_id'))
+
+

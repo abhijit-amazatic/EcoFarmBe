@@ -19,7 +19,12 @@ from integration.crm import (insert_records,is_user_existing,)
 from integration.box import upload_file
 from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
-from integration.tasks import (update_in_crm_task, update_license_task, insert_record_to_crm,)
+from integration.tasks import (
+    update_in_crm_task,
+    update_license_task,
+    insert_record_to_crm,
+    update_account_cultivars_of_interest_in_crm,
+)
 from user.models import (User,)
 from cultivar.models import (Cultivar,)
 from .tasks import (onboarding_fetched_data_insert_to_db,)
@@ -364,14 +369,21 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         dba = None
         if validated_data.get('business_dba'):
             dba = validated_data.pop('business_dba')
-        updated_instance = super().update(instance, validated_data)
+        update_cultivar_of_interest = 'cultivars_of_interest' in validated_data and validated_data.get('validated_data') == instance.cultivars_of_interest
+
+        instance = super().update(instance, validated_data)
         if dba:
-            updated_instance.license.business_dba = dba
-        updated_instance.license.brand = updated_instance.brand_association
-        updated_instance.license.save()
+            instance.license.business_dba = dba
+        instance.license.brand = instance.brand_association
+        instance.license.save()
         update_in_crm_task.delay('Accounts', instance.id)
         update_in_crm_task.delay('Vendors', instance.id)
-        return updated_instance
+        if update_cultivar_of_interest:
+            update_account_cultivars_of_interest_in_crm.delay(
+                instance.zoho_crm_account_id,
+                instance.cultivars_of_interest,
+            )
+        return instance
 
     class Meta:
         model = LicenseProfile
