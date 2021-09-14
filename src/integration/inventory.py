@@ -809,6 +809,10 @@ def get_category_count(params):
     strain_list = []
     new_items_date = []
     #Adjustments as of want to filter icontains & in to cf_strain_name
+    if 'actual_available_stock__gte_g' in updated_params.keys():
+        updated_params.pop('actual_available_stock__gte_g')
+    if 'actual_available_stock__gte_ml' in updated_params.keys():
+        updated_params.pop('actual_available_stock__gte_ml')
     if 'cf_strain_name__in' in updated_params.keys():
         strain_list.extend(updated_params['cf_strain_name__in'])
         updated_params.pop('cf_strain_name__in')
