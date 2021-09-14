@@ -55,6 +55,7 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'labtest',
             'cf_date_available',
             'tags',
+            'mobile_url',
             'thumbnail_url')
         
 class ItemFeedbackSerializer(serializers.ModelSerializer):
