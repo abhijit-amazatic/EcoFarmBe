@@ -46,11 +46,16 @@ from .models import ReversionMeta
 from django.contrib.admin import AdminSite
 from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
 from import_export import resources
+from import_export.fields import Field
+from django.utils.html import strip_tags
 
 
 
 
 class RevisionResource(resources.ModelResource):
+    
+    formatted_comment = Field()
+
 
     class Meta:
         model = Revision
@@ -61,7 +66,7 @@ class RevisionResource(resources.ModelResource):
             'reversion_meta__ip_address',
             'reversion_meta__user_agent',
             'reversion_meta__path',
-            'comment',
+            'formatted_comment',
         )
         export_order = ( 'id',
                          'date_created', 
@@ -69,7 +74,10 @@ class RevisionResource(resources.ModelResource):
                          'reversion_meta__ip_address',
                          'reversion_meta__user_agent',
                          'reversion_meta__path',
-                         'comment')
+                         'formatted_comment')
+
+    def dehydrate_formatted_comment(self, revision):
+        return strip_tags(truncatewords_html(linebreaksbr(mark_safe(revision.comment)), 10))
         
         
 class RevisionAdmin(ExportActionMixin,admin.ModelAdmin):
