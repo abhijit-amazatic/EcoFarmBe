@@ -22,6 +22,7 @@ from multiselectfield import MultiSelectField
 
 from integration.box import (delete_file,)
 from integration.tasks import (insert_record_to_crm,)
+from .tasks import (invite_profile_contacts,)
 from core.utility import (send_async_approval_mail, get_profile_type,send_async_approval_mail_admin,)
 from .models import (
     Organization,
