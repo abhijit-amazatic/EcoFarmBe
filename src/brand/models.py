@@ -263,6 +263,9 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     is_notified_before_expiry = models.BooleanField(_('Is Notified Before Expiry'), default=False)
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
+
+    box_folder_id = models.CharField(_('Box Folder Id'), max_length=100, blank=True, null=True)
+    box_folder_url = models.CharField(_('Box Folder URL'), max_length=255, blank=True, null=True)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
     books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
 

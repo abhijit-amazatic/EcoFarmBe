@@ -22,7 +22,7 @@ from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
                          VENDOR_LICENSE_TYPES, ACCOUNT_LICENSE_TYPES,
                          ACCOUNT_TYPES)
 from integration.box import (get_shared_link, move_file,
-                  create_folder, upload_file_stream)
+                  create_folder, upload_file_stream, get_folder_obj)
 from core.celery import app
 from integration.utils import (get_vendor_contacts, get_account_category,
                     get_cultivars_date, get_layout, get_overview_field,)
@@ -549,6 +549,19 @@ def update_license(dba, license=None, license_id=None, is_return_orginal_data=Fa
     license_number = license['license_number']
     dir_name = f'{dba}_{license_number}'
     new_folder = create_folder(LICENSE_PARENT_FOLDER_ID, dir_name)
+    try:
+        folder_obj = get_folder_obj(new_folder)
+        folder_link = folder_obj.get_shared_link()
+    except Exception:
+        pass
+    else:
+        if folder_link:
+            License.objects.filter(pk=license['license_db_id']).update(
+                box_folder_id=new_folder,
+                box_folder_url=folder_link,
+            )
+            license['box_folder_id'] = new_folder
+            license['box_folder_url'] = folder_link
     license_folder = create_folder(new_folder, 'Licenses')
     if not license.get('uploaded_license_to') or license_id:
         try:

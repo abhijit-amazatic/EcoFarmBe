@@ -322,7 +322,8 @@ CRM_FORMAT  = {
         "Annual_Revenue": "",
         "Tier_Selection": "Tier_Selection",
         "Cultivars_List": "cultivars_of_interest",
-
+        "box__Box_Folder_ID": "box_folder_id",
+        "Box_Folder_URL": "box_folder_url",
     },
     "Vendors": {
         "db_id": "db_id",
@@ -475,6 +476,8 @@ CRM_FORMAT  = {
         "Unhide_Back_End_Fields": "Unhide_Back_End_Fields",
         "Vendor_Type": "Vendor_Type",
         "Which_third_party_lab_do_you_use": "Which_third_party_lab_do_you_use",
+        "Box_Folder_ID": "box_folder_id",
+        "Box_Folder_URL": "box_folder_url",
     },
     "Brands_X_Vendors": {
         "Brand": "Brand",
