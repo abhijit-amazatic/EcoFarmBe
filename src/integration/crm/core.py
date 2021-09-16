@@ -269,6 +269,26 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         v = value.split('.')
         if len(v) == 2 and obj.get(v[0]):
             return obj.get(v[0]).get(v[1])
+    if value.startswith('Farm_Contact_first_Name'):
+        user_id = obj.get('created_by_id')
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except Exception:
+                pass
+            else:
+                return user.first_name
+        return ''
+    if value.startswith('Farm_Contact_Last_Name'):
+        user_id = obj.get('created_by_id')
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except Exception:
+                pass
+            else:
+                return user.last_name
+        return ''
     if value.startswith('Cultivars'):
         if obj.get(value):
             return obj.get(value).split(', ')

@@ -348,8 +348,8 @@ CRM_FORMAT  = {
         "Have_you_ever_had_issues_with_failed_Lab_tests": "issues_with_failed_labtest",
         "Preferred_Payment_Method": "preferred_payment",
         #Farm contact
-        "Farm_Contact_Name": "Farm_Contact_Name",
-        "Last_Name": "Last_Name",
+        "Farm_Contact_Name": "Farm_Contact_first_Name_parse",
+        "Last_Name": "Farm_Contact_Last_Name_parse",
         "Title": "Title",
         "Phone": "company_phone",
         "Email": "company_email",
