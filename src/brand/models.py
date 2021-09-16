@@ -196,6 +196,13 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     """
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
+    CULTIVATION_TYPE_CHOICES = (
+        ('Mixed-Light', _('Mixed-Light')),
+        ('Outdoor', _('Outdoor')),
+        ('Indoor', _('Indoor')),
+    )
+
+
     brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), null=True, on_delete=SET_NULL,)
     organization = models.ForeignKey(
@@ -264,8 +271,10 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
     is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
 
+
     box_folder_id = models.CharField(_('Box Folder Id'), max_length=100, blank=True, null=True)
     box_folder_url = models.CharField(_('Box Folder URL'), max_length=255, blank=True, null=True)
+    cultivation_type = models.CharField(_('Cultivation Type'), choices=CULTIVATION_TYPE_CHOICES, max_length=255, blank=True, null=True)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
     books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
 

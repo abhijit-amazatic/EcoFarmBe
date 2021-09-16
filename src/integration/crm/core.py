@@ -238,9 +238,14 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     if value.startswith('logistic_manager_email'):
         if obj.get('logistic_manager_name'):
             return create_or_get_user(obj.get('logistic_manager_name'), obj.get(value))
+    if value.startswith('cultivation_type_list'):
+        v = obj.get('cultivation_type')
+        if isinstance(v, str):
+            return [v]
+        return []
+
     list_fields = (
         'transportation',
-        'cultivation_type',
         'vendor_type',
         'type_of_nutrients'
         )

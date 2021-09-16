@@ -336,7 +336,7 @@ CRM_FORMAT  = {
         "Client_Code": "Client_Code",
         "Client_ID": "client_id",
         "Associated_Account_Record": "zoho_crm_account_id",
-        "Cultivation_Type": "cultivation_type_parse",
+        "Cultivation_Type": "cultivation_type_list_parse",
         "Vendor_Type": "vendor_type_parse",
         "County2": "county_parse",
         "Region": "region",
@@ -1265,3 +1265,33 @@ ACCOUNT_LICENSE_TYPES = [
     'Retailer - Storefront',
     'Testing Laboratory',
 ]
+
+_LICENSE_CULTIVATION_TYPE = {
+    'Indoor': (
+        'Large Indoor',
+        'Medium Indoor',
+        'Small Indoor',
+        'Specialty Cottage Indoor',
+        'Specialty Indoor',
+    ),
+    'Outdoor': (
+        'Large Outdoor',
+        'Medium Outdoor',
+        'Small Outdoor',
+        'Specialty Cottage Outdoor',
+        'Specialty Outdoor',
+    ),
+    'Mixed-Light': (
+        'Large Mixed-Light',
+        'Medium Mixed-Light Tier 1',
+        'Medium Mixed-Light Tier 2',
+        'Small Mixed-Light Tier 1',
+        'Small Mixed-Light Tier 2',
+        'Specialty Cottage Mixed-Light Tier 1',
+        'Specialty Cottage Mixed-Light Tier 2',
+        'Specialty Mixed-Light Tier 1',
+        'Specialty Mixed-Light Tier 2',
+    ),
+}
+LICENSE_CULTIVATION_TYPE = {t: k for k, v in _LICENSE_CULTIVATION_TYPE.items() for t in v}
+

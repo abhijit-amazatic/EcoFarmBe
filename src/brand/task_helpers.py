@@ -119,6 +119,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
                     'uploaded_w9_to':             data_l.get('uploaded_w9_to', ''),
                     'uploaded_license_to':        data_l.get('uploaded_license_to', ''),
                     'uploaded_sellers_permit_to': data_l.get('uploaded_sellers_permit_to', ''),
+                    'cultivation_type':           data_l.get('cultivation_type', ''),
                 })
                 license_obj.save()
 
