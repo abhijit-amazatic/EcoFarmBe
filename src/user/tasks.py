@@ -10,6 +10,9 @@ from django.utils import  timezone
 from core.celery import app
 from user.models import (User,)
 from core.utility import (send_async_user_approval_mail,)
+#from knox.settings import knox_settings
+
+#KNOXUSER_SERIALIZER = knox_settings.USER_SERIALIZER
 
 def bypass_verifications_for_email(instance):
     """

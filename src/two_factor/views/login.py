@@ -57,7 +57,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         if not request.user.is_2fa_enabled:
             response_data = get_user_login_info(request.user)
-            response_data["token"] = AuthToken.objects.create(request.user)
+            response_data["token"] = AuthToken.objects.create(request.user)[1]
         else:
             response_data = {
                 "user": UserSerializer(request.user).data,
@@ -219,7 +219,7 @@ class TwoFactoLogInViewSet(GenericViewSet):
 
             if device.verify_token(token=token, event_code=event_code):
                 response_data = get_user_login_info(request.user)
-                response_data["token"] = AuthToken.objects.create(request.user)
+                response_data["token"] = AuthToken.objects.create(request.user)[1]
                 response = Response(response_data)
             else:
                 response = Response({"detail": "Device verification failed"}, status=400)

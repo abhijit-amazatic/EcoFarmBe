@@ -9,7 +9,6 @@ django-filter==2.0.0
 googlemaps==4.4.2
 psycopg2-binary==2.8.3
 pdfminer==20191125
-django-rest-knox==3.6.0
 django-cors-headers==3.0.0
 pycrypto==2.6.1
 requests==2.13.0
@@ -40,10 +39,11 @@ django-multiselectfield==0.1.12
 PyYAML==5.4.1
 django-admin-interface==0.15.5
 django-import-export==2.5.0
-#drf-api-logger==1.0.8
 django-reversion==3.0.9
 django-reversion-compare==0.14.0
 # django-simple-history==2.12.0
-# -e git+ssh://git@code.amazatic.net/eco-farm/eco-farm-zoho-integration.git#egg=pyzoho
+#django-rest-knox==3.6.0
+django-rest-knox==4.1.0
 -e git+ssh://git@github.com/Eco-Farm/pyzoho.git#egg=pyzoho
 -e git+ssh://git@github.com/Eco-Farm/drf-api-logger.git#egg=drf-api-logger
+-e git+ssh://git@github.com/Eco-Farm/passwordless-login.git#egg=passwordless-login

@@ -309,7 +309,7 @@ class LogInView(APIView):
         serializer = LogInSerializer(
             data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
-            token = AuthToken.objects.create(request.user)
+            instance, token = AuthToken.objects.create(request.user)[1]
             response = Response({
                 "user": KNOXUSER_SERIALIZER(request.user).data,
                 "token": token,

@@ -170,6 +170,8 @@ router.register(r'newsletter-subscription', NewsletterSubscriptionViewSet, base_
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('logger/', logger_admin_site.urls),
+    path('', include('knoxpasswordlessdrf.urls')),
+    #path('', include('djangopasswordlessknox.urls')),
     path(r'user/me/', MeView.as_view(), name='user-me'),
     # path(r'user/login/', LogInView.as_view(), name='login'),
     path(r'user/logout/', LogoutAllView.as_view(), name='logout'), #LogoutView - removes only single related token from DB.
@@ -317,6 +319,7 @@ urlpatterns = [
     path(r'books/permission/', ZohoPermissionsView.as_view(), name="zoho-permission"),
     path(r'seo/page-meta/', PageMetaView.as_view(), name="page-meta"),
     path(r'bot/', ChatbotView.as_view(), name="chat-bot"),
+
 ] + router.urls
 
 

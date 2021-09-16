@@ -37,13 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'rest_framework',
+    'knox',
     'django_filters',
     'ckeditor_uploader',
     'ckeditor',
     'permission',
     'user',
     'two_factor',
-    'knox',
     'django_otp',
     'phonenumber_field',
     'corsheaders',
@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'drf_api_logger',
     'reversion',
     'reversion_extention',
+    'knoxpasswordlessdrf'
+    #'djangopasswordlessknox'
     # 'django_extensions',
     # 'rest_social_auth',
     # 'sslserver',
@@ -153,6 +155,9 @@ REST_KNOX = {
     'AUTH_TOKEN_CHARACTER_LENGTH': 64,
     'TOKEN_TTL': datetime.timedelta(hours=12),  # None for never exp. token
     'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': False
+
 }
 
 # Custom user model
