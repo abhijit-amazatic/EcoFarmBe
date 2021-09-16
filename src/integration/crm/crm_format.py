@@ -122,7 +122,7 @@ CRM_FORMAT  = {
         "License_Status": "license_status",
         "Account_Name_Lookup": "zoho_crm_account_id",
         "Vendor_Name_Lookup": "zoho_crm_vendor_id",
-        "Verified": "verified",
+        "Verified": "verified_parse",
         "Verified_by": "verified_by",
         "Verified_Date": "verified_date",
         #Premises Information
@@ -1295,3 +1295,17 @@ _LICENSE_CULTIVATION_TYPE = {
 }
 LICENSE_CULTIVATION_TYPE = {t: k for k, v in _LICENSE_CULTIVATION_TYPE.items() for t in v}
 
+VENDOR_CATEGORIES = (
+    'Consultant',
+    'Cultivator',
+    'Distribution',
+    'Lab Supplies',
+    'Manufacturer',
+    'Non-Inventoriable Goods',
+    'Nursery',
+    'Nursery Supplies',
+    'Other',
+    'Packaging',
+    'Service Provider',
+    'Subcontracted Warehouse',
+)

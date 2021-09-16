@@ -263,6 +263,8 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         return get_overview_field(key, value, obj, crm_obj)
     if value in ('full_season', 'autoflower'):
         return "yes" if obj.get(value) else "No"
+    if value.startswith('verified'):
+        return "Yes" if obj.get('status') == 'approved' else "No"
     if value.startswith(('billing_address', 'mailing_address')):
         v = value.split('.')
         if len(v) == 2 and obj.get(v[0]):
