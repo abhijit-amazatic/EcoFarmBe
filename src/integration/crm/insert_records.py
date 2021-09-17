@@ -342,6 +342,26 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
     return final_response
 
 
+def get_crm_license(license_number):
+    """
+    Get license from Zoho CRM.
+    """
+    licenses = search_query('Licenses', license_number, 'Name')
+    if licenses['status_code'] == 200:
+        for license in licenses['response']:
+            if license.get('Name') == license_number:
+                return license
+
+def get_crm_license_by_id(obj_id):
+    """
+    Get license from Zoho CRM.
+    """
+    licenses = search_query('Licenses', obj_id, 'id')
+    if licenses['status_code'] == 200:
+        for license in licenses['response']:
+            if license.get('id') == obj_id:
+                return license
+
 def _insert_record(record=None, license_id=None, is_update=False):
     """
     Insert record to Zoho CRM.
@@ -360,7 +380,15 @@ def _insert_record(record=None, license_id=None, is_update=False):
             license_db_id = lic_record['id']
             d.update({'license_db_id': license_db_id})
             license_db_obj = License.objects.select_related().get(id=license_db_id)
-            licenses = get_licenses(lic_record['legal_business_name'], license_db_obj.license_number)
+
+            crm_license = {}
+            if license_db_obj.zoho_crm_id:
+                crm_license = get_crm_license_by_id(license_db_obj.zoho_crm_id)
+            if not crm_license:
+                crm_license = get_licenses(lic_record['legal_business_name'], license_db_obj.license_number)
+            if not crm_license:
+                crm_license = get_crm_license(license_db_obj.license_number)
+
             d.update(license_db_obj.license_profile.__dict__)
             try:
                 d.update(license_db_obj.profile_contact.profile_contact_details)
@@ -392,7 +420,7 @@ def _insert_record(record=None, license_id=None, is_update=False):
                 pass
 
 
-            d.update({'id':licenses['id'], 'Owner':licenses['Owner']['id']})
+            d.update({'id':crm_license['id'], 'Owner':crm_license['Owner']['id']})
             l.append(d['id'])
             d.update({'licenses': l})
             # farm_name = license_db_obj.license_profile.__dict__['name']
