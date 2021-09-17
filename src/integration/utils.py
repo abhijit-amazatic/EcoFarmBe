@@ -170,10 +170,13 @@ def get_overview_field(key, value, obj, crm_obj):
     if is_autoflower == False and index == 1:
         return None
     if dictionary:
-        if 'cultivars' in field:
-            return get_cultivars_date(key, field, dictionary[index], crm_obj)
-        else:
-            return dictionary[index].get(field)
+        try:
+            if 'cultivars' in field:
+                return get_cultivars_date(key, field, dictionary[index], crm_obj)
+            else:
+                return dictionary[index].get(field)
+        except Exception as e:
+            print(e)
     return None
 
 def update_documents(license_id=None):
