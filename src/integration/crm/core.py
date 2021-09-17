@@ -89,12 +89,10 @@ def get_vendor_types(vendor_type, reverse=False):
     return response
 
 def get_dict(cd, i):
-        user = dict()
-        for k,v in cd.items():
-            user[k] = i.get(v)
-        user = create_records('Contacts', [user])
-        if user['status_code'] in (201, 202):
-            return user['response']['data'][0]['details']['id']
+    d = dict()
+    for k, v in cd.items():
+        d[k] = i.get(v)
+    return d
 
 def get_users(user_type='ActiveUsers', email=None, page=1, per_page=200):
     """
@@ -132,28 +130,22 @@ def create_employees(key, value, obj, crm_obj):
         contacts = list()
         try:
             for i in d:
-                contacts.append({
-                    'roles': i.get('roles', []),
-                    'contact_crm_id': get_dict(cd, i),
-                })
+                user = get_dict(cd, i)
+                if user.get('email'):
+                    r = create_records('Contacts', [user])
+                    if r['status_code'] in (201, 202):
+                        try:
+                            contact_id = r['response']['data'][0]['details']['id']
+                        except Exception:
+                            pass
+                        else:
+                            contacts.append({
+                                'roles': i.get('roles', []),
+                                'contact_crm_id': contact_id,
+                            })
+
+
             return contacts
-        except IndexError:
-            return []
-        except TypeError:
-            return []
-    else:
-        user = None
-        try:
-            for i in d:
-                if 'Farm Manager' in i['roles'] and key == 'Contact_1':
-                    user = get_dict(cd, i)
-                elif 'Logistics' in i['roles'] and key == 'Contact_2':
-                    user = get_dict(cd, i)
-                elif 'Sales/Inventory' in i['roles'] and key == 'Contact_3':
-                    user = get_dict(cd, i)
-                elif 'License Owner' in i['roles'] and key == 'Owner1':
-                    user = get_dict(cd, i)
-            return user
         except IndexError:
             return []
         except TypeError:
