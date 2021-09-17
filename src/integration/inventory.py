@@ -779,11 +779,11 @@ def get_updated_params(params):
     Update params if Array fields are present.
     Char Fields used for multiselect filters should be included here.
     """
-    db_array_fields = ['ethics_and_certification', 'nutrients','tags','county_grown','appellation','cf_strain_name']
+    db_array_fields = ['ethics_and_certification', 'nutrients','tags','county_grown','appellation','cf_strain_name','category_name']
     for i in db_array_fields:
         if i in params.keys():
             val = params[i].split(',')
-            if i == 'cf_strain_name':
+            if i == 'cf_strain_name' or i == 'category_name':
                 params[i+'__in'] = params.pop(i)
                 params[i+'__in'] = val
             else:
@@ -807,6 +807,7 @@ def get_category_count(params):
     params['cf_cfi_published'] = True
     updated_params = get_updated_params(params)
     strain_list = []
+    category_name=[]
     new_items_date = []
     #Adjustments as of want to filter icontains & in to cf_strain_name
     if 'actual_available_stock__gte_g' in updated_params.keys():
@@ -816,6 +817,9 @@ def get_category_count(params):
     if 'cf_strain_name__in' in updated_params.keys():
         strain_list.extend(updated_params['cf_strain_name__in'])
         updated_params.pop('cf_strain_name__in')
+    if 'category_name__in' in updated_params.keys():
+        category_name.extend(updated_params['category_name__in'])
+        updated_params.pop('category_name__in')
     if 'cf_cannabis_grade_and_category__in' in updated_params.keys():
         grade_val = updated_params['cf_cannabis_grade_and_category__in'].split(',')
         updated_params['cf_cannabis_grade_and_category__in'] =  grade_val

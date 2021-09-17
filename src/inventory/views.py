@@ -79,6 +79,7 @@ class DataFilter(FilterSet):
     name__in = CharInFilter(field_name='name', lookup_expr='in')
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
+    category_name__in = CharInFilter(method='category_name__in', lookup_expr='in')
     vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     cf_strain_name = CharInFilter(method='cf_strain_name__in', lookup_expr='in')
@@ -150,6 +151,10 @@ class DataFilter(FilterSet):
     def cf_strain_name__in(self, queryset, name, values):
         #items = queryset.filter(cf_cfi_published=True,cf_strain_name__in=values)
         items = queryset.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in values)))
+        return items
+
+    def category_name__in(self, queryset, name, values):
+        items = queryset.filter(reduce(operator.or_, (Q(category_name__icontains=x) for x in values)))
         return items
 
     def cf_client_code__in(self, queryset, name, values):
@@ -423,6 +428,35 @@ class InventorySyncView(APIView):
         return Response(record)
 
 
+
+
+class CategoryNameView(APIView):
+    """
+    Return distinct category_name
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Return QuerySet.
+        """
+        if request.query_params.get('category_name'):
+            categories = Inventory.objects.filter(
+                status='active',
+                cf_cfi_published=True,
+                category_name__icontains=request.query_params.get('category_name')
+                ).values('category_name').distinct()
+        else:
+            categories = Inventory.objects.filter(
+                status='active',
+                cf_cfi_published=True,
+                ).values('category_name').distinct()
+        return Response({
+            'status_code': 200,
+            'response': [{
+                'label': i['category_name'],
+                'value': i['category_name']} for i in categories if i['category_name'] != None]})
+    
 class CultivarCategoryView(APIView):
     """
     Return distinct cultivar categroies.
