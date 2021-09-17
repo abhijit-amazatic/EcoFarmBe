@@ -79,7 +79,7 @@ class DataFilter(FilterSet):
     name__in = CharInFilter(field_name='name', lookup_expr='in')
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
-    category_name__in = CharInFilter(method='category_name__in', lookup_expr='in')
+    category_name = CharInFilter(method='category_name__in', lookup_expr='in')
     vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     cf_strain_name = CharInFilter(method='cf_strain_name__in', lookup_expr='in')

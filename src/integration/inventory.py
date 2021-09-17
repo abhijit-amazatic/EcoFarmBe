@@ -825,10 +825,12 @@ def get_category_count(params):
         updated_params['cf_cannabis_grade_and_category__in'] =  grade_val
     if 'cf_date_available' in updated_params.keys():
         new_items_date.extend(updated_params['cf_date_available'])
-        updated_params.pop('cf_date_available')        
+        updated_params.pop('cf_date_available')
     inventory = InventoryModel.objects.filter(**updated_params)
     if strain_list:
         inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
+    if category_name:
+        inventory = inventory.filter(reduce(operator.or_, (Q(category_name__icontains=x) for x in category_name)))
     if new_items_date:
         inventory = inventory.annotate(full_date=ExpressionWrapper(F('cf_date_available') + timedelta(days=7),output_field=DateField())).filter(full_date__gt=timezone.now().date())
     for name, category in categories.items():
