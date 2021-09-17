@@ -163,11 +163,11 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 except User.DoesNotExist:
                     pass
                 else:
-                    if user.email != c_data.get('Email'):
+                    if user.email != c_data.get('Email').lower():
                         return Response(
                             {
                                 'detail': (
-                                    f"contact {c_data.get('Full_Name')} (email: {c_data.get('Email')}) "
+                                    f"contact {c_data.get('Full_Name')} (email: {c_data.get('Email').lower()}) "
                                     f"have phone number ({c_data.get('Phone')}) "
                                     f"which is already present and associated to another user (email: {user.email}) on Web App."
                                 )
@@ -202,7 +202,8 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         'crm_link':          f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Contacts/{contact_id}/",
                         'membership_type':   User.CATEGORY_BUSINESS,
                     }
-                    user, created = User.objects.get_or_create(email=contact_data.get('Email'), defaults=user_defaults)
+                    email = contact_data.get('Email') or ''
+                    user, created = User.objects.get_or_create(email=email.lower(), defaults=user_defaults)
                     if created:
                         user.set_unusable_password()
                     mem_cat = MemberCategory.objects.filter(name__in=contact_data.get('Contact_Type'))
