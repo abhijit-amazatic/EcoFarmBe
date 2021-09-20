@@ -171,7 +171,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('logger/', logger_admin_site.urls),
     path('', include('knoxpasswordlessdrf.urls')),
-    #path('', include('djangopasswordlessknox.urls')),
     path(r'user/me/', MeView.as_view(), name='user-me'),
     # path(r'user/login/', LogInView.as_view(), name='login'),
     path(r'user/logout/', LogoutAllView.as_view(), name='logout'), #LogoutView - removes only single related token from DB.
