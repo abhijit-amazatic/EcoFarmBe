@@ -4,8 +4,9 @@ from integration.apps.twilio import (send_sms,)
 from django.conf import settings
 from user.models import User
 from bill.models import LineItem
-from inventory.models import Inventory
+from inventory.models import Inventory, InTransitOrder
 from brand.models import License
+from .models import Estimate
 
 @app.task(queue="urgent")
 def notify_estimate(notification_methods,sign_url,customer_name,request_data, line_items):
@@ -70,7 +71,22 @@ def notify_estimate(notification_methods,sign_url,customer_name,request_data, li
                 print('exception while sending notification to external contact',e)
                 
             
-        
+@app.task(queue="urgent")
+def remove_estimates_after_intransit_clears(profile_id):
+    """
+    Removes estimates (bills->Estimate if cart is cleared)
+    """
+    est_ids = InTransitOrder.objects.filter(profile_id=profile_id,order_data__estimate_id__isnull=False).values_list('order_data__estimate_id',flat=True)
+    est_lst = list(set(est_ids))
+    est_to_remove = Estimate.objects.filter(estimate_id__in=est_lst)
+    if est_to_remove:
+        est_to_remove.delete()
+	
+
+
+    
+    
+                
 
 
 

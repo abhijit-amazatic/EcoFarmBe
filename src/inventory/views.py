@@ -70,6 +70,8 @@ from .tasks import (
 )
 from integration.books import (get_salesorder, parse_book_object)
 from .utils import delete_in_transit_item
+from bill.tasks import remove_estimates_after_intransit_clears
+
 
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -619,6 +621,15 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
 
         return obj
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Method to add some more customization related to bills(Estimate removal)
+        """
+        obj = self.get_object()
+        remove_estimates_after_intransit_clears.delay(obj.profile_id)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DocumentPreSignedView(APIView):
