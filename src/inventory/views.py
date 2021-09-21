@@ -2,6 +2,7 @@
 Views for Inventory
 """
 import operator
+import time
 from datetime import datetime, timedelta
 from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
@@ -72,7 +73,7 @@ from integration.books import (get_salesorder, parse_book_object)
 from .utils import delete_in_transit_item
 from bill.tasks import remove_estimates_after_intransit_clears
 from bill.models import (Estimate, LineItem, )
-from bill.utils import (parse_fields, get_notify_addresses, save_estimate, save_estimate_from_intransit, )
+from bill.utils import (parse_fields, get_notify_addresses, save_estimate, save_estimate_from_intransit, parse_intransit_to_pending,)
 
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -644,7 +645,7 @@ class PendingOrderAdminView(APIView):
             in_transit_data = parse_intransit_to_pending(request.data)
         except Exception as e:
             print('exception while parsint intransit to pending', e)
-
+            
         if in_transit_data:
             response = parse_fields('estimate', in_transit_data)
             sign_url = None

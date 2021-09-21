@@ -5,7 +5,7 @@ from django.conf import settings
 from user.models import User
 from bill.models import LineItem
 from inventory.models import Inventory, InTransitOrder
-from brand.models import License
+from brand.models import License, LicenseProfile
 from .models import Estimate
 
 @app.task(queue="urgent")
@@ -81,6 +81,14 @@ def remove_estimates_after_intransit_clears(profile_id):
     est_to_remove = Estimate.objects.filter(estimate_id__in=est_lst)
     if est_to_remove:
         est_to_remove.delete()
+
+    license_profile_obj = LicenseProfile.objects.get(id=profile_id)
+    customer_name  =  license_profile_obj.license.legal_business_name
+    updated_est = Estimate.objects.filter(customer_name=customer_name)
+    if updated_est:
+        upadted_est.delete()
+
+        
 
 
         

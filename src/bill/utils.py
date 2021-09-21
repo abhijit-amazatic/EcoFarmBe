@@ -69,7 +69,6 @@ def parse_intransit_to_pending(data):
     """
     parse data according to model format.
     """
-    
     line_items = [{"sku": item.get('sku',''),
                    "item_id": item.get('item_id',''),
                    "item_order": item.get('item_order'),
