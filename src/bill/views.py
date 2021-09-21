@@ -55,10 +55,11 @@ class EstimateWebappView(APIView):
         del request.data['notification_methods']
         organization_name = request.query_params.get('organization_name')
         if is_draft == 'true' or is_draft == 'True':
-            estimate_obj = save_estimate(request)
-            if not estimate_obj:
-                return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({'message': 'Updated', 'id': id})
+            return Response({'status':'pass'},status=status.HTTP_200_OK)
+            # estimate_obj = save_estimate(request)
+            # if not estimate_obj:
+            #     return Response({'error': 'error while creating estimate'}, status=status.HTTP_400_BAD_REQUEST)
+            #return Response({'message': 'Updated', 'id': id})
         else:
             # response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
             # if response.get('code') and response.get('code') != 0:
@@ -80,10 +81,12 @@ class EstimateWebappView(APIView):
             line_items = parse_fields('item', line_items, many=True)
             notify_estimate(notification_methods, sign_url, estimate.get('customer_name'),request.data, line_items)
             del request.data['external_contacts']
-            estimate_obj = save_estimate(request)
-            estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
-            items = list()
-            for item in line_items:
-                item_obj = LineItem.objects.filter(estimate=estimate_obj, id=item.get('id')).update(**item)
+            # estimate_obj = save_estimate(request)
+            # estimate_obj = Estimate.objects.filter(customer_name=estimate.get('customer_name')).update(**estimate)
+            # items = list()
+            # for item in line_items:
+            #     item_obj = LineItem.objects.filter(estimate=estimate_obj, id=item.get('id')).update(**item)
             return Response(estimate)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+

@@ -81,7 +81,9 @@ def remove_estimates_after_intransit_clears(profile_id):
     est_to_remove = Estimate.objects.filter(estimate_id__in=est_lst)
     if est_to_remove:
         est_to_remove.delete()
-	
+
+
+        
 
 
     

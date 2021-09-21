@@ -71,7 +71,8 @@ from .tasks import (
 from integration.books import (get_salesorder, parse_book_object)
 from .utils import delete_in_transit_item
 from bill.tasks import remove_estimates_after_intransit_clears
-
+from bill.models import (Estimate, LineItem, )
+from bill.utils import (parse_fields, get_notify_addresses, save_estimate, save_estimate_from_intransit, )
 
 
 class CharInFilter(BaseInFilter,CharFilter):
@@ -631,7 +632,30 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class PendingOrderAdminView(APIView):
+    """
+    View to save pending order that will reflect in admin 
+    """
+    permission_classes = (IsAuthenticated, )
 
+    def put(self, request, **kwargs):
+        
+        try:
+            in_transit_data = parse_intransit_to_pending(request.data)
+        except Exception as e:
+            print('exception while parsint intransit to pending', e)
+
+        if in_transit_data:
+            response = parse_fields('estimate', in_transit_data)
+            sign_url = None
+            estimate = response
+            line_items = in_transit_data.get('line_items',[])
+            line_items = parse_fields('item', line_items, many=True)
+            estimate_obj = save_estimate_from_intransit(in_transit_data)
+            return Response(estimate, status=status.HTTP_200_OK)
+        return Response({'error': 'something went wrong while saving pending/estimate data'},status=status.HTTP_400_BAD_REQUEST)
+         
+    
 class DocumentPreSignedView(APIView):
     """
     Document pre signed view class.

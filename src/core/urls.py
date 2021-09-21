@@ -75,8 +75,8 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
                              SalesReturnView, PackageView, ContactView, InventoryMetaDataView,
                              ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView,
-                             InTransitDeleteSyncView, InventoryUpdateView, CategoryNameView,)
-from cultivar.views import (CultivarViewSet, CultivarSyncView, )
+                             InTransitDeleteSyncView, InventoryUpdateView, CategoryNameView, PendingOrderAdminView,)
+from cultivar.views import (CultivarViewSet, CultivarSyncView,)
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
 from brand.views import (
@@ -209,6 +209,7 @@ urlpatterns = [
          name='get_account_client_code'),
     path(r'crm/vendor-client-code/', VendorClientCodeView.as_view(),name='get_vendor_client_code'),
     path(r'cultivar/sync/', CultivarSyncView.as_view(), name='sync_cultivar'),
+    path(r'inventory/pending-order/', PendingOrderAdminView.as_view(), name="pending-order-admin-view"),
     path(r'books/estimate/sales-rep/', EstimateWebappView.as_view(), name="estimate-sales-rep-view"),
     path(r'books/estimate/sales-rep/<str:id>/', EstimateWebappView.as_view(), name="estimate-sales-rep-view"),
     path(r'books/estimate/', EstimateView.as_view(), name='estimate'),
