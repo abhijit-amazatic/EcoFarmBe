@@ -14,10 +14,11 @@ def notify_estimate(notification_methods,sign_url,customer_name,request_data, li
     Send estimate notifications.
     """
 
-    order_data = list(LineItem.objects.filter(estimate__customer_name=customer_name).values())
+    #order_data = list(LineItem.objects.filter(estimate__customer_name=customer_name).values())
+    order_data = [i.get('item_id') for i in request_data.get('line_items')]
     item_total = "${:,.2f}".format(request_data.get('total'))  #'{:,.2f}'.format(sum(i['item_total'] for i in order_data))
     quantity = sum(int(i['quantity']) for i in line_items if i['sku'] not in ['CT1','MCSP'])
-    prod_category = Inventory.objects.filter(item_id__in=[i['item_id'] for i in  order_data],parent_category_name__isnull=False).values_list('parent_category_name',flat=True).distinct()
+    prod_category = Inventory.objects.filter(item_id__in=order_data,parent_category_name__isnull=False).values_list('parent_category_name',flat=True).distinct()
     category = ",".join(list(prod_category))
     license_obj = License.objects.filter(legal_business_name=customer_name).values('license_number')
     get_license_number = lambda license_obj:license_obj[0].get('license_number') if license_obj  else 0
