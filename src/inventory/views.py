@@ -628,8 +628,9 @@ class InTransitOrderViewSet(viewsets.ModelViewSet):
         """
         Method to add some more customization related to bills(Estimate removal)
         """
+
         obj = self.get_object()
-        remove_estimates_after_intransit_clears.delay(obj.profile_id)
+        remove_estimates_after_intransit_clears.delay(obj.profile_id) 
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

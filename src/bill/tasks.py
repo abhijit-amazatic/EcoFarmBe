@@ -81,12 +81,11 @@ def remove_estimates_after_intransit_clears(profile_id):
     est_to_remove = Estimate.objects.filter(estimate_id__in=est_lst)
     if est_to_remove:
         est_to_remove.delete()
-
     license_profile_obj = LicenseProfile.objects.get(id=profile_id)
     customer_name  =  license_profile_obj.license.legal_business_name
     updated_est = Estimate.objects.filter(customer_name=customer_name)
     if updated_est:
-        upadted_est.delete()
+        updated_est.delete()
 
         
 
