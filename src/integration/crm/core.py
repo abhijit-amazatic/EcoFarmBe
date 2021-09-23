@@ -934,11 +934,11 @@ def update_program_selection(record_id, tier_selection):
     """
     qs = LicenseProfile.objects.filter(zoho_crm_vendor_id=record_id)
     if not qs.exists():
-        qs = LicenseProfile.objects.filter(zoho_crm_account_id=record_id)
-        if not qs.exists():
-            error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
-            print(error)
-            return error
+        # qs = LicenseProfile.objects.filter(zoho_crm_account_id=record_id)
+        # if not qs.exists():
+        error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
+        print(error)
+        return error
     if tier_selection:
         for license_profile in qs:
             try:
