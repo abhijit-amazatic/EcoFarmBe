@@ -40,8 +40,11 @@ def get_associated_vendor(license_crm_id,):
             license_record = license_response.get('response', {}).get(license_crm_id, {})
             vendor_id = get_lookup_id(license_record, 'Vendor_Name_Lookup')
     else:
-        vendor = vendor['response'][0]['Licenses_Module']
-        vendor_id = vendor['id']
+        try:
+            vendor = vendor['response'][0]['Licenses_Module']
+            vendor_id = vendor['id']
+        except Exception:
+            pass
     return vendor_id
 
 def get_associated_account(license_crm_id):
@@ -53,8 +56,11 @@ def get_associated_account(license_crm_id):
             license_record = license_response.get('response', {}).get(license_crm_id, {})
             account_id = get_lookup_id(license_record, 'Account_Name_Lookup')
     else:
-        account = account['response'][0]['Licenses_Module']
-        account_id = account['id']
+        try:
+            account = account['response'][0]['Licenses_Module']
+            account_id = account['id']
+        except Exception:
+            pass
     return account_id
 
 
@@ -429,14 +435,15 @@ def _insert_record(record=None, license_id=None, is_update=False):
             #     continue
             license_response = update_license(dba=farm_name, license=d, is_return_orginal_data=True)
             final_dict['license'] = license_response
-            license_crm_id = None
+            license_crm_id = crm_license['id']
             if license_response['status_code'] == 200:
                 license_record_data = license_response['response']['response']['data']
                 try:
                     record_obj = License.objects.get(id=license_db_id)
-                    license_crm_id = license_record_data[0]['details']['id']
-                    if license_crm_id:
-                        record_obj.zoho_crm_id = license_crm_id
+                    if license_record_data[0]['details']['id']:
+                        license_crm_id = license_record_data[0]['details']['id']
+                        if license_crm_id and not record_obj.zoho_crm_id:
+                            record_obj.zoho_crm_id = license_crm_id
                     record_obj.is_updated_in_crm = True
                     record_obj.save()
                 except KeyError as exc:
