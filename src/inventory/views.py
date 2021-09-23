@@ -177,7 +177,7 @@ class DataFilter(FilterSet):
         return items
 
     def cf_cultivar_type__in(self, queryset, name, values):
-        items = queryset.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__contains=x) for x in values)))
+        items = queryset.filter(cultivar__cultivar_type__in=values)#filter(reduce(operator.or_, (Q(cultivar__cultivar_type__contains=x) for x in values)))
         return items
         
     def cf_cultivation_type__in(self, queryset, name, values):

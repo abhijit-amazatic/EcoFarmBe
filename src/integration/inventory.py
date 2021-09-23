@@ -848,7 +848,7 @@ def get_category_count(params):
         names = lic_obj.values_list('license_profile__name',flat=True)
         inventory = inventory.filter(cf_vendor_name__in=names)
     if cultivar_types:
-        inventory = inventory.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__contains=x) for x in cultivar_types)))
+        inventory = inventory.filter(cultivar__cultivar_type__in=cultivar_types)#filter(reduce(operator.or_, (Q(cultivar__cultivar_type__contains=x) for x in cultivar_types)))
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response
