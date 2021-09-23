@@ -20,6 +20,7 @@ from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper,
 from django.utils import  timezone
 from pyzoho.inventory import Inventory
 from .models import (Integration, )
+from brand.models import License
 from .inventory_data import(INVENTORY_ITEM_CATEGORY_NAME_ID_MAP, )
 from labtest.models import (LabTest, )
 from inventory.models import PriceChange, Inventory as InventoryModel, Documents
@@ -809,6 +810,7 @@ def get_category_count(params):
     strain_list = []
     category_name=[]
     new_items_date = []
+    cf_vendor_names = []
     #Adjustments as of want to filter icontains & in to cf_strain_name
     if 'actual_available_stock__gte_g' in updated_params.keys():
         updated_params.pop('actual_available_stock__gte_g')
@@ -826,6 +828,10 @@ def get_category_count(params):
     if 'cf_date_available' in updated_params.keys():
         new_items_date.extend(updated_params['cf_date_available'])
         updated_params.pop('cf_date_available')
+    if 'cf_vendor_name' in updated_params.keys():
+        cf_vendor_names.extend(updated_params['cf_vendor_name'].split(','))
+        updated_params.pop('cf_vendor_name')
+        
     inventory = InventoryModel.objects.filter(**updated_params)
     if strain_list:
         inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
@@ -833,6 +839,10 @@ def get_category_count(params):
         inventory = inventory.filter(reduce(operator.or_, (Q(category_name__icontains=x) for x in category_name)))
     if new_items_date:
         inventory = inventory.annotate(full_date=ExpressionWrapper(F('cf_date_available') + timedelta(days=7),output_field=DateField())).filter(full_date__gt=timezone.now().date())
+    if cf_vendor_names:
+        lic_obj = License.objects.filter(client_id__in=[int(val) for val in cf_vendor_names]).select_related()
+        names = lic_obj.values_list('license_profile__name',flat=True)
+        inventory = inventory.filter(cf_vendor_name__in=names)
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response

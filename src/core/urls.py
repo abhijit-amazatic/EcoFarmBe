@@ -75,7 +75,7 @@ from inventory.views import (InventoryViewSet, InventorySyncView,
                              InventoryItemEditViewSet, InventoryItemDelistViewSet,
                              SalesReturnView, PackageView, ContactView, InventoryMetaDataView,
                              ConvertSalesOrderToPackage,CultivarTypesView,InventoryTagsView,
-                             InTransitDeleteSyncView, InventoryUpdateView, CategoryNameView, PendingOrderAdminView,)
+                             InTransitDeleteSyncView, InventoryUpdateView, CategoryNameView, PendingOrderAdminView,InventoryLicenseClientIdView,)
 from cultivar.views import (CultivarViewSet, CultivarSyncView,)
 from labtest.views import (LabTestViewSet, LabTestSyncViewSet, )
 from permission.views import (PermissionListView,)
@@ -249,6 +249,8 @@ urlpatterns = [
          name='cultivar_types'),
     path(r'inventory/client-code', InventoryClientCodeView.as_view(),
          name='inventory_client_code'),
+    path(r'inventory/license/client-id', InventoryLicenseClientIdView.as_view(),
+         name='inventory_license_client_code'),
     path(r'inventory/cultivation-type', InventoryCultivationTypeView.as_view(),
          name='inventory_cultivation_type'),
     path(r'inventory/status/', InventoryStatusTypeView.as_view(),
