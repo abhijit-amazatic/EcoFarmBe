@@ -82,7 +82,7 @@ class CharInFilter(BaseInFilter,CharFilter):
 class DataFilter(FilterSet):   
     name__in = CharInFilter(field_name='name', lookup_expr='in')
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
-    cf_cultivar_type__in = CharInFilter(field_name='cf_cultivar_type', lookup_expr='in')
+    cf_cultivar_type = CharInFilter(method='cf_cultivar_type__in', lookup_expr='in')
     category_name = CharInFilter(method='category_name__in', lookup_expr='in')
     vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
     #cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
@@ -175,7 +175,11 @@ class DataFilter(FilterSet):
     def get_cultivar_type(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__icontains=x) for x in values)))
         return items
-    
+
+    def cf_cultivar_type__in(self, queryset, name, values):
+        items = queryset.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__contains=x) for x in values)))
+        return items
+        
     def cf_cultivation_type__in(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cf_cultivation_type__icontains=x) for x in values)))
         return items
