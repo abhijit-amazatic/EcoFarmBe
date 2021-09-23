@@ -808,9 +808,10 @@ def get_category_count(params):
     params['cf_cfi_published'] = True
     updated_params = get_updated_params(params)
     strain_list = []
-    category_name=[]
+    category_name = []
     new_items_date = []
     cf_vendor_names = []
+    cf_cultivar_types = []
     #Adjustments as of want to filter icontains & in to cf_strain_name
     if 'actual_available_stock__gte_g' in updated_params.keys():
         updated_params.pop('actual_available_stock__gte_g')
@@ -831,7 +832,10 @@ def get_category_count(params):
     if 'cf_vendor_name' in updated_params.keys():
         cf_vendor_names.extend(updated_params['cf_vendor_name'].split(','))
         updated_params.pop('cf_vendor_name')
-        
+    if 'cf_cultivar_type__in' in updated_params.keys():
+        cf_cultivar_types.extend(updated_params['cf_cultivar_type__in'].split(','))
+        updated_params.pop('cf_cultivar_type__in')   
+
     inventory = InventoryModel.objects.filter(**updated_params)
     if strain_list:
         inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
@@ -843,6 +847,8 @@ def get_category_count(params):
         lic_obj = License.objects.filter(client_id__in=[int(val) for val in cf_vendor_names]).select_related()
         names = lic_obj.values_list('license_profile__name',flat=True)
         inventory = inventory.filter(cf_vendor_name__in=names)
+    if cf_cultivar_types:
+        inventory = inventory.filter(cf_cultivar_type__in=cf_cultivar_types)
     for name, category in categories.items():
         response[name] = inventory.filter(cf_status__in=category).count()
     return response
