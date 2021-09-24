@@ -169,9 +169,11 @@ class Inventory(models.Model):
     ethics_and_certification = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     cf_payment_method = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     mapped_items = JSONField(blank=True, null=True, default=dict)
+    client_id = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
+
 
     class Meta:
         verbose_name = _('Item')

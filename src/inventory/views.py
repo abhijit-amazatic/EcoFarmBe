@@ -79,7 +79,7 @@ from bill.utils import (parse_fields, get_notify_addresses, save_estimate, save_
 class CharInFilter(BaseInFilter,CharFilter):
     pass
 
-class DataFilter(FilterSet):   
+class DataFilter(FilterSet):
     name__in = CharInFilter(field_name='name', lookup_expr='in')
     product_type__in = CharInFilter(field_name='product_type', lookup_expr='in')
     cf_cultivar_type = CharInFilter(method='cf_cultivar_type__in', lookup_expr='in')
@@ -88,7 +88,7 @@ class DataFilter(FilterSet):
     cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     cf_strain_name = CharInFilter(method='cf_strain_name__in', lookup_expr='in')
     cf_client_code = CharInFilter(method='cf_client_code__in', lookup_expr='in')
-    #cf_vendor_name = CharInFilter(method='cf_vendor_name__in', lookup_expr='in')
+    client_id = CharInFilter(method='client_id__in', lookup_expr='in')
     cf_cultivation_type = CharInFilter(method='cf_cultivation_type__in', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
@@ -165,12 +165,12 @@ class DataFilter(FilterSet):
     def cf_client_code__in(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cf_client_code__icontains=x) for x in values)))
         return items
-    
-    # def cf_vendor_name__in(self, queryset, name, values):
-    #     lic_obj = License.objects.filter(client_id__in=[int(val) for val in values]).select_related()
-    #     cf_vendor_names = lic_obj.values_list('license_profile__name',flat=True)
-    #     items = queryset.filter(cf_vendor_name__in=cf_vendor_names)
-    #     return items
+
+    def client_id__in(self, queryset, name, values):
+        lic_obj = License.objects.filter(client_id__in=[int(val) for val in values]).select_related()
+        cf_vendor_names = lic_obj.values_list('license_profile__name',flat=True)
+        items = queryset.filter(cf_vendor_name__in=cf_vendor_names)
+        return items
 
     def get_cultivar_type(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__icontains=x) for x in values)))
@@ -254,6 +254,7 @@ class DataFilter(FilterSet):
         'actual_available_stock': ['gte', 'lte', 'gt', 'lt'],
         'pre_tax_price': ['gte', 'lte', 'gt', 'lt']
         }
+
 
 class CustomOrderFilter(OrderingFilter):
     fields_related = {
