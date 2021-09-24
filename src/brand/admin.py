@@ -294,6 +294,16 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
         if obj.license_profile:
             return obj.license_profile.zoho_crm_vendor_id
 
+    def is_account_updated_in_crm(self, obj):
+        if obj.license_profile:
+            return obj.license_profile.is_account_updated_in_crm
+    is_account_updated_in_crm.boolean = True
+
+    def is_vendor_updated_in_crm(self, obj):
+        if obj.license_profile:
+            return obj.license_profile.is_vendor_updated_in_crm
+    is_vendor_updated_in_crm.boolean = True
+
     def get_search_results(self, request, queryset, search_term):
         """
         Default and custom search filter for farm names.
@@ -308,10 +318,10 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('name', 'organization','license_number','legal_business_name', 'client_id', 'status','profile_category','brand', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'approved_on','approved_by','created_on','updated_on',)
+    list_display = ('name', 'organization','license_number','legal_business_name', 'client_id', 'status','profile_category','brand', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'is_updated_in_crm', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm','approved_on','approved_by','created_on','updated_on',)
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
-    search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name')
-    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output', 'books_output')
+    search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name', )
+    readonly_fields = ('created_on','updated_on', 'client_id', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm', 'crm_output', 'books_output')
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )

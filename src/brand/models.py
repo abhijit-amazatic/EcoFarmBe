@@ -260,7 +260,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     profile_category = models.CharField(_('Profile Category'), blank=True, null=True, max_length=255)
     is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
-    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
+    is_updated_in_crm = models.BooleanField(_('Is License Updated In CRM'), default=False)
     zoho_crm_id = models.CharField(_('Zoho CRM ID - License'), max_length=100, blank=True, null=True)
     zoho_books_customer_ids = HStoreField(_('Zoho Books Customer IDs'), blank=True, default=dict)
     zoho_books_vendor_ids = HStoreField(_('Zoho Books Vendor IDs'), blank=True, default=dict)
@@ -556,9 +556,6 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     farm_photo_sharable_link = models.CharField(
         _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     signed_program_name = models.CharField(_('Signed Program Name'), blank=True, null=True, max_length=255)
-    is_updated_in_crm = models.BooleanField(_('Is Updated In CRM'), default=False)
-    zoho_crm_account_id = models.CharField(_('Zoho CRM Account ID'), max_length=100, blank=True, null=True)
-    zoho_crm_vendor_id = models.CharField(_('Zoho CRM  Vendor ID'), max_length=100, blank=True, null=True)
     lab_test_issues = models.TextField(blank=True, null=True)
 
     preferred_payment = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
@@ -570,6 +567,11 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     bank_zip_code  = models.CharField(_('Bank Zip Code '), null=True, blank=True, max_length=255)
     bank_state  = models.CharField(_('Bank State'), null=True, blank=True, max_length=255)
     bank_country  = models.CharField(_('Bank Country'), null=True, blank=True, max_length=255)
+
+    zoho_crm_account_id = models.CharField(_('Zoho CRM Account ID'), max_length=100, blank=True, null=True)
+    is_account_updated_in_crm = models.BooleanField(_('Is Account Updated In CRM'), default=False)
+    zoho_crm_vendor_id = models.CharField(_('Zoho CRM  Vendor ID'), max_length=100, blank=True, null=True)
+    is_vendor_updated_in_crm = models.BooleanField(_('Is Vendor Updated In CRM'), default=False)
 
     crm_account_owner_id = models.CharField(_('CRM Account Owner ID'), null=True, blank=True, max_length=255)
     crm_account_owner_email = models.CharField(_('CRM Account Owner EMAIL'), null=True, blank=True, max_length=255)

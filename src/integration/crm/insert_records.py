@@ -91,18 +91,15 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
 
     if license_crm_id and result['status_code'] in [200, 201]:
         record_response = result['response']['response']['data']
-        try:
-            record_obj = LicenseProfile.objects.get(id=license_profile_id)
-            if record_response[0]['details']['id']:
-                record_obj.zoho_crm_account_id = record_response[0]['details']['id']
-            record_obj.is_updated_in_crm = True
-            record_obj.save()
-        except KeyError as exc:
-            print(exc)
+        account_id = record_response[0]['details']['id']
+        record_obj = LicenseProfile.objects.get(id=license_profile_id)
+        if account_id and record_obj.zoho_crm_account_id != account_id:
+            record_obj.zoho_crm_account_id = account_id
+        record_obj.is_account_updated_in_crm = True
+        record_obj.save()
 
         final_response['Accounts_X_Licenses'] = dict()
         try:
-            account_id = record_response[0]['details']['id']
             if (result['response']['orignal_data'][0].get('Licenses_List')):
                 data = dict()
                 data['Licenses_Module'] = account_id
@@ -201,6 +198,10 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
             e = ''.join(traceback.format_exception(*exc_info))
             final_response['Accounts_X_Contacts']['exception'] = e
             final_response['Accounts_X_Contacts']['local_vars'] = locals_data
+    else:
+        record_obj = LicenseProfile.objects.get(id=license_profile_id)
+        record_obj.is_account_updated_in_crm = False
+        record_obj.save()
 
     return final_response
 
@@ -234,18 +235,17 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
 
     if license_crm_id and result['status_code'] in [200, 201]:
         record_response = result['response']['response']['data']
-        try:
-            record_obj = LicenseProfile.objects.get(id=license_profile_id)
-            record_obj.zoho_crm_vendor_id = record_response[0]['details']['id']
-            record_obj.is_updated_in_crm = True
-            record_obj.save()
-        except KeyError as exc:
-            print(exc)
+        vendor_id = record_response[0]['details']['id']
+
+        record_obj = LicenseProfile.objects.get(id=license_profile_id)
+        if vendor_id and record_obj.zoho_crm_vendor_id != vendor_id:
+            record_obj.zoho_crm_vendor_id = vendor_id
+        record_obj.is_vendor_updated_in_crm = True
+        record_obj.save()
 
 
         final_response['Vendors_X_Licenses'] = dict()
         try:
-            vendor_id = record_response[0]['details']['id']
             if (result['response']['orignal_data'][0].get('Licenses_List')):
                 data = dict()
                 data['Licenses_Module'] = vendor_id
@@ -344,6 +344,10 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
             e = ''.join(traceback.format_exception(*exc_info))
             final_response['Vendors_X_Contacts']['exception'] = e
             final_response['Vendors_X_Contacts']['local_vars'] = locals_data
+    else:
+        record_obj = LicenseProfile.objects.get(id=license_profile_id)
+        record_obj.is_vendor_updated_in_crm = False
+        record_obj.save()
 
     return final_response
 
@@ -396,6 +400,10 @@ def _insert_record(record=None, license_id=None, is_update=False):
                 crm_license = get_crm_license(license_db_obj.license_number)
 
             d.update(license_db_obj.license_profile.__dict__)
+            license_db_obj.license_profile.is_account_updated_in_crm = False
+            license_db_obj.license_profile.is_vendor_updated_in_crm = False
+            license_db_obj.license_profile.save()
+
             try:
                 d.update(license_db_obj.profile_contact.profile_contact_details)
             except Exception:
@@ -448,6 +456,10 @@ def _insert_record(record=None, license_id=None, is_update=False):
                     record_obj.save()
                 except KeyError as exc:
                     print(exc)
+            else:
+                record_obj = License.objects.get(id=license_db_id)
+                record_obj.is_updated_in_crm = False
+                record_obj.save()
 
             final_dict.update(insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
             final_dict.update(insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
