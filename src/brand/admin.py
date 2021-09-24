@@ -289,20 +289,24 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     def zoho_crm_account_id(self, obj):
         if obj.license_profile:
             return obj.license_profile.zoho_crm_account_id
+    zoho_crm_account_id.admin_order_field = '-license_profile__zoho_crm_account_id'
 
     def zoho_crm_vendor_id(self, obj):
         if obj.license_profile:
             return obj.license_profile.zoho_crm_vendor_id
+    zoho_crm_vendor_id.admin_order_field = '-license_profile__zoho_crm_vendor_id'
 
     def is_account_updated_in_crm(self, obj):
         if obj.license_profile:
             return obj.license_profile.is_account_updated_in_crm
     is_account_updated_in_crm.boolean = True
+    is_account_updated_in_crm.admin_order_field = '-license_profile__is_account_updated_in_crm'
 
     def is_vendor_updated_in_crm(self, obj):
         if obj.license_profile:
             return obj.license_profile.is_vendor_updated_in_crm
     is_vendor_updated_in_crm.boolean = True
+    is_vendor_updated_in_crm.admin_order_field = '-license_profile__is_vendor_updated_in_crm'
 
     def get_search_results(self, request, queryset, search_term):
         """

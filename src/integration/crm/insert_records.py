@@ -458,6 +458,8 @@ def _insert_record(record=None, license_id=None, is_update=False):
                     print(exc)
             else:
                 record_obj = License.objects.get(id=license_db_id)
+                if license_crm_id and not record_obj.zoho_crm_id:
+                    record_obj.zoho_crm_id = license_crm_id
                 record_obj.is_updated_in_crm = False
                 record_obj.save()
 
