@@ -85,10 +85,10 @@ class DataFilter(FilterSet):
     cf_cultivar_type = CharInFilter(method='cf_cultivar_type__in', lookup_expr='in')
     category_name = CharInFilter(method='category_name__in', lookup_expr='in')
     vendor_name__in = CharInFilter(field_name='vendor_name', lookup_expr='in')
-    #cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
+    cf_vendor_name__in = CharInFilter(field_name='cf_vendor_name', lookup_expr='in')
     cf_strain_name = CharInFilter(method='cf_strain_name__in', lookup_expr='in')
     cf_client_code = CharInFilter(method='cf_client_code__in', lookup_expr='in')
-    cf_vendor_name = CharInFilter(method='cf_vendor_name__in', lookup_expr='in')
+    #cf_vendor_name = CharInFilter(method='cf_vendor_name__in', lookup_expr='in')
     cf_cultivation_type = CharInFilter(method='cf_cultivation_type__in', lookup_expr='in')
     cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
@@ -166,11 +166,11 @@ class DataFilter(FilterSet):
         items = queryset.filter(reduce(operator.or_, (Q(cf_client_code__icontains=x) for x in values)))
         return items
     
-    def cf_vendor_name__in(self, queryset, name, values):
-        lic_obj = License.objects.filter(client_id__in=[int(val) for val in values]).select_related()
-        cf_vendor_names = lic_obj.values_list('license_profile__name',flat=True)
-        items = queryset.filter(cf_vendor_name__in=cf_vendor_names)
-        return items
+    # def cf_vendor_name__in(self, queryset, name, values):
+    #     lic_obj = License.objects.filter(client_id__in=[int(val) for val in values]).select_related()
+    #     cf_vendor_names = lic_obj.values_list('license_profile__name',flat=True)
+    #     items = queryset.filter(cf_vendor_name__in=cf_vendor_names)
+    #     return items
 
     def get_cultivar_type(self, queryset, name, values):
         items = queryset.filter(reduce(operator.or_, (Q(cultivar__cultivar_type__icontains=x) for x in values)))
