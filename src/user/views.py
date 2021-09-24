@@ -282,6 +282,12 @@ class PendoView(APIView):
         """
         qs_license = filterQuerySet.for_user(License.objects.all(), request.user)
         qs_org = filterQuerySet.for_user(Organization.objects.all(), request.user)
+        try:
+            tc_obj = TermsAndConditionAcceptance.objects.filter(user=request.user,terms_and_condition__profile_type='other').latest('updated_on')
+            is_accepted = tc_obj.is_accepted
+        except TermsAndConditionAcceptance.DoesNotExist as e:
+            print('exception whie getting t&c info',e)
+            is_accepted  = False
         return Response({
             "has_access_to_organizations":qs_org.values_list('name', flat=True).distinct(),
             "created_organizations":qs_org.filter(created_by=request.user).values_list('name',flat=True).distinct(),
@@ -289,7 +295,8 @@ class PendoView(APIView):
             "created_license_names":qs_license.filter(created_by=request.user).values_list('legal_business_name',flat=True).distinct(),
             "has_access_to_license_numbers":qs_license.values_list('license_number', flat=True).distinct(),
             "created_license_numbers":qs_license.filter(created_by=request.user).values_list('license_number',flat=True).distinct(),
-            "associated_profile_categories":qs_license.values_list('profile_category', flat=True).distinct()
+            "associated_profile_categories":qs_license.values_list('profile_category', flat=True).distinct(),
+            "is_tc_accepted": is_accepted
         }, status=200)
 
 
