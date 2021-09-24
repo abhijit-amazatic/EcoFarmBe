@@ -527,8 +527,9 @@ class InventoryLicenseClientIdView(APIView):
         Return QuerySet.
         -here legal_business_name maks difference also.Need to make vendor name on item inventory as profile name or lbn.
         """
-        cf_vendor_names = Inventory.objects.filter(cf_cfi_published=True,status='active').values_list('cf_vendor_name',flat=True).distinct()
-        items = License.objects.filter(license_profile__name__in=cf_vendor_names).values('client_id') 
+        #cf_vendor_names = Inventory.objects.filter(cf_cfi_published=True,status='active').values_list('cf_vendor_name',flat=True).distinct()
+        #items = License.objects.filter(license_profile__name__in=cf_vendor_names).values('client_id')
+        items = License.objects.values('client_id')
         return Response({
             'status_code': 200,
             'response': [{
