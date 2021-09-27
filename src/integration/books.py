@@ -105,7 +105,6 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
         except Exception:
             pass
 
-        record_dict = parse_books_customer(request)
         for contact_type in ['vendor', 'customer']:
             crm_profile_id = request.get(f'zoho_crm_{crm_profiles.get(contact_type)}_id')
             response_dict[contact_type] = dict()
@@ -130,6 +129,7 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                         response_dict[contact_type][org_name] = f'Skiped, no CRM {crm_profiles.get(contact_type)} id present in db.'
                 else:
                     try:
+                        record_dict = parse_books_customer(request)
                         record_dict['contact_type'] = contact_type
                         if not contact_id:
                             resp = search_contact_by_field(contact_obj, 'cf_client_id', request.get('client_id', ''), contact_type)
