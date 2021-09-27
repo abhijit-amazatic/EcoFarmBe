@@ -77,7 +77,7 @@ class RevisionResource(resources.ModelResource):
                          'formatted_comment')
 
     def dehydrate_formatted_comment(self, revision):
-        return strip_tags(truncatewords_html(linebreaksbr(mark_safe(revision.comment)), 10))
+        return strip_tags(linebreaksbr(mark_safe(revision.comment)))
         
         
 class RevisionAdmin(ExportActionMixin,admin.ModelAdmin):
