@@ -32,9 +32,6 @@ def get_custom_inventory_data_from_crm_vendor(obj):
                             client_code = vendor.get('Client_Code')
                             if client_code:
                                 obj.client_code = client_code
-                            cultivation_type = vendor.get('Cultivation_Type')
-                            if cultivation_type and isinstance(cultivation_type, list):
-                                obj.cultivation_type = vendor.get('Cultivation_Type')[0]
 
 def get_custom_inventory_data_from_crm_account(obj):
     if obj.vendor_name:

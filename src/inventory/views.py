@@ -1025,7 +1025,7 @@ class CustomInventoryViewSet(viewsets.ModelViewSet):
         obj.save()
         get_custom_inventory_data_from_crm_task(obj.id)
         notify_inventory_item_submitted_task.delay(obj.id)
-        create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
+        # create_duplicate_crm_vendor_from_crm_account_task.delay(obj.id)
 
 
 class InventoryExportViewSet(viewsets.ModelViewSet):

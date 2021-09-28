@@ -306,9 +306,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                                 p_rep_name = vendor.get('Owner', {}).get('name')
                                 if p_rep_name:
                                     obj.procurement_rep_name = p_rep_name
-                                cultivation_type = vendor.get('Cultivation_Type')
-                                if cultivation_type and isinstance(cultivation_type, list):
-                                    obj.cultivation_type = vendor.get('Cultivation_Type')[0]
+                                # cultivation_type = vendor.get('Cultivation_Type')
+                                # if cultivation_type and isinstance(cultivation_type, list):
+                                #     obj.cultivation_type = vendor.get('Cultivation_Type')[0]
                                 client_code = vendor.get('Client_Code')
                                 if client_code:
                                     obj.client_code = client_code

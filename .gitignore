@@ -90,3 +90,5 @@ celerybeat-schedule
 
 # todo
 todo.md
+
+*.ipynb
