@@ -295,8 +295,8 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         model = License
         # fields = ('__all__')
         read_only_fields = ['approved_on', 'approved_by',
-                            'uploaded_sellers_permit_to', 'uploaded_license_to']
-        exclude = ('organization', 'crm_output', 'zoho_crm_id', 'zoho_books_customer_ids', 'zoho_books_vendor_ids', 'client_id')
+                            'uploaded_sellers_permit_to', 'uploaded_license_to', 'client_id']
+        exclude = ('organization', 'crm_output', 'zoho_crm_id', 'zoho_books_customer_ids', 'zoho_books_vendor_ids',)
 
 
 class ProfileContactSerializer(serializers.ModelSerializer):

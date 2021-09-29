@@ -507,8 +507,8 @@ class DownloadSignDocumentView(APIView):
             dir_name = f'{business_dba}_{document_number}'
             data = get_document(request_id)['requests']
             folder_id = get_client_folder_id(dir_name)
-            new_folder = create_folder(folder_id, 'agreements')
-            offline_folder = create_folder(new_folder, 'offline')
+            new_folder = create_folder(folder_id, 'Agreements')
+            offline_folder = create_folder(new_folder, 'Offline')
             for document in data.get('document_ids'):
                 filename = document.get('document_name')
                 file_id = upload_pdf_box(request_id, offline_folder, filename, True)
@@ -574,12 +574,12 @@ class EstimateSignCompleteView(APIView):
             filename = document.get('document_name')
             folder_id = get_client_folder_id(dir_name)
             if is_agreement:
-                new_folder = create_folder(folder_id, 'agreements')
+                new_folder = create_folder(folder_id, 'Agreements')
                 upload_agreement_pdf_to_box.delay(request_id, new_folder, filename, document_number)
             else:
                 a = mark_estimate(organization_name, estimate_id, 'sent')
                 a = mark_estimate(organization_name, estimate_id, 'accepted')
-                new_folder = create_folder(folder_id, 'estimates')
+                new_folder = create_folder(folder_id, 'Estimates')
                 try:
                     estimate_obj = Estimate.objects.get(estimate_id=estimate_id)
                     estimate_obj.db_status = 'signed'
