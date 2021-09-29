@@ -56,6 +56,7 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'cf_date_available',
             'tags',
             'mobile_url',
+            'parent_category_name',
             'thumbnail_url')
         
 class ItemFeedbackSerializer(serializers.ModelSerializer):
