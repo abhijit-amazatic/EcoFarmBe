@@ -896,6 +896,14 @@ def list_vendor_payments(books_name, params=None):
     def _list(books_name):
         obj = get_books_obj(books_name)
         po_obj = obj.VendorPayments()
+        legal_business_name = params.get('vendor_name')
+        if legal_business_name:
+            contact_obj = obj.Contacts()
+            contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
+            for contact in contacts['response']:
+                if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
+                    params['vendor_name'] = contact['contact_name']
+                    break
         payments = po_obj.list_payments(parameters=params)
         for payment in payments.get('response'):
             data = get_vendor_payment(books_name, payment['payment_id'])
