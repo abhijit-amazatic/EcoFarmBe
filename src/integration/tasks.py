@@ -74,11 +74,16 @@ def create_customer_in_books_task(license_id, is_update=False):
     create_customer_in_books(id=license_id)
 
 @app.task(queue="general")
-def insert_record_to_crm(license_id, is_update=False):
+def insert_record_to_crm(license_id, is_update=False, account_crm_id=None, vendor_crm_id=None):
     """
     Insert record to crm and create/update customer and vendor to books.
     """
-    r = insert_records(id=license_id, is_update=is_update)
+    r = insert_records(
+        id=license_id,
+        is_update=is_update,
+        account_crm_id=account_crm_id,
+        vendor_crm_id=vendor_crm_id,
+    )
     create_customer_in_books_task.delay(license_id=license_id)
     return r
 

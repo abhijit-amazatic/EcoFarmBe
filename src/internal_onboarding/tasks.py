@@ -132,7 +132,12 @@ def fetch_onboarding_data_to_db(user_id, license_number, license_obj_id):
 @app.task(queue="general")
 def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_dict={}, constacts_data_dict={}, vendor_data={}, account_data={}):
     crm_obj = get_crm_obj()
+
     if vendor_id:
+        r = crm_obj.update_records('Licenses', [{'id': license_id, 'Vendor_Name_Lookup': vendor_id}])
+        if r.get('status_code') != 200:
+            print(r)
+
         vendor_associations = get_vendor_associations(vendor_id=vendor_id, brands=False, cultivars=False)
         if license_id not in [x['id'] for x in vendor_associations['Licenses']]:
             r = create_records('Vendors_X_Licenses', [{'Licenses_Module': vendor_id, 'Licenses': license_id}])
@@ -164,6 +169,10 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
                 print(r)
 
     if account_id:
+        r = crm_obj.update_records('Licenses', [{'id': license_id, 'Account_Name_Lookup': account_id}])
+        if r.get('status_code') != 200:
+            print(r)
+
         account_associations = get_account_associations(account_id=account_id, brands=False)
         if license_id not in [x['id'] for x in account_associations['Licenses']]:
             r = create_records('Accounts_X_Licenses', [{'Licenses_Module': account_id, 'Licenses': license_id}])
@@ -210,4 +219,9 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
 def create_crm_associations_and_fetch_data(create_crm_associations_kwargs, fetch_data_kwargs={}):
     create_crm_associations(**create_crm_associations_kwargs)
     fetch_onboarding_data_to_db(**fetch_data_kwargs)
-    insert_record_to_crm.delay(fetch_data_kwargs.get('license_obj_id'), True)
+    insert_record_to_crm.delay(
+        fetch_data_kwargs.get('license_obj_id'),
+        is_update=True,
+        account_crm_id=create_crm_associations_kwargs.get('account_id'),
+        vendor_crm_id=create_crm_associations_kwargs.get('vendor_id'),
+    )

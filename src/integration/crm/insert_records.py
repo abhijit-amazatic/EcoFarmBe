@@ -33,39 +33,39 @@ from .get_records import(
 
 def get_associated_vendor(license_crm_id,):
     vendor_id = None
-    vendor = search_query('Vendors_X_Licenses', license_crm_id, 'Licenses')
-    if vendor['status_code'] != 200:
-        license_response = get_record('Licenses', license_crm_id)
-        if license_response.get('status_code') == 200:
-            license_record = license_response.get('response', {}).get(license_crm_id, {})
-            vendor_id = get_lookup_id(license_record, 'Vendor_Name_Lookup')
-    else:
-        try:
-            vendor = vendor['response'][0]['Licenses_Module']
-            vendor_id = vendor['id']
-        except Exception:
-            pass
+    license_response = get_record('Licenses', license_crm_id)
+    if license_response.get('status_code') == 200:
+        license_record = license_response.get('response', {}).get(license_crm_id, {})
+        vendor_id = get_lookup_id(license_record, 'Vendor_Name_Lookup')
+    if not vendor_id:
+        vendor = search_query('Vendors_X_Licenses', license_crm_id, 'Licenses')
+        if vendor['status_code'] == 200:
+            try:
+                vendor = vendor['response'][0]['Licenses_Module']
+                vendor_id = vendor['id']
+            except Exception:
+                pass
     return vendor_id
 
 def get_associated_account(license_crm_id):
     account_id = None
-    account = search_query('Accounts_X_Licenses', license_crm_id, 'Licenses')
-    if account['status_code'] != 200:
-        license_response = get_record('Licenses', license_crm_id)
-        if license_response.get('status_code') == 200:
-            license_record = license_response.get('response', {}).get(license_crm_id, {})
-            account_id = get_lookup_id(license_record, 'Account_Name_Lookup')
-    else:
-        try:
-            account = account['response'][0]['Licenses_Module']
-            account_id = account['id']
-        except Exception:
-            pass
+    license_response = get_record('Licenses', license_crm_id)
+    if license_response.get('status_code') == 200:
+        license_record = license_response.get('response', {}).get(license_crm_id, {})
+        account_id = get_lookup_id(license_record, 'Account_Name_Lookup')
+    if not account_id:
+        account = search_query('Accounts_X_Licenses', license_crm_id, 'Licenses')
+        if account['status_code'] == 200:
+            try:
+                account = account['response'][0]['Licenses_Module']
+                account_id = account['id']
+            except Exception:
+                pass
     return account_id
 
 
 
-def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_update=False):
+def insert_account_record(data_dict, license_db_obj, license_crm_id=None, account_crm_id=None, is_update=False):
     """
     Insert account record to Zoho CRM.
     """
@@ -74,13 +74,23 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
     d = dict()
     d.update(data_dict)
     license_profile_id = license_db_obj.license_profile.__dict__['id']
-    d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_account_id']
+
+    d['id'] = account_crm_id
+    if not d['id']:
+        d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_account_id']
+
+    if not d['id']:
+        r = search_query('Vendors', d['legal_business_name'], 'Legal_Entity_Names')
+        if r.get('status_code') == 200:
+            d['id'] = r.get('response')[0]['id']
+
+    if not d['id']:
+        d['id'] = get_associated_account(license_crm_id)
+
     if not d['id']:
         r = search_query('Accounts', d['name'], 'Account_Name')
         if r.get('status_code') == 200:
             d['id'] = r.get('response')[0]['id']
-    if not d['id']:
-        d['id'] = get_associated_account(license_crm_id)
 
     if d['id']:
         result = update_records('Accounts', d, is_return_orginal_data=True)
@@ -93,7 +103,7 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
         record_response = result['response']['response']['data']
         account_id = record_response[0]['details']['id']
         record_obj = LicenseProfile.objects.get(id=license_profile_id)
-        if account_id and record_obj.zoho_crm_account_id != account_id:
+        if account_id and (not record_obj.zoho_crm_account_id or account_crm_id):
             record_obj.zoho_crm_account_id = account_id
         record_obj.is_account_updated_in_crm = True
         record_obj.save()
@@ -206,7 +216,7 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, is_upd
     return final_response
 
 
-def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_update=False):
+def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, vendor_crm_id=None, is_update=False):
     final_response = dict()
 
     d = dict()
@@ -217,7 +227,15 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
     else:
         d['Layout_Name'] = 'vendor_cannabis'
 
-    d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_vendor_id']
+    d['id'] = vendor_crm_id
+    if not d['id']:
+        d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_vendor_id']
+
+    if not d['id']:
+        r = search_query('Vendors', d['legal_business_name'], 'Legal_Entity_Names')
+        if r.get('status_code') == 200:
+            d['id'] = r.get('response')[0]['id']
+
     if not d['id']:
         r = search_query('Vendors', d['name'], 'Vendor_Name')
         if r.get('status_code') == 200:
@@ -238,7 +256,7 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, is_upda
         vendor_id = record_response[0]['details']['id']
 
         record_obj = LicenseProfile.objects.get(id=license_profile_id)
-        if vendor_id and record_obj.zoho_crm_vendor_id != vendor_id:
+        if vendor_id and (not record_obj.zoho_crm_vendor_id or vendor_crm_id):
             record_obj.zoho_crm_vendor_id = vendor_id
         record_obj.is_vendor_updated_in_crm = True
         record_obj.save()
@@ -372,7 +390,7 @@ def get_crm_license_by_id(obj_id):
             if license.get('id') == obj_id:
                 return license
 
-def _insert_record(record=None, license_id=None, is_update=False):
+def _insert_record(record=None, license_id=None, account_crm_id=None, vendor_crm_id=None, is_update=False):
     """
     Insert record to Zoho CRM.
     """
@@ -463,8 +481,8 @@ def _insert_record(record=None, license_id=None, is_update=False):
                 record_obj.is_updated_in_crm = False
                 record_obj.save()
 
-            final_dict.update(insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
-            final_dict.update(insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, is_update=is_update))
+            final_dict.update(insert_account_record(d, license_db_obj, license_crm_id=license_crm_id, account_crm_id=account_crm_id, is_update=is_update))
+            final_dict.update(insert_vendor_record(d, license_db_obj, license_crm_id=license_crm_id, vendor_crm_id=vendor_crm_id, is_update=is_update))
             if not d.get('zoho_crm_vendor_id') or not d.get('zoho_crm_account_id'):
                 update_in_crm('Licenses', license_db_obj.id)
         except Exception as exc:
@@ -477,7 +495,7 @@ def _insert_record(record=None, license_id=None, is_update=False):
 
 
 
-def insert_records(id=None, is_update=False):
+def insert_records(id=None, is_update=False, account_crm_id=None, vendor_crm_id=None,):
     """
     Insert Vendors into Zoho CRM.
     """
@@ -537,7 +555,7 @@ def insert_records(id=None, is_update=False):
                 except KeyError as exc:
                     print(exc)
 
-            record_response = _insert_record(record=record, is_update=is_update)
+            record_response = _insert_record(record=record, account_crm_id=account_crm_id, vendor_crm_id=vendor_crm_id, is_update=is_update)
             final_dict.update(record_response)
 
             for k, response in record_response.items():

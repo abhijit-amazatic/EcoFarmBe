@@ -11,25 +11,23 @@ from .core import (
 
 
 def get_associated_vendor_from_license(crm_license_dict):
-    vendor_id = None
-    license_number = crm_license_dict['Name']
-    vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
-    if vendor['status_code'] != 200:
-        vendor_id = get_lookup_id(crm_license_dict, 'Vendor_Name_Lookup')
-    else:
-        vendor = vendor['response'][0]['Licenses_Module']
-        vendor_id = vendor['id']
+    vendor_id = get_lookup_id(crm_license_dict, 'Vendor_Name_Lookup')
+    if not vendor_id:
+        license_number = crm_license_dict['Name']
+        vendor = search_query('Vendors_X_Licenses', license_number, 'Licenses')
+        if vendor['status_code'] == 200:
+            vendor = vendor['response'][0]['Licenses_Module']
+            vendor_id = vendor['id']
     return vendor_id
 
 def get_associated_account_from_license(crm_license_dict):
-    account_id = None
-    license_number = crm_license_dict['Name']
-    account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
-    if account['status_code'] != 200:
-        account_id = get_lookup_id(crm_license_dict, 'Account_Name_Lookup')
-    else:
-        account = account['response'][0]['Licenses_Module']
-        account_id = account['id']
+    account_id = get_lookup_id(crm_license_dict, 'Account_Name_Lookup')
+    if not account_id:
+        license_number = crm_license_dict['Name']
+        account = search_query('Accounts_X_Licenses', license_number, 'Licenses')
+        if account['status_code'] == 200:
+            account = account['response'][0]['Licenses_Module']
+            account_id = account['id']
     return account_id
 
 def get_crm_vendor_to_db(vendor_id):
