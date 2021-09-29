@@ -774,25 +774,8 @@ def get_inventory_summary(inventory, statuses):
         return response
     except Exception as exc:
         return {'error': f'{exc}'}
-
-def get_updated_params(params):
-    """
-    Update params if Array fields are present.
-    Char Fields used for multiselect filters should be included here.
-    """
-    db_array_fields = ['ethics_and_certification', 'nutrients','tags','county_grown','appellation','cf_strain_name','category_name']
-    for i in db_array_fields:
-        if i in params.keys():
-            val = params[i].split(',')
-            if i == 'cf_strain_name' or i == 'category_name':
-                params[i+'__in'] = params.pop(i)
-                params[i+'__in'] = val
-            else:
-                params[i+'__overlap'] = params.pop(i)
-                params[i+'__overlap'] = val    
-    return params        
-    
-def get_category_count(params):
+            
+def get_category_count(params, filtered_qs):
     """
     Return category count.
     """
@@ -805,52 +788,8 @@ def get_category_count(params):
         'Future_Exchange': ('Vegging', 'Flowering', 'Under Contract',),
         'Market_Intelligence': ('Sold',)
     }
-    params['cf_cfi_published'] = True
-    updated_params = get_updated_params(params)
-    strain_list = []
-    category_name = []
-    new_items_date = []
-    cultivar_types = []
-    client_ids = []
-    #Adjustments as of want to filter icontains & in to cf_strain_name
-    if 'actual_available_stock__gte_g' in updated_params.keys():
-        updated_params.pop('actual_available_stock__gte_g')
-    if 'actual_available_stock__gte_ml' in updated_params.keys():
-        updated_params.pop('actual_available_stock__gte_ml')
-    if 'cf_strain_name__in' in updated_params.keys():
-        strain_list.extend(updated_params['cf_strain_name__in'])
-        updated_params.pop('cf_strain_name__in')
-    if 'category_name__in' in updated_params.keys():
-        category_name.extend(updated_params['category_name__in'])
-        updated_params.pop('category_name__in')
-    if 'cf_cannabis_grade_and_category__in' in updated_params.keys():
-        grade_val = updated_params['cf_cannabis_grade_and_category__in'].split(',')
-        updated_params['cf_cannabis_grade_and_category__in'] =  grade_val
-    if 'cf_date_available' in updated_params.keys():
-        new_items_date.extend(updated_params['cf_date_available'])
-        updated_params.pop('cf_date_available')
-    if 'cf_cultivar_type' in updated_params.keys():
-        cultivar_types.extend(updated_params['cf_cultivar_type'].split(','))
-        updated_params.pop('cf_cultivar_type')
-    if 'client_id' in updated_params.keys():
-        client_ids.extend(updated_params['client_id'].split(','))
-        updated_params.pop('client_id')       
-
-    inventory = InventoryModel.objects.filter(**updated_params)
-    if strain_list:
-        inventory = inventory.filter(reduce(operator.or_, (Q(cf_strain_name__icontains=x) for x in strain_list)))
-    if category_name:
-        inventory = inventory.filter(reduce(operator.or_, (Q(category_name__icontains=x) for x in category_name)))
-    if new_items_date:
-        inventory = inventory.annotate(full_date=ExpressionWrapper(F('cf_date_available') + timedelta(days=7),output_field=DateField())).filter(full_date__gt=timezone.now().date())
-    if cultivar_types:
-        inventory = inventory.filter(cultivar__cultivar_type__in=cultivar_types)#filter(reduce(operator.or_, (Q(cultivar__cultivar_type__contains=x) for x in cultivar_types)))
-    if client_ids:
-        lic_obj = License.objects.filter(client_id__in=[int(val) for val in client_ids]).select_related()
-        names = lic_obj.values_list('license_profile__name',flat=True)
-        inventory = inventory.filter(cf_vendor_name__in=names)
     for name, category in categories.items():
-        response[name] = inventory.filter(cf_status__in=category).count()
+        response[name] = filtered_qs.filter(cf_status__in=category).count()
     return response
 
 def resize_box_images():

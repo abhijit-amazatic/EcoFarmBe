@@ -3,6 +3,7 @@ Views for Inventory
 """
 import operator
 import time
+import copy
 from datetime import datetime, timedelta
 from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
@@ -346,12 +347,13 @@ class InventoryViewSet(viewsets.ModelViewSet):
         page_size = request.query_params.get('page_size', 50)
         statuses = request.query_params.get('cf_status__in')
         summary = self.filter_queryset(self.get_queryset())
+        filtered_qs = copy.deepcopy(summary)
         summary = get_inventory_summary(summary, statuses)
         params = dict()
         for k, v in request.query_params.items():
             if k not in ['cf_status__in', 'order-by', 'page', 'page_size'] and v:
                 params[k] = v
-        category_count = get_category_count(params)
+        category_count = get_category_count(params, filtered_qs)
         queryset = Paginator(self.filter_queryset(self.get_queryset()), page_size)
         page = int(request.query_params.get('page', 1))
         if page > queryset.num_pages:
