@@ -261,7 +261,8 @@ class CustomOrderFilter(OrderingFilter):
         'Total_THC': 'labtest__Total_THC', # ForeignKey Field lookup for ordering
         'Box_Link': 'labtest__Box_Link',
         'Created_Time':'labtest__Created_Time',
-        'Total_CBD': 'labtest__Total_CBD'
+        'Total_CBD': 'labtest__Total_CBD',
+        'cultivar_type':'cultivar__cultivar_type'
     }
 
     def get_valid_fields(self, queryset, view, context={}):
