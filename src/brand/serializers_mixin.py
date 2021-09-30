@@ -6,6 +6,7 @@ from .models import (
     Brand,
     OrganizationUserInvite,
     OrganizationRole,
+    LicenseUserInvite,
 )
 
 class NestedModelSerializer:
@@ -107,7 +108,7 @@ class InviteUserTokenField(serializers.Field):
 
     def to_internal_value(self, data):
         try:
-            instance = OrganizationUserInvite.get_object_from_invite_token(data)
+            instance = LicenseUserInvite.get_object_from_invite_token(data)
         except ExpiredInviteToken:
                     raise serializers.ValidationError('Expired.')
         except InvalidInviteToken:

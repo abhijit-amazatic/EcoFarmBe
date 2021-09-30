@@ -40,6 +40,8 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
     """
     Stores Brand's details.
     """
+    TTL = timedelta(days=7).total_seconds()
+    _MAX_CLOCK_SKEW = 60
     fernet = Fernet(get_fernet_key(key_salt='intinv'))
     STATUS_CHOICES = (
         ('pending', _('Pending')),
@@ -100,16 +102,14 @@ class InternalOnboardingInvite(TimeStampFlagModelMixin, models.Model):
 
     @classmethod
     def get_object_from_invite_token(cls, token):
-        TTL = timedelta(days=7).total_seconds()
-        _MAX_CLOCK_SKEW = 60
         current_time = int(time.time())
         try:
             token_data = token + ('=' * (4 - len(token) % 4))
             token_data = token_data.encode('utf-8')
             timestamp = cls.fernet.extract_timestamp(token_data)
-            if timestamp + TTL < current_time:
+            if timestamp + cls.TTL < current_time:
                 raise ExpiredInviteToken
-            if current_time + _MAX_CLOCK_SKEW < timestamp:
+            if current_time + cls._MAX_CLOCK_SKEW < timestamp:
                 raise InvalidInviteToken
             context = cls.fernet.decrypt(token_data).decode('utf-8')
             obj_id, user_id, license_id = context.split('|')

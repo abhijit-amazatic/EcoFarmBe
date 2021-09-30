@@ -56,6 +56,7 @@ from .models import (
     # Permission,
     OrganizationUserInvite,
     OnboardingDataFetch,
+    LicenseUserInvite,
 )
 
 from utils import (reverse_admin_change_path,)
@@ -781,13 +782,13 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
     # full_name = serializers.CharField(max_length=200)
     phone = PhoneNumberField(max_length=15)
     # email = serializers.EmailField()
-    role = InviteUserRelatedField(
+    roles = InviteUserRelatedField(
         queryset=OrganizationRole.objects.all(),
-    )
-    licenses = InviteUserRelatedField(
-        queryset=License.objects.all(),
         many=True,
-        required=False,
+        required=True,
+    )
+    license = InviteUserRelatedField(
+        queryset=License.objects.all(),
     )
 
     # def validate_phone(self, value):
@@ -808,15 +809,15 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
         return super().create(validated_data)
 
     class Meta:
-        model = OrganizationUserInvite
+        model = LicenseUserInvite
         read_only_fields = ('id', 'status', 'is_invite_accepted',)
         fields = (
             'id',
             'full_name',
             'email',
             'phone',
-            'role',
-            'licenses',
+            'roles',
+            'license',
             'is_invite_accepted',
             'status',
             'created_on',

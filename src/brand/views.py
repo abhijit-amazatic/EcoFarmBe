@@ -66,6 +66,7 @@ from .models import (
     OrganizationUserRole,
     # Permission,
     OrganizationUserInvite,
+    LicenseUserInvite,
     OnboardingDataFetch,
 )
 from .serializers import (
@@ -745,7 +746,7 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
 class InvitesDataFilter(FilterSet):
     status__in = CharInFilter(field_name='status', lookup_expr='in')
     class Meta:
-        model = OrganizationUserInvite
+        model = LicenseUserInvite
         fields = {
             'status':['icontains', 'exact'],
         }
@@ -760,7 +761,7 @@ class InviteUserViewSet(NestedViewSetMixin,
     """
     Invite User view
     """
-    queryset=OrganizationUserInvite.objects.all()
+    queryset=LicenseUserInvite.objects.all()
     permission_classes = (IsAuthenticated, OrganizationInvitePermission)
     serializer_class = InviteUserSerializer
     filter_backends = [DjangoFilterBackend]
@@ -814,14 +815,15 @@ class UserInvitationVerificationView(GenericAPIView):
             else:
                 response_data['new_user'] = False
                 organization_user, _ = OrganizationUser.objects.get_or_create(
-                    organization=instance.organization,
+                    organization=instance.license.organization,
                     user=user,
                 )
-                organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
-                    organization_user=organization_user,
-                    role=instance.role,
-                )
-                organization_user_role.licenses.add(*instance.licenses.all())
+                for role in instance.roles:
+                    organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
+                        organization_user=organization_user,
+                        role=instance.role,
+                    )
+                    organization_user_role.licenses.add(instance.license)
 
                 instance.status = 'completed'
             response = Response(response_data, status=status.HTTP_200_OK)

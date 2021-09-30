@@ -92,9 +92,9 @@ def send_async_invitation(invite_obj_id):
         context = {
             'full_name': invite_obj.full_name,
             'email': invite_obj.email,
-            'organization': invite_obj.organization.name,
-            'role': invite_obj.role.name,
-            'licenses': [ f"{x.license_number} | {x.legal_business_name}" for x in invite_obj.licenses.all()],
+            'organization': invite_obj.license.organization.name,
+            'roles': [x.name for x in invite_obj.roles.all()],
+            'license': invite_obj.role.name,
             'phone': invite_obj.phone.as_e164,
             # 'token': invite_obj.get_invite_token(),
             'link':  '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
@@ -127,26 +127,25 @@ def invite_profile_contacts(profile_contact_id):
     if pro_contact_obj:
         license_obj = pro_contact_obj.license
         employee_data = pro_contact_obj.profile_contact_details.get('employees')
-        extracted_employee = [i for i in employee_data if i.get('employee_email')]
-        for employee in extracted_employee:
+        extracted_employee = {}
+        for employee in [i for i in employee_data if i.get('employee_email')]:
+            if employee['employee_email'] in extracted_employee:
+                roles = extracted_employee[employee['employee_email']].get('roles') or []
+                new_roles = employee.get('roles') or []
+                if new_roles:
+                    extracted_employee[employee['employee_email']]['roles'] = list(set(roles).add(*new_roles))
+            else:
+                extracted_employee[employee['employee_email']] = employee
+
+        for employee in extracted_employee.values():
+            roles = []
             for role_name in employee['roles']:
                 role, _ = OrganizationRole.objects.get_or_create(
                     organization=license_obj.organization,
                     name=role_name,
                 )
-                if not license_obj.organization.created_by.email == employee['employee_email']:
-                    invite = OrganizationUserInvite.objects.create(
-                        full_name=employee['employee_name'],
-                        email=employee['employee_email'],
-                        phone=employee['phone'],
-                        organization=license_obj.organization,
-                        role=role,
-                        created_by_id=license_obj.organization.created_by_id
-                    )
-                    invite.licenses.set([license_obj])
-                    invite.save()
-                    send_async_invitation.delay(invite.id)
-                else:
+                roles.append(role)
+                if license_obj.organization.created_by.email == employee['employee_email']:
                     user = license_obj.organization.created_by
                     organization_user, _ = OrganizationUser.objects.get_or_create(
                         organization=license_obj.organization,
@@ -159,8 +158,19 @@ def invite_profile_contacts(profile_contact_id):
                     organization_user_role.licenses.add(license_obj)
                     organization_user.save()
 
-                    # notify_admins_on_profile_user_registration(obj.email,license_obj[0].license_profile.name)
-                    # notify_profile_user(obj.email,license_obj[0].license_profile.name)
+
+            if not license_obj.organization.created_by.email == employee['employee_email']:
+                invite = OrganizationUserInvite.objects.create(
+                    full_name=employee['employee_name'],
+                    email=employee['employee_email'],
+                    phone=employee['phone'],
+                    license=license_obj,
+                    created_by_id=license_obj.organization.created_by_id
+                )
+                invite.roles.set(roles)
+                invite.save()
+                send_async_invitation.delay(invite.id)
+
 
 @app.task(queue="urgent")
 def send_onboarding_data_fetch_verification(onboarding_data_fetch_id, user_id):

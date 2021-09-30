@@ -11,6 +11,7 @@ class NestedViewSetMixin:
     parent_field_default = dict()
     url_params_model_map = {
         'organization': models.Organization,
+        'license__organization': models.Organization,
         'organization_user': models.OrganizationUser,
         'brand': models.Brand,
         'license': models.License,

@@ -146,7 +146,7 @@ router.registry.extend([
     ('organization/(?P<parent_organization>[^/.]+)/role', OrganizationRoleViewSet, 'organization-role'),
     ('organization/(?P<parent_organization>[^/.]+)/user', OrganizationUserViewSet, 'organization-user'),
     ('organization/(?P<parent_organization>[^/.]+)/user/(?P<parent_organization_user>[^/.]+)/role', OrganizationUserRoleViewSet, 'organization-user-role-nest'),
-    ('organization/(?P<parent_organization>[^/.]+)/invite-user', InviteUserViewSet, 'organization-invite-user'),
+    ('organization/(?P<parent_license__organization>[^/.]+)/invite-user', InviteUserViewSet, 'organization-invite-user'),
 ])
 
 router.register(r'compliance-binder/license', BinderLicenseViewSet, base_name="binder-license")

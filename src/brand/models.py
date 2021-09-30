@@ -29,6 +29,7 @@ from cryptography.fernet import (Fernet, InvalidToken)
 
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin, )
 from core.validators import full_domain_validator
+from utils import get_fernet_key
 from user.models import User
 from permission.models import (Permission)
 from two_factor.utils import (random_hex, random_hex_32, key_validator,)
@@ -93,6 +94,7 @@ class OrganizationRole(TimeStampFlagModelMixin, models.Model):
     )
 
     def __str__(self):
+        # return f'{self.name}|{self.organization}'
         return self.name
 
     def natural_key(self):
@@ -500,6 +502,114 @@ class OrganizationUserInvite(TimeStampFlagModelMixin, models.Model):
             return obj
 
 
+class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
+    """
+    Stores Brand's details.
+    """
+    TLL = 60*60*48
+    _MAX_CLOCK_SKEW = 60
+    fernet = Fernet(get_fernet_key(key_salt='licinv'))
+    STATUS_CHOICES = (
+        ('pending', _('Pending')),
+        ('user_joining_platform', _('User Joining Platform')),
+        ('completed', _('Completed')),
+    )
+    full_name = models.CharField(_('Full Name'), max_length=200)
+    email = models.EmailField(_('Email Address'), )
+    phone = PhoneNumberField(_('Phone'), )
+    roles = models.ManyToManyField(
+        OrganizationRole,
+        verbose_name=_('Roles'),
+        related_name='user_invites',
+    )
+    license = models.ForeignKey(
+        License,
+        verbose_name=_('Licenses'),
+        related_name='user_invites',
+        on_delete=models.CASCADE,
+    )
+    is_invite_accepted = models.BooleanField(_('Is Invite Accepted'), default=False)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Created By'),
+        # related_name='invited_users',
+        on_delete=models.CASCADE
+    )
+    status = models.CharField(
+        max_length=60,
+        choices=STATUS_CHOICES,
+        default='pending',
+    )
+
+    class Meta:
+        verbose_name = _('License User Invite')
+        verbose_name_plural = _('License User Invites')
+
+    def __str__(self):
+        return f'{self.email} | {self.license}'
+
+    @property
+    def tll(self):
+        timedelta(hours=self.TLL_IN_HOURS).total_seconds()
+
+    def get_invite_token(self):
+        context = "{0}|{1}|{2}".format(self.id, self.email, 'inviteToken')
+        return hexlify(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
+
+    @classmethod
+    def get_object_from_invite_token(cls, token):
+        current_time = int(time.time())
+        try:
+            token_data = unhexlify(token.encode('utf-8'))
+            timestamp = fernet.extract_timestamp(token_data)
+            if timestamp + cls.TLL < current_time:
+                raise ExpiredInviteToken
+            if current_time + cls._MAX_CLOCK_SKEW < timestamp:
+                raise InvalidInviteToken
+            context = fernet.decrypt(token_data).decode('utf-8')
+            obj_id, email, event_code = context.split('|')
+            if not event_code == 'inviteToken':
+                raise InvalidInviteToken
+            obj = cls.objects.get(id=int(obj_id), email=email)
+        except InvalidToken:
+            raise InvalidInviteToken
+        except (InvalidInviteToken, ExpiredInviteToken) as e:
+            raise e
+        except Exception as e:
+            traceback.print_tb(e.__traceback__)
+            raise InvalidInviteToken
+        else:
+            return obj
+
+    def get_invite_token(self):
+        context = "{0}|{1}|{2}".format(self.id, self.user_id, self.license_id)
+        token_bytes = self.fernet.encrypt(context.encode('utf-8'))
+        # removing '=' to use token as url param
+        return token_bytes.decode('utf-8').rstrip('=')
+
+    @classmethod
+    def get_object_from_invite_token(cls, token):
+        current_time = int(time.time())
+        try:
+            token_data = token + ('=' * (4 - len(token) % 4))
+            token_data = token_data.encode('utf-8')
+            timestamp = cls.fernet.extract_timestamp(token_data)
+            if timestamp + cls.TTL < current_time:
+                raise ExpiredInviteToken
+            if current_time + cls._MAX_CLOCK_SKEW < timestamp:
+                raise InvalidInviteToken
+            context = cls.fernet.decrypt(token_data).decode('utf-8')
+            obj_id, user_id, license_id = context.split('|')
+            obj = cls.objects.get(id=int(obj_id), user_id=user_id, license_id=license_id)
+        except (InvalidToken, cls.DoesNotExist):
+            raise InvalidInviteToken
+        except (InvalidInviteToken, ExpiredInviteToken) as e:
+            raise e
+        except Exception as e:
+            traceback.print_tb(e.__traceback__)
+            raise InvalidInviteToken
+        else:
+            return obj
 
 class ProfileContact(models.Model):
     """

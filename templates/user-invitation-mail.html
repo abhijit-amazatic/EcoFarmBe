@@ -5,12 +5,12 @@
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            You have been invited to join organization <strong>{{organization}}</strong> as <strong>{{role}}</strong>
-        {% if licenses %} for
+            You have been invited to join license profile <strong>{{license}}</strong> (organization: <strong>{{organization}}</strong>
+        {% if licenses %} as following roles
         </p>
         <ul style='font-size:16px !important;color: #013c48;'>
-            {% for lic in licenses %}
-            <li>{{lic}}</li>
+            {% for role in roles %}
+            <li>{{role}}</li>
             {% endfor %}
         </ul>
         <p style='font-size:16px !important;color: #013c48;'>

@@ -38,6 +38,8 @@ from .models import (
     OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
+    LicenseUserInvite,
+    OrganizationUserInvite,
 )
 from utils import (reverse_admin_change_path,)
 from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
@@ -517,8 +519,23 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
 #         models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
 #     }
 
+class OrganizationUserInviteAdmin(admin.ModelAdmin):
+    """
+    OrganizationUserInviteAdmin
+    """
+    filter_horizontal = ['licenses', ]
+
+class LicenseUserInviteAdmin(admin.ModelAdmin):
+    """
+    LicenseUserInviteAdmin
+    """
+    filter_horizontal = ['roles', ]
+
+
 admin.site.register(Organization, OrganizationAdmin)
 # admin.site.register(OrganizationRole,OrganizationRoleAdmin)
+# admin.site.register(OrganizationUserInvite,OrganizationUserInviteAdmin)
+# admin.site.register(LicenseUserInvite,LicenseUserInviteAdmin)
 admin.site.register(Brand,MyBrandAdmin)
 admin.site.register(License,MyLicenseAdmin)
 admin.site.register(ProfileCategory, ProfileCategoryAdmin)
