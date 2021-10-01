@@ -35,7 +35,7 @@ from integration.books import  get_buyer_summary
 from integration.apps.aws import (create_presigned_url, )
 from core.utility import (notify_admins_on_slack,email_admins_on_profile_progress, )
 from core.mailer import (mail, mail_send,)
-from integration.crm import (update_program_selection, create_records, search_query, update_records, create_or_update_org_in_crm)
+from integration.crm import (update_program_selection, create_records, search_query, update_records, update_license, create_or_update_org_in_crm)
 from integration.crm.get_records import (get_account_associated_cultivars_of_interest)
 from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
@@ -459,6 +459,19 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
                 else:
                     return Response({'detail':"No program_name in Programe Overview."}, status=400)
 
+    @action(detail=True, url_path='update-license-file', methods=['post'])
+    def update_license_file(self, request, pk, *args, **kwargs):
+        """
+        get buyer summary
+        """
+        instance = self.get_object()
+        instance.uploaded_license_to = None
+        instance.save()
+        try:
+            update_license(dba=instance.legal_business_name, license_id=instance.id)
+            return Response({'detail': " updated successfully"}, status=200)
+        except Exception as e:
+            return Response({'detail': "{e}."}, status=400)
 
 
 

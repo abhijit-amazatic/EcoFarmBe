@@ -64,6 +64,9 @@ class LicenseViewSetPermission(ViewPermission):
         'update_signed_program': {
             'post': 'edit_license_profile',
         },
+        'update_license_file': {
+            'post': True,
+        },
     }
 
 
