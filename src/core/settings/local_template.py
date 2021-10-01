@@ -187,8 +187,11 @@ NOTIFICATION_EMAIL_INVENTORY = 'tech@ecofarm.ag'
 NOTIFICATION_EMAIL_LOGISTICS_TRANSPORT = 'tech@ecofarm.ag' #PROD: logistics@thrive-society.com 
 
 #layouts
-VENDOR_LAYOUT = "4230236000001156761"
-
+VENDOR_LAYOUT = {
+    "vendor_cannabis": "4230236000001999777",
+    "vendor_cannabis_non_cultivator": "4230236000002263267",
+    "vendor_cannabis_nursery": "4230236000004898031"
+}
 LEADS_LAYOUT = {
     "accounts": "4230236000001156737",
     "vendor_cannabis_cultivar": "4230236000001229441",

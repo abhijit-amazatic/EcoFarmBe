@@ -20,7 +20,7 @@ from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from .crm_format import (CRM_FORMAT, VENDOR_TYPES,
                          VENDOR_LICENSE_TYPES, ACCOUNT_LICENSE_TYPES,
-                         ACCOUNT_TYPES)
+                         ACCOUNT_TYPES, LICENSE_TYPE_TO_VENDOR_TYPE)
 from integration.box import (get_shared_link, move_file,
                   create_folder, upload_file_stream, get_folder_obj)
 from core.celery import app
@@ -220,6 +220,10 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         return create_employees(key, value, obj, crm_obj)
     if value == 'brand_category':
         return get_vendor_types(obj.get(value))
+    if value == 'Vendor_Type':
+        if obj.get('license_type'):
+            return LICENSE_TYPE_TO_VENDOR_TYPE.get(obj.get('license_type'), [])
+        return []
     if value.startswith('Contact'):
         return get_vendor_contacts(key, value, obj, crm_obj)
     if value.startswith('layout'):
@@ -375,6 +379,8 @@ def update_in_crm(module, record_id):
                 request['id'] = request.get('zoho_crm_vendor_id')
                 if lp_obj.license.profile_category == 'nursery':
                     request['Layout_Name'] = 'vendor_cannabis_nursery'
+                # elif lp_obj.license.profile_category in ('distribution', 'manufacturing', 'retail', 'microbusiness',):
+                #     request['Layout_Name'] = 'vendor_cannabis_non_cultivator'
                 else:
                     request['Layout_Name'] = 'vendor_cannabis'
         else:
