@@ -291,6 +291,11 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
             return obj.license_profile.approved_by.get('email',"N/A")
         return "N/A"
 
+    def business_dba(self, obj):
+        if obj.license_profile:
+            return obj.license_profile.business_dba
+    business_dba.admin_order_field = '-license_profile__business_dba'
+
     def zoho_crm_account_id(self, obj):
         if obj.license_profile:
             return obj.license_profile.zoho_crm_account_id
@@ -327,7 +332,7 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('name', 'organization','license_number','legal_business_name', 'client_id', 'status','profile_category','brand', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'is_updated_in_crm', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm','approved_on','approved_by','created_on','updated_on',)
+    list_display = ('name', 'license_number','legal_business_name', 'business_dba', 'client_id', 'status','profile_category', 'organization', 'brand', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'is_updated_in_crm', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm','approved_on','approved_by','created_on','updated_on',)
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
     search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name', )
     readonly_fields = ('created_on','updated_on', 'client_id', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm', 'crm_output', 'books_output', 'is_updated_in_crm')

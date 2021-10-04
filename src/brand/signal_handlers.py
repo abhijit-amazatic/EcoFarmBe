@@ -44,18 +44,30 @@ def pre_save_license_profile(sender, instance, **kwargs):
     """
     Deletes old file.
     """
-    if not instance.pk:
-        return
-    try:
-        old_instance = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
-        return
-
-    if instance.agreement_signed and not old_instance.agreement_signed:
+    if instance.pk:
         try:
-            instance.signed_program_name = instance.license.program_overview.program_details.get('program_name')
-        except ObjectDoesNotExist:
+            old_instance = sender.objects.get(pk=instance.pk)
+        except sender.DoesNotExist:
             pass
+        else:
+            if instance.agreement_signed and not old_instance.agreement_signed:
+                try:
+                    instance.signed_program_name = instance.license.program_overview.program_details.get('program_name')
+                except ObjectDoesNotExist:
+                    pass
+
+    if not instance.business_dba:
+        try:
+            instance.business_dba = instance.license.legal_business_name
+        except Exception:
+           pass
+
+    if not instance.name:
+        profile_name = instance.get_profile_name()
+        if profile_name:
+            instance.name = profile_name
+
+
 
 # @receiver(signals.pre_save, sender=apps.get_model('brand', 'ProfileContact'))
 # def pre_save_profile_contact(sender, instance, **kwargs):
