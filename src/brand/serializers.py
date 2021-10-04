@@ -338,29 +338,18 @@ class NurseryOverviewSerializer(serializers.ModelSerializer):
         model = NurseryOverview
         fields = ('__all__')
 
-class DBAField(serializers.CharField):
-    def get_attribute(self, instance):
-        return instance.license.business_dba
 
 class LicenseProfileSerializer(serializers.ModelSerializer):
     """
     This defines LicenseProfileSerializer
     """
     brand_association = LicenseProfileBrandAssociationField(allow_null=True)
-    business_dba = DBAField(required=False, allow_null=True)
 
     def create(self, validated_data):
         """
         Update for licenseprofile
         """
-        dba = None
-        if validated_data.get('business_dba'):
-            dba = validated_data.pop('business_dba')
-            if validated_data['license']:
-                validated_data['license'].business_dba = dba
         instance = super().create(validated_data)
-        if dba:
-            instance.license.business_dba = dba
         instance.license.brand = instance.brand_association
         instance.license.save()
         return instance
@@ -369,14 +358,9 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         """
         Update for licenseprofile
         """
-        dba = None
-        if validated_data.get('business_dba'):
-            dba = validated_data.pop('business_dba')
         update_cultivar_of_interest = 'cultivars_of_interest' in validated_data and validated_data.get('cultivars_of_interest') != instance.cultivars_of_interest
 
         instance = super().update(instance, validated_data)
-        if dba:
-            instance.license.business_dba = dba
         instance.license.brand = instance.brand_association
         instance.license.save()
         update_in_crm_task.delay('Accounts', instance.id)

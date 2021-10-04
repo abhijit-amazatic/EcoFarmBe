@@ -224,8 +224,6 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         _('Owner or Manager'), blank=True, null=True, max_length=12)
     legal_business_name = models.CharField(
         _('Legal Business Name'), blank=True, null=True, max_length=255)
-    business_dba = models.CharField(
-        _('business DBA'), blank=True, null=True, max_length=255)
     license_number = models.CharField(
         _('License Number'), blank=True, null=True, max_length=255)
     expiration_date = models.DateField(
@@ -285,13 +283,6 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
 
     class Meta:
         verbose_name = _('License/Profile')
-
-    def get_profile_name(self):
-        if self.business_dba:
-            return f'{self.business_dba} {self.client_id}'
-        if self.legal_business_name:
-            return f'{self.legal_business_name} {self.client_id}'
-        return ''
 
 class OnboardingDataFetch(ThrottlingMixin, models.Model):
     OTP_DIGITS = 8
@@ -533,8 +524,8 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
                                 related_name='license_profile', on_delete=models.CASCADE)
     brand_association = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(_('Name'), blank=True, null=True, max_length=255)
-    county = models.CharField(
-        _('County'), blank=True, null=True, max_length=255)
+    business_dba = models.CharField(_('business DBA'), blank=True, null=True, max_length=255)
+    county = models.CharField(_('County'), blank=True, null=True, max_length=255)
     appellation = models.CharField(_('Appellation'), blank=True, null=True, max_length=255)
     region = models.CharField(_('Region'), blank=True, null=True, max_length=255)
     ethics_and_certification = ArrayField(models.CharField(max_length=255, blank=True),blank=True, null=True, default=list)
@@ -551,10 +542,8 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     agreement_signed = models.BooleanField(_('Is Agreement Signed'), default=False)
     agreement_link = models.CharField(_('Box Agreement Link'), max_length=100, blank=True, null=True)
     is_draft = models.BooleanField(_('Is Draft'), default=False)
-    farm_profile_photo = models.CharField(
-        _('Farm Profile Photo Box ID'), blank=True, null=True, max_length=255)
-    farm_photo_sharable_link = models.CharField(
-        _('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
+    farm_profile_photo = models.CharField(_('Farm Profile Photo Box ID'), blank=True, null=True, max_length=255)
+    farm_photo_sharable_link = models.CharField(_('Farm Profile Photo Sharable Link'), blank=True, null=True, max_length=255)
     signed_program_name = models.CharField(_('Signed Program Name'), blank=True, null=True, max_length=255)
     lab_test_issues = models.TextField(blank=True, null=True)
 
@@ -580,6 +569,14 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_profile_name(self):
+        if self.license:
+            if self.business_dba:
+                return f'{self.business_dba} {self.license.client_id}'
+            if self.license.legal_business_name:
+                return f'{self.license.legal_business_name} {self.license.client_id}'
+        return ''
 
 
 class CultivationOverview(models.Model):
