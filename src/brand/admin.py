@@ -251,7 +251,12 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = LicenseProfile
     can_delete = False
-    readonly_fields = ('is_draft', 'agreement_signed')
+    readonly_fields = ('name', 'is_draft', 'agreement_signed',)
+    exclude = (
+        'name',
+        'is_account_updated_in_crm',
+        'is_vendor_updated_in_crm',
+    )
 
 
 # class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
@@ -325,13 +330,17 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     list_display = ('name', 'organization','license_number','legal_business_name', 'client_id', 'status','profile_category','brand', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'is_updated_in_crm', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm','approved_on','approved_by','created_on','updated_on',)
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
     search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name', )
-    readonly_fields = ('created_on','updated_on', 'client_id', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm', 'crm_output', 'books_output')
+    readonly_fields = ('created_on','updated_on', 'client_id', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm', 'crm_output', 'books_output', 'is_updated_in_crm')
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
+    exclude = ('is_seller', 'is_buyer')
     actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records]
     list_per_page = 50
+
+    verbose_name = "My Book"
+    verbose_name_plural = "My Books"
 
     @transaction.atomic
     def save_model(self, request, obj, form, change):
@@ -353,6 +362,7 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
         form = super(MyLicenseAdmin, self).get_form(request, *args, **kwargs)
         form.request = request
         return form    
+
 
 class OrganizationRoleNestedAdmin(nested_admin.NestedTabularInline):
     """
@@ -480,7 +490,6 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
 #         # models.ManyToManyField: {'widget': PermissionSelectMultipleWidget()},
 #         models.ManyToManyField: {'widget': widgets.FilteredSelectMultiple("Permission", is_stacked=False)},
 #     }
-
 
 admin.site.register(Organization, OrganizationAdmin)
 # admin.site.register(OrganizationRole,OrganizationRoleAdmin)
