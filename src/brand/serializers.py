@@ -355,6 +355,8 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         dba = None
         if validated_data.get('business_dba'):
             dba = validated_data.pop('business_dba')
+            if validated_data['license']:
+                validated_data['license'].business_dba = dba
         instance = super().create(validated_data)
         if dba:
             instance.license.business_dba = dba

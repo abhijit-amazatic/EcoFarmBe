@@ -80,7 +80,7 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, accoun
         d['id'] = license_db_obj.license_profile.__dict__['zoho_crm_account_id']
 
     if not d['id']:
-        r = search_query('Vendors', d['legal_business_name'], 'Legal_Entity_Names')
+        r = search_query('Accounts', d['legal_business_name'], 'Legal_Entity_Names')
         if r.get('status_code') == 200:
             d['id'] = r.get('response')[0]['id']
 
