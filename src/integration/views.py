@@ -334,7 +334,7 @@ class EstimateView(APIView):
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         # estimate_obj = save_estimate(request)
-        customer_name = response.get('customer_name')
+        customer_name = request.data.get('customer_name')
         delete_estimate_task.delay(customer_name)
         return Response(response)
         
