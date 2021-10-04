@@ -517,6 +517,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                 license_data = LicenseSerializer(license).data
                 license_profile_kpis.append({
                     'id': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.id,
+                    'client_id': license.client_id,
                     'name': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.name,
                     'county': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.county,
                     'appellation': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.appellation,
