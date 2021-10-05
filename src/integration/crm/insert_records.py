@@ -89,6 +89,11 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, accoun
             d['id'] = r.get('response')[0]['id']
 
     if d['id']:
+        if 'Owner' in d:
+            data = {}
+            data.update(d)
+            data.pop('Owner')
+            d = data
         result = update_records('Accounts', d, is_return_orginal_data=True)
     else:
         result = create_records('Accounts', d, is_return_orginal_data=True)
@@ -247,6 +252,11 @@ def insert_vendor_record(data_dict, license_db_obj, license_crm_id=None, vendor_
         d['id'] = get_associated_vendor(license_crm_id)
 
     if d['id']:
+        if 'Owner' in d:
+            data = {}
+            data.update(d)
+            data.pop('Owner')
+            d = data
         result = update_records('Vendors', d, is_return_orginal_data=True)
     else:
         result = create_records('Vendors', d, is_return_orginal_data=True)
