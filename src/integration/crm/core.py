@@ -303,11 +303,13 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     #     return obj.get(value)
     if value.startswith('cultivars'):
         cultivars = list()
-        dictionary = obj.get('cr.overview')
-        if dictionary:
-            for i in dictionary:
-                for j in i['cultivars']:
+        try:
+            crop_overview = obj.get('cr.overview')
+            if crop_overview and isinstance(crop_overview, dict):
+                for j in crop_overview.get('cultivars'):
                     cultivars.extend(j['cultivar_names'])
+        except Exception as e:
+            print(e)
         return list(set(cultivars))
     if value.startswith('Created_By'):
         return value
