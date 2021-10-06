@@ -76,7 +76,7 @@ def insert_account_record(data_dict, license_db_obj, license_crm_id=None, accoun
             d['id'] = get_lookup_id(license_record, 'Account_Name_Lookup')
 
     if not d['id']:
-        r = search_query('Accounts', d['legal_business_name'], 'Legal_Entity_Names')
+        r = search_query('Accounts', d['legal_business_name'], 'Account_Business_DBA')
         if r.get('status_code') == 200:
             d['id'] = r.get('response')[0]['id']
 
