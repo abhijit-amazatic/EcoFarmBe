@@ -253,7 +253,7 @@ PASSWORDLESS_AUTH = {
     'PASSWORDLESS_USER_MOBILE_FIELD_NAME':'phone',
     'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': "Thrive Society <support@thrive-society.com>",
     'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless.html",
-    'PASSWORDLESS_MOBILE_MESSAGE':  "Use this code to log in with Thrive Society:@{} %s".format(os.environ.get('OTP_LOGIN_URL')),
+    'PASSWORDLESS_MOBILE_MESSAGE':  "Use this code to log in with Thrive Society:%(key)s @{} #%(key)s".format(os.environ.get('OTP_LOGIN_URL')),
     'PASSWORDLESS_MOBILE_NOREPLY_NUMBER':  os.environ.get('DEFAULT_PHONE_NUMBER'),
     'TWILIO_ACCOUNT_SID':os.environ.get('TWILIO_ACCOUNT'),
     'TWILIO_AUTH_TOKEN':os.environ.get('TWILIO_AUTH_TOKEN')    

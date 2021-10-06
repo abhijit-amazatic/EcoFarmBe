@@ -274,7 +274,7 @@ PASSWORDLESS_AUTH = {
     'PASSWORDLESS_REGISTER_NEW_USERS': False,
     'PASSWORDLESS_USER_MOBILE_FIELD_NAME':'phone',
     'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': "Thrive Society <support@thrive-society.com>",
-    'PASSWORDLESS_MOBILE_MESSAGE':  "Use this code to log in with Thrive Society:@dev.ecofarm.app/verify-otp %s",
+    'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in with Thrive Society: %(key)s @dev.ecofarm.app/verify-otp #%(key)s",
     'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless.html",
     'PASSWORDLESS_MOBILE_NOREPLY_NUMBER': '+18558055506',
     'TWILIO_ACCOUNT_SID':'',
