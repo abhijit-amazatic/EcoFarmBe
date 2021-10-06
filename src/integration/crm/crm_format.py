@@ -107,7 +107,8 @@ CRM_FORMAT  = {
     "Licenses":{
         "id": "id",
         "license_db_id": "license_db_id",
-        "Name": "license_number",
+        # "Name": "license_number",
+        "license_number": "license_number",
         "Legal_Business_Name": "legal_business_name",
         "License_Type": "license_type",
         "Expiration_Date": "expiration_date",
@@ -1341,7 +1342,7 @@ LICENSE_TYPE_TO_VENDOR_TYPE = {
     'Manufacturer - Type N':                ['Manufacturer',],
     'Manufacturer - Type P':                ['Manufacturer',],
     'Manufacturer - Type S':                ['Manufacturer',],
-    'Microbusiness':                        ['Distribution',],
+    'Microbusiness':                        [],
     'Retailer - Delivery':                  ['Other',],
     'Retailer - Storefront':                ['Other',],
     'Testing Laboratory':                   ['Other',],
