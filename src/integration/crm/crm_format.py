@@ -112,7 +112,7 @@ CRM_FORMAT  = {
         "Legal_Business_Name": "legal_business_name",
         "License_Type": "license_type",
         "Expiration_Date": "expiration_date",
-        "Business_DBA": "business_dba",
+        # "Business_DBA": "business_dba",
         "Issue_Date": "issue_date",
         "License_Box_Link": "uploaded_license_to",
         "Owner": "Owner",
