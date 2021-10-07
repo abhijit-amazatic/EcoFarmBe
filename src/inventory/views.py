@@ -3,6 +3,7 @@ Views for Inventory
 """
 import operator
 import time
+import re
 import copy
 from datetime import datetime, timedelta
 from io import BytesIO, BufferedReader
@@ -772,6 +773,9 @@ class DocumentPreSignedView(APIView):
             path = f'inventory/{sku}/{obj.id}/{object_name}'
         else:
             path = object_name
+        path = path.replace(' ', '_')
+        path = path.replace('&', 'N')
+        path = re.sub(r"[^\w/!-_.*'()]+", '', path)
         obj.path = path
         obj.save()
         response = create_presigned_post(AWS_BUCKET, path, expiry)
