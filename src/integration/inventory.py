@@ -732,7 +732,7 @@ def get_average_thc(inventory):
     (qty*THC)+(qty*THC)+.. +/Sum(qty)
     """
     try:
-        item_qs = inventory.filter(cf_cfi_published=True,actual_available_stock__gt=0,cf_status__in=['Under Contract','Available'],labtest__Total_THC__gt=0).select_related()
+        item_qs = inventory.filter(cf_cfi_published=True,status='active',actual_available_stock__gt=0,labtest__Total_THC__gt=0).select_related()
         summation = item_qs.aggregate(total=Sum(F('actual_available_stock') * F('labtest__Total_THC')))['total']
         quantity_sum = item_qs.aggregate(Sum('actual_available_stock'))['actual_available_stock__sum']
         avg_thc = (summation)/(quantity_sum)
