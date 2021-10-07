@@ -127,6 +127,16 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                         response_dict[contact_type][org_name] = response
                     else:
                         response_dict[contact_type][org_name] = f'Skiped, no CRM {crm_profiles.get(contact_type)} id present in db.'
+                    if not contact_id:
+                        r = contact_obj.get_contact_using_crm_account_id(crm_profile_id)
+                        try:
+                            if r and r.get('code') == 0:
+                                for c in r.get('contacts', []):
+                                    if c.get('contact_type') == contact_type:
+                                        if c.get('contact_id'):
+                                            contact_id = contact_id
+                        except Exception as e:
+                            print(e)
                 else:
                     try:
                         record_dict = parse_books_customer(request)
