@@ -83,6 +83,11 @@ class OrganizationUserRoleRelatedLicenseField(OrganizationUserRoleRelatedField):
 class InviteUserRelatedField(serializers.RelatedField):
 
     def to_representation(self, obj):
+        if obj.__class__.__name__ == 'OrganizationRole':
+            return {
+                'id': obj.id,
+                'name': obj.name
+            }
         return obj.pk
 
     def to_internal_value(self, data):
