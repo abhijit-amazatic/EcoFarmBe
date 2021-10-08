@@ -553,36 +553,7 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
         timedelta(hours=self.TLL_IN_HOURS).total_seconds()
 
     def get_invite_token(self):
-        context = "{0}|{1}|{2}".format(self.id, self.email, 'inviteToken')
-        return hexlify(fernet.encrypt(context.encode('utf-8'))).decode('utf-8')
-
-    @classmethod
-    def get_object_from_invite_token(cls, token):
-        current_time = int(time.time())
-        try:
-            token_data = unhexlify(token.encode('utf-8'))
-            timestamp = fernet.extract_timestamp(token_data)
-            if timestamp + cls.TLL < current_time:
-                raise ExpiredInviteToken
-            if current_time + cls._MAX_CLOCK_SKEW < timestamp:
-                raise InvalidInviteToken
-            context = fernet.decrypt(token_data).decode('utf-8')
-            obj_id, email, event_code = context.split('|')
-            if not event_code == 'inviteToken':
-                raise InvalidInviteToken
-            obj = cls.objects.get(id=int(obj_id), email=email)
-        except InvalidToken:
-            raise InvalidInviteToken
-        except (InvalidInviteToken, ExpiredInviteToken) as e:
-            raise e
-        except Exception as e:
-            traceback.print_tb(e.__traceback__)
-            raise InvalidInviteToken
-        else:
-            return obj
-
-    def get_invite_token(self):
-        context = "{0}|{1}|{2}".format(self.id, self.user_id, self.license_id)
+        context = "{0}|{1}|{2}".format(self.id, self.email, self.license_id)
         token_bytes = self.fernet.encrypt(context.encode('utf-8'))
         # removing '=' to use token as url param
         return token_bytes.decode('utf-8').rstrip('=')
@@ -594,13 +565,13 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
             token_data = token + ('=' * (4 - len(token) % 4))
             token_data = token_data.encode('utf-8')
             timestamp = cls.fernet.extract_timestamp(token_data)
-            if timestamp + cls.TTL < current_time:
+            if timestamp + cls.TLL < current_time:
                 raise ExpiredInviteToken
             if current_time + cls._MAX_CLOCK_SKEW < timestamp:
                 raise InvalidInviteToken
             context = cls.fernet.decrypt(token_data).decode('utf-8')
-            obj_id, user_id, license_id = context.split('|')
-            obj = cls.objects.get(id=int(obj_id), user_id=user_id, license_id=license_id)
+            obj_id, email, license_id = context.split('|')
+            obj = cls.objects.get(id=int(obj_id), email=email, license_id=license_id)
         except (InvalidToken, cls.DoesNotExist):
             raise InvalidInviteToken
         except (InvalidInviteToken, ExpiredInviteToken) as e:

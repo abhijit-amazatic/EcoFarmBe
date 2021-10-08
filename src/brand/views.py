@@ -817,10 +817,10 @@ class UserInvitationVerificationView(GenericAPIView):
                     organization=instance.license.organization,
                     user=user,
                 )
-                for role in instance.roles:
+                for role in instance.roles.all():
                     organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
                         organization_user=organization_user,
-                        role=instance.role,
+                        role=role,
                     )
                     organization_user_role.licenses.add(instance.license)
 

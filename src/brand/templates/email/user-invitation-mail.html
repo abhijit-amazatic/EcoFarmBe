@@ -5,8 +5,7 @@
 <div style="padding-left:15px;">
     <div >
         <p style='font-size:16px !important;color: #013c48;'>
-            You have been invited to join license profile <strong>{{license}}</strong> (organization: <strong>{{organization}}</strong>
-        {% if licenses %} as following roles
+            You have been invited to join license profile <strong>{{license}}</strong> (organization: <strong>{{organization}}</strong>) as following roles.
         </p>
         <ul style='font-size:16px !important;color: #013c48;'>
             {% for role in roles %}
@@ -14,9 +13,6 @@
             {% endfor %}
         </ul>
         <p style='font-size:16px !important;color: #013c48;'>
-        {% else %}
-            <br>
-        {% endif %}
             Please click the link below to accept invitation.<br>
             <span style="font-size:12px !important;color: #013c48;">(Link is valid for 24 hours.)</span><br>
             <a style="font-size:16px !important;color: #90835c;" href="{{link}}">{{link}}</a>
@@ -24,3 +20,4 @@
     </div>
 </div>
 {% endblock %}
+

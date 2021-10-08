@@ -22,6 +22,7 @@ class NestedModelSerializer:
 
     def create(self, validated_data):
         parent_field_default = self.context.get('parent_field_default')
+        parent_field_default = {k: v for k, v in parent_field_default.items() if not '__' in k}
         if parent_field_default:
             validated_data.update(parent_field_default)
         return super().create(validated_data)
@@ -101,7 +102,7 @@ class InviteUserRelatedField(serializers.RelatedField):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(organization=self.context.get('organization'))
+        queryset = queryset.filter(organization=self.context.get('license__organization'))
         return queryset
 
 

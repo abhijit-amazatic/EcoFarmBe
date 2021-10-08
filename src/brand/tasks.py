@@ -94,7 +94,7 @@ def send_async_invitation(invite_obj_id):
             'email': invite_obj.email,
             'organization': invite_obj.license.organization.name,
             'roles': [x.name for x in invite_obj.roles.all()],
-            'license': invite_obj.role.name,
+            'license': f"{invite_obj.license.license_number} | {invite_obj.license.legal_business_name}",
             'phone': invite_obj.phone.as_e164,
             # 'token': invite_obj.get_invite_token(),
             'link':  '{}/verify-user-invitation?code={}'.format(settings.FRONTEND_DOMAIN_NAME.rstrip('/'), invite_obj.get_invite_token()),
@@ -103,7 +103,7 @@ def send_async_invitation(invite_obj_id):
 
         try:
             mail_send(
-                "user-invitation-mail.html",
+                "email/user-invitation-mail.html",
                 context,
                 "Thrive Society Invitation.",
                 context.get('email'),
@@ -111,7 +111,7 @@ def send_async_invitation(invite_obj_id):
         except Exception as e:
             traceback.print_tb(e.__traceback__)
         else:
-            msg = 'You have been invited to join organization "{organization}" as {role}.\nPlease check your email {email}'.format(**context)
+            msg = 'You have been invited to join license profile {license} under organization "{organization}".\nPlease check your email {email}'.format(**context)
             send_sms(context['phone'], msg)
 
 
