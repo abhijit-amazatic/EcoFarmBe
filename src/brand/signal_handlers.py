@@ -10,7 +10,6 @@ Organization = apps.get_model('brand', 'Organization')
 OrganizationRole = apps.get_model('brand', 'OrganizationRole')
 # OrganizationUser = apps.get_model('brand', 'OrganizationUser')
 # OrganizationUserRole = apps.get_model('brand', 'OrganizationUserRole')
-# OrganizationUserInvite = apps.get_model('brand', 'OrganizationUserInvite')
 
 
 @receiver(signals.post_save, sender=apps.get_model('brand', 'Organization'))

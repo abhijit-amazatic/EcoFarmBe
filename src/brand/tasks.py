@@ -43,8 +43,8 @@ from .models import (
     OrganizationRole,
     OrganizationUser,
     OrganizationUserRole,
-    OrganizationUserInvite,
     OnboardingDataFetch,
+    LicenseUserInvite,
 )
 from .task_helpers import (
     insert_data_from_crm,
@@ -85,8 +85,8 @@ def send_async_invitation(invite_obj_id):
     Async send organization user invitation.
     """
     try:
-        invite_obj = OrganizationUserInvite.objects.get(id=invite_obj_id)
-    except OrganizationUserInvite.DoesNotExist:
+        invite_obj = LicenseUserInvite.objects.get(id=invite_obj_id)
+    except LicenseUserInvite.DoesNotExist:
         pass
     else:
         context = {
@@ -160,7 +160,7 @@ def invite_profile_contacts(profile_contact_id):
 
 
             if not license_obj.organization.created_by.email == employee['employee_email']:
-                invite = OrganizationUserInvite.objects.create(
+                invite = LicenseUserInvite.objects.create(
                     full_name=employee['employee_name'],
                     email=employee['employee_email'],
                     phone=employee['phone'],

@@ -9,7 +9,7 @@ PrimaryPhoneTOTPDevice = apps.get_model('user', 'PrimaryPhoneTOTPDevice')
 Organization = apps.get_model('brand', 'Organization')
 OrganizationUser = apps.get_model('brand', 'OrganizationUser')
 OrganizationUserRole = apps.get_model('brand', 'OrganizationUserRole')
-OrganizationUserInvite = apps.get_model('brand', 'OrganizationUserInvite')
+LicenseUserInvite = apps.get_model('brand', 'LicenseUserInvite')
 
 
 @receiver(signals.pre_save, sender=apps.get_model('user', 'User'))
@@ -40,21 +40,22 @@ def post_save_user(sender, instance, created, **kwargs):
 
     if created:
         ###################### user invite #####################
-        invites = OrganizationUserInvite.objects.filter(
+        invites = LicenseUserInvite.objects.filter(
             email=instance.email,
             status__in=['pending', 'user_joining_platform']
         )
         for invite in invites:
             if invite.is_invite_accepted:
                 organization_user, _ = OrganizationUser.objects.get_or_create(
-                    organization=invite.organization,
+                    organization=invite.license.organization,
                     user=instance,
                 )
-                organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
-                    organization_user=organization_user,
-                    role=invite.role,
-                )
-                organization_user_role.licenses.add(*invite.licenses.all())
+                for role in invites.roles:
+                    organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
+                        organization_user=organization_user,
+                        role=role,
+                    )
+                    organization_user_role.licenses.add(invite.license)
                 invite.status = 'completed'
                 invite.save()
             elif invite.status == 'user_joining_platform':

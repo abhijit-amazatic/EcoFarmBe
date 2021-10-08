@@ -53,7 +53,6 @@ tracking_app_models = {
         "License",
         # "OnboardingDataFetch",
         # "OrganizationUserRole",
-        # "OrganizationUserInvite",
         "ProfileContact",
         "LicenseProfile",
         "CultivationOverview",

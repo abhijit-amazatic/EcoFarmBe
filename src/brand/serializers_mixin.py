@@ -4,7 +4,6 @@ from .exceptions import (InvalidInviteToken, ExpiredInviteToken)
 from .models import (
     License,
     Brand,
-    OrganizationUserInvite,
     OrganizationRole,
     LicenseUserInvite,
 )

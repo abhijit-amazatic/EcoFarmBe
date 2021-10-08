@@ -65,7 +65,6 @@ from .models import (
     OrganizationUser,
     OrganizationUserRole,
     # Permission,
-    OrganizationUserInvite,
     LicenseUserInvite,
     OnboardingDataFetch,
 )
