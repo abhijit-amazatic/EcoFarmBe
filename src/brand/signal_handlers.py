@@ -62,10 +62,9 @@ def pre_save_license_profile(sender, instance, **kwargs):
         except Exception:
            pass
 
-    if not instance.name:
-        profile_name = instance.get_profile_name()
-        if profile_name:
-            instance.name = profile_name
+    profile_name = instance.get_profile_name()
+    if profile_name:
+        instance.name = profile_name
 
 
 
