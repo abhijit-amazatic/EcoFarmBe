@@ -251,11 +251,16 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
     extra = 0
     model = LicenseProfile
     can_delete = False
-    readonly_fields = ('name', 'is_draft', 'agreement_signed',)
-    exclude = (
+    readonly_fields = (
         'name',
+        'is_draft',
+        'agreement_signed',
         'is_account_updated_in_crm',
         'is_vendor_updated_in_crm',
+
+    )
+    exclude = (
+        'name',
     )
 
 
@@ -306,17 +311,25 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
             return obj.license_profile.zoho_crm_vendor_id
     zoho_crm_vendor_id.admin_order_field = '-license_profile__zoho_crm_vendor_id'
 
-    def is_account_updated_in_crm(self, obj):
+    def crm_license(self, obj):
+        return obj.is_updated_in_crm
+    crm_license.boolean = True
+    crm_license.admin_order_field = '-is_updated_in_crm'
+    crm_license.short_description = 'license'
+
+    def crm_account(self, obj):
         if obj.license_profile:
             return obj.license_profile.is_account_updated_in_crm
-    is_account_updated_in_crm.boolean = True
-    is_account_updated_in_crm.admin_order_field = '-license_profile__is_account_updated_in_crm'
+    crm_account.boolean = True
+    crm_account.admin_order_field = '-license_profile__is_account_updated_in_crm'
+    crm_account.short_description = 'account'
 
-    def is_vendor_updated_in_crm(self, obj):
+    def crm_vendor(self, obj):
         if obj.license_profile:
             return obj.license_profile.is_vendor_updated_in_crm
-    is_vendor_updated_in_crm.boolean = True
-    is_vendor_updated_in_crm.admin_order_field = '-license_profile__is_vendor_updated_in_crm'
+    crm_vendor.boolean = True
+    crm_vendor.admin_order_field = '-license_profile__is_vendor_updated_in_crm'
+    crm_vendor.short_description = 'vendor'
 
     def get_search_results(self, request, queryset, search_term):
         """
@@ -332,10 +345,12 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     form = LicenseUpdatedForm
     extra = 0
     model = License
-    list_display = ('name', 'license_number','legal_business_name', 'business_dba', 'client_id', 'status','profile_category', 'organization', 'brand', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'is_updated_in_crm', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm','approved_on','approved_by','created_on','updated_on',)
+    list_display = ('business_dba', 'client_id', 'license_number','legal_business_name', 'organization', 'brand', 'profile_category', 'status','approved_on','approved_by','created_on','updated_on',)
+    list_display_integration_admin = ('business_dba', 'client_id', 'license_number','legal_business_name', 'profile_category', 'status', 'zoho_crm_id', 'zoho_crm_account_id', 'zoho_crm_vendor_id', 'crm_license', 'crm_account', 'crm_vendor', 'zoho_books_customer_ids', 'zoho_books_vendor_ids', 'approved_on','approved_by','created_on','updated_on',)
+
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
-    search_fields = ('brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email', 'status','license_number', 'legal_business_name', )
-    readonly_fields = ('created_on','updated_on', 'client_id', 'is_account_updated_in_crm', 'is_vendor_updated_in_crm', 'crm_output', 'books_output', 'is_updated_in_crm')
+    search_fields = ('license_number', 'legal_business_name', 'client_id', 'license_profile__business_dba', 'brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email',)
+    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output', 'books_output', 'is_updated_in_crm')
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )
@@ -367,6 +382,12 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
         form = super(MyLicenseAdmin, self).get_form(request, *args, **kwargs)
         form.request = request
         return form    
+
+    def get_list_display(self, request):
+        if request.user.email in getattr(settings, 'INTEGRATION_ADMIN_EMAILS', []):
+            return self.list_display_integration_admin
+        return self.list_display_integration_admin
+        return self.list_display
 
 
 class OrganizationRoleNestedAdmin(nested_admin.NestedTabularInline):
