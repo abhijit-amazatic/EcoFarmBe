@@ -1,4 +1,5 @@
 import json
+from logging import error
 import operator
 from functools import reduce
 from datetime import (datetime, timedelta)
@@ -656,6 +657,92 @@ def fetch_inventory(inventory_name, days=1, price_data=None, is_composite=False)
                     'error': exc
                     })
                 continue
+
+def fetch_inventory_item_fields(inventory_name, fields=(), days=None, is_composite=False):
+    """
+    Fetch latest inventory from Zoho Inventory.
+    """
+    cultivar = None
+    has_more = True
+    page = 0
+
+    params = {'page': page}
+    if days:
+        yesterday = datetime.now() - timedelta(days=days)
+        date = datetime.strftime(yesterday, '%Y-%m-%dT%H:%M:%S-0000')
+        params['last_modified_time'] = date
+
+    while has_more:
+        if is_composite:
+            records = get_composite_item(inventory_name)
+        else:
+            records = get_inventory_items(inventory_name, params=params)
+        try:
+            has_more = records['page_context']['has_more_page']
+            params['page'] = records['page_context']['page'] + 1
+        except Exception as e:
+            print({'error': e, 'response': records,})
+            return None
+        else:
+            for record in records['items']:
+                try:
+                    if is_composite:
+                        record.update(get_composite_item(inventory_name, item_id=record['item_id']))
+                    if 'pre_tax_price' in fields:
+                        try:
+                            record['pre_tax_price'] = get_pre_tax_price(record)
+                        except KeyError:
+                            pass
+                    if 'cultivar' in fields:
+                        try:
+                            cultivar = get_cultivar_from_db(record['cf_strain_name'])
+                            if cultivar:
+                                record['cultivar'] = cultivar
+                        except KeyError:
+                            pass
+
+                    if 'labtest' in fields:
+                        try:
+                            labtest = get_labtest_from_db(record['cf_lab_test_sample_id'])
+                            if labtest:
+                                record['labtest'] = labtest
+                        except KeyError:
+                            pass
+
+                    if any(f in fields for f in ('documents', 'thumbnail_url', 'mobile_url')):
+                        documents, thumbnail_url, mobile_url = check_documents(inventory_name, record)
+                        record['documents'] = documents
+                        record['thumbnail_url'] = thumbnail_url
+                        record['mobile_url'] = mobile_url
+
+
+                    if any(f in fields for f in ('county_grown', 'appellation', 'nutrients', 'ethics_and_certification')):
+                        try:
+                            if record['cf_vendor_name']:
+                                record.update(get_record_data(record['cf_vendor_name']))
+                        except KeyError:
+                            pass
+
+                    if 'parent_category_name' in fields:
+                        try:
+                            if record['category_name']:
+                                record['parent_category_name'] = get_parent_category(record['category_name'])
+                        except KeyError:
+                            pass
+
+                    record['inventory_name'] = get_inventory_name_from_db(inventory_name)
+                    update_data = {k: v for k, v in record.items() if k in fields}
+                    qs = InventoryModel.objects.filter(item_id=record['item_id'])
+                    qs.update(**update_data)
+                    # update_price_change(price_data, record)
+                except Exception as exc:
+                    print({
+                        'item_id': record['item_id'],
+                        'error': exc
+                        })
+                    continue
+
+
 
 def sync_inventory(inventory_name, response):
     """

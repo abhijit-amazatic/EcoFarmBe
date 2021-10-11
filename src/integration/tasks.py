@@ -15,7 +15,7 @@ from brand.models import (License, LicenseProfile)
 from .crm import (insert_users, fetch_labtests, create_records, delete_record,
                   update_in_crm, update_license, search_query)
 from .crm.get_records import (get_account_associated_cultivars_of_interest)
-from .inventory import (fetch_inventory, fetch_inventory_from_list)
+from .inventory import (fetch_inventory, fetch_inventory_from_list, fetch_inventory_item_fields)
 from .books import (send_estimate_to_sign, create_customer_in_books)
 from .crm import (fetch_cultivars, fetch_licenses, insert_records)
 from  .sign import (upload_pdf_box,)
@@ -61,6 +61,23 @@ def fetch_inventory_on_interval():
         #        'deleted': inventory_before[0],
                 'inserted': inventory_after,
                 'licenses': licenses}
+    except Exception as exc:
+        print(exc)
+        return {'status_code': 400,
+                'error': exc}
+@app.task(queue="general")
+def fetch_inventory_item_fields_task(fields=(), days=None):
+    """
+    Update inventory on every interval from Zoho Inventory.
+    """
+    try:
+        fetch_inventory_item_fields('inventory_efd', fields=fields, days=days)
+        fetch_inventory_item_fields('inventory_efl', fields=fields, days=days)
+        inventory_after = Inventory.objects.all().count()
+        return {
+            'status_code': 200,
+            'updated': inventory_after,
+        }
     except Exception as exc:
         print(exc)
         return {'status_code': 400,

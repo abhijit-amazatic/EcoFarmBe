@@ -75,6 +75,7 @@ class Inventory(models.Model):
     manufacturer = models.CharField(_('Manufracturer'), blank=True, null=True, max_length=100)
     category_name = models.CharField(_('Category Name'), max_length=50)
     category_id = models.CharField(_('Category ID'), blank=True, null=True, max_length=50)
+    vendor_id = models.CharField(_('Vendor ID'), blank=True, null=True, max_length=50)
     vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
     unit = models.CharField(_('Unit'), blank=True, null=True, max_length=20)
     status = models.CharField(_('Status'), blank=True, null=True, max_length=20)
