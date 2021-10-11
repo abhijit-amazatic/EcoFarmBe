@@ -1011,11 +1011,13 @@ class InventoryEthicsView(APIView):
 
 class CustomInventoryFilterSet(FilterSet):
     status__in = CharInFilter(field_name='status', lookup_expr='in')
+    vendor_name = django_filters.CharFilter(field_name='license_profile__name')
+
     class Meta:
         model = CustomInventory
         fields = {
             'status':['icontains', 'exact'],
-            'vendor_name':['icontains', 'exact'],
+            # 'vendor_name':['icontains', 'exact'],
         }
 
 class CustomInventoryViewSet(viewsets.ModelViewSet):
