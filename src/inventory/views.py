@@ -103,6 +103,7 @@ class DataFilter(FilterSet):
     ethics_and_certification = django_filters.CharFilter(method='get_ethics_and_certification')
     county_grown = django_filters.CharFilter(method='get_county_grown')
     appellation = django_filters.CharFilter(method='get_appellation')
+    extra_documents__file_type = django_filters.CharFilter(method='get_photo_video_items')
     labtest__CBD__in = CharInFilter(field_name='labtest__CBD', lookup_expr='in')
     labtest__THC__in = CharInFilter(field_name='labtest__THC', lookup_expr='in')
     labtest__d_8_THC__in = CharInFilter(field_name='labtest__d_8_THC', lookup_expr='in')
@@ -153,6 +154,17 @@ class DataFilter(FilterSet):
 
     def get_appellation(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,appellation__overlap=value.split(','))
+        return items
+    
+    def get_photo_video_items(self, queryset, name, value):
+        check_for = value.split(',')
+        media_map = {'video':['video/mp4','video/quicktime'],
+                     'photo':['image/png','image/jpeg']}
+        if len(check_for) == 2:
+            skus = Documents.objects.filter(status='AVAILABLE',file_type__in=['video/mp4','video/quicktime','image/png','image/jpeg']).values_list('sku',flat=True).distinct()
+        elif len(check_for) == 1:
+            skus = Documents.objects.filter(status='AVAILABLE',file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+        items = queryset.filter(cf_cfi_published=True,status='active',sku__in=skus)
         return items
     
     def cf_strain_name__in(self, queryset, name, values):
