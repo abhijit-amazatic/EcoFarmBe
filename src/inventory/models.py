@@ -109,7 +109,7 @@ class Inventory(models.Model):
     cf_procurement_rep = models.CharField(_('Procurement Rep'), blank=True, null=True, max_length=50)
     cf_cfi_published = models.BooleanField(_('CFI_Published'), blank=True, null=True)
     cf_ifp_farm = models.BooleanField(_('IFP_Farm'), blank=True, null=True)
-    cf_vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=50)
+    cf_vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
     county_grown = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     appellation = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     cf_procurement_confirmed = models.CharField(_('PnC'), blank=True, null=True, max_length=50)
