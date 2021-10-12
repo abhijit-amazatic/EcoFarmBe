@@ -22,7 +22,7 @@ from integration.apps.aws import (create_presigned_url, )
 from integration.inventory import (
     get_inventory_obj,
     get_item_category_id,
-    get_vendor_id,
+    get_vendor_id_by_client_id,
 )
 from integration.tasks import (
     fetch_inventory_from_list_task,
@@ -287,63 +287,45 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         return '-'.join(sku)
 
     def get_crm_data(self, request, obj):
-        if obj.vendor_name:
-            try:
-                result = search_query('Vendors', obj.vendor_name, 'Vendor_Name')
-            except Exception:
-                self.message_user(request, 'Error while fetching client code from Zoho CRM Vendor', level='error')
+        client_id = obj.license_profile.license.client_id
+        try:
+            result = search_query('Vendors', client_id, 'Client_ID')
+        except Exception as e:
+            self.message_user(request, f'Error while fetching client code from Zoho CRM Vendor: {e}', level='error')
+        else:
+            if result.get('status_code') == 200:
+                data_ls = result.get('response')
+                if data_ls and isinstance(data_ls, list):
+                    for vendor in data_ls:
+                        if vendor.get('Client_ID') == client_id:
+                            if vendor.get('id'):
+                                obj.crm_vendor_id = vendor.get('id')
+                            p_rep = vendor.get('Owner', {}).get('email')
+                            if p_rep:
+                                obj.procurement_rep = p_rep
+                            p_rep_name = vendor.get('Owner', {}).get('name')
+                            if p_rep_name:
+                                obj.procurement_rep_name = p_rep_name
+                            client_code = vendor.get('Client_Code')
+                            if client_code:
+                                obj.client_code = client_code
+                                return client_code
+                            vendor_name = vendor.get('Vendor_Name')
+                            self.message_user(request, f'client code not found for vendor \'{vendor_name}\' (client_id: {client_id}) in Zoho CRM', level='error')
+                            return None
+                self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
+            elif result.get('status_code') == 204:
+                self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
             else:
-                if result.get('status_code') == 200:
-                    data_ls = result.get('response')
-                    if data_ls and isinstance(data_ls, list):
-                        for vendor in data_ls:
-                            if vendor.get('Vendor_Name') == obj.vendor_name:
-                                if vendor.get('id'):
-                                    obj.crm_vendor_id = vendor.get('id')
-                                p_rep = vendor.get('Owner', {}).get('email')
-                                if p_rep:
-                                    obj.procurement_rep = p_rep
-                                p_rep_name = vendor.get('Owner', {}).get('name')
-                                if p_rep_name:
-                                    obj.procurement_rep_name = p_rep_name
-                                # cultivation_type = vendor.get('Cultivation_Type')
-                                # if cultivation_type and isinstance(cultivation_type, list):
-                                #     obj.cultivation_type = vendor.get('Cultivation_Type')[0]
-                                client_code = vendor.get('Client_Code')
-                                if client_code:
-                                    obj.client_code = client_code
-                                    return client_code
-            try:
-                result = search_query('Accounts', obj.vendor_name, 'Account_Name')
-            except Exception:
-                self.message_user(request, 'Error while fetching client code from Zoho CRM Account', level='error')
-            else:
-                if result.get('status_code') == 200:
-                    data_ls = result.get('response')
-                    if data_ls and isinstance(data_ls, list):
-                        for vendor in data_ls:
-                            if vendor.get('Account_Name') == obj.vendor_name:
-                                if not obj.procurement_rep:
-                                    p_rep = vendor.get('Owner', {}).get('email')
-                                    if p_rep:
-                                        obj.procurement_rep = p_rep
-                                    p_rep_name = vendor.get('Owner', {}).get('name')
-                                    if p_rep_name:
-                                        obj.procurement_rep_name = p_rep_name
-                                client_code = vendor.get('Client_Code')
-                                if client_code:
-                                    obj.client_code = client_code
-                                    return client_code
-                    # self.message_user(request, 'Account not found in Zoho CRM', level='error')
-                    self.message_user(request, f'client code not found for vendor \'{obj.vendor_name}\' in Zoho CRM', level='error')
-                elif result.get('status_code') == 204:
-                    self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
-                else:
-                    self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
+                self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
         return None
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
+            if not obj.license_profile:
+                if request:
+                    self.message_user(request, 'No license Profile assigned to the item.', level='error')
+                return None
             item_name = self.generate_name(obj, request=request,)
             if item_name:
                 mcsp_fee = get_item_mcsp_fee(
@@ -374,25 +356,20 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                                 metadata=metadata,
                             )
                             if category_id:
-                                if obj.vendor_name:
-                                    vendor_id = get_vendor_id(inv_obj, obj.vendor_name)
-                                    if not vendor_id and obj.license_profile:
-                                        vendor_id = get_vendor_id(inv_obj, obj.license_profile.license.legal_business_name)
-                                    if vendor_id:
-                                        data = get_new_item_data(
-                                            obj=obj,
-                                            inv_obj=inv_obj,
-                                            item_name=item_name,
-                                            category_id=category_id,
-                                            vendor_id=vendor_id,
-                                            tax=tax,
-                                            mcsp_fee=mcsp_fee,
-                                        )
-                                        self._approve(request, obj, inv_obj, data,)
-                                    else:
-                                        self.message_user(request, 'Vendor not found on zoho', level='error')
+                                vendor_id = get_vendor_id_by_client_id(inv_obj, obj.license_profile.license.client_id)
+                                if vendor_id:
+                                    data = get_new_item_data(
+                                        obj=obj,
+                                        inv_obj=inv_obj,
+                                        item_name=item_name,
+                                        category_id=category_id,
+                                        vendor_id=vendor_id,
+                                        tax=tax,
+                                        mcsp_fee=mcsp_fee,
+                                    )
+                                    self._approve(request, obj, inv_obj, data,)
                                 else:
-                                    self.message_user(request, 'Vendor Name is not set', level='error')
+                                    self.message_user(request, 'Vendor not found on zoho', level='error')
                             else:
                                 self.message_user(request, 'Invalid item category for selected Zoho inventory Organization', level='error')
 

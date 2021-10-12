@@ -66,7 +66,7 @@ ORG_ITEM_CUSTOM_FIELD_MAP_TABLE = (
     ('cf_lpn',                         'cf_lpn',                         'cf_lpn',                         '',                          ),
     ('cf_trim_qty_lbs',                'cf_trim_qty_lbs',                'cf_trim_qty_lbs',                '',                          ),
     ('cf_batch_qty_g',                 'cf_batch_qty_g',                 'cf_batch_qty_g',                 '',                          ),
-    ('cf_client_id',                   'cf_client_id',                   '',                               '',                          ),
+    ('cf_client_id',                   'cf_client_id',                   'cf_client_id',                   'cf_client_id',              ),
     ('cf_cannabinoid_percentage',      'cf_cannabinoid_percentage',      'cf_cannabinoid_percentage',      '',                          ),
     ('cf_cannabinoid_type',            'cf_cannabinoid_type',            'cf_cannabinoid_type',            '',                          ),
     ('cf_manufacturing_date',          '',                               'cf_manufacturing_date',          '',                          ),

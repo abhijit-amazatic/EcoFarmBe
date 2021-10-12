@@ -28,12 +28,16 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
     data['product_type'] = 'goods'
     data['cf_vendor_name'] = vendor_id
     data['cf_client_code'] = obj.client_code
+    data['cf_client_id'] = obj.license_profile.license.client_id
 
     data['cf_strain_name'] = obj.get_cultivar_name
     data['cf_cultivar_type'] = obj.get_cultivar_type
 
     if obj.product_quality_notes:
         data['cf_batch_quality_notes'] = obj.product_quality_notes
+
+    if obj.pricing_position:
+        data['cf_seller_position'] = obj.pricing_position
 
     if obj.payment_terms:
         data['cf_payment_terms'] = obj.payment_terms

@@ -95,6 +95,22 @@ def get_vendor_id(inventory_obj, vendor_name):
             break
     return vendor_id
 
+def get_vendor_id_by_client_id(inventory_obj, client_id):
+    """
+    Get vendor id from zoho using client id.
+    """
+    # client_id = str(client_id)
+    vendor_id = None
+    resp = inventory_obj.get_contact(params={'cf_client_id': client_id, 'contact_type': 'vendor'})
+    if resp.get('code') == 0:
+        for vendor in resp.get('contacts'):
+            if vendor.get('custom_field_hash', {}).get('cf_client_id', '') == str(client_id):
+                if vendor.get('contact_type') == 'vendor':
+                    vendor_id = vendor.get('contact_id')
+                    break
+    return vendor_id
+
+
 def get_user_id(inventory, email):
     """
     Get vendor id from zoho.
