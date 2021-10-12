@@ -21,7 +21,7 @@ from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
 from integration.box import (delete_file,)
-from integration.tasks import (insert_record_to_crm,)
+from integration.tasks import (insert_record_to_crm, create_customer_in_books_task)
 from .tasks import (invite_profile_contacts,)
 from core.utility import (send_async_approval_mail, get_profile_type,send_async_approval_mail_admin,)
 from .models import (
@@ -141,6 +141,12 @@ def update_records(modeladmin, request, queryset):
             license_id=record.id,
             is_update=True)
 update_records.short_description = "Update Records To CRM"
+
+def update_books_records(modeladmin, request, queryset):
+    for record in queryset:
+        create_customer_in_books_task.delay(license_id=record.id)
+
+update_books_records.short_description = "Update Records To Books"
 
 def update_status_to_in_progress(modeladmin, request, queryset):
     for profile in queryset:
@@ -358,7 +364,7 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
     exclude = ('is_seller', 'is_buyer')
-    actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records]
+    actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records, update_books_records]
     list_per_page = 50
 
     verbose_name = "My Book"

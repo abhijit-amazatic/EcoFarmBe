@@ -124,7 +124,7 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                             response = contact_obj.import_vendor_using_crm_vendor_id(crm_profile_id)
                         if response and response.get('code') == 0:
                             contact_id = response.get('data', {}).get('customer_id')
-                        response_dict[contact_type][org_name] = response
+                        response_dict[contact_type][org_name]['CRM import'] = response
                         if not contact_id:
                             r = contact_obj.get_contact_using_crm_account_id(crm_profile_id)
                             try:
@@ -136,7 +136,40 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                             except Exception as e:
                                 print(e)
                     else:
-                        response_dict[contact_type][org_name] = f'Skiped, no CRM {crm_profiles.get(contact_type)} id present in db.'
+                        response_dict[contact_type][org_name]['Error'] = f'Skiped, no CRM {crm_profiles.get(contact_type)} id present in db.'
+                    if contact_id:
+                        contact_persons_parsed = parse_books_fields("contact_persons", 'employees', request)
+                        contact_persons_obj = books_obj.ContactPersons()
+                        contact_persons_update = []
+                        existing_contact_persons = {}
+                        result = contact_persons_obj.get_contact_person(contact_id)
+                        if result.get('code') == 0:
+                            existing_contact_persons = result.get('contact_persons', [])
+                            existing_contact_persons = {c.get('email'): c for c in existing_contact_persons}
+
+                        for contact_person in contact_persons_parsed:
+                            if contact_person.get('email') in existing_contact_persons:
+                                c = existing_contact_persons[contact_person.get('email')]
+                                contact_person.update({'contact_person_id': c.get('contact_person_id')})
+                                contact_persons_update.append(contact_person)
+                            else:
+                                contact_persons_update.append(contact_person)
+                        update_data = {'contact_id': contact_id, 'contact_persons': contact_persons_update}
+                        response = update_contact(books_name, update_data, params=params)
+                        if response.get('code'):
+                            print('Error while updating contact persons.')
+                            print(f'books_name: {books_name}')
+                            print('data: ', update_data)
+                            print('response: ', response)
+                            response_dict[contact_type][org_name]['contact persons update'] = {
+                                'data': update_data,
+                                'response': response,
+                            }
+                        else:
+                            response_dict[contact_type][org_name]['contact persons update'] = {
+                                'data': update_data,
+                                'response': "OK",
+                            }
                 else:
                     try:
                         record_dict = parse_books_customer(request)
@@ -161,9 +194,47 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                             response = create_contact(books_name, record_dict, params=params)
                             contact_id = response.get('contact_id')
                         if response.get('code'):
-                            response_dict[contact_type][org_name] = response
+                            response_dict[contact_type][org_name]['contact'] = response
                         elif contact_id == response.get('contact_id'):
-                            response_dict[contact_type][org_name] = 'OK'
+                            response_dict[contact_type][org_name]['contact'] = 'OK'
+
+
+                        if contact_id:
+                            contact_persons_parsed = parse_books_fields("contact_persons", 'employees', request)
+                            contact_persons_obj = books_obj.ContactPersons()
+                            contact_persons_update = []
+                            existing_contact_persons = {}
+                            result = contact_persons_obj.get_contact_person(contact_id)
+                            if result.get('code') == 0:
+                                existing_contact_persons = result.get('contact_persons', [])
+                                existing_contact_persons = {c.get('email'): c for c in existing_contact_persons}
+
+                            for contact_person in contact_persons_parsed:
+                                if contact_person.get('email') in existing_contact_persons:
+                                    c = existing_contact_persons[contact_person.get('email')]
+                                    contact_person.update({'contact_person_id': c.get('contact_person_id')})
+                                    contact_persons_update.append(contact_person)
+                                else:
+                                    contact_persons_update.append(contact_person)
+                            update_data = {'contact_id': contact_id, 'contact_persons': contact_persons_update}
+                            response = update_contact(books_name, update_data, params=params)
+                            if response.get('code'):
+                                print('Error while updating contact persons.')
+                                print(f'books_name: {books_name}')
+                                print('data: ', update_data)
+                                print('response: ', response)
+                                response_dict[contact_type][org_name]['contact persons update'] = {
+                                    'data': update_data,
+                                    'response': response,
+                                }
+                            else:
+                                response_dict[contact_type][org_name]['contact persons update'] = {
+                                    'data': update_data,
+                                    'response': "OK",
+                                }
+
+
+
                     except Exception as exc:
                         print(exc)
                         debug_vars = ('record_dict', 'contact_id', 'resp')
@@ -226,37 +297,42 @@ def parse_books_fields(k, v, request):
             'phone': value.get('phone')
         }
     elif v == 'employees':
-        contact_persons = list()
+        contact_persons = dict()
         for value in request.get(v, None):
             email = value.get('employee_email')
-            is_duplicate = is_duplicate_contact(email, contact_persons)
-            if is_duplicate == False:
-                contact_persons.append({
-                    'first_name': value.get('employee_name'),
-                    'last_name': value.get('last_name'),
-                    'email': value.get('employee_email'),
-                    'phone': value.get('phone'),
-                    'mobile': value.get('phone'),
-                    'designation': value.get('roles')[0],
-                    'department': value.get('department'),
-                    # 'is_primary_contact': is_primary,
-                    'skype': value.get('skype'),
-                })
-        return contact_persons
+            if email:
+                role = ''
+                roles = value.get('roles')
+                if roles and isinstance(roles, list):
+                    role = roles[0]
+                if email not in contact_persons:
+                    first_name = ''
+                    last_name = ''
+                    full_name = value.get('employee_name')
+                    if full_name and isinstance(full_name, str):
+                        full_name = full_name.split()
+                        first_name = ' '.join(full_name[0:-1])
+                        last_name = full_name[-1]
+                    contact_persons[email] = {
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'email': value.get('employee_email'),
+                        'phone': value.get('phone'),
+                        # 'mobile': value.get('phone'),
+                        'designation': role,
+                        # 'department': value.get('department'),
+                        # 'is_primary_contact': is_primary,
+                        # 'skype': value.get('skype'),
+                    }
+                else:
+                    if role and not contact_persons[email]['designation']:
+                        contact_persons[email]['designation'] = role
+        return list(contact_persons.values())
     elif v == 'contact_type':
         if request.get('is_buyer'):
             return 'customer'
         elif request.get('is_seller'):
             return 'vendor'
-        
-def is_duplicate_contact(email, contact_persons):
-    """
-    Check if contact is duplicate.
-    """
-    for contact in contact_persons:
-        if email == contact.get('email'):
-            return True
-    return False
 
 def update_available_for_sale(estimate):
     """
