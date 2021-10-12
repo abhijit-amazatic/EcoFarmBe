@@ -358,9 +358,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Return inventory list queryset with summary.
         """
         page_size = request.query_params.get('page_size', 50)
-        statuses = request.query_params.get('cf_status__in')
-        summary = self.filter_queryset(self.get_queryset())
-        summary = get_inventory_summary(summary, statuses)
+        statuses = request.query_params.get('cf_status__in')   
         params = dict()
         for k, v in request.query_params.items():
             if k not in ['cf_status__in', 'order-by', 'page', 'page_size'] and v:
@@ -369,8 +367,10 @@ class InventoryViewSet(viewsets.ModelViewSet):
         request.query_params.pop('cf_status__in')
         filtered_qs = self.filter_queryset(self.get_queryset())
         category_count = get_category_count(params,filtered_qs)
-        request.query_params['cf_status__in'] = statuses
-        queryset = Paginator(self.filter_queryset(self.get_queryset()), page_size)
+        #request.query_params['cf_status__in'] = statuses
+        qs = filtered_qs.filter(cf_status__in = statuses.split(','))
+        summary = get_inventory_summary(qs, statuses)
+        queryset = Paginator(qs, page_size)
         page = int(request.query_params.get('page', 1))
         if page > queryset.num_pages:
             return Response({
