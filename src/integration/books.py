@@ -137,24 +137,11 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                                 print(e)
                     else:
                         response_dict[contact_type][org_name]['Error'] = f'Skiped, no CRM {crm_profiles.get(contact_type)} id present in db.'
-                    if contact_id:
-                        contact_persons_parsed = parse_books_fields("contact_persons", 'employees', request)
-                        contact_persons_obj = books_obj.ContactPersons()
-                        contact_persons_update = []
-                        existing_contact_persons = {}
-                        result = contact_persons_obj.get_contact_person(contact_id)
-                        if result.get('code') == 0:
-                            existing_contact_persons = result.get('contact_persons', [])
-                            existing_contact_persons = {c.get('email'): c for c in existing_contact_persons}
 
-                        for contact_person in contact_persons_parsed:
-                            if contact_person.get('email') in existing_contact_persons:
-                                c = existing_contact_persons[contact_person.get('email')]
-                                contact_person.update({'contact_person_id': c.get('contact_person_id')})
-                                contact_persons_update.append(contact_person)
-                            else:
-                                contact_persons_update.append(contact_person)
-                        update_data = {'contact_id': contact_id, 'contact_persons': contact_persons_update}
+                    if contact_id:
+                        parsed_contact_persons = parse_books_fields("contact_persons", 'employees', request)
+                        contact_persons_update = get_contact_persons_to_update(books_name, contact_id, parsed_contact_persons)
+                        update_data = {'contact_id': contact_id, 'contact_persons': contact_persons_update }
                         response = update_contact(books_name, update_data, params=params)
                         if response.get('code'):
                             print('Error while updating contact persons.')
@@ -184,8 +171,7 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                                     contact_id = resp.get('contact_id')
 
                         if contact_id:
-                            if 'contact_persons' in record_dict:
-                                record_dict.pop('contact_persons')
+                            record_dict['contact_persons'] = get_contact_persons_to_update(books_name, contact_id, record_dict.get('contact_persons', []))
                             record_dict['contact_id'] = contact_id
                             response = update_contact(books_name, record_dict, params=params)
                         else:
@@ -193,46 +179,14 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                                 record_dict.pop('contact_id')
                             response = create_contact(books_name, record_dict, params=params)
                             contact_id = response.get('contact_id')
+ 
                         if response.get('code'):
-                            response_dict[contact_type][org_name]['contact'] = response
-                        elif contact_id == response.get('contact_id'):
-                            response_dict[contact_type][org_name]['contact'] = 'OK'
-
-
-                        if contact_id:
-                            contact_persons_parsed = parse_books_fields("contact_persons", 'employees', request)
-                            contact_persons_obj = books_obj.ContactPersons()
-                            contact_persons_update = []
-                            existing_contact_persons = {}
-                            result = contact_persons_obj.get_contact_person(contact_id)
-                            if result.get('code') == 0:
-                                existing_contact_persons = result.get('contact_persons', [])
-                                existing_contact_persons = {c.get('email'): c for c in existing_contact_persons}
-
-                            for contact_person in contact_persons_parsed:
-                                if contact_person.get('email') in existing_contact_persons:
-                                    c = existing_contact_persons[contact_person.get('email')]
-                                    contact_person.update({'contact_person_id': c.get('contact_person_id')})
-                                    contact_persons_update.append(contact_person)
-                                else:
-                                    contact_persons_update.append(contact_person)
-                            update_data = {'contact_id': contact_id, 'contact_persons': contact_persons_update}
-                            response = update_contact(books_name, update_data, params=params)
-                            if response.get('code'):
-                                print('Error while updating contact persons.')
-                                print(f'books_name: {books_name}')
-                                print('data: ', update_data)
-                                print('response: ', response)
-                                response_dict[contact_type][org_name]['contact persons update'] = {
-                                    'data': update_data,
+                            response_dict[contact_type][org_name] = {
+                                    'data': record_dict,
                                     'response': response,
                                 }
-                            else:
-                                response_dict[contact_type][org_name]['contact persons update'] = {
-                                    'data': update_data,
-                                    'response': "OK",
-                                }
-
+                        elif contact_id == response.get('contact_id'):
+                            response_dict[contact_type][org_name] = 'OK'
 
 
                     except Exception as exc:
@@ -256,6 +210,29 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
         final_response_list.append(response_dict)
 
     return final_response_list
+
+def get_contact_persons_to_update(books_name, contact_id, parsed_contact_persons):
+    books_contact_persons = []
+    books_obj = get_books_obj(books_name)
+    contact_persons_obj = books_obj.ContactPersons()
+    result = contact_persons_obj.get_contact_person(contact_id)
+    if result.get('code') == 0:
+        books_contact_persons = [
+            {k: v for k, v in c.items() if k in ('contact_person_id', 'first_name', 'last_name', 'email', 'phone', 'designation')}
+            for c in result.get('contact_persons', [])
+        ]
+
+    parsed_contact_persons = {c.get('email'): c for c in parsed_contact_persons}
+    updated_contact_persons = []
+
+    for contact_person in books_contact_persons:
+        if contact_person.get('email') in parsed_contact_persons:
+            c = parsed_contact_persons.pop(contact_person.get('email'))
+            contact_person.update({k:v for k, v in c.items() if v})
+        updated_contact_persons.append(contact_person)
+    updated_contact_persons += list(parsed_contact_persons.values())
+
+    return updated_contact_persons
 
 def parse_books_customer(request):
     books_dict = get_format_dict('Books_Customer')
