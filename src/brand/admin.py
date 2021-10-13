@@ -14,6 +14,7 @@ from django.db import transaction
 from django_json_widget.widgets import JSONEditorWidget
 import nested_admin
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
+import integration
 from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
@@ -293,6 +294,28 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     #ImportExportModelAdmin
     Configuring License
     """
+
+    integration_fields = ('zoho_crm_id', 'is_updated_in_crm', 'zoho_books_customer_ids', 'zoho_books_vendor_ids','crm_output', 'books_output',)
+
+    def get_fieldsets(self, request, obj=None):
+        """
+        Hook for specifying fieldsets.
+        """
+
+        if self.fieldsets:
+            return self.fieldsets
+        return [
+            (None, {
+                'fields': (f for f in self.get_fields(request, obj) if f not in self.integration_fields),
+            }),
+            ('Integration Info', {
+                'classes': ('collapse',),
+                'fields': self.integration_fields,
+            }),
+
+        ]
+
+
     def approved_on(self, obj):
         return obj.license_profile.approved_on
 
@@ -394,7 +417,6 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     def get_list_display(self, request):
         if request.user.email in getattr(settings, 'INTEGRATION_ADMIN_EMAILS', []):
             return self.list_display_integration_admin
-        return self.list_display_integration_admin
         return self.list_display
 
 

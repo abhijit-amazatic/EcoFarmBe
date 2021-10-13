@@ -205,14 +205,16 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     )
 
 
-    brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), null=True, on_delete=SET_NULL,)
     organization = models.ForeignKey(
         Organization,
         verbose_name=_('Organization'),
         related_name='licenses',
         on_delete=models.CASCADE,
     )
+    brand = models.ForeignKey(Brand, verbose_name=_('Brand'), on_delete=models.CASCADE, blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Created By'), null=True, on_delete=SET_NULL,)
+    owner_or_manager = models.CharField(
+        _('Owner or Manager'), blank=True, null=True, max_length=12)
     client_id = models.PositiveIntegerField(
         validators=[client_id_validator],
         default=get_client_id,
@@ -220,33 +222,33 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         help_text="Randomly genrated 6 digit number.",
     )
 
-    license_type = models.CharField(
-        _('License Type'), blank=True, null=True, max_length=255)
-    owner_or_manager = models.CharField(
-        _('Owner or Manager'), blank=True, null=True, max_length=12)
-    legal_business_name = models.CharField(
-        _('Legal Business Name'), blank=True, null=True, max_length=255)
     license_number = models.CharField(
         _('License Number'), blank=True, null=True, max_length=255)
-    expiration_date = models.DateField(
-        _('Expiration Date'), blank=True, null=True, default=None)
+    legal_business_name = models.CharField(
+        _('Legal Business Name'), blank=True, null=True, max_length=255)
     issue_date = models.DateField(
         _('Issue Date'), blank=True, null=True, default=None)
-    premises_address = models.TextField(blank=True, null=True)
-    premises_county = models.CharField(
-        _('Premises County'), blank=True, null=True, max_length=255)
+    expiration_date = models.DateField(
+        _('Expiration Date'), blank=True, null=True, default=None)
+    license_type = models.CharField(
+        _('License Type'), blank=True, null=True, max_length=255)
+    profile_category = models.CharField(_('Profile Category'), blank=True, null=True, max_length=255)
+    cultivation_type = models.CharField(_('Cultivation Type'), choices=CULTIVATION_TYPE_CHOICES, max_length=255, blank=True, null=True)
     business_structure = models.CharField(
         _('Business sructure'), blank=True, null=True, max_length=255)
     tax_identification = models.CharField(
         _('Tax Identification'), blank=True, null=True, max_length=255)
     ein_or_ssn = models.CharField(
         _('EIN or SSN'), blank=True, null=True, max_length=255)
+    premises_apn = models.CharField(
+        _('Premises APN'), blank=True, null=True, max_length=255)
+    premises_address = models.TextField(blank=True, null=True)
+    premises_county = models.CharField(
+        _('Premises County'), blank=True, null=True, max_length=255)
     premises_city = models.CharField(
         _('Premises City'), blank=True, null=True, max_length=255)
     zip_code = models.CharField(
         _('Premises Zip'), blank=True, null=True, max_length=255)
-    premises_apn = models.CharField(
-        _('Premises APN'), blank=True, null=True, max_length=255)
     premises_state = models.CharField(
         _('Premises State'), blank=True, null=True, max_length=255)
     uploaded_license_to = models.CharField(
@@ -255,30 +257,28 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         _('Uploaded Sellers Permit To'), blank=True, null=True, max_length=255)
     uploaded_w9_to = models.CharField(
         _('Uploaded W9  To'), blank=True, null=True, max_length=255)
+    box_folder_id = models.CharField(_('Box Folder Id'), max_length=100, blank=True, null=True)
+    box_folder_url = models.CharField(_('Box Folder URL'), max_length=255, blank=True, null=True)
     associated_program = models.CharField(
         _('Associated_program'), blank=True, null=True, max_length=255)
-    profile_category = models.CharField(_('Profile Category'), blank=True, null=True, max_length=255)
     is_buyer = models.BooleanField(_('Is Buyer/accounts(if individual user)'), default=False)
     is_seller = models.BooleanField(_('Is Seller/Vendor(if individual user)'), default=False)
-    is_updated_in_crm = models.BooleanField(_('Is License Updated In CRM'), default=False)
+    status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
+    is_notified_before_expiry = models.BooleanField(_('Is Notified Before Expiry'), default=False)
+    is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
+    is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
+    is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
+
+
     zoho_crm_id = models.CharField(_('Zoho CRM ID - License'), max_length=100, blank=True, null=True)
     zoho_books_customer_ids = HStoreField(_('Zoho Books Customer IDs'), blank=True, default=dict)
     zoho_books_vendor_ids = HStoreField(_('Zoho Books Vendor IDs'), blank=True, default=dict)
-    documents = GenericRelation(Documents)
-    is_data_fetching_complete = models.BooleanField(_('Is crm data fetched for existing user'), default=False)
-    status_before_expiry = models.CharField(_('License status before expiry'), max_length=100, blank=True, null=True)
-    is_notified_before_expiry = models.BooleanField(_('Is Notified Before Expiry'), default=False)
-    is_updated_via_trigger = models.BooleanField(_('Is Updated Via Trigger'), default=False)
-    is_contract_downloaded = models.BooleanField(_('Is Contract Downloaded For Offline Sign'), default=False)
-
-
-    box_folder_id = models.CharField(_('Box Folder Id'), max_length=100, blank=True, null=True)
-    box_folder_url = models.CharField(_('Box Folder URL'), max_length=255, blank=True, null=True)
-    cultivation_type = models.CharField(_('Cultivation Type'), choices=CULTIVATION_TYPE_CHOICES, max_length=255, blank=True, null=True)
+    is_updated_in_crm = models.BooleanField(_('Is License Updated In CRM'), default=False)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
     books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
 
     license_status = models.CharField(blank=True, null=True, max_length=255,)
+    documents = GenericRelation(Documents)
 
     def __str__(self):
         return self.legal_business_name or ''
