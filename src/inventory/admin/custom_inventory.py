@@ -342,7 +342,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                         item_quantity=obj.total_batch_quantity,
                         request=request,)
                     if isinstance(tax, float):
-                        if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id or not obj.cultivation_type:
+                        if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                             self.get_crm_data(request, obj)
                         if obj.zoho_organization:
                             inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
