@@ -18,6 +18,7 @@ import integration
 from user.models import (User,)
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django_reverse_admin import ReverseModelAdmin
 from multiselectfield import MultiSelectField
 
@@ -295,7 +296,7 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     Configuring License
     """
 
-    integration_fields = ('zoho_crm_id', 'is_updated_in_crm', 'zoho_books_customer_ids', 'zoho_books_vendor_ids','crm_output', 'books_output',)
+    integration_fields = ('zoho_crm_id', 'is_updated_in_crm', 'zoho_books_customer_ids', 'zoho_books_vendor_ids','crm_output_display', 'books_output_display',)
 
     def get_fieldsets(self, request, obj=None):
         """
@@ -315,6 +316,17 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
 
         ]
 
+    def crm_output_display(self, obj):
+        jw = JSONEditorWidget(options={'modes':['code', 'text', 'view'],'search': True})
+        return jw.render('CRM Output', obj.crm_output, attrs={"id": "crm_output_display"})
+
+    crm_output_display.short_description = 'CRM Output'
+ 
+    def books_output_display(self, obj):
+        jw = JSONEditorWidget(options={'modes':['code', 'text', 'view'],'search': True})
+        return jw.render('Books Output', obj.books_output, attrs={"id": "books_output_display"})
+
+    books_output_display.short_description = 'Books output'
 
     def approved_on(self, obj):
         return obj.license_profile.approved_on
@@ -381,12 +393,12 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
 
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
     search_fields = ('license_number', 'legal_business_name', 'client_id', 'license_profile__business_dba', 'brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email',)
-    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output', 'books_output', 'is_updated_in_crm')
+    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output_display', 'books_output_display', 'is_updated_in_crm')
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
-    exclude = ('is_seller', 'is_buyer')
+    exclude = ('is_seller', 'is_buyer', 'crm_output', 'books_output',)
     actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records, update_books_records]
     list_per_page = 50
 
