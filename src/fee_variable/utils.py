@@ -109,19 +109,15 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
         if lp:
             if lp.license.status == 'approved':
                 program_name = None
-                try:
-                    program_overview = lp.license.program_overview
-                    program_name = program_overview.program_details.get('program_name')
-                except ObjectDoesNotExist:
-                    pass
-                    # self.message_user(request, 'program overview not exist', level='error')
+                if lp.agreement_signed:
+                    program_name = lp.signed_program_name
                 if not program_name and no_tier_fee:
                     if lp.license.is_buyer:
                         program_name = 'IBP No Tier'
                     else:
                         program_name = 'IFP No Tier'
                     if request:
-                        messages.warning(request, f'No program tier found for profile, using {program_name} MCSP fee.',)
+                        messages.warning(request, f'No signed program tier found for profile, using {program_name} MCSP fee.',)
 
                 tier = custom_inventory_variable_program_map.get(program_name, {})
                 inventory_variable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
