@@ -158,12 +158,20 @@ class DataFilter(FilterSet):
     
     def get_photo_video_items(self, queryset, name, value):
         check_for = value.split(',')
-        media_map = {'video':['video/mp4','video/quicktime'],
-                     'photo':['image/png','image/jpeg']}
-        if len(check_for) == 2:
-            skus = Documents.objects.filter(status='AVAILABLE',file_type__in=['video/mp4','video/quicktime','image/png','image/jpeg']).values_list('sku',flat=True).distinct()
-        elif len(check_for) == 1:
-            skus = Documents.objects.filter(status='AVAILABLE',file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+        media_map = {**dict.fromkeys(['photo','no_photo'],['image/png','image/jpeg']),**dict.fromkeys(['video','no_video'],['video/mp4','video/quicktime'])}
+        document_objs =  Documents.objects.filter(status='AVAILABLE').select_related()
+        if len(check_for) == 2 and set(['photo','video']).issubset(check_for):
+            skus = document_objs.filter(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
+        elif len(check_for) == 1 and any(x in ['photo','video'] for x in check_for):
+            skus = document_objs.filter(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+        elif len(check_for) == 2 and set(['no_photo','no_video']).issubset(check_for):
+            skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
+        elif len(check_for) == 1 and any(x in ['no_photo','no_video'] for x in check_for):
+            skus = document_objs.exclude(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+        elif len(check_for) == 2 and any(x in ['no_photo','no_video'] for x in check_for):
+            skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
+        else:
+            skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()     
         items = queryset.filter(cf_cfi_published=True,status='active',sku__in=skus)
         return items
     
