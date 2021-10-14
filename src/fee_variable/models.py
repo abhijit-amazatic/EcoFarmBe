@@ -177,9 +177,9 @@ class VendorInventoryDefaultAccounts(TimeStampFlagModelMixin,models.Model):
 
     zoho_organization = models.CharField(_('Zoho Organization'), unique=True, choices=ZOHO_ORG_CHOICES, max_length=20)
 
-    sales_account = models.CharField(verbose_name=_("Sales Account"), max_length=255, null=True, blank=True)
-    purchase_account = models.CharField(verbose_name=_("Purchase Account"), max_length=255, null=True, blank=True)
-    inventory_account = models.CharField(verbose_name=_("inventory Account"), max_length=255, null=True, blank=True)
+    sales_account = models.CharField(verbose_name=_("Default Sales Account"), max_length=255, null=True, blank=True)
+    purchase_account = models.CharField(verbose_name=_("Default Purchase Account"), max_length=255, null=True, blank=True)
+    inventory_account = models.CharField(verbose_name=_("Default inventory Account"), max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.zoho_organization
@@ -197,3 +197,52 @@ class VendorInventoryDefaultAccounts(TimeStampFlagModelMixin,models.Model):
     class Meta:
         verbose_name = _('Vendor Inventory Default Accounts')
         verbose_name_plural = _('Vendor Inventory Default Accounts')
+
+
+class VendorInventoryCategoryAccounts(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing  CustomInventory variables
+    """
+    CATEGORY_NAME_CHOICES = (
+        ('Flower - Tops', _('Flower - Tops')),
+        ('Flower - Small', _('Flower - Small')),
+        ('Trim', _('Trim')),
+        ('Isolates - CBD', _('Isolates - CBD')),
+        ('Isolates - THC', _('Isolates - THC')),
+        ('Isolates - CBG', _('Isolates - CBG')),
+        ('Isolates - CBN', _('Isolates - CBN')),
+        ('Crude Oil - THC', _('Crude Oil - THC')),
+        ('Crude Oil - CBD', _('Crude Oil - CBD')),
+        ('Distillate Oil - THC', _('Distillate Oil - THC')),
+        ('Distillate Oil - CBD', _('Distillate Oil - CBD')),
+        ('Shatter', _('Shatter')),
+        ('Sauce', _('Sauce')),
+        ('Crumble', _('Crumble')),
+        ('Kief', _('Kief')),
+        ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
+        ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
+        ('Clones', _('Clones')),
+    )
+    default_accounts = models.ForeignKey(VendorInventoryDefaultAccounts, verbose_name=_('Default Accounts'), related_name='category_accounts_set', on_delete=models.CASCADE)
+    item_category = models.CharField(_('Item Category'), choices=CATEGORY_NAME_CHOICES, max_length=50)
+
+    sales_account = models.CharField(verbose_name=_("Sales Account"), max_length=255, null=True, blank=True)
+    purchase_account = models.CharField(verbose_name=_("Purchase Account"), max_length=255, null=True, blank=True)
+    inventory_account = models.CharField(verbose_name=_("inventory Account"), max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.item_category
+
+    def get_new_item_accounts_dict(self):
+        resp = {}
+        if self.sales_account:
+            resp['account_id'] = self.sales_account
+        if self.purchase_account:
+            resp['purchase_account_id'] = self.purchase_account
+        if self.inventory_account:
+            resp['inventory_account_id'] = self.inventory_account
+        return resp
+
+    class Meta:
+        verbose_name = _('Vendor Inventory Category Accounts')
+        verbose_name_plural = _('Vendor Inventory Category Accounts')

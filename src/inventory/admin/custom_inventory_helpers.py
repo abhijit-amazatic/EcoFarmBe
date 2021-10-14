@@ -18,7 +18,12 @@ from ..data import (
 def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp_fee):
     data = {}
     # data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
-    data.update(get_new_items_accounts(zoho_organization=obj.zoho_organization))
+    data.update(
+        get_new_items_accounts(
+            zoho_organization=obj.zoho_organization,
+            item_category=obj.category_name,
+        )
+    )
     data['category_name'] = obj.category_name
     data['category_id'] = category_id
     data['name'] = item_name

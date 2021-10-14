@@ -2,7 +2,13 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 
 from brand.models import (License, LicenseProfile,)
-from .models import (CustomInventoryVariable, TaxVariable, VendorInventoryDefaultAccounts)
+from .models import (
+    CustomInventoryVariable,
+    TaxVariable,
+    VendorInventoryCategoryAccounts,
+    VendorInventoryDefaultAccounts,
+    VendorInventoryCategoryAccounts,
+)
 
 
 custom_inventory_variable_program_map = {
@@ -160,14 +166,15 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
         else:
             msg_error('Item category not supported or not defined.')
 
-def get_new_items_accounts(zoho_organization: str):
+def get_new_items_accounts(zoho_organization: str, item_category: str):
     """
         get ids of sales account, purchase account and inventory account from database for new item.
 
     Args:
-        zoho_org (str): Zoho inventory organization.
+        zoho_organization (str): Zoho inventory organization.
                         choices: 'efd', 'efl', 'efn'.
-
+        iteam_category (str): Vendor inventory iteam category.
+                        eg. 'Flower - Tops', 'Flower - Small', 'Trim', 'Isolates - CBD',.
     Returns:
         dict: Dictionary of account ids for new vendor inventory item.
               sample:
@@ -183,5 +190,10 @@ def get_new_items_accounts(zoho_organization: str):
     except VendorInventoryDefaultAccounts.DoesNotExist:
         pass
     else:
-        resp_dict = obj.get_new_item_accounts_dict()
+        try:
+            cat_obj = obj.category_accounts_set.get(item_category=item_category)
+        except VendorInventoryDefaultAccounts.DoesNotExist:
+            resp_dict = obj.get_new_item_accounts_dict()
+        else:
+            resp_dict = cat_obj.get_new_item_accounts_dict()
     return resp_dict

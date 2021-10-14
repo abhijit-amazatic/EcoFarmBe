@@ -6,6 +6,8 @@ from django.contrib import admin
 from django.conf import settings
 from django.db import models
 
+import nested_admin
+
 from integration.inventory import (get_inventory_obj, )
 from .models import *
 
@@ -40,54 +42,96 @@ class VendorInventoryDefaultAccountsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         instance = kwargs.get('instance')
         if instance and instance.zoho_organization:
-            inv_obj = get_inventory_obj(inventory_name=f'inventory_{instance.zoho_organization}')
-            metadata = {}
-            resp_metadata = inv_obj.get_metadata(params={})
-            if resp_metadata.get('code') == 0:
-                metadata = resp_metadata
-            if metadata:
-                if metadata.get('income_accounts_list'):
-                    sales_account_choices = tuple(
-                        [(None, '---------')] + [
-                            (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
-                            for acc in metadata.get('income_accounts_list')
-                        ]
-                    )
-                    self.fields['sales_account'] = forms.ChoiceField(choices=sales_account_choices, required=False)
+            try:
+                inv_obj = get_inventory_obj(inventory_name=f'inventory_{instance.zoho_organization}')
+                resp_metadata = inv_obj.get_metadata(params={})
+            except Exception as e:
+                print(e)
+            else:
+                if resp_metadata.get('code') == 0:
+                    self.fields_metadata = resp_metadata
+                    self.instance.fields_metadata = resp_metadata
+                self.set_fields_choices()
 
-                if metadata.get('purchase_accounts_list'):
-                    purchase_account_choices = tuple(
-                        [(None, '---------')] + [
-                            (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
-                            for acc in metadata.get('purchase_accounts_list')
-                        ]
-                    )
-                    self.fields['purchase_account'] = forms.ChoiceField(choices=purchase_account_choices, required=False)
+    def set_fields_choices(self):
+        if hasattr(self, 'fields_metadata') and self.fields_metadata:
+            fields_metadata = self.fields_metadata
+            if fields_metadata.get('income_accounts_list'):
+                sales_account_choices = tuple(
+                    [(None, '---------')] + [
+                        (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
+                        for acc in fields_metadata.get('income_accounts_list')
+                    ]
+                )
+                self.fields['sales_account'] = forms.ChoiceField(choices=sales_account_choices, required=False)
 
-                if metadata.get('inventory_accounts_list'):
-                    inventory_account_choices = tuple(
-                        [(None, '---------')] + [
-                            (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
-                            for acc in metadata.get('inventory_accounts_list')
-                        ]
-                    )
-                    self.fields['inventory_account'] = forms.ChoiceField(choices=inventory_account_choices, required=False)
+            if fields_metadata.get('purchase_accounts_list'):
+                purchase_account_choices = tuple(
+                    [(None, '---------')] + [
+                        (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
+                        for acc in fields_metadata.get('purchase_accounts_list')
+                    ]
+                )
+                self.fields['purchase_account'] = forms.ChoiceField(choices=purchase_account_choices, required=False)
+
+            if fields_metadata.get('inventory_accounts_list'):
+                inventory_account_choices = tuple(
+                    [(None, '---------')] + [
+                        (acc['account_id'], f"({acc['account_code']}) {acc['account_name']}" if acc['account_code'] else  acc['account_name']) 
+                        for acc in fields_metadata.get('inventory_accounts_list')
+                    ]
+                )
+                self.fields['inventory_account'] = forms.ChoiceField(choices=inventory_account_choices, required=False)
 
 
     class Meta:
         model = VendorInventoryDefaultAccounts
         fields = '__all__'
 
+class VendorInventoryCategoryAccountsForm(VendorInventoryDefaultAccountsForm):
+
+    def __init__(self, *args, **kwargs):
+        super(VendorInventoryDefaultAccountsForm, self).__init__(*args, **kwargs)
+        if hasattr(self, 'parent_formset') and hasattr(self.parent_formset, 'instance'):
+            if hasattr(self.parent_formset.instance, 'fields_metadata') and self.parent_formset.instance.fields_metadata:
+                self.fields_metadata = self.parent_formset.instance.fields_metadata
+                self.set_fields_choices()
+
+    class Meta:
+        model = VendorInventoryCategoryAccounts
+        fields = '__all__'
 
 
-class VendorInventoryDefaultAccountsAdmin(admin.ModelAdmin):
+
+class VendorInventoryCategoryAccountsNestedAdmin(nested_admin.NestedTabularInline):
+    extra = 0
+    model = VendorInventoryCategoryAccounts
+    readonly_fields = ('created_on','updated_on',)
+    form = VendorInventoryCategoryAccountsForm
+
+    # fieldsets = (
+    #     (None, {
+    #         'fields': (
+    #             'zoho_organization',
+    #             'sales_account',
+    #             'purchase_account',
+    #             'inventory_account',
+    #         )
+    #     }),
+    # )
+
+
+
+class VendorInventoryDefaultAccountsAdmin(nested_admin.NestedModelAdmin):
     """
     Vendor Inventory Default Accounts Admin
     """
     form = VendorInventoryDefaultAccountsForm
+    inlines = [VendorInventoryCategoryAccountsNestedAdmin]
     list_display = ('zoho_organization', 'sales_account', 'purchase_account', 'inventory_account', 'updated_on', 'created_on')
     readonly_fields = ('updated_on', 'created_on')
     create_fields = ('zoho_organization',)
+
 
     fieldsets = (
         (None, {
@@ -117,6 +161,11 @@ class VendorInventoryDefaultAccountsAdmin(admin.ModelAdmin):
             f.update(readonly_fields)
             return tuple(f)
         return readonly_fields
+
+    def get_form(self, request, obj=None, **kwargs):
+        request._zoho_org = obj
+        return super().get_form(request, obj, **kwargs)
+
 
 
 
