@@ -40,14 +40,14 @@ def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None
         if CG.get(category_name, '') == 'Kief':
             tax = get_tax_from_db(tax='trim')
             if isinstance(tax, float):
-                return round(tax/454, 2)
+                return round(tax/454, 5)
         if CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
             trim_tax = get_tax_from_db(tax='trim')
             if isinstance(trim_tax, float):
                 if trim_used:
                     if item_quantity:
                         tax = (trim_tax * trim_used) / item_quantity
-                        return round(tax, 2)
+                        return round(tax, 5)
                     else:
                         msg_error('Item does not have a Batch quantity to calculate.')
                         return None

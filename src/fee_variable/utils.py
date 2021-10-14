@@ -188,7 +188,7 @@ def get_new_items_accounts(zoho_organization: str, item_category: str):
     else:
         try:
             cat_obj = obj.category_accounts_set.get(item_category=item_category)
-        except VendorInventoryDefaultAccounts.DoesNotExist:
+        except VendorInventoryCategoryAccounts.DoesNotExist:
             resp_dict = obj.get_new_item_accounts_dict()
         else:
             resp_dict = cat_obj.get_new_item_accounts_dict()
