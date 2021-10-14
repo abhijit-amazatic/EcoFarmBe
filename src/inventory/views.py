@@ -356,6 +356,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         then few items might be missed from list so keeping these two step qs.
         """
         qs = Inventory.objects.filter(status='active',cf_cfi_published=True)
+        qs = qs.select_related('cultivar', 'labtest')
         if self.request.query_params.get('cf_vendor_name'):
             return qs
         else:
