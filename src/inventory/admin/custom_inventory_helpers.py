@@ -87,12 +87,11 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
         data['cf_date_available'] = str(obj.batch_availability_date or '')
         data['cf_harvest_date'] = str(obj.harvest_date or '')
         data['cf_flower_smalls'] = obj.category_name in ('Flower - Small',)
+        if obj.category_group == 'Flowers' and obj.marketplace_status not in ('Vegging', 'Flowering'):
+            data['cf_grade_seller'] = obj.grade_estimate
         if obj.marketplace_status in ('Vegging', 'Flowering', 'Processing'):
             if obj.quantity_available:
                 data['cf_quantity_estimate'] = int(obj.quantity_available)
-        else:
-            if obj.category_group == 'Flowers':
-                data['cf_grade_seller'] = obj.grade_estimate
 
     elif obj.category_group in ('Kief', 'Terpenes',):
 

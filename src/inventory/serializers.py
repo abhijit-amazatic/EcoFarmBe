@@ -188,6 +188,8 @@ class CustomInventorySerializer(serializers.ModelSerializer):
                     if not attrs.get('cultivar'):
                         errors[field] = f'This field is required for category \'{category_name}\'.'
                 else:
+                    if field == 'grade_estimate' and attrs.get('marketplace_status') in ('Vegging', 'Flowering'):
+                        continue
                     if not attrs.get(field):
                         errors[field] = f'This field is required for category \'{category_name}\'.'
         if errors:
