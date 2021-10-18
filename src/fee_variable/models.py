@@ -244,5 +244,6 @@ class VendorInventoryCategoryAccounts(TimeStampFlagModelMixin,models.Model):
         return resp
 
     class Meta:
+        unique_together = (('default_accounts', 'item_category'), )
         verbose_name = _('Vendor Inventory Category Accounts')
         verbose_name_plural = _('Vendor Inventory Category Accounts')
