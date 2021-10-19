@@ -635,136 +635,268 @@ class GetTemplateStatus(APIView):
         return Response({'code': 1, 'error': 'No request id provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PurchaseOrderView(APIView):
-    """
-    View class for Zoho books purchase orders.
-    """
+class LicenseBillingAndAccountingAPI(APIView):
     permission_classes = (IsAuthenticated,)
-    
+
+    contact_type = 'vendor'
+    detail_view_key = 'po_id'
+    func = {
+        'get_func': get_purchase_order,
+        'list_func': list_purchase_orders,
+    }
+
     def get(self, request):
         """
         Get PO.
         """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('po_id', None):
-            return Response(get_purchase_order(
-                organization_name,
-                request.query_params.get('po_id'),
-                params=request.query_params.dict()))
-        return Response(list_purchase_orders(organization_name, params=request.query_params.dict()))
+        get_func = self.func.get('get_func')
+        list_func = self.func.get('list_func')
 
-class VendorPaymentView(APIView):
+        params = request.query_params.dict()
+        organization_name = params.get('organization_name')
+        if params.get(self.detail_view_key, None):
+            response = Response(get_func(
+                organization_name,
+                params.get(self.detail_view_key),
+                params=params))
+            if response.get('code') and response['code'] != 0:
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response, status=status.HTTP_200_OK)
+
+        else:
+            contact_ids = {}
+
+            if 'license_id' in params:
+                license_id = params.get('license_id')
+                try:
+                    license_obj = License.objects.get(id=license_id)
+                except ObjectDoesNotExist:
+                    return Response({'datails': f'License id {license_id} does not exist.'}, status=400)
+                except ValueError:
+                    return Response({'datails': f'Invalid value passed \'{license_id}\' to license_id.'}, status=400)
+                else:
+                    contact_ids = getattr(license_obj, f'zoho_books_{self.contact_type}_ids')
+
+            if organization_name == 'all':
+                result = dict()
+                for org in BOOKS_ORGANIZATION_LIST:
+                    if 'license_id' in params:
+                        org_short = org.replace('books_', '')
+                        params[f'{self.contact_type}_id'] = contact_ids.get(org_short) or '0'
+                    result[org] = list_func(org, params=params)
+                return Response(result)
+            else:
+                if 'license_id' in params:
+                    org_short = organization_name.replace('books_', '')
+                    params[f'{self.contact_type}_id'] = contact_ids.get(org_short) or '0'
+                response = list_func(organization_name, params=params)
+                if response.get('code') and response['code'] != 0:
+                    return Response(response, status=status.HTTP_400_BAD_REQUEST)
+                return Response(response, status=status.HTTP_200_OK)
+
+
+
+
+
+class PurchaseOrderView(LicenseBillingAndAccountingAPI):
+    """
+    View class for Zoho books purchase orders.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    contact_type = 'vendor'
+    detail_view_key = 'po_id'
+    func = {
+        'get_func': get_purchase_order,
+        'list_func': list_purchase_orders,
+    }
+
+    # def get(self, request):
+    #     """
+    #     Get PO.
+    #     """
+    #     params = request.query_params.dict()
+    #     organization_name = params.get('organization_name')
+    #     if params.get('po_id', None):
+    #         return Response(get_purchase_order(
+    #             organization_name,
+    #             params.get('po_id'),
+    #             params=params))
+    #     else:
+    #         vendor_ids = {}
+    #         if 'license_id' in params:
+    #             license_id = params.get('license_id')
+    #             try:
+    #                 license_obj = License.objects.get(id=license_id)
+    #             except ObjectDoesNotExist:
+    #                 return Response({'datails': f'License id {license_id} does not exist.'}, status=400)
+    #             except ValueError:
+    #                 return Response({'datails': f'Invalid value passed \'{license_id}\' to license_id.'}, status=400)
+    #             else:
+    #                 vendor_ids = license_obj.zoho_books_vendor_ids
+    #         if organization_name == 'all':
+    #             result = dict()
+    #             for org in BOOKS_ORGANIZATION_LIST:
+    #                 if 'license_id' in params:
+    #                     org_short = org.replace('books_', '')
+    #                     params['vendor_id'] = vendor_ids.get(org_short) or ''
+    #                 result[org] = list_purchase_orders(org, params=params)
+    #         else:
+    #             org_short = organization_name.replace('books_', '')
+    #             params['vendor_id'] = vendor_ids.get(org_short) or ''
+    #             result = list_purchase_orders(organization_name, params=params)
+    #         return Response(result)
+
+
+class VendorPaymentView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books vendor payments.
     """
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get payment made.
-        """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('payment_id', None):
-            return Response(get_vendor_payment(
-                organization_name,
-                request.query_params.get('payment_id'),
-                params=request.query_params.dict()))
-        return Response(list_vendor_payments(organization_name, params=request.query_params.dict()))
 
-class CustomerPaymentView(APIView):
+    contact_type = 'vendor'
+    detail_view_key = 'payment_id'
+    func = {
+        'get_func': get_vendor_payment,
+        'list_func': list_vendor_payments,
+    }
+
+    # def get(self, request):
+    #     """
+    #     Get payment made.
+    #     """
+    #     organization_name = request.query_params.get('organization_name')
+    #     if request.query_params.get('payment_id', None):
+    #         return Response(get_vendor_payment(
+    #             organization_name,
+    #             request.query_params.get('payment_id'),
+    #             params=request.query_params.dict()))
+    #     return Response(list_vendor_payments(organization_name, params=request.query_params.dict()))
+
+class CustomerPaymentView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books customer payments received.
     """
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get Payment received.
-        """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('payment_id', None):
-            return Response(get_customer_payment(
-                organization_name,
-                request.query_params.get('payment_id'),
-                params=request.query_params.dict()))
-        return Response(list_customer_payments(organization_name, params=request.query_params.dict()))
 
-class InvoiceView(APIView):
+    contact_type = 'customer'
+    detail_view_key = 'payment_id'
+    func = {
+        'get_func': get_customer_payment,
+        'list_func': list_customer_payments,
+    }
+
+    # def get(self, request):
+    #     """
+    #     Get Payment received.
+    #     """
+    #     organization_name = request.query_params.get('organization_name')
+    #     if request.query_params.get('payment_id', None):
+    #         return Response(get_customer_payment(
+    #             organization_name,
+    #             request.query_params.get('payment_id'),
+    #             params=request.query_params.dict()))
+    #     return Response(list_customer_payments(organization_name, params=request.query_params.dict()))
+
+class InvoiceView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books invoices.
     """
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get an invoice.
-        """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('invoice_id', None):
-            return Response(get_invoice(
-                organization_name,
-                request.query_params.get('invoice_id'),
-                params=request.query_params.dict()))
-        return Response(list_invoices(organization_name, params=request.query_params.dict()))
+
+    contact_type = 'customer'
+    detail_view_key = 'invoice_id'
+    func = {
+        'get_func': get_invoice,
+        'list_func': list_invoices,
+    }
+
+
+    # def get(self, request):
+    #     """
+    #     Get an invoice.
+    #     """
+    #     organization_name = request.query_params.get('organization_name')
+    #     if request.query_params.get('invoice_id', None):
+    #         return Response(get_invoice(
+    #             organization_name,
+    #             request.query_params.get('invoice_id'),
+    #             params=request.query_params.dict()))
+    #     return Response(list_invoices(organization_name, params=request.query_params.dict()))
 
     def put(self, request):
         """
         Update invoice.
         """
-        organization_name = request.query_params.get('organization_name')
+        params = request.query_params.dict()
+        organization_name = params.get('organization_name')
         invoice_id = request.data['invoice_id']
-        response = update_invoice(organization_name, invoice_id=invoice_id, data=request.data, params=request.query_params.dict())
+        response = update_invoice(organization_name, invoice_id=invoice_id, data=request.data, params=params)
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response)
 
-class BillView(APIView):
+class BillView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books bills.
     """
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get/List bills.
-        """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('bill_id', None):
-            response = get_bill(
-                organization_name,
-                request.query_params.get('bill_id'),
-                params=request.query_params.dict())
-            if response.get('code') and response['code'] != 0:
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            return Response(response, status=status.HTTP_200_OK)
-        response = list_bills(organization_name, params=request.query_params.dict())
-        if response.get('code') and response['code'] != 0:
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        return Response(response, status=status.HTTP_200_OK)
 
-class SalesOrderView(APIView):
+    contact_type = 'vendor'
+    detail_view_key = 'bill_id'
+    func = {
+        'get_func': get_bill,
+        'list_func': list_bills,
+    }
+
+    # def get(self, request):
+    #     """
+    #     Get/List bills.
+    #     """
+    #     organization_name = request.query_params.get('organization_name')
+    #     if request.query_params.get('bill_id', None):
+    #         response = get_bill(
+    #             organization_name,
+    #             request.query_params.get('bill_id'),
+    #             params=request.query_params.dict())
+    #         if response.get('code') and response['code'] != 0:
+    #             return Response(response, status=status.HTTP_400_BAD_REQUEST)
+    #         return Response(response, status=status.HTTP_200_OK)
+    #     response = list_bills(organization_name, params=request.query_params.dict())
+    #     if response.get('code') and response['code'] != 0:
+    #         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+    #     return Response(response, status=status.HTTP_200_OK)
+
+class SalesOrderView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books sales order.
     """
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get/List sales orders.
-        """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('so_id', None):
-            response = get_salesorder(
-                organization_name,
-                request.query_params.get('so_id'),
-                params=request.query_params.dict())
-            if response.get('code') and response['code'] != 0:
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            return Response(response, status=status.HTTP_200_OK)
-        response = list_salesorders(organization_name, params=request.query_params.dict())
-        if response.get('code') and response['code'] != 0:
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        return Response(response, status=status.HTTP_200_OK)
+
+    contact_type = 'customer'
+    detail_view_key = 'so_id'
+    func = {
+        'get_func': get_salesorder,
+        'list_func': list_salesorders,
+    }
+
+    # def get(self, request):
+    #     """
+    #     Get/List sales orders.
+    #     """
+    #     organization_name = request.query_params.get('organization_name')
+    #     if request.query_params.get('so_id', None):
+    #         response = get_salesorder(
+    #             organization_name,
+    #             request.query_params.get('so_id'),
+    #             params=request.query_params.dict())
+    #         if response.get('code') and response['code'] != 0:
+    #             return Response(response, status=status.HTTP_400_BAD_REQUEST)
+    #         return Response(response, status=status.HTTP_200_OK)
+    #     response = list_salesorders(organization_name, params=request.query_params.dict())
+    #     if response.get('code') and response['code'] != 0:
+    #         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+    #     return Response(response, status=status.HTTP_200_OK)
 
     def put(self, request):
         """
@@ -777,7 +909,7 @@ class SalesOrderView(APIView):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         return Response(response)
 
-class SalesOrderSubStatusesView(APIView):
+class SalesOrderSubStatusesView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books sales order sub statuses.
     """
@@ -791,23 +923,30 @@ class SalesOrderSubStatusesView(APIView):
         response = get_sub_statuses(organization_name, params=request.query_params.dict())
         return Response(response, status=status.HTTP_200_OK)
 
-class VendorCreditView(APIView):
+class VendorCreditView(LicenseBillingAndAccountingAPI):
     """
     View class for Zoho books vendor credit.
     """
     permission_classes = (IsAuthenticated,)
-    
-    def get(self, request):
-        """
-        Get vendor credit.
-        """
-        organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('credit_id', None):
-            return Response(get_vendor_credit(
-                organization_name,
-                request.query_params.get('credit_id'),
-                params=request.query_params.dict()))
-        return Response(list_vendor_credits(organization_name, params=request.query_params.dict()))
+
+    contact_type = 'vendor'
+    detail_view_key = 'credit_id'
+    func = {
+        'get_func': get_vendor_credit,
+        'list_func': list_vendor_credits,
+    }
+
+    # def get(self, request):
+    #     """
+    #     Get vendor credit.
+    #     """
+    #     organization_name = request.query_params.get('organization_name')
+    #     if request.query_params.get('credit_id', None):
+    #         return Response(get_vendor_credit(
+    #             organization_name,
+    #             request.query_params.get('credit_id'),
+    #             params=request.query_params.dict()))
+    #     return Response(list_vendor_credits(organization_name, params=request.query_params.dict()))
 
 class AccountSummaryView(APIView):
     """
