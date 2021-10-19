@@ -99,6 +99,7 @@ class DataFilter(FilterSet):
     cf_quantity_estimate__in = CharInFilter(field_name='cf_quantity_estimate', lookup_expr='in')
     cultivar = django_filters.CharFilter(method='get_cultivars')
     tags = django_filters.CharFilter(method='get_tags')
+    tags__no_tags = django_filters.CharFilter(method='tags_no_tags')
     nutrients = django_filters.CharFilter(method='get_nutrients')
     ethics_and_certification = django_filters.CharFilter(method='get_ethics_and_certification')
     county_grown = django_filters.CharFilter(method='get_county_grown')
@@ -142,6 +143,10 @@ class DataFilter(FilterSet):
     
     def get_tags(self, queryset, name, value):
         items = queryset.filter(cf_cfi_published=True,tags__overlap=value.split(','))
+        return items
+
+    def tags_no_tags(self, queryset, name, value):
+        items = queryset.filter(Q(tags__len=0) | Q(tags__isnull=True))
         return items
 
     def get_ethics_and_certification(self, queryset, name, value):
