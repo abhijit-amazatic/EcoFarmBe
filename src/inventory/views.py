@@ -165,14 +165,17 @@ class DataFilter(FilterSet):
         check_for = value.split(',')
         media_map = {**dict.fromkeys(['photo','no_photo'],['image/png','image/jpeg']),**dict.fromkeys(['video','no_video'],['video/mp4','video/quicktime'])}
         document_objs =  Documents.objects.filter(status='AVAILABLE').select_related()
+        null_doc_skus = Inventory.objects.filter(extra_documents__isnull=True).values_list('sku',flat=True).distinct()
         if len(check_for) == 2 and set(['photo','video']).issubset(check_for):
             skus = document_objs.filter(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
         elif len(check_for) == 1 and any(x in ['photo','video'] for x in check_for):
             skus = document_objs.filter(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
         elif len(check_for) == 2 and set(['no_photo','no_video']).issubset(check_for):
-            skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
+            exclude_skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
+            skus = list(set(list(null_doc_skus)+list(exclude_skus)))
         elif len(check_for) == 1 and any(x in ['no_photo','no_video'] for x in check_for):
-            skus = document_objs.exclude(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+            exclude_skus = document_objs.exclude(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+            skus = list(set(list(null_doc_skus)+list(exclude_skus)))
         elif len(check_for) == 2 and any(x in ['no_photo','no_video'] for x in check_for):
             skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
         else:
