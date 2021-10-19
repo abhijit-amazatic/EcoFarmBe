@@ -654,18 +654,9 @@ def list_estimates(books_name, params=None):
     """
     List estimates.
     """
-    def _list(books_name):
-        obj = get_books_obj(books_name)
-        estimate_obj = obj.Estimates()
-        return estimate_obj.list_estimates(parameters=params)
-
-    if books_name == 'all':
-        result = dict()
-        for org in BOOKS_ORGANIZATION_LIST:
-            result[org] = _list(org)
-        return result
-    else:
-        return _list(books_name)
+    obj = get_books_obj(books_name)
+    estimate_obj = obj.Estimates()
+    return estimate_obj.list_estimates(parameters=params)
 
 def update_estimate_address(books_name, estimate_id, address_type, data, params=None):
     """
