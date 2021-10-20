@@ -167,7 +167,9 @@ class DataFilter(FilterSet):
         document_objs =  Documents.objects.filter(status='AVAILABLE').select_related()
         null_doc_skus = Inventory.objects.filter(extra_documents__isnull=True).values_list('sku',flat=True).distinct()
         if len(check_for) == 2 and set(['photo','video']).issubset(check_for):
-            skus = document_objs.filter(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
+             qs1 = document_objs.filter(Q(file_type__contains=media_map.get('photo')[0])|Q(file_type__contains=media_map.get('photo')[1])).values_list('sku',flat=True)
+             qs2 =  document_objs.filter(Q(file_type__contains=media_map.get('video')[0])|Q(file_type__contains=media_map.get('video')[1])|Q(file_type__contains=media_map.get('video')[2])).values_list('sku',flat=True)
+             skus = list(set(list(qs1)).intersection(list(qs2)))
         elif len(check_for) == 1 and any(x in ['photo','video'] for x in check_for):
             skus = document_objs.filter(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
         elif len(check_for) == 2 and set(['no_photo','no_video']).issubset(check_for):
