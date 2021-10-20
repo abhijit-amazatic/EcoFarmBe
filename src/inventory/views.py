@@ -163,7 +163,7 @@ class DataFilter(FilterSet):
     
     def get_photo_video_items(self, queryset, name, value):
         check_for = value.split(',')
-        media_map = {**dict.fromkeys(['photo','no_photo'],['image/png','image/jpeg']),**dict.fromkeys(['video','no_video'],['video/mp4','video/quicktime'])}
+        media_map = {**dict.fromkeys(['photo','no_photo'],['image/png','image/jpeg']),**dict.fromkeys(['video','no_video'],['video/mp4','video/quicktime','video/x-msvideo'])}
         document_objs =  Documents.objects.filter(status='AVAILABLE').select_related()
         null_doc_skus = Inventory.objects.filter(extra_documents__isnull=True).values_list('sku',flat=True).distinct()
         if len(check_for) == 2 and set(['photo','video']).issubset(check_for):
