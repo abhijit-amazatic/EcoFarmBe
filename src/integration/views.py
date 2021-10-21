@@ -8,7 +8,9 @@ import ast
 from io import (BytesIO, )
 from django.http import (QueryDict,)
 from django.core.exceptions import (ObjectDoesNotExist,)
+from django.utils.functional import (cached_property)
 from rest_framework import (status,)
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -35,6 +37,7 @@ from integration.crm import (
     get_record, update_vendor_tier,
 )
 from integration.books import (
+    get_books_obj,
     create_contact, create_estimate,
     get_estimate, list_estimates,
     get_contact, list_contacts,
@@ -59,7 +62,8 @@ from integration.books import (
     approve_purchaseorder, mark_invoice, 
     approve_invoice, mark_bill, approve_bill,
     create_sales_order, create_invoice, parse_book_object,
-    create_purchase_order, update_sales_order, update_invoice)
+    create_purchase_order, update_sales_order, update_invoice,
+    CRM_PROFILES_MAP)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
@@ -323,7 +327,6 @@ class LicenseBillingAndAccountingAPI(APIView):
         Get PO.
         """
         get_func = self.func.get('get_func')
-        list_func = self.func.get('list_func')
 
         params = request.query_params.dict()
         organization_name = params.get('organization_name')
@@ -333,35 +336,75 @@ class LicenseBillingAndAccountingAPI(APIView):
                 params.get(self.detail_view_key),
                 params=params))
         else:
-            contact_ids = {}
-
-            if 'license_id' in params:
-                license_id = params.get('license_id')
-                try:
-                    license_obj = License.objects.get(id=license_id)
-                except ObjectDoesNotExist:
-                    return Response({'datails': f'License id {license_id} does not exist.'}, status=400)
-                except ValueError:
-                    return Response({'datails': f'Invalid value passed \'{license_id}\' to license_id.'}, status=400)
-                else:
-                    contact_ids = getattr(license_obj, f'zoho_books_{self.contact_type}_ids')
-
             if organization_name == 'all':
                 result = dict()
-                for org in BOOKS_ORGANIZATION_LIST:
-                    if 'license_id' in params:
-                        org_short = org.replace('books_', '')
-                        params[f'{self.contact_type}_id'] = contact_ids.get(org_short) or '0'
-                    result[org] = list_func(org, params=params)
+                for books_name in BOOKS_ORGANIZATION_LIST:
+                    result[books_name] = self.list_func(books_name, params=params)
                 return Response(result)
             else:
-                if 'license_id' in params:
-                    org_short = organization_name.replace('books_', '')
-                    params[f'{self.contact_type}_id'] = contact_ids.get(org_short) or '0'
-                response = list_func(organization_name, params=params)
+                response = self.list_func(organization_name, params=params)
                 if response.get('code') and response['code'] != 0:
                     return Response(response, status=status.HTTP_400_BAD_REQUEST)
                 return Response(response, status=status.HTTP_200_OK)
+
+    def list_func(self, books_name, params):
+        list_func = self.func.get('list_func')
+        if 'license_id' in self.request.query_params:
+            params[f'{self.contact_type}_id'] = self.get_contact_id(books_name) or '0'
+        return list_func(books_name, params=params)
+
+    @cached_property
+    def license_obj(self):
+        license_id = self.request.query_params.get('license_id', '')
+        try:
+            license_obj = License.objects.prefetch_related('license_profile').get(id=license_id)
+        except ObjectDoesNotExist:
+            raise ValidationError({'license_id': f'License id {license_id} does not exist.'})
+
+        except ValueError:
+            raise ValidationError({'license_id': f'Invalid value passed \'{license_id}\' to license_id.'})
+        else:
+            return license_obj
+
+    def get_contact_id(self, organization_name=None):
+        params = self.request.query_params.dict()
+        books_name = organization_name or params.get('organization_name')
+        org_name = books_name.replace('books_', '')
+        contact_id = None
+        if 'license_id' in params:
+            contact_ids = getattr(self.license_obj, f'zoho_books_{self.contact_type}_ids')
+            if contact_ids.get(org_name):
+                contact_id = contact_ids.get(org_name).strip()
+            if not contact_id:
+                try:
+                    lp = License.license_profile
+                except ObjectDoesNotExist:
+                    pass
+                else:
+                    crm_profile_id = getattr(lp, f'zoho_crm_{CRM_PROFILES_MAP.get(self.contact_type)}_id')
+                    if not crm_profile_id:
+                        if self.contact_type == 'customer':
+                            r = search_query('Accounts', self.license_obj.client_id, 'Client_ID')
+                        else:
+                            r = search_query('Vendors', self.license_obj.client_id, 'Client_ID')
+                        if r['status_code'] == 200:
+                            for crm_profile in r['response']:
+                                if crm_profile['Client_ID'] == self.license_obj.client_id:
+                                    crm_profile_id = crm_profile['id']
+                                    break
+
+                    books_obj = get_books_obj(f'books_{org_name}')
+                    contact_obj = books_obj.Contacts()
+                    r = contact_obj.get_contact_using_crm_account_id(crm_profile_id)
+                    try:
+                        if r and r.get('code') == 0:
+                            for c in r.get('contacts', []):
+                                if c.get('contact_type') == self.contact_type:
+                                    if c.get('contact_id'):
+                                        contact_id = c.get('contact_id')
+                    except Exception as e:
+                        print(e)
+        return contact_id
 
 
 class EstimateView(LicenseBillingAndAccountingAPI):
@@ -381,8 +424,11 @@ class EstimateView(LicenseBillingAndAccountingAPI):
         """
         Create and estimate in Zoho Books. 
         """
-        organization_name = request.query_params.get('organization_name')
-        response = create_estimate(organization_name, data=request.data, params=request.query_params.dict())
+        params = request.query_params.dict()
+        organization_name = params.get('organization_name')
+        if 'license_id' in self.request.query_params:
+            request.data[f'{self.contact_type}_id'] = self.get_contact_id(organization_name) or '0'
+        response = create_estimate(organization_name, data=request.data, params=params)
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         # estimate_obj = save_estimate(request)
@@ -395,6 +441,8 @@ class EstimateView(LicenseBillingAndAccountingAPI):
         Update an estimate in Zoho Books.
         """
         organization_name = request.query_params.get('organization_name')
+        if 'license_id' in self.request.query_params:
+            request.data[f'{self.contact_type}_id'] = self.get_contact_id(organization_name) or '0'
         is_draft = request.query_params.get('is_draft')
         delete_estimate_from_db = request.query_params.get('delete_estimate_from_db', False)
         estimate_id = request.data['estimate_id']

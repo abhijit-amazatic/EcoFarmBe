@@ -79,7 +79,7 @@ def get_format_dict(module):
     """
     return CRM_FORMAT[module]
 
-crm_profiles = {
+CRM_PROFILES_MAP = {
     'customer': 'account',
     'vendor': 'vendor',
 }
@@ -106,7 +106,7 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
             pass
 
         for contact_type in ['vendor', 'customer']:
-            crm_profile_id = request.get(f'zoho_crm_{crm_profiles.get(contact_type)}_id')
+            crm_profile_id = request.get(f'zoho_crm_{CRM_PROFILES_MAP.get(contact_type)}_id')
             response_dict[contact_type] = dict()
             for org_name in ('efd', 'efl', 'efn'):
                 books_name = f'books_{org_name}'
@@ -136,7 +136,7 @@ def create_customer_in_books(id=None, is_single_user=False, params={}):
                             except Exception as e:
                                 print(e)
                     else:
-                        response_dict[contact_type][org_name]['Error'] = f'Skiped, no CRM {crm_profiles.get(contact_type)} id present in db.'
+                        response_dict[contact_type][org_name]['Error'] = f'Skiped, no CRM {CRM_PROFILES_MAP.get(contact_type)} id present in db.'
 
                     if contact_id:
                         parsed_contact_persons = parse_books_fields("contact_persons", 'employees', request)
@@ -595,9 +595,10 @@ def create_estimate(books_name, data, params=None):
     try:
         obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
-        result = get_customer(obj, data)
-        if result['code'] != 0:
-            return result
+        if not data.get('customer_id'):
+            result = get_customer(obj, data)
+            if result['code'] != 0:
+                return result
         result = get_item(obj, result['data'])
         if result['code'] != 0:
            return result
@@ -629,9 +630,10 @@ def update_estimate(books_name, estimate_id, data, params=None):
     try:
         obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
-        result = get_customer(obj, data)
-        if result['code'] != 0:
-            return result
+        if not data.get('customer_id'):
+            result = get_customer(obj, data)
+            if result['code'] != 0:
+                return result
         result = get_item(obj, result['data'])
         if result['code'] != 0 and result['code'] != 1004:
            return result
