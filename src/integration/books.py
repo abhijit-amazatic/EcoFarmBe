@@ -361,40 +361,28 @@ def get_contact(books_name, contact_id, params=None):
     contact_obj = obj.Contacts()
     return contact_obj.get_contact(contact_id, parameters=params)
 
-def get_contact_addresses(books_name, contact_name):
+def get_contact_addresses(books_name, contact_id):
     """
     Get contact address list.
     """
     obj = get_books_obj(books_name)
-    contact = get_contact_id(obj, contact_name)
-    if contact.get('code'):
-        return {'code': '1003', 'error': 'Contact not found in zoho books.'}
-    contact_id = contact['contact_id']
     contact_obj = obj.Contacts()
     return contact_obj.get_contact_addresses(contact_id)
 
-def add_contact_address(books_name, contact_name, data, params=None):
+def add_contact_address(books_name, contact_id, data, params=None):
     """
     Add contact address in Zoho Books.
     """
     obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
-    contact = get_contact_id(obj, contact_name)
-    if contact.get('code'):
-        return {'code': '1003', 'error': 'Contact not found in zoho books.'}
-    contact_id = contact['contact_id']
     return contact_obj.add_contact_address(contact_id, data, parameters=params)
 
-def edit_contact_address(books_name, contact_name, address_id, data, params=None):
+def edit_contact_address(books_name, contact_id, address_id, data, params=None):
     """
     Edit contact address in Zoho Books.
     """
     obj = get_books_obj(books_name)
     contact_obj = obj.Contacts()
-    contact = get_contact_id(obj, contact_name)
-    if contact.get('code'):
-        return {'code': '1003', 'error': 'Contact not found in zoho books.'}
-    contact_id = contact['contact_id']
     return contact_obj.edit_contact_address(contact_id, address_id, data, parameters=params)
 
 def get_contact_person(books_name, contact_id, contact_person_id, params=None):
@@ -674,7 +662,6 @@ def send_estimate_to_sign(books_name, estimate_id, customer_name, notify_address
     """
     try:
         obj = get_books_obj(books_name)
-        # contact = get_contact_id(obj, customer_name)
         contact = search_contact(obj, value=customer_name, contact_type='customer')
         # if contact.get('code'):
         if not contact:
@@ -872,9 +859,10 @@ def create_purchase_order(books_name, record, params=None):
     try:
         obj = get_books_obj(books_name)
         po_obj = obj.PurchaseOrders()
-        result = get_vendor(obj, record)
-        if result['code'] != 0:
-            return result
+        if not record.get('customer_id'):
+            result = get_vendor(obj, record)
+            if result['code'] != 0:
+                return result
         result = get_item(obj, result['data'])
         if result['code'] != 0:
            return result
@@ -892,9 +880,10 @@ def update_purchase_order(books_name, po_id, record, params=None):
     try:
         obj = get_books_obj(books_name)
         po_obj = obj.PurchaseOrders()
-        result = get_vendor(obj, record)
-        if result['code'] != 0:
-            return result
+        if not record.get('customer_id'):
+            result = get_vendor(obj, record)
+            if result['code'] != 0:
+                return result
         result = get_item(obj, result['data'])
         if result['code'] != 0 and result['code'] != 1004:
            return result
@@ -1152,36 +1141,11 @@ def get_buyer_summary(books_name,customer):
     else:
         return _buyer_summary(books_name, customer)
 
-def get_contact_id(obj, contact_name):
-    """
-    Get contact id using contact name.
-    """
-    contact_obj = obj.Contacts()
-    try:
-        customer = contact_obj.list_contacts(parameters={'contact_name': contact_name})
-        customer = customer['response']
-    except KeyError:
-        return {"code": 1003, "error": "Customer name not provided"}
-    if len(customer) == 1:
-        customer = customer[0]
-    elif len(customer) > 1:
-        for i in customer:
-            if i['contact_name'] == contact_name:
-                customer = i
-                break
-    else:
-        return {"code": 1003, "message": "Contact not in zoho books."}
-    return customer
-
-def get_contact_statement(books_name, contact_name):
+def get_contact_statement(books_name, contact_id):
     """
     Get contact address list.
     """
     obj = get_books_obj(books_name)
-    contact = get_contact_id(obj, contact_name)
-    if contact.get('code'):
-        return {'code': '1003', 'error': 'Contact not found in zoho books.'}
-    contact_id = contact['contact_id']
     contact_obj = obj.Contacts()
     return contact_obj.get_statement(contact_id)
 

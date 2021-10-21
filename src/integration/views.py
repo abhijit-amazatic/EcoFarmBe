@@ -427,7 +427,7 @@ class EstimateView(LicenseBillingAndAccountingAPI):
         params = request.query_params.dict()
         organization_name = params.get('organization_name')
         if 'license_id' in self.request.query_params:
-            request.data[f'{self.contact_type}_id'] = self.get_contact_id(organization_name) or '0'
+            request.data[f'{self.contact_type}_id'] = self.get_contact_id(organization_name)
         response = create_estimate(organization_name, data=request.data, params=params)
         if response.get('code') and response['code'] != 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -442,7 +442,7 @@ class EstimateView(LicenseBillingAndAccountingAPI):
         """
         organization_name = request.query_params.get('organization_name')
         if 'license_id' in self.request.query_params:
-            request.data[f'{self.contact_type}_id'] = self.get_contact_id(organization_name) or '0'
+            request.data[f'{self.contact_type}_id'] = self.get_contact_id(organization_name)
         is_draft = request.query_params.get('is_draft')
         delete_estimate_from_db = request.query_params.get('delete_estimate_from_db', False)
         estimate_id = request.data['estimate_id']
@@ -933,8 +933,8 @@ class ContactAddressView(APIView):
         Get contact addresses.
         """
         organization_name = request.query_params.get('organization_name')
-        if request.query_params.get('contact_name', None):
-            return Response(get_contact_addresses(organization_name, request.query_params.get('contact_name')))
+        if request.query_params.get('contact_id', None):
+            return Response(get_contact_addresses(organization_name, request.query_params.get('contact_id')))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request):
@@ -942,9 +942,9 @@ class ContactAddressView(APIView):
         add contact addresses.
         """
         organization_name = request.query_params.get('organization_name')
-        if request.data.get('contact_name', None):
-            contact_name = request.data.get('contact_name', None)
-            return Response(add_contact_address(organization_name, contact_name, request.data))
+        if request.data.get('contact_id', None):
+            contact_id = request.data.get('contact_id', None)
+            return Response(add_contact_address(organization_name, contact_id, request.data))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request):
@@ -952,10 +952,10 @@ class ContactAddressView(APIView):
         edit contact addresses.
         """
         organization_name = request.query_params.get('organization_name')
-        if request.data.get('contact_name', None) and request.data.get('address_id', None):
-            contact_name = request.data.get('contact_name', None)
+        if request.data.get('contact_id', None) and request.data.get('address_id', None):
+            contact_id = request.data.get('contact_id', None)
             address_id = request.data.get('address_id', None)
-            return Response(edit_contact_address(organization_name, contact_name, address_id, request.data))
+            return Response(edit_contact_address(organization_name, contact_id, address_id, request.data))
         return Response({'error': 'Conact name not specified'}, status=status.HTTP_400_BAD_REQUEST)
 
 
