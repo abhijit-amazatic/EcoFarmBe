@@ -176,7 +176,8 @@ class DataFilter(FilterSet):
             exclude_skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
             skus = list(set(list(null_doc_skus)+list(exclude_skus)))
         elif len(check_for) == 1 and any(x in ['no_photo','no_video'] for x in check_for):
-            exclude_skus = document_objs.exclude(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+            #exclude_skus = document_objs.exclude(file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True).distinct()
+            exclude_skus = Inventory.objects.filter(cf_cfi_published=True,status='active').exclude(extra_documents__file_type__in=media_map.get(check_for[0])).values_list('sku',flat=True)
             skus = list(set(list(null_doc_skus)+list(exclude_skus)))
         elif len(check_for) == 2 and any(x in ['no_photo','no_video'] for x in check_for):
             skus = document_objs.exclude(file_type__in=media_map.get('photo')+media_map.get('video')).values_list('sku',flat=True).distinct()
