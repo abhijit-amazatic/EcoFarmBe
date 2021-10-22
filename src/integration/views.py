@@ -21,7 +21,7 @@ from rest_framework.authentication import (TokenAuthentication,)
 from django.conf import settings
 
 from core.permissions import UserPermissions
-from .models import (Integration)
+from .models import (Integration, ConfiaCallback)
 from inventory.models import Inventory
 from integration.box import(
     get_box_tokens, get_shared_link,
@@ -72,6 +72,7 @@ from integration.tasks import (send_estimate, delete_estimate_task, upload_agree
 from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET, BOOKS_ORGANIZATION_LIST,
+                           CONFIA_BASIC_CALLBACK_USER_PW
     )
 from slacker import Slacker
 from core.mailer import (mail, mail_send,)
@@ -1605,4 +1606,30 @@ class ChatbotView(APIView):
             msg.body('I only know about related quotes and product images, sorry!')
         return Response({str(resp)})
 
+    
+
+class ConfiaCallbackView(APIView):
+    """
+    View class to add confia callbacks
+    """
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        """
+        save/update confia callback data.
+        """
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        token_type, _, credentials = auth_header.partition(' ')
+        expected = base64.b64encode(CONFIA_BASIC_CALLBACK_USER_PW.encode()).decode()
+        if token_type != 'Basic' or credentials != expected:
+            return  Response({'Error':"Auth Creds are not valid/provided"}, status=status.HTTP_400_BAD_REQUEST)
+        default_data = {
+            "partner_company_id":request.data.get('partnerCompanyId'),
+            "confia_member_id":request.data.get('confiaMemberId'),
+            "status": request.data.get('status')
+        }
+        obj,created =  ConfiaCallback.objects.update_or_create(partner_company_id=request.data.get('partnerCompanyId'),defaults=default_data)
+        if obj:
+            return Response({'Success': "Member onboarded/status updated!"},status=status.HTTP_200_OK)
+        
     

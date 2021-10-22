@@ -58,7 +58,7 @@ from integration.views import (GetBoxTokensView, InventoryView,
                                ApprovePurchaseOrderView, MarkInvoiceView, 
                                ApproveInvoiceView, MarkBillView, ApproveBillView,
                                ConvertEstimateToSalesOrder, ConvertSalesOrderToInvoice,ChatbotView,
-                               ConvertEstimateToInvoice, ConvertSalesOrderToPurchaseOrder)
+                               ConvertEstimateToInvoice, ConvertSalesOrderToPurchaseOrder, ConfiaCallbackView)
 
 from fee_variable.views import (OrderVariableView,
                                 CustomInventoryVariableView,
@@ -195,6 +195,7 @@ urlpatterns = [
     path(r'notify/', NotificationView.as_view(), name='notification'),
     path(r'integration/box-aws/',
          GetBoxTokenAuthenticationView.as_view(), name='box-token-authentication'),
+    path(r'integration/confia/callback/', ConfiaCallbackView.as_view(), name="confia-callback"),
     path(r'crm/search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
     path(r'crm/picklist/', GetPickListView.as_view(), name='get_picklist'),
     path(r'crm/account-picklist/', GetPickListAccountView.as_view(),

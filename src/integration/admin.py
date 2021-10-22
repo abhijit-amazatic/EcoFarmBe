@@ -17,7 +17,7 @@ from django.urls import path, reverse
 from core import settings
 from core.mixins.admin import (CustomButtonMixin,)
 from utils import reverse_admin_change_path
-from .models import Integration
+from .models import (Integration,ConfiaCallback)
 from .admin_config import INTEGRATION_OAUTH_MAP
 
 class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
@@ -220,4 +220,17 @@ class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
     refresh_token_masked.short_description = 'Refresh Token'
 
 
+class ConfiaCallbackAdmin(admin.ModelAdmin):
+    """
+    ConfiaCallbackAdmin
+    """
+    list_display = ('partner_company_id', 'confia_member_id','status','created_on','updated_on')
+    list_filter = ('partner_company_id',)
+    list_per_page = 25
+    search_fields = ('partner_company_id','confia_member_id',)
+    ordering = ('-created_on',)
+    readonly_fields = ('created_on','updated_on',)
+    fields = ('partner_company_id', 'confia_member_id', 'status','created_on','updated_on')
+    
 admin.site.register(Integration, IntegrationAdmin)
+admin.site.register(ConfiaCallback, ConfiaCallbackAdmin)
