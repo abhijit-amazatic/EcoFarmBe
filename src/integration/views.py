@@ -238,7 +238,7 @@ class GetPickListAccountView(APIView):
         return Response(get_picklist('Accounts', request.query_params['field']))
 
     def get_permissions(self):
-        if self.request.query_params['field'] in ('Product of Interest',):
+        if self.request.query_params['field'] in ('Products of Interest',):
             self.permission_classes = [AllowAny, ]
         else:
             self.permission_classes = [IsAuthenticated, ]

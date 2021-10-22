@@ -108,7 +108,7 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
             lp = license_profile
         if lp:
             if lp.license.status == 'approved':
-                program_name = lp.signed_program_name
+                program_name = lp.signed_program_name or ''
                 program_name = program_name.strip()
                 if not program_name and no_tier_fee:
                     if lp.license.profile_category in ('microbusiness', 'manufacturing', 'retail', 'distribution', 'processing'):
