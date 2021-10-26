@@ -52,6 +52,9 @@ class Documents(TimeStampFlagModelMixin, models.Model):
     box_id = models.CharField(_('Box ID'), blank=True, null=True, max_length=100)
     is_primary = models.BooleanField(_('Is Primary Image'), default=False)
     doc_type = models.CharField(_('Doc Type'), blank=True, null=True, max_length=50)
+    S3_url = models.CharField(_('Box Url'), blank=True, null=True, max_length=500)
+    s3_thumbnail_url = models.CharField(_('Thumbnail Url'), blank=True, null=True, max_length=500)
+    S3_mobile_url = models.CharField(_('Mobile Url'), blank=True, null=True, max_length=500)
     order = models.IntegerField(_('Order'), blank=True, null=True)
 
 
