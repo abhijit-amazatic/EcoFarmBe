@@ -96,6 +96,15 @@ def approve_license_profile(modeladmin, request, queryset):
 approve_license_profile.short_description = 'Approve Selected License Profiles'
 
 
+def temporary_approve_license_profile(modeladmin, request, queryset):
+    """
+    Function for bulk profile approval.
+    """
+    for profile in queryset:
+        if profile.status != 'approved':
+            profile.status ='approved'
+            profile.save()
+    messages.success(request,'License Profiles Temporarily Approved!')    
 
 def get_obj_file_ids(obj):
     """
@@ -155,7 +164,7 @@ def update_status_to_in_progress(modeladmin, request, queryset):
         profile.status = 'in_progress'
         profile.save()
     messages.success(request,'Status Updated to in_progress!')    
-update_status_to_in_progress.short_description = "Update Status To in_progress"
+update_status_to_in_progress.short_description = "Revert Temporary approval/Update Status To in_progress"
 
 class ProfileContactForm(forms.ModelForm):
     class Meta:
@@ -399,7 +408,7 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     )
     ordering = ('-created_on','legal_business_name','status','updated_on',)
     exclude = ('is_seller', 'is_buyer', 'crm_output', 'books_output',)
-    actions = [approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records, update_books_records]
+    actions = [temporary_approve_license_profile, approve_license_profile, update_status_to_in_progress, delete_model, sync_records, update_records, update_books_records]
     list_per_page = 50
 
     verbose_name = "My Book"
