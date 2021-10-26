@@ -920,11 +920,11 @@ class DocumentStatusView(APIView):
             obj, created = Documents.objects.update_or_create(
                     id=id,
                     defaults=request.data)
-            if request.data.get('thumbnail_url') and request.data.get('mobile_url') and obj.is_primary:
+            if request.data.get('s3_thumbnail_url') and request.data.get('S3_mobile_url') and obj.is_primary:
                 try:
                     item = Inventory.objects.get(item_id=obj.object_id)
-                    item.thumbnail_url = request.data.get('thumbnail_url')
-                    item.mobile_url = request.data.get('mobile_url')
+                    item.thumbnail_url = request.data.get('s3_thumbnail_url')
+                    item.mobile_url = request.data.get('S3_mobile_url')
                     item.save()
                 except Inventory.DoesNotExist:
                     return Response({}, status=status.HTTP_400_BAD_REQUEST)
