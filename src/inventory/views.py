@@ -808,13 +808,13 @@ class DocumentPreSignedView(APIView):
                         sku=sku, name=object_name,
                         file_type=mime_type, doc_type=doc_type)
         obj.save()
+        object_name = object_name.replace(' ', '_')
+        object_name = object_name.replace('&', 'N')
+        object_name = re.sub(r"[^\w/!-_.*'()]+", '', object_name)
         if sku:
             path = f'inventory/{sku}/{obj.id}/{object_name}'
         else:
             path = object_name
-        path = path.replace(' ', '_')
-        path = path.replace('&', 'N')
-        path = re.sub(r"[^\w/!-_.*'()]+", '', path)
         obj.path = path
         obj.save()
         response = create_presigned_post(AWS_BUCKET, path, expiry)
