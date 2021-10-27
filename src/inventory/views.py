@@ -802,15 +802,16 @@ class DocumentPreSignedView(APIView):
             except License.DoesNotExist:
                 return Response({'error': 'License not in database'},
                                 status=status.HTTP_400_BAD_REQUEST)
+        if sku:
+            object_name = re.sub(r"[^\w\ \"\'\-#!$%&()+,.]+", '', object_name)
+            object_name = re.sub(r"[\ ]+", ' ', object_name)
+
         mime = MimeTypes()
         mime_type, _ = mime.guess_type(object_name)
         obj = Documents(content_object=obj,
                         sku=sku, name=object_name,
                         file_type=mime_type, doc_type=doc_type)
         obj.save()
-        object_name = object_name.replace(' ', '_')
-        object_name = object_name.replace('&', 'N')
-        object_name = re.sub(r"[^\w/!-_.*'()]+", '', object_name)
         if sku:
             path = f'inventory/{sku}/{obj.id}/{object_name}'
         else:
