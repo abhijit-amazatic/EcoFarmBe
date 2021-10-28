@@ -280,3 +280,5 @@ PASSWORDLESS_AUTH = {
     'TWILIO_ACCOUNT_SID':'',
     'TWILIO_AUTH_TOKEN':''       
 }
+
+AWS_OUTPUT_BUCKET='compressed-ecofarm-staging'

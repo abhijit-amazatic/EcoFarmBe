@@ -258,3 +258,5 @@ PASSWORDLESS_AUTH = {
     'TWILIO_ACCOUNT_SID':os.environ.get('TWILIO_ACCOUNT'),
     'TWILIO_AUTH_TOKEN':os.environ.get('TWILIO_AUTH_TOKEN')    
 }
+
+AWS_OUTPUT_BUCKET = os.environ.get('AWS_OUTPUT_BUCKET')
