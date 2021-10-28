@@ -11,7 +11,9 @@ from core.celery import (app,)
 from integration.box import get_file_obj
 from inventory.models import Documents, Inventory
 
-CACHE_CONTROL = 'public,max-age= 604800,immutable'
+CACHE_CONTROL = 'max-age=604800'
+extra_args_video = {'ACL':'public-read', 'ContentType': 'video/mp4'}
+extra_args_img = {'CacheControl': CACHE_CONTROL, 'ACL': 'public-read', 'ContentType': 'image/jpeg'}
 
 S3 = boto3.resource(
     's3',
@@ -42,14 +44,6 @@ transfer_config_img = boto3.s3.transfer.TransferConfig(
 def get_s3_output_url_unsigned(key):
     return S3_client_unsigned.generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': settings.AWS_OUTPUT_BUCKET, 'Key': key})
 
-def upload_file(file_path, folder_name, db_id, file_name, return_s3_key=False):
-    s3_key = '/'.join(('inventory', folder_name, db_id, file_name))
-    # S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_file(file_path, s3_key)
-    S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_file(file_path, s3_key, {'ACL':'public-read'})
-    s3_url = get_s3_output_url_unsigned(s3_key)
-    s3_resp = (s3_url, s3_key) if return_s3_key else s3_url
-    return  s3_resp
-
 
 @app.task(queue="general")
 def inv_img_box_to_s3_task():
@@ -69,7 +63,6 @@ def inv_img_box_to_s3_task():
     from django.contrib.contenttypes.models import ContentType
     ct = ContentType.objects.get_for_model(Inventory)
     qs = Documents.objects.filter(content_type=ct)
-
 
     video_qs = qs.filter(file_type__startswith='video', status='AVAILABLE')
     for doc in video_qs:
@@ -92,7 +85,7 @@ def inv_img_box_to_s3_task():
                         r = request('get', file_obj.get_download_url(), stream=True)
                         if r.status_code == 200:
                             uploaded = 0.0
-                            S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, {'ACL':'public-read'}, Callback=cb)
+                            S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, extra_args_video, Callback=cb)
                             # obj.put(Body=file_obj.content(), CacheControl=CACHE_CONTROL, ACL='public-read')
                             # S3.put_object(Bucket=settings.AWS_OUTPUT_BUCKET, Key=s3_key, CacheControl='max-age=86400', ACL='public-read')
                             print()
@@ -119,7 +112,7 @@ def inv_img_box_to_s3_task():
                         file_name = file_name_split[0] + '-thumbnail.jpg'
                         s3_key = '/'.join(('inventory', doc.sku, str(doc.id), file_name))
                         uploaded = 0.0
-                        S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, {'CacheControl': CACHE_CONTROL, 'ACL':'public-read'}, Callback=cb)
+                        S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, extra_args_img, Callback=cb)
                         print()
                         # S3.Bucket(settings.AWS_OUTPUT_BUCKET).put_object(Key=s3_key, Body=bytes_obj, CacheControl=CACHE_CONTROL, ACL='public-read')
                         s3_thumbnail_url = get_s3_output_url_unsigned(s3_key)
@@ -149,7 +142,7 @@ def inv_img_box_to_s3_task():
                 r = request('get', file_obj.get_download_url(), stream=True)
                 if r.status_code == 200:
                     uploaded = 0.0
-                    S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, {'CacheControl': CACHE_CONTROL, 'ACL':'public-read'}, Callback=cb)
+                    S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, extra_args_img, Callback=cb)
                     # obj.put(Body=file_obj.content(), CacheControl=CACHE_CONTROL, ACL='public-read')
                     # S3.put_object(Bucket=settings.AWS_OUTPUT_BUCKET, Key=s3_key, CacheControl='max-age=86400', ACL='public-read')
                     # S3.Bucket(settings.AWS_OUTPUT_BUCKET).put_object(Key=s3_key, Body=file_content, CacheControl=CACHE_CONTROL, ACL='public-read')
@@ -167,7 +160,7 @@ def inv_img_box_to_s3_task():
                         file_name = file_name_split[0] + '-mobile.' + file_name_split[1]
                         s3_key = '/'.join(('inventory', doc.sku, str(doc.id), file_name))
                         uploaded = 0.0
-                        S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, {'CacheControl': CACHE_CONTROL, 'ACL':'public-read'}, Callback=cb)
+                        S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, extra_args_img, Callback=cb)
                         print()
                         # S3.Bucket(settings.AWS_OUTPUT_BUCKET).put_object(Key=s3_key, Body=bytes_obj, CacheControl=CACHE_CONTROL, ACL='public-read')
                         S3_mobile_url = get_s3_output_url_unsigned(s3_key)
@@ -182,7 +175,7 @@ def inv_img_box_to_s3_task():
                         file_name = file_name_split[0] + '-thumbnail.jpg'
                         s3_key = '/'.join(('inventory', doc.sku, str(doc.id), file_name))
                         uploaded = 0.0
-                        S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, {'CacheControl': CACHE_CONTROL, 'ACL':'public-read'}, Callback=cb)
+                        S3.Bucket(settings.AWS_OUTPUT_BUCKET).upload_fileobj(r.raw, s3_key, extra_args_img, Callback=cb)
                         print()
                         # S3.Bucket(settings.AWS_OUTPUT_BUCKET).put_object(Key=s3_key, Body=bytes_obj, CacheControl=CACHE_CONTROL, ACL='public-read')
                         s3_thumbnail_url = get_s3_output_url_unsigned(s3_key)

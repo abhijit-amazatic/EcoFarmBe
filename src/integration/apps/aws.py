@@ -95,10 +95,16 @@ def get_s3_output_url_unsigned(key, Bucket):
     return S3_unsigned.generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': Bucket, 'Key': key})
 
 
-def upload_compressed_file_stream_to_s3(file_obj, key):
+def upload_compressed_file_stream_to_s3(file_obj, key, content_type=None):
     S3 = get_boto_resource_s3()
     S3_bucket = S3.Bucket(AWS_OUTPUT_BUCKET)
     file_obj.seek(0)
-    S3_bucket.put_object(Key=key, Body=file_obj, CacheControl='max-age=86400', ACL='public-read')
+    params = {
+        'CacheControl': 'max-age=604800',
+        'ACL':'public-read',
+    }
+    if content_type:
+        params.update({'ContentType': content_type})
+    S3_bucket.put_object(Key=key, Body=file_obj, **params)
     s3_url = get_s3_output_url_unsigned(key, AWS_OUTPUT_BUCKET)
     return  s3_url

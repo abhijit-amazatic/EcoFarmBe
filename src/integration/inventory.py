@@ -416,7 +416,7 @@ def get_s3_mobile_url(compressed_file, folder_name, file_name):
     file_name = file_name[0] + '-mobile.jpg'
 
     s3_key = '/'.join(('inventory', folder_name, file_name))
-    url = upload_compressed_file_stream_to_s3(file_obj, s3_key)
+    url = upload_compressed_file_stream_to_s3(file_obj, s3_key, content_type='image/jpeg')
     return url
 
 def get_s3_thumbnail_url(compressed_file, folder_name, file_name):
@@ -431,7 +431,7 @@ def get_s3_thumbnail_url(compressed_file, folder_name, file_name):
     file_name = file_name[0] + '-thumbnail.jpg'
 
     s3_key = '/'.join(('inventory', folder_name, file_name))
-    url = upload_compressed_file_stream_to_s3(file_obj, s3_key)
+    url = upload_compressed_file_stream_to_s3(file_obj, s3_key, content_type='image/jpeg')
     return url
 
 
@@ -448,19 +448,25 @@ def check_documents(inventory_name, record):
         if record.get('documents') and len(record['documents']) > 0:
             folder_name = f"{record['sku']}"
             # folder_id = create_folder(INVENTORY_BOX_ID, folder_name)
+            resp_docs = {}
+            print(f"Item {record['sku']} image count: {len(record['documents'] or [])}" )
             for document in record['documents']:
-                if document['attachment_order'] == 1: # Limit upload image to primary.
-                    file_obj = get_inventory_document(inventory_name, record['item_id'], document['document_id'])
-                    file_obj = BytesIO(file_obj)
-                    file_name = f"{document['document_id']}-{document['file_name']}"
-                    s3_key = '/'.join(('inventory', folder_name, file_name))
-                    cropped_file_obj = crop_image_to_aspect_ratio(file_obj)
-                    link = upload_compressed_file_stream_to_s3(file_obj, s3_key)
 
+                file_obj = get_inventory_document(inventory_name, record['item_id'], document['document_id'])
+                file_obj = BytesIO(file_obj)
+                file_name = document['file_name'].split('.')
+                file_name = f"{document['document_id']}-{file_name[0]}.jpg"
+                s3_key = '/'.join(('inventory', folder_name, file_name))
+                cropped_file_obj = crop_image_to_aspect_ratio(file_obj)
+                link = upload_compressed_file_stream_to_s3(file_obj, s3_key, content_type='image/jpeg')
+
+                if document['attachment_order'] == 1: # Limit upload image to primary.
                     mobile_url = get_s3_mobile_url(cropped_file_obj, folder_name, file_name)
                     thumbnail_url = get_s3_thumbnail_url(cropped_file_obj, folder_name, file_name)
 
-                    response.append(link)
+                # response.append(link)
+                resp_docs[document['attachment_order']] = link
+            response = [v for _, v in sorted(resp_docs.items())]
             return response, thumbnail_url, mobile_url
         return response, thumbnail_url, mobile_url
     except Exception as exc:
