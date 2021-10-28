@@ -16,6 +16,7 @@ from core.settings import (
     INVENTORY_EFN_ORGANIZATION_ID,
     INVENTORY_BOX_ID,
     INVENTORY_TAXES,
+    INVENTORY_IMAGE_CROP_RATIO,
 )
 from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper, DateField,)
 from django.utils import  timezone
@@ -28,6 +29,7 @@ from inventory.models import PriceChange, Inventory as InventoryModel, Documents
 from cultivar.models import (Cultivar, )
 from integration.crm import (get_labtest, search_query, get_record, )
 from inventory.utils import (get_item_tax, )
+from integration.apps.aws import (upload_compressed_file_stream_to_s3, )
 from integration.box import (upload_file_stream, create_folder,
                              get_preview_url, update_file_version,
                              get_thumbnail_url, get_inventory_folder_id,
@@ -373,20 +375,65 @@ def get_pre_tax_price(record):
     # elif 'Trim' in record['category_name']:
     #     return record['price'] - taxes[ESTIMATE_TAXES['Trim']]
 
-def get_mobile_url(compressed_file, folder_id, file_name):
+def crop_image_to_aspect_ratio(compressed_file):
+    crop_x = 0
+    crop_y = 0
+
+    img = Image.open(compressed_file)
+    o_width, o_height = img.size
+    img_ratio = round(o_width/o_height, 5)
+    img_crop_ratio = round(INVENTORY_IMAGE_CROP_RATIO, 5) 
+    if img_ratio != img_crop_ratio:
+        if img_ratio < img_crop_ratio:
+            n_width = o_width
+            n_height = int(round(o_width/INVENTORY_IMAGE_CROP_RATIO))
+            crop_y = int((o_height - n_height)/2)
+        elif img_ratio > img_crop_ratio:
+            n_height = o_height
+            n_width = int(round(o_height*INVENTORY_IMAGE_CROP_RATIO))
+            crop_x = int((o_width - n_width)/2)
+
+        cropped_img = img.crop((crop_x, crop_y, crop_x+n_width, crop_y+n_height))
+
+        file_obj = BytesIO()
+        cropped_img.save(file_obj, format='JPEG')
+        return file_obj
+
+    return compressed_file
+
+
+def get_s3_mobile_url(compressed_file, folder_name, file_name):
+    """
+    Get mobile url for image.
+    """
+    resize_width=1280
+    resize_height=int(round(resize_width/INVENTORY_IMAGE_CROP_RATIO))
+    img = Image.open(compressed_file)
+    resized_img = img.resize((resize_width, resize_height))
+    file_obj = BytesIO()
+    resized_img.save(file_obj, format='JPEG')
+    file_name = file_name.split('.')
+    file_name = file_name[0] + '-mobile.jpg'
+
+    s3_key = '/'.join(('inventory', folder_name, file_name))
+    url = upload_compressed_file_stream_to_s3(file_obj, s3_key)
+    return url
+
+def get_s3_thumbnail_url(compressed_file, folder_name, file_name):
     """
     Get mobile url for image.
     """
     img = Image.open(compressed_file)
-    img.resize((1280, 720))
-    out = BytesIO()
-    img.save(out, format='JPEG')
+    img.thumbnail((160, 160))
+    file_obj = BytesIO()
+    img.save(file_obj, format='JPEG')
     file_name = file_name.split('.')
-    mobile_id = upload_file_stream(folder_id, out, file_name[0] + '-mobile.' + file_name[1])
-    try:
-        return get_preview_url(mobile_id.id)
-    except AttributeError:
-        return get_preview_url(mobile_id)
+    file_name = file_name[0] + '-thumbnail.jpg'
+
+    s3_key = '/'.join(('inventory', folder_name, file_name))
+    url = upload_compressed_file_stream_to_s3(file_obj, s3_key)
+    return url
+
 
 def check_documents(inventory_name, record):
     """
@@ -400,21 +447,19 @@ def check_documents(inventory_name, record):
             record = get_inventory_item(inventory_name, record['item_id'])
         if record.get('documents') and len(record['documents']) > 0:
             folder_name = f"{record['sku']}"
-            folder_id = create_folder(INVENTORY_BOX_ID, folder_name)
+            # folder_id = create_folder(INVENTORY_BOX_ID, folder_name)
             for document in record['documents']:
                 if document['attachment_order'] == 1: # Limit upload image to primary.
                     file_obj = get_inventory_document(inventory_name, record['item_id'], document['document_id'])
                     file_obj = BytesIO(file_obj)
                     file_name = f"{document['document_id']}-{document['file_name']}"
-                    new_file = upload_file_stream(folder_id, file_obj, file_name)
-                    try:
-                        link = get_preview_url(new_file.id)
-                        thumbnail_url = get_thumbnail_url(new_file.id, folder_id, file_name)
-                        mobile_url = get_mobile_url(file_obj, folder_id, file_name)
-                    except Exception:
-                        link = get_preview_url(new_file)
-                        thumbnail_url = get_thumbnail_url(new_file, folder_id, file_name)
-                        mobile_url = get_mobile_url(file_obj, folder_id, file_name)
+                    s3_key = '/'.join(('inventory', folder_name, file_name))
+                    cropped_file_obj = crop_image_to_aspect_ratio(file_obj)
+                    link = upload_compressed_file_stream_to_s3(file_obj, s3_key)
+
+                    mobile_url = get_s3_mobile_url(cropped_file_obj, folder_name, file_name)
+                    thumbnail_url = get_s3_thumbnail_url(cropped_file_obj, folder_name, file_name)
+
                     response.append(link)
             return response, thumbnail_url, mobile_url
         return response, thumbnail_url, mobile_url
@@ -814,20 +859,35 @@ def sync_inventory(inventory_name, response):
         print(exc)
         return {}
 
+# def update_inventory_thumbnail():
+#     """
+#     Update  inventory thumbnail urls.
+#     """
+#     inventory = InventoryModel.objects.filter(documents__isnull=False)
+#     for item in inventory:
+#         folder_id = get_inventory_folder_id(item.sku)
+#         file_info = get_file_from_link(item.documents[0])
+#         url = get_thumbnail_url(item.box_id, folder_id, item.name)
+#         inv = Inventory.objects.get(item_id=item.object_id)
+#         item.thumbnail_url = url
+#         inv.thumbnail_url = url
+#         item.save()
+#         inv.save()
+
 def update_inventory_thumbnail():
     """
     Update  inventory thumbnail urls.
     """
+    from requests import request
+
     inventory = InventoryModel.objects.filter(documents__isnull=False)
     for item in inventory:
-        folder_id = get_inventory_folder_id(item.sku)
-        file_info = get_file_from_link(item.documents[0])
-        url = get_thumbnail_url(item.box_id, folder_id, item.name)
-        inv = Inventory.objects.get(item_id=item.object_id)
-        item.thumbnail_url = url
-        inv.thumbnail_url = url
-        item.save()
-        inv.save()
+        if item.documents:
+            r = request('get', item.documents[0])
+            if r.status_code == 200:
+                url = get_s3_thumbnail_url(item.box_id, item.sku, item.name)
+                item.thumbnail_url = url
+                item.save()
 
 def get_average_thc(inventory):
     """

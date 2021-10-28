@@ -2,25 +2,51 @@
 Aws module.
 """
 import boto3
-from botocore.client import Config
+from botocore.client import (Config, UNSIGNED)
 from botocore.exceptions import ClientError
-from core.settings import (AWS_CLIENT_ID, AWS_CLIENT_SECRET, AWS_REGION)
+from core.settings import (AWS_CLIENT_ID, AWS_CLIENT_SECRET, AWS_REGION, AWS_OUTPUT_BUCKET)
 
-def get_boto_client(resource,
-                    aws_access_key_id=AWS_CLIENT_ID,
-                    aws_secret_access_key=AWS_CLIENT_SECRET,
-                    region=AWS_REGION):
+
+def get_boto_resource_s3(
+        aws_access_key_id=AWS_CLIENT_ID,
+        aws_secret_access_key=AWS_CLIENT_SECRET,
+        **kwargs,
+    ):
+    """
+    Return aws resource S3.
+
+    @aws_access_key_id: access key.
+    @aws_secret_access_key: secret key.
+    """
+    return boto3.resource(
+        's3',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        **kwargs,
+    )
+
+
+def get_boto_client(
+        resource,
+        aws_access_key_id=AWS_CLIENT_ID,
+        aws_secret_access_key=AWS_CLIENT_SECRET,
+        region=AWS_REGION,
+        **kwargs,
+    ):
     """
     Return aws client for resource.
-    
+
     @param resource: aws resource name.
     @aws_access_key_id: access key.
     @aws_secret_access_key: secret key.
     """
-    return boto3.client(resource,
-                        aws_access_key_id=aws_access_key_id,
-                        aws_secret_access_key=aws_secret_access_key,
-                        region_name=region)
+    return boto3.client(
+        resource,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=region,
+        **kwargs,
+    )
 
 def create_presigned_post(bucket_name, object_name, expiration=3600):
     """
@@ -59,3 +85,20 @@ def create_presigned_url(bucket_name, object_name, expiration=604800):
         return {'error': f'Error while creating presigned url - {exc}',
                 'status_code': 1}
     return {'status_code': 0, 'response': response}
+
+
+
+
+def get_s3_output_url_unsigned(key, Bucket):
+    s3_unsigned_config = Config(signature_version=UNSIGNED)
+    S3_unsigned = boto3.client('s3', config=s3_unsigned_config)
+    return S3_unsigned.generate_presigned_url('get_object', ExpiresIn=0, Params={'Bucket': Bucket, 'Key': key})
+
+
+def upload_compressed_file_stream_to_s3(file_obj, key):
+    S3 = get_boto_resource_s3()
+    S3_bucket = S3.Bucket(AWS_OUTPUT_BUCKET)
+    file_obj.seek(0)
+    S3_bucket.put_object(Key=key, Body=file_obj, CacheControl='max-age=86400', ACL='public-read')
+    s3_url = get_s3_output_url_unsigned(key, AWS_OUTPUT_BUCKET)
+    return  s3_url
