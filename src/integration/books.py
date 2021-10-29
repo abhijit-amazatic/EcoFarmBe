@@ -552,29 +552,22 @@ def search_contact(books_obj, value, contact_type):
             break
     return contact
 
-def get_customer(obj, data):
+def get_customer_id(obj, customer_name):
     """
     Return customer from Zoho books using Zoho Inventory name.
     """
-    customer = search_contact(obj, value=data['customer_name'], contact_type='customer')
-    if customer is None:
-        return {"code": 1003, "message": f"Customer \'{data['customer_name']}\' not in zoho books."}
-    if customer.get('email') == '':
-        return {"code": 1003, "message": "Contact don't have email associated with it."}
-    data['customer_id'] = customer['contact_id']
-    return {"code": 0, "data": data}
+    customer = search_contact_by_field(obj, 'contact_name', value=customer_name, contact_type='customer')
+    if customer and customer.get('contact_id'):
+        return customer['contact_id']
 
-def get_vendor(obj, data):
+
+def get_vendor_id(obj, vendor_name):
     """
     Return vendor from Zoho books using Zoho Inventory name.
     """
-    vendor = search_contact(obj, value=data['vendor_name'], contact_type='vendor')
-    if vendor is None:
-        return {"code": 1003, "message": "Contact not in zoho books."}
-    if vendor.get('email') == '':
-        return {"code": 1003, "message": "Contact don't have email associated with it."}
-    data['vendor_id'] = vendor['contact_id']
-    return {"code": 0, "data": data}
+    vendor = search_contact_by_field(obj, 'contact_name', value=vendor_name, contact_type='vendor')
+    if vendor and vendor.get('contact_id'):
+        return  vendor.get('contact_id')
 
 def create_estimate(books_name, data, params=None):
     """
@@ -583,11 +576,18 @@ def create_estimate(books_name, data, params=None):
     try:
         obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
+
+        if not data.get('customer_id') and data.get('customer_name'):
+            customer_id = get_customer_id(obj, data.get('customer_name'))
+            if not customer_id:
+                return {"code": 1003, "message": f"Customer \'{data.get('customer_name')}\' not in zoho books."}
+            else:
+                data['customer_id'] = customer_id
+
         if not data.get('customer_id'):
-            result = get_customer(obj, data)
-            if result['code'] != 0:
-                return result
-        result = get_item(obj, result['data'])
+            return {"code": 1003, "message": f"customer_id is required."}
+
+        result = get_item(obj, data)
         if result['code'] != 0:
            return result
         return estimate_obj.create_estimate(result['data'], parameters=params)
@@ -618,15 +618,20 @@ def update_estimate(books_name, estimate_id, data, params=None):
     try:
         obj = get_books_obj(books_name)
         estimate_obj = obj.Estimates()
-        if not data.get('customer_id'):
-            result = get_customer(obj, data)
-            if result['code'] != 0:
-                return result
-        result = get_item(obj, result['data'])
+
+        if not data.get('customer_id') and data.get('customer_name'):
+            customer_id = get_customer_id(obj, data.get('customer_name'))
+            if not customer_id:
+                return {"code": 1003, "message": f"Customer \'{data.get('customer_name')}\' not in zoho books."}
+            else:
+                data['customer_id'] = customer_id
+
+        result = get_item(obj, data)
         if result['code'] != 0 and result['code'] != 1004:
            return result
         return estimate_obj.update_estimate(estimate_id, result['data'], parameters=params)
     except Exception as exc:
+        print(exc)
         return {
             'status_code': 400,
             'error': exc
@@ -656,21 +661,20 @@ def update_estimate_address(books_name, estimate_id, address_type, data, params=
     estimate_obj = obj.Estimates()
     return estimate_obj.update_estimate_address(estimate_id, address_type, data, parameters=params)
 
-def send_estimate_to_sign(books_name, estimate_id, customer_name=None, contact_id=None, notify_addresses=None):
+def send_estimate_to_sign(books_name, estimate_id, contact_id=None, customer_name=None, notify_addresses=None):
     """
     sync estimate status from zoho books.
     """
     try:
         obj = get_books_obj(books_name)
-        # contact_obj = obj.Contacts()
+        contact_obj = obj.Contacts()
         contact = None
         if contact_id:
             r = get_contact(books_name, contact_id)
             if r.get('contact_id'):
                 contact = r
         if not contact and customer_name:
-            contact = search_contact(obj, value=customer_name, contact_type='customer')
-            # search_contact_by_field(contact_obj, 'contact_name', customer_name, contact_type='customer')
+            contact = search_contact_by_field(contact_obj, 'contact_name', customer_name, contact_type='customer')
         # if contact.get('code'):
         if not contact:
             return {'code': '1003', 'error': 'Contact not found in zoho books.'}
@@ -867,11 +871,19 @@ def create_purchase_order(books_name, record, params=None):
     try:
         obj = get_books_obj(books_name)
         po_obj = obj.PurchaseOrders()
-        if not record.get('customer_id'):
-            result = get_vendor(obj, record)
-            if result['code'] != 0:
-                return result
-        result = get_item(obj, result['data'])
+
+        if not record.get('vendor_id') and record.get('vendor_name'):
+            vendor_id = get_vendor_id(obj, record.get('vendor_name'))
+            if not vendor_id:
+                return {"code": 1003, "message": f"Vendor \'{record.get('vendor_name')}\' not in zoho books."}
+            else:
+                record['vendor_id'] = vendor_id
+
+        if not record.get('vendor_id'):
+            return {"code": 1003, "message": f"vendor_id is required."}
+
+
+        result = get_item(obj, record)
         if result['code'] != 0:
            return result
         return po_obj.create_purchase_order(result['data'], parameters=params)
@@ -888,11 +900,15 @@ def update_purchase_order(books_name, po_id, record, params=None):
     try:
         obj = get_books_obj(books_name)
         po_obj = obj.PurchaseOrders()
-        if not record.get('customer_id'):
-            result = get_vendor(obj, record)
-            if result['code'] != 0:
-                return result
-        result = get_item(obj, result['data'])
+
+        if not record.get('vendor_id') and record.get('vendor_name'):
+            vendor_id = get_vendor_id(obj, record.get('vendor_name'))
+            if not vendor_id:
+                return {"code": 1003, "message": f"Vendor \'{record.get('vendor_name')}\' not in zoho books."}
+            else:
+                record['vendor_id'] = vendor_id
+
+        result = get_item(obj, record)
         if result['code'] != 0 and result['code'] != 1004:
            return result
         return po_obj.update_purchase_order(po_id, result['data'], parameters=params)

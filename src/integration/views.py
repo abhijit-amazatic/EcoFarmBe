@@ -368,7 +368,7 @@ class LicenseBillingAndAccountingAPI(APIView):
 
     def get_contact_id(self, organization_name=None):
         params = self.request.query_params.dict()
-        books_name = organization_name or params.get('organization_name')
+        books_name = organization_name or params.get('organization_name') or ''
         org_name = books_name.replace('books_', '')
         contact_id = None
         if 'license_id' in params:
@@ -404,6 +404,18 @@ class LicenseBillingAndAccountingAPI(APIView):
                                         contact_id = c.get('contact_id')
                     except Exception as e:
                         print(e)
+
+            if not contact_id:
+                raise ValidationError(
+                    {
+                        "code": 1004,
+                        "message": (
+                            f'Unable to find {org_name.upper()} {self.contact_type} id '
+                            f'for license id \'{params.get("license_id")}\'.',
+                        )
+                    }
+                )
+
         return contact_id
 
 
@@ -517,10 +529,11 @@ class EstimateSignView(LicenseBillingAndAccountingAPI):
         estimate_id = request.query_params.get('estimate_id', None)
         customer_name = request.query_params.get('customer_name', None)
         organization_name = request.query_params.get('organization_name')
+        customer_id = None
         if 'license_id' in self.request.query_params:
             customer_id = self.get_contact_id(organization_name)
-        if estimate_id and customer_name:
-            response = send_estimate_to_sign(organization_name, estimate_id, customer_name)
+        if estimate_id and customer_id:
+            response = send_estimate_to_sign(organization_name, estimate_id, customer_id, customer_name)
             if response.get('code') and response.get('code') != 0:
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             return Response(response, status=status.HTTP_200_OK)
