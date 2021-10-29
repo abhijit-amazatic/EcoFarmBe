@@ -656,13 +656,21 @@ def update_estimate_address(books_name, estimate_id, address_type, data, params=
     estimate_obj = obj.Estimates()
     return estimate_obj.update_estimate_address(estimate_id, address_type, data, parameters=params)
 
-def send_estimate_to_sign(books_name, estimate_id, customer_name, notify_addresses=None):
+def send_estimate_to_sign(books_name, estimate_id, customer_name=None, contact_id=None, notify_addresses=None):
     """
     sync estimate status from zoho books.
     """
     try:
         obj = get_books_obj(books_name)
-        contact = search_contact(obj, value=customer_name, contact_type='customer')
+        # contact_obj = obj.Contacts()
+        contact = None
+        if contact_id:
+            r = get_contact(books_name, contact_id)
+            if r.get('contact_id'):
+                contact = r
+        if not contact and customer_name:
+            contact = search_contact(obj, value=customer_name, contact_type='customer')
+            # search_contact_by_field(contact_obj, 'contact_name', customer_name, contact_type='customer')
         # if contact.get('code'):
         if not contact:
             return {'code': '1003', 'error': 'Contact not found in zoho books.'}

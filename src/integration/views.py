@@ -502,12 +502,14 @@ class EstimateAddressView(APIView):
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EstimateSignView(APIView):
+class EstimateSignView(LicenseBillingAndAccountingAPI):
     """
     View class to sign for estimate.
     """
     permission_classes = (IsAuthenticated,)
-    
+    contact_type = 'customer'
+    detail_view_key = 'estimate_id'
+
     def get(self, request):
         """
         Get signing url.
@@ -515,6 +517,8 @@ class EstimateSignView(APIView):
         estimate_id = request.query_params.get('estimate_id', None)
         customer_name = request.query_params.get('customer_name', None)
         organization_name = request.query_params.get('organization_name')
+        if 'license_id' in self.request.query_params:
+            customer_id = self.get_contact_id(organization_name)
         if estimate_id and customer_name:
             response = send_estimate_to_sign(organization_name, estimate_id, customer_name)
             if response.get('code') and response.get('code') != 0:
