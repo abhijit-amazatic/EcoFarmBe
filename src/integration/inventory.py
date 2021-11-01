@@ -380,6 +380,8 @@ def crop_image_to_aspect_ratio(compressed_file):
     crop_y = 0
 
     img = Image.open(compressed_file)
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
     o_width, o_height = img.size
     img_ratio = round(o_width/o_height, 5)
     img_crop_ratio = round(INVENTORY_IMAGE_CROP_RATIO, 5) 
