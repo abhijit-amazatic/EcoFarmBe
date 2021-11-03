@@ -11,7 +11,7 @@ psycopg2-binary==2.8.3
 pdfminer==20191125
 django-cors-headers==3.0.0
 pycrypto==2.6.1
-requests==2.13.0
+requests==2.26.0
 pyOpenSSL==17.2.0
 django-sslserver
 redis==3.3.8
