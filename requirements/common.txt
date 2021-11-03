@@ -46,4 +46,4 @@ django-reversion-compare==0.14.0
 django-rest-knox==4.1.0
 -e git+ssh://git@github.com/Eco-Farm/pyzoho.git#egg=pyzoho
 -e git+ssh://git@github.com/Eco-Farm/drf-api-logger.git#egg=drf-api-logger
--e git+ssh://git@github.com/Eco-Farm/passwordless-login.git#egg=passwordless-login
+-e git+ssh://git@github.com/Eco-Farm/passwordless-login.git#egg=knoxpasswordlessdrf
