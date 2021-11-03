@@ -1027,7 +1027,7 @@ def resize_box_images():
     resize_tuple = (1280, 720)
     for document in documents:
         url = get_preview_url(document.box_id)
-        data = BytesIO(requests.get(url).content)
+        data = BytesIO(requests.get(ourl).content)
         out = BytesIO()
         img = Image.open(data)
         img.resize(resize_tuple)

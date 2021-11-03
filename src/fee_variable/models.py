@@ -160,7 +160,19 @@ class CampaignVariable(TimeStampFlagModelMixin,models.Model):
         verbose_name = _('Campaign Variable')
         verbose_name_plural = _('Campaign Variables')
 
+class QRCodeVariable(TimeStampFlagModelMixin,models.Model):
+    """
+    QR Code related variables.
+    """
+    qr_code_size = models.IntegerField(verbose_name=_("QR Code Size"),null=True, blank=True,help_text="The width and height of the QR code displayed on your image.This is the minimum pixel size of your QR code image.Actual size of the QR code can be slightly bigger depending on data and configuration.")
+    
+    class Meta:
+        verbose_name = _('QR Code Variable')
+        verbose_name_plural = _('QR Code Variables')
 
+     
+
+        
 class VendorInventoryDefaultAccounts(TimeStampFlagModelMixin,models.Model):
     """
     Class implementing  CustomInventory variables

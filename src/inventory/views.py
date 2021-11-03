@@ -70,6 +70,7 @@ from .tasks import (
     notify_inventory_item_change_submitted_task,
     notify_inventory_item_delist_submitted_task,
     async_update_inventory_item,
+    generate_upload_item_detail_qr_code_stream,
 )
 from integration.books import (get_salesorder, parse_book_object)
 from .utils import delete_in_transit_item
@@ -488,10 +489,13 @@ class InventorySyncView(APIView):
         record = sync_inventory(
             request.data.get('inventory_name'),
             request.data.get('JSONString'))
+        try:
+            obj = Inventory.objects.get(item_id=record)
+            if not obj.item_qr_code_url:
+                generate_upload_item_detail_qr_code_stream.delay(obj.item_id)
+        except Inventory.DoesNotExist as e:
+            pass
         return Response(record)
-
-
-
 
 class CategoryNameView(APIView):
     """

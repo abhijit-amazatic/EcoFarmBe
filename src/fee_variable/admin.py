@@ -35,6 +35,10 @@ class CampaignVariableAdmin(admin.ModelAdmin):
     Zoho campaign Variables
     """
 
+class QRCodeVariableAdmin(admin.ModelAdmin):
+    """
+    QR code Admin config here.
+    """
 
 class VendorInventoryDefaultAccountsForm(forms.ModelForm):
 
@@ -174,4 +178,5 @@ admin.site.register(OrderVariable, OrderVariableAdmin)
 admin.site.register(CustomInventoryVariable, CustomInventoryVariableAdmin)
 admin.site.register(TaxVariable, TaxVariableAdmin)
 admin.site.register(CampaignVariable, CampaignVariableAdmin)
+admin.site.register(QRCodeVariable, QRCodeVariableAdmin)
 admin.site.register(VendorInventoryDefaultAccounts, VendorInventoryDefaultAccountsAdmin)

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.conf import settings
 from django.contrib.admin.filters import (
     BooleanFieldListFilter,
 )
@@ -9,7 +10,10 @@ from core.mixins.admin_filters import (
 from ..models import (
     Inventory,
 )
-
+from ..tasks.qr_code import generate_upload_item_detail_qr_code_stream
+from integration.box import (search,delete_file)
+from django.http import HttpResponseRedirect
+from fee_variable.models import QRCodeVariable
 
 class InventoryItemAdmin(admin.ModelAdmin):
     """
@@ -191,12 +195,23 @@ class InventoryItemAdmin(admin.ModelAdmin):
                 'ethics_and_certification',
                 'mapped_items',
                 'client_id',
+                'item_qr_code_url',
                 # 'extra_documents',
             ),
         }),
     )
+    change_form_template = 'user/qr_code.html'
 
-
+    def response_change(self, request, obj):
+        if "_trigger-qr" in request.POST:
+            size_obj = QRCodeVariable.objects.values('qr_code_size')[0]
+            box_obj_id = search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.item_id)
+            if box_obj_id:
+                delete_file(box_obj_id)
+            generate_upload_item_detail_qr_code_stream.delay(obj.item_id,size_obj['qr_code_size'])
+            self.message_user(request, "Task Triggered.Check refreshed URL mapped to field 'QR Code-Box URL' in 1-2 mins!")
+            return HttpResponseRedirect(".")
+        return super().response_change(request, obj)
 
     def has_change_permission(self, request, obj=None):
         return False

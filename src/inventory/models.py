@@ -182,6 +182,7 @@ class Inventory(models.Model):
     cf_payment_method = ArrayField(models.CharField(max_length=255), blank=True, null=True, default=list)
     mapped_items = JSONField(blank=True, null=True, default=dict)
     client_id = models.PositiveIntegerField(blank=True, null=True)
+    item_qr_code_url = models.CharField(_('QR Code-Box URL'), blank=True, null=True, max_length=500)
 
     def __str__(self):
         return self.name
