@@ -85,16 +85,13 @@ def get_vendor_id(inventory_obj, vendor_name):
     Get vendor id from zoho.
     """
     vendor_id = None
-    for field in ('contact_name', 'company_name', 'cf_legal_business_name'):
-        resp = inventory_obj.get_contact(params={field: vendor_name, 'contact_type': 'vendor'})
-        if resp.get('code') == 0:
-            for vendor in resp.get('contacts'):
-                if vendor.get(field, '') == vendor_name or vendor.get('custom_field_hash', {}).get(field, '') == vendor_name:
-                    if vendor.get('contact_type') == 'vendor':
-                        vendor_id = vendor.get('contact_id')
-                        break
-        if vendor_id:
-            break
+    resp = inventory_obj.get_contact(params={'contact_name': vendor_name, 'contact_type': 'vendor'})
+    if resp.get('code') == 0:
+        for vendor in resp.get('contacts'):
+            if vendor.get('contact_name', '') == vendor_name:
+                if vendor.get('contact_type') == 'vendor':
+                    vendor_id = vendor.get('contact_id')
+                    break
     return vendor_id
 
 def get_vendor_id_by_client_id(inventory_obj, client_id):
@@ -144,12 +141,18 @@ def create_inventory_item(inventory_name, record, params={}):
     Create an inventory item in zoho inventory.
     """
     inventory = get_inventory_obj(inventory_name)
-    if 'cf_vendor_name' in record:
-        vendor_id = get_vendor_id(inventory, record.get('cf_vendor_name'))
-        if vendor_id:
-            record['cf_vendor_name'] = vendor_id
-        else:
-            record.pop('cf_vendor_name')
+
+    if record.get('cf_vendor_name'):
+        try:
+            int(record.get('cf_vendor_name'))
+        except ValueError:
+            vendor_id = get_vendor_id(inventory, record.get('cf_vendor_name'))
+            if not vendor_id:
+                return {"code": 1003, "message": f"Vendor \'{record.get('cf_vendor_name')}\' not in zoho books."}
+            else:
+                record['cf_vendor_name'] = vendor_id
+    # else:
+    #     return {"code": 1003, "message": f"cf_vendor_name is required."}
 
     if 'cf_procurement_rep' in record:
         user_id = get_user_id(inventory, record['cf_procurement_rep'])
@@ -165,12 +168,17 @@ def update_inventory_item(inventory_name, record_id, record, params={}):
     Update an inventory item in zoho inventory.
     """
     inventory = get_inventory_obj(inventory_name)
-    if 'cf_vendor_name' in record:
-        vendor_id = get_vendor_id(inventory, record.get('cf_vendor_name'))
-        if vendor_id:
-            record['cf_vendor_name'] = vendor_id
-        else:
-            record.pop('cf_vendor_name')
+
+    if record.get('cf_vendor_name'):
+        try:
+            int(record.get('cf_vendor_name'))
+        except ValueError:
+            vendor_id = get_vendor_id(inventory, record.get('cf_vendor_name'))
+            if not vendor_id:
+                return {"code": 1003, "message": f"Vendor \'{record.get('cf_vendor_name')}\' not in zoho books."}
+            else:
+                record['cf_vendor_name'] = vendor_id
+
     if 'cf_procurement_rep' in record:
         user_id = get_user_id(inventory, record['cf_procurement_rep'])
         if user_id:
@@ -1047,14 +1055,16 @@ def create_purchase_order(inventory_name, record, params=None):
     try:
         inv_obj = get_inventory_obj(inventory_name)
         po_obj = inv_obj.PurchaseOrders()
-        if 'vendor_name' in record:
+
+        if not record.get('vendor_id') and record.get('vendor_name'):
             vendor_id = get_vendor_id(inv_obj, record.get('vendor_name'))
-            if vendor_id:
-                record['vendor_id'] = vendor_id
+            if not vendor_id:
+                return {"code": 1003, "message": f"Vendor \'{record.get('vendor_name')}\' not in zoho books."}
             else:
-                return {"code": 1003, "message": "Contact not in zoho inventory."}
-        else:
-            {"code": 1003, "error": "vendor name not provided"}
+                record['vendor_id'] = vendor_id
+
+        if not record.get('vendor_id'):
+            return {"code": 1003, "message": f"vendor_id is required."}
 
         result = get_line_item(inv_obj, record)
         if result['code'] != 0:
