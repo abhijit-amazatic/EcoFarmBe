@@ -298,7 +298,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 data_ls = result.get('response')
                 if data_ls and isinstance(data_ls, list):
                     for vendor in data_ls:
-                        if vendor.get('Client_ID') == client_id:
+                        if vendor.get('Client_ID', '') == str(client_id):
                             if vendor.get('id'):
                                 obj.crm_vendor_id = vendor.get('id')
                             p_rep = vendor.get('Owner', {}).get('email')
