@@ -21,9 +21,9 @@ def post_save_custom_inventory(sender, instance, created, **kwargs):
             if  l_p.license.profile_category == 'nursery' and instance.category_name in ['Clones',]:
                 instance.zoho_organization = 'efn'
                 instance.save()
-            elif l_p.license.legal_business_name == 'EFL, LLC':
-                instance.zoho_organization = 'efl'
-                instance.save()
+            # elif l_p.license.legal_business_name == 'EFL, LLC':
+            #     instance.zoho_organization = 'efl'
+            #     instance.save()
             else:
                 instance.zoho_organization = 'efd'
                 instance.save()
