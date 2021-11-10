@@ -373,6 +373,10 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
         update_cultivar_of_interest = 'cultivars_of_interest' in validated_data and validated_data.get('cultivars_of_interest') != instance.cultivars_of_interest
 
         instance = super().update(instance, validated_data)
+        if instance.agreement_signed and not instance.signed_program_name:
+            if instance.license.profile_category and instance.license.profile_category not in ('cultivation', 'nursery'):
+                instance.signed_program_name = 'Silver - Member'
+                instance.save()
         instance.license.brand = instance.brand_association
         instance.license.save()
         update_in_crm_task.delay('Accounts', instance.id)
