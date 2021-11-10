@@ -1,3 +1,5 @@
+import decimal
+from decimal import Decimal
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -75,7 +77,7 @@ ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
 }
 
 ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP = {
-    'Kief': lambda val: val/454, # convert lb to gram
+    'Kief': lambda val: Decimal(val)/Decimal(453.59237), # convert lb to gram
 }
 
 PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES = (
@@ -121,8 +123,8 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
                 inventory_variable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
                 if inventory_variable and hasattr(inventory_variable, fee_var) and getattr(inventory_variable, fee_var) is not None:
                     try:
-                        db_val = float(getattr(inventory_variable, fee_var))
-                    except ValueError:
+                        db_val = Decimal(getattr(inventory_variable, fee_var))
+                    except decimal.InvalidOperation:
                         msg_error('Error while parsing MCSP fee from db.')
                         return None
                     else:
@@ -131,17 +133,17 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
                         if item_category in PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES:
                             if farm_price is not None:
                                 try:
-                                    fp = float(farm_price)
-                                except ValueError:
+                                    fp = Decimal(farm_price)
+                                except decimal.InvalidOperation:
                                     msg_error('Error while parsingfarm price for MCSP fee calculation.')
                                     return None
                                 else:
-                                    return round((fp*db_val)/100, 2)
+                                    return round((fp*db_val)/Decimal('100'), 6)
                             else:
                                 msg_error('Farm price not provided for MCSP fee calculation.')
                                 return None
                         else:
-                            return round(db_val, 2)
+                            return round(db_val, 6)
                 else:
                     program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
                     program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)

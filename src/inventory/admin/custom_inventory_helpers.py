@@ -16,7 +16,7 @@ from ..data import (
     ITEM_CUSTOM_FIELD_ORG_MAP,
 )
 
-def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp_fee):
+def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id,):
     data = {}
     # data.update(CUSTOM_INVENTORY_ITEM_DEFAULT_ACCOUNTS.get(inv_obj.ORGANIZATION_ID, {}))
     data.update(
@@ -61,10 +61,11 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
 
     data['cf_status'] = obj.marketplace_status
 
-    if obj.farm_ask_price:
-        data['cf_farm_price_2'] = obj.farm_ask_price
-        # data['purchase_rate'] = obj.farm_ask_price
-        data['rate'] = obj.farm_ask_price + tax + mcsp_fee
+    data['cf_farm_price_2'] = obj.farm_ask_price
+    # data['purchase_rate'] = obj.farm_ask_price
+    data['cf_cultivation_tax'] = obj.cultivation_tax
+    data['cf_mscp'] = obj.mcsp_fee
+    data['rate'] = obj.farm_ask_price + obj.cultivation_tax + obj.mcsp_fee
 
 
     if obj.need_lab_testing_service is not None:

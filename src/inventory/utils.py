@@ -45,11 +45,12 @@ def get_item_tax(category_name, biomass_type=None, biomass_input_g=None, total_b
         elif CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
 
             if biomass_type:
-                trim_tax = get_tax_from_db(tax=BIOMASS_TYPE_TO_TAX.get(biomass_type))
-                if isinstance(trim_tax, Decimal):
+                biomass_tax_lb = get_tax_from_db(tax=BIOMASS_TYPE_TO_TAX.get(biomass_type))
+                if isinstance(biomass_tax_lb, Decimal):
+                    biomass_tax_g = biomass_tax_lb/Decimal('453.59237')
                     if biomass_input_g:
                         if total_batch_output:
-                            tax = (trim_tax * Decimal(biomass_input_g)) / Decimal(total_batch_output)
+                            tax = (biomass_tax_g * Decimal(biomass_input_g)) / Decimal(total_batch_output)
                             return round(tax, 6)
                         else:
                             msg_error('Item does not have a Batch output quantity to calculate the tax.')

@@ -1,5 +1,6 @@
 # from os import urandom
 import random
+from decimal import Decimal
 from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericStackedInline
@@ -143,11 +144,12 @@ class CustomInventoryForm(forms.ModelForm):
                 if self.instance.status == 'pending_for_approval':
                     if self.instance.category_name:
                         if self.instance.category_group in ('Isolates', 'Distillates', 'Concentrates', 'Terpenes'):
-                            if not cleaned_data.get('biomass_input_g'):
-                                self.add_error('biomass_input_g', "This value is required for current item category.")
-                            if not cleaned_data.get('biomass_used_verified'):
-                                self.add_error('biomass_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
-                                # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
+                            if cleaned_data.get('biomass_type') and cleaned_data.get('biomass_type') != 'Unknown':
+                                if not cleaned_data.get('biomass_input_g'):
+                                    self.add_error('biomass_input_g', "This value is required for current item category.")
+                                if not cleaned_data.get('biomass_used_verified'):
+                                    self.add_error('biomass_used_verified', "Please check Batch Record Document to verify used biomass quantity and mark as verified.")
+                                    # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
             return cleaned_data
 
     class Meta:
@@ -357,21 +359,22 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 return None
             item_name = self.generate_name(obj, request=request,)
             if item_name:
-                mcsp_fee = get_item_mcsp_fee(
-                    obj.vendor_name,
-                    license_profile=obj.license_profile,
-                    item_category=obj.category_name,
-                    request=request,
-                    farm_price=obj.farm_ask_price
-                )
-                if isinstance(mcsp_fee, float):
+                if not obj.mcsp_fee:
+                    obj.mcsp_fee = get_item_mcsp_fee(
+                        obj.vendor_name,
+                        license_profile=obj.license_profile,
+                        item_category=obj.category_name,
+                        request=request,
+                        farm_price=obj.farm_ask_price
+                    )
+                if isinstance(obj.mcsp_fee, Decimal):
                     tax = get_item_tax(
                         category_name=obj.category_name,
                         biomass_type=obj.biomass_type,
                         biomass_input_g=obj.biomass_input_g,
                         total_batch_output=obj.total_batch_quantity,
                         request=request,)
-                    if isinstance(tax, float):
+                    if isinstance(obj.cultivation_tax, Decimal):
                         if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                             self.get_crm_data(request, obj)
                         if obj.zoho_organization:
@@ -428,8 +431,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                         obj.save()
                         self.message_user(request, 'This item is approved', level='success')
                         if obj.marketplace_status in ('In-Testing', 'Available'):
-                            # if settings.PRODUCTION or obj.zoho_organization in ['efd',]:
-                            #     create_approved_item_po_task.delay(obj.id)
                             create_approved_item_po_task.delay(obj.id)
                             notify_inventory_item_approved_task.delay(obj.id)
                         else:

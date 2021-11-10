@@ -4,11 +4,13 @@ Serializer for inventory
 import json
 from rest_framework import serializers
 from django.utils import timezone
+
 from integration.apps.aws import (create_presigned_url, )
 from permission.filterqueryset import (filterQuerySet, )
 from brand.models import LicenseProfile
 from cultivar.models import Cultivar
 from core.settings import (AWS_BUCKET, )
+from .utils import get_item_tax
 from .models import (
     Inventory,
     CustomInventory,
@@ -129,14 +131,15 @@ class CustomInventorySerializer(serializers.ModelSerializer):
     labtest_url = serializers.SerializerMethodField()
 
     category_required_fields = {
-        'Flowers':      ('cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
-        'Trims':        ('cultivar_name', 'batch_availability_date', 'harvest_date',),
-        'Kief':         ('cultivar_name', 'batch_availability_date', 'manufacturing_date',),
-        'Concentrates': ('cultivar_name', 'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'biomass_input_g',),
-        'Distillates':  ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'biomass_input_g', 'cannabinoid_percentage',),
-        'Isolates':     ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'biomass_input_g', 'cannabinoid_percentage',),
-        'Terpenes':     ('cultivar_name', 'batch_availability_date', 'manufacturing_date', ),
-        'Clones':       ('cultivar_name', 'rooting_days',),
+        # 'Flowers':      ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
+        'Flowers':      ('cultivation_tax', 'cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
+        'Trims':        ('cultivation_tax', 'cultivar_name', 'batch_availability_date', 'harvest_date',),
+        'Kief':         ('cultivation_tax', 'cultivar_name', 'batch_availability_date', 'manufacturing_date',),
+        'Concentrates': ('cultivation_tax', 'cultivar_name', 'batch_availability_date', 'manufacturing_date', 'biomass_type',),
+        'Distillates':  ('cultivation_tax', 'mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'biomass_type', 'cannabinoid_percentage',),
+        'Isolates':     ('cultivation_tax', 'mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'biomass_type', 'cannabinoid_percentage',),
+        'Terpenes':     ('cultivation_tax', 'cultivar_name', 'batch_availability_date', 'manufacturing_date', ),
+        'Clones':       ('cultivation_tax', 'cultivar_name', 'rooting_days',),
     }
 
 
@@ -183,17 +186,40 @@ class CustomInventorySerializer(serializers.ModelSerializer):
             required_fields = ('category_name',)
         else:
             required_fields = self.category_required_fields.get(CG.get(category_name), ())
-            for field in required_fields:
-                if field == 'cultivar_name':
-                    if not attrs.get('cultivar'):
-                        errors[field] = f'This field is required for category \'{category_name}\'.'
-                else:
-                    if field == 'grade_estimate' and attrs.get('marketplace_status') in ('Vegging', 'Flowering'):
-                        continue
-                    if not attrs.get(field):
-                        errors[field] = f'This field is required for category \'{category_name}\'.'
+        for field in required_fields:
+            if field == 'cultivar_name':
+                if attrs.get('cultivar'):
+                    continue
+            elif field == 'grade_estimate':
+                if attrs.get('marketplace_status') in ('Vegging', 'Flowering'):
+                    continue
+            elif attrs.get(field):
+                continue
+            errors[field] = f'This field is required for category \'{category_name}\'.'
+
+        biomass_type = attrs.get('biomass_type') or ''
+        if 'biomass_type' in required_fields and  biomass_type in ('Dried Flower', 'Dried Leaf', 'Fresh Plant'):
+            for field in ('biomass_input_g', 'total_batch_quantity'):
+                if attrs.get(field):
+                    continue
+                errors[field] = f'This field is required for category \'{category_name}\' and  biomass type \'{biomass_type}\'.'
+
         if errors:
             raise serializers.ValidationError(errors)
+
+        if 'biomass_type' in required_fields and  biomass_type in ('Dried Flower', 'Dried Leaf', 'Fresh Plant'):
+            tax = get_item_tax(
+                category_name=attrs.get('category_name'),
+                biomass_type=attrs.get('biomass_type'),
+                biomass_input_g=attrs.get('biomass_input_g'),
+                total_batch_output=attrs.get('total_batch_quantity'),
+            )
+            if not attrs.get('cultivation_tax') == tax:
+                errors['cultivation_tax'] = f'Value do not match with backend calculations (backend value: \'{tax}\').'
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
         return attrs
 
     def validate_vendor_name(self, val):

@@ -27,6 +27,8 @@ fieldsets_default = {
     'PRICING INFORMATION': {
         'fields': (
             'farm_ask_price',
+            'mcsp_fee',
+            'cultivation_tax',
             'pricing_position',
             # 'have_minimum_order_quantity',
             # 'minimum_order_quantity',
@@ -113,6 +115,7 @@ _fieldsets = {
         'BATCH & QUALITY INFORMATION': {
             'fields': (
                 'quantity_available',
+                'biomass_type',
                 'total_batch_quantity',
                 ('biomass_input_g', 'batch_record_file'),
                 'biomass_used_verified',
@@ -138,6 +141,7 @@ _fieldsets = {
         'BATCH & QUALITY INFORMATION': {
             'fields': (
                 'quantity_available',
+                'biomass_type',
                 'total_batch_quantity',
                 ('biomass_input_g', 'batch_record_file'),
                 'biomass_used_verified',
@@ -163,6 +167,7 @@ _fieldsets = {
         'BATCH & QUALITY INFORMATION': {
             'fields': (
                 'quantity_available',
+                'biomass_type',
                 'total_batch_quantity',
                 ('biomass_input_g', 'batch_record_file'),
                 'biomass_used_verified',
@@ -179,6 +184,7 @@ _fieldsets = {
         'BATCH & QUALITY INFORMATION': {
             'fields': (
                 'quantity_available',
+                'biomass_type',
                 'total_batch_quantity',
                 ('biomass_input_g', 'batch_record_file'),
                 'biomass_used_verified',

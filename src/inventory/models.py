@@ -381,6 +381,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Crude Oil - CBD', _('Crude Oil - CBD')),
         ('Distillate Oil - THC', _('Distillate Oil - THC')),
         ('Distillate Oil - CBD', _('Distillate Oil - CBD')),
+        ('Hash', _('Hash')),
         ('Shatter', _('Shatter')),
         ('Sauce', _('Sauce')),
         ('Crumble', _('Crumble')),
@@ -496,20 +497,8 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         null=True,
     )
     biomass_used_verified = models.BooleanField(_('Biomass Used Verified'), default=False)
-    cultivation_tax = PositiveDecimalField(
-        _('Total Batch Output'),
-        decimal_places=6,
-        max_digits=16,
-        blank=True,
-        null=True,
-    )
-    mcsp_fee = PositiveDecimalField(
-        _('Total Batch Output'),
-        decimal_places=6,
-        max_digits=16,
-        blank=True,
-        null=True,
-    )
+    cultivation_tax = PositiveDecimalField(_('Cultivation Tax'), decimal_places=6, max_digits=16, blank=True, null=True)
+    mcsp_fee = PositiveDecimalField(_('MCSP Fee'), decimal_places=6, max_digits=16, blank=True, null=True)
 
 
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
