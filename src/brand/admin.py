@@ -327,13 +327,13 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
 
     def crm_output_display(self, obj):
         jw = JSONEditorWidget(options={'modes':['code', 'text', 'view'],'search': True})
-        return jw.render('CRM Output', obj.crm_output, attrs={"id": "crm_output_display"})
+        return jw.render('CRM Output', json.dumps(obj.crm_output or {}), attrs={"id": "crm_output_display"})
 
     crm_output_display.short_description = 'CRM Output'
  
     def books_output_display(self, obj):
         jw = JSONEditorWidget(options={'modes':['code', 'text', 'view'],'search': True})
-        return jw.render('Books Output', obj.books_output, attrs={"id": "books_output_display"})
+        return jw.render('Books Output', json.dumps(obj.books_output or {}), attrs={"id": "books_output_display"})
 
     books_output_display.short_description = 'Books output'
 
