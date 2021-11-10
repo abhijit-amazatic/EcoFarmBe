@@ -1,7 +1,9 @@
 """
 Inventory Model
 """
+from decimal import Decimal
 from django import forms
+from django.core.validators import MinValueValidator
 from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRelation)
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -11,7 +13,7 @@ from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from cultivar.models import (Cultivar, )
 from labtest.models import (LabTest, )
 from core.mixins.models import (TimeStampFlagModelMixin, )
-from core.db.models import (PercentField, )
+from core.db.models import (PercentField, PositiveDecimalField)
 from user.models import (User, )
 from .fields import (ChoiceArrayField,)
 from .data import (
@@ -456,6 +458,12 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('efl', _('Eco Farm Labs (EFL LLC)')),
         ('efn', _('Eco Farm Nursery (EFN LLC)')),
     )
+    BIOMASS_TYPE_CHOICES = (
+        ('Dried Flower', _('Dried Flower')),
+        ('Dried Leaf', _('Dried Leaf')),
+        ('Fresh Plant', _('Fresh Plant')),
+    )
+
     license_profile = models.ForeignKey('brand.LicenseProfile', verbose_name=_('License Profile'), related_name='custom_inventory', null=True, on_delete=models.SET_NULL)
     cultivar = models.ForeignKey(Cultivar, verbose_name=_('Cultivar'), related_name='custom_inventory', on_delete=models.SET_NULL, blank=True, null=True,)
  
@@ -469,7 +477,38 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     marketplace_status = models.CharField(_('Marketplace Status'), choices=MARKETPLACE_STATUS_CHOICES, max_length=225, default='In-Testing')
 
     quantity_available = models.FloatField(_('Quantity Available'))
-    total_batch_quantity = models.PositiveIntegerField(_('Total Batch Output'), blank=True, null=True,)
+    biomass_type = models.CharField(_('Biomass Type'), choices=BIOMASS_TYPE_CHOICES, blank=True, null=True, max_length=50)
+    biomass_input_g = PositiveDecimalField(
+        _('Raw Material Input (grams)'),
+        decimal_places=6,
+        max_digits=16,
+        help_text='This field is used to calculate tax for Isolates, Concentrates and Terpenes.',
+        blank=True,
+        null=True,
+    )
+    total_batch_quantity = PositiveDecimalField(
+        _('Total Batch Output'),
+        decimal_places=6,
+        max_digits=16,
+        help_text='This field is used to calculate tax for Isolates, Concentrates and Terpenes.',
+        blank=True,
+        null=True,
+    )
+    biomass_used_verified = models.BooleanField(_('Biomass Used Verified'), default=False)
+    cultivation_tax = PositiveDecimalField(
+        _('Total Batch Output'),
+        decimal_places=6,
+        max_digits=16,
+        blank=True,
+        null=True,
+    )
+    mcsp_fee = PositiveDecimalField(
+        _('Total Batch Output'),
+        decimal_places=6,
+        max_digits=16,
+        blank=True,
+        null=True,
+    )
 
 
     harvest_date = models.DateField(_('Harvest Date'), auto_now=False, blank=True, null=True, default=None)
@@ -485,16 +524,9 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     clone_size = models.PositiveIntegerField(_('Clone Size (inch)'), blank=True, null=True,)
 
-    trim_used = models.FloatField(
-        _('Trim Used (lbs)'),
-        help_text='This field is used to calculate tax for Isolates, Concentrates and Terpenes.',
-        blank=True,
-        null=True,
-    )
-    trim_used_verified = models.BooleanField(_('Trim Used Verified'), default=False)
-
     farm_ask_price = models.FloatField(_('Farm Ask Price'), blank=True, null=True,)
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
+
     # have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
     # minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
 

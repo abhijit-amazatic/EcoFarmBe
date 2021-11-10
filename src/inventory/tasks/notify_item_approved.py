@@ -121,7 +121,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                 'harvest_date':             ('Harvest Date',                            obj.harvest_date                       ),
                 'manufacturing_date':       ('Manufacturing Date',                      obj.manufacturing_date                 ),
                 'total_batch_quantity':     ('Total Batch Quantity',                    obj.total_batch_quantity               ),
-                'trim_used':                ('Trim Used (lb)',                          obj.trim_used                          ),
+                'biomass_input_g':          ('Trim Used (lb)',                          obj.biomass_input_g                    ),
                 'rooting_days':             ('Rooting Days',                            obj.rooting_days,                      ),
                 'clone_size':               ('Clone Size (inch)',                       obj.clone_size,                        ),
                 'product_quality_notes':    ('Batch Quality Notes',                     obj.product_quality_notes              ),
@@ -157,7 +157,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                     'cannabinoid_percentage',
                     'manufacturing_date',
                     'total_batch_quantity',
-                    'trim_used',
+                    'biomass_input_g',
                 )
             elif obj.category_group in ('Concentrates', 'Terpenes'):
                 category_specific_fields = (
@@ -165,7 +165,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                     'cultivar_type',
                     'manufacturing_date',
                     'total_batch_quantity',
-                    'trim_used',
+                    'biomass_input_g',
                 )
             elif obj.category_group in ('Clones'):
                 category_specific_fields = (

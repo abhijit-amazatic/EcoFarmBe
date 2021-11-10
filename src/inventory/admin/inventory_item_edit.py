@@ -142,7 +142,7 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
             if isinstance(mcsp_fee, float):
                 tax = get_item_tax(
                     category_name=obj.item.category_name,
-                    trim_used=obj.item.cf_trim_qty_lbs,
+                    biomass_input_g=obj.item.cf_trim_qty_lbs,
                     item_quantity=obj.item.cf_batch_qty_g,
                     request=request,
                 )

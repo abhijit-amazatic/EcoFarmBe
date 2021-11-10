@@ -38,6 +38,10 @@ class TaxVariableVariableSerializer(serializers.ModelSerializer):
     """
     This defines TaxVariableVariableSerializer
     """
+    cultivar_tax = serializers.CharField(source='dried_flower_tax')
+    trim_tax = serializers.CharField(source='dried_leaf_tax')
+    cultivar_tax_item = serializers.CharField(source='dried_flower_tax_item')
+    trim_tax_item = serializers.CharField(source='dried_leaf_tax_item')
     class Meta:
         model = TaxVariable
         fields = ('__all__')

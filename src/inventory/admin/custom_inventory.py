@@ -99,7 +99,7 @@ class InlineDocumentsAdmin(GenericStackedInline):
 
 
 class CustomInventoryForm(forms.ModelForm):
-    # trim_used_verified = forms.BooleanField(label='Used Trim Verified', initial=False, required=False)
+    # biomass_used_verified = forms.BooleanField(label='Used Trim Verified', initial=False, required=False)
 
 
     # def __init__(self, *args, **kwargs):
@@ -143,10 +143,10 @@ class CustomInventoryForm(forms.ModelForm):
                 if self.instance.status == 'pending_for_approval':
                     if self.instance.category_name:
                         if self.instance.category_group in ('Isolates', 'Distillates', 'Concentrates', 'Terpenes'):
-                            if not cleaned_data.get('trim_used'):
-                                self.add_error('trim_used', "This value is required for current item category.")
-                            if not cleaned_data.get('trim_used_verified'):
-                                self.add_error('trim_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
+                            if not cleaned_data.get('biomass_input_g'):
+                                self.add_error('biomass_input_g', "This value is required for current item category.")
+                            if not cleaned_data.get('biomass_used_verified'):
+                                self.add_error('biomass_used_verified', "Please check doc to verify used trim quantity and mark as verified.")
                                 # raise ValidationError("Please check doc to verify used trim quantity and mark as verified.")
             return cleaned_data
 
@@ -181,7 +181,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         'cultivar_type',
         'cultivar_crm_id',
         'category_name',
-        'trim_used_doc',
+        'batch_record_file',
         'status',
         # 'vendor_name',
         'crm_vendor_id',
@@ -367,8 +367,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 if isinstance(mcsp_fee, float):
                     tax = get_item_tax(
                         category_name=obj.category_name,
-                        trim_used=obj.trim_used,
-                        item_quantity=obj.total_batch_quantity,
+                        biomass_type=obj.biomass_type,
+                        biomass_input_g=obj.biomass_input_g,
+                        total_batch_output=obj.total_batch_quantity,
                         request=request,)
                     if isinstance(tax, float):
                         if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
@@ -451,13 +452,13 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     #     pass
 
 
-    def get_doc_url(self, obj, doc_type):
+    def get_doc_url(self, obj, doc_types):
         """
         Return s3 license url.
         """
         try:
             # document_obj = Documents.objects.filter(object_id=obj.id, doc_type=doc_type).latest('created_on')
-            document_obj = obj.extra_documents.filter(doc_type=doc_type).latest('created_on')
+            document_obj = obj.extra_documents.filter(doc_type__in=doc_types).latest('created_on')
             if document_obj.box_url:
                 return document_obj.box_url
             else:
@@ -468,12 +469,12 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
         except Exception:
             return None
 
-    def trim_used_doc(self, obj):
-        url = self.get_doc_url(obj, doc_type='trim_used_doc')
+    def batch_record_file(self, obj):
+        url = self.get_doc_url(obj, doc_types=('trim_used_doc', 'item_batch_record'))
         if url:
             return mark_safe(f'<a href="{url}" target="_blank">{Truncator(url).chars(100)}</a>')
         else:
             return '-'
-    # trim_used_doc.short_description = 'Document'
-    trim_used_doc.short_description = 'Batch Record File'
-    trim_used_doc.allow_tags = True
+    # batch_record_file.short_description = 'Document'
+    batch_record_file.short_description = 'Batch Record File'
+    batch_record_file.allow_tags = True

@@ -1,6 +1,7 @@
 import json
 from logging import error
 import operator
+from decimal import Decimal
 from functools import reduce
 from datetime import (datetime, timedelta)
 from io import BytesIO
@@ -369,12 +370,17 @@ def get_pre_tax_price(record):
     #     return record['price'] - float(taxes['cultivar_tax'])
     # elif 'Trim' in record['category_name']:
     #     return record['price'] - float(taxes['trim_tax'])
-    tax = get_item_tax(
-        record.get('category_name'),
-        trim_used=float(record.get('cf_trim_qty_lbs')) if record.get('cf_trim_qty_lbs') else None,
-        item_quantity=float(record.get('cf_batch_qty_g')) if record.get('cf_batch_qty_g') else None ,
-    )
-    if isinstance(tax, float):
+    tax = record.get('cf_cultivation_tax', '')
+    if tax:
+        tax = Decimal(str(tax))
+    else:
+        tax = get_item_tax(
+            record.get('category_name'),
+            biomass_type=record.get('cf_biomass', ''),
+            biomass_input_g=float(record.get('cf_trim_qty_lbs')) if record.get('cf_trim_qty_lbs') else None,
+            total_batch_output=float(record.get('cf_batch_qty_g')) if record.get('cf_batch_qty_g') else None ,
+        )
+    if isinstance(tax, Decimal):
         return record['price'] - tax
     # Issue:- It will call Books API multiple times.
     # taxes = get_tax_rates()

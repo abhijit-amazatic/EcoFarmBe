@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.contrib import messages
 
 from fee_variable.models import (TaxVariable, )
@@ -5,57 +6,62 @@ from .models import InTransitOrder
 from .data import (CG, )
 
 
-def get_tax_from_db(tax='flower', request=None):
+BIOMASS_TYPE_TO_TAX = {
+    'Dried Flower': 'dried_flower_tax',
+    'Dried Leaf':   'dried_leaf_tax',
+    'Fresh Plant':  'fresh_plant_tax',
+}
+
+def get_tax_from_db(tax='dried_flower_tax', request=None):
     msg_error = lambda msg: messages.error(request, msg,) if request else None
     try:
         tax_var = TaxVariable.objects.latest('-created_on')
     except TaxVariable.DoesNotExist:
-        pass
+        msg_error('Tax variables not found in db.')
+        return None
     else:
-        if tax == 'flower':
-            tax = 'cultivar_tax'
-        elif tax == 'trim':
-            tax = 'trim_tax'
-        else:
-            tax = None
-        if tax:
-            try:
-                return float(getattr(tax_var, tax))
-            except ValueError:
-                msg_error('Error while parsing tax from db.')
-                return None
+        try:
+            return Decimal(getattr(tax_var, tax))
+        except ValueError:
+            msg_error('Error while fetching tax from db.')
+            return None
 
 
-def get_item_tax(category_name, trim_used=None, item_quantity=None, request=None):
+def get_item_tax(category_name, biomass_type=None, biomass_input_g=None, total_batch_output=None, request=None):
     msg_error = lambda msg: messages.error(request, msg,) if request else print(msg)
     if category_name:
         if CG.get(category_name, '') == 'Flowers':
-            tax = get_tax_from_db(tax='flower')
-            if isinstance(tax, float):
+            tax = get_tax_from_db(tax='dried_flower_tax')
+            if isinstance(tax, Decimal):
                 return tax
-        if CG.get(category_name, '') == 'Trims':
-            tax = get_tax_from_db(tax='trim')
-            if isinstance(tax, float):
+        elif CG.get(category_name, '') == 'Trims':
+            tax = get_tax_from_db(tax='dried_leaf_tax')
+            if isinstance(tax, Decimal):
                 return tax
-        if CG.get(category_name, '') == 'Kief':
-            tax = get_tax_from_db(tax='trim')
-            if isinstance(tax, float):
-                return round(tax/454, 6)
-        if CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
-            trim_tax = get_tax_from_db(tax='trim')
-            if isinstance(trim_tax, float):
-                if trim_used:
-                    if item_quantity:
-                        tax = (trim_tax * trim_used) / item_quantity
-                        return round(tax, 6)
+        elif CG.get(category_name, '') == 'Kief':
+            tax = get_tax_from_db(tax='dried_leaf_tax')
+            if isinstance(tax, Decimal):
+                return round(tax/Decimal('453.59237'), 6)
+        elif CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
+
+            if biomass_type:
+                trim_tax = get_tax_from_db(tax=BIOMASS_TYPE_TO_TAX.get(biomass_type))
+                if isinstance(trim_tax, Decimal):
+                    if biomass_input_g:
+                        if total_batch_output:
+                            tax = (trim_tax * Decimal(biomass_input_g)) / Decimal(total_batch_output)
+                            return round(tax, 6)
+                        else:
+                            msg_error('Item does not have a Batch output quantity to calculate the tax.')
+                            return None
                     else:
-                        msg_error('Item does not have a Batch quantity to calculate.')
+                        msg_error('Item do not have a quantity of Biomass used to produce the item.')
                         return None
-                else:
-                    msg_error('Item does not have a quantity of Trim used to produce the item.')
-                    return None
-        if CG.get(category_name, '') in ('Clones', 'Terpenes'):
-            return float(0.0)
+            else:
+                msg_error('Biomass type is not provided to calculate the tax.')
+                return None
+        elif CG.get(category_name, '') in ('Clones', 'Terpenes'):
+            return Decimal(0.0)
         else:
             msg_error('No Cultivar Tax is defined for selected category.')
             return None

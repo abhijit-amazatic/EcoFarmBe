@@ -447,7 +447,7 @@ def get_tax_rates(books_name):
     """
     Get all tax rates.
     """
-    taxes = TaxVariable.objects.values('cultivar_tax_item','trim_tax_item')[0]
+    taxes = TaxVariable.objects.values('dried_flower_tax_item','dried_leaf_tax_item')[0]
     books_obj = get_books_obj(books_name)
     response = dict()
     for k,v in taxes.items():
@@ -468,17 +468,17 @@ def calculate_tax(books_name, product_category, quantity):
     """
     Calculate tax from product category for estimate page.
     """
-    taxes = TaxVariable.objects.values('cultivar_tax_item','trim_tax_item')[0]
+    taxes = TaxVariable.objects.values('dried_flower_tax_item','dried_leaf_tax_item')[0]
     books_obj = get_books_obj(books_name)
     if product_category == 'Flower':
-        item = get_tax(books_obj, taxes['cultivar_tax_item'])['response'][0]
+        item = get_tax(books_obj, taxes['dried_flower_tax_item'])['response'][0]
         item_id = item['item_id']
         item_sku = item['sku']
         item_name = item['name']
         tax = item['rate']
         total_tax = float(quantity) * float(tax)
     elif product_category == 'Trim':
-        item = get_tax(books_obj, taxes['trim_tax_item'])['response'][0]
+        item = get_tax(books_obj, taxes['dried_leaf_tax_item'])['response'][0]
         item_name = item['name']
         item_id = item['item_id']
         item_sku = item['sku']

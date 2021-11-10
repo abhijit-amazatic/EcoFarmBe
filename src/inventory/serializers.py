@@ -132,9 +132,9 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         'Flowers':      ('cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
         'Trims':        ('cultivar_name', 'batch_availability_date', 'harvest_date',),
         'Kief':         ('cultivar_name', 'batch_availability_date', 'manufacturing_date',),
-        'Concentrates': ('cultivar_name', 'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'trim_used',),
-        'Distillates':  ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'trim_used', 'cannabinoid_percentage',),
-        'Isolates':     ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'trim_used', 'cannabinoid_percentage',),
+        'Concentrates': ('cultivar_name', 'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'biomass_input_g',),
+        'Distillates':  ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'biomass_input_g', 'cannabinoid_percentage',),
+        'Isolates':     ('mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'total_batch_quantity', 'biomass_input_g', 'cannabinoid_percentage',),
         'Terpenes':     ('cultivar_name', 'batch_availability_date', 'manufacturing_date', ),
         'Clones':       ('cultivar_name', 'rooting_days',),
     }

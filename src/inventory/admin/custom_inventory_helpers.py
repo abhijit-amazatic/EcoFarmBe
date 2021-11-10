@@ -1,4 +1,5 @@
 from os import urandom
+from decimal import Decimal
 from django.utils import timezone
 from django.utils.encoding import force_str
 from django.utils.html import mark_safe
@@ -102,7 +103,7 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id, tax, mcsp
     elif obj.category_group in ('Concentrates', 'Isolates', 'Distillates'):
 
         data['cf_date_available'] = str(obj.batch_availability_date or '')
-        data['cf_trim_qty_lbs'] = obj.trim_used
+        data['cf_raw_material_input_g'] = obj.biomass_input_g # lb to gram converssion
         data['cf_batch_qty_g'] = obj.total_batch_quantity
         if obj.manufacturing_date:
             data['cf_manufacturing_date'] = str(obj.manufacturing_date)

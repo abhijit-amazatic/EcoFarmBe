@@ -137,13 +137,19 @@ class TaxVariable(TimeStampFlagModelMixin,models.Model):
     """
     Class implementing  Tax variables
     """
-    cultivar_tax = models.CharField(verbose_name=_("Cultivar Tax"), max_length=255,blank=True, null=True)
-    trim_tax = models.CharField(verbose_name=_("Trim Tax"), max_length=255,blank=True, null=True)
-    cultivar_tax_item = models.CharField(verbose_name=_("Cultivar Tax Item"), max_length=255, blank=True, null=True)
-    trim_tax_item = models.CharField(verbose_name=_("Trim Tax Item"), max_length=255, blank=True, null=True)
+    dried_flower_tax = models.CharField(verbose_name=_("Dried Flower Tax"), max_length=255,blank=True, null=True)
+    dried_leaf_tax = models.CharField(verbose_name=_("Dried Leaf Tax"), max_length=255,blank=True, null=True)
+    fresh_plant_tax = models.CharField(verbose_name=_("Fresh Plant Tax"), max_length=255,blank=True, null=True)
+    dried_flower_tax_item = models.CharField(verbose_name=_("Dried Flower Tax Item"), max_length=255, blank=True, null=True)
+    dried_leaf_tax_item = models.CharField(verbose_name=_("Dried Leaf Tax Item"), max_length=255, blank=True, null=True)
+    fresh_plant_tax_item = models.CharField(verbose_name=_("Fresh Plant Tax Item"), max_length=255, blank=True, null=True)
+    # cultivar_tax = models.CharField(verbose_name=_("Cultivar Tax"), max_length=255,blank=True, null=True)
+    # trim_tax = models.CharField(verbose_name=_("Trim Tax"), max_length=255,blank=True, null=True)
+    # cultivar_tax_item = models.CharField(verbose_name=_("Cultivar Tax Item"), max_length=255, blank=True, null=True)
+    # trim_tax_item = models.CharField(verbose_name=_("Trim Tax Item"), max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.cultivar_tax} | {self.trim_tax}'
+        return f'{self.dried_flower_tax} | {self.dried_leaf_tax} | {self.fresh_plant_tax}'
 
     class Meta:
         verbose_name = _('Tax Variable')

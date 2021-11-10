@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from brand.models import (License, LicenseProfile,)
 from .models import (
     CustomInventoryVariable,
-    TaxVariable,
     VendorInventoryCategoryAccounts,
     VendorInventoryDefaultAccounts,
     VendorInventoryCategoryAccounts,

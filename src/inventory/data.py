@@ -64,6 +64,7 @@ ORG_ITEM_CUSTOM_FIELD_MAP_TABLE = (
     ('cf_lab_testing_services',        'cf_lab_testing_services',        '',                               '',                          ),
     ('cf_sample_lbs_inlcuded_in_eob_', 'cf_sample_lbs_inlcuded_in_eob_', '',                               '',                          ),
     ('cf_lpn',                         'cf_lpn',                         'cf_lpn',                         '',                          ),
+    ('cf_raw_material_input_g',        'cf_raw_material_input_g',        '',                               '',                          ),
     ('cf_trim_qty_lbs',                'cf_trim_qty_lbs',                'cf_trim_qty_lbs',                '',                          ),
     ('cf_batch_qty_g',                 'cf_batch_qty_g',                 'cf_batch_qty_g',                 '',                          ),
     ('cf_client_id',                   'cf_client_id',                   'cf_client_id',                   'cf_client_id',              ),
