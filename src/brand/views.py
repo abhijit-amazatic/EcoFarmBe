@@ -748,6 +748,7 @@ class InvitesDataFilter(FilterSet):
         model = LicenseUserInvite
         fields = {
             'status':['icontains', 'exact'],
+            'license_id':['exact'],
         }
 
 
