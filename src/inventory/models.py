@@ -459,6 +459,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('efn', _('Eco Farm Nursery (EFN LLC)')),
     )
     BIOMASS_TYPE_CHOICES = (
+        ('Unknown', _('Unknown')),
         ('Dried Flower', _('Dried Flower')),
         ('Dried Leaf', _('Dried Leaf')),
         ('Fresh Plant', _('Fresh Plant')),
