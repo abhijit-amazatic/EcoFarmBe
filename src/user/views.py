@@ -136,10 +136,8 @@ class SearchLicenseView(APIView):
     def get(self, request):
         if request.query_params.get('license_number', None):
             license_number = request.query_params['license_number'].strip()
+            license_type = request.query_params.get('license_type', '').strip()
             is_allow_all = request.query_params.get('is_allow_all', False)
-            if is_allow_all not in [True, 'true']:
-                if License.objects.filter(license_number=license_number).exists():
-                    return Response({'error': 'License already in database.'}, status=status.HTTP_400_BAD_REQUEST)
             crm_obj = get_crm_obj()
             query = (
                 "SELECT "
@@ -148,10 +146,16 @@ class SearchLicenseView(APIView):
                 "Premises_APN_Number,Premises_City,Premises_County,Premises_State,Premises_Zipcode "
                 f"FROM Licenses WHERE Name like '%{license_number}%'"
             )
+            if license_type:
+                query += f" and License_Type='{license_type}'"
             resp = crm_obj.get_coql_query(query=query)
             if resp is not None:
                 if resp.get('status_code') in (200, 204):
-                    resp['response'] = resp.get('data', [])
+                    data = resp.get('data', [])
+                    if is_allow_all not in (True, 'true'):
+                        existing_license_numbers = tuple(License.objects.all().values_list('license_number', flat=True))
+                        data = [x for x in data if x.get('Name', '').strip() not in existing_license_numbers]
+                    resp['response'] = data
                     if 'data' in resp:
                         resp.pop('data')
                     resp['info'] = resp.get('info', {"count": 0, "more_records": False})
