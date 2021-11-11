@@ -137,14 +137,15 @@ class CustomInventorySerializer(serializers.ModelSerializer):
     # )
     required_fields = ('license_profile',)
     category_required_fields = {
-        'Flowers':      ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
-        'Trims':        ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'harvest_date',),
-        'Kief':         ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'manufacturing_date',),
-        'Concentrates': ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'manufacturing_date', 'biomass_type',),
-        'Distillates':  ('mcsp_fee', 'cultivation_tax', 'mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'biomass_type', 'cannabinoid_percentage',),
-        'Isolates':     ('mcsp_fee', 'cultivation_tax', 'mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'biomass_type', 'cannabinoid_percentage',),
-        'Terpenes':     ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'manufacturing_date', ),
-        'Clones':       ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'rooting_days',),
+        # 'Flowers':      ('mcsp_fee', 'cultivation_tax', 'cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
+        'Flowers':      ('mcsp_fee', 'cultivar_name', 'batch_availability_date', 'harvest_date', 'grade_estimate',),
+        'Trims':        ('mcsp_fee', 'cultivar_name', 'batch_availability_date', 'harvest_date',),
+        'Kief':         ('mcsp_fee', 'cultivar_name', 'batch_availability_date', 'manufacturing_date',),
+        'Concentrates': ('mcsp_fee', 'cultivar_name', 'batch_availability_date', 'manufacturing_date', 'biomass_type',),
+        'Distillates':  ('mcsp_fee', 'mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'biomass_type', 'cannabinoid_percentage',),
+        'Isolates':     ('mcsp_fee', 'mfg_batch_id',  'batch_availability_date', 'manufacturing_date', 'biomass_type', 'cannabinoid_percentage',),
+        'Terpenes':     ('mcsp_fee', 'cultivar_name', 'batch_availability_date', 'manufacturing_date', ),
+        'Clones':       ('mcsp_fee', 'cultivar_name', 'rooting_days',),
     }
 
 
@@ -184,60 +185,60 @@ class CustomInventorySerializer(serializers.ModelSerializer):
             return None
 
     def validate(self, attrs):
-        data = super().validate(attrs)
+        attrs = super().validate(attrs)
         errors = dict()
 
         for field in self.required_fields:
-            if not data.get(field):
+            if not attrs.get(field):
                 errors[field] = "This field is required."
 
-        category_name = data.get('category_name', '')
+        category_name = attrs.get('category_name', '')
         cat_required_fields = self.category_required_fields.get(CG.get(category_name), ())
         for field in cat_required_fields:
             if field == 'cultivar_name':
-                if data.get('cultivar'):
+                if attrs.get('cultivar'):
                     continue
             elif field == 'grade_estimate':
-                if data.get('marketplace_status') in ('Vegging', 'Flowering'):
+                if attrs.get('marketplace_status') in ('Vegging', 'Flowering'):
                     continue
-            elif data.get(field):
+            if attrs.get(field):
                 continue
             errors[field] = f'This field is required for category \'{category_name}\'.'
 
-        biomass_type = data.get('biomass_type') or ''
+        biomass_type = attrs.get('biomass_type') or ''
         if 'biomass_type' in cat_required_fields and  biomass_type in ('Dried Flower', 'Dried Leaf', 'Fresh Plant'):
             for field in ('biomass_input_g', 'total_batch_quantity'):
-                if data.get(field):
+                if attrs.get(field):
                     continue
                 errors[field] = f'This field is required for category \'{category_name}\' and  biomass type \'{biomass_type}\'.'
 
         if errors:
             raise serializers.ValidationError(errors)
 
-        if 'biomass_type' in cat_required_fields and  biomass_type in ('Dried Flower', 'Dried Leaf', 'Fresh Plant'):
-            tax = get_item_tax(
-                category_name=data.get('category_name'),
-                biomass_type=data.get('biomass_type'),
-                biomass_input_g=data.get('biomass_input_g'),
-                total_batch_output=data.get('total_batch_quantity'),
-            )
-            if not data.get('cultivation_tax') == tax:
-                errors['cultivation_tax'] = f'Value do not match with backend calculations (backend value: \'{tax}\').'
+        # if 'biomass_type' in cat_required_fields and  biomass_type in ('Dried Flower', 'Dried Leaf', 'Fresh Plant'):
+        #     tax = get_item_tax(
+        #         category_name=attrs.get('category_name'),
+        #         biomass_type=attrs.get('biomass_type'),
+        #         biomass_input_g=attrs.get('biomass_input_g'),
+        #         total_batch_output=attrs.get('total_batch_quantity'),
+        #     )
+        #     if not attrs.get('cultivation_tax') == tax:
+        #         errors['cultivation_tax'] = f'Value do not match with backend calculations (backend value: \'{tax}\').'
 
         mcsp_fee = get_item_mcsp_fee(
-            vendor_name=data.get('vendor_name'),
-            license_profile=data.get('license_profile'),
-            item_category=data.get('category_name'),
-            farm_price=data.get('farm_ask_price'),
+            vendor_name=attrs.get('vendor_name'),
+            license_profile=attrs.get('license_profile'),
+            item_category=attrs.get('category_name'),
+            farm_price=attrs.get('farm_ask_price'),
             no_tier_fee=True,
         )
-        if not data.get('mcsp_fee') == mcsp_fee:
+        if not attrs.get('mcsp_fee') == mcsp_fee:
             errors['mcsp_fee'] = f'Value do not match with backend calculations (backend value: \'{mcsp_fee}\').'
 
         if errors:
             raise serializers.ValidationError(errors)
 
-        return data
+        return attrs
 
     def validate_vendor_name(self, val):
         queryset = filterQuerySet.for_user(LicenseProfile.objects.all(), self.context['request'].user)

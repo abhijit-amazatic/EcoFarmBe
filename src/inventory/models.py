@@ -598,6 +598,20 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         return 'Yes' if self.need_lab_testing_service else 'No'
 
     @property
+    def biomass_input_g_formatted(self):
+        if self.biomass_input_g is not None:
+            val = float(round(self.biomass_input_g, 2))
+            return f"{val if val%1 else int(val)}"
+        return ''
+
+    @property
+    def total_batch_quantity_formatted(self):
+        if self.total_batch_quantity is not None:
+            val = float(round(self.total_batch_quantity, 2))
+            return f"{val if val%1 else int(val)}"
+        return ''
+
+    @property
     def item_name(self):
         category_group = CG.get(self.category_name)
         name = ''
