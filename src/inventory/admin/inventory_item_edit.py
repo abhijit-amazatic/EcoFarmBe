@@ -140,12 +140,17 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                 farm_price=obj.item.cf_farm_price_2
             )
             if isinstance(mcsp_fee, float):
-                tax = get_item_tax(
-                    category_name=obj.item.category_name,
-                    biomass_input_g=obj.item.cf_trim_qty_lbs,
-                    item_quantity=obj.item.cf_batch_qty_g,
-                    request=request,
-                )
+                if obj.item.cf_cultivation_tax:
+                    tax = obj.item.cf_cultivation_tax
+                else:
+                    tax = get_item_tax(
+                        category_name=obj.item.category_name,
+                        biomass_type=obj.item.cf_biomass,
+                        biomass_input_g=obj.item.cf_raw_material_input_g,
+                        total_batch_output=obj.item.cf_batch_qty_g,
+                        request=request,
+                    )
+                    data['cf_cultivation_tax'] = tax
                 if isinstance(tax, float):
                     data = obj.get_item_update_data()
                     if obj.farm_price:

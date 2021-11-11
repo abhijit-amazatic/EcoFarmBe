@@ -135,7 +135,7 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
                                 try:
                                     fp = Decimal(farm_price)
                                 except decimal.InvalidOperation:
-                                    msg_error('Error while parsingfarm price for MCSP fee calculation.')
+                                    msg_error('Error while parsing farm price for MCSP fee calculation.')
                                     return None
                                 else:
                                     return round((fp*db_val)/Decimal('100'), 6)

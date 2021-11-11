@@ -400,8 +400,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                                         item_name=item_name,
                                         category_id=category_id,
                                         vendor_id=vendor_id,
-                                        tax=tax,
-                                        mcsp_fee=mcsp_fee,
                                     )
                                     self._approve(request, obj, inv_obj, data,)
                                 else:
