@@ -514,7 +514,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
 
     clone_size = models.PositiveIntegerField(_('Clone Size (inch)'), blank=True, null=True,)
 
-    farm_ask_price = models.FloatField(_('Farm Ask Price'), blank=True, null=True,)
+    farm_ask_price = models.FloatField(_('Farm Ask Price'))
     pricing_position = models.CharField(_('Pricing Position'), choices=PRICING_POSITION_CHOICES, blank=True, null=True, max_length=255)
 
     # have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)

@@ -368,12 +368,14 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                         farm_price=obj.farm_ask_price
                     )
                 if isinstance(obj.mcsp_fee, Decimal):
-                    tax = get_item_tax(
-                        category_name=obj.category_name,
-                        biomass_type=obj.biomass_type,
-                        biomass_input_g=obj.biomass_input_g,
-                        total_batch_output=obj.total_batch_quantity,
-                        request=request,)
+                    if not obj.cultivation_tax:
+                        obj.cultivation_tax = get_item_tax(
+                            category_name=obj.category_name,
+                            biomass_type=obj.biomass_type,
+                            biomass_input_g=obj.biomass_input_g,
+                            total_batch_output=obj.total_batch_quantity,
+                            request=request,
+                        )
                     if isinstance(obj.cultivation_tax, Decimal):
                         if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
                             self.get_crm_data(request, obj)
