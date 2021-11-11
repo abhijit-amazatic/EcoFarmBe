@@ -132,12 +132,88 @@ class SearchLicenseView(APIView):
     Return access token to frontend.
     """
     permission_classes = (AllowAny,)
+    LICENSE_TYPES_OF_PROFILE_CATEGORY = {
+        'cultivation': (
+            'Large Indoor',
+            'Large Mixed-Light',
+            'Large Outdoor',
+            'Medium Indoor',
+            'Medium Mixed-Light Tier 1',
+            'Medium Mixed-Light Tier 2',
+            'Medium Outdoor',
+            'Small Indoor',
+            'Small Mixed-Light Tier 1',
+            'Small Mixed-Light Tier 2',
+            'Small Outdoor',
+            'Specialty Cottage Indoor',
+            'Specialty Cottage Mixed-Light Tier 1',
+            'Specialty Cottage Mixed-Light Tier 2',
+            'Specialty Cottage Outdoor',
+            'Specialty Indoor',
+            'Specialty Mixed-Light Tier 1',
+            'Specialty Mixed-Light Tier 2',
+            'Specialty Outdoor',
+        ),
+        'manufacturing': (
+            'Manufacturer - Type 6',
+            'Manufacturer - Type 7',
+            'Manufacturer - Type N',
+            'Manufacturer - Type P',
+            'Manufacturer - Type S',
+        ),
+        'microbusiness': (
+            'Microbusiness',
+        ),
+        'nursery': (
+            'Nursery',
+        ),
+        'retail': (
+            'Retailer - Delivery',
+            'Retailer - Storefront',
+        ),
+        'delivery': (
+            'Retailer - Delivery',
+        ),
+        'storefront': (
+            'Retailer - Storefront',
+        ),
+        'distribution': (
+            'Distributor',
+            'Distributor Transport Only',
+        ),
+        'processing': (
+            'Processor',
+        ),
+        'testing': (
+            'Testing Laboratory',
+        ),
+        'event': (
+            'Event Organizer',
+        ),
+        'brand': (
+        ),
+        'hemp': (
+        ),
+        'ancillary products': (
+        ),
+        'ancillary services': (
+        ),
+        'investment': (
+        ),
+        'patient': (
+        ),
+        'healthcare': (
+        ),
+    }
 
     def get(self, request):
         if request.query_params.get('license_number', None):
             license_number = request.query_params['license_number'].strip()
-            license_type = request.query_params.get('license_type', '').strip()
+            profile_category = request.query_params.get('profile_category', '').strip()
             is_allow_all = request.query_params.get('is_allow_all', False)
+            qs = License.objects.all()
+            if License.objects.filter(license_number=license_number).exists():
+                return Response({'error': 'License already in database.'}, status=400)
             crm_obj = get_crm_obj()
             query = (
                 "SELECT "
@@ -146,14 +222,16 @@ class SearchLicenseView(APIView):
                 "Premises_APN_Number,Premises_City,Premises_County,Premises_State,Premises_Zipcode "
                 f"FROM Licenses WHERE Name like '%{license_number}%'"
             )
-            if license_type:
-                query += f" and License_Type='{license_type}'"
+            if profile_category:
+                license_types_str = ', '.join([f"'{x}'" for x in self.LICENSE_TYPES_OF_PROFILE_CATEGORY.get(profile_category, ())])
+                query += f" and License_Type in ({license_types_str})"
+                print(query)
             resp = crm_obj.get_coql_query(query=query)
             if resp is not None:
                 if resp.get('status_code') in (200, 204):
                     data = resp.get('data', [])
                     if is_allow_all not in (True, 'true'):
-                        existing_license_numbers = tuple(License.objects.all().values_list('license_number', flat=True))
+                        existing_license_numbers = tuple(qs.values_list('license_number', flat=True))
                         data = [x for x in data if x.get('Name', '').strip() not in existing_license_numbers]
                     resp['response'] = data
                     if 'data' in resp:
