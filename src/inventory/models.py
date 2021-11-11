@@ -590,8 +590,16 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         return ''
 
     @property
+    def mcsp_fee_formatted(self):
+        return f'${self.mcsp_fee:,.2f}' if isinstance(self.mcsp_fee, Decimal) else ''
+
+    @property
+    def cultivation_tax_formatted(self):
+        return f'${self.cultivation_tax:,.2f}' if isinstance(self.cultivation_tax, Decimal) else ''
+
+    @property
     def farm_ask_price_formatted(self):
-        return '${:,.2f}'.format(self.farm_ask_price) if self.farm_ask_price else ''
+        return f'${self.farm_ask_price:,.2f}' if isinstance(self.farm_ask_price, Decimal) else ''
 
     @property
     def need_lab_testing_service_formatted(self):
@@ -600,15 +608,13 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
     @property
     def biomass_input_g_formatted(self):
         if self.biomass_input_g is not None:
-            val = float(round(self.biomass_input_g, 2))
-            return f"{val if val%1 else int(val)}"
+            return f"{self.biomass_input_g.normalize():f}"
         return ''
 
     @property
     def total_batch_quantity_formatted(self):
         if self.total_batch_quantity is not None:
-            val = float(round(self.total_batch_quantity, 2))
-            return f"{val if val%1 else int(val)}"
+            return f"{self.total_batch_quantity.normalize():f}"
         return ''
 
     @property

@@ -97,7 +97,8 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
             data['created_by_email'] = obj.created_by.get('email')
             data['created_by_name'] = obj.created_by.get('name')
 
-
+            u = obj.unit
+            
             details_display = {
                 'transportation':           ('Transportation / Sample Pickup',          obj.transportation,                    ),
                 'pick_contact_time':        ('Best time to call to arrange for pickup', obj.pick_contact_time_formatted        ),
@@ -112,6 +113,8 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                 'sku':                      ('SKU',                                     obj.sku                                ),
                 'marketplace_status':       ('Marketplace Status',                      obj.marketplace_status                 ),
                 'quantity_available':       ('Quantity Available',                      obj.quantity_available                 ),
+                'mcsp_fee':                 (f'Mcsp Fee ($/{u})',                       obj.mcsp_fee_formatted                 ),
+                'cultivation_tax':          (f'Cultivation Tax ($/{u})',                obj.cultivation_tax_formatted          ),
                 'farm_price':               ('Farm Price',                              obj.farm_ask_price_formatted           ),
                 'pricing_position':         ('Pricing Position',                        obj.pricing_position                   ),
                 # 'minimum_order_quantity':   ('Min Qty Purchase',                        obj.minimum_order_quantity             ),
@@ -120,8 +123,9 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                 'batch_availability_date':  ('Batch Availability Date',                 obj.batch_availability_date            ),
                 'harvest_date':             ('Harvest Date',                            obj.harvest_date                       ),
                 'manufacturing_date':       ('Manufacturing Date',                      obj.manufacturing_date                 ),
+                'biomass_type':             ('Biomass Type',                            obj.biomass_type                       ),
                 'total_batch_quantity':     ('Total Batch Quantity',                    obj.total_batch_quantity_formatted     ),
-                'biomass_input_g':          ('Biomass Input (g)',                           obj.biomass_input_g_formatted          ),
+                'biomass_input_g':          ('Biomass Input (g)',                       obj.biomass_input_g_formatted          ),
                 'rooting_days':             ('Rooting Days',                            obj.rooting_days,                      ),
                 'clone_size':               ('Clone Size (inch)',                       obj.clone_size,                        ),
                 'product_quality_notes':    ('Batch Quality Notes',                     obj.product_quality_notes              ),
@@ -135,6 +139,8 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                 'sku',
                 'marketplace_status',
                 'quantity_available',
+                'mcsp_fee',
+                'cultivation_tax',
                 'farm_price',
                 'pricing_position',
                 'need_lab_testing_service',
@@ -156,6 +162,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                     'cannabinoid_type',
                     'cannabinoid_percentage',
                     'manufacturing_date',
+                    'biomass_type',
                     'total_batch_quantity',
                     'biomass_input_g',
                 )
@@ -164,6 +171,7 @@ def notify_inventory_item_approved_task(custom_inventory_id, notify_logistics=Tr
                     'cultivar_name',
                     'cultivar_type',
                     'manufacturing_date',
+                    'biomass_type',
                     'total_batch_quantity',
                     'biomass_input_g',
                 )

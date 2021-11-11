@@ -139,7 +139,7 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id,):
         org_cf_map = ITEM_CUSTOM_FIELD_ORG_MAP[obj.zoho_organization]
         for k, v in data.items():
             if isinstance(v, Decimal):
-                v = str(v)
+                v = f"{v.normalize():f}"
             if k.startswith('cf_'):
                 if k in org_cf_map:
                     final_data[org_cf_map[k]] = v
