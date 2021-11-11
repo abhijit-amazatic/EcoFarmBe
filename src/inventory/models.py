@@ -159,8 +159,14 @@ class Inventory(models.Model):
     cf_farm_price_2 = models.FloatField(_('Farm Price'), blank=True, null=True)
     cf_minimum_quantity = models.FloatField(_('Minimum Quantity'), blank=True, null=True)
     cf_available_date = models.DateField(auto_now=False, blank=True, null=True, default=None)
+
+    cf_biomass = models.CharField(_('Biomass Type'), blank=True, null=True, max_length=100)
     cf_trim_qty_lbs = models.FloatField(_('Trim Quantity Used (lbs)'), blank=True, null=True)
-    cf_batch_qty_g = models.FloatField(_('Batch Quantity (g)'), null=True, blank=True)
+    cf_batch_qty_g = models.FloatField(_('Total Batch Output (grams)'), null=True, blank=True)
+    cf_raw_material_input_g = models.DecimalField(_('Boimass Input (grams)'), max_digits=16, decimal_places=6, blank=True, null=True)
+    cf_mscp = models.DecimalField(_('MCSP fee'), max_digits=16, decimal_places=6, blank=True, null=True)
+    cf_cultivation_tax = models.DecimalField(_('Cultivation Tax'), max_digits=16, decimal_places=6, blank=True, null=True)
+
     package_details = JSONField(blank=True, null=True, default=dict)
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
