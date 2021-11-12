@@ -104,7 +104,8 @@ def get_new_item_data(obj, inv_obj, item_name, category_id, vendor_id,):
     elif obj.category_group in ('Concentrates', 'Isolates', 'Distillates'):
 
         data['cf_date_available'] = str(obj.batch_availability_date or '')
-        data['cf_raw_material_input_g'] = obj.biomass_input_g # lb to gram converssion
+        data['cf_biomass'] = obj.biomass_type
+        data['cf_raw_material_input_g'] = obj.biomass_input_g
         data['cf_batch_qty_g'] = obj.total_batch_quantity
         if obj.manufacturing_date:
             data['cf_manufacturing_date'] = str(obj.manufacturing_date)
