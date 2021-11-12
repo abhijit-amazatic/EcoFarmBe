@@ -1625,10 +1625,10 @@ class ConfiaCallbackView(APIView):
             return  Response({'Error':"Auth Creds are not valid/provided"}, status=status.HTTP_400_BAD_REQUEST)
         default_data = {
             "partner_company_id":request.data.get('partnerCompanyId'),
-            "confia_member_id":request.data.get('confiaMemberId'),
+            "confia_member_id":request.data.get('memberId'),
             "status": request.data.get('status')
         }
-        obj,created =  ConfiaCallback.objects.update_or_create(partner_company_id=request.data.get('partnerCompanyId'),defaults=default_data)
+        obj,created =  ConfiaCallback.objects.update_or_create(partner_company_id=request.data.get('memberId'),defaults=default_data)
         if obj:
             return Response({'Success': "Member onboarded/status updated!"},status=status.HTTP_200_OK)
         

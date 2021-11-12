@@ -33,7 +33,7 @@ class ConfiaCallback(TimeStampFlagModelMixin, models.Model):
     status = models.CharField(_('status'), max_length=255, blank=True, null=True)
     
     def __str__(self):
-        return self.partner_company_id
+        return self.partner_company_id if self.partner_company_id else ""
 
     class Meta:
         verbose_name = _('Confia Onboarding')

@@ -229,7 +229,7 @@ class ConfiaCallbackAdmin(admin.ModelAdmin):
     list_per_page = 25
     search_fields = ('partner_company_id','confia_member_id',)
     ordering = ('-created_on',)
-    readonly_fields = ('created_on','updated_on',)
+    readonly_fields = ('partner_company_id', 'confia_member_id','status','created_on','updated_on',)
     fields = ('partner_company_id', 'confia_member_id', 'status','created_on','updated_on')
     
 admin.site.register(Integration, IntegrationAdmin)
