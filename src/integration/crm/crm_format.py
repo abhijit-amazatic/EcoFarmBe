@@ -119,6 +119,7 @@ CRM_FORMAT  = {
         "Client_ID":"client_id",
         "Sellers_Permit_Box_Link": "uploaded_sellers_permit_to",
         "W9_Box_Link": "uploaded_w9_to",
+        "Signed_Agreement": "agreement_link",
         "Cultivation_Type": "cultivation_type",
         "License_Status": "license_status",
         "Account_Name_Lookup": "zoho_crm_account_id",
