@@ -377,11 +377,16 @@ def get_pre_tax_price(record):
         tax = get_item_tax(
             record.get('category_name'),
             biomass_type=record.get('cf_biomass', ''),
-            biomass_input_g=float(record.get('cf_trim_qty_lbs')) if record.get('cf_trim_qty_lbs') else None,
-            total_batch_output=float(record.get('cf_batch_qty_g')) if record.get('cf_batch_qty_g') else None ,
+            biomass_input_g=Decimal(record.get('cf_raw_material_input_g')) if record.get('cf_raw_material_input_g') else None,
+            total_batch_output=Decimal(record.get('cf_batch_qty_g')) if record.get('cf_batch_qty_g') else None ,
         )
     if isinstance(tax, Decimal):
-        return record['price'] - tax
+        try:
+            return float(round(Decimal(str(record['price'])) - tax, 6))
+        except Exception as e:
+            print(f'tax value: {tax:r}')
+            print(f'price value: {record.get("price"):r}')
+            print(e)
     # Issue:- It will call Books API multiple times.
     # taxes = get_tax_rates()
     # if 'Flower' in record['category_name']:
