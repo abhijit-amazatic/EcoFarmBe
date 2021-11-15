@@ -150,9 +150,9 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                         total_batch_output=obj.item.cf_batch_qty_g,
                         request=request,
                     )
-                    data['cf_cultivation_tax'] = tax
                 if isinstance(tax, float):
                     data = obj.get_item_update_data()
+                    data['cf_cultivation_tax'] = tax
                     if obj.farm_price:
                         data['price'] = obj.farm_price + mcsp_fee + tax
                         data['rate'] = obj.farm_price + mcsp_fee + tax

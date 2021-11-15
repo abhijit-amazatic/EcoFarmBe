@@ -140,12 +140,13 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
                                     msg_error('Error while parsing farm price for MCSP fee calculation.')
                                     return None
                                 else:
-                                    return round((fp*db_val)/Decimal('100'), 6)
+                                    mcsp_fee = (fp*db_val)/Decimal('100')
+                                    return mcsp_fee.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
                             else:
                                 msg_error('Farm price not provided for MCSP fee calculation.')
                                 return None
                         else:
-                            return round(db_val, 6)
+                            return db_val.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
                 else:
                     program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
                     program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)

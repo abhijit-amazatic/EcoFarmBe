@@ -1,3 +1,4 @@
+import decimal
 from decimal import Decimal
 from django.contrib import messages
 
@@ -29,6 +30,7 @@ def get_tax_from_db(tax='dried_flower_tax', request=None):
 
 def get_item_tax(category_name, biomass_type=None, biomass_input_g=None, total_batch_output=None, request=None):
     msg_error = lambda msg: messages.error(request, msg,) if request else print(msg)
+    fixed_to_6 = lambda val: val.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
     if category_name:
         if CG.get(category_name, '') == 'Flowers':
             tax = get_tax_from_db(tax='dried_flower_tax')
@@ -41,7 +43,7 @@ def get_item_tax(category_name, biomass_type=None, biomass_input_g=None, total_b
         elif CG.get(category_name, '') == 'Kief':
             tax = get_tax_from_db(tax='dried_leaf_tax')
             if isinstance(tax, Decimal):
-                return round(tax/Decimal('453.59237'), 6)
+                fixed_to_6(tax/Decimal('453.59237'))
         elif CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
 
             if biomass_type:
@@ -50,8 +52,7 @@ def get_item_tax(category_name, biomass_type=None, biomass_input_g=None, total_b
                     biomass_tax_g = biomass_tax_lb/Decimal('453.59237')
                     if biomass_input_g:
                         if total_batch_output:
-                            tax = (biomass_tax_g * Decimal(biomass_input_g)) / Decimal(total_batch_output)
-                            return round(tax, 6)
+                            return fixed_to_6(biomass_tax_g * Decimal(biomass_input_g)) / Decimal(total_batch_output)
                         else:
                             msg_error('Item does not have a Batch output quantity to calculate the tax.')
                             return None

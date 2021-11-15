@@ -8,6 +8,9 @@ from integration.inventory import (
     submit_purchase_order
 )
 from utils import (get_approved_by, )
+from brand.models import (
+    LicenseProfile,
+)
 from ..models import (
     InventoryItemQuantityAddition,
 )
@@ -83,21 +86,26 @@ def add_item_quantity(obj, request=None):
                     print(update_result)
                     return False
     else:
-        result = create_custom_inventory_item_po(
-            inventory_name=f'inventory_{inventory_org}',
-            sku=obj.item.sku,
-            quantity=obj.quantity,
-            vendor_name=obj.item.cf_vendor_name,
-            client_code=obj.item.cf_client_code
-        )
-        if result.get('code') == 0:
-            obj.po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
-            obj.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
-            obj.status = 'approved'
-            obj.approved_on = timezone.now()
-            obj.approved_by = get_approved_by(user=request.user)
-            obj.save()
-            submit_purchase_order(inventory_name=f'inventory_{inventory_org}', po_id=obj.po_id)
+        try:
+            lp = LicenseProfile.objects.get(name=obj.item.cf_vendor_name)
+        except LicenseProfile.DoesNotExist:
+            print(f"License Profile '{obj.item.cf_vendor_name}' not found")
+        else:
+            result = create_custom_inventory_item_po(
+                inventory_name=inventory_org,
+                sku=obj.item.sku,
+                quantity=obj.quantity,
+                license_profile=lp,
+                client_code=obj.item.cf_client_code,
+            )
+            if result.get('code') == 0:
+                obj.po_id = result.get('purchaseorder', {}).get('purchaseorder_id')
+                obj.po_number = result.get('purchaseorder', {}).get('purchaseorder_number')
+                obj.status = 'approved'
+                obj.approved_on = timezone.now()
+                obj.approved_by = get_approved_by(user=request.user)
+                obj.save()
+                submit_purchase_order(inventory_name=f'inventory_{inventory_org}', po_id=obj.po_id)
 
 @app.task(queue="general")
 def inventory_item_quantity_addition_task(item_quantity_addition_id):

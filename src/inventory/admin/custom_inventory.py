@@ -41,6 +41,9 @@ from ..tasks import (
     create_approved_item_po_task,
     notify_inventory_item_approved_task,
 )
+from ..tasks.create_approved_item_po import (
+    get_vendor_id,
+)
 from ..utils import (
     get_item_tax,
 )
@@ -323,34 +326,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                 self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
         return None
 
-    def get_vendor_id(self, obj):
-        contact_id = None
-        contact_ids = obj.license_profile.license.zoho_books_vendor_ids
-        if contact_ids.get(obj.zoho_organization):
-            contact_id = contact_ids.get(obj.zoho_organization).strip()
-        if not contact_id:
-            crm_profile_id = obj.license_profile.zoho_crm_vendor_id
-            if not crm_profile_id:
-                r = search_query('Vendors', obj.license_profile.license.client_id, 'Client_ID')
-                if r['status_code'] == 200:
-                    for crm_profile in r['response']:
-                        if crm_profile['Client_ID'] == obj.license_profile.license.client_id:
-                            crm_profile_id = crm_profile['id']
-                            break
-
-            books_obj = get_books_obj(f'books_{obj.zoho_organization}')
-            contact_obj = books_obj.Contacts()
-            r = contact_obj.get_contact_using_crm_account_id(crm_profile_id)
-            try:
-                if r and r.get('code') == 0:
-                    for c in r.get('contacts', []):
-                        if c.get('contact_type') == self.contact_type:
-                            if c.get('contact_id'):
-                                contact_id = c.get('contact_id')
-            except Exception as e:
-                print(e)
-        return contact_id
-
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             if not obj.license_profile:
@@ -391,8 +366,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                                 metadata=metadata,
                             )
                             if category_id:
-                                vendor_id = get_vendor_id_by_client_id(inv_obj, obj.license_profile.license.client_id)
-                                vendor_id = self.get_vendor_id(obj)
+                                vendor_id = get_vendor_id(obj.license_profile, obj.zoho_organization)
                                 if vendor_id:
                                     data = get_new_item_data(
                                         obj=obj,
