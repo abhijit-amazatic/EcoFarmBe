@@ -274,14 +274,18 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
         'name',
         'is_draft',
         'agreement_signed',
-        'is_account_updated_in_crm',
-        'is_vendor_updated_in_crm',
 
     )
     exclude = (
         'name',
+        'is_account_updated_in_crm',
+        'is_vendor_updated_in_crm',
     )
 
+    def get_fields(self, request, obj):
+        fields = list(super().get_fields(request, obj))
+        fields.remove('name')
+        return ['name']+fields
 
 # class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
 #     extra = 0
@@ -305,7 +309,8 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
     Configuring License
     """
 
-    integration_fields = ('zoho_crm_id', 'is_updated_in_crm', 'zoho_books_customer_ids', 'zoho_books_vendor_ids','crm_output_display', 'books_output_display',)
+    integration_fields = ('zoho_crm_id', 'crm_license', 'zoho_crm_account_id', 'crm_account', 'zoho_crm_vendor_id', 'crm_vendor',
+                          'zoho_books_customer_ids', 'zoho_books_vendor_ids','crm_output_display', 'books_output_display',)
 
     def get_fieldsets(self, request, obj=None):
         """
@@ -402,7 +407,8 @@ class MyLicenseAdmin(ImportExportModelAdmin,nested_admin.NestedModelAdmin):
 
     list_select_related = ['brand__organization__created_by', 'organization__created_by']
     search_fields = ('license_number', 'legal_business_name', 'client_id', 'license_profile__business_dba', 'brand__brand_name', 'brand__organization__created_by__email', 'organization__name', 'organization__created_by__email',)
-    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output_display', 'books_output_display', 'is_updated_in_crm')
+    readonly_fields = ('created_on','updated_on', 'client_id', 'crm_output_display', 'books_output_display', 'is_updated_in_crm',
+                       'crm_license', 'zoho_crm_account_id', 'crm_account', 'zoho_crm_vendor_id', 'crm_vendor',)
     list_filter = (
         ('created_on', DateRangeFilter), ('updated_on', DateRangeFilter),'status','profile_category','is_contract_downloaded','license_type',
     )
