@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils import timezone
 from django.contrib import admin
 from django.contrib import messages
@@ -139,7 +140,7 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                 request=request,
                 farm_price=obj.item.cf_farm_price_2
             )
-            if isinstance(mcsp_fee, float):
+            if isinstance(mcsp_fee, Decimal):
                 if obj.item.cf_cultivation_tax:
                     tax = obj.item.cf_cultivation_tax
                 else:
@@ -150,12 +151,12 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                         total_batch_output=obj.item.cf_batch_qty_g,
                         request=request,
                     )
-                if isinstance(tax, float):
+                if isinstance(tax, Decimal):
                     data = obj.get_item_update_data()
                     data['cf_cultivation_tax'] = tax
                     if obj.farm_price:
-                        data['price'] = obj.farm_price + mcsp_fee + tax
-                        data['rate'] = obj.farm_price + mcsp_fee + tax
+                        data['price'] = Decimal(obj.farm_price + mcsp_fee + tax)
+                        data['rate'] = data['price']
                     inventory_org = data.get('inventory_name', '').lower()
                     if inventory_org in ('efd', 'efn', 'efl'):
                         inventory_name = f'inventory_{inventory_org}'
