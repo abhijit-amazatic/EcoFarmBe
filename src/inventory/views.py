@@ -299,6 +299,7 @@ class CustomOrderFilter(OrderingFilter):
         'Box_Link': 'labtest__Box_Link',
         'Created_Time':'labtest__Created_Time',
         'Total_CBD': 'labtest__Total_CBD',
+        'Total_Terpenes': 'labtest__Total_Terpenes',
         'cultivar_type':'cultivar__cultivar_type'
     }
 
