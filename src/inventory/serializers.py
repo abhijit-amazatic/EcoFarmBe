@@ -225,15 +225,15 @@ class CustomInventorySerializer(serializers.ModelSerializer):
         #     if not attrs.get('cultivation_tax') == tax:
         #         errors['cultivation_tax'] = f'Value do not match with backend calculations (backend value: \'{tax}\').'
 
-        mcsp_fee = get_item_mcsp_fee(
-            vendor_name=attrs.get('vendor_name'),
-            license_profile=attrs.get('license_profile'),
-            item_category=attrs.get('category_name'),
-            farm_price=attrs.get('farm_ask_price'),
-            no_tier_fee=True,
-        )
-        if not attrs.get('mcsp_fee') == mcsp_fee:
-            errors['mcsp_fee'] = f'Value do not match with backend calculations (backend value: \'{mcsp_fee}\').'
+        # mcsp_fee = get_item_mcsp_fee(
+        #     vendor_name=attrs.get('vendor_name'),
+        #     license_profile=attrs.get('license_profile'),
+        #     item_category=attrs.get('category_name'),
+        #     farm_price=attrs.get('farm_ask_price'),
+        #     no_tier_fee=True,
+        # )
+        # if not attrs.get('mcsp_fee') == mcsp_fee:
+        #     errors['mcsp_fee'] = f'Value do not match with backend calculations (backend value: \'{mcsp_fee}\').'
 
         if errors:
             raise serializers.ValidationError(errors)
