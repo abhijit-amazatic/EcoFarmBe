@@ -4,3 +4,5 @@ pylint-django==2.0.11
 pylama==7.7.1
 eradicate==1.0
 django-querycount==0.7.0
+
+-e git+ssh://git@github.com/Eco-Farm/pyzoho.git@dev#egg=pyzoho
