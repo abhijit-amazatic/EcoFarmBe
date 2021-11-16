@@ -36,9 +36,13 @@ class PageMetaView(APIView):
                 url = '/' + url
             if not url.endswith('/'):
                 url = url + '/'
-            instance = PageMeta.objects.get(page_url__iexact=url)
-        except PageMeta.DoesNotExist:
-            return Response({"detail": "Meta not found for this url"}, status=404)
+            try:
+                instance = PageMeta.objects.get(page_url__iexact=url)
+            except PageMeta.DoesNotExist:
+                try:
+                    instance = PageMeta.objects.get(page_url='/')
+                except PageMeta.DoesNotExist:
+                    return Response({"detail": "Meta not found for this url"}, status=404)
         except Exception as exc:
             return Response({"detail": exc}, status=400)
         else:
