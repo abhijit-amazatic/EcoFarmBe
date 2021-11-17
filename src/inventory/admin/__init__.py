@@ -1,13 +1,16 @@
+from django import forms
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
 from django.db import models
 from django.shortcuts import (reverse, )
-from django.contrib.contenttypes.admin import GenericStackedInline
+
+from django_json_widget.widgets import JSONEditorWidget
 from import_export import resources
+from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
+
 from core import settings
 from core.settings import (AWS_BUCKET, )
-from import_export.admin import (ImportExportModelAdmin, ExportActionMixin)
 from brand.models import LicenseProfile
-from django import forms
 from ..models import (
     Inventory,
     CustomInventory,
@@ -31,9 +34,12 @@ from .inventory_item_edit import (
 from .inventory_item_quantity_addition import (
     InventoryItemQuantityAdditionAdmin,
 )
-from .inventory_item_delist import (InventoryItemDelistAdmin, )
-from django_json_widget.widgets import JSONEditorWidget
-
+from .inventory_item_delist import (
+    InventoryItemDelistAdmin,
+)
+from .item_admin import (
+    InventoryItemAdmin,
+)
 
 
 class DailyInventoryAggrigatedSummaryResource(resources.ModelResource):
@@ -169,7 +175,7 @@ class InlineVendorDailySummaryAdmin(GenericStackedInline):
     ct_field = "content_type"
     ct_fk_field = "object_id"
     can_delete = False
-    
+
 class VendorAdmin(ExportActionMixin, admin.ModelAdmin):
     """
     Admin
@@ -178,41 +184,7 @@ class VendorAdmin(ExportActionMixin, admin.ModelAdmin):
     model = Vendor
     list_display  = ('cf_client_code','vendor_name')
     search_fields = ('vendor_name','cf_client_code')
-   
-    
-class InventoryAdmin(admin.ModelAdmin):
-    """
-    Admin
-    """
-    model = Inventory
-    list_display = (
-        'name',
-        'sku',
-        'category_name',
-        'cf_vendor_name',
-        'actual_available_stock',
-        'price',
-        'pre_tax_price',
-        'cf_farm_price_2',
-        'cf_trim_qty_lbs',
-        'cf_batch_qty_g',
-        'cf_status',
-        'cf_cfi_published',
-        'inventory_name',
-        'created_time'
-    )
-    list_filter = ('category_name', 'status', 'cf_status', 'cf_cfi_published', 'inventory_name')
-    search_fields = ('sku', 'name',)
-    ordering = ('-created_time',)
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 class InTransitForm(forms.ModelForm):
     class Meta:
@@ -245,7 +217,7 @@ class InTransitOrderAdmin(admin.ModelAdmin):
     
 
 
-admin.site.register(Inventory, InventoryAdmin)
+admin.site.register(Inventory, InventoryItemAdmin)
 admin.site.register(InventoryItemEdit, InventoryItemEditAdmin)
 admin.site.register(InventoryItemDelist, InventoryItemDelistAdmin)
 # admin.site.register(InventoryItemQuantityAddition, InventoryItemQuantityAdditionAdmin)
