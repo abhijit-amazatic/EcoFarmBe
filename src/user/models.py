@@ -137,6 +137,17 @@ class User(StatusFlagMixin,AbstractUser):
                 full_name += ' ' + self.last_name
         return full_name.strip()
 
+    def get_user_info(self):
+        """
+        return user info dict.
+        """
+        return {
+            'id':        self.id,
+            'email':     self.email,
+            'first_name':self.first_name,
+            'last_name': self.last_name,
+        }
+
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
