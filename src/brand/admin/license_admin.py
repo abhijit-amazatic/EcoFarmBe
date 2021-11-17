@@ -75,15 +75,11 @@ def get_obj_file_ids(obj):
         print("exception", e)
 
 
-class ProfileContactForm(forms.ModelForm):
-    class Meta:
-        model = ProfileContact
-        fields = "__all__"
-        widgets = {
-            "profile_contact_details": JSONEditorWidget(
-                options={"modes": ["code", "text"], "search": True}
-            ),
-        }
+json_field_overide = {
+    fields.JSONField: {
+        "widget": JSONEditorWidget(options={"modes": ["code", "text"], "search": True})
+    },
+}
 
 
 class InlineLicenseProfileContactAdmin(nested_admin.NestedStackedInline):
@@ -95,18 +91,8 @@ class InlineLicenseProfileContactAdmin(nested_admin.NestedStackedInline):
     model = ProfileContact
     readonly_fields = ("is_draft",)
     can_delete = False
-    form = ProfileContactForm
-
-
-class CultivationForm(forms.ModelForm):
-    class Meta:
-        model = CultivationOverview
-        fields = "__all__"
-        widgets = {
-            "overview": JSONEditorWidget(
-                options={"modes": ["code", "text"], "search": True}
-            ),
-        }
+    # form = ProfileContactForm
+    formfield_overrides = json_field_overide
 
 
 class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
@@ -121,7 +107,8 @@ class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
         "overview",
     )
     can_delete = False
-    form = CultivationForm
+    # form = CultivationForm
+    formfield_overrides = json_field_overide
 
 
 class InlineNurseryOverviewAdmin(nested_admin.NestedStackedInline):
@@ -133,17 +120,6 @@ class InlineNurseryOverviewAdmin(nested_admin.NestedStackedInline):
     model = NurseryOverview
     can_delete = False
     # readonly_fields = ('is_draft','overview',)
-
-
-class FinancialForm(forms.ModelForm):
-    class Meta:
-        model = FinancialOverview
-        fields = "__all__"
-        widgets = {
-            "overview": JSONEditorWidget(
-                options={"modes": ["code", "text"], "search": True}
-            ),
-        }
 
 
 class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
@@ -158,18 +134,8 @@ class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
         "is_draft",
         "overview",
     )
-    form = FinancialForm
-
-
-class CropForm(forms.ModelForm):
-    class Meta:
-        model = CropOverview
-        fields = "__all__"
-        widgets = {
-            "overview": JSONEditorWidget(
-                options={"modes": ["code", "text"], "search": True}
-            ),
-        }
+    # form = FinancialForm
+    json_field_overide
 
 
 class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
@@ -184,7 +150,8 @@ class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
         "is_draft",
         "overview",
     )
-    form = CropForm
+    # form = CropForm
+    json_field_overide
 
 
 class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
@@ -228,29 +195,14 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
 #     model = LicenseUser
 
 
-def get_user_data(request):
-    """
-    return user info dict.
-    """
-    return {
-        "id": request.user.id,
-        "email": request.user.email,
-        "first_name": request.user.first_name,
-        "last_name": request.user.last_name,
-    }
-
-
 class LicenseUpdatedForm(forms.ModelForm):
     class Meta:
         model = License
         fields = "__all__"
 
     def clean(self):
-        if self.changed_data:
-            if (
-                "status" in self.changed_data
-                and self.cleaned_data.get("status") == "approved"
-            ):
+        if self.changed_data and "status" in self.changed_data:
+            if self.cleaned_data.get("status") == "approved":
                 license_obj = License.objects.filter(id=self.instance.id)
                 if license_obj:
                     ac_manager = license_obj[0].created_by.email
@@ -337,7 +289,6 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
             json.dumps(obj.crm_output or {}),
             attrs={"id": "crm_output_display"},
         )
-
     crm_output_display.short_description = "CRM Output"
 
     def books_output_display(self, obj):
@@ -349,7 +300,6 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
             json.dumps(obj.books_output or {}),
             attrs={"id": "books_output_display"},
         )
-
     books_output_display.short_description = "Books output"
 
     def approved_on(self, obj):
@@ -538,7 +488,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
                 license_profile[0].save()
             if hasattr(obj, "profile_contact"):
                 invite_profile_contacts.delay(obj.profile_contact.id)
-                pass  # add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
+                # add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
         super().save_model(request, obj, form, change)
 
     def get_form(self, request, *args, **kwargs):
@@ -551,8 +501,8 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
             return self.list_display_integration_admin
         return self.list_display
 
-    ################ Actions ####################
-    def temporary_approve_license_profile(modeladmin, request, queryset):
+    ################### Actions ####################
+    def temporary_approve_license_profile(self, request, queryset):
         """
         Function for bulk profile approval.
         """
@@ -566,7 +516,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
         "Temporary Selected License Profiles"
     )
 
-    def approve_license_profile(modeladmin, request, queryset):
+    def approve_license_profile(self, request, queryset):
         """
         Function for bulk profile approval.
         """
@@ -583,7 +533,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
                 send_async_approval_mail_admin.delay(profile.id, request.user.id)
                 if hasattr(profile, "profile_contact"):
                     invite_profile_contacts.delay(profile.profile_contact.id)
-                    pass  # add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
+                    # add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
         messages.success(request, "License Profiles Approved!")
 
     approve_license_profile.short_description = "Approve Selected License Profiles"
