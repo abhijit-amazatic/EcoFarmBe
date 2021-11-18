@@ -7,7 +7,7 @@ from django import forms
 from django.contrib.admin.utils import (unquote,)
 
 from integration.crm import (create_records, update_records)
-from integration.tasks import (insert_record_to_crm,)
+from brand.tasks import (insert_record_to_crm,)
 from brand.models import (NurseryOverview)
 from core.mixins.admin import (CustomButtonMixin,)
 from .models import Cultivar

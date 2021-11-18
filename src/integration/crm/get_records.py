@@ -4,6 +4,7 @@ from core.celery import app
 from .core import (
     get_crm_obj,
     get_format_dict,
+    get_record,
     parse_fields,
     search_query,
     get_lookup_id,
@@ -323,3 +324,26 @@ def get_account_associations(account_id, organizations=True, brands=True, licens
     if cultivars:
         final_response['Cultivars'] = get_account_associated_cultivars_of_interest(account_id)
     return final_response
+
+
+
+def _get_record_by_clint_id(module, client_id, full=False):
+    result = search_query(module, client_id, 'Client_ID')
+    if result.get('status_code') == 200:
+        data_ls = result.get('response')
+        if data_ls and isinstance(data_ls, list):
+            for record in data_ls:
+                if record.get('Client_ID', '') == str(client_id):
+                    if full:
+                        return get_record(module, record.get('id'), full=full)
+                    return record
+    return {}
+
+def get_license_by_clint_id(client_id, full=False):
+    _get_record_by_clint_id('Licenses', client_id, full=full)
+
+def get_vendor_by_clint_id(client_id, full=False):
+    _get_record_by_clint_id('Vendors', client_id, full=full)
+
+def get_account_by_clint_id(client_id, full=False):
+    _get_record_by_clint_id('Accounts', client_id, full=full)

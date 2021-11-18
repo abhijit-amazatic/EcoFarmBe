@@ -63,7 +63,7 @@ from integration.books import (
     approve_invoice, mark_bill, approve_bill,
     create_sales_order, create_invoice, parse_book_object,
     create_purchase_order, update_sales_order, update_invoice,
-    CRM_PROFILES_MAP)
+)
 from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
@@ -316,6 +316,11 @@ class InventoryView(APIView):
 class LicenseBillingAndAccountingAPI(APIView):
     permission_classes = (IsAuthenticated,)
 
+    CRM_PROFILES_MAP = {
+        'customer': 'account',
+        'vendor': 'vendor',
+    }
+
     contact_type = 'vendor'
     detail_view_key = 'id'
     func = {
@@ -382,7 +387,7 @@ class LicenseBillingAndAccountingAPI(APIView):
                 except ObjectDoesNotExist:
                     pass
                 else:
-                    crm_profile_id = getattr(lp, f'zoho_crm_{CRM_PROFILES_MAP.get(self.contact_type)}_id')
+                    crm_profile_id = getattr(lp, f'zoho_crm_{self.CRM_PROFILES_MAP.get(self.contact_type)}_id')
                     if not crm_profile_id:
                         if self.contact_type == 'customer':
                             r = search_query('Accounts', self.license_obj.client_id, 'Client_ID')

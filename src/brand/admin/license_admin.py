@@ -24,12 +24,14 @@ from core.mailer import mail, mail_send
 from integration.box import (
     delete_file,
 )
-from integration.tasks import insert_record_to_crm, create_customer_in_books_task
 from utils import (
     reverse_admin_change_path,
 )
 from ..tasks import (
+    insert_record_to_crm,
     invite_profile_contacts_task,
+    create_customer_in_books_task,
+    refresh_integration_ids_task,
 )
 from core.utility import (
     send_async_approval_mail,
@@ -568,6 +570,12 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
             create_customer_in_books_task.delay(license_id=record.id)
 
     update_books_records.short_description = "Update Records To Books"
+
+    def refresh_integration_ids(self, request, queryset):
+        for record in queryset:
+            refresh_integration_ids_task.delay(license_id=record.id)
+
+    refresh_integration_ids.short_description = "Refresh Integration IDs"
 
     def update_status_to_in_progress(self, request, queryset):
         for profile in queryset:

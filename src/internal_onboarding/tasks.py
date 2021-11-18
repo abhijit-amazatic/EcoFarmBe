@@ -25,7 +25,7 @@ from integration.crm import (
     create_or_update_org_in_crm,
     get_format_dict,
 )
-from integration.tasks import (
+from brand.tasks import (
     insert_record_to_crm,
 )
 

@@ -1,6 +1,8 @@
 from .core import *
 from .insert_records import (
     insert_records,
+    get_crm_license_by_id,
+    get_crm_license,
 )
 from .get_records import (
     get_associated_vendor_from_license,
@@ -12,4 +14,7 @@ from .get_records import (
     get_vendors_from_crm,
     get_vendor_associations,
     get_account_associations,
+    get_license_by_clint_id,
+    get_vendor_by_clint_id,
+    get_account_by_clint_id,
 )

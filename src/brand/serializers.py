@@ -17,17 +17,19 @@ from core.utility import (email_admins_on_profile_registration_completed,notify_
 from inventory.models import (Documents, )
 from integration.crm import (insert_records,is_user_existing,)
 from integration.box import upload_file
-from integration.books import(create_customer_in_books, )
 from integration.apps.aws import (create_presigned_url, )
 from integration.tasks import (
     update_in_crm_task,
     update_license_task,
-    insert_record_to_crm,
     update_account_cultivars_of_interest_in_crm,
 )
 from user.models import (User,)
 from cultivar.models import (Cultivar,)
-from .tasks import (onboarding_verified_license_data_population_task,)
+from .tasks import (
+    insert_record_to_crm,
+    create_customer_in_books,
+    onboarding_verified_license_data_population_task,
+)
 from .serializers_mixin import (
     NestedModelSerializer,
     OrganizationUserRoleRelatedField,

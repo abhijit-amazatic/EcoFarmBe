@@ -15,9 +15,8 @@ from slacker import Slacker
 from integration.apps.twilio import (
     send_sms,
 )
-from integration.books import (
-    get_books_obj,
-    search_contact,
+from integration.crm import (
+    insert_records,
 )
 from core.celery import app
 from core.utility import (
@@ -35,6 +34,9 @@ from .license_oboarding_tasks import (
 from .license_user_invite_tasks import (
     invite_license_user_task,
     invite_profile_contacts_task,
+)
+from .create_customer_in_books import (
+    create_customer_in_books_task,
 )
 
 slack = Slacker(settings.SLACK_TOKEN)
@@ -82,3 +84,18 @@ def update_before_expire():
                     "Notified License before expiry & flagged as notified",
                     obj.license_number,
                 )
+
+
+@app.task(queue="general")
+def insert_record_to_crm(license_id, is_update=False, account_crm_id=None, vendor_crm_id=None):
+    """
+    Insert record to crm and create/update customer and vendor to books.
+    """
+    r = insert_records(
+        id=license_id,
+        is_update=is_update,
+        account_crm_id=account_crm_id,
+        vendor_crm_id=vendor_crm_id,
+    )
+    create_customer_in_books_task.delay(license_id=license_id)
+    return r

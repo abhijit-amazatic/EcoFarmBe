@@ -16,7 +16,7 @@ from .crm import (insert_users, fetch_labtests, create_records, delete_record,
                   update_in_crm, update_license, search_query)
 from .crm.get_records import (get_account_associated_cultivars_of_interest)
 from .inventory import (fetch_inventory, fetch_inventory_from_list, fetch_inventory_item_fields)
-from .books import (send_estimate_to_sign, create_customer_in_books)
+from .books import (send_estimate_to_sign, )
 from .crm import (fetch_cultivars, fetch_licenses, insert_records)
 from  .sign import (upload_pdf_box,)
 from .box import(
@@ -82,27 +82,6 @@ def fetch_inventory_item_fields_task(fields=(), days=None):
         print(exc)
         return {'status_code': 400,
                 'error': exc}
-
-@app.task(queue="general")
-def create_customer_in_books_task(license_id, is_update=False):
-    """
-    Insert record to crm and create/update customer and vendor to books.
-    """
-    create_customer_in_books(id=license_id)
-
-@app.task(queue="general")
-def insert_record_to_crm(license_id, is_update=False, account_crm_id=None, vendor_crm_id=None):
-    """
-    Insert record to crm and create/update customer and vendor to books.
-    """
-    r = insert_records(
-        id=license_id,
-        is_update=is_update,
-        account_crm_id=account_crm_id,
-        vendor_crm_id=vendor_crm_id,
-    )
-    create_customer_in_books_task.delay(license_id=license_id)
-    return r
 
 
 @app.task(queue="general")
