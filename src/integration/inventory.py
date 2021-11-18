@@ -556,9 +556,16 @@ def get_parent_category(category_name):
             'Flower - Small',
             'Flower - Bucked Untrimmed',
             'Flower - Bucked Untrimmed - Seeded',
-            'Flower - Bucked Untrimmed - Contaminated'],
-        'Wholesale - Trim': ['Trim - THC', 'Trim - CBD', 'Trim'],
-        'Bucked Untrimmed': ['Bucked Untrimmed'],
+            'Flower - Bucked Untrimmed - Contaminated'
+        ],
+        'Wholesale - Trim': [
+            'Trim - THC',
+            'Trim - CBD',
+            'Trim'
+        ],
+        'Bucked Untrimmed': [
+            'Bucked Untrimmed'
+        ],
         'Wholesale - Concentrates': [
             'Crude Oil',
             'Crude Oil - THC',
@@ -573,17 +580,39 @@ def get_parent_category(category_name):
             'Crumbe',
             'Crumble',
             'Kief',
-            'Hash'],
-        'Waste': ['Distillate Waste'],
-        'Lab Testing': ['Lab Testing'],
-        'Wholesale - Terpenes': ['Terpenes - Cultivar Specific', 'Terpenes - Cultivar Blended'],
+            'Hash'
+            'Badder'
+            'Live Resin'
+            'Rosin'
+            'HTE'
+            'HTE Diamonds'
+        ],
+        'Waste': [
+            'Distillate Waste'
+        ],
+        'Lab Testing': [
+            'Lab Testing'
+        ],
+        'Wholesale - Terpenes': [
+            'Terpenes - Cultivar Specific',
+            'Terpenes - Cultivar Blended'
+        ],
         'Wholesale - Isolates': [
             'Isolates - CBD',
             'Isolates - THC',
             'Isolates - CBG',
-            'Isolates - CBN'],
-        'Services': ['QC', 'Transport', 'Secure Cash Handling', 'Services'],
-        'Packaged Goods': ['Packaged Goods'],}
+            'Isolates - CBN'
+        ],
+        'Services': [
+            'QC',
+            'Transport',
+            'Secure Cash Handling',
+            'Services'
+        ],
+        'Packaged Goods': [
+            'Packaged Goods'
+        ],
+    }
     for k, v in category_dict.items():
         if category_name in v:
             return k

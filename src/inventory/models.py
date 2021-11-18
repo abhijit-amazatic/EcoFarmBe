@@ -392,6 +392,11 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Sauce', _('Sauce')),
         ('Crumble', _('Crumble')),
         ('Kief', _('Kief')),
+        ('Badder', _('Badder')),
+        ('Live Resin', _('Live Resin')),
+        ('Rosin', _('Rosin')),
+        ('HTE', _('HTE')),
+        ('HTE Diamonds', _('HTE Diamonds')),
         ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
         ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
         ('Clones', _('Clones')),
@@ -466,7 +471,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('efn', _('Eco Farm Nursery (EFN LLC)')),
     )
     BIOMASS_TYPE_CHOICES = (
-        ('Unknown', _('Unknown')),
+        ('Unknown',  _('Unknown')),
         ('Dried Flower', _('Dried Flower')),
         ('Dried Leaf', _('Dried Leaf')),
         ('Fresh Plant', _('Fresh Plant')),

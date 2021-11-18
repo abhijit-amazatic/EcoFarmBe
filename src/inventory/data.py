@@ -130,6 +130,11 @@ CATEGORY_GROUP_MAP = {
         'Shatter',
         'Sauce',
         'Crumble',
+        'Badder',
+        'Live Resin',
+        'Rosin',
+        'HTE',
+        'HTE Diamonds',
     ),
     'Distillates': (
         'Distillate Oil',
