@@ -276,7 +276,7 @@ def insert_data_from_crm(user, response_data, license_id, license_number):
         return {"success":"Data successfully fetched to DB"}
 
 
-def send_onboarding_data_fetch_verification_mail(instance, user_id):
+def send_license_onboarding_verification_mail(instance, user_id):
     """
     docstring
     """

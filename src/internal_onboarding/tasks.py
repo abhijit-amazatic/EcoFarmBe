@@ -29,7 +29,7 @@ from integration.tasks import (
     insert_record_to_crm,
 )
 
-from brand.task_helpers import insert_data_from_crm
+from brand.tasks.license_oboarding_helpers import insert_data_from_crm
 from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
@@ -101,7 +101,7 @@ def send_internal_onboarding_invitation(invite_obj_id_list):
 
 
 @app.task(queue="general")
-def fetch_onboarding_data_to_db(user_id, license_number, license_obj_id):
+def populate_onboarding_data_to_db(user_id, license_number, license_obj_id):
     """
     async task for existing user.Insert/create license based on license number.
     We use this while fetching data after first step(license creation).
@@ -218,7 +218,7 @@ def create_crm_associations(vendor_id, account_id, org_id, license_id, contacts_
 @app.task(queue="general")
 def create_crm_associations_and_fetch_data(create_crm_associations_kwargs, fetch_data_kwargs={}):
     create_crm_associations(**create_crm_associations_kwargs)
-    fetch_onboarding_data_to_db(**fetch_data_kwargs)
+    populate_onboarding_data_to_db(**fetch_data_kwargs)
     insert_record_to_crm.delay(
         fetch_data_kwargs.get('license_obj_id'),
         is_update=True,

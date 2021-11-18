@@ -41,9 +41,9 @@ from user.serializers import (get_encrypted_data,)
 from user.views import (notify_admins,)
 from permission.filterqueryset import (filterQuerySet, )
 from .tasks import (
-    send_async_invitation,
-    send_onboarding_data_fetch_verification,
-    resend_onboarding_data_fetch_verification,
+    invite_license_user_task,
+    send_license_onboarding_verification_task,
+    resend_license_onboarding_verification_task,
 )
 from permission.models import Permission
 from compliance_binder.models import BinderLicense
@@ -770,7 +770,7 @@ class InviteUserViewSet(NestedViewSetMixin,
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        send_async_invitation.delay(instance.id)
+        invite_license_user_task.delay(instance.id)
 
     @action(
         detail=True,
@@ -786,7 +786,7 @@ class InviteUserViewSet(NestedViewSetMixin,
         Resend Invitation
         """
         instance = self.get_object()
-        send_async_invitation.delay(instance.id)
+        invite_license_user_task.delay(instance.id)
         return Response(status=200)
 
 class UserInvitationVerificationView(GenericAPIView):
@@ -969,7 +969,7 @@ class OnboardingDataFetchViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMi
         """
         instance = serializer.save()
         try:
-            send_onboarding_data_fetch_verification.delay(instance.id, self.request.user.id)
+            send_license_onboarding_verification_task.delay(instance.id, self.request.user.id)
         except Exception as e:
             print('Exception while creating & pulling existing user license',e)
             traceback.print_tb(e.__traceback__)
@@ -1013,5 +1013,5 @@ class OnboardingDataFetchViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMi
         Verify License Datafetch Otp
         """
         instance = self.get_object()
-        resend_onboarding_data_fetch_verification.delay(instance.id, self.request.user.id)
+        resend_license_onboarding_verification_task.delay(instance.id, self.request.user.id)
         return Response({}, status=status.HTTP_200_OK,)

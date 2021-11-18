@@ -27,7 +27,7 @@ from integration.tasks import (
 )
 from user.models import (User,)
 from cultivar.models import (Cultivar,)
-from .tasks import (onboarding_fetched_data_insert_to_db,)
+from .tasks import (onboarding_verified_license_data_population_task,)
 from .serializers_mixin import (
     NestedModelSerializer,
     OrganizationUserRoleRelatedField,
@@ -288,7 +288,10 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         fetch_instance = OnboardingDataFetch.objects.filter(data_fetch_token=data_fetch_token).first()
         instance = super().create(validated_data)
         if fetch_instance.owner_verification_status == 'verified':
-            onboarding_fetched_data_insert_to_db.delay(self.context['request'].user.id, fetch_instance.id, instance.id)
+            onboarding_verified_license_data_population_task.delay(
+                self.context['request'].user.id,
+                fetch_instance.id, instance.id
+            )
         return instance
 
     class Meta:

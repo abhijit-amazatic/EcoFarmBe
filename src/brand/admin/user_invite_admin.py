@@ -14,7 +14,7 @@ from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
 
 from core.mixins.admin import CustomButtonMixin
 from ..tasks import (
-    send_async_invitation,
+    invite_license_user_task,
 )
 from ..models import LicenseUserInvite
 
@@ -106,10 +106,10 @@ class LicenseUserInviteAdmin(CustomButtonMixin, admin.ModelAdmin):
         return False
 
     def resend_invite(self, request, obj):
-        send_async_invitation.delay(obj.id)
+        invite_license_user_task.delay(obj.id)
 
     def action_resend_invites(self, request, queryset):
         for obj in queryset.filter(status__in=("pending", "user_joining_platform")):
-            send_async_invitation.delay(obj.id)
+            invite_license_user_task.delay(obj.id)
 
     action_resend_invites.short_description = "Resend Selected Invites"

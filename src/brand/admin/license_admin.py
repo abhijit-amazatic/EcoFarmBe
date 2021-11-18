@@ -29,7 +29,7 @@ from utils import (
     reverse_admin_change_path,
 )
 from ..tasks import (
-    invite_profile_contacts,
+    invite_profile_contacts_task,
 )
 from core.utility import (
     send_async_approval_mail,
@@ -487,7 +487,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
                 license_profile[0].approved_by = request.user.get_user_info()
                 license_profile[0].save()
             if hasattr(obj, "profile_contact"):
-                invite_profile_contacts.delay(obj.profile_contact.id)
+                invite_profile_contacts_task.delay(obj.profile_contact.id)
                 # add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
         super().save_model(request, obj, form, change)
 
@@ -532,7 +532,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
                 send_async_approval_mail.delay(profile.id)
                 send_async_approval_mail_admin.delay(profile.id, request.user.id)
                 if hasattr(profile, "profile_contact"):
-                    invite_profile_contacts.delay(profile.profile_contact.id)
+                    invite_profile_contacts_task.delay(profile.profile_contact.id)
                     # add_users_to_system_and_license.delay(profile.profile_contact.id,profile.id)
         messages.success(request, "License Profiles Approved!")
 
