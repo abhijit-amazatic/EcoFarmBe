@@ -44,6 +44,9 @@ from ..tasks import (
 from ..tasks.create_approved_item_po import (
     get_vendor_id,
 )
+from ..tasks.custom_inventory_data_from_crm import (
+    get_custom_inventory_data_from_crm_vendor,
+)
 from ..utils import (
     get_item_tax,
 )
@@ -292,40 +295,6 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
 
         return '-'.join(sku)
 
-    def get_crm_data(self, request, obj):
-        client_id = obj.license_profile.license.client_id
-        try:
-            result = search_query('Vendors', client_id, 'Client_ID')
-        except Exception as e:
-            self.message_user(request, f'Error while fetching client code from Zoho CRM Vendor: {e}', level='error')
-        else:
-            if result.get('status_code') == 200:
-                data_ls = result.get('response')
-                if data_ls and isinstance(data_ls, list):
-                    for vendor in data_ls:
-                        if vendor.get('Client_ID', '') == str(client_id):
-                            if vendor.get('id'):
-                                obj.crm_vendor_id = vendor.get('id')
-                            p_rep = vendor.get('Owner', {}).get('email')
-                            if p_rep:
-                                obj.procurement_rep = p_rep
-                            p_rep_name = vendor.get('Owner', {}).get('name')
-                            if p_rep_name:
-                                obj.procurement_rep_name = p_rep_name
-                            client_code = vendor.get('Client_Code')
-                            if client_code:
-                                obj.client_code = client_code
-                                return client_code
-                            vendor_name = vendor.get('Vendor_Name')
-                            self.message_user(request, f'client code not found for vendor \'{vendor_name}\' (client_id: {client_id}) in Zoho CRM', level='error')
-                            return None
-                self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
-            elif result.get('status_code') == 204:
-                self.message_user(request, 'Vendor not found in Zoho CRM', level='error')
-            else:
-                self.message_user(request, 'Error while fetching client code from Zoho CRM', level='error')
-        return None
-
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
             if not obj.license_profile:
@@ -353,7 +322,7 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
                         )
                     if isinstance(obj.cultivation_tax, Decimal):
                         if not obj.client_code or not obj.procurement_rep or not obj.crm_vendor_id:
-                            self.get_crm_data(request, obj)
+                            get_custom_inventory_data_from_crm_vendor(obj, request)
                         if obj.zoho_organization:
                             inv_obj = get_inventory_obj(inventory_name=f'inventory_{obj.zoho_organization}')
                             metadata = {}
