@@ -97,5 +97,5 @@ def insert_record_to_crm(license_id, is_update=False, account_crm_id=None, vendo
         account_crm_id=account_crm_id,
         vendor_crm_id=vendor_crm_id,
     )
-    create_customer_in_books_task.delay(license_id=license_id)
+    create_customer_in_books_task.delay(license_id)
     return r
