@@ -936,26 +936,6 @@ def fetch_licenses():
             error_licenses.append(license.license_number)
     return {'success_count': success_count, 'error_count': error_count}
 
-def update_program_selection(record_id, tier_selection):
-    """
-    Sync program selection from crm to webapp.
-    """
-    qs = LicenseProfile.objects.filter(zoho_crm_vendor_id=record_id)
-    if not qs.exists():
-        # qs = LicenseProfile.objects.filter(zoho_crm_account_id=record_id)
-        # if not qs.exists():
-        error = {'code': 1, 'error': f'Vendor {record_id} not in database.'}
-        print(error)
-        return error
-    if tier_selection:
-        for license_profile in qs:
-            try:
-                program_overview = license_profile.license.program_overview
-            except ObjectDoesNotExist:
-                program_overview = ProgramOverview.objects.create(license=license_profile.license)
-            program_overview.program_details = {'program_name': tier_selection}
-            program_overview.save()
-    return {'code': 0, 'message': 'Success'}
 
 def fetch_record_owners(license_number=None, update_all=False):
     """
