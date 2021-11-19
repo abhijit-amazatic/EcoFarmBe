@@ -5,22 +5,16 @@ import json
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin import widgets
 from django.contrib.postgres import fields
-from django.db import models
 from django.db import transaction
 from django.utils import timezone
-from django.utils.safestring import mark_safe
 
-import nested_admin
-from django_reverse_admin import ReverseModelAdmin
+from nested_admin import NestedStackedInline, NestedModelAdmin
 from django_json_widget.widgets import JSONEditorWidget
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
-from multiselectfield import MultiSelectField
 from import_export.admin import ImportExportModelAdmin, ExportActionMixin
-from import_export import resources
 
-from core.mailer import mail, mail_send
+from core.mailer import mail_send
 from integration.box import (
     delete_file,
 )
@@ -39,8 +33,6 @@ from core.utility import (
     send_async_approval_mail_admin,
 )
 from ..models import (
-    Organization,
-    Brand,
     License,
     ProfileContact,
     LicenseProfile,
@@ -84,7 +76,7 @@ json_field_overide = {
 }
 
 
-class InlineLicenseProfileContactAdmin(nested_admin.NestedStackedInline):
+class InlineLicenseProfileContactAdmin(NestedStackedInline):
     """
     Configuring field admin view for ProfileContact model.
     """
@@ -93,11 +85,10 @@ class InlineLicenseProfileContactAdmin(nested_admin.NestedStackedInline):
     model = ProfileContact
     readonly_fields = ("is_draft",)
     can_delete = False
-    # form = ProfileContactForm
     formfield_overrides = json_field_overide
 
 
-class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
+class InlineCultivationOverviewAdmin(NestedStackedInline):
     """
     Configuring field admin view for CultivationOverview.
     """
@@ -109,11 +100,10 @@ class InlineCultivationOverviewAdmin(nested_admin.NestedStackedInline):
         "overview",
     )
     can_delete = False
-    # form = CultivationForm
     formfield_overrides = json_field_overide
 
 
-class InlineNurseryOverviewAdmin(nested_admin.NestedStackedInline):
+class InlineNurseryOverviewAdmin(NestedStackedInline):
     """
     Configuring field admin view for NurseryOverview.
     """
@@ -124,7 +114,7 @@ class InlineNurseryOverviewAdmin(nested_admin.NestedStackedInline):
     # readonly_fields = ('is_draft','overview',)
 
 
-class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
+class InlineFinancialOverviewAdmin(NestedStackedInline):
     """
     Configuring field admin view for FinancialOverview model.
     """
@@ -136,11 +126,10 @@ class InlineFinancialOverviewAdmin(nested_admin.NestedStackedInline):
         "is_draft",
         "overview",
     )
-    # form = FinancialForm
-    json_field_overide
+    formfield_overrides = json_field_overide
 
 
-class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
+class InlineCropOverviewAdmin(NestedStackedInline):
     """
     Configuring field admin view for InlineCropOverview model.
     """
@@ -152,11 +141,10 @@ class InlineCropOverviewAdmin(nested_admin.NestedStackedInline):
         "is_draft",
         "overview",
     )
-    # form = CropForm
-    json_field_overide
+    formfield_overrides = json_field_overide
 
 
-class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
+class InlineProgramOverviewAdmin(NestedStackedInline):
     """
     Configuring field admin view for InlineProgramOverviewAdmin  model
     """
@@ -167,7 +155,7 @@ class InlineProgramOverviewAdmin(nested_admin.NestedStackedInline):
     readonly_fields = ("is_draft",)
 
 
-class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
+class InlineLicenseProfileAdmin(NestedStackedInline):
     """
     Configuring field admin view for InlineLicenseProfile  model
     """
@@ -192,7 +180,7 @@ class InlineLicenseProfileAdmin(nested_admin.NestedStackedInline):
         return ["name"] + fields
 
 
-# class InlineLicenseUserAdmin(nested_admin.NestedTabularInline):
+# class InlineLicenseUserAdmin(NestedTabularInline):
 #     extra = 0
 #     model = LicenseUser
 
@@ -235,7 +223,7 @@ class LicenseUpdatedForm(forms.ModelForm):
                     )
 
 
-class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
+class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
     """
     #ExportActionMixin
     #ImportExportModelAdmin
@@ -255,6 +243,16 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
         "books_output_display",
     )
 
+    def get_form(self, request, *args, **kwargs):
+        form = super(LicenseAdmin, self).get_form(request, *args, **kwargs)
+        form.request = request
+        return form
+
+    def get_list_display(self, request):
+        if request.user.email in getattr(settings, "INTEGRATION_ADMIN_EMAILS", []):
+            return self.list_display_integration_admin
+        return self.list_display
+
     def get_fieldsets(self, request, obj=None):
         """
         Hook for specifying fieldsets.
@@ -263,23 +261,17 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
         if self.fieldsets:
             return self.fieldsets
         return [
-            (
-                None,
-                {
-                    "fields": (
-                        f
-                        for f in self.get_fields(request, obj)
-                        if f not in self.integration_fields
-                    ),
-                },
-            ),
-            (
-                "Integration Info",
-                {
-                    "classes": ("collapse",),
-                    "fields": self.integration_fields,
-                },
-            ),
+            (None, {
+                "fields": (
+                    f
+                    for f in self.get_fields(request, obj)
+                    if f not in self.integration_fields
+                ),
+            }),
+            ("Integration Info", {
+                "classes": ("collapse",),
+                "fields": self.integration_fields,
+            }),
         ]
 
     def crm_output_display(self, obj):
@@ -291,6 +283,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
             json.dumps(obj.crm_output or {}),
             attrs={"id": "crm_output_display"},
         )
+
     crm_output_display.short_description = "CRM Output"
 
     def books_output_display(self, obj):
@@ -302,6 +295,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
             json.dumps(obj.books_output or {}),
             attrs={"id": "books_output_display"},
         )
+
     books_output_display.short_description = "Books output"
 
     def approved_on(self, obj):
@@ -472,6 +466,7 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
         "sync_records",
         "update_records",
         "update_books_records",
+        "refresh_integration_ids",
     ]
     list_per_page = 50
 
@@ -492,16 +487,6 @@ class LicenseAdmin(ImportExportModelAdmin, nested_admin.NestedModelAdmin):
                 invite_profile_contacts_task.delay(obj.profile_contact.id)
                 # add_users_to_system_and_license.delay(obj.profile_contact.id,obj.id)
         super().save_model(request, obj, form, change)
-
-    def get_form(self, request, *args, **kwargs):
-        form = super(LicenseAdmin, self).get_form(request, *args, **kwargs)
-        form.request = request
-        return form
-
-    def get_list_display(self, request):
-        if request.user.email in getattr(settings, "INTEGRATION_ADMIN_EMAILS", []):
-            return self.list_display_integration_admin
-        return self.list_display
 
     ################### Actions ####################
     def temporary_approve_license_profile(self, request, queryset):

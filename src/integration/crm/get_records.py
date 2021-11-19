@@ -333,17 +333,17 @@ def _get_record_by_clint_id(module, client_id, full=False):
         data_ls = result.get('response')
         if data_ls and isinstance(data_ls, list):
             for record in data_ls:
-                if record.get('Client_ID', '') == str(client_id):
+                if str(record.get('Client_ID', '')) == str(client_id):
                     if full:
                         return get_record(module, record.get('id'), full=full)
                     return record
     return {}
 
 def get_license_by_clint_id(client_id, full=False):
-    _get_record_by_clint_id('Licenses', client_id, full=full)
+    return _get_record_by_clint_id('Licenses', client_id, full=full)
 
 def get_vendor_by_clint_id(client_id, full=False):
-    _get_record_by_clint_id('Vendors', client_id, full=full)
+    return _get_record_by_clint_id('Vendors', client_id, full=full)
 
 def get_account_by_clint_id(client_id, full=False):
-    _get_record_by_clint_id('Accounts', client_id, full=full)
+    return _get_record_by_clint_id('Accounts', client_id, full=full)
