@@ -921,14 +921,15 @@ class ProgramSelectionSyncView(APIView):
             response = Response(error, status=status.HTTP_400_BAD_REQUEST)
         else:
             if tier_selection:
-                # for license_profile in qs:
+                for license_profile in qs:
                 #     try:
                 #         program_overview = license_profile.license.program_overview
                 #     except ObjectDoesNotExist:
                 #         program_overview = ProgramOverview.objects.create(license=license_profile.license)
                 #     program_overview.program_details = {'program_name': tier_selection}
                 #     program_overview.save()
-                qs.update(signed_program_name=tier_selection)
+                    license_profile.signed_program_name = tier_selection
+                    license_profile.save()
             response = Response({'code': 0, 'message': 'Success'})
         return response
 
