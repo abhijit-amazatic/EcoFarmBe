@@ -580,12 +580,12 @@ def get_parent_category(category_name):
             'Crumbe',
             'Crumble',
             'Kief',
-            'Hash'
-            'Badder'
-            'Live Resin'
-            'Rosin'
-            'HTE'
-            'HTE Diamonds'
+            'Hash',
+            'Badder',
+            'Live Resin',
+            'Rosin',
+            'HTE',
+            'HTE Diamonds',
         ],
         'Waste': [
             'Distillate Waste'
