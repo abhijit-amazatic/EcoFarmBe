@@ -1525,6 +1525,15 @@ class ConvertSalesOrderToInvoice(APIView):
     View class to convert Sales order to Invoice.
     """
     permission_classes = (IsAuthenticated,)
+    cf_filter = (
+        # "cf_thrive_society_s_payment_in",
+        # "cf_license",
+        # "cf_tax_terms",
+        # "cf_total_margin",
+        "cf_client_code",
+        "cf_client_license",
+        "cf_billing_published",
+    )
 
     def post(self, request):
         """
@@ -1534,7 +1543,9 @@ class ConvertSalesOrderToInvoice(APIView):
         sales_order_id = request.data.get('salesorder_id')
         if sales_order_id:
             so = get_salesorder(organization_name, so_id=sales_order_id, params={})
-            so = parse_book_object('invoice', so)
+            so['custom_fields'] = [f for f in so.get('custom_fields', []) if f.get('placeholder') in self.cf_filter]
+            so = parse_book_object('salesorder_to_invoice', so, line_item_parser='salesorder_to_invoice_parser')
+            so['custom_fields'] += [{"api_name": "cf_tax_terms", "value": ["Applicable "]},]
             invoice = create_invoice(organization_name, so)
             if invoice.get('code') != 0:
                 return Response(invoice, status=status.HTTP_400_BAD_REQUEST)

@@ -1013,6 +1013,9 @@ def get(record, v, **kwargs):
         if kwargs.get('line_item_parser') == 'salesorder_parser':
             line_item = parse_book_object('salesorder_line_item', value)
             return line_item    
+        elif kwargs.get('line_item_parser') == 'salesorder_to_invoice_parser':
+            line_item = parse_book_object('salesorder_to_invoice_line_item', value)
+            return line_item    
         line_item = parse_book_object('item', value)
         return line_item
     if v == 'custom_fields':
