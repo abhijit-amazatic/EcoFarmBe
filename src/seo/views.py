@@ -1,6 +1,7 @@
 """
 This module defines API views.
 """
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import (AllowAny, IsAuthenticated, )
@@ -18,6 +19,28 @@ class PageMetaView(APIView):
     Return Page Meta info from db.
     """
     permission_classes = (AllowAny, )
+    default_data = {
+        "id": 0,
+        "created_on": timezone.now(),
+        "updated_on": timezone.now(),
+        "page_url": "",
+        "page_name": "Default",
+        "page_title": (
+            "Thrive Society - Conscious Cannabis Distribution and ",
+            "Manufacturing located in Sonoma County, California"
+        ),
+        "meta_title": (
+            "Thrive Society - Conscious Cannabis Distribution and ",
+            "Manufacturing located in Sonoma County, California"
+        ),
+        "meta_description": (
+            "Thrive Society is a collective of mission driven people, ",
+            "farms and companies working together to realize the true ",
+            "potential and power of the cannabis plant. We do this through ",
+            "education, innovation, relationship building, technology, supply ",
+            "chain empowerment and utilizing business as a force for good."
+        )
+    }
 
     def get_serializer_context(self):
         return {
@@ -39,10 +62,11 @@ class PageMetaView(APIView):
             try:
                 instance = PageMeta.objects.get(page_url__iexact=url)
             except PageMeta.DoesNotExist:
-                try:
-                    instance = PageMeta.objects.get(page_url='/')
-                except PageMeta.DoesNotExist:
-                    return Response({"detail": "Meta not found for this url"}, status=404)
+                return Response(self.default_data)
+                # try:
+                #     instance = PageMeta.objects.get(page_url='/')
+                # except PageMeta.DoesNotExist:
+                #     return Response({"detail": "Meta not found for this url"}, status=404)
         except Exception as exc:
             return Response({"detail": exc}, status=400)
         else:
