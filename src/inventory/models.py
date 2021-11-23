@@ -183,6 +183,9 @@ class Inventory(models.Model):
     mapped_items = JSONField(blank=True, null=True, default=dict)
     client_id = models.PositiveIntegerField(blank=True, null=True)
     item_qr_code_url = models.CharField(_('QR Code-Box URL'), blank=True, null=True, max_length=500)
+    qr_code_box_id = models.CharField(_('QR Code-Box ID'), blank=True, null=True, max_length=255)
+    qr_box_direct_url = models.CharField(_('QR direct Box URL'), blank=True, null=True, max_length=500)
+    
 
     def __str__(self):
         return self.name

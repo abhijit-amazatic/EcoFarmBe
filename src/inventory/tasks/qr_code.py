@@ -16,7 +16,7 @@ from PIL import Image
 from boxsdk.exception import (BoxOAuthException,
                               BoxException, BoxAPIException)
 from inventory.models import Inventory as InventoryModel
-from integration.box import delete_file
+from integration.box import delete_file,search
 
 @app.task(queue="general")
 def generate_upload_item_detail_qr_code_stream(item,size=None):
@@ -40,19 +40,23 @@ def generate_upload_item_detail_qr_code_stream(item,size=None):
     if size:
         payload.update({'size':size})
     else:
-        payload.update({'size':100})
+        payload.update({'size':200})
         
     response = request("POST", rapid_url, headers=headers, data=json.dumps(payload))
     img = BytesIO(response.content)
     try:
         new_file=upload_file_stream(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,img,"%s.png"%item)
         box_url= get_preview_url(new_file.id)
+        box_file_id=new_file.id
     except AttributeError:
         print("Exception.File already exists.")
         box_url= get_preview_url(new_file)
+        box_file_id=search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%item)
     try:
         obj = InventoryModel.objects.get(item_id=item)
         obj.item_qr_code_url = box_url
+        obj.qr_code_box_id = box_file_id
+        obj.qr_box_direct_url = "https://ecofarm.app.box.com/file/"+str(box_file_id)
         obj.save()
         print("Generated/Uploaded/Saved QR code URL of item '%s' is '%s'.\n" %(item,box_url))
     except InventoryModel.DoesNotExist as e:
@@ -70,5 +74,17 @@ def update_inventory_qr_codes():
             generate_upload_item_detail_qr_code_stream.delay(item.item_id)
     
         
-    
-
+def remove_all_existing_qr_codes_from_box():
+    """
+    Remove existing QR codes & update db links to None
+    """
+    inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True)
+    for obj in inventory:
+        box_obj_id = search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.item_id)
+        if box_obj_id:
+            delete_file(box_obj_id)
+            obj.item_qr_code_url=None
+            obj.save()
+            print('Removed/Updated link for', obj.item_id)
+            
+            
