@@ -168,6 +168,16 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     Vendors Inventory Admin
     """
     form = CustomInventoryForm
+    search_fields = (
+        'item_name',
+        'sku',
+    )
+    list_filter = (
+        'category_name',
+        'license_profile',
+        'marketplace_status',
+        'status',
+    )
     list_display = (
         'item_name',
         # 'sku',
