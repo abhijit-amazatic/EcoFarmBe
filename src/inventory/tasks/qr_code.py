@@ -70,8 +70,7 @@ def update_inventory_qr_codes():
     """
     inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True)
     for item in inventory:
-        if not item.item_qr_code_url:
-            generate_upload_item_detail_qr_code_stream.delay(item.item_id)
+        generate_upload_item_detail_qr_code_stream.delay(item.item_id)
     
         
 def remove_all_existing_qr_codes_from_box():
