@@ -16,7 +16,7 @@ from PIL import Image
 from boxsdk.exception import (BoxOAuthException,
                               BoxException, BoxAPIException)
 from inventory.models import Inventory as InventoryModel
-from integration.box import delete_file,search
+from integration.box import (delete_file,search,rename_file)
 
 @app.task(queue="general")
 def generate_upload_item_detail_qr_code_stream(item,size=None):
@@ -45,24 +45,20 @@ def generate_upload_item_detail_qr_code_stream(item,size=None):
     response = request("POST", rapid_url, headers=headers, data=json.dumps(payload))
     img = BytesIO(response.content)
     try:
-        new_file=upload_file_stream(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,img,"%s.png"%item)
+        obj = InventoryModel.objects.get(item_id=item)
+        new_file=upload_file_stream(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,img,"%s.png"%obj.sku)
         box_url= get_preview_url(new_file.id)
         box_file_id=new_file.id
     except AttributeError:
         print("Exception.File already exists.")
         box_url= get_preview_url(new_file)
-        box_file_id=search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%item)
-    try:
-        obj = InventoryModel.objects.get(item_id=item)
-        obj.item_qr_code_url = box_url
-        obj.qr_code_box_id = box_file_id
-        obj.qr_box_direct_url = "https://ecofarm.app.box.com/file/"+str(box_file_id)
-        obj.save()
-        print("Generated/Uploaded/Saved QR code URL of item '%s' is '%s'.\n" %(item,box_url))
-    except InventoryModel.DoesNotExist as e:
-        print("Item is not in databse.\n Box URL is", box_url)
-        return box_url
-    
+        box_file_id=search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.sku)        
+    obj.item_qr_code_url = box_url
+    obj.qr_code_box_id = box_file_id
+    obj.qr_box_direct_url = "https://ecofarm.app.box.com/file/"+str(box_file_id)
+    obj.save()
+    print("Generated/Uploaded/Saved QR code URL of item '%s'with sku '%s' is '%s'.\n" %(item,obj.sku,box_url))
+
 
 def update_inventory_qr_codes():
     """
@@ -79,7 +75,7 @@ def remove_all_existing_qr_codes_from_box():
     """
     inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True)
     for obj in inventory:
-        box_obj_id = search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.item_id)
+        box_obj_id = search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.sku)
         if box_obj_id:
             delete_file(box_obj_id)
             obj.item_qr_code_url=None
@@ -87,3 +83,10 @@ def remove_all_existing_qr_codes_from_box():
             print('Removed/Updated link for', obj.item_id)
             
             
+def rename_all_existing_qr_codes_from_box():
+    """
+    Rename existing QR codes to sku form item_id.
+    """
+    inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True)
+    for obj in inventory:
+        rename_file(obj.qr_code_box_id,'%s.png'%obj.sku)
