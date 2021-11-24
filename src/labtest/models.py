@@ -109,7 +109,7 @@ class LabTest(models.Model):
     Methylene_chloride = models.CharField(_('Methylene chloride'), blank=True, null=True, max_length=255)
     Mevinphos = models.CharField(_('Mevinphos'), blank=True, null=True, max_length=255)
     Microbiological_Contamination = models.CharField(_('Microbiological Contamination PASS/FAIL'), blank=True, null=True, max_length=255)
-    Modified_By = models.CharField(_('Modified_By'), blank=True, null=True, max_length=100)
+    Modified_By = models.CharField(_('Modified_By'), blank=True, null=True, max_length=255)
     Modified_Time = models.DateField(auto_now=False, blank=True, null=True)
     Moisture = models.CharField(_('Moisture'), blank=True, null=True, max_length=255)
     MoistureL = models.CharField(_('Moisture PASS/FAIL'), blank=True, null=True, max_length=255)
