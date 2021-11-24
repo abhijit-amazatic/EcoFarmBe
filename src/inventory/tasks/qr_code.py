@@ -46,13 +46,18 @@ def generate_upload_item_detail_qr_code_stream(item,size=None):
     img = BytesIO(response.content)
     try:
         obj = InventoryModel.objects.get(item_id=item)
-        new_file=upload_file_stream(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,img,"%s.png"%obj.sku)
+        new_file=upload_file_stream(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,img,"%s.png"%obj.sku.strip())
+        box_url= get_preview_url(new_file.id)
+        box_file_id=new_file.id
+    except BoxAPIException as e:
+        print('Item name is not valid', e)
+        new_file=upload_file_stream(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,img,"%s.png"%item)
         box_url= get_preview_url(new_file.id)
         box_file_id=new_file.id
     except AttributeError:
         print("Exception.File already exists.")
         box_url= get_preview_url(new_file)
-        box_file_id=search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.sku)        
+        box_file_id=search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.sku.strip())        
     obj.item_qr_code_url = box_url
     obj.qr_code_box_id = box_file_id
     obj.qr_box_direct_url = "https://ecofarm.app.box.com/file/"+str(box_file_id)
@@ -75,7 +80,7 @@ def remove_all_existing_qr_codes_from_box():
     """
     inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True)
     for obj in inventory:
-        box_obj_id = search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.sku)
+        box_obj_id = search(settings.INVENTORY_QR_UPLOAD_FOLDER_ID,"%s.png"%obj.sku.strip())
         if box_obj_id:
             delete_file(box_obj_id)
             obj.item_qr_code_url=None
@@ -87,6 +92,10 @@ def rename_all_existing_qr_codes_from_box():
     """
     Rename existing QR codes to sku form item_id.
     """
-    inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True)
+    inventory = InventoryModel.objects.filter(status='active',cf_cfi_published=True,qr_code_box_id__isnull=False)
     for obj in inventory:
-        rename_file(obj.qr_code_box_id,'%s.png'%obj.sku)
+        try:
+            rename_file.delay(obj.qr_code_box_id,'%s.png'%obj.sku.strip())
+        except Exception as e:
+            print('Exception while renaming', obj.item_id)
+            

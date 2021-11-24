@@ -445,6 +445,7 @@ def get_file_from_link(link):
     client = get_box_client()
     return client.get_shared_item(link)
 
+@app.task(queue="general")
 def rename_file(file_id, new_name):
     """
     Rename file.
