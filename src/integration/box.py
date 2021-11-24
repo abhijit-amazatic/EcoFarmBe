@@ -444,3 +444,12 @@ def get_file_from_link(link):
     """
     client = get_box_client()
     return client.get_shared_item(link)
+
+def rename_file(file_id, new_name):
+    """
+    Rename file.
+    """
+    client = get_box_client()
+    file_to_rename = client.file(file_id)
+    renamed_file = file_to_rename.rename(new_name)
+    return renamed_file
