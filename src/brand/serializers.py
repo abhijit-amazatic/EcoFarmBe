@@ -360,7 +360,8 @@ class LicenseProfileSerializer(serializers.ModelSerializer):
     """
     This defines LicenseProfileSerializer
     """
-    brand_association = LicenseProfileBrandAssociationField(allow_null=True)
+    brand_association = LicenseProfileBrandAssociationField(required=False,
+                                                            allow_empty=True, allow_null=True)
 
     def create(self, validated_data):
         """
