@@ -663,6 +663,14 @@
         group: 5
 
 
+# Inventory Filters
+-   model: permission.permission
+    pk: internal_inventory_filters
+    fields:
+        name: Internal Inventory Filters
+        type: internal
+        description: ''
+        group: 5
 
 #########################################################################################
 ###################################### field perm #######################################
