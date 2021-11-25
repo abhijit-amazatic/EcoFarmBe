@@ -237,25 +237,28 @@ def calculate_tax(books_name, product_category, quantity):
     """
     Calculate tax from product category for estimate page.
     """
-    taxes = TaxVariable.objects.values('dried_flower_tax_item','dried_leaf_tax_item')[0]
+    CAT_TAX_ITEM_FIELD = {
+        'Flower':      'dried_flower_tax_item',
+        'Trim':        'dried_leaf_tax_item',
+        'fresh_plant': 'fresh_plant_tax_item',
+    }
+    taxes = TaxVariable.objects.values(*CAT_TAX_ITEM_FIELD.values())[0]
     books_obj = get_books_obj(books_name)
-    if product_category == 'Flower':
-        item = get_tax(books_obj, taxes['dried_flower_tax_item'])['response'][0]
-        item_id = item['item_id']
-        item_sku = item['sku']
-        item_name = item['name']
-        tax = item['rate']
-        total_tax = float(quantity) * float(tax)
-    elif product_category == 'Trim':
-        item = get_tax(books_obj, taxes['dried_leaf_tax_item'])['response'][0]
-        item_name = item['name']
-        item_id = item['item_id']
-        item_sku = item['sku']
-        tax = item['rate']
-        total_tax = float(quantity) * float(tax)
-    else:
+    if product_category not in CAT_TAX_ITEM_FIELD.keys():
         return {'status_code': 400,
                 'error': 'product category not found.'}
+    else:
+        tax_item_name = taxes[CAT_TAX_ITEM_FIELD[product_category]]
+        if not tax_item_name:
+            return {'status_code': 400,
+                    "error": f"Tax variable '{CAT_TAX_ITEM_FIELD[product_category]}' not defined."}
+        item = get_tax(books_obj, tax_item_name)['response'][0]
+        item_name = item['name']
+        item_id = item['item_id']
+        item_sku = item['sku']
+        tax = item['rate']
+        total_tax = float(quantity) * float(tax)
+
     return {
         'status_code': 200,
         'response': {
