@@ -506,7 +506,7 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
     """
     Stores Brand's details.
     """
-    TLL = 60*60*48
+    TLL = timedelta(days=7).total_seconds()
     _MAX_CLOCK_SKEW = 60
     fernet = Fernet(get_fernet_key(key_salt='licinv'))
     STATUS_CHOICES = (
