@@ -134,7 +134,7 @@ CATEGORY_GROUP_MAP = {
         'Live Resin',
         'Rosin',
         'HTE',
-        'HTE Diamonds',
+        'Liquid Diamond Sauce',
     ),
     'Distillates': (
         'Distillate Oil',

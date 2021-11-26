@@ -400,7 +400,7 @@ class CustomInventory(TimeStampFlagModelMixin, models.Model):
         ('Live Resin', _('Live Resin')),
         ('Rosin', _('Rosin')),
         ('HTE', _('HTE')),
-        ('HTE Diamonds', _('HTE Diamonds')),
+        ('Liquid Diamond Sauce', _('Liquid Diamond Sauce')),
         ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
         ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
         ('Clones', _('Clones')),

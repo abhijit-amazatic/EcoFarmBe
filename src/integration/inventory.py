@@ -586,6 +586,7 @@ def get_parent_category(category_name):
             'Rosin',
             'HTE',
             'HTE Diamonds',
+            'Liquid Diamond Sauce',
         ],
         'Waste': [
             'Distillate Waste'

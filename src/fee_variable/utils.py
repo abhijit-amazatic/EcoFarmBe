@@ -75,7 +75,7 @@ ITEM_CATEGORY_MSCP_FEE_VAR_MAP = {
     'Live Resin':                   'mcsp_fee_concentrates',
     'Rosin':                        'mcsp_fee_concentrates',
     'HTE':                          'mcsp_fee_concentrates',
-    'HTE Diamonds':                 'mcsp_fee_concentrates',
+    'Liquid Diamond Sauce':         'mcsp_fee_concentrates',
     'Terpenes':                     'mcsp_fee_terpenes',
     'Terpenes - Cultivar Specific': 'mcsp_fee_terpenes',
     'Terpenes - Cultivar Blended':  'mcsp_fee_terpenes',
@@ -105,7 +105,7 @@ PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES = (
     'Live Resin',
     'Rosin',
     'HTE',
-    'HTE Diamonds',
+    'Liquid Diamond Sauce',
     'Terpenes - Cultivar Specific',
     'Terpenes - Cultivar Blended',
 )
