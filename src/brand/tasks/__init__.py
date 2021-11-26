@@ -64,10 +64,10 @@ def update_before_expire():
     )
     if license_obj:
         for obj in license_obj:
-            if not obj.status_before_expiry:
-                obj.status_before_expiry = obj.status
-                obj.save()
-                print("updated license before status for ", obj.license_number)
+            # if not obj.status_before_expiry:
+            #     obj.status_before_expiry = obj.status
+            #     obj.save()
+            #     print("updated license before status for ", obj.license_number)
             if not obj.is_notified_before_expiry:
                 mail_send(
                     "license-expiry.html",

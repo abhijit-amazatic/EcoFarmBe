@@ -248,7 +248,7 @@ class InternalOnboardingView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     if k in license_obj.__dict__ and k not in ('license_number', 'legal_business_name'):
                         license_obj.__dict__[k] = license_data.get(v)
                 license_obj.step = 1
-                license_obj.status = StatusFlagMixin.STATUS_IN_PROGRESS
+                license_obj.status = License.PROFILE_STATUS_IN_PROGRESS
                 if data.get('business_structure'):
                     license_obj.business_structure = data.get('business_structure')
                 license_obj.save()

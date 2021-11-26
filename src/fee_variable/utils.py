@@ -120,53 +120,56 @@ def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, far
         else:
             lp = license_profile
         if lp:
-            if lp.license.status == 'approved':
-                program_name = lp.signed_program_name or ''
-                program_name = program_name.strip()
-                if not program_name and no_tier_fee:
-                    if lp.license.profile_category in ('microbusiness', 'manufacturing', 'retail', 'distribution', 'processing'):
-                        program_name = 'IBP No Tier'
-                    else:
-                        program_name = 'IFP No Tier'
-                    if request:
-                        messages.warning(request, f'No signed program tier found for profile, using {program_name} MCSP fee.',)
-
-                tier = custom_inventory_variable_program_map.get(program_name, {})
-                inventory_variable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
-                if inventory_variable and hasattr(inventory_variable, fee_var) and getattr(inventory_variable, fee_var) is not None:
-                    try:
-                        db_val = Decimal(getattr(inventory_variable, fee_var))
-                    except decimal.InvalidOperation:
-                        msg_error('Error while parsing MCSP fee from db.')
-                        return None
-                    else:
-                        if item_category in ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP:
-                            db_val = ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP[item_category](db_val)
-                        if item_category in PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES:
-                            if farm_price is not None:
-                                try:
-                                    fp = Decimal(farm_price)
-                                except decimal.InvalidOperation:
-                                    msg_error('Error while parsing farm price for MCSP fee calculation.')
-                                    return None
-                                else:
-                                    mcsp_fee = (fp*db_val)/Decimal('100')
-                                    return mcsp_fee.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
-                            else:
-                                msg_error('Farm price not provided for MCSP fee calculation.')
-                                return None
+            if lp.license.license_status == 'Active':
+                if lp.license.status == 'approved':
+                    program_name = lp.signed_program_name or ''
+                    program_name = program_name.strip()
+                    if not program_name and no_tier_fee:
+                        if lp.license.profile_category in ('microbusiness', 'manufacturing', 'retail', 'distribution', 'processing'):
+                            program_name = 'IBP No Tier'
                         else:
-                            return db_val.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
+                            program_name = 'IFP No Tier'
+                        if request:
+                            messages.warning(request, f'No signed program tier found for profile, using {program_name} MCSP fee.',)
+
+                    tier = custom_inventory_variable_program_map.get(program_name, {})
+                    inventory_variable = CustomInventoryVariable.objects.filter(**tier).order_by('-created_on').first()
+                    if inventory_variable and hasattr(inventory_variable, fee_var) and getattr(inventory_variable, fee_var) is not None:
+                        try:
+                            db_val = Decimal(getattr(inventory_variable, fee_var))
+                        except decimal.InvalidOperation:
+                            msg_error('Error while parsing MCSP fee from db.')
+                            return None
+                        else:
+                            if item_category in ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP:
+                                db_val = ITEM_CATEGORY_MSCP_FEE_CONVERSION_MAP[item_category](db_val)
+                            if item_category in PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES:
+                                if farm_price is not None:
+                                    try:
+                                        fp = Decimal(farm_price)
+                                    except decimal.InvalidOperation:
+                                        msg_error('Error while parsing farm price for MCSP fee calculation.')
+                                        return None
+                                    else:
+                                        mcsp_fee = (fp*db_val)/Decimal('100')
+                                        return mcsp_fee.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
+                                else:
+                                    msg_error('Farm price not provided for MCSP fee calculation.')
+                                    return None
+                            else:
+                                return db_val.quantize(Decimal('1.000000'), rounding=decimal.ROUND_DOWN)
+                    else:
+                        program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
+                        program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
+                        msg_error(
+                            f"MCSP fee not found in Vendor Inventory Variables (fee var: '{fee_var}') for "
+                            f"Program Type: '{program_type_choices_dict.get(tier.get('program_type'))}', "
+                            f" Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
+                        )
                 else:
-                    program_type_choices_dict = dict(CustomInventoryVariable.PROGRAM_TYPE_CHOICES)
-                    program_tier_choices_dict = dict(CustomInventoryVariable.PROGRAM_TIER_CHOICES)
-                    msg_error(
-                        f"MCSP fee not found in Vendor Inventory Variables (fee var: '{fee_var}') for "
-                        f"Program Type: '{program_type_choices_dict.get(tier.get('program_type'))}', "
-                        f" Program Tier: '{program_tier_choices_dict.get(tier.get('tier'))}'."
-                    )
+                    msg_error('Profile is not approved.')
             else:
-                msg_error('Profile is not approved.')
+                msg_error('license is not active.')
         else:
             msg_error('License Profile not found.')
     else:

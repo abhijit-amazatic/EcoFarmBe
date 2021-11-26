@@ -4,10 +4,12 @@ from django.db import migrations
 
 def forward_func(apps, schema_editor):
     License = apps.get_model("brand", "License")
+    print()
     for obj in License.objects.filter(status='expired'):
         obj.status = obj.status_before_expiry or 'completed'
         obj.license_status = 'Expired'
         obj.save()
+        print(f"{obj.id} : {obj.status} : {obj.status_before_expiry}")
 
 def reverse_func(apps, schema_editor):
     License = apps.get_model("brand", "License")

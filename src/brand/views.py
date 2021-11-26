@@ -200,6 +200,7 @@ class CharInFilter(BaseInFilter,CharFilter):
 class DataFilter(FilterSet):
     owner_or_manager__in = CharInFilter(field_name='owner_or_manager', lookup_expr='in')
     status__in = CharInFilter(field_name='status', lookup_expr='in')
+    license_status__in = CharInFilter(field_name='status', lookup_expr='in')
     premises_county__in = CharInFilter(field_name='premises_county', lookup_expr='in')
     license_type__in = CharInFilter(field_name='license_type', lookup_expr='in')
 
@@ -210,6 +211,7 @@ class DataFilter(FilterSet):
             'legal_business_name':['icontains', 'exact'],
             'owner_or_manager__in':['icontains', 'exact'],
             'status__in':['icontains', 'exact'],
+            'license_status__in':['icontains', 'exact'],
             'license_type__in':['icontains', 'exact'],
             'premises_county__in':['icontains', 'exact']
         }
@@ -562,6 +564,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                         'id': license.id,
                         'status': "N/A" if not hasattr(license, 'status') else license.status,
                         'step': "N/A" if not hasattr(license, 'status') else license.step,
+                        'license_status': "N/A" if not hasattr(license, 'license_status') else license.license_status,
                         # 'is_buyer': "N/A" if not hasattr(license, 'is_buyer') else license.is_buyer,
                         # 'is_seller': "N/A" if not hasattr(license, 'is_seller') else license.is_seller,
                         'is_buyer': True,
