@@ -244,6 +244,8 @@ CRM_FORMAT  = {
         "Client_ID": "client_id",
         "Client_Code": "client_code",
         "Account_Owner": "",
+        "Agreement_Signed": "agreement_signed",
+        "Signed_Agreement_Link": "agreement_link",
         "Company_Type": "account_category",
         "Account_Legal_Entity_Name": "",
         "Associated_Vendor_Record": "zoho_crm_vendor_id",
