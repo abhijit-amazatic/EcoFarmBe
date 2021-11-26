@@ -442,6 +442,7 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
         ("created_on", DateRangeFilter),
         ("updated_on", DateRangeFilter),
         "status",
+        "license_status",
         "profile_category",
         "is_contract_downloaded",
         "license_type",

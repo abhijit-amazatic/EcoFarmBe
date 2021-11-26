@@ -45,10 +45,10 @@ slack = Slacker(settings.SLACK_TOKEN)
 @periodic_task(run_every=(crontab(hour=[1], minute=0)), options={"queue": "general"})
 def update_expired_license_status():
     """
-    Update expired licence status to 'expired'.
+    Update expired licence status to 'Expired'.
     """
     qs = License.objects.filter(expiration_date__lt=timezone.now())
-    qs.update(status="expired")
+    qs.update(license_status="Expired")
 
 
 @periodic_task(run_every=(crontab(hour=[1], minute=0)), options={"queue": "general"})

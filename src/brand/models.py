@@ -194,7 +194,7 @@ def client_id_validator(value):
         raise ValidationError(f'{value} is not valid 6 digit integer.')
 
 
-class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
+class License(TimeStampFlagModelMixin, models.Model):
     """
     Stores License Profile for either related to brand or individual user-so category & buyer and seller.
     """
@@ -204,6 +204,55 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
         ('Indoor', _('Indoor')),
     )
 
+    LICENSE_STATUS_ACTIVE = 'Active'
+    # LICENSE_STATUS_CANCELLED = 'Cancelled'
+    # LICENSE_STATUS_ABOUT_TO_EXPIRE = 'About to Expire'
+    LICENSE_STATUS_EXPIRED = 'Expired'
+    # LICENSE_STATUS_EXPIRED_PENDING_RENEWAL = 'Expired - Pending Renewal'
+    # LICENSE_STATUS_INACTIVE = 'Inactive'
+    # LICENSE_STATUS_REVOKED = 'Revoked'
+    # LICENSE_STATUS_SURRENDERED = 'Surrendered'
+    # LICENSE_STATUS_SUSPENDED = 'Suspended'
+
+    LICENSE_STATUS_CHOICES = (
+        (LICENSE_STATUS_ACTIVE,                  _('Active')),
+        # (LICENSE_STATUS_CANCELLED,               _('Cancelled')),
+        # (LICENSE_STATUS_ABOUT_TO_EXPIRE,         _('About to Expire')),
+        (LICENSE_STATUS_EXPIRED,                 _('Expired')),
+        # (LICENSE_STATUS_EXPIRED_PENDING_RENEWAL, _('Expired - Pending Renewal')),
+        # (LICENSE_STATUS_INACTIVE,                _('Inactive')),
+        # (LICENSE_STATUS_REVOKED,                 _('Revoked')),
+        # (LICENSE_STATUS_SURRENDERED,             _('Surrendered')),
+        # (LICENSE_STATUS_SUSPENDED,               _('Suspended')),
+    )
+
+    PROFILE_STATUS_NOT_STARTED = 'not_started'
+    PROFILE_STATUS_IN_PROGRESS = 'in_progress'
+    PROFILE_STATUS_COMPLETED = 'completed'
+    PROFILE_STATUS_APPROVED = 'approved'
+
+    PROFILE_STATUS_CHOICES = (
+        (PROFILE_STATUS_NOT_STARTED, _('Not Started')),
+        (PROFILE_STATUS_IN_PROGRESS, _('In Progress')),
+        (PROFILE_STATUS_COMPLETED, _('Completed')),
+        (PROFILE_STATUS_APPROVED, _('Approved')),
+    )
+
+    status = models.CharField(
+        _('Status'),
+        choices=PROFILE_STATUS_CHOICES,
+        max_length=20,
+        default=PROFILE_STATUS_NOT_STARTED,
+        null=False,
+        blank=False,
+    )
+    step = models.CharField(_('Steps'), default='0', blank=False, max_length=255)
+    license_status = models.CharField(
+        _('License Status'),
+        choices=LICENSE_STATUS_CHOICES,
+        max_length=100,
+        default=LICENSE_STATUS_ACTIVE,
+    )
 
     organization = models.ForeignKey(
         Organization,
@@ -277,7 +326,6 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
     books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
 
-    license_status = models.CharField(blank=True, null=True, max_length=255,)
     documents = GenericRelation(Documents)
 
     def __str__(self):
@@ -285,6 +333,7 @@ class License(TimeStampFlagModelMixin,StatusFlagMixin, models.Model):
 
     class Meta:
         verbose_name = _('License/Profile')
+
 
 class OnboardingDataFetch(ThrottlingMixin, models.Model):
     OTP_DIGITS = 8

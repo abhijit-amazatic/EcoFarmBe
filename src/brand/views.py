@@ -855,8 +855,8 @@ class LicenseSyncView(APIView):
         license_number = request.data.get('license_number')
         issue = request.data.get('issue')
         expiry = request.data.get('expiry')
-        license_status = request.data.get('license_status')
-        license_status_2 = request.data.get('license_status_2')
+        # license_status = request.data.get('license_status')
+        # license_status_2 = request.data.get('license_status_2')
         account_id = request.data.get('account_id')
         vendor_id = request.data.get('vendor_id')
         owner_id = request.data.get('owner_id')
@@ -868,16 +868,18 @@ class LicenseSyncView(APIView):
                 license_obj.expiration_date = date_time_obj.date()
                 license_obj.is_updated_via_trigger = True
                 license_obj.issue_date = issue
-                if license_status or license_status_2:
-                    license_obj.license_status = license_status or license_status_2
+                # if license_status or license_status_2:
+                #     license_obj.license_status = license_status or license_status_2
                 license_obj.save()
                 if license_obj.expiration_date >= timezone.now().date():
-                    if license_obj.status_before_expiry:
-                        license_obj.status = license_obj.status_before_expiry
-                        license_obj.save()
-                    else:
-                        license_obj.status = 'completed'
-                        license_obj.save()
+                    license_obj.license_status = 'Active'
+                    license_obj.save()
+                    # if license_obj.status_before_expiry:
+                    #     license_obj.status = license_obj.status_before_expiry
+                    #     license_obj.save()
+                    # else:
+                    #     license_obj.status = 'completed'
+                    #     license_obj.save()
                 response = Response(status=status.HTTP_202_ACCEPTED)
             except License.DoesNotExist:
                 pass

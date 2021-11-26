@@ -1,8 +1,10 @@
+from datetime import datetime
 from django.core import exceptions
 from django.dispatch import receiver
 from django.db.models import signals
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from .permission_defaults import (DEFAULT_ROLE_PERM,)
 from integration.crm.crm_format import LICENSE_CULTIVATION_TYPE
 
@@ -26,6 +28,9 @@ def post_save_user(sender, instance, created, **kwargs):
 
 @receiver(signals.pre_save, sender=apps.get_model('brand', 'License'))
 def pre_save_license(sender, instance, **kwargs):
+    if not instance.id:
+        if not isinstance(instance.expiration_date, datetime) or instance.expiration_date < timezone.now():
+            instance.license_status = 'Expired'
     if instance.license_type and not instance.cultivation_type:
         if LICENSE_CULTIVATION_TYPE.get(instance.license_type):
             instance.cultivation_type = LICENSE_CULTIVATION_TYPE.get(instance.license_type)
