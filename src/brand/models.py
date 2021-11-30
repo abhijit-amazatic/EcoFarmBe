@@ -696,6 +696,7 @@ class LicenseProfile(TimeStampFlagModelMixin,models.Model):
     crm_account_owner_email = models.CharField(_('CRM Account Owner EMAIL'), null=True, blank=True, max_length=255)
     crm_vendor_owner_id = models.CharField(_('CRM Vendor Owner ID'), null=True, blank=True, max_length=255)
     crm_vendor_owner_email = models.CharField(_('CRM Vendor Owner EMAIL'), null=True, blank=True, max_length=255)
+    is_confia_member = models.BooleanField(_('Is Confia Member/Signed Up'), default=False)
 
     def __str__(self):
         return self.name

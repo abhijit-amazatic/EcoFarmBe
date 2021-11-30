@@ -87,7 +87,7 @@ from .views_permissions import (
     BillViewPermission,
     SalesOrderViewPermission,
 )
-from brand.models import (License, Sign, )
+from brand.models import (License, Sign, LicenseProfile)
 from bill.models import (Estimate, LineItem)
 from integration.campaign import (create_campaign, )
 from fee_variable.models import (CampaignVariable, )
@@ -1644,8 +1644,14 @@ class ConfiaCallbackView(APIView):
             "confia_member_id":request.data.get('memberId'),
             "status": request.data.get('status')
         }
-        obj,created =  ConfiaCallback.objects.update_or_create(partner_company_id=request.data.get('memberId'),defaults=default_data)
+        obj,created =  ConfiaCallback.objects.update_or_create(partner_company_id=request.data.get('partnerCompanyId'),defaults=default_data)
         if obj:
+            try:
+                lic_obj = LicenseProfile.objects.get(license__client_id=int(obj.partner_company_id))
+                lic_obj.is_confia_member = True
+                lic_obj.save()
+            except Exception as e:
+                print("Error while updating is_confia_member flag from LicenseProfile", e)
             return Response({'Success': "Member onboarded/status updated!"},status=status.HTTP_200_OK)
         
     

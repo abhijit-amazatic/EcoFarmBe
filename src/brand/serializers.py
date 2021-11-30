@@ -448,6 +448,7 @@ class BillingInformationSerializer(serializers.ModelSerializer):
             'bank_zip_code',
             'bank_state',
             'bank_country',
+            'is_confia_member'
         )
 
     def update(self, instance, validated_data):
