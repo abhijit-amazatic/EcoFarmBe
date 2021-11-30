@@ -334,6 +334,59 @@ class License(TimeStampFlagModelMixin, models.Model):
     class Meta:
         verbose_name = _('License/Profile')
 
+    def get_contacts(self):
+        employees_dict = {}
+        emp_list = []
+        try:
+            emp_list += self.profile_contact.profile_contact_details.get('employees') or []
+        except Exception as e:
+            print(e)
+
+        try:
+            qs = self.user_invites.prefetch_related('roles').filter(is_invite_accepted=True)
+            if qs.exists():
+                emp_list += [
+                    {
+                        "phone": invite.phone.as_e164 or '',
+                        "roles": [r.name for r in invite.roles.all()],
+                        "employee_name": invite.full_name or '',
+                        "employee_email": invite.email,
+                    }
+                    for invite in qs
+                ]
+        except Exception as e:
+            print(e)
+
+        try:
+            qs = self.organizationuserrole_set.select_related('role', 'organization_user__user').all()
+            if qs.exists():
+                emp_list += [
+                    {
+                        "phone": org_user.organization_user.user.phone.as_e164 or '',
+                        "roles": [org_user.role.name],
+                        "employee_name": org_user.organization_user.user.get_full_name() or '',
+                        "employee_email": org_user.organization_user.user.email,
+                    }
+                    for org_user in qs
+                ]
+        except Exception as e:
+            print(e)
+
+        for e in emp_list:
+            if e.get('employee_email'):
+                if e.get('employee_email') in employees_dict:
+                    if e.get('roles'):
+                        employees_dict[e.get('employee_email')]['roles'].update(e['roles'] or [])
+                else:
+                    employees_dict[e.get('employee_email')] = {
+                        "phone": e.get("phone") or '',
+                        "roles": set(e.get("roles") or []),
+                        "employee_name": e.get("employee_name") or '',
+                        "employee_email": e.get("employee_email"),
+                    }
+        return list(employees_dict.values())
+
+
 
 class OnboardingDataFetch(ThrottlingMixin, models.Model):
     OTP_DIGITS = 8

@@ -43,7 +43,7 @@ def create_customer_in_books_task(id=None, is_single_user=False, params={}):
             request.update(license_obj.profile_contact.profile_contact_details)
         except Exception:
             pass
-
+        request['employees'] = license_obj.get_contacts()
         for contact_type in ['vendor', 'customer']:
             crm_profile_id = request.get(f'zoho_crm_{CRM_PROFILES_MAP.get(contact_type)}_id')
             response_dict[contact_type] = dict()

@@ -88,11 +88,12 @@ def get_vendor_types(vendor_type, reverse=False):
                 response.append(type_)
     return response
 
-def get_dict(cd, i):
-    d = dict()
-    for k, v in cd.items():
-        d[k] = i.get(v)
-    return d
+# def get_dict(cd, i):
+# def get_dict(cd, i):
+#     d = dict()
+#     for k, v in cd.items():
+#         d[k] = i.get(v)
+#     return d
 
 def get_users(user_type='ActiveUsers', email=None, page=1, per_page=200):
     """
@@ -116,40 +117,41 @@ def get_user(user_id):
     crm_obj = get_crm_obj()
     return crm_obj.get_user(user_id)
 
-def create_employees(key, value, obj, crm_obj):
-    """
-    Create contacts in Zoho CRM.
-    """
-    d = obj.get(value)
-    cd = {
-        'last_name': 'employee_name',
-        'email': 'employee_email',
-        'phone': 'phone',
-    }
-    if key == 'Contacts_List':
-        contacts = list()
-        try:
-            for i in d:
-                user = get_dict(cd, i)
-                if user.get('email'):
-                    r = create_records('Contacts', [user])
-                    if r['status_code'] in (201, 202):
-                        try:
-                            contact_id = r['response']['data'][0]['details']['id']
-                        except Exception:
-                            pass
-                        else:
-                            contacts.append({
-                                'roles': i.get('roles', []),
-                                'contact_crm_id': contact_id,
-                            })
+# def create_employees(key, value, obj, crm_obj):
+#     """
+#     Create contacts in Zoho CRM.
+#     """
+#     d = obj.get(value)
+#     cd = {
+#         'last_name': 'employee_name',
+#         'email': 'employee_email',
+#         'phone': 'phone',
+#     }
+#     if key == 'Contacts_List':
+#         contacts = list()
+#         try:
+#             for i in d:
+#                 user = get_dict(cd, i)
+#                 user = get_dict(cd, i)
+#                 if user.get('email'):
+#                     r = create_records('Contacts', [user])
+#                     if r['status_code'] in (201, 202):
+#                         try:
+#                             contact_id = r['response']['data'][0]['details']['id']
+#                         except Exception:
+#                             pass
+#                         else:
+#                             contacts.append({
+#                                 'roles': i.get('roles', []),
+#                                 'contact_crm_id': contact_id,
+#                             })
 
 
-            return contacts
-        except IndexError:
-            return []
-        except TypeError:
-            return []
+#             return contacts
+#         except IndexError:
+#             return []
+#         except TypeError:
+#             return []
 
 def parse_fields(module, key, value, obj, crm_obj, **kwargs):
     """
@@ -216,8 +218,8 @@ def parse_fields(module, key, value, obj, crm_obj, **kwargs):
         d = obj.get('program_details')
         if d and len(d) > 0:
             return d.get('program_name')
-    if value.startswith('employees'):
-        return create_employees(key, value, obj, crm_obj)
+    # if value.startswith('employees'):
+    #     return create_employees(key, value, obj, crm_obj)
     if value == 'brand_category':
         return get_vendor_types(obj.get(value))
     if value == 'Vendor_Type':
