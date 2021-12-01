@@ -1,14 +1,15 @@
 """
 Serializer to validate brand related modules.
 """
-
+import json
 import requests
 from tempfile import TemporaryFile
 
 from django.conf import settings
 from rest_framework import serializers
-from rest_framework.fields import (empty, )
+from rest_framework.fields import (empty, JSONField)
 from phonenumber_field.serializerfields import PhoneNumberField
+from rest_framework.utils import html, model_meta, representation
 
 from core.settings import (AWS_BUCKET, )
 from user.models import User
@@ -317,13 +318,64 @@ class LicenseSerializer(NestedModelSerializer, serializers.ModelSerializer):
         )
 
 
+
+class CustomPhoneNumberField(PhoneNumberField):
+
+    def to_internal_value(self, data):
+        phone_number = super().to_internal_value(data)
+        return phone_number.as_e164
+
+class ProfileContactEmployeeSerializer(serializers.Serializer):
+    phone = CustomPhoneNumberField(max_length=15, allow_blank=True, required=False, default='')
+    roles = serializers.ListField(
+        child=serializers.CharField(max_length=255,),
+        required=False,
+        allow_empty=True,
+        default=[]
+    )
+    employee_name = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    employee_email = serializers.EmailField(max_length=50,)
+
+
+class ProfileContactAddressSerializer(serializers.Serializer):
+    city = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    state = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    street = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    country = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    zip_code = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    company_name = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+    street_line_2 = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+
+
+class ProfileContactDetailsSerializer(serializers.Serializer):
+    twitter = serializers.URLField(max_length=255, allow_blank=True, required=False, default='')
+    website = serializers.URLField(max_length=255, allow_blank=True, required=False, default='')
+    facebook = serializers.URLField(max_length=255, allow_blank=True, required=False, default='')
+    linkedin = serializers.URLField(max_length=255, allow_blank=True, required=False, default='')
+    instagram = serializers.URLField(max_length=255, allow_blank=True, required=False, default='')
+    company_email = serializers.EmailField(max_length=50, allow_blank=True, required=False, default='')
+    company_phone = CustomPhoneNumberField(max_length=15, allow_blank=True, required=False, default='')
+    employees = ProfileContactEmployeeSerializer(required=False, many=True, default=[])
+    billing_address = ProfileContactAddressSerializer(required=False, default={})
+    mailing_address = ProfileContactAddressSerializer(required=False, default={})
+    no_of_employees = serializers.CharField(max_length=255, allow_blank=True, required=False, default='')
+
+
 class ProfileContactSerializer(serializers.ModelSerializer):
     """
     This defines ProfileContactSerializer
     """
+    # profile_contact_details = ProfileContactDetailsSerializer(required=False)
+    profile_contact_details = JSONField(required=False)
+
     class Meta:
         model = ProfileContact
         fields = ('__all__')
+
+    def validate_profile_contact_details(self, data):
+        serializer = ProfileContactDetailsSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
 
 
 class CultivationOverviewSerializer(serializers.ModelSerializer):
