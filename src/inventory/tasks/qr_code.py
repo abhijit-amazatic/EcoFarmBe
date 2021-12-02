@@ -34,7 +34,7 @@ def generate_upload_item_detail_qr_code_stream(item,size=None):
     }
     payload ={
         'data': settings.FRONTEND_DOMAIN_NAME+"marketplace/"+str(item)+"/item",
-        'config': {'bodyColor': '#013C48', 'bgColor': '#FFFFFF', 'gradientOnEyes': False, 'logo': '5077de589ef4588913df60364d47fedc6347f431.png', 'body': 'rounded-pointed', 'eye': 'frame14', 'eyeBall': 'ball16', 'erf1': [], 'erf2': ['fh'], 'erf3': ['fv'], 'brf1': [], 'brf2': ['fh'], 'brf3': ['fv'], 'eye1Color': '#1a6160', 'eye2Color': '#1a6160', 'eye3Color': '#1a6160', 'eyeBall1Color': '#1a6160', 'eyeBall2Color': '#1a6160', 'eyeBall3Color': '#1a6160', 'gradientColor1': '#1a6160', 'gradientColor2': '#1a6160', 'gradientType': 'radial'},
+        'config': {'bodyColor': '#013C48', 'bgColor': '#FFFFFF', 'gradientOnEyes': False, 'logo': '5077de589ef4588913df60364d47fedc6347f431.png', 'body': 'square', 'eye': 'frame0', 'eyeBall': 'ball0', 'erf1': [], 'erf2': ['fh'], 'erf3': ['fv'], 'brf1': [], 'brf2': ['fh'], 'brf3': ['fv'], 'eye1Color': '#1a6160', 'eye2Color': '#1a6160', 'eye3Color': '#1a6160', 'eyeBall1Color': '#1a6160', 'eyeBall2Color': '#1a6160', 'eyeBall3Color': '#1a6160', 'gradientColor1': '#1a6160', 'gradientColor2': '#1a6160', 'gradientType': 'radial'},
         'download': False,
         'file': 'png'}
     if size:
