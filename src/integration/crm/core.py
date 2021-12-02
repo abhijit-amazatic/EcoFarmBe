@@ -701,15 +701,44 @@ def list_crm_contacts(contact_id=None):
 
 
 
-def post_leads_to_slack_and_email(record,response):
+def post_leads_to_slack_and_email(record,lead_id):
     """
     Post New leads on slack.
     """
     try:
-        lead_crm_link = settings.ZOHO_CRM_URL+"/crm/org"+settings.CRM_ORGANIZATION_ID+"/tab/Leads/"+response.get('response')['data'][0]['details']['id']+"/"
-        msg = """New lead is added via connect page with the details as:\n- First Name:%s\n- Last Name:%s\n- Company Name:%s\n -Title:%s\n- Vendor Category:%s\n- Heard From:%s\n- Phone:%s\n- Message:%s\n- Email:%s\n- Lead Origin:%s\n- Lead CRM Link:<%s> """ %(record.get("first_name"),record.get("last_name"),record.get("company_name"),record.get("title"),','.join(record.get("vendor_category")),record.get("heard_from"),record.get("phone"),record.get("message"),record.get("email"),record.get("Lead_Origin"),lead_crm_link)
-        slack.chat.post_message(settings.SLACK_SALES_CHANNEL,msg, as_user=False, username=settings.BOT_NAME, icon_url=settings.BOT_ICON_URL)
-        mail_send("connect.html",{'first_name': record.get("first_name"),'last_name':record.get("last_name"),'mail':record.get("email"),'company_name':record.get("company_name"),'title':record.get("title"),'vendor_category':','.join(record.get("vendor_category")),'heard_from':record.get("heard_from"),'phone':record.get("phone"),'message':record.get("message"),'lead_origin':record.get("Lead_Origin"),'lead_crm_link':lead_crm_link},"New lead via connect page.",'connect@thrive-society.com')
+        lead_crm_link = f"{settings.ZOHO_CRM_URL}/crm/org{settings.CRM_ORGANIZATION_ID}/tab/Leads/{lead_id}/"
+        msg = (
+            "New lead is added via connect page with the details as:\n"
+            "- First Name: {first_name}\n"
+            "- Last Name: {last_name}\n"
+            "- Company Name: {company_name}\n"
+            "- Title: {title}\n"
+            "- Company Type: {Company_Type}\n"
+            "- Heard From: {heard_from}\n"
+            "- Phone: {phone}\n"
+            "- Message: {message}\n"
+            "- Email: {email}\n"
+            "- Lead Origin: {Lead_Origin}\n"
+            "- Lead CRM Link: <{lead_crm_link}>"
+        ).format(**record, lead_crm_link=lead_crm_link)
+        slack.chat.post_message(
+            settings.SLACK_SALES_CHANNEL,
+            msg,
+            as_user=False,
+            username=settings.BOT_NAME,
+            icon_url=settings.BOT_ICON_URL
+        )
+        if not record.get('Email_Opt_Out'):
+            mail_send(
+                "connect.html",
+                {
+                    **record,
+                    'vendor_category':','.join(record.get("vendor_category")),
+                    'lead_crm_link':lead_crm_link
+                },
+                "New lead via connect page.",
+                'connect@thrive-society.com'
+            )
     except Exception as e:
         print("Exception while posting to slack & email on lead creation.")
     
@@ -720,8 +749,15 @@ def create_lead(record):
     Create lead in Zoho CRM.
     """
     record.update({"Lead_Origin":"Connect Form"})
+    if isinstance(record.get('Company_Type'), list):
+        record['Company_Type'] = record.get('Company_Type')[0]
+    subscribe_to_newsletters = record.pop('subscribe_to_newsletters')
+    if subscribe_to_newsletters not in ('true', 'True', True):
+        record.update({"Email_Opt_Out": True})
     response = create_records('Leads', record)
-    post_leads_to_slack_and_email(record,response)
+    if response.get('status_code') in (200, 201):
+        lead_id = response.get('response')['data'][0]['details']['id']
+        post_leads_to_slack_and_email(record, lead_id)
     return response
 
 def get_field(record, key, field):
