@@ -169,7 +169,9 @@ class CustomInventoryAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     form = CustomInventoryForm
     search_fields = (
-        'item_name',
+        'cultivar_name',
+        'category_name',
+        'category_name',
         'sku',
     )
     list_filter = (
