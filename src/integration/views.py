@@ -218,6 +218,8 @@ class GetPickListView(APIView):
             return Response(get_picklist('Orgs', request.query_params['field']))
         elif request.query_params.get('module') == 'Licenses':
             return Response(get_picklist('Licenses', request.query_params['field']))
+        elif request.query_params.get('module') == 'Leads':
+            return Response(get_picklist('Leads', request.query_params['field']))
         return Response(get_picklist('Vendors', request.query_params['field']))
 
     def get_permissions(self):

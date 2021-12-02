@@ -63,6 +63,8 @@ def get_picklist(module, field_name):
         for field in fields:
             if field['field_label'] == field_name and field['data_type'] in picklist_types:
                 return field['pick_list_values']
+            if field['api_name'] == field_name and field['data_type'] in picklist_types:
+                return field['pick_list_values']
     return list()
 
 def get_format_dict(module):
