@@ -385,10 +385,10 @@ class InventoryViewSet(viewsets.ModelViewSet):
         qs = qs.select_related('cultivar', 'labtest')
         # qs = qs.prefetch_related('extra_documents').all()
         qs = self.prefetch_related_docs(qs)
-        if self.request.query_params.get('cf_vendor_name'):
-            return qs
-        else:
-            return self.extract_positive_value_queryset(qs)
+        if self.action == 'list':
+            if not self.request.query_params.get('cf_vendor_name'):
+                return self.extract_positive_value_queryset(qs)
+        return qs
 
     def list(self, request):
         """
