@@ -24,22 +24,41 @@ from .models import (
 )
 from .data import CG
 
-class InventorySerializer(serializers.ModelSerializer):
+
+class BaseInventorySerializer(serializers.ModelSerializer):
+    """
+    Base Inventory Serializer
+    """
+    mobile_url = serializers.SerializerMethodField(method_name='tile_image_patch')
+
+    def tile_image_patch(self, obj):
+        url = obj.mobile_url
+        if not url:
+            for d in obj.extra_documents.all():
+                if d.S3_mobile_url or d.S3_url:
+                    url = d.S3_mobile_url or d.S3_url
+                    break
+        return url
+
+    class Meta:
+        model = Inventory
+        read_only_fields = ('mobile_url',)
+        depth = 1
+
+
+class InventorySerializer(BaseInventorySerializer):
     """
     Inventory Serializer
     """
-    class Meta:
-        model = Inventory
-        depth = 1
+    class Meta(BaseInventorySerializer.Meta):
         exclude = ()
-        
-class LogoutInventorySerializer(serializers.ModelSerializer):
+
+
+class LogoutInventorySerializer(BaseInventorySerializer):
     """
     Logout serializer.
     """
-    class Meta:
-        model = Inventory
-        depth = 1
+    class Meta(BaseInventorySerializer.Meta):
         fields = (
             'created_time',
             'item_id',
@@ -61,7 +80,8 @@ class LogoutInventorySerializer(serializers.ModelSerializer):
             'mobile_url',
             'parent_category_name',
             'thumbnail_url')
-        
+
+
 class ItemFeedbackSerializer(serializers.ModelSerializer):
     """
     User item feedback serializer.

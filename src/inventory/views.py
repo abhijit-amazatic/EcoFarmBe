@@ -11,7 +11,9 @@ from mimetypes import MimeTypes
 from functools import reduce
 import django_filters
 from django.shortcuts import (render, )
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper, DateField,)
+from django.db.models import Prefetch
 from django.utils import  timezone
 from rest_framework.views import APIView
 from rest_framework.viewsets import (GenericViewSet, mixins)
@@ -357,7 +359,14 @@ class InventoryViewSet(viewsets.ModelViewSet):
         quantity_est_qs = qs.filter(cf_status__in=['Vegging','Processing', 'Sold', 'Under Contract','Flowering','Return to Vendor',None],cf_quantity_estimate__gt=0,cf_cfi_published=True)
         final_qs = available_stock_qs | quantity_est_qs
         return final_qs
-    
+
+    @staticmethod
+    def prefetch_related_docs(qs):
+        ct_inventory = ContentType.objects.get_for_model(Inventory)
+        doc_qs = Documents.objects.filter(content_type=ct_inventory, status='AVAILABLE').order_by('order')
+        qs = qs.prefetch_related(Prefetch('extra_documents', queryset=doc_qs))
+        return qs
+
     def get_serializer_class(self):
         """
         Return serializer.
@@ -374,6 +383,8 @@ class InventoryViewSet(viewsets.ModelViewSet):
         """
         qs = Inventory.objects.filter(status='active',cf_cfi_published=True)
         qs = qs.select_related('cultivar', 'labtest')
+        # qs = qs.prefetch_related('extra_documents').all()
+        qs = self.prefetch_related_docs(qs)
         if self.request.query_params.get('cf_vendor_name'):
             return qs
         else:
@@ -384,17 +395,22 @@ class InventoryViewSet(viewsets.ModelViewSet):
         Return inventory list queryset with summary.
         """
         page_size = request.query_params.get('page_size', 50)
-        statuses = request.query_params.get('cf_status__in')   
+        request.query_params._mutable = True
+        statuses = None
+        if 'cf_status__in' in request.query_params:
+            statuses = request.query_params.get('cf_status__in')
+            request.query_params.pop('cf_status__in')
+
         params = dict()
         for k, v in request.query_params.items():
             if k not in ['cf_status__in', 'order-by', 'page', 'page_size'] and v:
                 params[k] = v
-        request.query_params._mutable = True
-        request.query_params.pop('cf_status__in')
-        filtered_qs = self.filter_queryset(self.get_queryset())
-        category_count = get_category_count(params,filtered_qs)
+        qs = self.filter_queryset(self.get_queryset())
+        category_count = get_category_count(params,qs)
         #request.query_params['cf_status__in'] = statuses
-        qs = filtered_qs.filter(cf_status__in = statuses.split(','))
+        if statuses is not None:
+            cf_status_ls =[x.strip() for x in statuses.split(',')]
+            qs = qs.filter(cf_status__in=cf_status_ls)
         summary = get_inventory_summary(qs, statuses)
         queryset = Paginator(qs, page_size)
         page = int(request.query_params.get('page', 1))

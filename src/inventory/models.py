@@ -171,7 +171,6 @@ class Inventory(models.Model):
     documents = ArrayField(models.CharField(max_length=255), blank=True, null=True)
     batches = ArrayField(JSONField(default=dict), blank=True, null=True)
     pre_tax_price = models.FloatField(_('pre_tax_price'), blank=True, null=True)
-    extra_documents = GenericRelation(Documents)
     current_price_change = models.FloatField(_('Current Price Change'), blank=True, null=True)
     parent_category_name = models.CharField(_('Parent Category Name'), blank=True, null=True, max_length=50)
     inventory_name = models.CharField(_('Inventory Name'), max_length=50, blank=True, null=True)
@@ -185,6 +184,7 @@ class Inventory(models.Model):
     item_qr_code_url = models.CharField(_('QR Code-Box URL'), blank=True, null=True, max_length=500)
     qr_code_box_id = models.CharField(_('QR Code-Box ID'), blank=True, null=True, max_length=255)
     qr_box_direct_url = models.CharField(_('QR direct Box URL'), blank=True, null=True, max_length=500)
+    extra_documents = GenericRelation(Documents)
     
 
     def __str__(self):
