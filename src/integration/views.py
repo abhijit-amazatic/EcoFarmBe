@@ -229,6 +229,19 @@ class GetPickListView(APIView):
             self.permission_classes = [IsAuthenticated, ]
         return super(GetPickListView, self).get_permissions()
 
+class GetLeadsCompanyTypeListView(APIView):
+    """
+    Get Leads Company Type choices from Zoho CRM.
+    """
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        """
+        Get picklist.
+        """
+        return Response(get_picklist('Leads', 'Company_Type'))
+
+
 class GetPickListAccountView(APIView):
     """
     Get field dropdowns from Zoho CRM accounts.
