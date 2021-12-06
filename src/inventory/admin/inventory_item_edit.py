@@ -156,10 +156,12 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                     data['cf_cultivation_tax'] = tax
                     if obj.farm_price:
                         price = Decimal(obj.farm_price) + mcsp_fee + tax
-                        if isinstance(v, Decimal):
+                        if isinstance(price, Decimal):
                             price = f"{price.normalize():f}"
                         data['price'] = price
                         data['rate'] = price
+                        data['cf_cultivation_tax'] = f"{tax.normalize():f}"
+                        data['cf_mscp'] = f"{mcsp_fee.normalize():f}"
                     inventory_org = data.get('inventory_name', '').lower()
                     if inventory_org in ('efd', 'efn', 'efl'):
                         inventory_name = f'inventory_{inventory_org}'
