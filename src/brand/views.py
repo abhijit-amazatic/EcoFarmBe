@@ -714,17 +714,6 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
         reports = reports.filter(user=self.request.user)
         return reports
 
-    def create(self, request):
-        """
-        This endpoint is used to create report
-        """
-        serializer = ProfileReportSerializer(
-            data=request.data, context={'request': request})
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 # class SendVerificationView(APIView):
 #     """

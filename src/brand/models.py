@@ -867,11 +867,10 @@ class ProfileReport(models.Model):
     """
     Stores reports/calculation data.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Report Manager'),on_delete=models.CASCADE)
-    profile = models.CharField( _('Vendor Profile'), blank=True, null=True, max_length=255)
-    report_name = models.CharField( _('Report Name'), blank=True, null=True, max_length=255)
-    profile_type = ArrayField(models.CharField(max_length=255, blank=True), blank=True, null=True, default=list)
-    profile_reports = JSONField(null=False, blank=False, default=dict)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Report Manager'), on_delete=models.CASCADE)
+    profile = models.ForeignKey(LicenseProfile, verbose_name=_("Vendor Profile"), on_delete=models.CASCADE)
+    name = models.CharField( _('Report Name'), max_length=255)
+    data = JSONField(null=False, blank=False, default=dict)
 
 class Sign(TimeStampFlagModelMixin,models.Model):
     """
@@ -883,6 +882,6 @@ class Sign(TimeStampFlagModelMixin,models.Model):
         related_name='Licenses',
         on_delete=models.CASCADE,
     )
-    request_id = models.CharField( _('Request ID'), blank=True, null=True, max_length=255)
-    action_id = models.CharField( _('Action ID'), blank=True, null=True, max_length=255)
+    request_id = models.CharField(_('Request ID'), blank=True, null=True, max_length=255)
+    action_id = models.CharField(_('Action ID'), blank=True, null=True, max_length=255)
     fields = JSONField(null=True, blank=True, default=dict)
