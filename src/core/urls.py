@@ -119,11 +119,6 @@ from compliance_binder.views import(
 from internal_onboarding.views import (
      InternalOnboardingView,
 )
-
-from seo.views import (
-     PageMetaView,
-)
-
 from core.admin_sites import logger_admin_site
 
 router = SimpleRouter()
@@ -321,9 +316,8 @@ urlpatterns = [
     path(r'inventory/sales-order/convert/package/', ConvertSalesOrderToPackage.as_view(), name="convert-so-to-package"),
     path(r'intransit/sync/', InTransitDeleteSyncView.as_view(), name="intransit-delete-sync"),
     path(r'books/permission/', ZohoPermissionsView.as_view(), name="zoho-permission"),
-    path(r'seo/page-meta/', PageMetaView.as_view(), name="page-meta"),
     path(r'bot/', ChatbotView.as_view(), name="chat-bot"),
-
+    path(r'seo/', include(('seo.urls'))),
 ] + router.urls
 
 
