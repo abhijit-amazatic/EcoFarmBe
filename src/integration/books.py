@@ -976,11 +976,16 @@ def list_bills(books_name, params=None):
     contact_obj = obj.Contacts()
     legal_business_name = params.get('vendor_name')
     contacts = contact_obj.list_contacts({'cf_legal_business_name': legal_business_name})
-    for contact in contacts['response']:
-        if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
-            params['vendor_name'] = contact['contact_name']
-            break
-    return bill_obj.list_bills(parameters=params)
+    try:
+        for contact in contacts['response']:
+            if contact['company_name'] == legal_business_name and contact['contact_type'] == 'vendor':
+                params['vendor_name'] = contact['contact_name']
+                break
+        return bill_obj.list_bills(parameters=params)
+    except Exception as e:
+        print(contacts)
+        print(''.join(traceback.format_exception(*sys.exc_info())))
+        return {}
 
 
 def get_salesorder(books_name, so_id, params=None):
