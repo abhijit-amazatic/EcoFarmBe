@@ -1,7 +1,7 @@
 import datetime
 from django.dispatch import receiver
 from django.db.models import signals
-# from django.forms.models import model_to_dict
+from django.forms.models import model_to_dict
 from django.apps import apps
 
 
@@ -33,11 +33,8 @@ def pre_save_item_delisting_request(sender, instance, **kwargs):
     if not instance.status == 'approved':
         item = instance.item
         if item:
-            data = {
-                k: str(v) if isinstance(v, datetime.date) or isinstance(v, datetime.time) else v
-                for k, v in item.__dict__.items()
-                if not k.startswith('_')
-            }
+            # data = {k: v for k, v in item.__dict__.items() if not k.startswith('_')}
+            data = model_to_dict(item)
             instance.name = item.name
             instance.item_data = data
             instance.vendor_name = item.cf_vendor_name
@@ -50,11 +47,7 @@ def pre_save_item_edit_request(sender, instance, **kwargs):
     if not instance.status == 'approved':
         item = instance.item
         if item:
-            data = {
-                k: str(v) if isinstance(v, datetime.date) or isinstance(v, datetime.time) else v
-                for k, v in item.__dict__.items()
-                if not k.startswith('_')
-            }
+            data = model_to_dict(item)
             instance.name = item.name
             instance.item_data = data
             instance.vendor_name = item.cf_vendor_name
