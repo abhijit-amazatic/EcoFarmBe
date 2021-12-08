@@ -205,7 +205,12 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         ('pending_for_approval', _('Pending For Approval')),
         ('approved', _('Approved')),
     )
-
+    BIOMASS_TYPE_CHOICES = (
+        ('Unknown',  _('Unknown')),
+        ('Dried Flower', _('Dried Flower')),
+        ('Dried Leaf', _('Dried Leaf')),
+        ('Fresh Plant', _('Fresh Plant')),
+    )
     PRICING_POSITION_CHOICES = (
         ('Negotiable', _('Negotiable')),
         ('Firm', _('Firm')),
@@ -245,6 +250,26 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     have_minimum_order_quantity = models.BooleanField(_('Minimum Order Quantity'), default=False)
     minimum_order_quantity = models.FloatField(_('Minimum Order Quantity(lbs)'), blank=True, null=True,)
 
+    biomass_type = models.CharField(_('Biomass Type'), choices=BIOMASS_TYPE_CHOICES, blank=True, null=True, max_length=50)
+    biomass_input_g = PositiveDecimalField(
+        _('Raw Material Input (grams)'),
+        decimal_places=6,
+        max_digits=16,
+        help_text='This field is used to calculate tax for Isolates, Concentrates and Terpenes.',
+        blank=True,
+        null=True,
+    )
+    total_batch_quantity = PositiveDecimalField(
+        _('Total Batch Output'),
+        decimal_places=6,
+        max_digits=16,
+        help_text='This field is used to calculate tax for Isolates, Concentrates and Terpenes.',
+        blank=True,
+        null=True,
+    )
+    mcsp_fee = PositiveDecimalField(_('MCSP Fee'), decimal_places=6, max_digits=16, blank=True, null=True)
+    cultivation_tax = PositiveDecimalField(_('Cultivation Tax'), decimal_places=6, max_digits=16, blank=True, null=True)
+
     payment_terms = models.CharField(_('Payment Terms'), choices=PAYMENT_TERMS_CHOICES, blank=True, null=True, max_length=50)
     payment_method = ChoiceArrayField(models.CharField(_('Payment Method'), max_length=100, choices=PAYMENT_METHOD_CHOICES), blank=True, default=list)
 
@@ -257,10 +282,32 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     vendor_name = models.CharField(_('Vendor Name'), blank=True, null=True, max_length=255)
     zoho_item_id = models.CharField(_('Zoho Item ID'), blank=True, null=True, max_length=50)
 
+
     status = models.CharField(_('Status'), choices=STATUS_CHOICES, max_length=255, default='pending_for_approval')
     created_by = JSONField(_('Created by'), null=True, blank=True, default=dict)
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
+
+    DIFF_FIELDS = {
+        'farm_price': 'cf_farm_price_2',
+        'minimum_order_quantity': 'cf_minimum_quantity',
+        'pricing_position': 'cf_seller_position',
+        'biomass_type': 'cf_biomass',
+        'biomass_input_g': 'cf_raw_material_input_g',
+        'total_batch_quantity': 'cf_batch_qty_g',
+        'mcsp_fee': 'cf_mscp',
+        'cultivation_tax': 'cf_cultivation_tax',
+        'payment_terms': 'cf_payment_terms',
+        'payment_method': 'cf_payment_method',
+        'batch_availability_date': 'cf_date_available',
+        'marketplace_status': 'cf_status',
+    }
+
+    @classmethod
+    def get_diff_verbose(cls):
+        verbose = dict()
+        for field_name in cls.DIFF_FIELDS:
+            verbose[field_name] = getattr(cls, field_name).verbose_name or field_name.title()
 
     def get_item_update_data(self):
         data = {
@@ -272,6 +319,11 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
             'cf_seller_position': self.pricing_position,
             'cf_payment_terms': self.payment_terms,
             'cf_payment_method': self.payment_method,
+            'cf_biomass': self.biomass_type,
+            'cf_raw_material_input_g': self.biomass_input_g,
+            'cf_batch_qty_g': self.total_batch_quantity,
+            'cf_mscp': self.mcsp_fee,
+            'cf_cultivation_tax': self.cultivation_tax,
         }
         if self.marketplace_status:
             data['cf_status'] = self.marketplace_status
@@ -280,6 +332,8 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         # else:
         #     data['cf_minimum_quantity'] = None
         return data
+
+
 
     def get_display_diff_data(self):
         data = {}
@@ -290,6 +344,11 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         #     int(self.item.cf_minimum_quantity) if self.item.cf_minimum_quantity else None,
         #     int(self.minimum_order_quantity)  if self.have_minimum_order_quantity else None,
         # )
+        data['biomass_type'] = ('Payment Terms', self.item.cf_biomass, self.biomass_type)
+        data['biomass_input_g'] = ('Payment Terms', self.item.cf_raw_material_input_g, self.biomass_input_g)
+        data['total_batch_quantity'] = ('Payment Terms', self.item.cf_batch_qty_g, self.total_batch_quantity)
+        data['cultivation_tax'] = ('Payment Terms', self.item.cf_cultivation_tax, self.cultivation_tax)
+        data['mcsp_fee'] = ('Payment Terms', self.item.cf_mscp, self.mcsp_fee)
         data['payment_terms'] = ('Payment Terms', self.item.cf_payment_terms, self.payment_terms)
         data['payment_method'] = (
             'Payment Method',

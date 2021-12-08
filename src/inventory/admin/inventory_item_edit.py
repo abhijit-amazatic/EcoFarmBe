@@ -49,10 +49,13 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         'sku',
         'item_marketplace_status',
         'item_farm_price',
+        'item_farm_price',
+        'item_farm_price',
         'item_pricing_position',
         'item_batch_availability_date',
         'item_payment_terms',
         'item_payment_method',
+        'payment_method',
         'status',
         'cultivar_name',
         'vendor_name',
@@ -63,6 +66,7 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         'created_on',
         'updated_on',
     )
+
     fieldsets = (
         (None, {
             'fields': (
@@ -231,8 +235,6 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         else:
             return span2_fixed(old_val, obj.pricing_position)
     item_pricing_position.short_description = 'Pricing Position'
-    allow_tags = True
-
 
     def item_batch_availability_date(self, obj):
         old_val = obj.item_data.get('cf_date_available')
@@ -241,7 +243,6 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         else:
             return span2_fixed(old_val, obj.batch_availability_date)
     item_batch_availability_date.short_description = 'Batch Availability Date'
-    allow_tags = True
 
 
     def item_payment_terms(self, obj):
@@ -251,7 +252,6 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         else:
             return span2_fixed(old_val, obj.payment_terms)
     item_payment_terms.short_description = 'Payment Terms'
-    allow_tags = True
 
 
     def item_payment_method(self, obj):
@@ -269,5 +269,21 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         else:
             return span2_fixed(old_val, new_val)
     item_payment_method.short_description = 'Payment Method'
-    allow_tags = True
 
+    def get_change_field(self):
+        
+        def func(self, obj):
+            old_val = obj.item_data.get('cf_payment_method')
+            if old_val:
+                old_val = ', '.join(old_val)
+            else:
+                old_val = None
+            if obj.payment_method:
+                new_val = ', '.join(obj.payment_method)
+            else:
+                new_val = None
+            if self.is_obj_changable(obj):
+                return span_fixed(old_val)
+            else:
+                return span2_fixed(old_val, new_val)
+        func.short_description = 'Payment Method'
