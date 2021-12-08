@@ -90,7 +90,7 @@ class PageMetaViewSet(ReadOnlyModelViewSet):
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
     filterset_fields = ['page_url', 'page_name', 'page_title', 'meta_title']
     permission_classes = (AllowAny,)
-
+    pagination_class = None
 
     @action(
         detail=False,
