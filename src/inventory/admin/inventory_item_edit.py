@@ -1,3 +1,4 @@
+from datetime import (date, datetime)
 from decimal import Decimal
 from django.utils import timezone
 from django.contrib import admin
@@ -15,7 +16,9 @@ from ..tasks import (
     notify_inventory_item_change_approved_task,
 )
 from ..utils import (get_item_tax,)
-
+from ..data import(
+    ITEM_CUSTOM_FIELD_ORG_MAP,
+)
 # str_fixed = lambda x : "{0:_<20}".format(str(x))
 def span_fixed(x):
     return mark_safe(
@@ -55,7 +58,6 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         'item_batch_availability_date',
         'item_payment_terms',
         'item_payment_method',
-        'payment_method',
         'status',
         'cultivar_name',
         'vendor_name',
@@ -136,40 +138,59 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         return [(None, {'fields': self.get_fields(request, obj)})]
 
 
+    def transform_data(self, data, org):
+        data_type_conversion_map = {
+            float: lambda v: str(v),
+            date: lambda v: v.strftime("%Y-%m-%d"),
+            Decimal: lambda v: f"{v.normalize():f}",
+        }
+        if data and org in ITEM_CUSTOM_FIELD_ORG_MAP:
+            final_data = dict()
+            org_cf_map = ITEM_CUSTOM_FIELD_ORG_MAP[org]
+            for k, v in data.items():
+                if type(v) in data_type_conversion_map:
+                    v = data_type_conversion_map[type(v)](v)
+                if k.startswith('cf_'):
+                    if k in org_cf_map:
+                        final_data[org_cf_map[k]] = v
+                else:
+                    final_data[k] = v
+            return final_data
+        return {}
+
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            mcsp_fee = get_item_mcsp_fee(
-                obj.item.cf_vendor_name,
-                item_category=obj.item.category_name,
-                request=request,
-                farm_price=obj.item.cf_farm_price_2
-            )
-            if isinstance(mcsp_fee, Decimal):
-                if obj.item.cf_cultivation_tax:
-                    tax = obj.item.cf_cultivation_tax
-                else:
-                    tax = get_item_tax(
-                        category_name=obj.item.category_name,
-                        biomass_type=obj.item.cf_biomass,
-                        biomass_input_g=obj.item.cf_raw_material_input_g,
-                        total_batch_output=obj.item.cf_batch_qty_g,
-                        request=request,
-                    )
-                if isinstance(tax, Decimal):
+            if obj.mcsp_fee is None:
+                obj.mcsp_fee = get_item_mcsp_fee(
+                    obj.item.cf_vendor_name,
+                    item_category=obj.item.category_name,
+                    request=request,
+                    farm_price=obj.item.cf_farm_price_2
+                )
+            if isinstance(obj.mcsp_fee, Decimal):
+                if obj.cultivation_tax is None:
+                    if obj.item.cf_cultivation_tax:
+                        obj.cultivation_tax = obj.item.cf_cultivation_tax
+                    else:
+                        obj.cultivation_tax = get_item_tax(
+                            category_name=obj.item.category_name,
+                            biomass_type=obj.item.cf_biomass,
+                            biomass_input_g=obj.item.cf_raw_material_input_g,
+                            total_batch_output=obj.item.cf_batch_qty_g,
+                            request=request,
+                        )
+                if isinstance(obj.cultivation_tax, Decimal):
                     data = obj.get_item_update_data()
-                    data['cf_cultivation_tax'] = tax
                     if obj.farm_price:
-                        price = Decimal(obj.farm_price) + mcsp_fee + tax
+                        price = Decimal(obj.farm_price) + obj.mcsp_fee + obj.cultivation_tax
                         if isinstance(price, Decimal):
                             price = f"{price.normalize():f}"
                         data['price'] = price
                         data['rate'] = price
-                        data['cf_cultivation_tax'] = f"{tax.normalize():f}"
-                        data['cf_mscp'] = f"{mcsp_fee.normalize():f}"
-                    inventory_org = data.get('inventory_name', '').lower()
+                    inventory_org = obj.item_data.get('inventory_name', '').lower()
                     if inventory_org in ('efd', 'efn', 'efl'):
                         inventory_name = f'inventory_{inventory_org}'
-                        data.pop('inventory_name')
+                        data = self.transform_data(data, inventory_org)
                         try:
                             result = update_inventory_item(inventory_name, data.get('item_id'), data)
                         except Exception as exc:

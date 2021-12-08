@@ -2,6 +2,7 @@
 Inventory Model
 """
 from decimal import Decimal
+from operator import attrgetter
 from django import forms
 from django.core.validators import MinValueValidator
 from django.core.serializers.json import DjangoJSONEncoder
@@ -9,6 +10,7 @@ from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRelati
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.functional import (cached_property)
 from django.contrib.postgres.fields import (ArrayField, JSONField,)
 
 from cultivar.models import (Cultivar, )
@@ -288,84 +290,52 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     approved_by = JSONField(_('Approved by'), null=True, blank=True, default=dict)
     approved_on = models.DateTimeField(_('Approved on'), auto_now=False, blank=True, null=True, default=None)
 
-    DIFF_FIELDS = {
-        'farm_price': 'cf_farm_price_2',
-        'minimum_order_quantity': 'cf_minimum_quantity',
-        'pricing_position': 'cf_seller_position',
-        'biomass_type': 'cf_biomass',
-        'biomass_input_g': 'cf_raw_material_input_g',
-        'total_batch_quantity': 'cf_batch_qty_g',
-        'mcsp_fee': 'cf_mscp',
-        'cultivation_tax': 'cf_cultivation_tax',
-        'payment_terms': 'cf_payment_terms',
-        'payment_method': 'cf_payment_method',
+    UPDATE_FIELDS = {
+        'farm_price':              'cf_farm_price_2',
+        'minimum_order_quantity':  'cf_minimum_quantity',
+        'pricing_position':        'cf_seller_position',
+        'biomass_type':            'cf_biomass',
+        'biomass_input_g':         'cf_raw_material_input_g',
+        'total_batch_quantity':    'cf_batch_qty_g',
+        'mcsp_fee':                'cf_mscp',
+        'cultivation_tax':         'cf_cultivation_tax',
+        'payment_terms':           'cf_payment_terms',
+        'payment_method':          'cf_payment_method',
         'batch_availability_date': 'cf_date_available',
-        'marketplace_status': 'cf_status',
+        'marketplace_status':      'cf_status',
     }
 
     @classmethod
     def get_diff_verbose(cls):
         verbose = dict()
-        for field_name in cls.DIFF_FIELDS:
+        for field_name in cls.UPDATE_FIELDS:
             verbose[field_name] = getattr(cls, field_name).verbose_name or field_name.title()
 
+    @cached_property
+    def diff_verbose_names(self):
+        return  self.__class__.get_diff_verbose()
+
     def get_item_update_data(self):
-        data = {
-            'item_id': self.item.item_id,
-            'inventory_name': self.item.inventory_name,
-            'cf_date_available': self.batch_availability_date.strftime("%Y-%m-%d"),
-            'cf_farm_price': str(self.farm_price),
-            'cf_farm_price_2': self.farm_price,
-            'cf_seller_position': self.pricing_position,
-            'cf_payment_terms': self.payment_terms,
-            'cf_payment_method': self.payment_method,
-            'cf_biomass': self.biomass_type,
-            'cf_raw_material_input_g': self.biomass_input_g,
-            'cf_batch_qty_g': self.total_batch_quantity,
-            'cf_mscp': self.mcsp_fee,
-            'cf_cultivation_tax': self.cultivation_tax,
-        }
-        if self.marketplace_status:
-            data['cf_status'] = self.marketplace_status
-        # if self.have_minimum_order_quantity:
-        #     data['cf_minimum_quantity'] = int(self.minimum_order_quantity)
-        # else:
-        #     data['cf_minimum_quantity'] = None
+        data ={ v: getattr(self, k) for k, v in self.UPDATE_FIELDS.items()}
+        data['item_id'] = self.item.item_id
         return data
 
 
-
     def get_display_diff_data(self):
-        data = {}
-        data['farm_price'] = ('Farm Price', "${:,.2f}".format(self.item.cf_farm_price_2), "${:,.2f}".format(self.farm_price))
-        data['pricing_position'] = ('Pricing Position', self.item.cf_seller_position, self.pricing_position)
-        # data['minimum_order_quantity'] = (
-        #     'Minimum Order Quantity',
-        #     int(self.item.cf_minimum_quantity) if self.item.cf_minimum_quantity else None,
-        #     int(self.minimum_order_quantity)  if self.have_minimum_order_quantity else None,
-        # )
-        data['biomass_type'] = ('Payment Terms', self.item.cf_biomass, self.biomass_type)
-        data['biomass_input_g'] = ('Payment Terms', self.item.cf_raw_material_input_g, self.biomass_input_g)
-        data['total_batch_quantity'] = ('Payment Terms', self.item.cf_batch_qty_g, self.total_batch_quantity)
-        data['cultivation_tax'] = ('Payment Terms', self.item.cf_cultivation_tax, self.cultivation_tax)
-        data['mcsp_fee'] = ('Payment Terms', self.item.cf_mscp, self.mcsp_fee)
-        data['payment_terms'] = ('Payment Terms', self.item.cf_payment_terms, self.payment_terms)
-        data['payment_method'] = (
-            'Payment Method',
-            ', '.join(self.item.cf_payment_method) if self.item.cf_payment_method else None,
-            ', '.join(self.payment_method) if self.payment_method else None,
-        )
-        data['batch_availability_date'] = (
-            'Batch Availability Date',
-                self.item.cf_date_available.strftime("%Y-%m-%d") if self.item.cf_date_available else None,
-                self.batch_availability_date.strftime("%Y-%m-%d") if self.batch_availability_date else None,
-        )
-        if self.marketplace_status:
-            data['marketplace_status'] = (
-                'Marketplace Status',
-                self.item.cf_status,
-                self.marketplace_status,
-            )
+        field_formats = {
+            'farm_price': lambda v: "${:,.2f}".format(v) if v is not None else None,
+            'batch_availability_date': lambda v: v.strftime("%Y-%m-%d") if v else None,
+            'minimum_order_quantity': lambda v: int(v) if v else None,
+            'payment_method': lambda v: ', '.join(v) if v else None,
+        }
+        data = {
+            k: (self.diff_verbose_names[k],self.item_data[v], getattr(self, k))
+            for k, v in self.UPDATE_FIELDS
+        }
+        data.update({
+            k : (data[k][0], f(data[k][1]), f(data[k][2]))
+            for k, f in field_formats if k in data
+        })
         return data
 
     def __str__(self):
