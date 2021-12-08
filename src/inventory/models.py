@@ -1,6 +1,7 @@
 """
 Inventory Model
 """
+from datetime import date
 from decimal import Decimal
 from operator import attrgetter
 from django import forms
@@ -292,7 +293,7 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
 
     UPDATE_FIELDS = {
         'farm_price':              'cf_farm_price_2',
-        'minimum_order_quantity':  'cf_minimum_quantity',
+        # 'minimum_order_quantity':  'cf_minimum_quantity',
         'pricing_position':        'cf_seller_position',
         'biomass_type':            'cf_biomass',
         'biomass_input_g':         'cf_raw_material_input_g',
@@ -305,18 +306,13 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
         'marketplace_status':      'cf_status',
     }
 
-    @classmethod
-    def get_diff_verbose(cls):
-        verbose = dict()
-        for field_name in cls.UPDATE_FIELDS:
-            verbose[field_name] = getattr(cls, field_name).verbose_name or field_name.title()
-
     @cached_property
-    def diff_verbose_names(self):
-        return  self.__class__.get_diff_verbose()
+    def filds_verbose_name(self):
+        fields = self.__class__._meta.fields
+        return {f.name: f.verbose_name or f.name.title() for f in fields}
 
     def get_item_update_data(self):
-        data ={ v: getattr(self, k) for k, v in self.UPDATE_FIELDS.items()}
+        data = { v: getattr(self, k) for k, v in self.UPDATE_FIELDS.items()}
         data['item_id'] = self.item.item_id
         return data
 
@@ -324,17 +320,19 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
     def get_display_diff_data(self):
         field_formats = {
             'farm_price': lambda v: "${:,.2f}".format(v) if v is not None else None,
-            'batch_availability_date': lambda v: v.strftime("%Y-%m-%d") if v else None,
+            'mcsp_fee': lambda v: "${:,.2f}".format(v) if v is not None else None,
+            'cultivation_tax': lambda v: "${:,.2f}".format(v) if v is not None else None,
+            'batch_availability_date': lambda v: v.strftime("%Y-%m-%d") if isinstance(v, date) else v,
             'minimum_order_quantity': lambda v: int(v) if v else None,
             'payment_method': lambda v: ', '.join(v) if v else None,
         }
         data = {
-            k: (self.diff_verbose_names[k],self.item_data[v], getattr(self, k))
-            for k, v in self.UPDATE_FIELDS
+            k: (self.filds_verbose_name[k], self.item_data[v], getattr(self, k))
+            for k, v in self.UPDATE_FIELDS.items()
         }
         data.update({
             k : (data[k][0], f(data[k][1]), f(data[k][2]))
-            for k, f in field_formats if k in data
+            for k, f in field_formats.items() if k in data
         })
         return data
 

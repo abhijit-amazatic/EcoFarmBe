@@ -1,9 +1,11 @@
+import types
 from datetime import (date, datetime)
 from decimal import Decimal
 from django.utils import timezone
 from django.contrib import admin
 from django.contrib import messages
 from django.utils.html import mark_safe
+from django_filters.utils import verbose_field_name
 
 from core.mixins.admin import (CustomButtonMixin,)
 from fee_variable.utils import (get_item_mcsp_fee,)
@@ -11,6 +13,9 @@ from utils import (get_approved_by, )
 
 from integration.inventory import (
     update_inventory_item,
+)
+from ..models import (
+    InventoryItemEdit,
 )
 from ..tasks import (
     notify_inventory_item_change_approved_task,
@@ -34,7 +39,7 @@ def span2_fixed(x, y):
     )
 
 
-class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
+class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
@@ -51,6 +56,11 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         'name',
         'sku',
         'item_marketplace_status',
+        'item_biomass_type',
+        'item_biomass_input_g',
+        'item_total_batch_quantity',
+        'item_mcsp_fee',
+        'item_cultivation_tax',
         'item_farm_price',
         'item_farm_price',
         'item_farm_price',
@@ -82,6 +92,11 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         ('Changes', {
             'fields': (
                 ('item_marketplace_status', 'marketplace_status'),
+                ('item_biomass_type', 'biomass_type'),
+                ('item_biomass_input_g', 'biomass_input_g'),
+                ('item_total_batch_quantity', 'total_batch_quantity'),
+                ('item_mcsp_fee', 'mcsp_fee'),
+                ('item_cultivation_tax', 'cultivation_tax'),
                 ('item_farm_price', 'farm_price'),
                 ('item_pricing_position', 'pricing_position'),
                 ('item_batch_availability_date', 'batch_availability_date'),
@@ -111,6 +126,10 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
     #         'color': '#ba2121',
     #     }
     # }
+
+    # def __init__(self, model, *args, **kwargs):
+    #     self.set_display_change_fields(model)
+    #     return super().__init__(model, *args, **kwargs)
 
     def show_approve_button(self, request, obj,  add=False, change=False):
         return change and obj and obj.status == 'pending_for_approval'
@@ -165,7 +184,7 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                     obj.item.cf_vendor_name,
                     item_category=obj.item.category_name,
                     request=request,
-                    farm_price=obj.item.cf_farm_price_2
+                    farm_price=obj.farm_price
                 )
             if isinstance(obj.mcsp_fee, Decimal):
                 if obj.cultivation_tax is None:
@@ -174,9 +193,9 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                     else:
                         obj.cultivation_tax = get_item_tax(
                             category_name=obj.item.category_name,
-                            biomass_type=obj.item.cf_biomass,
-                            biomass_input_g=obj.item.cf_raw_material_input_g,
-                            total_batch_output=obj.item.cf_batch_qty_g,
+                            biomass_type=obj.biomass_type,
+                            biomass_input_g=obj.biomass_input_g,
+                            total_batch_output=obj.total_batch_quantity,
                             request=request,
                         )
                 if isinstance(obj.cultivation_tax, Decimal):
@@ -220,9 +239,15 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
                         print('Item have invalid inventory name.')
 
     def get_form(self, request, obj=None, change=False, **kwargs):
+        change_fields = tuple(
+            f[1]
+            for x in self.fieldsets if x[0] == 'Changes'
+            for k, v in x[1].items()
+            for f in v
+        )
         form = super().get_form(request=request, obj=obj, change=change, **kwargs)
         if obj:
-            change_fields = ('marketplace_status', 'farm_price', 'pricing_position', 'batch_availability_date', 'payment_terms', 'payment_method',)
+            # change_fields = ('marketplace_status', 'farm_price', 'pricing_position', 'batch_availability_date', 'payment_terms', 'payment_method',)
             for cf in change_fields:
                 f = form.base_fields.get(cf)
                 if f:
@@ -230,81 +255,43 @@ class InventoryItemEditAdmin(CustomButtonMixin, admin.ModelAdmin):
         return form
 
 
-    def item_marketplace_status(self, obj):
-        old_val = obj.item_data.get('cf_status')
+
+def get_display_func(k, v):
+    data_type_conversion_map = {
+        float: lambda v: str(v) if v else None,
+        date: lambda v: v.strftime("%Y-%m-%d") if v else None,
+        Decimal: lambda v: f"{v.normalize():f}" if v else None,
+        list: lambda v: ', '.join(v)if v else None,
+    }
+    def func(self, obj):
+        old_val = obj.item_data.get(v)
+        if type(old_val) in data_type_conversion_map:
+            old_val = data_type_conversion_map[type(old_val)](old_val)
+
         if self.is_obj_changable(obj):
             return span_fixed(old_val)
         else:
-            return span2_fixed(old_val, obj.marketplace_status)
-    item_marketplace_status.short_description = 'Marketplace Status'
-    allow_tags = True
-
-    def item_farm_price(self, obj):
-        old_val = obj.item_data.get('cf_farm_price_2')
-        if self.is_obj_changable(obj):
-            return span_fixed(old_val)
-        else:
-            return span2_fixed(old_val, obj.farm_price)
-    item_farm_price.short_description = 'Farm Price'
-    allow_tags = True
-
-
-    def item_pricing_position(self, obj):
-        old_val = obj.item_data.get('cf_seller_position')
-        if self.is_obj_changable(obj):
-            return span_fixed(old_val)
-        else:
-            return span2_fixed(old_val, obj.pricing_position)
-    item_pricing_position.short_description = 'Pricing Position'
-
-    def item_batch_availability_date(self, obj):
-        old_val = obj.item_data.get('cf_date_available')
-        if self.is_obj_changable(obj):
-            return span_fixed(old_val)
-        else:
-            return span2_fixed(old_val, obj.batch_availability_date)
-    item_batch_availability_date.short_description = 'Batch Availability Date'
-
-
-    def item_payment_terms(self, obj):
-        old_val = obj.item_data.get('cf_payment_terms')
-        if self.is_obj_changable(obj):
-            return span_fixed(old_val)
-        else:
-            return span2_fixed(old_val, obj.payment_terms)
-    item_payment_terms.short_description = 'Payment Terms'
-
-
-    def item_payment_method(self, obj):
-        old_val = obj.item_data.get('cf_payment_method')
-        if old_val:
-            old_val = ', '.join(old_val)
-        else:
-            old_val = None
-        if obj.payment_method:
-            new_val = ', '.join(obj.payment_method)
-        else:
-            new_val = None
-        if self.is_obj_changable(obj):
-            return span_fixed(old_val)
-        else:
+            new_val = getattr(obj, k, None)
+            if type(new_val) in data_type_conversion_map:
+                new_val = data_type_conversion_map[type(new_val)](new_val)
             return span2_fixed(old_val, new_val)
-    item_payment_method.short_description = 'Payment Method'
+    return func
 
-    def get_change_field(self):
-        
-        def func(self, obj):
-            old_val = obj.item_data.get('cf_payment_method')
-            if old_val:
-                old_val = ', '.join(old_val)
-            else:
-                old_val = None
-            if obj.payment_method:
-                new_val = ', '.join(obj.payment_method)
-            else:
-                new_val = None
-            if self.is_obj_changable(obj):
-                return span_fixed(old_val)
-            else:
-                return span2_fixed(old_val, new_val)
-        func.short_description = 'Payment Method'
+
+def set_display_change_fields(model):
+
+    update_fields = model.UPDATE_FIELDS
+    fields = model._meta.fields
+    verbose_names = {f.name: f.verbose_name or f.name.title() for f in fields}
+    method_dict = dict()
+    for k, v  in update_fields.items():
+        display_func = get_display_func(k,v)
+        display_func.short_description = verbose_names.get(k)
+        method_dict[f"item_{k}"] = display_func
+    return method_dict
+
+InventoryItemEditAdmin = type(
+    'InventoryItemEditAdmin',
+    (InventoryItemEditAdminBase,),
+    set_display_change_fields(InventoryItemEdit)
+)
