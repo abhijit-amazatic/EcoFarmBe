@@ -694,6 +694,19 @@ class MyOrganizationRoleView(APIView):
                 result[query_lookup] = kwarg_value
         return result
 
+
+class ProfileReportFilter(FilterSet):
+    class Meta:
+        model = ProfileReport
+        fields = {
+            'name':['contains', 'icontains', 'exact'],
+            'profile':['exact'],
+            'profile_id':['exact'],
+            'user':['exact'],
+            'profile_id':['exact'],
+        }
+
+
 class ProfileReportViewSet(viewsets.ModelViewSet):
     """
     All Vendor/account profile related report data stored here.
@@ -702,7 +715,8 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedBrandPermission,)
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['report_name']
-    filterset_fields = ['profile']
+    filterset_class = ProfileReportFilter
+
 
     def get_queryset(self):
         """
