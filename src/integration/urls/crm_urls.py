@@ -1,0 +1,95 @@
+"""
+URL Configuration
+"""
+from django.conf.urls import url, include
+from django.contrib import admin
+from django.conf import settings
+from django.urls import path
+from rest_framework.routers import SimpleRouter
+
+from ..views import (
+    GetBoxTokensView,
+    InventoryView,
+    GetPickListView,
+    GetLeadsCompanyTypeListView,
+    EstimateView,
+    ContactView as ContactViewBooks,
+    CRMContactView,
+    SearchCultivars,
+    LeadView,
+    GetBoxSharedLink,
+    LeadSourcesView,
+    PurchaseOrderView,
+    CRMVendorView,
+    VendorPaymentView,
+    InvoiceView,
+    AccountSummaryView,
+    VendorCreditView,
+    EstimateTaxView,
+    GetTaxView,
+    ContactAddressView,
+    GetPickListAccountView,
+    EstimateStatusView,
+    ClientCodeView,
+    VendorClientCodeView,
+    EstimateSignView,
+    EstimateSignCompleteView,
+    GetDocumentStatus,
+    GetSignURL,
+    TemplateSignView,
+    GetDistanceView,
+    GetSalesPersonView,
+    GetTemplateStatus,
+    CustomerPaymentView,
+    GetBoxTokenAuthenticationView,
+    BillView,
+    SalesOrderView,
+    EstimateAddressView,
+    ContactPersonView,
+    CRMVendorTierView,
+    GetNewsFeedView,
+    GetRecordView,
+    LabTestView,
+    GetAutoComplete,
+    NotificationView,
+    DownloadSignDocumentView,
+    CampaignView,
+    MarkEstimateView,
+    ApproveEstimateView,
+    MarkSalesOrderView,
+    ApproveSalesOrderView,
+    SalesOrderSubStatusesView,
+    MarkPurchaseOrderView,
+    ApprovePurchaseOrderView,
+    MarkInvoiceView,
+    ApproveInvoiceView,
+    MarkBillView,
+    ApproveBillView,
+    ConvertEstimateToSalesOrder,
+    ConvertSalesOrderToInvoice,
+    ChatbotView,
+    ConvertEstimateToInvoice,
+    ConvertSalesOrderToPurchaseOrder,
+    ConfiaCallbackView,
+)
+
+app_name = "integration"
+
+router = SimpleRouter()
+
+urlpatterns = [
+    path(r'', GetRecordView.as_view(), name='get_crm_record'),
+    path(r'search/cultivar', SearchCultivars.as_view(), name='search_cultivar'),
+    path(r'picklist/', GetPickListView.as_view(), name='get_picklist'),
+    path(r'picklist/leads-company-type', GetLeadsCompanyTypeListView.as_view(), name='get_picklist'),
+    path(r'account-picklist/', GetPickListAccountView.as_view(), name='get_account_picklist'),
+    path(r'contact/', CRMContactView.as_view(), name='list_crm_contacts'),
+    path(r'lead/', LeadView.as_view(), name='create_lead'),
+    path(r'lead-sources/', LeadSourcesView.as_view(), name='get_lead_sources'),
+    path(r'vendor/', CRMVendorView.as_view(), name='get_vendor'),
+    path(r'vendor-tier/', CRMVendorTierView.as_view(), name='update_tier'),
+    path(r'account-client-code/', ClientCodeView.as_view(), name='get_account_client_code'),
+    path(r'vendor-client-code/', VendorClientCodeView.as_view(),name='get_vendor_client_code'),
+    path(r'sales-person/', GetSalesPersonView.as_view(), name='get_sales_person'),
+    path(r'labtest/<str:labtest_id>/', LabTestView.as_view(), name='labtest'),
+] + router.urls
