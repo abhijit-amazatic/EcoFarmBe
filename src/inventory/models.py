@@ -319,9 +319,9 @@ class InventoryItemEdit(TimeStampFlagModelMixin, models.Model):
 
     def get_display_diff_data(self):
         field_formats = {
-            'farm_price': lambda v: "${:,.2f}".format(v) if v is not None else None,
-            'mcsp_fee': lambda v: "${:,.2f}".format(v) if v is not None else None,
-            'cultivation_tax': lambda v: "${:,.2f}".format(v) if v is not None else None,
+            'farm_price': lambda v: f"${v:,.2f}" if v is not None else None,
+            'mcsp_fee': lambda v: f"${Decimal(v):,.2f}" if v is not None else v,
+            'cultivation_tax': lambda v: f"${Decimal(v):,.2f}" if v is not None else v,
             'batch_availability_date': lambda v: v.strftime("%Y-%m-%d") if isinstance(v, date) else v,
             'minimum_order_quantity': lambda v: int(v) if v else None,
             'payment_method': lambda v: ', '.join(v) if v else None,
