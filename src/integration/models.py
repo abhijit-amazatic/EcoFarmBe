@@ -28,8 +28,8 @@ class ConfiaCallback(TimeStampFlagModelMixin, models.Model):
     """
     Model to save confia callback data after onboarding.
     """
-    partner_company_id = models.CharField(_('partnerCompanyId'), max_length=255, blank=True, null=True)
-    confia_member_id = models.CharField(_('confiaMemberId'), max_length=255, blank=True, null=True)
+    partner_company_id = models.CharField(_('client ID'), max_length=255, blank=True, null=True)
+    confia_member_id = models.CharField(_('confia Member ID'), max_length=255, blank=True, null=True)
     status = models.CharField(_('status'), max_length=255, blank=True, null=True)
     
     def __str__(self):

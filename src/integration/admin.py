@@ -18,7 +18,9 @@ from core import settings
 from core.mixins.admin import (CustomButtonMixin,)
 from utils import reverse_admin_change_path
 from .models import (Integration,ConfiaCallback)
+from brand.models import License
 from .admin_config import INTEGRATION_OAUTH_MAP
+from rangefilter.filter import DateRangeFilter
 
 class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
@@ -224,13 +226,24 @@ class ConfiaCallbackAdmin(admin.ModelAdmin):
     """
     ConfiaCallbackAdmin
     """
-    list_display = ('partner_company_id', 'confia_member_id','status','created_on','updated_on')
-    list_filter = ('partner_company_id',)
+    list_display = ('company','partner_company_id', 'confia_member_id','status','created_on','updated_on')
+    list_filter = ('partner_company_id','status', ("created_on", DateRangeFilter),("updated_on", DateRangeFilter),)
     list_per_page = 25
     search_fields = ('partner_company_id','confia_member_id',)
     ordering = ('-created_on',)
-    readonly_fields = ('partner_company_id', 'confia_member_id','status','created_on','updated_on',)
-    fields = ('partner_company_id', 'confia_member_id', 'status','created_on','updated_on')
+    fields = ('partner_company_id', 'confia_member_id', 'status',)
+    #readonly_fields = ('partner_company_id', 'confia_member_id','status','created_on','updated_on',)
     
+    def company(self, obj):
+        if obj.partner_company_id:
+            name = License.objects.filter(client_id=obj.partner_company_id).values('legal_business_name')    
+            if name:
+                return name[0].get('legal_business_name')
+            else:
+                return "N/A"
+        return "N/A"
+    company.short_description = "Company Name"
+
+
 admin.site.register(Integration, IntegrationAdmin)
 admin.site.register(ConfiaCallback, ConfiaCallbackAdmin)
