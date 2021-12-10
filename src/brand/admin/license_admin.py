@@ -553,13 +553,13 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
 
     def update_books_records(self, request, queryset):
         for record in queryset:
-            create_customer_in_books_task.delay(license_id=record.id)
+            create_customer_in_books_task.delay(record.id)
 
     update_books_records.short_description = "Update Records To Books"
 
     def refresh_integration_ids(self, request, queryset):
         for record in queryset:
-            refresh_integration_ids_task.delay(license_id=record.id)
+            refresh_integration_ids_task.delay(record.id)
 
     refresh_integration_ids.short_description = "Refresh Integration IDs"
 
