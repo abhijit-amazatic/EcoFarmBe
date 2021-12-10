@@ -869,6 +869,7 @@ class ProfileReport(models.Model):
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Report Manager'), on_delete=models.CASCADE)
     profile = models.ForeignKey(LicenseProfile, verbose_name=_("Vendor Profile"), on_delete=models.CASCADE)
+    selected_profiles = ArrayField(models.CharField(max_length=255), verbose_name=_('Selected Profiles'), blank=True, null=True, default=list)
     name = models.CharField( _('Report Name'), max_length=255)
     data = JSONField(null=False, blank=False, default=dict)
 
