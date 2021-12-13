@@ -454,3 +454,45 @@ def rename_file(file_id, new_name):
     file_to_rename = client.file(file_id)
     renamed_file = file_to_rename.rename(new_name)
     return renamed_file
+
+
+
+def create_sign_request(source_file_id, parent_folder_id, signer_email, signer_name, prefill_tags={}, external_id=None):
+    """
+    Create Sign Request.
+    """
+    client = get_box_client()
+    url = 'https://api.box.com/2.0/sign_requests'
+
+    signer = {
+        'name': signer_name,
+        'email': signer_email,
+    }
+    signer.setdefault('embed_url_external_user_id', signer_email)
+    signer.setdefault('is_in_person', True)
+    signer.setdefault('order', 1)
+
+    body = {
+        # "no_convert": True,
+        'is_document_preparation_needed': False,
+        'parent_folder': {'id': parent_folder_id, 'type': 'folder'},
+        'source_files': [{'id': source_file_id, 'type': 'file'},],
+        'signers': [signer],
+        'prefill_tags': prefill_tags,
+    }
+    if external_id:
+        body['external_id'] = external_id
+
+    # r = client.create_sign_request(files, signers, parent_folder_id, prefill_tags=prefill_tags, external_id='123123123', is_document_preparation_needed=False,)
+    r = client.make_request('POST', url=url, data=json.dumps(body))
+    return r.json()
+
+
+def get_sign_request(sign_request_id):
+    """
+    get Sign Request.
+    """
+    client = get_box_client()
+    url = 'https://api.box.com/2.0/sign_requests'
+    r = client.make_request('GET', url=f"{url}/{sign_request_id}")
+    return r.json()
