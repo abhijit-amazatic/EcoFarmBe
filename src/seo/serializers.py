@@ -24,4 +24,3 @@ class PageMetaSerializer(serializers.ModelSerializer):
         model = PageMeta
         fields = ('__all__')
         # read_only_fields = ('created_on', 'updated_on')
-        # exclude = ('profile_category', )
