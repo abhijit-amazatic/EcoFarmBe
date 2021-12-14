@@ -416,7 +416,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
         page = int(request.query_params.get('page', 1))
         if page > queryset.num_pages:
             return Response({
-                "status": "Result only have {} number of pages".format(applicants.num_pages)
+                "status": "Result only have {} number of pages".format(queryset.num_pages)
             }, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(queryset.page(page), many=True)
         data = {}
