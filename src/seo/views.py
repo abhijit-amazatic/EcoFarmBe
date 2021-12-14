@@ -30,6 +30,11 @@ class PageMetaViewSet(ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
     pagination_class = None
 
+    def list(self, request, *args, **kwargs):
+        if 'url' in request.query_params:
+            return self.get_url_meta(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
+
     @action(
         detail=False,
         methods=['get'],
