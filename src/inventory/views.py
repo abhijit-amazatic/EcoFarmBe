@@ -12,8 +12,8 @@ from functools import reduce
 import django_filters
 from django.shortcuts import (render, )
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper, DateField,)
-from django.db.models import Prefetch
+from django.db.models import (Sum, F, Min, Max, Avg, Q, Func, ExpressionWrapper, DateField, Case, Value, When,)
+from django.db.models import Prefetch, IntegerField
 from django.utils import  timezone
 from rest_framework.views import APIView
 from rest_framework.viewsets import (GenericViewSet, mixins)
@@ -314,6 +314,7 @@ class CustomOrderFilter(OrderingFilter):
 
     def filter_queryset(self, request, queryset, view):
         order_fields = []
+        grade_order_category = ['Tops AAA','Tops AA','Tops A','Tops B','Tops C','Smalls A','Smalls B', 'Smalls C']
         ordering = self.get_ordering(request, queryset, view)
         if ordering:
             for field in ordering:
@@ -325,6 +326,14 @@ class CustomOrderFilter(OrderingFilter):
                     order_fields.append(F(self.fields_related.get(f, f)).asc(nulls_last=True))
         if order_fields:
             return queryset.order_by(*order_fields)
+        if not order_fields:
+            return queryset.annotate(
+                grade_order=Case(
+                    *[When(cf_cannabis_grade_and_category=name,thumbnail_url__isnull=False,then=Value(grade_order_category.index(name))) for name in grade_order_category],
+                    default=Value(len(grade_order_category)),
+                    output_field=IntegerField(),
+                ),
+            ).order_by('grade_order')
 
         return queryset
 
@@ -347,7 +356,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filterset_class = DataFilter
     ordering_fields = '__all__'
     pagination_class = BasicPagination
-    ordering = ('-Created_Time',)
+    #ordering = ('-Created_Time',)
     
     def extract_positive_value_queryset(self, qs):
         """
