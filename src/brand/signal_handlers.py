@@ -29,8 +29,11 @@ def post_save_user(sender, instance, created, **kwargs):
 @receiver(signals.pre_save, sender=apps.get_model('brand', 'License'))
 def pre_save_license(sender, instance, **kwargs):
     if not instance.id:
-        if not isinstance(instance.expiration_date, datetime) or instance.expiration_date < timezone.now():
+        if isinstance(instance.expiration_date, datetime) or instance.expiration_date >= timezone.now():
+            instance.license_status = 'Active'
+        else:
             instance.license_status = 'Expired'
+
     if instance.license_type and not instance.cultivation_type:
         if LICENSE_CULTIVATION_TYPE.get(instance.license_type):
             instance.cultivation_type = LICENSE_CULTIVATION_TYPE.get(instance.license_type)
