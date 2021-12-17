@@ -35,9 +35,11 @@ class BaseInventorySerializer(serializers.ModelSerializer):
         url = obj.mobile_url
         if not url:
             for d in obj.extra_documents.all():
-                if d.S3_mobile_url or d.S3_url:
-                    url = d.S3_mobile_url or d.S3_url
-                    break
+                ft = d.file_type or ''
+                if ft.startswith('image'):
+                    if d.S3_mobile_url or d.S3_url:
+                        url = d.S3_mobile_url or d.S3_url
+                        break
         return url
 
     class Meta:
