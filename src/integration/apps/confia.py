@@ -108,6 +108,7 @@ def delete_transaction(transaction_id,reason):
 
 @app.task(queue="urgent")
 def initiate_b2b_refund(partner_transaction_id,reason,refund_amount,sha_hash,transaction_id):
+    
     """
     Issues a refund from a Confia Member to either a Consumer or other Member.
     This can be used for both retail and b2b payments.Multiple refund requests can be made per transaction,
@@ -130,7 +131,20 @@ def initiate_b2b_refund(partner_transaction_id,reason,refund_amount,sha_hash,tra
     return response.json()
 
 
+def search_member(member_id):
+    """
+    Search for members.
+    """
+    data = {'memberId':member_id}
+    response = request("GET",CONFIA_API_BASE_URL+'v1/member',headers=get_confia_headers(),params=data)
+    return response.json()
 
+def search_merchant(member_id):
+    """
+    Search for merchants.
+    """
+    response = request("GET",CONFIA_API_BASE_URL+'v1/member/merchant',headers=get_confia_headers(),params={'memberId':member_id})
+    return response.json()
     
 
 
