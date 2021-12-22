@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import (datetime, date)
 from django.core import exceptions
 from django.dispatch import receiver
 from django.db.models import signals
@@ -28,11 +28,17 @@ def post_save_user(sender, instance, created, **kwargs):
 
 @receiver(signals.pre_save, sender=apps.get_model('brand', 'License'))
 def pre_save_license(sender, instance, **kwargs):
-    if not instance.id:
-        if isinstance(instance.expiration_date, datetime) or instance.expiration_date >= timezone.now():
-            instance.license_status = 'Active'
-        else:
-            instance.license_status = 'Expired'
+    if isinstance(instance.expiration_date, str):
+        try:
+            instance.expiration_date = date.fromisoformat(instance.expiration_date)
+        except Exception:
+            pass
+    if isinstance(instance.expiration_date, datetime):
+            instance.expiration_date = instance.expiration_date.date()
+    if type(instance.expiration_date) is date and instance.expiration_date >= timezone.now().date():
+        instance.license_status = 'Active'
+    else:
+        instance.license_status = 'Expired'
 
     if instance.license_type and not instance.cultivation_type:
         if LICENSE_CULTIVATION_TYPE.get(instance.license_type):
