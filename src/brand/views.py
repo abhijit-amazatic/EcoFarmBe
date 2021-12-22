@@ -711,6 +711,7 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
     """
     All Vendor/account profile related report data stored here.
     """
+    queryset=ProfileReport.objects.filter()
     serializer_class = ProfileReportSerializer
     permission_classes = (IsAuthenticatedBrandPermission,)
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
@@ -718,15 +719,15 @@ class ProfileReportViewSet(viewsets.ModelViewSet):
     filterset_class = ProfileReportFilter
 
 
-    def get_queryset(self):
-        """
-        Return queryset based on action.
-        """
-        reports = ProfileReport.objects.filter()
-        if self.action == "list":
-            reports = reports.select_related('user')
-        reports = reports.filter(user=self.request.user)
-        return reports
+    # def get_queryset(self):
+    #     """
+    #     Return queryset based on action.
+    #     """
+    #     reports = 
+    #     # if self.action == "list":
+    #     #     reports = reports.select_related('user')
+    #     # reports = reports.filter(user=self.request.user)
+    #     return reports
 
 
 # class SendVerificationView(APIView):

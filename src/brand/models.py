@@ -873,6 +873,12 @@ class ProfileReport(models.Model):
     name = models.CharField( _('Report Name'), max_length=255)
     data = JSONField(null=False, blank=False, default=dict)
 
+    class Meta:
+        verbose_name = _('Profile Report')
+        verbose_name_plural = _('Profile Reports')
+        unique_together = ('profile', 'name')
+
+
 class Sign(TimeStampFlagModelMixin,models.Model):
     """
     Store sign request ids.
