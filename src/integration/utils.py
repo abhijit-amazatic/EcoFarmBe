@@ -213,7 +213,7 @@ def update_documents(license_id=None):
                 documents = Documents.objects.get(object_id=license.id, doc_type='w9')
             except Documents.DoesNotExist:
                 continue
-            documents.box_url = license.uploaded_sellers_permit_to
+            documents.box_url = license.uploaded_w9_to
             documents.save()
             updated_list.append(license.id)
 

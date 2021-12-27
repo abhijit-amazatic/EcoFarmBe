@@ -648,7 +648,7 @@ def update_license(dba, license=None, license_id=None, is_return_orginal_data=Fa
             moved_file = move_file(file_id, license_folder)
             w9_url = get_shared_link(file_id)
             if w9_url:
-                license['uploaded_sellers_permit_to'] = w9_url + "?id=" + moved_file.id
+                license['uploaded_w9_to'] = w9_url + "?id=" + moved_file.id
                 license_to.box_url = w9_url
                 license_to.box_id = moved_file.id
                 license_to.save()
