@@ -541,6 +541,7 @@ def upload_file_s3_to_box(aws_bucket, aws_key):
     Upload file from s3 to box.
     """
     aws_client = get_boto_client('s3')
+    print(aws_bucket, aws_key)
     file_obj = aws_client.get_object(Bucket=aws_bucket, Key=aws_key)
     md5sum = aws_client.head_object(Bucket=aws_bucket,Key=aws_key)['ETag'][1:-1]
     if file_obj.get('Body'):
@@ -596,7 +597,7 @@ def update_license(dba, license=None, license_id=None, is_return_orginal_data=Fa
     license_folder = create_folder(new_folder, 'Licenses')
     if not license.get('uploaded_license_to') or license_id:
         try:
-            license_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='license').first()
+            license_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='license').latest('created_on')
             license_to_path = license_to.path
             aws_bucket = AWS_BUCKET
             box_file = upload_file_s3_to_box(aws_bucket, license_to_path)
@@ -617,7 +618,7 @@ def update_license(dba, license=None, license_id=None, is_return_orginal_data=Fa
     # documents = create_folder(new_folder, 'documents')
     if not license.get('uploaded_sellers_permit_to') or license_id:
         try:
-            seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').first()
+            seller_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='seller_permit').latest('created_on')
             seller_to_path = seller_to.path
             aws_bucket = AWS_BUCKET
             box_file = upload_file_s3_to_box(aws_bucket, seller_to_path)
@@ -629,15 +630,15 @@ def update_license(dba, license=None, license_id=None, is_return_orginal_data=Fa
             seller_permit_url = get_shared_link(file_id)
             if seller_permit_url:
                 license['uploaded_sellers_permit_to'] = seller_permit_url + "?id=" + moved_file.id
-                license_to.box_url = seller_permit_url
-                license_to.box_id = moved_file.id
-                license_to.save()
+                seller_to.box_url = seller_permit_url
+                seller_to.box_id = moved_file.id
+                seller_to.save()
         except Exception as exc:
             print('Error in update license', exc)
             pass
     if not license.get('uploaded_w9_to') or license_id:
         try:
-            w9_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='w9').first()
+            w9_to = Documents.objects.filter(object_id=license['license_db_id'], doc_type='w9').latest('created_on')
             w9_to_path = w9_to.path
             aws_bucket = AWS_BUCKET
             box_file = upload_file_s3_to_box(aws_bucket, w9_to_path)
@@ -658,6 +659,7 @@ def update_license(dba, license=None, license_id=None, is_return_orginal_data=Fa
     license_obj = License.objects.filter(pk=license['license_db_id']).update(
         uploaded_license_to=license.get('uploaded_license_to'),
         uploaded_sellers_permit_to=license.get('uploaded_sellers_permit_to'),
+        uploaded_w9_to=license.get('uploaded_w9_to'),
         is_notified_before_expiry=False
     )
     data.append(license)
