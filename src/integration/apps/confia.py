@@ -113,6 +113,8 @@ def initiate_b2b_refund(partner_transaction_id,reason,refund_amount,sha_hash,tra
     Issues a refund from a Confia Member to either a Consumer or other Member.
     This can be used for both retail and b2b payments.Multiple refund requests can be made per transaction,
     but the sum of those requests cannot exceed the total transaction amount.
+    'sha_hash' needs to be saved in DB in order to pass it to refund.Once model structure/wireframe is fixed
+    add models & pass this.
     """
 
     try:
@@ -120,7 +122,7 @@ def initiate_b2b_refund(partner_transaction_id,reason,refund_amount,sha_hash,tra
             "partnerTransactionId": partner_transaction_id,
             "reason":reason,
             "refundAmount": int(refund_amount),
-            "shaHash":sha_hash,
+            #"shaHash":sha_hash,
             "transactionId":transaction_id
         }
         response = request("POST",CONFIA_API_BASE_URL+'v1/transaction/refund',
@@ -145,8 +147,44 @@ def search_merchant(member_id):
     """
     response = request("GET",CONFIA_API_BASE_URL+'v1/member/merchant',headers=get_confia_headers(),params={'memberId':member_id})
     return response.json()
-    
 
+def get_digital_check_pdf(transaction_id):
+    """
+    
+    Get digital check pdf by transaction id.
+    Read stream response
+    """
+    response = request("GET",CONFIA_API_BASE_URL+'v1/transaction/b2b/'+str(transaction_id)+'/check',headers=get_confia_headers())
+    return response.json()
+
+
+@app.task(queue="urgent")
+def tip_payment(partner_transaction_id,tip_amount,sha_hash,transaction_id):
+    
+    """
+    A tip from Consumer to a Confia Member. This endpoint can be used only for retail payments.
+    Sum of these request cannot exceed 50% of the original total payment amount, including taxes.
+    """
+    try:
+        payload = {
+            "partnerTransactionId": partner_transaction_id,
+            "refundAmount": int(tip_amount),
+            #"shaHash":sha_hash,
+            "transactionId":transaction_id
+        }
+        response = request("POST",CONFIA_API_BASE_URL+'v1/transaction/tip',
+                           headers=get_confia_headers(),
+                           data=json.dumps(payload))
+    except Exception as e:
+        return {'error': f'Error while adding Tip -{e}'}
+    return response.json()
+
+
+
+
+
+
+    
 
 
 
