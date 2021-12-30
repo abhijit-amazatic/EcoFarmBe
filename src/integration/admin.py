@@ -14,13 +14,22 @@ from django.http.response import (
 )
 from django.urls import path, reverse
 
+import nested_admin
+
 from core import settings
 from core.mixins.admin import (CustomButtonMixin,)
 from utils import reverse_admin_change_path
-from .models import (Integration,ConfiaCallback)
 from brand.models import License
-from .admin_config import INTEGRATION_OAUTH_MAP
 from rangefilter.filter import DateRangeFilter
+from .admin_config import INTEGRATION_OAUTH_MAP
+from .models import (
+    Integration,
+    ConfiaCallback,
+    BoxSignDocType,
+    BoxSignDocApprover,
+    BoxSignFinalCopyReader,
+    BoxSign,
+)
 
 class IntegrationAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
@@ -245,5 +254,27 @@ class ConfiaCallbackAdmin(admin.ModelAdmin):
     company.short_description = "Company Name"
 
 
+class BoxSignDocApproverNestedAdmin(nested_admin.NestedStackedInline):
+    extra = 0
+    model = BoxSignDocApprover
+    readonly_fields = ('created_on','updated_on',)
+
+
+class BoxSignFinalCopyReaderNestedAdmin(nested_admin.NestedTabularInline):
+    extra = 0
+    model = BoxSignFinalCopyReader
+    readonly_fields = ('created_on','updated_on',)
+
+
+class BoxSignDocTypeAdmin(nested_admin.NestedModelAdmin):
+    """
+    OrganizationRoleAdmin
+    """
+    inlines = [BoxSignDocApproverNestedAdmin,BoxSignFinalCopyReaderNestedAdmin]
+    ordering = ('name',)
+
+
+
 admin.site.register(Integration, IntegrationAdmin)
 admin.site.register(ConfiaCallback, ConfiaCallbackAdmin)
+admin.site.register(BoxSignDocType, BoxSignDocTypeAdmin)

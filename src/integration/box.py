@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import (datetime, date)
 from io import BytesIO
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -456,29 +457,44 @@ def rename_file(file_id, new_name):
     return renamed_file
 
 
+def list_sign_request(params=dict()):
+    """
+    get Sign Request.
+    """
+    client = get_box_client()
+    url = 'https://api.box.com/2.0/sign_requests'
+    r = client.make_request('GET', url=url, params=params)
+    return r.json()
 
-def create_sign_request(source_file_id, parent_folder_id, signer_email, signer_name, prefill_tags={}, external_id=None):
+def create_sign_request(source_file_id, parent_folder_id, signers, prefill_tags={}, external_id=None):
     """
     Create Sign Request.
     """
     client = get_box_client()
     url = 'https://api.box.com/2.0/sign_requests'
 
-    signer = {
-        'name': signer_name,
-        'email': signer_email,
-    }
-    signer.setdefault('embed_url_external_user_id', signer_email)
-    signer.setdefault('is_in_person', True)
-    signer.setdefault('order', 1)
+    prefill_tags_final = list()
+    for k, v in prefill_tags.items():
+        tag = {"document_tag_id": k}
+        if isinstance(v, date):
+            if isinstance(v, datetime):
+                v = v.expiration_date.date()
+            tag["date_value"] = v.isoformat()
+        elif isinstance(v, bool):
+            tag["checkbox_value"] = v
+        elif isinstance(v, str):
+            tag["text_value"] = v
+        else:
+            continue
+        prefill_tags_final.append(tag)
 
     body = {
         # "no_convert": True,
         'is_document_preparation_needed': False,
         'parent_folder': {'id': parent_folder_id, 'type': 'folder'},
         'source_files': [{'id': source_file_id, 'type': 'file'},],
-        'signers': [signer],
-        'prefill_tags': prefill_tags,
+        'signers': signers,
+        'prefill_tags': prefill_tags_final,
     }
     if external_id:
         body['external_id'] = external_id
@@ -487,12 +503,11 @@ def create_sign_request(source_file_id, parent_folder_id, signer_email, signer_n
     r = client.make_request('POST', url=url, data=json.dumps(body))
     return r.json()
 
-
-def get_sign_request(sign_request_id):
+def get_sign_request(sign_request_id, params=dict()):
     """
     get Sign Request.
     """
     client = get_box_client()
     url = 'https://api.box.com/2.0/sign_requests'
-    r = client.make_request('GET', url=f"{url}/{sign_request_id}")
+    r = client.make_request('GET', url=f"{url}/{sign_request_id}", params=params)
     return r.json()

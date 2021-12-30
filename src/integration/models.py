@@ -2,6 +2,7 @@
 Model for integrations.
 """
 from django.db import models
+from django.contrib.postgres.fields import (ArrayField, JSONField,)
 from django.utils.translation import ugettext_lazy as _
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin)
 
@@ -37,3 +38,124 @@ class ConfiaCallback(TimeStampFlagModelMixin, models.Model):
 
     class Meta:
         verbose_name = _('Confia Onboarding')
+
+
+
+class BoxSignDocType(TimeStampFlagModelMixin, models.Model):
+    """
+    Store sign Document Type.
+    """
+    DOC_TYPE_CHOICES = (
+        ('agreement', _('Agreement')),
+        ('w9', _('W9')),
+    )
+    name = models.CharField(_('Name'), choices=DOC_TYPE_CHOICES, unique=True, primary_key=True, max_length=100)
+    display_name = models.CharField(_('Display Name'), max_length=100)
+    need_approval = models.BooleanField(_('Need Approval'), default=False)
+
+    class Meta:
+        verbose_name = _('Box Sign Doc Type')
+        verbose_name_plural = _('Box Sign Doc Type')
+
+    def __str__(self):
+        return self.display_name
+
+class BoxSignDocApprover(TimeStampFlagModelMixin, models.Model):
+    """
+    Store sign Document Approver.
+    """
+    doc_type = models.OneToOneField(
+        BoxSignDocType,
+        verbose_name=_("Doc Type"),
+        related_name='approver',
+        on_delete=models.CASCADE,
+    )
+
+    name = models.CharField(_('Approver Name'), max_length=255)
+    email = models.EmailField(_('Approver Email'), max_length=255)
+    prefill_data = JSONField(_('Approver prefill Data'), blank=True, default=dict)
+
+    class Meta:
+        verbose_name = _('Box Sign Doc Approver')
+        verbose_name_plural = _('Box Sign Doc Approvers')
+
+    def get_prefill_data(self):
+        prefill_data = self.prefill_data or {}
+        prefill_data.setdefault('approver_name', self.name)
+        prefill_data.setdefault('approver_email', self.email)
+        return prefill_data
+
+
+
+class BoxSignFinalCopyReader(TimeStampFlagModelMixin, models.Model):
+    """
+    Store sign Document Approver.
+    """
+    doc_type = models.ForeignKey(
+        BoxSignDocType,
+        verbose_name=_("Doc Type"),
+        related_name='final_copy_readers',
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(_('Name'), max_length=255)
+    email = models.EmailField(_('Email'), max_length=255)
+
+    class Meta:
+        verbose_name = _('Box Sign Final Copy Reader')
+        verbose_name_plural = _('Box Sign Final Copy Readers')
+
+
+
+# class BoxSignDocTypePrefillField(TimeStampFlagModelMixin,models.Model):
+#     """
+#     Store sign Document Type.
+#     """
+#     FIELD_TYPE_CHOICES = (
+#         ('text', _('Text')),
+#         ('date', _('Date')),
+#         ('boolen', _('Boolen')),
+#     )
+#     doc_type = models.ForeignKey(
+#         BoxSignDocType,
+#         verbose_name=_('License'),
+#         related_name='box_sign_requests',
+#         on_delete=models.CASCADE,
+#     )
+#     id = models.CharField(_('Field ID'), max_length=255, unique=True, primary_key=True)
+#     field_type = models.CharField(_('field Type'), choices=FIELD_TYPE_CHOICES, max_length=50)
+
+#     class Meta:
+#         verbose_name = _('Box Sign Doc Type Prefill Field')
+#         verbose_name_plural = _('Box Sign Doc Type Prefill Fields')
+
+
+class BoxSign(TimeStampFlagModelMixin,models.Model):
+    """
+    Store sign request ids.
+    """
+    license = models.ForeignKey(
+        'brand.License',
+        verbose_name=_('License'),
+        related_name='box_sign_requests',
+        on_delete=models.CASCADE,
+    )
+
+    doc_type = models.ForeignKey(
+        BoxSignDocType,
+        verbose_name=_('License'),
+        related_name='box_sign_requests',
+        on_delete=models.CASCADE,
+    )
+    request_id = models.CharField(_('Request ID'), unique=True, max_length=255)
+
+    status = models.CharField(_('Status'), blank=True, null=True, max_length=255)
+    signer_decision = models.CharField(_('Signer Decision'), blank=True, null=True, max_length=255)
+    output_file_id = models.CharField(_('Action ID'), max_length=255)
+    fields = JSONField(null=True, blank=True, default=dict)
+    response = JSONField(null=True, blank=True, default=dict)
+
+    class Meta:
+        verbose_name = _('Box Sign Request')
+        verbose_name_plural = _('Box Sign Requests')
+        unique_together = ('license', 'request_id')
+

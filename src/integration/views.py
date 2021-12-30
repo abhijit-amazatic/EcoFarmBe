@@ -14,6 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework import (permissions, viewsets, filters, mixins)
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import GenericAPIView
@@ -21,11 +22,14 @@ from rest_framework.authentication import (TokenAuthentication,)
 from django.conf import settings
 
 from core.permissions import UserPermissions
-from .models import (Integration, ConfiaCallback)
+from .models import (Integration, ConfiaCallback, BoxSign, BoxSignDocType)
 from inventory.models import Inventory
 from integration.box import(
     get_box_tokens, get_shared_link,
-    get_client_folder_id, create_folder, get_download_url)
+    get_client_folder_id, create_folder, get_download_url,
+    list_sign_request, create_sign_request, get_sign_request,
+    BoxException, BoxAPIException,
+    )
 from integration.inventory import (
     get_inventory_item, get_inventory_items,)
 from integration.crm import (
@@ -86,6 +90,9 @@ from .views_permissions import (
     InvoiceViewPermission,
     BillViewPermission,
     SalesOrderViewPermission,
+)
+from .serializers import (
+    BoxSignAgreementSerializer,
 )
 from brand.models import (License, Sign, LicenseProfile)
 from bill.models import (Estimate, LineItem)
@@ -653,6 +660,177 @@ class DownloadSignDocumentView(APIView):
                 response.append(get_download_url(file_id))
                 License.objects.filter(legal_business_name=business_dba).update(is_contract_downloaded=True)
         return Response(response)
+
+
+class AgrementBoxSignViewSet(ViewSet):
+    """
+    View class to sign for template.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    # def list(self, request, *args, **kwargs):
+    #     """
+    #     List sign requests.
+    #     """
+    #     return Response(list_sign_request(request.query_params.dict()))
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create agreement sign request.
+        """
+        serializer = BoxSignAgreementSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        try:
+            doc_type_obj = BoxSignDocType.objects.get(name='agreement')
+        except ObjectDoesNotExist:
+            return Response({"detail": 'Agreement doc_type not configured on backend.'}, status=400)
+
+        license_number = data['prefill_data']['license_number']
+
+        try:
+            license = License.objects.get(license_number=license_number)
+            obj = BoxSign.objects.filter(license=license).latest('created_on')
+            if obj:
+                # if all([data.get(k) == v for k, v in obj.fields.items()]):
+                if self.is_fields_same(obj.fields, data):
+                    try:
+                        response = get_sign_request(obj.request_id)
+                    except BoxAPIException as e :
+                        response = e.network_response.json()
+                    else:
+                        return Response(response)
+        except ObjectDoesNotExist as exc:
+            pass
+        prefill_data = data['prefill_data']
+        prefill_tags = {
+            "license_number": license_number,
+            "company": prefill_data['legal_business_name'],
+            "full_name": prefill_data['legal_business_name'],
+            "email": prefill_data['license_owner_email'],
+            "address": ', '.join(
+                [prefill_data[k]
+                 for k in ('premise_address', 'premise_city', 'premise_state', 'premise_zip')]
+            ),
+        }
+
+        signer_order = 1
+        signers = [
+            {
+                'name': data['recipient']['name'],
+                'email': data['recipient']['email'],
+                'embed_url_external_user_id': data['recipient']['name'],
+                'is_in_person': True,
+                'order': signer_order,
+            },
+        ]
+
+        if doc_type_obj.need_approval:
+            try:
+                doc_type_obj_approver = doc_type_obj.approver
+            except ObjectDoesNotExist:
+                return Response({'Agreement doc_type Approver details not added.'}, status=400)
+            else:
+                prefill_tags.update(doc_type_obj_approver.get_prefill_data())
+                signer_order += 1
+                signers.append({
+                    'name': doc_type_obj_approver.name,
+                    'email': doc_type_obj_approver.email,
+                    'is_in_person': False,
+                    'order': signer_order,
+                })
+
+        for reader in doc_type_obj.final_copy_readers.all():
+            signer_order += 1
+            signers.append({
+                'name': reader.name,
+                'email': reader.email,
+                'role': 'final_copy_reader',
+                'is_in_person': False,
+                'order': signer_order,
+            })
+        try:
+            response = create_sign_request(
+                source_file_id=data.get('source_file_id'),
+                parent_folder_id='149236939009',
+                signers=signers,
+                prefill_tags=prefill_tags,
+                external_id=license_number
+            )
+        except BoxAPIException as e :
+            response = e.network_response.json()
+        else:
+            try:
+                license_obj = License.objects.get(license_number=license_number)
+            except ObjectDoesNotExist:
+                pass
+            else:
+                signer_status = ''
+                for signer in response['signers']:
+                    if signer['order'] == 1:
+                        if signer['signer_decision']:
+                            signer_status = signer['signer_decision'].get('type', '')
+                        break
+                defaults = {
+                    "doc_type": doc_type_obj,
+                    "status": response['status'],
+                    "signer_decision": signer_status,
+                    "output_file_id": response['sign_files']['files'][0]['id'],
+                    "license": license,
+                    "fields": data,
+                    "response": response,
+                }
+                obj = BoxSign.objects.update_or_create(request_id=response['id'], defaults=defaults)
+
+        return Response(response)
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     request_id = kwargs.get('pk')
+    #     response = get_sign_request(request_id, params=request.query_params.dict())
+    #     return Response(response)
+
+    # def destroy(self, request, *args, **kwargs):
+    #     pass
+
+    @staticmethod
+    def bussiness_structure_tags(value):
+        tags = {}
+        bussiness_structure_choices = {
+            'Individual': 'bs_individual',
+            'C Corporation': 'bs_c_corporation',
+            'S Corporation': 'bs_s_corporation',
+            'Partnership': 'bs_partnership',
+            'Trust': 'bs_trust',
+            'LLC': 'bs_llc',
+            'Other': 'bs_other',
+        }
+        if value in bussiness_structure_choices:
+            for k, v in bussiness_structure_choices.items():
+                tag = {"document_tag_id": k}
+                if value == k:
+                    tag[v] = True
+                else:
+                    tag[v] = False
+                tags.append(tag)
+        return tags
+
+    def is_fields_same(self, dict1, dict2):
+        """
+        Check fields are same or not.
+        """
+        if len(dict1) != len(dict2):
+            return False
+        for k, v in dict1.items():
+            if isinstance(v, dict):
+                if not self.is_fields_same(dict2.get(k), v):
+                    return False
+            else:
+                if dict2.get(k) != v:
+                    return False
+        return True
+
+
 
 class EstimateTaxView(APIView):
     """
