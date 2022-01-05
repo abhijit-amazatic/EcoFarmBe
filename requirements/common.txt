@@ -1,4 +1,4 @@
-boxsdk[jwt]==2.7.1
+boxsdk[jwt]==2.14.0
 celery==4.4.2
 beautifulsoup4==4.9.3
 boto3==1.15.12
