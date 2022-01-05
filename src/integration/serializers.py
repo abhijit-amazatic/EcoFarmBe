@@ -3,6 +3,7 @@ Integration serializer
 """
 from rest_framework import serializers
 
+from brand.models import License
 from  .models import BoxSignDocType
 
 # class IntegrationSerializer(serializers.ModelSerializer):
@@ -31,12 +32,13 @@ class BoxSignSerializer(serializers.Serializer):
     """
     recipient = BoxSignRecipientSerializer()
     source_file_id = serializers.CharField(max_length=255)
-    # doc_type = serializers.RelatedField(queryset=BoxSignDocType.objects)
-    # doc_type = serializers.ChoiceField(choices=BoxSignDocType.DOC_TYPE_CHOICES)
     # doc_type = serializers.CharField(max_length=255)
+    doc_type = serializers.ChoiceField(choices=BoxSignDocType.DOC_TYPE_CHOICES)
+    # doc_type = serializers.RelatedField(queryset=BoxSignDocType.objects)
+    license = serializers.PrimaryKeyRelatedField(queryset=License.objects)
     prefill_data = serializers.JSONField()
 
-class BoxSignPrefillDataAgreementSerializer(serializers.Serializer):
+class AgreementSignPrefillDataSerializer(serializers.Serializer):
     """
     Agreement Sign (using Box Sign) request prefill data Serializer
     """
@@ -53,5 +55,5 @@ class BoxSignAgreementSerializer(BoxSignSerializer):
     """
     Agreement Box Sign request Serializer
     """
-    prefill_data = BoxSignPrefillDataAgreementSerializer()
+    prefill_data = AgreementSignPrefillDataSerializer()
 

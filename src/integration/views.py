@@ -92,7 +92,9 @@ from .views_permissions import (
     SalesOrderViewPermission,
 )
 from .serializers import (
+    BoxSignSerializer,
     BoxSignAgreementSerializer,
+    AgreementSignPrefillDataSerializer,
 )
 from brand.models import (License, Sign, LicenseProfile)
 from bill.models import (Estimate, LineItem)
@@ -662,11 +664,15 @@ class DownloadSignDocumentView(APIView):
         return Response(response)
 
 
-class AgrementBoxSignViewSet(ViewSet):
+class BoxSignViewSet(ViewSet):
     """
     View class to sign for template.
     """
     permission_classes = (IsAuthenticated,)
+
+    DOC_TYPE_PREFILL_DATA_SERIALIZERS = {
+        "agreement": AgreementSignPrefillDataSerializer,
+    }
 
     # def list(self, request, *args, **kwargs):
     #     """
@@ -678,49 +684,47 @@ class AgrementBoxSignViewSet(ViewSet):
         """
         Create agreement sign request.
         """
-        serializer = BoxSignAgreementSerializer(data=request.data)
+        serializer = BoxSignSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
+        if data['doc_type'] in self.DOC_TYPE_PREFILL_DATA_SERIALIZERS:
+            prefill_data_serializer = self.DOC_TYPE_PREFILL_DATA_SERIALIZERS[data['doc_type']](data=data['prefill_data'])
+            if prefill_data_serializer.is_valid(raise_exception=False):
+                data['prefill_data'] = prefill_data_serializer.validated_data
+            else:
+                raise ValidationError({"prefill_data": prefill_data_serializer.errors})
+
         try:
-            doc_type_obj = BoxSignDocType.objects.get(name='agreement')
+            doc_type_obj = BoxSignDocType.objects.get(name=data['doc_type'])
         except ObjectDoesNotExist:
-            return Response({"detail": 'Agreement doc_type not configured on backend.'}, status=400)
-
-        license_number = data['prefill_data']['license_number']
+            return Response({"detail": f"Doc type '{data['doc_type']}' not configured on backend."}, status=400)
 
         try:
-            license = License.objects.get(license_number=license_number)
-            obj = BoxSign.objects.filter(license=license).latest('created_on')
+            obj = BoxSign.objects.filter(license=data['license']).latest('created_on')
             if obj:
                 # if all([data.get(k) == v for k, v in obj.fields.items()]):
-                if self.is_fields_same(obj.fields, data):
+                if self.is_fields_same(obj.fields, request.data):
                     try:
                         response = get_sign_request(obj.request_id)
-                    except BoxAPIException as e :
+                    except BoxAPIException as e:
                         response = e.network_response.json()
                     else:
                         return Response(response)
         except ObjectDoesNotExist as exc:
             pass
-        prefill_data = data['prefill_data']
-        prefill_tags = {
-            "license_number": license_number,
-            "company": prefill_data['legal_business_name'],
-            "full_name": prefill_data['legal_business_name'],
-            "email": prefill_data['license_owner_email'],
-            "address": ', '.join(
-                [prefill_data[k]
-                 for k in ('premise_address', 'premise_city', 'premise_state', 'premise_zip')]
-            ),
-        }
+
+        if hasattr(self, f"get_prefill_tags_{data['doc_type']}"):
+            prefill_tags = getattr(self, f"get_prefill_tags_{data['doc_type']}")(request, data)
+        else:
+            prefill_tags = {**data['prefill_data']}
 
         signer_order = 1
         signers = [
             {
                 'name': data['recipient']['name'],
                 'email': data['recipient']['email'],
-                'embed_url_external_user_id': data['recipient']['name'],
+                'embed_url_external_user_id': request.user.email,
                 'is_in_person': True,
                 'order': signer_order,
             },
@@ -751,37 +755,38 @@ class AgrementBoxSignViewSet(ViewSet):
                 'order': signer_order,
             })
         try:
+            license_folder = create_folder(
+                settings.LICENSE_PARENT_FOLDER_ID,
+                f"{data['license'].legal_business_name}_{data['license'].license_number}",
+            )
+            parent_folder = create_folder(license_folder,data['doc_type'].title())
+
             response = create_sign_request(
                 source_file_id=data.get('source_file_id'),
-                parent_folder_id='149236939009',
+                parent_folder_id=parent_folder,
                 signers=signers,
                 prefill_tags=prefill_tags,
-                external_id=license_number
+                external_id=data['license'].license_number
             )
-        except BoxAPIException as e :
+        except BoxAPIException as e:
             response = e.network_response.json()
         else:
-            try:
-                license_obj = License.objects.get(license_number=license_number)
-            except ObjectDoesNotExist:
-                pass
-            else:
-                signer_status = ''
-                for signer in response['signers']:
-                    if signer['order'] == 1:
-                        if signer['signer_decision']:
-                            signer_status = signer['signer_decision'].get('type', '')
-                        break
-                defaults = {
-                    "doc_type": doc_type_obj,
-                    "status": response['status'],
-                    "signer_decision": signer_status,
-                    "output_file_id": response['sign_files']['files'][0]['id'],
-                    "license": license,
-                    "fields": data,
-                    "response": response,
-                }
-                obj = BoxSign.objects.update_or_create(request_id=response['id'], defaults=defaults)
+            signer_status = ''
+            for signer in response['signers']:
+                if signer['order'] == 1:
+                    if signer['signer_decision']:
+                        signer_status = signer['signer_decision'].get('type', '')
+                    break
+            defaults = {
+                "doc_type": doc_type_obj,
+                "status": response['status'],
+                "signer_decision": signer_status,
+                "output_file_id": response['sign_files']['files'][0]['id'],
+                "license": data['license'],
+                "fields": request.data,
+                "response": response,
+            }
+            obj = BoxSign.objects.update_or_create(request_id=response['id'], defaults=defaults)
 
         return Response(response)
 
@@ -792,6 +797,20 @@ class AgrementBoxSignViewSet(ViewSet):
 
     # def destroy(self, request, *args, **kwargs):
     #     pass
+
+    def get_prefill_tags_agreement(self, request, data):
+        prefill_data = data['prefill_data']
+        prefill_tags = {
+            "license_number": prefill_data['license_number'],
+            "company": prefill_data['legal_business_name'],
+            "full_name": prefill_data['legal_business_name'],
+            "email": prefill_data['license_owner_email'],
+            "address": ', '.join(
+                [prefill_data[k]
+                 for k in ('premise_address', 'premise_city', 'premise_state', 'premise_zip')]
+            ),
+        }
+        return prefill_tags
 
     @staticmethod
     def bussiness_structure_tags(value):

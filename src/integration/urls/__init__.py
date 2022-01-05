@@ -19,7 +19,7 @@ from ..views import (
     CampaignView,
     ChatbotView,
     ConfiaCallbackView,
-    AgrementBoxSignViewSet,
+    BoxSignViewSet,
 )
 
 from . import (
@@ -29,7 +29,7 @@ from . import (
 app_name = "integration"
 
 router = SimpleRouter()
-router.register(r'box/sign/agreement', AgrementBoxSignViewSet, base_name="box-sign-agreement")
+router.register(r'box/sign', BoxSignViewSet, base_name="box-sign-agreement")
 
 urlpatterns = [
     path(r'crm/', include(crm_urls, namespace='crm')),
