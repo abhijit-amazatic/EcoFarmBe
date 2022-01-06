@@ -21,6 +21,10 @@ from .crm import (fetch_cultivars, fetch_licenses, insert_records)
 from  .sign import (upload_pdf_box,)
 from .box import(
     get_shared_link,
+    get_sign_request,
+)
+from .models import(
+    BoxSign,
 )
 from integration.apps.bcc import (post_licenses_to_crm, )
 from bill.utils import (delete_estimate, )
@@ -166,3 +170,8 @@ def update_account_cultivars_of_interest_in_crm(license_profile_id):
                 r = delete_record('Accounts_X_Cultivars', cultivar.get('linking_obj_id'))
 
 
+
+@app.task(queue="general")
+def box_sign_update_to_db(box_sign_obj_id):
+    sign_obj = BoxSign.objects.get(id=box_sign_obj_id)
+    print(sign_obj)

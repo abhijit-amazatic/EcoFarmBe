@@ -159,3 +159,14 @@ class BoxSign(TimeStampFlagModelMixin,models.Model):
         verbose_name_plural = _('Box Sign Requests')
         unique_together = ('license', 'request_id')
 
+class BoxEventTracker(TimeStampFlagModelMixin,models.Model):
+    """
+    Store Box Event Tracker data.
+    """
+    id = models.CharField(_('Request ID'), unique=True, primary_key=True, max_length=255)
+    stream_position = models.BigIntegerField(_('Request ID'), default=0)
+    is_state_ideal = models.BooleanField(_("Is State Ideal"), default=True)
+
+    class Meta:
+        verbose_name = _('Box Event Tracker')
+        verbose_name_plural = _('Box Event Trackers')
