@@ -9,9 +9,13 @@ from celery.schedules import crontab
 from core.celery import app
 from core.settings import (NUMBER_OF_DAYS_TO_FETCH_INVENTORY,PRODUCTION)
 
+from drf_api_logger.models import APILogsModel
+
 from inventory.models import (Inventory, )
+from bill.utils import (delete_estimate, )
 from labtest.models import (LabTest, )
 from brand.models import (License, LicenseProfile)
+from integration.apps.bcc import (post_licenses_to_crm, )
 from .crm import (insert_users, fetch_labtests, create_records, delete_record,
                   update_in_crm, update_license, search_query)
 from .crm.get_records import (get_account_associated_cultivars_of_interest)
@@ -21,14 +25,13 @@ from .crm import (fetch_cultivars, fetch_licenses, insert_records)
 from  .sign import (upload_pdf_box,)
 from .box import(
     get_shared_link,
-    get_sign_request,
 )
 from .models import(
     BoxSign,
 )
-from integration.apps.bcc import (post_licenses_to_crm, )
-from bill.utils import (delete_estimate, )
-from drf_api_logger.models import APILogsModel
+from .task_helpers import (
+    box_sign_update_to_db,
+)
 
 def get_price_data():
     """
@@ -172,6 +175,6 @@ def update_account_cultivars_of_interest_in_crm(license_profile_id):
 
 
 @app.task(queue="general")
-def box_sign_update_to_db(box_sign_obj_id):
+def box_sign_update_to_db_task(box_sign_obj_id):
     sign_obj = BoxSign.objects.get(id=box_sign_obj_id)
-    print(sign_obj)
+    box_sign_update_to_db(sign_obj)
