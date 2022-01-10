@@ -149,22 +149,24 @@ class BoxSign(TimeStampFlagModelMixin,models.Model):
     request_id = models.CharField(_('Request ID'), unique=True, max_length=255)
 
     status = models.CharField(_('Status'), blank=True, null=True, max_length=255)
+    output_file_id = models.CharField(_('Action ID'), unique=True, max_length=255)
     signer_decision = models.CharField(_('Signer Decision'), blank=True, null=True, max_length=255)
-    output_file_id = models.CharField(_('Action ID'), max_length=255)
+    signer_embed_url = models.URLField(_('Signer Embed URL'), blank=True, null=True, max_length=255)
+    program_name = models.CharField(_('Program Name'), blank=True, null=True, max_length=255)
     fields = JSONField(null=True, blank=True, default=dict)
     response = JSONField(null=True, blank=True, default=dict)
 
     class Meta:
         verbose_name = _('Box Sign Request')
         verbose_name_plural = _('Box Sign Requests')
-        unique_together = ('license', 'request_id')
+
 
 class BoxEventTracker(TimeStampFlagModelMixin,models.Model):
     """
     Store Box Event Tracker data.
     """
-    id = models.CharField(_('Request ID'), unique=True, primary_key=True, max_length=255)
-    stream_position = models.BigIntegerField(_('Request ID'), default=0)
+    id = models.CharField(_('Tracker ID'), unique=True, primary_key=True, max_length=255)
+    stream_position = models.BigIntegerField(_('Stream Position'), default=0)
     is_state_ideal = models.BooleanField(_("Is State Ideal"), default=True)
 
     class Meta:

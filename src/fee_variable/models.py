@@ -258,3 +258,39 @@ class VendorInventoryCategoryAccounts(TimeStampFlagModelMixin,models.Model):
         unique_together = (('default_accounts', 'item_category'), )
         verbose_name = _('Vendor Inventory Category Accounts')
         verbose_name_plural = _('Vendor Inventory Category Accounts')
+
+
+class Agreement(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing Agreement Model.
+    """
+    name = models.CharField(_('Name'), unique=True, max_length=255)
+    box_source_file_id = models.CharField(_('Box Source File Id'), unique=True, max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Agreement')
+        verbose_name_plural = _('Agreements')
+
+
+
+class Program(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing Agreement Model.
+    """
+    name = models.CharField(_('Name'), unique=True, max_length=255)
+    agreement = models.ForeignKey(
+        Agreement,
+        verbose_name=_('Agreement'),
+        related_name='program_set',
+        on_delete=models.PROTECT,
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Program')
+        verbose_name_plural = _('Programs')

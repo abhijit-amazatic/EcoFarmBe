@@ -173,7 +173,24 @@ class VendorInventoryDefaultAccountsAdmin(nested_admin.NestedModelAdmin):
 
 
 
+class AgreementAdmin(nested_admin.NestedModelAdmin):
+    """
+    Agreement Admin
+    """
+    pass
 
+class programAdmin(nested_admin.NestedModelAdmin):
+    """
+    Agreement Admin
+    """
+    pass
+
+
+
+
+
+admin.site.register(Agreement, AgreementAdmin)
+admin.site.register(Program, programAdmin)
 admin.site.register(OrderVariable, OrderVariableAdmin)
 admin.site.register(CustomInventoryVariable, CustomInventoryVariableAdmin)
 admin.site.register(TaxVariable, TaxVariableAdmin)

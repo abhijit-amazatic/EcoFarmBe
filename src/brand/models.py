@@ -854,7 +854,21 @@ class ProfileCategory(models.Model):
     """
     Class implementing  Vendor/Profile categories.
     """
-    name = models.CharField(max_length=255)
+    name = models.CharField(unique=True, max_length=255)
+    default_program = models.ForeignKey(
+        'fee_variable.Program',
+        verbose_name=_('Default Program'),
+        on_delete=models.SET_NULL,
+        related_name='profile_category_default_set',
+        blank=True,
+        null=True,
+    )
+    programs = models.ManyToManyField(
+        'fee_variable.Program',
+        verbose_name=_('Programs'),
+        related_name='profile_category_set',
+        blank=True,
+    )
 
     def __str__(self):
         return self.name
@@ -862,6 +876,7 @@ class ProfileCategory(models.Model):
     class Meta:
         verbose_name = _('Vendor/Profile Category')
         verbose_name_plural = _('Vendor/Profile Categories')
+
 
 class ProfileReport(models.Model):
     """
