@@ -35,7 +35,7 @@ def get_box_sign_request_info(response):
 
     info = {
         "signer_decision": signer_status,
-        # "signer_embed_url": signer_embed_url,
+        "signer_embed_url": signer_embed_url,
         "output_file_id": response['sign_files']['files'][0]['id'],
     }
     return info

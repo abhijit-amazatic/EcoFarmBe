@@ -72,7 +72,8 @@ from integration.sign import (upload_pdf_box, get_document,
                               get_embedded_url_from_sign,
                               download_pdf,
                               send_template)
-from integration.tasks import (send_estimate, delete_estimate_task, upload_agreement_pdf_to_box)
+from integration.task_helpers import (get_box_sign_request_info, box_sign_update_to_db)
+from integration.tasks import (send_estimate, delete_estimate_task, upload_agreement_pdf_to_box,)
 from integration.utils import (get_distance, get_places)
 from core.settings import (INVENTORY_BOX_ID, BOX_CLIENT_ID,
                            BOX_CLIENT_SECRET, CAMPAIGN_HTML_BUCKET, BOOKS_ORGANIZATION_LIST,
@@ -93,8 +94,6 @@ from .views_permissions import (
 )
 from .serializers import (
     BoxSignSerializer,
-    BoxSignAgreementSerializer,
-    AgreementSignPrefillDataSerializer,
 )
 from brand.models import (License, Sign, LicenseProfile)
 from bill.models import (Estimate, LineItem)
@@ -664,88 +663,72 @@ class DownloadSignDocumentView(APIView):
         return Response(response)
 
 
-class BoxSignViewSet(ViewSet):
+class BoxSignViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """
     View class to sign for template.
     """
+    queryset = BoxSign.objects.get_queryset()
     permission_classes = (IsAuthenticated,)
+    serializer_class = BoxSignSerializer
 
-    DOC_TYPE_PREFILL_DATA_SERIALIZERS = {
-        "agreement": AgreementSignPrefillDataSerializer,
-    }
+    lookup_field = 'request_id'
 
-    # def list(self, request, *args, **kwargs):
-    #     """
-    #     List sign requests.
-    #     """
-    #     return Response(list_sign_request(request.query_params.dict()))
+    def get_object(self):
+        obj = super().get_object()
+        return box_sign_update_to_db(obj)
 
     def create(self, request, *args, **kwargs):
         """
         Create agreement sign request.
         """
-        serializer = BoxSignSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
+        validated_data = serializer.validated_data
 
-        if data['doc_type'] in self.DOC_TYPE_PREFILL_DATA_SERIALIZERS:
-            prefill_data_serializer = self.DOC_TYPE_PREFILL_DATA_SERIALIZERS[data['doc_type']](data=data['prefill_data'])
-            if prefill_data_serializer.is_valid(raise_exception=False):
-                data['prefill_data'] = prefill_data_serializer.validated_data
-            else:
-                raise ValidationError({"prefill_data": prefill_data_serializer.errors})
+        # try:
+        #     doc_type_obj = BoxSignDocType.objects.get(name=validated_data['doc_type'])
+        # except ObjectDoesNotExist:
+        #     return Response({"detail": f"Doc type '{validated_data['doc_type']}' not configured on backend."}, status=400)
 
         try:
-            doc_type_obj = BoxSignDocType.objects.get(name=data['doc_type'])
-        except ObjectDoesNotExist:
-            return Response({"detail": f"Doc type '{data['doc_type']}' not configured on backend."}, status=400)
-
-        try:
-            obj = BoxSign.objects.filter(license=data['license']).latest('created_on')
+            obj = BoxSign.objects.filter(license=validated_data['license']).latest('created_on')
             if obj:
-                # if all([data.get(k) == v for k, v in obj.fields.items()]):
-                if self.is_fields_same(obj.fields, request.data):
-                    try:
-                        response = get_sign_request(obj.request_id)
-                    except BoxAPIException as e:
-                        response = e.network_response.json()
-                    else:
-                        return Response(response)
+                # if all([validated_data.get(k) == v for k, v in obj.fields.items()]):
+                if self.is_fields_same(obj.fields, serializer.initial_data):
+                    obj = box_sign_update_to_db(obj)
+                    serializer = self.get_serializer(obj)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist as exc:
             pass
 
-        if hasattr(self, f"get_prefill_tags_{data['doc_type']}"):
-            prefill_tags = getattr(self, f"get_prefill_tags_{data['doc_type']}")(request, data)
-        else:
-            prefill_tags = {**data['prefill_data']}
 
         signer_order = 1
         signers = [
             {
-                'name': data['recipient']['name'],
-                'email': data['recipient']['email'],
-                'embed_url_external_user_id': request.user.email,
+                'name': validated_data['recipient']['name'],
+                'email': validated_data['recipient']['email'],
+                'embed_url_external_user_id': self.request.user.email,
                 'is_in_person': True,
                 'order': signer_order,
             },
         ]
 
-        if doc_type_obj.need_approval:
+        if validated_data['doc_type'].need_approval:
             try:
-                doc_type_obj_approver = doc_type_obj.approver
+                doc_type_approver = validated_data['doc_type'].approver
             except ObjectDoesNotExist:
                 return Response({'Agreement doc_type Approver details not added.'}, status=400)
             else:
-                prefill_tags.update(doc_type_obj_approver.get_prefill_data())
+                validated_data['prefill_tags'].update(doc_type_approver.get_prefill_validated_data())
                 signer_order += 1
                 signers.append({
-                    'name': doc_type_obj_approver.name,
-                    'email': doc_type_obj_approver.email,
+                    'name': doc_type_approver.name,
+                    'email': doc_type_approver.email,
                     'is_in_person': False,
                     'order': signer_order,
                 })
 
-        for reader in doc_type_obj.final_copy_readers.all():
+        for reader in validated_data['doc_type'].final_copy_readers.all():
             signer_order += 1
             signers.append({
                 'name': reader.name,
@@ -757,38 +740,33 @@ class BoxSignViewSet(ViewSet):
         try:
             license_folder = create_folder(
                 settings.LICENSE_PARENT_FOLDER_ID,
-                f"{data['license'].legal_business_name}_{data['license'].license_number}",
+                f"{validated_data['license'].legal_business_name}_{validated_data['license'].license_number}",
             )
-            parent_folder = create_folder(license_folder,data['doc_type'].title())
+            parent_folder = create_folder(license_folder,validated_data['doc_type'].name.title())
 
             response = create_sign_request(
-                source_file_id=data.get('source_file_id'),
+                source_file_id=validated_data.get('source_file_id'),
                 parent_folder_id=parent_folder,
                 signers=signers,
-                prefill_tags=prefill_tags,
-                external_id=data['license'].license_number
+                prefill_tags=validated_data['prefill_tags'],
+                external_id=validated_data['license'].license_number
             )
         except BoxAPIException as e:
             response = e.network_response.json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
         else:
-            signer_status = ''
-            for signer in response['signers']:
-                if signer['order'] == 1:
-                    if signer['signer_decision']:
-                        signer_status = signer['signer_decision'].get('type', '')
-                    break
             defaults = {
-                "doc_type": doc_type_obj,
+                **get_box_sign_request_info(response),
+                "doc_type": validated_data['doc_type'],
+                "program_name": validated_data.get('program_name'),
                 "status": response['status'],
-                "signer_decision": signer_status,
-                "output_file_id": response['sign_files']['files'][0]['id'],
-                "license": data['license'],
-                "fields": request.data,
+                "license": validated_data['license'],
+                "fields": serializer.initial_data,
                 "response": response,
             }
             obj = BoxSign.objects.update_or_create(request_id=response['id'], defaults=defaults)
-
-        return Response(response)
+            serializer = self.get_serializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     # def retrieve(self, request, *args, **kwargs):
     #     request_id = kwargs.get('pk')
@@ -798,41 +776,6 @@ class BoxSignViewSet(ViewSet):
     # def destroy(self, request, *args, **kwargs):
     #     pass
 
-    def get_prefill_tags_agreement(self, request, data):
-        prefill_data = data['prefill_data']
-        prefill_tags = {
-            "license_number": prefill_data['license_number'],
-            "company": prefill_data['legal_business_name'],
-            "full_name": prefill_data['legal_business_name'],
-            "email": prefill_data['license_owner_email'],
-            "address": ', '.join(
-                [prefill_data[k]
-                 for k in ('premise_address', 'premise_city', 'premise_state', 'premise_zip')]
-            ),
-        }
-        return prefill_tags
-
-    @staticmethod
-    def bussiness_structure_tags(value):
-        tags = {}
-        bussiness_structure_choices = {
-            'Individual': 'bs_individual',
-            'C Corporation': 'bs_c_corporation',
-            'S Corporation': 'bs_s_corporation',
-            'Partnership': 'bs_partnership',
-            'Trust': 'bs_trust',
-            'LLC': 'bs_llc',
-            'Other': 'bs_other',
-        }
-        if value in bussiness_structure_choices:
-            for k, v in bussiness_structure_choices.items():
-                tag = {"document_tag_id": k}
-                if value == k:
-                    tag[v] = True
-                else:
-                    tag[v] = False
-                tags.append(tag)
-        return tags
 
     def is_fields_same(self, dict1, dict2):
         """
