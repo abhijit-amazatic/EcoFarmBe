@@ -1,11 +1,15 @@
 """
 Integration serializer
 """
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from brand.models import License
+from brand.models import (
+    License,
+    ProfileCategory,
+)
 from fee_variable.models import Program
 from  .models import (
     BoxSignDocType,
@@ -71,11 +75,11 @@ class BoxSignSerializer(serializers.ModelSerializer):
 
     # license = serializers.PrimaryKeyRelatedField(queryset=License.objects)
     recipient = BoxSignRecipientSerializer(write_only=True)
-    source_file_id = serializers.CharField(write_only=True, max_length=255)
+    source_file_id = serializers.CharField(write_only=True, required=False, max_length=255)
     # doc_type = serializers.CharField(max_length=255)
     # doc_type = serializers.ChoiceField(choices=BoxSignDocType.DOC_TYPE_CHOICES)
     # doc_type = serializers.RelatedField(queryset=BoxSignDocType.objects)
-    program_name = BoxSignRelatedProgramNameField()
+    program_name = BoxSignRelatedProgramNameField(required=False)
     prefill_data = serializers.JSONField(write_only=True)
 
 
@@ -90,32 +94,58 @@ class BoxSignSerializer(serializers.ModelSerializer):
 
         if hasattr(self, f"validate_doc_type_{doc_type}"):
             attrs = getattr(self, f"validate_doc_type_{doc_type}")(attrs)
+        else:
+            attrs = self.validate_doc_type_other(attrs)
 
         if hasattr(self, f"get_prefill_tags_{doc_type}"):
             attrs['prefill_tags'] = getattr(self, f"get_prefill_tags_{doc_type}")(attrs)
         else:
             attrs['prefill_tags'] = {**attrs['prefill_data']}
+
         return attrs
 
     def validate_doc_type_agreement(self, attrs):
         if not attrs.get('program_name'):
-            raise ValidationError({"program_name": "This field is required."})
+            profile_category = attrs['license'].profile_category or ''
+            try:
+                qs = ProfileCategory.objects.select_related('default_program__agreement')
+                profile_category_obj = qs.get(name=profile_category)
+            except ObjectDoesNotExist:
+                pass
+            else:
+                if profile_category_obj.default_program:
+                    attrs['program_name'] = profile_category_obj.default_program
+            if not attrs.get('program_name'):
+                raise ValidationError({
+                    "program_name": (
+                        "This field is required.(Default program_name not found "
+                        f"for profile_category \'{profile_category}\')"
+                    )
+                })
+
         if attrs['program_name'].agreement.box_source_file_id:
             attrs['source_file_id'] = attrs['program_name'].agreement.box_source_file_id
         attrs['program_name'] = attrs['program_name'].name
         return attrs
 
+    def validate_doc_type_other(self, attrs):
+        if not attrs.get('source_file_id'):
+            raise ValidationError({"source_file_id": "This field is required for current doc_type."})
+        return attrs
+
     def get_prefill_tags_agreement(self, data):
         prefill_data = data['prefill_data']
+        address = (
+            f"{prefill_data['premise_address']}, \n"
+            f"{prefill_data['premise_city']}, \n"
+            f"{prefill_data['premise_state']} - {prefill_data['premise_zip']}"
+        ),
         prefill_tags = {
             "license_number": prefill_data['license_number'],
             "company": prefill_data['legal_business_name'],
             "full_name": prefill_data['legal_business_name'],
             "email": prefill_data['license_owner_email'],
-            "address": ', '.join(
-                [prefill_data[k]
-                 for k in ('premise_address', 'premise_city', 'premise_state', 'premise_zip')]
-            ),
+            "address": address
         }
         return prefill_tags
 
@@ -133,12 +163,10 @@ class BoxSignSerializer(serializers.ModelSerializer):
         }
         if value in bussiness_structure_choices:
             for k, v in bussiness_structure_choices.items():
-                tag = {"document_tag_id": k}
                 if value == k:
-                    tag[v] = True
+                    tags[v] = True
                 else:
-                    tag[v] = False
-                tags.append(tag)
+                    tags[v] = False
         return tags
 
     class Meta:
