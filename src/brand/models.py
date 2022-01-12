@@ -863,12 +863,6 @@ class ProfileCategory(models.Model):
         blank=True,
         null=True,
     )
-    programs = models.ManyToManyField(
-        'fee_variable.Program',
-        verbose_name=_('Programs'),
-        related_name='profile_category_set',
-        blank=True,
-    )
 
     def __str__(self):
         return self.name

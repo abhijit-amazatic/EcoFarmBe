@@ -12,8 +12,4 @@ class ProfileCategoryAdmin(admin.ModelAdmin):
     """
     ProfileCategoryAdmin
     """
-    filter_horizontal = [
-        "programs",
-    ]
-
     #search_fields = ('',)
