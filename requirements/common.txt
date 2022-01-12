@@ -32,7 +32,7 @@ django-phonenumber-field==5.0.0
 phonenumbers==8.12.9
 authy==2.2.6
 qrcode==6.1
-pyjwt==1.4.2
+pyjwt==2.3.0
 django-ckeditor==6.0.0
 django-storages==1.10.1
 django-multiselectfield==0.1.12
