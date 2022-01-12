@@ -1,6 +1,10 @@
+from django.core.exceptions import ObjectDoesNotExist
+
+from brand.models import LicenseProfile
 from .box import(
     get_shared_link,
     get_sign_request,
+
     BoxException,
     BoxAPIException,
 )
@@ -19,8 +23,21 @@ def box_sign_update_to_db(box_sign_obj):
             "response": response,
         }
         box_sign_obj.__dict__.update(update_data)
+        if box_sign_obj.signer_decision == 'signed' and  signer_decision != 'signed':
+            if box_sign_obj.doc_type == 'agreement':
+                try:
+                    profile = box_sign_obj.license.license_profile
+                except ObjectDoesNotExist:
+                    pass
+                else:
+                    profile.agreement_signed = True
+                    profile.agreement_link = get_shared_link(box_sign_obj.output_file_id)
+                    profile.save()
+            elif box_sign_obj.doc_type == 'w9':
+                output_file_id = box_sign_obj.output_file_id
+                box_sign_obj.license.uploaded_w9_to = get_shared_link(output_file_id)
+                box_sign_obj.license.save()
         box_sign_obj.save()
-        # if signer_decision !=
     return box_sign_obj
 
 def get_box_sign_request_info(response):

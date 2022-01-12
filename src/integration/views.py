@@ -695,9 +695,11 @@ class BoxSignViewSet(mixins.RetrieveModelMixin, GenericViewSet):
             if obj:
                 # if all([validated_data.get(k) == v for k, v in obj.fields.items()]):
                 if self.is_fields_same(obj.fields, serializer.initial_data):
-                    obj = box_sign_update_to_db(obj)
-                    serializer = self.get_serializer(obj)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    if obj.status not in ('cancelled', 'declined', 'error_converting', 'error_sending', 'expired'):
+                        if obj.signer_decision not in ('declined',):
+                            obj = box_sign_update_to_db(obj)
+                            serializer = self.get_serializer(obj)
+                            return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist as exc:
             pass
 
@@ -764,7 +766,7 @@ class BoxSignViewSet(mixins.RetrieveModelMixin, GenericViewSet):
                 "fields": serializer.initial_data,
                 "response": response,
             }
-            obj = BoxSign.objects.update_or_create(request_id=response['id'], defaults=defaults)
+            obj, created = BoxSign.objects.update_or_create(request_id=response['id'], defaults=defaults)
             serializer = self.get_serializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
 

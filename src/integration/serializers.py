@@ -1,6 +1,7 @@
 """
 Integration serializer
 """
+from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -46,6 +47,8 @@ class BoxSignRelatedProgramNameField(serializers.RelatedField):
     queryset = Program.objects.get_queryset().select_related('agreement')
 
     def to_representation(self, obj):
+        if isinstance(obj, models.Model):
+            return obj.name
         return obj
 
     def to_internal_value(self, data):
@@ -141,7 +144,7 @@ class BoxSignSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoxSign
         # fields = ('__all__')
-        exclude = ('id', 'response',)
+        exclude = ('id', 'response', 'fields')
         read_only_fields = (
             'request_id',
             'status',
