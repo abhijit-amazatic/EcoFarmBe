@@ -37,7 +37,7 @@ from .create_customer_in_books import create_customer_in_books_task
 
 
 @app.task(queue="general")
-def refresh_integration_ids(license_id=None):
+def refresh_integration_ids_task(license_id=None):
     """
     Populate Integration records id to respective fields.
     """

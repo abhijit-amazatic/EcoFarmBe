@@ -39,6 +39,9 @@ from .create_customer_in_books import (
     create_customer_in_books_task,
 )
 
+from .refresh_integration_ids import (
+    refresh_integration_ids_task,
+)
 slack = Slacker(settings.SLACK_TOKEN)
 
 
