@@ -139,11 +139,11 @@ class BoxSignSerializer(serializers.ModelSerializer):
             f"{prefill_data['premise_address']}, \n"
             f"{prefill_data['premise_city']}, \n"
             f"{prefill_data['premise_state']} - {prefill_data['premise_zip']}"
-        ),
+        )
         prefill_tags = {
             "license_number": prefill_data['license_number'],
             "company": prefill_data['legal_business_name'],
-            "full_name": prefill_data['legal_business_name'],
+            "full_name": prefill_data['license_owner_name'],
             "email": prefill_data['license_owner_email'],
             "address": address
         }
@@ -172,7 +172,11 @@ class BoxSignSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoxSign
         # fields = ('__all__')
-        exclude = ('id', 'response', 'fields')
+        exclude = (
+            'id',
+            'fields',
+            # 'response',
+        )
         read_only_fields = (
             'request_id',
             'status',

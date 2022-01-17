@@ -721,7 +721,7 @@ class BoxSignViewSet(mixins.RetrieveModelMixin, GenericViewSet):
             except ObjectDoesNotExist:
                 return Response({'Agreement doc_type Approver details not added.'}, status=400)
             else:
-                validated_data['prefill_tags'].update(doc_type_approver.get_prefill_validated_data())
+                validated_data['prefill_tags'].update(doc_type_approver.get_prefill_data())
                 signer_order += 1
                 signers.append({
                     'name': doc_type_approver.name,
