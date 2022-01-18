@@ -67,7 +67,6 @@ class UserSerializer(serializers.ModelSerializer):
     """
     User Serializer.
     """
-    id = serializers.ReadOnlyField()
     email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True,
@@ -75,25 +74,13 @@ class UserSerializer(serializers.ModelSerializer):
         help_text='Leave empty if no change needed',
         style={'input_type': 'password', 'placeholder': 'Password'}
     )
-    is_staff = serializers.ReadOnlyField()
-    is_superuser = serializers.ReadOnlyField()
-    unique_user_id = serializers.ReadOnlyField()
-    is_phone_verified = serializers.ReadOnlyField()
-    crm_link = serializers.ReadOnlyField()
-    date_joined = serializers.ReadOnlyField()
-    member_categories = serializers.SerializerMethodField(read_only=True)
-    two_factor_devices = serializers.SerializerMethodField(read_only=True)
-    organizations = serializers.SerializerMethodField(read_only=True)
-    is_verified = serializers.ReadOnlyField()
-    is_2fa_enabled = serializers.ReadOnlyField()
-    is_approved = serializers.ReadOnlyField()
-    approved_on = serializers.ReadOnlyField()
-    approved_by = serializers.ReadOnlyField()
-    profile_photo_sharable_link = serializers.ReadOnlyField()
-    platform_kpi = serializers.SerializerMethodField(read_only=True)
+    organizations = serializers.SerializerMethodField()
     document_url = serializers.SerializerMethodField()
     internal_roles = serializers.SerializerMethodField()
     internal_permission = serializers.SerializerMethodField()
+    member_categories = serializers.SerializerMethodField()
+    two_factor_devices = serializers.SerializerMethodField()
+    platform_kpi = serializers.SerializerMethodField()
 
     def get_organizations(self, obj):
         """
@@ -173,62 +160,35 @@ class UserSerializer(serializers.ModelSerializer):
         qs = filterQuerySet.for_user(qs, obj)
         profile_count = qs.count()
         return {"profile_count":profile_count}
-    
-    
+
     class Meta:
         model = User
-        fields = (
+        read_only_fields = (
             'id',
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'categories',
-            'member_categories',
-            'membership_type',
-            'full_name',
-            'country',
-            'state',
-            'date_of_birth',
-            'city',
-            'zip_code',
-            'phone',
-            'date_joined',
-            'legal_business_name',
-            'business_dba',
-            'existing_member',
-            'password',
-            'recovery_email',
-            'alternate_email',
-            'is_superuser',
             'is_staff',
-            'is_verified',
-            'is_approved',
+            'is_superuser',
+            'unique_user_id',
             'is_phone_verified',
+            'crm_link',
+            'date_joined',
+            'is_verified',
             'is_2fa_enabled',
-            'status',
-            'step',
-            'profile_photo',
+            'is_approved',
             'profile_photo_sharable_link',
-            'title',
-            'department',
-            'website',
-            'instagram',
-            'linkedin',
-            'facebook',
-            'twitter',
             'approved_on',
             'approved_by',
-            'platform_kpi',
-            'about',
-            'two_factor_devices',
-            'document_url',
-            'crm_link',
-            'organizations',
-            'internal_roles',
-            'internal_permission',
-            'unique_user_id',
-            'default_org',
+            'created_on',
+            'updated_on',
+        )
+        exclude = (
+            'last_login',
+            'is_active',
+            'groups',
+            'user_permissions',
+            'bypass_terms_and_conditions',
+            'zoho_crm_id',
+            'zoho_contact_id',
+            'is_updated_in_crm',
         )
 
     def validate_password(self, password):
