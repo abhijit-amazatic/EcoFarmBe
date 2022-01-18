@@ -5,6 +5,5 @@ class IntegrationConfig(AppConfig):
     name = 'integration'
 
     def ready(self):
-        pass
-        # from ..box_sign_event_tracker import start_tracking
-        # start_tracking()
+        from ..box_sign_event_tracker import start_tracking
+        start_tracking()

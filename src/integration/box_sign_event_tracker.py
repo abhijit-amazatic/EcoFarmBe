@@ -1,3 +1,4 @@
+import os
 import time
 import threading
 from django.conf import settings
@@ -70,17 +71,18 @@ class BoxSignEventTracker(threading.Thread):
                     box_sign_update_to_db_task.delay(obj.id)
 
 def start_tracking():
-    already_exists = False
+    if os.environ.get('ENABLE_BOX_SIGN_TRACKER', '').lower() == 'true':
+        already_exists = False
 
-    for t in threading.enumerate():
-        if t.getName() == TRACKER_THREAD_NAME:
-            already_exists = True
+        for t in threading.enumerate():
+            if t.getName() == TRACKER_THREAD_NAME:
+                already_exists = True
 
-    if not already_exists:
-        t = BoxSignEventTracker()
-        t.daemon = True
-        t.setName(TRACKER_THREAD_NAME)
-        t.start()
+        if not already_exists:
+            t = BoxSignEventTracker()
+            t.daemon = True
+            t.setName(TRACKER_THREAD_NAME)
+            t.start()
 
 def test():
     t = BoxSignEventTracker()
