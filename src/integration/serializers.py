@@ -33,10 +33,10 @@ class AgreementSignPrefillDataSerializer(serializers.Serializer):
     legal_business_name = serializers.CharField(max_length=255)
     license_owner_name = serializers.CharField(max_length=255)
     license_owner_email = serializers.EmailField(max_length=255)
-    premise_address = serializers.CharField(max_length=255)
-    premise_state = serializers.CharField(max_length=255)
-    premise_city = serializers.CharField(max_length=255)
-    premise_zip = serializers.CharField(max_length=255)
+    premises_address = serializers.CharField(max_length=255)
+    premises_state = serializers.CharField(max_length=255)
+    premises_city = serializers.CharField(max_length=255)
+    premises_zip = serializers.CharField(max_length=255)
 
 
 class BoxSignRecipientSerializer(serializers.Serializer):
@@ -136,9 +136,9 @@ class BoxSignSerializer(serializers.ModelSerializer):
     def get_prefill_tags_agreement(self, data):
         prefill_data = data['prefill_data']
         address = (
-            f"{prefill_data['premise_address']}, \n"
-            f"{prefill_data['premise_city']}, \n"
-            f"{prefill_data['premise_state']} - {prefill_data['premise_zip']}"
+            f"{prefill_data['premises_address']}, "
+            f"{prefill_data['premises_city']}, "
+            f"{prefill_data['premises_state']} - {prefill_data['premises_zip']}"
         )
         prefill_tags = {
             "license_number": prefill_data['license_number'],

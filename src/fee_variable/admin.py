@@ -177,6 +177,10 @@ class AgreementAdmin(nested_admin.NestedModelAdmin):
     """
     Agreement Admin
     """
+    list_display = (
+        'name',
+        'box_source_file_id',
+    )
     pass
 
 class programAdmin(nested_admin.NestedModelAdmin):

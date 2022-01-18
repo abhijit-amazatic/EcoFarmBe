@@ -28,11 +28,16 @@ def box_sign_update_to_db(box_sign_obj):
                 try:
                     profile = box_sign_obj.license.license_profile
                 except ObjectDoesNotExist:
-                    pass
-                else:
-                    profile.agreement_signed = True
-                    profile.agreement_link = get_shared_link(box_sign_obj.output_file_id)
-                    profile.save()
+                    profile = LicenseProfile.objects.create(license=box_sign_obj.license)
+
+                profile.agreement_signed = True
+                profile.agreement_link = get_shared_link(box_sign_obj.output_file_id)
+                profile.save()
+                if box_sign_obj.license.status == 'in_progress':
+                    box_sign_obj.license.status = 'completed'
+                    box_sign_obj.license.step = '1'
+                    box_sign_obj.license.save()
+
             elif box_sign_obj.doc_type == 'w9':
                 output_file_id = box_sign_obj.output_file_id
                 box_sign_obj.license.uploaded_w9_to = get_shared_link(output_file_id)

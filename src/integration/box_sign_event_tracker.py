@@ -4,7 +4,7 @@ from django.conf import settings
 
 
 from .box import get_box_client
-from.tasks import box_sign_update_to_db
+from.tasks import box_sign_update_to_db_task
 from .models import (
     BoxSign,
     BoxEventTracker,
@@ -67,7 +67,7 @@ class BoxSignEventTracker(threading.Thread):
 
             if file_id_ls:
                 for obj in BoxSign.objects.filter(output_file_id__in=file_id_ls).distinct():
-                    box_sign_update_to_db.delay(obj.id)
+                    box_sign_update_to_db_task.delay(obj.id)
 
 def start_tracking():
     already_exists = False
