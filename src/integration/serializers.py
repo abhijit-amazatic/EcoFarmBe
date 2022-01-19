@@ -10,7 +10,10 @@ from brand.models import (
     License,
     ProfileCategory,
 )
-from fee_variable.models import Program
+from fee_variable.models import (
+    Program,
+    ProgramProfileCategoryAgreement,
+)
 from  .models import (
     BoxSignDocType,
     BoxSign,
@@ -48,7 +51,7 @@ class BoxSignRecipientSerializer(serializers.Serializer):
 
 
 class BoxSignRelatedProgramNameField(serializers.RelatedField):
-    queryset = Program.objects.get_queryset().select_related('agreement')
+    queryset = Program.objects.get_queryset()
 
     def to_representation(self, obj):
         if isinstance(obj, models.Model):
@@ -105,26 +108,52 @@ class BoxSignSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_doc_type_agreement(self, attrs):
+        default_program = None
+        profile_category = attrs['license'].profile_category or ''
         if not attrs.get('program_name'):
-            profile_category = attrs['license'].profile_category or ''
             try:
-                qs = ProfileCategory.objects.select_related('default_program__agreement')
+                qs = ProfileCategory.objects.select_related('default_program')
                 profile_category_obj = qs.get(name=profile_category)
             except ObjectDoesNotExist:
                 pass
             else:
                 if profile_category_obj.default_program:
-                    attrs['program_name'] = profile_category_obj.default_program
-            if not attrs.get('program_name'):
-                raise ValidationError({
-                    "program_name": (
-                        "This field is required.(Default program_name not found "
-                        f"for profile_category \'{profile_category}\')"
-                    )
-                })
+                    attrs['program_name'] = default_program = profile_category_obj.default_program
 
-        if attrs['program_name'].agreement.box_source_file_id:
-            attrs['source_file_id'] = attrs['program_name'].agreement.box_source_file_id
+        if attrs['program_name']:
+            try:
+                qs = ProgramProfileCategoryAgreement.objects.get_queryset()
+                qs = qs.select_related('agreement')
+                program_profile_category_agreement_obj = qs.get(
+                    program=attrs['program_name'],
+                    profile_category__name=profile_category,
+                )
+            except ObjectDoesNotExist:
+                if not default_program:
+                    raise ValidationError({
+                        "program_name": (
+                            f"This program is not added to profile category '{profile_category}')"
+                        )
+                    })
+                else:
+                    attrs['program_name'] = None
+            else:
+                attrs.setdefault(
+                    'source_file_id', program_profile_category_agreement_obj.agreement.box_source_file_id
+                )
+
+
+        if not attrs.get('program_name'):
+            raise ValidationError({
+                "program_name": (
+                    "This field is required.(Default program_name not found "
+                    f"for profile_category \'{profile_category}\')"
+                )
+            })
+
+        if not attrs['source_file_id']:
+            raise ValidationError({"source_file_id": "This field is required."})
+
         attrs['program_name'] = attrs['program_name'].name
         return attrs
 
