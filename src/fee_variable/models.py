@@ -281,12 +281,6 @@ class Program(TimeStampFlagModelMixin,models.Model):
     Class implementing Agreement Model.
     """
     name = models.CharField(_('Name'), unique=True, max_length=255)
-    agreement = models.ForeignKey(
-        Agreement,
-        verbose_name=_('Agreement'),
-        related_name='program_set',
-        on_delete=models.PROTECT,
-    )
 
     def __str__(self):
         return self.name
@@ -294,3 +288,35 @@ class Program(TimeStampFlagModelMixin,models.Model):
     class Meta:
         verbose_name = _('Program')
         verbose_name_plural = _('Programs')
+
+
+class ProgramProfileCategoryAgreement(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing Program, Profile Category and Agreement related Model.
+    """
+    profile_category = models.ForeignKey(
+        'brand.ProfileCategory',
+        verbose_name=_('Profile Category'),
+        related_name='program_profile_category_agreement_set',
+        on_delete=models.CASCADE,
+    )
+    program = models.ForeignKey(
+        Program,
+        verbose_name=_('Program'),
+        related_name='program_profile_category_agreement_set',
+        on_delete=models.CASCADE,
+    )
+    agreement = models.ForeignKey(
+        Agreement,
+        verbose_name=_('Agreement'),
+        related_name='program_profile_category_agreement_set',
+        on_delete=models.PROTECT,
+    )
+
+    def __str__(self):
+        return f"{self.program} {self.profile_category}"
+
+    class Meta:
+        unique_together = ('program', 'profile_category')
+        verbose_name = _('Program Profile Category Agreement')
+        verbose_name_plural = _('Program Profile Category Agreement')

@@ -183,11 +183,19 @@ class AgreementAdmin(nested_admin.NestedModelAdmin):
     )
     pass
 
+class ProgramProfileCategoryAgreementInline(nested_admin.NestedTabularInline):
+    """
+    Agreement Admin
+    """
+    extra = 0
+    model = ProgramProfileCategoryAgreement
+    readonly_fields = ('created_on','updated_on',)
+
 class programAdmin(nested_admin.NestedModelAdmin):
     """
     Agreement Admin
     """
-    pass
+    inlines = [ProgramProfileCategoryAgreementInline]
 
 
 
