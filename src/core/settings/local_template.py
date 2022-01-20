@@ -266,6 +266,11 @@ BYPASS_VERIFICATION_FOR_EMAILS = []
 DRF_API_LOGGER_DATABASE = True
 DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token', 'access', 'refresh', 'Token']
 DRF_API_LOGGER_DEFAULT_DATABASE = 'logger'
+DRF_API_LOGGER_SKIP_URL_NAME = [
+    'page-meta-list',
+    'page-meta-detail',
+    'page-meta-url-page-meta',
+]
 
 INTEGRATION_ADMIN_EMAILS = []
 INTEGRATION_ADMIN_TOKEN_MASK = True

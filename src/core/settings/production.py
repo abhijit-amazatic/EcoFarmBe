@@ -247,7 +247,11 @@ BYPASS_VERIFICATION_FOR_EMAILS = json.loads(os.environ.get("BYPASS_VERIFICATION_
 DRF_API_LOGGER_DATABASE = True
 DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token', 'access', 'refresh', 'Token']
 DRF_API_LOGGER_DEFAULT_DATABASE = 'logger'
-
+DRF_API_LOGGER_SKIP_URL_NAME = [
+    'page-meta-list',
+    'page-meta-detail',
+    'page-meta-url-page-meta',
+]
 
 PASSWORDLESS_AUTH = {
     'PASSWORDLESS_AUTH_TYPES': ['EMAIL', 'PHONE'],
