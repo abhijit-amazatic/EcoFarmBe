@@ -1,6 +1,7 @@
 """
 Integration views
 """
+from argparse import Action
 import time
 from datetime import (datetime, timedelta)
 import base64
@@ -10,6 +11,7 @@ from django.http import (QueryDict,)
 from django.core.exceptions import (ObjectDoesNotExist,)
 from django.utils.functional import (cached_property)
 from rest_framework import (status,)
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (AllowAny, IsAuthenticated,)
 from rest_framework.response import Response
@@ -667,7 +669,7 @@ class BoxSignViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """
     View class to sign for template.
     """
-    queryset = BoxSign.objects.get_queryset()
+    queryset = BoxSign.objects.get_queryset().select_related('license')
     permission_classes = (IsAuthenticated,)
     serializer_class = BoxSignSerializer
 
@@ -778,6 +780,18 @@ class BoxSignViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     # def destroy(self, request, *args, **kwargs):
     #     pass
 
+    @action(detail=True, url_path='download', methods=['get'])
+    def download(self, request,*args, **kwargs):
+        """
+        Get document binary.
+        """
+        response = list()
+        obj = super().get_object()
+        response.append(get_download_url(obj.output_file_id))
+        if not obj.license.is_contract_downloaded:
+            obj.license.is_contract_downloaded = True
+            obj.license.save()
+        return Response(response)
 
     def is_fields_same(self, dict1, dict2):
         """
