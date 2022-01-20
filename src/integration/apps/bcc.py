@@ -18,6 +18,15 @@ def get_licenses():
     response = requests.get(url, headers=headers)
     return response.json()
 
+def get_dcc_pages():
+    url = 'https://as-cdt-pub-vip-cannabis-ww-p-002.azurewebsites.net/licenses/filteredSearch?pageSize=&pageNumber='
+    return requests.get(url).json()["metadata"]["totalPages"]
+
+def get_dcc_licenses(page):
+    url = 'https://as-cdt-pub-vip-cannabis-ww-p-002.azurewebsites.net/licenses/filteredSearch?pageSize=&pageNumber='
+    res = requests.get(url + str(page))
+    return res.json()["data"]
+
 def get_license_dict():
     return {
     "Layout": "layout_parse",
@@ -45,7 +54,7 @@ def parse_field(license, key, value):
     """
     Return parsed field.
     """
-    v = license.get(value)
+    v = license.get(value) 
     if value.startswith('businessOwner'):
         if v == 'null':
             return None
@@ -110,6 +119,39 @@ def get_all_licenses():
             page += 1
     return response
 
+def licenses_dcc_to_crm():
+    """
+    Post licenses from DCC to CRM.
+    """
+    crm_obj = get_crm_obj()
+    response_update = list()
+    total_pages = get_dcc_pages()
+    license_data_dict = get_all_licenses()
+    request_update = list()
+
+    for page in range(1,total_pages+1):    
+        licenses = get_dcc_licenses(page)
+        for license in licenses:
+            req = dict()
+            if license.get('licenseNumber') in license_data_dict:
+                v = license.get('activity')
+                if v:
+                    if v == 'Data Not Available':
+                        v = []
+                    else:
+                        v = [i.strip() for i in v.split(",")]
+                if v:
+                    req['Activities'] = v
+                    license_id = license_data_dict.get(license.get('licenseNumber'))
+                    if license_id:
+                        req['id'] = license_id
+                        request_update.append(req)
+    i = 0
+    while len(request_update) > i:
+        response_update.append(crm_obj.update_records("Licenses", request_update[i: i+100]))
+        i += 100
+    return response_update
+
 def post_licenses_to_crm():
     """
     Post licenses from BCC to CRM.
@@ -143,5 +185,6 @@ def post_licenses_to_crm():
     while len(request_update) > i:
         response_update.append(crm_obj.update_records("Licenses", request_update[i: i+100]))
         i += 100
-    return response_create, response_update
+    licenses_dcc_to_crm()
+    return response_create, response_update 
     
