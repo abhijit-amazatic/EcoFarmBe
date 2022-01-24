@@ -1,6 +1,7 @@
 """
 Integration serializer
 """
+from attr import attr
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -62,14 +63,22 @@ class W9SignPrefillDataSerializer(serializers.Serializer):
     """
     W9 Sign (using Box Sign) request prefill data Serializer
     """
-    BUSSINESS_STRUCTURE_CHOICES_TAGS = {
+    BUSINESS_STRUCTURE_CHOICES_TAGS = {
         'Individual': 'bs_individual',
+        'Sole Proprietor': 'bs_individual',
+        'Sole Proprietorship': 'bs_individual',
+        'Single Member LLC': 'bs_individual',
+        'Corporation': '',
         'C Corporation': 'bs_c_corporation',
         'S Corporation': 'bs_s_corporation',
         'Partnership': 'bs_partnership',
+        'General Partnership': 'bs_partnership',
         'Trust': 'bs_trust',
+        'Trust / Estate': 'bs_trust',
         'LLC': 'bs_llc',
+        'Limited Liability Company': 'bs_llc',
         'Other': 'bs_other',
+        'Undefined': ''
     }
     license_owner_name = serializers.CharField(max_length=255)
     legal_business_name = serializers.CharField(max_length=255)
@@ -77,7 +86,7 @@ class W9SignPrefillDataSerializer(serializers.Serializer):
     premises_city = serializers.CharField(max_length=255)
     premises_state = serializers.CharField(max_length=255)
     premises_zip = serializers.CharField(max_length=255)
-    bussiness_structure = serializers.ChoiceField(choices=list(BUSSINESS_STRUCTURE_CHOICES_TAGS.keys()))
+    bussiness_structure = serializers.ChoiceField(choices=list(BUSINESS_STRUCTURE_CHOICES_TAGS.keys()))
     ssn = serializers.CharField(required=False, min_length=9, max_length=11)
     ein = serializers.CharField(required=False, min_length=9, max_length=10)
 
@@ -93,13 +102,11 @@ class W9SignPrefillDataSerializer(serializers.Serializer):
         return ' '.join(ein[:2]) + middle_space + ' '.join(ein[2:])
 
     def bussiness_structure_tags(self, value):
-        tags = {}
-        if value in self.BUSSINESS_STRUCTURE_CHOICES_TAGS:
-            for k, v in self.BUSSINESS_STRUCTURE_CHOICES_TAGS.items():
-                if value == k:
-                    tags[v] = True
-                else:
-                    tags[v] = False
+        tags = {x: False for x in set(self.BUSINESS_STRUCTURE_CHOICES_TAGS.values()) if x}
+        if value in self.BUSINESS_STRUCTURE_CHOICES_TAGS:
+            k = self.BUSINESS_STRUCTURE_CHOICES_TAGS[value]
+            if k:
+                tags[k] = True
         return tags
 
     def validate(self, attrs):
@@ -115,9 +122,12 @@ class W9SignPrefillDataSerializer(serializers.Serializer):
                 f"{attrs['premises_state']}, "
                 f"{attrs['premises_zip']}"
             ),
-            "ssn": attrs['ssn'],
-            "ein": attrs['ein'],
         }
+        if attrs.get('ssn'):
+            prefill_tags["ssn"] = attrs['ssn']
+        if attrs.get('ein'):
+            prefill_tags["ein"] = attrs['ein']
+
         prefill_tags.update(self.bussiness_structure_tags(attrs['bussiness_structure']))
         return prefill_tags
 
