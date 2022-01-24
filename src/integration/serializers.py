@@ -103,6 +103,9 @@ class W9SignPrefillDataSerializer(serializers.Serializer):
         return tags
 
     def validate(self, attrs):
+        if not attrs.get('ssn') and not attrs.get('ein'):
+            raise ValidationError("At leas one field out of \'ssn\' and \'ein\' is required.")
+
         prefill_tags = {
             "full_name": attrs['license_owner_name'],
             "company": attrs['legal_business_name'],
