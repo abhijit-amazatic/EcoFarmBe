@@ -277,3 +277,6 @@ CONFIA_API_BASE_URL= os.environ.get('CONFIA_API_BASE_URL')
 
 #Rapid API
 RAPID_API_KEY = os.environ.get('RAPID_API_KEY')
+
+#Box Sign
+BOX_SIGN_W9_TEMPLATE_ID = os.environ.get('BOX_SIGN_W9_TEMPLATE_ID')

@@ -1,6 +1,7 @@
 """
 Integration serializer
 """
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework import serializers
@@ -233,6 +234,11 @@ class BoxSignSerializer(serializers.ModelSerializer):
 
         attrs['program_name'] = attrs['program_name'].name
         return attrs
+
+    def validate_doc_type_w9(self, attrs):
+        if settings.BOX_SIGN_W9_TEMPLATE_ID:
+            attrs['source_file_id'] = settings.BOX_SIGN_W9_TEMPLATE_ID
+        return self.validate_doc_type_other(attrs)
 
     def validate_doc_type_other(self, attrs):
         if not attrs.get('source_file_id'):

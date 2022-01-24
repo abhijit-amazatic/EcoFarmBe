@@ -301,3 +301,6 @@ CONFIA_API_BASE_URL= 'https://sandbox.pointchain.io/partner/'
 
 #Rapid API
 RAPID_API_KEY = ''
+
+#Box Sign
+BOX_SIGN_W9_TEMPLATE_ID = ''
