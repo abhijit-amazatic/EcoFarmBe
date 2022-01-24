@@ -42,6 +42,82 @@ class AgreementSignPrefillDataSerializer(serializers.Serializer):
     premises_zip = serializers.CharField(max_length=255)
 
 
+    def validate(self, attrs):
+        prefill_tags = {
+            "license_number": attrs['license_number'],
+            "company": attrs['legal_business_name'],
+            "full_name": attrs['license_owner_name'],
+            "email": attrs['license_owner_email'],
+            "address": (
+                f"{attrs['premises_address']}, "
+                f"{attrs['premises_city']}, "
+                f"{attrs['premises_state']} - {attrs['premises_zip']}"
+            ),
+        }
+        return prefill_tags
+
+
+class W9SignPrefillDataSerializer(serializers.Serializer):
+    """
+    W9 Sign (using Box Sign) request prefill data Serializer
+    """
+    BUSSINESS_STRUCTURE_CHOICES_TAGS = {
+        'Individual': 'bs_individual',
+        'C Corporation': 'bs_c_corporation',
+        'S Corporation': 'bs_s_corporation',
+        'Partnership': 'bs_partnership',
+        'Trust': 'bs_trust',
+        'LLC': 'bs_llc',
+        'Other': 'bs_other',
+    }
+    license_owner_name = serializers.CharField(max_length=255)
+    legal_business_name = serializers.CharField(max_length=255)
+    premises_address = serializers.CharField(max_length=255)
+    premises_city = serializers.CharField(max_length=255)
+    premises_state = serializers.CharField(max_length=255)
+    premises_zip = serializers.CharField(max_length=255)
+    bussiness_structure = serializers.ChoiceField(choices=list(BUSSINESS_STRUCTURE_CHOICES_TAGS.keys()))
+    ssn = serializers.CharField(required=False, min_length=9, max_length=11)
+    ein = serializers.CharField(required=False, min_length=9, max_length=10)
+
+
+    def validate_ssn(self, value):
+        ssn = list(value.replace('-', '').replace(' ', ''))
+        middle_space = 4 * ' '
+        return ' '.join(ssn[:3]) + middle_space + ' '.join(ssn[3:5]) + middle_space + ' '.join(ssn[5:])
+
+    def validate_ein(self, value):
+        ein = list(value.replace('-', '').replace(' ', ''))
+        middle_space = 4 * ' '
+        return ' '.join(ein[:2]) + middle_space + ' '.join(ein[2:])
+
+    def bussiness_structure_tags(self, value):
+        tags = {}
+        if value in self.BUSSINESS_STRUCTURE_CHOICES_TAGS:
+            for k, v in self.BUSSINESS_STRUCTURE_CHOICES_TAGS.items():
+                if value == k:
+                    tags[v] = True
+                else:
+                    tags[v] = False
+        return tags
+
+    def validate(self, attrs):
+        prefill_tags = {
+            "full_name": attrs['license_owner_name'],
+            "company": attrs['legal_business_name'],
+            "premises_address": attrs['premises_address'],
+            "city_state_zip": (
+                f"{attrs['premises_city']}, "
+                f"{attrs['premises_state']}, "
+                f"{attrs['premises_zip']}"
+            ),
+            "ssn": attrs['ssn'],
+            "ein": attrs['ein'],
+        }
+        prefill_tags.update(self.bussiness_structure_tags(attrs['bussiness_structure']))
+        return prefill_tags
+
+
 class BoxSignRecipientSerializer(serializers.Serializer):
     """
     Box Sign request Recipient Serializer
@@ -74,6 +150,7 @@ class BoxSignSerializer(serializers.ModelSerializer):
     """
     DOC_TYPE_PREFILL_DATA_SERIALIZERS = {
         "agreement": AgreementSignPrefillDataSerializer,
+        "w9": W9SignPrefillDataSerializer,
     }
 
     # license = serializers.PrimaryKeyRelatedField(queryset=License.objects)
@@ -162,41 +239,6 @@ class BoxSignSerializer(serializers.ModelSerializer):
             raise ValidationError({"source_file_id": "This field is required for current doc_type."})
         return attrs
 
-    def get_prefill_tags_agreement(self, data):
-        prefill_data = data['prefill_data']
-        address = (
-            f"{prefill_data['premises_address']}, "
-            f"{prefill_data['premises_city']}, "
-            f"{prefill_data['premises_state']} - {prefill_data['premises_zip']}"
-        )
-        prefill_tags = {
-            "license_number": prefill_data['license_number'],
-            "company": prefill_data['legal_business_name'],
-            "full_name": prefill_data['license_owner_name'],
-            "email": prefill_data['license_owner_email'],
-            "address": address
-        }
-        return prefill_tags
-
-    @staticmethod
-    def bussiness_structure_tags(value):
-        tags = {}
-        bussiness_structure_choices = {
-            'Individual': 'bs_individual',
-            'C Corporation': 'bs_c_corporation',
-            'S Corporation': 'bs_s_corporation',
-            'Partnership': 'bs_partnership',
-            'Trust': 'bs_trust',
-            'LLC': 'bs_llc',
-            'Other': 'bs_other',
-        }
-        if value in bussiness_structure_choices:
-            for k, v in bussiness_structure_choices.items():
-                if value == k:
-                    tags[v] = True
-                else:
-                    tags[v] = False
-        return tags
 
     class Meta:
         model = BoxSign
