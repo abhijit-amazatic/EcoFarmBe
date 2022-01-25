@@ -585,7 +585,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                         'premises_state': "N/A" if not hasattr(license, 'premises_state') else license.premises_state,
                         'uploaded_license_to': "N/A" if not hasattr(license, 'uploaded_license_to') else license.uploaded_license_to,
                         'uploaded_sellers_permit_to': "N/A" if not hasattr(license, 'uploaded_sellers_permit_to') else license.uploaded_sellers_permit_to,
-                        'uploaded_w9_to ': "N/A" if not hasattr(license, 'uploaded_w9_to ') else license.uploaded_w9_to,
+                        'uploaded_w9_to': "N/A" if not hasattr(license, 'uploaded_w9_to') else license.uploaded_w9_to,
                         'associated_program': "N/A" if not hasattr(license, 'associated_program') else license.associated_program,
                         'profile_category': "N/A" if not hasattr(license, 'profile_category') else license.profile_category,
                         'business_structure': "N/A" if not hasattr(license, 'business_structure') else license.business_structure,

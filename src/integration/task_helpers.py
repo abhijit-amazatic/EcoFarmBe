@@ -24,7 +24,7 @@ def box_sign_update_to_db(box_sign_obj):
         }
         box_sign_obj.__dict__.update(update_data)
         if box_sign_obj.signer_decision == 'signed' and  signer_decision != 'signed':
-            if box_sign_obj.doc_type == 'agreement':
+            if box_sign_obj.doc_type.name == 'agreement':
                 try:
                     profile = box_sign_obj.license.license_profile
                 except ObjectDoesNotExist:
@@ -38,7 +38,7 @@ def box_sign_update_to_db(box_sign_obj):
                     box_sign_obj.license.step = '1'
                     box_sign_obj.license.save()
 
-            elif box_sign_obj.doc_type == 'w9':
+            elif box_sign_obj.doc_type.name == 'w9':
                 output_file_id = box_sign_obj.output_file_id
                 box_sign_obj.license.uploaded_w9_to = get_shared_link(output_file_id)
                 box_sign_obj.license.save()
