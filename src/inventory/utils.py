@@ -43,7 +43,7 @@ def get_item_tax(category_name, biomass_type=None, biomass_input_g=None, total_b
         elif CG.get(category_name, '') == 'Kief':
             tax = get_tax_from_db(tax='dried_leaf_tax')
             if isinstance(tax, Decimal):
-                fixed_to_6(tax/Decimal('453.59237'))
+                return fixed_to_6(tax/Decimal('453.59237'))
         elif CG.get(category_name, '') in ('Isolates', 'Distillates', 'Concentrates'):
 
             if biomass_type:
@@ -79,6 +79,4 @@ def delete_in_transit_item(estimate_id):
     transit_orders = InTransitOrder.objects.filter(order_data__estimate_id=estimate_id)
     if transit_orders:
         transit_orders.delete()
-        
 
-        

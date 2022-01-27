@@ -112,7 +112,7 @@ PERCENTAGE_BASED_MSCP_FEE_ITEM_CATEGORIES = (
 
 
 def get_item_mcsp_fee(vendor_name, license_profile=None, item_category=None, farm_price=None, request=None, no_tier_fee=True ):
-    msg_error = lambda msg: messages.error(request, msg,) if request else None
+    msg_error = lambda msg: messages.error(request, msg,) if request else print(msg)
     if item_category and item_category in ITEM_CATEGORY_MSCP_FEE_VAR_MAP:
         fee_var = ITEM_CATEGORY_MSCP_FEE_VAR_MAP[item_category]
         if not license_profile:

@@ -8,7 +8,10 @@ from django.db import models
 
 import nested_admin
 
+from core.mixins.admin import CustomButtonMixin
 from integration.inventory import (get_inventory_obj, )
+from inventory.tasks import update_zoho_item_tax
+from inventory.models import Inventory
 from .models import *
 
 
@@ -25,10 +28,38 @@ class CustomInventoryVariableAdmin(admin.ModelAdmin):
     list_display = ('program_type', 'tier', 'mcsp_fee_flower_tops', 'mcsp_fee_flower_smalls', 'mcsp_fee_trims', 'mcsp_fee_concentrates', 'mcsp_fee_isolates', 'mcsp_fee_terpenes', 'mcsp_fee_clones', 'updated_on', 'created_on')
 
 
-class TaxVariableAdmin(admin.ModelAdmin):
+class TaxVariableAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     Tax Variables
     """
+
+    custom_buttons = ('update_tax',)
+    custom_buttons_prop = {
+        'update_tax': {
+            'label': 'Update Tax for All items to ZOHO',
+            'color': '#D76A04',
+        }
+    }
+
+    # def __init__(self, model, *args, **kwargs):
+    #     self.set_display_change_fields(model)
+    #     return super().__init__(model, *args, **kwargs)
+
+    def show_update_tax_button(self, request, obj,  add=False, change=False):
+        return False
+
+    def update_tax(self, request, obj):
+        """
+        method to update current cultivation tax to zoho inventory of given
+        inventory items.
+        """
+        qs = Inventory.objects.filter(
+            cf_cfi_published=True,
+            status='active',
+            cf_farm_price_2__isnull=False,
+        )
+        update_zoho_item_tax.delay(list(qs.values_list('pk', flat=True)))
+
 
 class CampaignVariableAdmin(admin.ModelAdmin):
     """

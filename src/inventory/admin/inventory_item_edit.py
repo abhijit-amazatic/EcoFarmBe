@@ -19,6 +19,7 @@ from ..models import (
 )
 from ..tasks import (
     notify_inventory_item_change_approved_task,
+    update_zoho_item_tax
 )
 from ..utils import (get_item_tax,)
 from ..data import(
@@ -118,6 +119,9 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
             ),
         }),
     )
+
+    actions = ['update_tax']
+
 
     custom_buttons = ('approve',)
     # custom_buttons_prop = {
@@ -253,7 +257,15 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
                     f.label = ''
         return form
 
+    def update_tax(self, request, queryset):
+        """
+        method to update current cultivation tax to zoho inventory of given
+        inventory items.
+        """
+        item_id_ls = [x for x in queryset.values_list('item_id', flat=True).distinct() if x]
+        update_zoho_item_tax.delay(item_id_ls)
 
+    update_tax.short_description = "Update current tax for selected items"
 
 def get_display_func(k, v):
     data_type_conversion_map = {

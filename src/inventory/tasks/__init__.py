@@ -33,6 +33,7 @@ from .crm_vendor_from_crm_account import (create_duplicate_crm_vendor_from_crm_a
 from .custom_inventory_data_from_crm import (get_custom_inventory_data_from_crm_task, )
 from .create_approved_item_po import (create_approved_item_po_task, )
 from .inventory_item_quantity_addition import (inventory_item_quantity_addition_task, )
+from .inventory_tax_update import (update_zoho_item_tax, )
 from .qr_code import *
 
 @app.task(queue="urgent", serializer='json')
