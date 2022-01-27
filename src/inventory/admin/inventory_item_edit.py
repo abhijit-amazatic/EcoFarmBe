@@ -188,16 +188,15 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
                 )
             if isinstance(obj.mcsp_fee, Decimal):
                 if obj.cultivation_tax is None:
-                    if obj.item.cf_cultivation_tax:
-                        obj.cultivation_tax = obj.item.cf_cultivation_tax
-                    else:
-                        obj.cultivation_tax = get_item_tax(
-                            category_name=obj.item.category_name,
-                            biomass_type=obj.biomass_type,
-                            biomass_input_g=obj.biomass_input_g,
-                            total_batch_output=obj.total_batch_quantity,
-                            request=request,
-                        )
+                    obj.cultivation_tax = get_item_tax(
+                        category_name=obj.item.category_name,
+                        biomass_type=obj.biomass_type,
+                        biomass_input_g=obj.biomass_input_g,
+                        total_batch_output=obj.total_batch_quantity,
+                        request=request,
+                    )
+                    # if obj.cultivation_tax is None and  obj.item.cf_cultivation_tax:
+                    #     obj.cultivation_tax = obj.item.cf_cultivation_tax
                 if isinstance(obj.cultivation_tax, Decimal):
                     data = obj.get_item_update_data()
                     if obj.farm_price:
