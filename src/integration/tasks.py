@@ -16,6 +16,11 @@ from bill.utils import (delete_estimate, )
 from labtest.models import (LabTest, )
 from brand.models import (License, LicenseProfile)
 from integration.apps.bcc import (post_licenses_to_crm, )
+from utils.integration_books import (
+    trigger_estimate_update_workflow,
+    trigger_salesorder_update_workflow,
+    trigger_invoice_update_workflow,
+)
 from .crm import (insert_users, fetch_labtests, create_records, delete_record,
                   update_in_crm, update_license, search_query)
 from .crm.get_records import (get_account_associated_cultivars_of_interest)
@@ -173,8 +178,26 @@ def update_account_cultivars_of_interest_in_crm(license_profile_id):
                 r = delete_record('Accounts_X_Cultivars', cultivar.get('linking_obj_id'))
 
 
-
 @app.task(queue="general")
 def box_sign_update_to_db_task(box_sign_obj_id):
     sign_obj = BoxSign.objects.get(id=box_sign_obj_id)
     box_sign_update_to_db(sign_obj)
+
+
+@app.task(queue="urgent")
+def trigger_estimate_update_workflow_task(books_name):
+    trigger_estimate_update_workflow(books_name)
+
+@app.task(queue="urgent")
+def trigger_salesorder_update_workflow_task(books_name):
+    trigger_salesorder_update_workflow(books_name)
+
+@app.task(queue="urgent")
+def trigger_invoice_update_workflow_task(books_name):
+    trigger_invoice_update_workflow(books_name)
+
+@app.task(queue="urgent")
+def trigger_all_workflow(books_name):
+    trigger_estimate_update_workflow(books_name)
+    trigger_salesorder_update_workflow(books_name)
+    trigger_invoice_update_workflow(books_name)
