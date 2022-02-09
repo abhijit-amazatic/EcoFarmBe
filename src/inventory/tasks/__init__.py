@@ -22,7 +22,10 @@ from .export_csv import (
     export_inventory_aggrigated_csv,
     export_inventory_aggrigated_county_csv,
 )
-from integration.inventory import update_inventory_item
+from integration.inventory import (
+    update_inventory_item,
+    sync_inventory,
+)
 from .notify_item_submitted import (notify_inventory_item_submitted_task, )
 from .notify_item_approved import (notify_inventory_item_approved_task, )
 from .notify_item_change_submitted import (notify_inventory_item_change_submitted_task, )
@@ -36,6 +39,8 @@ from .inventory_item_quantity_addition import (inventory_item_quantity_addition_
 from .inventory_tax_update import (update_zoho_item_tax, )
 from .qr_code import *
 
+from ..models import Inventory
+
 @app.task(queue="urgent", serializer='json')
 def async_update_inventory_item(inventory_name,item_id,item):
     """
@@ -43,6 +48,20 @@ def async_update_inventory_item(inventory_name,item_id,item):
     """
     update_inventory = update_inventory_item(inventory_name,item_id,item)
     return {"Task Processed": True} 
+
+@app.task(queue="urgent", serializer='json')
+def inventory_sync_task(inventory_name, record):
+    """
+    inventory sync.
+    """
+    sync_inventory(inventory_name, record)
+    try:
+        obj = Inventory.objects.get(item_id=record['item_id'])
+        if not obj.item_qr_code_url:
+            generate_upload_item_detail_qr_code_stream.delay(obj.item_id)
+    except Inventory.DoesNotExist as e:
+        print(f"Error{e}")
+    print(f"proccessed item_id: {record['item_id']}")
 
 
 # @app.task(queue="general")

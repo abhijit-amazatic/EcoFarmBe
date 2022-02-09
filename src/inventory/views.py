@@ -5,6 +5,8 @@ import operator
 import time
 import re
 import copy
+import json
+from urllib.parse import (unquote, )
 from datetime import datetime, timedelta
 from io import BytesIO, BufferedReader
 from mimetypes import MimeTypes
@@ -73,6 +75,7 @@ from .tasks import (
     notify_inventory_item_delist_submitted_task,
     async_update_inventory_item,
     generate_upload_item_detail_qr_code_stream,
+    inventory_sync_task,
 )
 from integration.books import (get_salesorder, parse_book_object)
 from .utils import delete_in_transit_item
@@ -511,16 +514,10 @@ class InventorySyncView(APIView):
         """
         Post realtime inventory updates.
         """
-        record = sync_inventory(
-            request.data.get('inventory_name'),
-            request.data.get('JSONString'))
-        try:
-            obj = Inventory.objects.get(item_id=record)
-            if not obj.item_qr_code_url:
-                generate_upload_item_detail_qr_code_stream.delay(obj.item_id)
-        except Inventory.DoesNotExist as e:
-            pass
-        return Response(record)
+        inventory_name = request.data.get('inventory_name')
+        record = json.loads(unquote(request.data.get('JSONString')))['item']
+        inventory_sync_task.delay(inventory_name, record)
+        return Response(record['item_id'])
 
 class CategoryNameView(APIView):
     """
