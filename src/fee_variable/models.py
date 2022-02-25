@@ -7,6 +7,8 @@ from core.mixins.models import (TimeStampFlagModelMixin)
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField,)
 
+from inventory.models import CustomInventory
+
 
 class OrderVariable(TimeStampFlagModelMixin,models.Model):
     """
@@ -214,28 +216,8 @@ class VendorInventoryCategoryAccounts(TimeStampFlagModelMixin,models.Model):
     """
     Class implementing  CustomInventory variables
     """
-    CATEGORY_NAME_CHOICES = (
-        ('Flower - Tops', _('Flower - Tops')),
-        ('Flower - Small', _('Flower - Small')),
-        ('Trim', _('Trim')),
-        ('Isolates - CBD', _('Isolates - CBD')),
-        ('Isolates - THC', _('Isolates - THC')),
-        ('Isolates - CBG', _('Isolates - CBG')),
-        ('Isolates - CBN', _('Isolates - CBN')),
-        ('Crude Oil - THC', _('Crude Oil - THC')),
-        ('Crude Oil - CBD', _('Crude Oil - CBD')),
-        ('Distillate Oil - THC', _('Distillate Oil - THC')),
-        ('Distillate Oil - CBD', _('Distillate Oil - CBD')),
-        ('Shatter', _('Shatter')),
-        ('Sauce', _('Sauce')),
-        ('Crumble', _('Crumble')),
-        ('Kief', _('Kief')),
-        ('Terpenes - Cultivar Specific', _('Terpenes - Cultivar Specific')),
-        ('Terpenes - Cultivar Blended', _('Terpenes - Cultivar Blended')),
-        ('Clones', _('Clones')),
-    )
     default_accounts = models.ForeignKey(VendorInventoryDefaultAccounts, verbose_name=_('Default Accounts'), related_name='category_accounts_set', on_delete=models.CASCADE)
-    item_category = models.CharField(_('Item Category'), choices=CATEGORY_NAME_CHOICES, max_length=50)
+    item_category = models.CharField(_('Item Category'), choices=CustomInventory.CATEGORY_NAME_CHOICES, max_length=50)
 
     sales_account = models.CharField(verbose_name=_("Sales Account"), max_length=255, null=True, blank=True)
     purchase_account = models.CharField(verbose_name=_("Purchase Account"), max_length=255, null=True, blank=True)
