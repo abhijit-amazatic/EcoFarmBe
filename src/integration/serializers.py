@@ -173,7 +173,7 @@ class BoxSignSerializer(serializers.ModelSerializer):
     # doc_type = serializers.CharField(max_length=255)
     # doc_type = serializers.ChoiceField(choices=BoxSignDocType.DOC_TYPE_CHOICES)
     # doc_type = serializers.RelatedField(queryset=BoxSignDocType.objects)
-    program_name = BoxSignRelatedProgramNameField(required=False)
+    program_name = BoxSignRelatedProgramNameField(required=False, allow_null=True)
     prefill_data = serializers.JSONField(write_only=True)
 
 
