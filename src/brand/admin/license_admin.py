@@ -389,6 +389,8 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
         "approved_by",
         "created_on",
         "updated_on",
+        "issue_date",
+        "expiration_date",
     )
     list_display_integration_admin = (
         "business_dba",
@@ -409,6 +411,8 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
         "approved_by",
         "created_on",
         "updated_on",
+        "issue_date",
+        "expiration_date",
     )
 
     list_select_related = [
@@ -424,6 +428,7 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
         "brand__organization__created_by__email",
         "organization__name",
         "organization__created_by__email",
+        "license_profile__signed_program_name",
     )
     readonly_fields = (
         "created_on",
@@ -446,6 +451,9 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
         "profile_category",
         "is_contract_downloaded",
         "license_type",
+        "license_profile__signed_program_name",
+        ("issue_date", DateRangeFilter),
+        ("expiration_date", DateRangeFilter),
     )
     ordering = (
         "-created_on",
