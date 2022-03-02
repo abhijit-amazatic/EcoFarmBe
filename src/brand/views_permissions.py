@@ -183,6 +183,6 @@ class OrganizationInvitePermission(ViewPermission):
             'delete':'delete_organization_invite',
         },
         'resend_invitation': {
-            'post':'send_organization_invite',
+            'patch':'send_organization_invite',
         },
     }

@@ -784,7 +784,7 @@ class InviteUserViewSet(NestedViewSetMixin,
 
     @action(
         detail=True,
-        methods=['post'],
+        methods=['patch'],
         name='Resend Invitation',
         url_name='resend-invitation',
         url_path='resend',
