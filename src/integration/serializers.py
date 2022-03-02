@@ -169,7 +169,7 @@ class BoxSignSerializer(serializers.ModelSerializer):
 
     # license = serializers.PrimaryKeyRelatedField(queryset=License.objects)
     recipient = BoxSignRecipientSerializer(write_only=True)
-    source_file_id = serializers.CharField(write_only=True, required=False, max_length=255)
+    source_file_id = serializers.CharField(write_only=True, allow_null=True, required=False, max_length=255)
     # doc_type = serializers.CharField(max_length=255)
     # doc_type = serializers.ChoiceField(choices=BoxSignDocType.DOC_TYPE_CHOICES)
     # doc_type = serializers.RelatedField(queryset=BoxSignDocType.objects)
