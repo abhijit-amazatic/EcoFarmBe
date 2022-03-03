@@ -608,7 +608,7 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
     """
     Stores Brand's details.
     """
-    TLL = timedelta(days=7).total_seconds()
+    TLL = timedelta(days=2).total_seconds()
     _MAX_CLOCK_SKEW = 60
     fernet = Fernet(get_fernet_key(key_salt='licinv'))
     STATUS_CHOICES = (
@@ -642,6 +642,7 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
         choices=STATUS_CHOICES,
         default='pending',
     )
+    last_token_generated_on = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = _('License User Invite')
@@ -650,19 +651,19 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
     def __str__(self):
         return f'{self.email} | {self.license}'
 
-    @property
-    def tll(self):
-        timedelta(hours=self.TLL_IN_HOURS).total_seconds()
-
     def get_invite_token(self):
+        last_token_generated_on = timezone.now()
+        current_time = int(time.mktime(last_token_generated_on.timetuple()))
         context = "{0}|{1}|{2}".format(self.id, self.email, self.license_id)
-        token_bytes = self.fernet.encrypt(context.encode('utf-8'))
+        token_bytes = self.fernet.encrypt_at_time(context.encode('utf-8'), current_time=current_time)
         # removing '=' to use token as url param
-        return token_bytes.decode('utf-8').rstrip('=')
+        token = token_bytes.decode('utf-8').rstrip('=')
+        self.save()
+        return token
 
     @classmethod
     def get_object_from_invite_token(cls, token):
-        current_time = int(time.time())
+        current_time = int(time.mktime(timezone.now().timetuple()))
         try:
             token_data = token + ('=' * (4 - len(token) % 4))
             token_data = token_data.encode('utf-8')

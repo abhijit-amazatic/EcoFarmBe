@@ -2,6 +2,7 @@
 All periodic tasks related to brand.
 """
 import traceback
+from datetime import timedelta
 from core.mailer import mail, mail_send
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -50,6 +51,7 @@ def invite_license_user_task(invite_obj_id):
             "roles": [x.name for x in invite_obj.roles.all()],
             "license": f"{invite_obj.license.license_number} | {invite_obj.license.legal_business_name}",
             "phone": invite_obj.phone.as_e164,
+            "tll_in_hours": int(invite_obj.__class__.TLL/3600),
             # 'token': invite_obj.get_invite_token(),
             "link": "{}/verify-user-invitation?code={}".format(
                 settings.FRONTEND_DOMAIN_NAME.rstrip("/"), invite_obj.get_invite_token()

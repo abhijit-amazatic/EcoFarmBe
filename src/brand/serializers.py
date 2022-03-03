@@ -4,8 +4,10 @@ Serializer to validate brand related modules.
 import json
 import requests
 from tempfile import TemporaryFile
+from datetime import timedelta
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.fields import (empty, JSONField)
 from phonenumber_field.serializerfields import PhoneNumberField
@@ -857,6 +859,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
 
     # full_name = serializers.CharField(max_length=200)
     phone = PhoneNumberField(max_length=15)
+    display_status = serializers.SerializerMethodField()
     # email = serializers.EmailField()
     roles = InviteUserRelatedField(
         queryset=OrganizationRole.objects.all(),
@@ -879,6 +882,13 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
     #         pass
     #     return value
 
+    def get_display_status(self, obj):
+        if obj.status == 'pending':
+            token_datetime = obj.last_token_generated_on or obj.updated_on
+            if not token_datetime or token_datetime + timedelta(seconds=obj.TLL) < timezone.now():
+                return 'expired'
+        return obj.status
+
     def create(self, validated_data):
         view = self.context['view']
         validated_data['created_by'] = view.request.user
@@ -896,6 +906,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
             'license',
             'is_invite_accepted',
             'status',
+            'display_status',
             'created_on',
             'updated_on',
             # 'organization',
