@@ -859,7 +859,8 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
 
     # full_name = serializers.CharField(max_length=200)
     phone = PhoneNumberField(max_length=15)
-    display_status = serializers.SerializerMethodField()
+    # display_status = serializers.SerializerMethodField()
+    display_status = serializers.CharField()
     # email = serializers.EmailField()
     roles = InviteUserRelatedField(
         queryset=OrganizationRole.objects.all(),
@@ -882,12 +883,12 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
     #         pass
     #     return value
 
-    def get_display_status(self, obj):
-        if obj.status == 'pending':
-            token_datetime = obj.last_token_generated_on or obj.updated_on
-            if not token_datetime or token_datetime + timedelta(seconds=obj.TLL) < timezone.now():
-                return 'expired'
-        return obj.status
+    # def get_display_status(self, obj):
+    #     if obj.status == 'pending':
+    #         token_datetime = obj.last_token_generated_on or obj.updated_on
+    #         if not token_datetime or token_datetime + timedelta(seconds=obj.TLL) < timezone.now():
+    #             return 'expired'
+    #     return obj.status
 
     def create(self, validated_data):
         view = self.context['view']
@@ -896,7 +897,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = LicenseUserInvite
-        read_only_fields = ('id', 'status', 'is_invite_accepted',)
+        read_only_fields = ('id', 'status', 'display_status', 'is_invite_accepted',)
         fields = (
             'id',
             'full_name',
@@ -909,6 +910,7 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
             'display_status',
             'created_on',
             'updated_on',
+            'last_token_generated_on',
             # 'organization',
         )
 

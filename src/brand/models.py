@@ -652,8 +652,8 @@ class LicenseUserInvite(TimeStampFlagModelMixin, models.Model):
         return f'{self.email} | {self.license}'
 
     def get_invite_token(self):
-        last_token_generated_on = timezone.now()
-        current_time = int(time.mktime(last_token_generated_on.timetuple()))
+        self.last_token_generated_on = timezone.now()
+        current_time = int(time.mktime(self.last_token_generated_on.timetuple()))
         context = "{0}|{1}|{2}".format(self.id, self.email, self.license_id)
         token_bytes = self.fernet.encrypt_at_time(context.encode('utf-8'), current_time=current_time)
         # removing '=' to use token as url param

@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission as DjangoPermission
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F, Case, CharField, Value, When
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django_filters.rest_framework import DjangoFilterBackend
@@ -765,6 +765,7 @@ class InvitesDataFilter(FilterSet):
 class InviteUserViewSet(NestedViewSetMixin,
                         mixins.CreateModelMixin,
                         mixins.ListModelMixin,
+                        mixins.UpdateModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
@@ -777,6 +778,20 @@ class InviteUserViewSet(NestedViewSetMixin,
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status',]
     filterset_class = InvitesDataFilter
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        valid_till = timezone.now()-datetime.timedelta(seconds=qs.model.TLL)
+        qs = qs.annotate(
+            display_status=Case(
+                When(Q(status=Value('pending'), last_token_generated_on__isnull=True), then=Value('expired')),
+                When(Q(status=Value('pending'), last_token_generated_on__lt=valid_till),then=Value('expired'),),
+                # When(Q(status=Value('pending'), updated_on__lt=valid_till),then=Value('expired')),
+                default=F('status'),
+                output_field=CharField(),
+            )
+        )
+        return qs
 
     def perform_create(self, serializer):
         instance = serializer.save()
