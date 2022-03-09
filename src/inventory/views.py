@@ -131,6 +131,12 @@ class DataFilter(FilterSet):
     actual_available_stock = CharInFilter(field_name='actual_available_stock', lookup_expr='in')
     pre_tax_price = CharInFilter(field_name='pre_tax_price', lookup_expr='in')
     cf_date_available = django_filters.CharFilter(field_name ='cf_date_available',method='get_new_items', label='New Items')
+    cf_featured = django_filters.CharFilter(method='get_featured')
+
+    def get_featured(self, queryset, name, value):
+        if value.lower() == 'true':
+            return queryset.filter(cf_featured=True)
+        return queryset
 
     def get_new_items(self, queryset, name, value):
         items = queryset.annotate(
@@ -1464,6 +1470,6 @@ class InventoryUpdateView(APIView):
             response = async_update_inventory_item.delay(inventory_name,item.get('item_id'), item)
             return Response({"Item Updated Successfully!"},status=status.HTTP_200_OK)
         return Response({"item_id is missing!"}, status=status.HTTP_400_BAD_REQUEST)        
-
+           
 
     

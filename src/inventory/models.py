@@ -188,6 +188,7 @@ class Inventory(models.Model):
     item_qr_code_url = models.CharField(_('QR Code-Box URL'), blank=True, null=True, max_length=500)
     qr_code_box_id = models.CharField(_('QR Code-Box ID'), blank=True, null=True, max_length=255)
     qr_box_direct_url = models.CharField(_('QR direct Box URL'), blank=True, null=True, max_length=500)
+    cf_featured = models.BooleanField(_('Featured'), default=False)
     extra_documents = GenericRelation(Documents)
     
 
