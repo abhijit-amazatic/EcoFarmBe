@@ -1052,7 +1052,49 @@ class InventoryTagsView(APIView):
         return Response({
             'status_code': 200,
             'response': [val['name'] for val in dynamic_tags[0]['values']]})
-    
+
+
+class InventoryStatusChoicesView(APIView):
+    """
+    Return Inventory Status Choices
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory Status Choices
+        """
+        response = get_inventory_metadata('inventory_efd')
+        return Response({
+            'status_code': 200,
+            'response': [
+                val['name'] 
+                for f in response['custom_fields'] if f['label'] == 'Marketplace Status'
+                for val in f['values']
+            ]
+        })
+
+class InventoryGradeChoicesView(APIView):
+    """
+    Return Inventory grade Choices
+    """
+    permission_classes = (AllowAny, )
+
+    def get(self, request):
+        """
+        Get inventory grade Choices
+        """
+        response = get_inventory_metadata('inventory_efd')
+        return Response({
+            'status_code': 200,
+            'response': [
+                val['name'] 
+                for f in response['custom_fields'] if f['label'] == 'Grade'
+                for val in f['values']
+            ]
+        })
+
+
 class InventoryEthicsView(APIView):
     """
     Return Inventory ethics & certifications
@@ -1464,17 +1506,16 @@ class InventoryUpdateView(APIView):
         """
         item = request.data
         if item.get('item_id'):
+            data = {'item_id': item.get('item_id')}
             obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
             if item.get('tags'):
-                item['cf_tags'] = item.pop('tags') #Added cf_tags insted of tags
+                data['cf_tags'] = item.pop('tags') #Added cf_tags insted of tags
             if item.get('grade'):
-                item['cf_cannabis_grade_and_category'] = item.pop('grade')
+                data['cf_cannabis_grade_and_category'] = item.pop('grade')
             if item.get('status'):
-                item['cf_status'] = item.pop('status')
-            inventory_name = get_inventory_name(item.get('item_id'))
-            response = async_update_inventory_item.delay(inventory_name,item.get('item_id'), item)
+                data['cf_status'] = item.pop('status')
+            inventory_name = get_inventory_name(data.get('item_id'))
+            response = async_update_inventory_item.delay(inventory_name,data.get('item_id'), data)
             return Response({"Item Updated Successfully!"},status=status.HTTP_200_OK)
-        return Response({"item_id is missing!"}, status=status.HTTP_400_BAD_REQUEST)        
-           
+        return Response({"item_id is missing!"}, status=status.HTTP_400_BAD_REQUEST)
 
-    

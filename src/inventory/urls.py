@@ -42,6 +42,8 @@ from .views import (
     ConvertSalesOrderToPackage,
     CultivarTypesView,
     InventoryTagsView,
+    InventoryStatusChoicesView,
+    InventoryGradeChoicesView,
     InTransitDeleteSyncView,
     InventoryUpdateView,
     CategoryNameView,
@@ -82,6 +84,8 @@ urlpatterns = [
     path(r'inventory/appellation/', InventoryAppellationView.as_view(), name='get-appellation'),
     path(r'inventory/nutrients/', InventoryNutrientsView.as_view(), name='get-nutrients'),#
     path(r'inventory/tags/', InventoryTagsView.as_view(), name='get-tags'),
+    path(r'inventory/status-choices/', InventoryStatusChoicesView.as_view(), name='get-status-choices'),
+    path(r'inventory/grade-choices/', InventoryGradeChoicesView.as_view(), name='get-grades-choices'),
     path(r'inventory/ethics-and-certification/', InventoryEthicsView.as_view(), name='ethics-and-certification'),
     path(r'inventory/update/', InventoryWebHook.as_view(), name="inventory-webhook"),
     path(r'inventory-update/', InventoryUpdateView.as_view(), name="inventory-update"),
