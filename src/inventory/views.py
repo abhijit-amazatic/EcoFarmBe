@@ -1465,7 +1465,12 @@ class InventoryUpdateView(APIView):
         item = request.data
         if item.get('item_id'):
             obj = Inventory.objects.update_or_create(item_id=item.get('item_id'), defaults=item)
-            item['cf_tags'] = item.pop('tags') #Added cf_tags insted of tags
+            if item.get('tags'):
+                item['cf_tags'] = item.pop('tags') #Added cf_tags insted of tags
+            if item.get('grade'):
+                item['cf_cannabis_grade_and_category'] = item.pop('grade')
+            if item.get('status'):
+                item['cf_status'] = item.pop('status')
             inventory_name = get_inventory_name(item.get('item_id'))
             response = async_update_inventory_item.delay(inventory_name,item.get('item_id'), item)
             return Response({"Item Updated Successfully!"},status=status.HTTP_200_OK)
