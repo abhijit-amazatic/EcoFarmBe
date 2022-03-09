@@ -198,6 +198,7 @@ class InventoryItemAdmin(admin.ModelAdmin):
                 'item_qr_code_url',
                 'qr_code_box_id',
                 'qr_box_direct_url',
+                'cf_featured',
                 # 'extra_documents',
             ),
         }),
