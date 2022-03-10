@@ -67,6 +67,7 @@ class LogoutInventorySerializer(BaseInventorySerializer):
             'name',
             'cf_strain_name',
             'cf_cultivation_type',
+            'cf_cultivar_type',
             'cf_cannabis_grade_and_category',
             'available_stock',
             'category_name',
