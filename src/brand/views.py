@@ -838,7 +838,7 @@ class UserInvitationVerificationView(GenericAPIView):
                 'phone': instance.phone.as_e164,
             }
             try:
-                user = Auth_User.objects.get(email=instance.email)
+                user = Auth_User.objects.get(email__iexact=instance.email)
             except Auth_User.DoesNotExist:
                 instance.status = 'user_joining_platform'
             else:

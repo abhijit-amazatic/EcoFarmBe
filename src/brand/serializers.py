@@ -871,6 +871,11 @@ class InviteUserSerializer(NestedModelSerializer, serializers.ModelSerializer):
         queryset=License.objects.all(),
     )
 
+    def validate_email(self, value):
+        if value:
+            return value.lower()
+        return value
+
     # def validate_phone(self, value):
     #     """
     #     nonfield validation.

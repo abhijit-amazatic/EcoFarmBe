@@ -41,7 +41,7 @@ def post_save_user(sender, instance, created, **kwargs):
     if created:
         ###################### user invite #####################
         invites = LicenseUserInvite.objects.filter(
-            email=instance.email,
+            email__iexact=instance.email,
             status__in=['pending', 'user_joining_platform']
         )
         for invite in invites:
@@ -50,7 +50,7 @@ def post_save_user(sender, instance, created, **kwargs):
                     organization=invite.license.organization,
                     user=instance,
                 )
-                for role in invites.roles:
+                for role in invite.roles.all():
                     organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
                         organization_user=organization_user,
                         role=role,

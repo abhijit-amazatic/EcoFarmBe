@@ -22,8 +22,12 @@ from core.celery import app
 from core.utility import (
     notify_admins_on_profile_user_registration,
 )
+from user.models import (User)
 from ..models import (
     License,
+    LicenseUserInvite,
+    OrganizationUser,
+    OrganizationUserRole,
 )
 
 from .license_oboarding_tasks import (
@@ -38,7 +42,6 @@ from .license_user_invite_tasks import (
 from .create_customer_in_books import (
     create_customer_in_books_task,
 )
-
 from .refresh_integration_ids import (
     refresh_integration_ids_task,
 )
@@ -87,6 +90,33 @@ def update_before_expire():
                     "Notified License before expiry & flagged as notified",
                     obj.license_number,
                 )
+
+
+@periodic_task(run_every=(crontab(hour=[8], minute=0)), options={"queue": "general"})
+def process_accepted_license_user_invite():
+    invites = LicenseUserInvite.objects.filter(
+        is_invite_accepted=True,
+        status__in=['pending', 'user_joining_platform']
+    )
+    for invite in invites:
+        try:
+            user = User.objects.get(email__iexact=invite.email)
+        except User.DoesNotExist:
+            pass
+        else:
+            print(f'Processing Invite:{invite.pk} {invite.email}')
+            organization_user, _ = OrganizationUser.objects.get_or_create(
+                organization=invite.license.organization,
+                user=user,
+            )
+            for role in invite.roles.all():
+                organization_user_role, _ = OrganizationUserRole.objects.get_or_create(
+                    organization_user=organization_user,
+                    role=role,
+                )
+                organization_user_role.licenses.add(invite.license)
+            invite.status = 'completed'
+            invite.save()
 
 
 @app.task(queue="general")
