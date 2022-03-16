@@ -237,14 +237,15 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
     filterset_class = DataFilter
 
     action_select_related_fields_map = {
-        'list':                    ('brand',),
-        'profile_contact':         ('profile_contact',),
-        'cultivation_overview':    ('cultivation_overview',),
-        'license_profile':         ('license_profile',),
-        'financial_overview':      ('financial_overview',),
-        'crop_overview':           ('crop_overview',),
-        'program_overview':        ('program_overview',),
+        'list':                  ('brand',),
+        'profile_contact':       ('profile_contact',),
+        'cultivation_overview':  ('cultivation_overview',),
+        'license_profile':       ('license_profile',),
+        'financial_overview':    ('financial_overview',),
+        'crop_overview':         ('crop_overview',),
+        'program_overview':      ('program_overview',),
         'update_signed_program': ('license_profile', 'program_overview',),
+        'buyer_summary':         ('license_profile',),
     }
 
     def get_queryset(self):
@@ -430,15 +431,18 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         get buyer summary
         """
         license_obj = self.get_object()
-        if license_obj.is_buyer:
-            return Response({'buyer_summary':get_buyer_summary(request.query_params.get('books_name'),license_obj.legal_business_name)},status=200)
-        else:
-            return Response({'detail':"License is not asscoaited with buyer account or couldn't fetch summary!"}, status=400)
+        books_name = request.query_params.get('books_name')
+        try:
+            customer_name = license_obj.license_profile.name
+        except ObjectDoesNotExist:
+            customer_name = f'{license_obj.legal_business_name} {license_obj.client_id}'
+        summery = get_buyer_summary(books_name, customer_name)
+        return Response({'buyer_summary': summery}, status=200)
 
     @action(detail=True, url_path='update-signed-program', methods=['post'])
     def update_signed_program(self, request, pk, *args, **kwargs):
         """
-        get buyer summary
+        Update Signed Program
         """
         license_obj = self.get_object()
 
@@ -464,7 +468,7 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
     @action(detail=True, url_path='update-license-file', methods=['post'])
     def update_license_file(self, request, pk, *args, **kwargs):
         """
-        get buyer summary
+        Update new License file link to DB
         """
         instance = self.get_object()
         instance.uploaded_license_to = None
