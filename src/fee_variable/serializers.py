@@ -69,3 +69,11 @@ class ProgramSerializer(serializers.ModelSerializer):
         model = Program
         fields = ('__all__')
 
+class FileLinkSerializer(serializers.ModelSerializer):
+    """
+    This defines FileLinkSerializer
+    """
+    class Meta:
+        model = FileLink
+        exclude = ('id', 'created_on', 'updated_on')
+

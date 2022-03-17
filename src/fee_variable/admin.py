@@ -229,11 +229,18 @@ class programAdmin(nested_admin.NestedModelAdmin):
     inlines = [ProgramProfileCategoryAgreementInline]
 
 
+class FileLinkAdmin(admin.ModelAdmin):
+    """
+    File Link Admin.
+    """
+    list_display = ('label', 'url', 'updated_on', 'created_on')
+    readonly_fields = ('created_on','updated_on',)
 
 
 
 admin.site.register(Agreement, AgreementAdmin)
 admin.site.register(Program, programAdmin)
+admin.site.register(FileLink, FileLinkAdmin)
 admin.site.register(OrderVariable, OrderVariableAdmin)
 admin.site.register(CustomInventoryVariable, CustomInventoryVariableAdmin)
 admin.site.register(TaxVariable, TaxVariableAdmin)

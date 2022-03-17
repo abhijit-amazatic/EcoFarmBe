@@ -56,3 +56,12 @@ class ProgramViewSet(ReadOnlyModelViewSet):
     queryset = Program.objects.all()
     serializer_class = ProgramSerializer
 
+
+class FileLinkViewSet(ReadOnlyModelViewSet):
+    """
+    Get Tax Variable information.
+    """
+    permission_classes = (IsAuthenticated,)
+    queryset = FileLink.objects.all()
+    serializer_class = FileLinkSerializer
+    lookup_field = 'label'

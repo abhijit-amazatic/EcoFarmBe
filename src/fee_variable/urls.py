@@ -12,6 +12,7 @@ from fee_variable.views import (
     CustomInventoryVariableView,
     TaxVariableVariableView,
     ProgramViewSet,
+    FileLinkViewSet,
 )
 
 app_name = "fee_variable"
@@ -21,6 +22,7 @@ router.register(r'order-variables', OrderVariableView, base_name="order-variable
 router.register(r'inventory-variables', CustomInventoryVariableView, base_name="inventory-variables")
 router.register(r'tax-variables', TaxVariableVariableView, base_name="tax-variables")
 router.register(r'fee_variables/program', ProgramViewSet, base_name="Program")
+router.register(r'fee_variables/file-link', FileLinkViewSet, base_name="file-link")
 
 urlpatterns = [
     #path(r'order-variables/', OrderVariableView.as_view(), name='order-variables'),

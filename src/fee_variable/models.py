@@ -302,3 +302,24 @@ class ProgramProfileCategoryAgreement(TimeStampFlagModelMixin,models.Model):
         unique_together = ('program', 'profile_category')
         verbose_name = _('Program Profile Category Agreement')
         verbose_name_plural = _('Program Profile Category Agreement')
+
+
+class FileLink(TimeStampFlagModelMixin,models.Model):
+    """
+    Class implementing file link variables.
+    """
+
+    LABEL_CHOICES = (
+        ('order_page_sales_agreement', _('Order Page Sales Agreement')),
+    )
+
+    label = models.CharField(_('Label'), unique=True, choices=LABEL_CHOICES, max_length=255)
+    # box_file_id = models.CharField(_('BOX File ID'), max_length=255)
+    url = models.URLField(_('URL'), max_length=255)
+
+    def __str__(self):
+        return self.label
+
+    class Meta:
+        verbose_name = _('File Link')
+        verbose_name_plural = _('File Links')
