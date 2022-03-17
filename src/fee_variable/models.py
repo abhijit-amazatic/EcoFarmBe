@@ -3,6 +3,7 @@ Fees model defined here.
 """
 from django.conf import settings
 from django.db import models
+from django.core.validators import RegexValidator
 from core.mixins.models import (TimeStampFlagModelMixin)
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import (ArrayField,)
@@ -314,7 +315,13 @@ class FileLink(TimeStampFlagModelMixin,models.Model):
     )
 
     label = models.CharField(_('Label'), unique=True, choices=LABEL_CHOICES, max_length=255)
-    # box_file_id = models.CharField(_('BOX File ID'), max_length=255)
+    box_file_id = models.CharField(
+        _('BOX File ID'),
+        max_length=255,
+        validators=[RegexValidator(r'\d{3,}', 'Enter a valid Box file ID')],
+        blank=True,
+        null=True,
+    )
     url = models.URLField(_('URL'), max_length=255)
 
     def __str__(self):

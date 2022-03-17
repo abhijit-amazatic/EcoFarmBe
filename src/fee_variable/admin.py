@@ -10,6 +10,7 @@ import nested_admin
 
 from core.mixins.admin import CustomButtonMixin
 from integration.inventory import (get_inventory_obj, )
+from integration.box import (get_box_client, BoxAPIException)
 from inventory.tasks import update_zoho_item_tax
 from inventory.models import Inventory
 from .models import *
@@ -229,13 +230,38 @@ class programAdmin(nested_admin.NestedModelAdmin):
     inlines = [ProgramProfileCategoryAgreementInline]
 
 
-class FileLinkAdmin(admin.ModelAdmin):
+class FileLinkAdmin(CustomButtonMixin, admin.ModelAdmin):
     """
     File Link Admin.
     """
-    list_display = ('label', 'url', 'updated_on', 'created_on')
+    list_display = ('label', 'box_file_id', 'url', 'updated_on', 'created_on')
     readonly_fields = ('created_on','updated_on',)
 
+    custom_buttons = ('generate_box_link',)
+    custom_buttons_prop = {
+        'generate_box_link': {
+            'label': 'Generated Box Shared Link From File ID',
+            'color': '#D76A04',
+        }
+    }
+
+    def show_generate_box_link_button(self, request, obj,  add=False, change=False):
+        if change and obj.box_file_id:
+            return True
+        return False
+
+    def generate_box_link(self, request, obj):
+        client = get_box_client()
+        file = client.file(obj.box_file_id)
+        try:
+            link = file.get_shared_link(access='open', allow_download=None, allow_preview=True)
+            # link = file.get_embed_url()
+        except BoxAPIException as exc:
+            self.message_user(request, f"Error while generating shared link: {exc.context_info}", level='error')
+        else:
+            # print(link)
+            obj.url = link
+            obj.save()
 
 
 admin.site.register(Agreement, AgreementAdmin)
