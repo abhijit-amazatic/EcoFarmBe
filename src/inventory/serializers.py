@@ -283,8 +283,16 @@ class  InventoryItemEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InventoryItemEdit
-        exclude = ()
-        read_only_fields = ('status', 'created_by', 'created_on', 'updated_on', 'approved_by', 'approved_on',)
+        exclude = ('mcsp_fee', 'cultivation_tax')
+        read_only_fields = (
+            'status',
+            'created_by',
+            'created_on',
+            'updated_on',
+            'approved_by',
+            'approved_on',
+        )
+
 
 class  InventoryItemQuantityAdditionSerializer(serializers.ModelSerializer):
     """

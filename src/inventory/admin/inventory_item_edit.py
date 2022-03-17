@@ -183,13 +183,12 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
 
     def approve(self, request, obj):
         if obj.status == 'pending_for_approval':
-            if obj.mcsp_fee is None:
-                obj.mcsp_fee = get_item_mcsp_fee(
-                    obj.item.cf_vendor_name,
-                    item_category=obj.item.category_name,
-                    request=request,
-                    farm_price=obj.farm_price
-                )
+            obj.mcsp_fee = get_item_mcsp_fee(
+                obj.item.cf_vendor_name,
+                item_category=obj.item.category_name,
+                request=request,
+                farm_price=obj.farm_price
+            )
             if isinstance(obj.mcsp_fee, Decimal):
                 if obj.cultivation_tax is None:
                     obj.cultivation_tax = get_item_tax(
