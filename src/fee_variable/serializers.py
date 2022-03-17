@@ -2,9 +2,11 @@
 Fees related serializers defined here.
 Basically they are used for API representation & validation.
 """
+import re
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
+from integration.box import get_embed_url
 from .models import *
 
 class OrderVariableSerializer(serializers.ModelSerializer):
@@ -73,6 +75,23 @@ class FileLinkSerializer(serializers.ModelSerializer):
     """
     This defines FileLinkSerializer
     """
+    box_embed_url = serializers.SerializerMethodField()
+
+    def get_box_embed_url(self, obj):
+        embed_link = None
+        matched = None
+        if obj.url:
+            box_shared_link_regex = r'^https://(?:(?P<customr_domain>[^.?=\/]*)\.)?app\.box\.com/s/(?P<shared_value>[^?\/]*)'
+            matched = re.match(box_shared_link_regex, obj.url)
+        if matched:
+            return f"https://app.box.com/embed/s/{matched.group('shared_value')}"
+        elif obj.box_file_id:
+            try:
+                embed_link = get_embed_url(obj.box_file_id)
+            except Exception:
+                pass
+        return embed_link
+
     class Meta:
         model = FileLink
         exclude = ('id', 'created_on', 'updated_on')

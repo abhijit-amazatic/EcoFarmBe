@@ -322,7 +322,7 @@ class FileLink(TimeStampFlagModelMixin,models.Model):
         blank=True,
         null=True,
     )
-    url = models.URLField(_('URL'), max_length=255)
+    url = models.URLField(_('URL'), max_length=255, blank=True, null=True,)
 
     def __str__(self):
         return self.label
