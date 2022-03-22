@@ -325,6 +325,12 @@ class License(TimeStampFlagModelMixin, models.Model):
     is_updated_in_crm = models.BooleanField(_('Is License Updated In CRM'), default=False)
     crm_output = JSONField(_('CRM Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
     books_output = JSONField(_('Books Output'), null=True, blank=True, default=dict, encoder=DjangoJSONEncoder)
+    cart_notification_user = models.ManyToManyField(
+        User,
+        verbose_name=_('Cart Notification User'),
+        related_name="cart_notification_licenses",
+        blank=True,
+    )
 
     documents = GenericRelation(Documents)
 

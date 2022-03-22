@@ -114,7 +114,7 @@ class User(StatusFlagMixin,AbstractUser):
         related_name="users",
         blank=True,
     )
-
+    recive_cart_notification = models.BooleanField(_('Recive Cart Notification'), default=False)
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
