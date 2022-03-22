@@ -479,6 +479,29 @@ class LicenseViewSet(PermissionQuerysetFilterMixin,
         except Exception as e:
             return Response({'detail': "{e}."}, status=400)
 
+    @action(detail=True, url_path='enable-cart-notification', methods=['post', 'patch'])
+    def enable_cart_notification(self, request, pk, *args, **kwargs):
+        """
+        Enable notification for Pending items in license cart
+        """
+        instance = self.get_object()
+        if instance.cart_notification_users.filter(pk=request.user.pk).exists():
+            return Response({'detail': "Already enabled"}, status=200)
+        else:
+            instance.cart_notification_users.add(request.user)
+            return Response({'detail': "Enabled successfully"}, status=200)
+
+    @action(detail=True, url_path='disable-cart-notification', methods=['post', 'patch'])
+    def disable_cart_notification(self, request, pk, *args, **kwargs):
+        """
+        Disable notification for Pending items in license cart
+        """
+        instance = self.get_object()
+        if instance.cart_notification_users.filter(pk=request.user.pk).exists():
+            instance.cart_notification_users.remove(request.user)
+            return Response({'detail': "Disabled successfully"}, status=200)
+        else:
+            return Response({'detail': "Already disabled"}, status=200)
 
 
 class ProfileCategoryView(APIView):
@@ -506,7 +529,8 @@ class KpiViewSet(NestedViewSetMixin, APIView):
         """
         Return QuerySet.
         """
-        qs = License.objects.all()
+        # qs = License.objects.prefetch_related('cart_notification_users').all()
+        qs = License.objects.prefetch_related().all()
         qs = self.filter_queryset_by_parents_lookups(qs)
         qs = filterQuerySet.for_user(qs, request.user)
         value_list = qs.values_list('profile_category', flat=True).distinct()
@@ -549,6 +573,7 @@ class KpiViewSet(NestedViewSetMixin, APIView):
                     'zoho_crm_vendor_id': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.zoho_crm_vendor_id,
                     'is_draft': "N/A" if not hasattr(license, 'license_profile') else license.license_profile.is_draft,
                     'program_name': '' if not hasattr(license, 'program_overview') else license.program_overview.program_details.get('program_name', ''),
+                    'cart_notification': license.cart_notification_users.filter(pk=request.user.pk).exists(),
                     'brand': "N/A" if not hasattr(license, 'brand') else {
                         'id': "N/A" if not hasattr(license.brand, 'id')else license.brand.id,
                         'brand_name': "N/A" if not hasattr(license.brand, 'brand_name') else license.brand.brand_name,

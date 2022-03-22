@@ -91,10 +91,11 @@ def inventory_sync_task(inventory_name, record):
 @periodic_task(run_every=(crontab(hour=[8], minute=0)), options={"queue": "general"})
 def send_pending_cart_notification():
     cart = {profile_id: order_data
-        for profile_id, order_data in InTransitOrder.objects.filter(profile_id=392).values_list('profile_id', 'order_data')
+        for profile_id, order_data in InTransitOrder.objects.all().values_list('profile_id', 'order_data')
         if order_data
     }
     license_qs = License.objects.select_related('license_profile').filter(license_profile__id__in=cart.keys())
+    print(f"pending cart count: {license_qs.count()}")
     for license_obj in license_qs:
         try:
             items = [
@@ -106,8 +107,9 @@ def send_pending_cart_notification():
         except Exception as e:
             print(e)
         else:
-            url = f"{settings.FRONTEND_DOMAIN_NAME}/marketplace/order/{license_obj.client_id}"
+            url = f"{settings.FRONTEND_DOMAIN_NAME}marketplace/order/{license_obj.client_id}"
             msg = f"Hi, you still have these {', '.join(items)} items in your cart . Would you like to complete your checkout? {url}"
             # print(msg)
             for user in license_obj.cart_notification_users.filter(receive_cart_notification=True):
+                print(f"Sending Cart notification message to {user.phone.as_e164} (user: {user.email}): {msg}")
                 send_sms(user.phone.as_e164, msg)

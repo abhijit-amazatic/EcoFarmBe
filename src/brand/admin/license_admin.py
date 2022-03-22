@@ -478,7 +478,7 @@ class LicenseAdmin(ImportExportModelAdmin, NestedModelAdmin):
         "refresh_integration_ids",
     ]
     list_per_page = 50
-
+    filter_horizontal = ('cart_notification_users',)
     verbose_name = "My Book"
     verbose_name_plural = "My Books"
 

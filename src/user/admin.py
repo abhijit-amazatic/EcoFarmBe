@@ -146,7 +146,7 @@ class MyUserAdmin(ImportExportModelAdmin,UserAdmin): #nested_admin.NestedModelAd
     actions = [approve_user, sync_records, ]
     filter_horizontal = ('groups', 'user_permissions', 'internal_roles','categories',)
     fieldsets = UserAdmin.fieldsets + (
-            (('User'), {'fields': ('full_name','phone', 'country','categories','state','date_of_birth','city','zip_code','recovery_email','alternate_email','is_phone_verified','legal_business_name','business_dba','existing_member','membership_type','is_updated_in_crm','profile_photo','profile_photo_sharable_link','website','title','department','instagram','facebook','twitter','linkedin','about','zoho_crm_id','is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org')}),
+            (('User'), {'fields': ('full_name','phone', 'country','categories','state','date_of_birth','city','zip_code','recovery_email','alternate_email','is_phone_verified','legal_business_name','business_dba','existing_member','membership_type','is_updated_in_crm','profile_photo','profile_photo_sharable_link','website','title','department','instagram','facebook','twitter','linkedin','about','zoho_crm_id','is_approved','approved_on','approved_by','is_verified','crm_link','bypass_terms_and_conditions','unique_user_id', 'default_org', 'receive_cart_notification')}),
             (('Internal Permission'), {'fields': ('internal_roles',)}),
     )
     resource_class = UserResource

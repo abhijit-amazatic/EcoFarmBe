@@ -67,6 +67,14 @@ class LicenseViewSetPermission(ViewPermission):
         'update_license_file': {
             'post': True,
         },
+        'enable_cart_notification': {
+            'post': True,
+            'patch': True,
+        },
+        'disable_cart_notification': {
+            'post': True,
+            'patch': True,
+        },
     }
 
 
