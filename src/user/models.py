@@ -17,6 +17,7 @@ from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 
 from permission.models import InternalRole
+from core.db.models.fields import CaseInsensitiveEmailField
 from core.validators import full_domain_validator
 from core.mixins.models import (StatusFlagMixin, TimeStampFlagModelMixin)
 from integration.apps.twilio import (send_sms, verification_call)
@@ -41,7 +42,7 @@ class User(StatusFlagMixin,AbstractUser):
         (CATEGORY_BUSINESS, _('Business')),
         (CATEGORY_PERSONAL, _('Personal')),
     )
-    email = models.EmailField(_('Email address'), unique=True)
+    email = CaseInsensitiveEmailField(_('Email address'), unique=True)
     username = models.CharField(
         _('Username'), max_length=150, blank=True, null=True)
     first_name = models.CharField(

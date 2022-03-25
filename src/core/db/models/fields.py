@@ -1,8 +1,38 @@
 from decimal import Decimal
+from django.contrib.postgres.fields import citext
 from django.core import exceptions
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils.six import with_metaclass
 
+# Custom lowecase CharField
+
+class CaseInsensitiveEmailField(models.EmailField):
+    """
+    Case-insensitive email field.
+    """
+    LOOKUP_REPLACE = {
+        'exact': 'iexact',
+        'contains': 'icontains',
+        'startswith': 'istartswith',
+        'endswith': 'iendswith',
+        'regex': 'iregex',
+    }
+
+    def get_lookup(self, lookup_name):
+        return super().get_lookup(self.LOOKUP_REPLACE.get(lookup_name, lookup_name))
+
+    def get_prep_value(self, value):
+        value = super().get_prep_value(value)
+        if isinstance(value, str):
+            return value.lower()
+        return value
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        if isinstance(value, str):
+            return value.lower()
+        return value
 
 class PercentField(models.FloatField):
     """
