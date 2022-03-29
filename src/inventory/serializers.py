@@ -2,6 +2,7 @@
 Serializer for inventory
 """
 import json
+from decimal import Decimal
 from rest_framework import serializers
 from django.utils import timezone
 
@@ -99,6 +100,7 @@ class InTransitOrderSerializer(serializers.ModelSerializer):
     """
     order_data = serializers.JSONField(allow_null=False)
     profile_id = serializers.IntegerField(required=True)
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         try:
@@ -292,6 +294,29 @@ class  InventoryItemEditSerializer(serializers.ModelSerializer):
             'approved_by',
             'approved_on',
         )
+
+    def create(self, validated_data):
+        item = validated_data['item']
+
+        mcsp_fee = get_item_mcsp_fee(
+                item.cf_vendor_name,
+                item_category=item.category_name,
+                farm_price=validated_data.get('farm_price'),
+                no_tier_fee=True,
+            )
+        if isinstance(mcsp_fee, Decimal):
+            validated_data['mcsp_fee'] = mcsp_fee
+
+        cultivation_tax = get_item_tax(
+            category_name=item.category_name,
+            biomass_type=validated_data.get('biomass_type'),
+            biomass_input_g=validated_data.get('biomass_input_g'),
+            total_batch_output=validated_data.get('total_batch_quantity'),
+        )
+        if isinstance(cultivation_tax, Decimal):
+            validated_data['cultivation_tax'] = cultivation_tax
+
+        return super().create(validated_data)
 
 
 class  InventoryItemQuantityAdditionSerializer(serializers.ModelSerializer):
