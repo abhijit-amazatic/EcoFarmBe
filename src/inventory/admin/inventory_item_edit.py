@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.utils import timezone
 from django.contrib import admin
 from django.contrib import messages
+from django import forms
 from django.utils.html import mark_safe
 from django_filters.utils import verbose_field_name
 
@@ -39,11 +40,37 @@ def span2_fixed(x, y):
         f'<span style="width: 10rem !important;display: inline-block;font-weight: 900;">{str(y)}</span>'
     )
 
+class InventoryItemEditForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        if instance and instance.status == 'pending_for_approval':
+            instance.mcsp_fee = get_item_mcsp_fee(
+                instance.item.cf_vendor_name,
+                item_category=instance.item.category_name,
+                farm_price=instance.farm_price,
+                no_tier_fee=True,
+            )
+
+            instance.cultivation_tax = get_item_tax(
+                category_name=instance.item.category_name,
+                biomass_type=instance.biomass_type,
+                biomass_input_g=instance.biomass_input_g,
+                total_batch_output=instance.total_batch_quantity,
+            )
+
+
+    class Meta:
+        model = InventoryItemEdit
+        fields = '__all__'
+
 
 class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
     """
     OrganizationRoleAdmin
     """
+    form = InventoryItemEditForm
     list_display = (
         'name',
         'sku',
@@ -61,7 +88,9 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
         'item_biomass_input_g',
         'item_total_batch_quantity',
         'item_mcsp_fee',
+        'mcsp_fee',
         'item_cultivation_tax',
+        'cultivation_tax',
         'item_farm_price',
         'item_farm_price',
         'item_farm_price',
@@ -187,7 +216,8 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
                 obj.item.cf_vendor_name,
                 item_category=obj.item.category_name,
                 request=request,
-                farm_price=obj.farm_price
+                farm_price=obj.farm_price,
+                no_tier_fee=True,
             )
             if isinstance(obj.mcsp_fee, Decimal):
                 if obj.cultivation_tax is None:
@@ -266,27 +296,6 @@ class InventoryItemEditAdminBase(CustomButtonMixin, admin.ModelAdmin):
 
     update_tax.short_description = "Update current tax for selected items"
 
-def get_display_func(k, v):
-    data_type_conversion_map = {
-        float: lambda v: str(v) if v else None,
-        date: lambda v: v.strftime("%Y-%m-%d") if v else None,
-        Decimal: lambda v: f"{v.normalize():f}" if v else None,
-        list: lambda v: ', '.join(v)if v else None,
-    }
-    def func(self, obj):
-        old_val = obj.item_data.get(v)
-        if type(old_val) in data_type_conversion_map:
-            old_val = data_type_conversion_map[type(old_val)](old_val)
-
-        if self.is_obj_changable(obj):
-            return span_fixed(old_val)
-        else:
-            new_val = getattr(obj, k, None)
-            if type(new_val) in data_type_conversion_map:
-                new_val = data_type_conversion_map[type(new_val)](new_val)
-            return span2_fixed(old_val, new_val)
-    return func
-
 
 def set_display_change_fields(model):
 
@@ -294,6 +303,28 @@ def set_display_change_fields(model):
     fields = model._meta.fields
     verbose_names = {f.name: f.verbose_name or f.name.title() for f in fields}
     method_dict = dict()
+
+    def get_display_func(k, v):
+        data_type_conversion_map = {
+            float: lambda v: str(v) if v else None,
+            date: lambda v: v.strftime("%Y-%m-%d") if v else None,
+            Decimal: lambda v: f"{v.normalize():.6f}" if v else None,
+            list: lambda v: ', '.join(v)if v else None,
+        }
+        def func(self, obj):
+            old_val = obj.item_data.get(v)
+            if type(old_val) in data_type_conversion_map:
+                old_val = data_type_conversion_map[type(old_val)](old_val)
+
+            if self.is_obj_changable(obj):
+                return span_fixed(old_val)
+            else:
+                new_val = getattr(obj, k, None)
+                if type(new_val) in data_type_conversion_map:
+                    new_val = data_type_conversion_map[type(new_val)](new_val)
+                return span2_fixed(old_val, new_val)
+        return func
+
     for k, v  in update_fields.items():
         display_func = get_display_func(k,v)
         display_func.short_description = verbose_names.get(k)
