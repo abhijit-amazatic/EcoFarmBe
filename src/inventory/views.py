@@ -83,7 +83,6 @@ from bill.tasks import remove_estimates_after_intransit_clears
 from bill.models import (Estimate, LineItem, )
 from bill.utils import (parse_fields, get_notify_addresses, save_estimate, save_estimate_from_intransit, parse_intransit_to_pending,)
 
-
 class CharInFilter(BaseInFilter,CharFilter):
     pass
 
@@ -98,7 +97,7 @@ class DataFilter(FilterSet):
     cf_client_code = CharInFilter(method='cf_client_code__in', lookup_expr='in')
     client_id = CharInFilter(method='client_id__in', lookup_expr='in')
     cf_cultivation_type = CharInFilter(method='cf_cultivation_type__in', lookup_expr='in')
-    cf_cannabis_grade_and_category__in = CharInFilter(field_name='cf_cannabis_grade_and_category', lookup_expr='in')
+    cf_cannabis_grade_and_category__in = CharInFilter(method='get_cf_cannabis_grade_and_category', lookup_expr='in')
     cf_pesticide_summary__in = CharInFilter(method='filter_cf_pesticide_summary__in', lookup_expr='in')
     cf_testing_type__in = CharInFilter(field_name='cf_testing_type', lookup_expr='in')
     cf_status__in = CharInFilter(field_name='cf_status', lookup_expr='in')
@@ -252,6 +251,14 @@ class DataFilter(FilterSet):
         )
         q = Q(**{'labtest__'+x+'__in': values for x in pesticide_summary_fields}, _connector='AND')
         return queryset.filter(q).distinct()
+
+    def get_cf_cannabis_grade_and_category(self, queryset, name, values):
+        Tops = ["Tops A","Tops AA","Tops AAA","Tops B","Tops C"]
+        Smalls = ["Smalls A","Smalls B","Smalls C"]
+        value = list()
+        [value.extend(Tops) if x=="Tops All" else (value.extend(Smalls) if x=="Smalls All" else value.append(x)) for x in values]
+        items = queryset.filter(cf_cannabis_grade_and_category__in=list(set(value)))
+        return items
 
     class Meta:
         model = Inventory
