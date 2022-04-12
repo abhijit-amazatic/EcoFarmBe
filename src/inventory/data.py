@@ -68,7 +68,7 @@ ORG_ITEM_CUSTOM_FIELD_MAP_TABLE = (
     ('cf_raw_material_input_g',        'cf_raw_material_input_g',        'cf_raw_material_input_g',        '',                          ),
     # ('cf_trim_qty_lbs',                'cf_trim_qty_lbs',                'cf_trim_qty_lbs',                '',                          ),
     ('cf_batch_qty_g',                 'cf_batch_qty_g',                 'cf_batch_qty_g',                 '',                          ),
-    ('cf_mscp',                        'cf_mscp',                        'cf_mscp',                        '',                          ),
+    ('cf_mscp',                        'cf_markup',                      'cf_markup',                      '',                          ),
     ('cf_cultivation_tax',             'cf_cultivation_tax',             'cf_cultivation_tax',             '',                          ),
     ('cf_client_id',                   'cf_client_id',                   'cf_client_id',                   'cf_client_id',              ),
     ('cf_cannabinoid_percentage',      'cf_cannabinoid_percentage',      'cf_cannabinoid_percentage',      '',                          ),
