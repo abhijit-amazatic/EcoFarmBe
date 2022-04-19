@@ -255,10 +255,9 @@ class DataFilter(FilterSet):
     def get_cf_cannabis_grade_and_category(self, queryset, name, values):
         Tops = ["Tops A","Tops AA","Tops AAA","Tops B","Tops C"]
         Smalls = ["Smalls A","Smalls B","Smalls C"]
-        value = list()
-        [value.extend(Tops) if x=="Tops All" else (value.extend(Smalls) if x=="Smalls All" else value.append(x)) for x in values]
-        items = queryset.filter(cf_cannabis_grade_and_category__in=list(set(value)))
-        return items
+        value = []
+        [value.extend(Tops) if x=="All Tops" else (value.extend(Smalls) if x=="All Smalls" else value.append(x)) for x in values]
+        return queryset.filter(cf_cannabis_grade_and_category__in=list(set(value)))
 
     class Meta:
         model = Inventory
